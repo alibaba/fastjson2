@@ -165,7 +165,7 @@ public class ObjectWriterAdapter<T>
     }
 
     @Override
-    public void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeArrayMappingJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
             writeClassInfo(jsonWriter);
         }
@@ -179,8 +179,13 @@ public class ObjectWriterAdapter<T>
     }
 
     @Override
-    public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         long featuresAll = features | this.features | jsonWriter.getFeatures();
+
+        if ((featuresAll & BeanToArray.mask) != 0) {
+            writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
+            return;
+        }
 
         if (!serializable) {
             if ((featuresAll & JSONWriter.Feature.ErrorOnNoneSerializable.mask) != 0) {
@@ -206,12 +211,12 @@ public class ObjectWriterAdapter<T>
         jsonWriter.startObject();
         for (int i = 0; i < size; ++i) {
             fieldWriters.get(i)
-                    .write(jsonWriter, object);
+                    .writeJSONB(jsonWriter, object);
         }
         jsonWriter.endObject();
     }
 
-    protected final void writeClassInfo(JSONWriter jsonWriter) {
+    protected final void writeClassInfo(JSONWriterJSONB jsonWriter) {
         SymbolTable symbolTable = jsonWriter.symbolTable;
         if (symbolTable != null) {
             if (writeClassInfoSymbol(jsonWriter, symbolTable)) {
@@ -262,13 +267,13 @@ public class ObjectWriterAdapter<T>
         long featuresAll = features | this.features | jsonWriter.getFeatures();
         boolean beanToArray = (featuresAll & BeanToArray.mask) != 0;
 
-        if (jsonWriter.jsonb) {
+        if (jsonWriter instanceof JSONWriterJSONB) {
             if (beanToArray) {
-                writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
+                writeArrayMappingJSONB((JSONWriterJSONB) jsonWriter, object, fieldName, fieldType, features);
                 return;
             }
 
-            writeJSONB(jsonWriter, object, fieldName, fieldType, features);
+            writeJSONB((JSONWriterJSONB) jsonWriter, object, fieldName, fieldType, features);
             return;
         }
 
@@ -371,7 +376,7 @@ public class ObjectWriterAdapter<T>
             }
             jsonWriter.writeNameRaw(nameWithColonUTF16);
             return true;
-        } else if (jsonWriter.jsonb) {
+        } else if (jsonWriter instanceof JSONWriterJSONB) {
             if (typeKeyJSONB == null) {
                 typeKeyJSONB = JSONB.toBytes(typeKey);
             }
@@ -394,8 +399,8 @@ public class ObjectWriterAdapter<T>
         }
 
         if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
-            if (jsonWriter.jsonb) {
-                writeClassInfo(jsonWriter);
+            if (jsonWriter instanceof JSONWriterJSONB) {
+                writeClassInfo((JSONWriterJSONB) jsonWriter);
                 jsonWriter.startObject();
             } else {
                 jsonWriter.startObject();

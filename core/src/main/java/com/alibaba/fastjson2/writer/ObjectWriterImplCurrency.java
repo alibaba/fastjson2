@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -23,7 +24,7 @@ final class ObjectWriterImplCurrency
     }
 
     @Override
-    public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
             jsonWriter.writeNull();
             return;
@@ -39,8 +40,8 @@ final class ObjectWriterImplCurrency
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        if (jsonWriter.jsonb) {
-            writeJSONB(jsonWriter, object, fieldName, fieldType, features);
+        if (jsonWriter instanceof JSONWriterJSONB) {
+            writeJSONB((JSONWriterJSONB) jsonWriter, object, fieldName, fieldType, features);
             return;
         }
         if (object == null) {

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -21,7 +22,7 @@ public final class ObjectWriterRootName<T>
         this.rootName = rootName;
     }
 
-    public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         jsonWriter.startObject();
         jsonWriter.writeName(rootName);
         super.writeJSONB(jsonWriter, object, fieldName, fieldType, features);

@@ -4524,7 +4524,7 @@ public interface JSON {
         byte[] jsonbBytes;
         try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
             writer.config(JSONWriter.Feature.WriteClassName);
-            objectWriter.writeJSONB(writer, object, null, null, 0);
+            objectWriter.writeJSONB((JSONWriterJSONB) writer, object, null, null, 0);
             jsonbBytes = writer.getBytes();
         }
 
@@ -4615,7 +4615,7 @@ public interface JSON {
         byte[] jsonbBytes;
         try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
             writer.config(JSONWriter.Feature.WriteClassName);
-            objectWriter.writeJSONB(writer, object, null, null, 0);
+            objectWriter.writeJSONB((JSONWriterJSONB) writer, object, null, null, 0);
             jsonbBytes = writer.getBytes();
         }
 

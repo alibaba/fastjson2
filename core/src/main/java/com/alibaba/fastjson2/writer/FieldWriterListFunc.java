@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -92,7 +93,7 @@ final class FieldWriterListFunc<T>
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
-        if (jsonWriter.jsonb) {
+        if (jsonWriter instanceof JSONWriterJSONB) {
             int size = list.size();
             jsonWriter.startArray(size);
 

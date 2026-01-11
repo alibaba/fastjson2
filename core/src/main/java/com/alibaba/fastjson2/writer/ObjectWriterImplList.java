@@ -58,7 +58,7 @@ final class ObjectWriterImplList
     }
 
     @Override
-    public void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeArrayMappingJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
             jsonWriter.writeArrayNull();
             return;
@@ -90,7 +90,7 @@ final class ObjectWriterImplList
     }
 
     @Override
-    public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
             jsonWriter.writeArrayNull();
             return;
@@ -240,7 +240,7 @@ final class ObjectWriterImplList
         ObjectWriter previousObjectWriter = null;
         boolean previousRefDetect = true;
 
-        if (jsonWriter.jsonb) {
+        if (jsonWriter instanceof JSONWriterJSONB) {
             jsonWriter.startArray(list.size());
             for (int i = 0; i < list.size(); i++) {
                 Object item = list.get(i);
@@ -258,7 +258,7 @@ final class ObjectWriterImplList
                     previousObjectWriter = itemObjectWriter;
                 }
 
-                itemObjectWriter.writeJSONB(jsonWriter, item, i, itemType, features);
+                itemObjectWriter.writeJSONB((JSONWriterJSONB) jsonWriter, item, i, itemType, features);
             }
             return;
         }

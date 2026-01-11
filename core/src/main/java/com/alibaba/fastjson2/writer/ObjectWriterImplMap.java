@@ -139,7 +139,7 @@ public final class ObjectWriterImplMap
     }
 
     @Override
-    public void writeArrayMappingJSONB(JSONWriter jsonWriter,
+    public void writeArrayMappingJSONB(JSONWriterJSONB jsonWriter,
                                        Object object,
                                        Object fieldName,
                                        Type fieldType,
@@ -174,7 +174,7 @@ public final class ObjectWriterImplMap
     }
 
     @Override
-    public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if ((fieldType == this.objectType && jsonWriter.isWriteMapTypeInfo(object, objectClass, features))
                 || jsonWriter.isWriteTypeInfo(object, fieldType, features)
         ) {
@@ -458,8 +458,8 @@ public final class ObjectWriterImplMap
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        if (jsonWriter.jsonb) {
-            writeJSONB(jsonWriter, object, fieldName, fieldType, features);
+        if (jsonWriter instanceof JSONWriterJSONB) {
+            writeJSONB((JSONWriterJSONB) jsonWriter, object, fieldName, fieldType, features);
             return;
         }
 

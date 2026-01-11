@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.SymbolTable;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
@@ -64,18 +65,18 @@ class FieldWriterEnum
         boolean usingToString = (features & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0;
         String str = usingToString ? e.toString() : e.name();
         if (IOUtils.isASCII(str)) {
-            return JSONB.IO.writeSymbol(bytes, off, str, symbolTable);
+            return JSONWriterJSONB.IO.writeSymbol(bytes, off, str, symbolTable);
         }
 
         if (usingOrdinal) {
-            return JSONB.IO.writeInt32(bytes, off, e.ordinal());
+            return JSONWriterJSONB.IO.writeInt32(bytes, off, e.ordinal());
         }
 
-        return JSONB.IO.writeString(bytes, off, str);
+        return JSONWriterJSONB.IO.writeString(bytes, off, str);
     }
 
     @Override
-    public final void writeEnumJSONB(JSONWriter jsonWriter, Enum e) {
+    public final void writeEnumJSONB(JSONWriterJSONB jsonWriter, Enum e) {
         if (e == null) {
             return;
         }
@@ -214,8 +215,8 @@ class FieldWriterEnum
         long features = jsonWriter.getFeatures(this.features);
 
         if ((features & JSONWriter.Feature.WriteEnumUsingToString.mask) == 0) {
-            if (jsonWriter.jsonb) {
-                writeEnumJSONB(jsonWriter, e);
+            if (jsonWriter instanceof JSONWriterJSONB) {
+                writeEnumJSONB((JSONWriterJSONB) jsonWriter, e);
                 return;
             }
 
@@ -338,8 +339,8 @@ class FieldWriterEnum
             }
         }
 
-        if (jsonWriter.jsonb) {
-            writeEnumJSONB(jsonWriter, value);
+        if (jsonWriter instanceof JSONWriterJSONB) {
+            writeEnumJSONB((JSONWriterJSONB) jsonWriter, value);
         } else {
             writeEnum(jsonWriter, value);
         }

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -32,13 +33,12 @@ public class ObjectWriter3<T>
         long featuresAll = features | this.features | jsonWriter.getFeatures();
         boolean beanToArray = (featuresAll & BeanToArray.mask) != 0;
 
-        if (jsonWriter.jsonb) {
+        if (jsonWriter instanceof JSONWriterJSONB) {
             if (beanToArray) {
-                writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
-                return;
+                writeArrayMappingJSONB((JSONWriterJSONB) jsonWriter, object, fieldName, fieldType, features);
+            } else {
+                writeJSONB((JSONWriterJSONB) jsonWriter, object, fieldName, fieldType, features);
             }
-
-            writeJSONB(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
 

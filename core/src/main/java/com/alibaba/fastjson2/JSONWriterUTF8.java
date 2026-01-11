@@ -24,7 +24,7 @@ import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.isInt64;
 
-final class JSONWriterUTF8
+public final class JSONWriterUTF8
         extends JSONWriter {
     static final long REF;
     static final short QUOTE2_COLON, QUOTE_COLON;

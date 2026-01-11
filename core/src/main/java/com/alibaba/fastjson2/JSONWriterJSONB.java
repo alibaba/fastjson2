@@ -25,7 +25,7 @@ import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
-final class JSONWriterJSONB
+public final class JSONWriterJSONB
         extends JSONWriter {
     // optimize for write ZonedDateTime
     static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
@@ -112,7 +112,7 @@ final class JSONWriterJSONB
             bytes = grow(off + 6);
         }
 
-        this.off = JSONB.IO.startArray(bytes, off, size);
+        this.off = IO.startArray(bytes, off, size);
     }
 
     @Override
@@ -210,7 +210,7 @@ final class JSONWriterJSONB
             bytes = grow(off + 6);
         }
         bytes[off] = BC_CHAR;
-        this.off = JSONB.IO.writeInt32(bytes, off + 1, ch);
+        this.off = IO.writeInt32(bytes, off + 1, ch);
     }
 
     @Override
@@ -373,7 +373,7 @@ final class JSONWriterJSONB
                 bytes[off++] = (byte) (len + BC_STR_ASCII_FIX_MIN);
             } else {
                 bytes[off] = BC_STR_ASCII;
-                off = JSONB.IO.writeInt32(bytes, off + 1, len);
+                off = IO.writeInt32(bytes, off + 1, len);
             }
             for (int i = 0; i < len; ++i) {
                 bytes[off++] = (byte) chars[coff + i];
@@ -392,7 +392,7 @@ final class JSONWriterJSONB
         if (minCapacity - bytes.length > 0) {
             bytes = grow(minCapacity);
         }
-        this.off = JSONB.IO.writeStringLatin1(bytes, off, value);
+        this.off = IO.writeStringLatin1(bytes, off, value);
     }
 
     @Override
@@ -468,7 +468,7 @@ final class JSONWriterJSONB
                 putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + strlen));
                 off += 3;
             } else {
-                off = JSONB.IO.writeInt32(bytes, off + 1, strlen);
+                off = IO.writeInt32(bytes, off + 1, strlen);
             }
         }
         for (int i = 0; i < strlen; i++) {
@@ -488,7 +488,7 @@ final class JSONWriterJSONB
             System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
         }
         bytes[off] = BC_STR_UTF8;
-        return JSONB.IO.writeInt32(bytes, off + 1, utf8len) + utf8len;
+        return IO.writeInt32(bytes, off + 1, utf8len) + utf8len;
     }
 
     public void writeString(String[] strings) {
@@ -555,7 +555,7 @@ final class JSONWriterJSONB
                 bytes = grow(off + 1);
             }
 
-            this.off = JSONB.IO.writeInt32(bytes, off, symbol);
+            this.off = IO.writeInt32(bytes, off, symbol);
             return;
         }
         this.off = off;
@@ -613,7 +613,7 @@ final class JSONWriterJSONB
         if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
             bytes[off++] = (byte) symbol;
         } else {
-            off = JSONB.IO.writeInt32(bytes, off, symbol);
+            off = IO.writeInt32(bytes, off, symbol);
         }
         this.off = off;
         return false;
@@ -627,7 +627,7 @@ final class JSONWriterJSONB
         }
 
         bytes[off] = BC_TYPED_ANY;
-        this.off = JSONB.IO.writeInt32(bytes, off + 1, -symbol);
+        this.off = IO.writeInt32(bytes, off + 1, -symbol);
         return false;
     }
 
@@ -679,7 +679,7 @@ final class JSONWriterJSONB
                 if (off + value.length + 6 >= bytes.length) {
                     bytes = grow(off + value.length + 6);
                 }
-                off = JSONB.IO.writeStringLatin1(bytes, off, value);
+                off = IO.writeStringLatin1(bytes, off, value);
             }
             if (latinAll) {
                 this.off = off;
@@ -726,7 +726,7 @@ final class JSONWriterJSONB
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        this.off = JSONB.IO.writeStringUTF16(bytes, off, value);
+        this.off = IO.writeStringUTF16(bytes, off, value);
     }
 
     boolean tryWriteStringUTF16(byte[] value) {
@@ -799,20 +799,20 @@ final class JSONWriterJSONB
         }
         int start = off;
         bytes[off] = strtype;
-        off = JSONB.IO.writeInt32(bytes, off + 1, utf8len);
+        off = IO.writeInt32(bytes, off + 1, utf8len);
         return (off - start) + utf8len;
     }
 
     private static int writeUTF16(byte[] bytes, int off, byte[] value) {
         int start = off;
         bytes[off] = JDKUtils.BIG_ENDIAN ? BC_STR_UTF16BE : BC_STR_UTF16LE;
-        off = JSONB.IO.writeInt32(bytes, off + 1, value.length);
+        off = IO.writeInt32(bytes, off + 1, value.length);
         System.arraycopy(value, 0, bytes, off, value.length);
         return value.length + off - start;
     }
 
     @Override
-    public final Object ensureCapacity(int minCapacity) {
+    public final byte[] ensureCapacity(int minCapacity) {
         byte[] bytes = this.bytes;
         if (minCapacity >= bytes.length) {
             this.bytes = bytes = Arrays.copyOf(bytes, newCapacity(minCapacity, bytes.length));
@@ -880,7 +880,7 @@ final class JSONWriterJSONB
             bytes = grow(minCapacity);
         }
 
-        this.off = JSONB.IO.writeInt64(bytes, off, i, context.features);
+        this.off = IO.writeInt64(bytes, off, i, context.features);
     }
 
     @Override
@@ -890,7 +890,7 @@ final class JSONWriterJSONB
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        this.off = JSONB.IO.writeInt64(bytes, this.off, val);
+        this.off = IO.writeInt64(bytes, this.off, val);
     }
 
     @Override
@@ -912,11 +912,11 @@ final class JSONWriterJSONB
             bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
         } else {
             bytes[off] = BC_ARRAY;
-            off = JSONB.IO.writeInt32(bytes, off + 1, size);
+            off = IO.writeInt32(bytes, off + 1, size);
         }
 
         for (int i = 0; i < value.length; i++) {
-            off = JSONB.IO.writeInt64(bytes, off, value[i]);
+            off = IO.writeInt64(bytes, off, value[i]);
         }
         this.off = off;
     }
@@ -940,7 +940,7 @@ final class JSONWriterJSONB
             bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
         } else {
             bytes[off] = BC_ARRAY;
-            off = JSONB.IO.writeInt32(bytes, off + 1, size);
+            off = IO.writeInt32(bytes, off + 1, size);
         }
 
         for (int i = 0; i < size; i++) {
@@ -949,7 +949,7 @@ final class JSONWriterJSONB
                 bytes[off++] = BC_NULL;
                 continue;
             }
-            off = JSONB.IO.writeInt64(bytes, off, item);
+            off = IO.writeInt64(bytes, off, item);
         }
         this.off = off;
     }
@@ -962,7 +962,7 @@ final class JSONWriterJSONB
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        this.off = JSONB.IO.writeFloat(bytes, off, value);
+        this.off = IO.writeFloat(bytes, off, value);
     }
 
     @Override
@@ -973,7 +973,7 @@ final class JSONWriterJSONB
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        this.off = JSONB.IO.writeFloat(bytes, off, values);
+        this.off = IO.writeFloat(bytes, off, values);
     }
 
     @Override
@@ -983,7 +983,7 @@ final class JSONWriterJSONB
         if (off + 9 > bytes.length) {
             bytes = grow(off + 9);
         }
-        this.off = JSONB.IO.writeDouble(bytes, off, value);
+        this.off = IO.writeDouble(bytes, off, value);
     }
 
     @Override
@@ -994,7 +994,7 @@ final class JSONWriterJSONB
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        this.off = JSONB.IO.writeDouble(bytes, off, values);
+        this.off = IO.writeDouble(bytes, off, values);
     }
 
     @Override
@@ -1030,11 +1030,11 @@ final class JSONWriterJSONB
             bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
         } else {
             bytes[off] = BC_ARRAY;
-            off = JSONB.IO.writeInt32(bytes, off + 1, size);
+            off = IO.writeInt32(bytes, off + 1, size);
         }
 
         for (int i = 0; i < values.length; i++) {
-            off = JSONB.IO.writeInt32(bytes, off, values[i]);
+            off = IO.writeInt32(bytes, off, values[i]);
         }
         this.off = off;
     }
@@ -1058,7 +1058,7 @@ final class JSONWriterJSONB
             bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
         } else {
             bytes[off] = BC_ARRAY;
-            off = JSONB.IO.writeInt32(bytes, off + 1, size);
+            off = IO.writeInt32(bytes, off + 1, size);
         }
 
         for (int val : values) {
@@ -1077,7 +1077,7 @@ final class JSONWriterJSONB
         if (off + 2 > bytes.length) {
             bytes = grow(off + 2);
         }
-        this.off = JSONB.IO.writeInt8(bytes, off, val);
+        this.off = IO.writeInt8(bytes, off, val);
     }
 
     @Override
@@ -1087,7 +1087,7 @@ final class JSONWriterJSONB
         if (off + 3 > bytes.length) {
             bytes = grow(off + 3);
         }
-        this.off = JSONB.IO.writeInt16(bytes, off, val);
+        this.off = IO.writeInt16(bytes, off, val);
     }
 
     @Override
@@ -1110,7 +1110,7 @@ final class JSONWriterJSONB
             if (off + 5 > bytes.length) {
                 bytes = grow(off + 5);
             }
-            this.off = JSONB.IO.writeInt32(bytes, off, ordinal);
+            this.off = IO.writeInt32(bytes, off, ordinal);
         }
     }
 
@@ -1122,7 +1122,7 @@ final class JSONWriterJSONB
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        this.off = JSONB.IO.writeInt32(bytes, off, i, context.features);
+        this.off = IO.writeInt32(bytes, off, i, context.features);
     }
 
     @Override
@@ -1133,7 +1133,7 @@ final class JSONWriterJSONB
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        this.off = JSONB.IO.writeInt32(bytes, off, val);
+        this.off = IO.writeInt32(bytes, off, val);
     }
 
     @Override
@@ -1155,7 +1155,7 @@ final class JSONWriterJSONB
             bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
         } else {
             bytes[off] = BC_ARRAY;
-            off = JSONB.IO.writeInt32(bytes, off + 1, size);
+            off = IO.writeInt32(bytes, off + 1, size);
         }
 
         for (int i = 0; i < size; i++) {
@@ -1165,7 +1165,7 @@ final class JSONWriterJSONB
                 continue;
             }
 
-            off = JSONB.IO.writeInt32(bytes, off, item);
+            off = IO.writeInt32(bytes, off, item);
         }
         this.off = off;
     }
@@ -1211,7 +1211,7 @@ final class JSONWriterJSONB
             putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + symbol));
             off += 2;
         } else {
-            off = JSONB.IO.writeInt32(bytes, off, symbol);
+            off = IO.writeInt32(bytes, off, symbol);
         }
         this.off = off;
     }
@@ -1254,7 +1254,7 @@ final class JSONWriterJSONB
                 if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
                     bytes[off++] = (byte) symbol;
                 } else {
-                    off = JSONB.IO.writeInt32(bytes, off, symbol);
+                    off = IO.writeInt32(bytes, off, symbol);
                 }
                 this.off = off;
                 return;
@@ -1267,7 +1267,7 @@ final class JSONWriterJSONB
         if (intValue >= BC_INT32_NUM_MIN && intValue <= BC_INT32_NUM_MAX) {
             bytes[off++] = (byte) intValue;
         } else {
-            off = JSONB.IO.writeInt32(bytes, off, intValue);
+            off = IO.writeInt32(bytes, off, intValue);
         }
         this.off = off;
     }
@@ -1279,7 +1279,7 @@ final class JSONWriterJSONB
         if (off + 5 > bytes.length) {
             bytes = grow(off + 5);
         }
-        this.off = JSONB.IO.writeLocalDate(bytes, off, date);
+        this.off = IO.writeLocalDate(bytes, off, date);
     }
 
     @Override
@@ -1289,7 +1289,7 @@ final class JSONWriterJSONB
         if (off + 9 > bytes.length) {
             bytes = grow(off + 9);
         }
-        this.off = JSONB.IO.writeLocalTime(bytes, off, time);
+        this.off = IO.writeLocalTime(bytes, off, time);
     }
 
     @Override
@@ -1299,7 +1299,7 @@ final class JSONWriterJSONB
         if (off + 13 > bytes.length) {
             bytes = grow(off + 13);
         }
-        this.off = JSONB.IO.writeLocalDateTime(bytes, off, dateTime);
+        this.off = IO.writeLocalDateTime(bytes, off, dateTime);
     }
 
     @Override
@@ -1324,7 +1324,7 @@ final class JSONWriterJSONB
                         | (dateTime.getHour() << 16)
                         | (dateTime.getMinute() << 8)
                         | dateTime.getSecond());
-        this.off = JSONB.IO.writeInt32(bytes, off + 8, dateTime.getNano());
+        this.off = IO.writeInt32(bytes, off + 8, dateTime.getNano());
 
         String zoneIdStr = dateTime.getZone().getId();
         if (zoneIdStr.equals(SHANGHAI_ZONE_ID_NAME)) {
@@ -1342,7 +1342,7 @@ final class JSONWriterJSONB
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        this.off = JSONB.IO.writeOffsetDateTime(bytes, off, dateTime);
+        this.off = IO.writeOffsetDateTime(bytes, off, dateTime);
     }
 
     @Override
@@ -1353,7 +1353,7 @@ final class JSONWriterJSONB
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        this.off = JSONB.IO.writeOffsetTime(bytes, off, offsetTime);
+        this.off = IO.writeOffsetTime(bytes, off, offsetTime);
     }
 
     @Override
@@ -1363,7 +1363,7 @@ final class JSONWriterJSONB
         if (off + 15 > bytes.length) {
             bytes = grow(off + 15);
         }
-        this.off = JSONB.IO.writeInstant(bytes, off, instant);
+        this.off = IO.writeInstant(bytes, off, instant);
     }
 
     @Override
@@ -1373,7 +1373,7 @@ final class JSONWriterJSONB
         if (off + 18 > bytes.length) {
             bytes = grow(off + 18);
         }
-        this.off = JSONB.IO.writeUUID(bytes, off, value);
+        this.off = IO.writeUUID(bytes, off, value);
     }
 
     @Override
@@ -1390,7 +1390,7 @@ final class JSONWriterJSONB
                 bytes = grow(off + 10);
             }
             bytes[off] = BC_BIGINT_LONG;
-            this.off = JSONB.IO.writeInt64(bytes, off + 1, value.longValue());
+            this.off = IO.writeInt64(bytes, off + 1, value.longValue());
             return;
         }
 
@@ -1401,7 +1401,7 @@ final class JSONWriterJSONB
         }
 
         bytes[off] = BC_BIGINT;
-        off = JSONB.IO.writeInt32(bytes, off + 1, valueBytes.length);
+        off = IO.writeInt32(bytes, off + 1, valueBytes.length);
         System.arraycopy(valueBytes, 0, bytes, off, valueBytes.length);
         this.off = off + valueBytes.length;
     }
@@ -1421,7 +1421,7 @@ final class JSONWriterJSONB
             bytes = grow(minCapacity);
         }
         bytes[off] = BC_BINARY;
-        off = JSONB.IO.writeInt32(bytes, off + 1, len);
+        off = IO.writeInt32(bytes, off + 1, len);
 
         System.arraycopy(binary, 0, bytes, off, len);
         this.off = off + len;
@@ -1446,16 +1446,16 @@ final class JSONWriterJSONB
             long intCompact = UNSAFE.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
             if (scale == 0) {
                 bytes[off] = BC_DECIMAL_LONG;
-                this.off = JSONB.IO.writeInt64(bytes, off + 1, intCompact);
+                this.off = IO.writeInt64(bytes, off + 1, intCompact);
                 return;
             }
 
             bytes[off] = BC_DECIMAL;
-            off = JSONB.IO.writeInt32(bytes, off + 1, scale);
+            off = IO.writeInt32(bytes, off + 1, scale);
             if (intCompact >= Integer.MIN_VALUE && intCompact <= Integer.MAX_VALUE) {
-                off = JSONB.IO.writeInt32(bytes, off, (int) intCompact);
+                off = IO.writeInt32(bytes, off, (int) intCompact);
             } else {
-                off = JSONB.IO.writeInt64(bytes, off, intCompact);
+                off = IO.writeInt64(bytes, off, intCompact);
             }
             this.off = off;
             return;
@@ -1465,17 +1465,17 @@ final class JSONWriterJSONB
         if (scale == 0
                 && isInt64(unscaledValue)) {
             bytes[off] = BC_DECIMAL_LONG;
-            this.off = JSONB.IO.writeInt64(bytes, off + 1, unscaledValue.longValue());
+            this.off = IO.writeInt64(bytes, off + 1, unscaledValue.longValue());
             return;
         }
 
         bytes[off] = BC_DECIMAL;
-        off = JSONB.IO.writeInt32(bytes, off + 1, scale);
+        off = IO.writeInt32(bytes, off + 1, scale);
 
         if (isInt32(unscaledValue)) {
-            off = JSONB.IO.writeInt32(bytes, off, unscaledValue.intValue());
+            off = IO.writeInt32(bytes, off, unscaledValue.intValue());
         } else if (isInt64(unscaledValue)) {
-            off = JSONB.IO.writeInt64(bytes, off, unscaledValue.longValue());
+            off = IO.writeInt64(bytes, off, unscaledValue.longValue());
         } else {
             this.off = off;
             writeBigInt(unscaledValue, 0);
@@ -1497,7 +1497,7 @@ final class JSONWriterJSONB
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
-        this.off = JSONB.IO.writeBoolean(bytes, off, values);
+        this.off = IO.writeBoolean(bytes, off, values);
     }
 
     @Override
@@ -1881,5 +1881,1217 @@ final class JSONWriterJSONB
 
     @Override
     public void println() {
+    }
+
+    /**
+     * IO utility methods for JSONB serialization
+     */
+    public abstract static class IO {
+        /**
+         * Calculates the capacity needed for an enum
+         *
+         * @param e the enum value
+         * @param features the features to apply
+         * @return the capacity needed
+         */
+        public static int enumCapacity(Enum e, long features) {
+            if ((features & (MASK_WRITE_ENUM_USING_TO_STRING | MASK_WRITE_ENUMS_USING_NAME)) != 0) {
+                return ((features & MASK_WRITE_ENUM_USING_TO_STRING) != 0
+                        ? e.toString()
+                        : e.name()).length() * 3 + 6;
+            }
+            return 5;
+        }
+
+        /**
+         * Writes an enum value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param e the enum value to write
+         * @param features the features to apply
+         * @return the new offset
+         */
+        public static int writeEnum(byte[] bytes, int off, Enum e, long features) {
+            if ((features & (MASK_WRITE_ENUM_USING_TO_STRING | MASK_WRITE_ENUMS_USING_NAME)) != 0) {
+                return writeString(bytes, off,
+                        (features & MASK_WRITE_ENUM_USING_TO_STRING) != 0
+                                ? e.toString()
+                                : e.name()
+                );
+            } else {
+                return writeInt32(bytes, off, e.ordinal());
+            }
+        }
+
+        /**
+         * Writes a Boolean value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the Boolean value to write
+         * @return the new offset
+         */
+        public static int writeBoolean(byte[] bytes, int off, Boolean value) {
+            bytes[off] = value == null ? BC_NULL : value ? BC_TRUE : BC_FALSE;
+            return off + 1;
+        }
+
+        /**
+         * Writes a boolean value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the boolean value to write
+         * @return the new offset
+         */
+        public static int writeBoolean(byte[] bytes, int off, boolean value) {
+            bytes[off] = value ? BC_TRUE : BC_FALSE;
+            return off + 1;
+        }
+
+        /**
+         * Writes a boolean array to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param values the boolean array to write
+         * @return the new offset
+         */
+        public static int writeBoolean(byte[] bytes, int off, boolean[] values) {
+            if (values == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            off = startArray(bytes, off, values.length);
+            for (int i = 0; i < values.length; i++) {
+                bytes[off + i] = values[i] ? BC_TRUE : BC_FALSE;
+            }
+            return off + values.length;
+        }
+
+        /**
+         * Writes a Float value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the Float value to write
+         * @param features the features to apply
+         * @return the new offset
+         */
+        public static int writeFloat(byte[] bytes, int off, Float value, long features) {
+            float floatValue;
+            if (value == null) {
+                if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0) {
+                    bytes[off] = BC_NULL;
+                    return off + 1;
+                }
+                floatValue = 0;
+            } else {
+                floatValue = value;
+            }
+            return IO.writeFloat(bytes, off, floatValue);
+        }
+
+        /**
+         * Writes a float array to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param values the float array to write
+         * @return the new offset
+         */
+        public static int writeFloat(byte[] bytes, int off, float[] values) {
+            if (values == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            off = startArray(bytes, off, values.length);
+            for (float value : values) {
+                off = IO.writeFloat(bytes, off, value);
+            }
+            return off;
+        }
+
+        /**
+         * Writes a float value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the float value to write
+         * @return the new offset
+         */
+        public static int writeFloat(byte[] bytes, int off, float value) {
+            int intValue = (int) value;
+            if (intValue == value && ((intValue + 0x40000) & ~0x7ffff) == 0) {
+                bytes[off] = BC_FLOAT_INT;
+                return IO.writeInt32(bytes, off + 1, intValue);
+            }
+
+            bytes[off] = BC_FLOAT;
+            IOUtils.putIntBE(bytes, off + 1, Float.floatToIntBits(value));
+            return off + 5;
+        }
+
+        /**
+         * Writes a Double value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the Double value to write
+         * @param features the features to apply
+         * @return the new offset
+         */
+        public static int writeDouble(byte[] bytes, int off, Double value, long features) {
+            if (value == null) {
+                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0
+                        ? BC_NULL
+                        : BC_DOUBLE_NUM_0;
+                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : BC_DOUBLE_NUM_0;
+                return off + 1;
+            }
+            return IO.writeDouble(bytes, off, value);
+        }
+
+        /**
+         * Writes a double value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the double value to write
+         * @return the new offset
+         */
+        public static int writeDouble(byte[] bytes, int off, double value) {
+            if (value == 0 || value == 1) {
+                bytes[off] = value == 0 ? BC_DOUBLE_NUM_0 : BC_DOUBLE_NUM_1;
+                return off + 1;
+            }
+
+            if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
+                long longValue = (long) value;
+                if (longValue == value) {
+                    bytes[off] = BC_DOUBLE_LONG;
+                    return IO.writeInt64(bytes, off + 1, longValue);
+                }
+            }
+
+            bytes[off] = BC_DOUBLE;
+            IOUtils.putLongBE(bytes, off + 1, Double.doubleToLongBits(value));
+            return off + 9;
+        }
+
+        /**
+         * Writes a double array to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param values the double array to write
+         * @return the new offset
+         */
+        public static int writeDouble(byte[] bytes, int off, double[] values) {
+            if (values == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            off = startArray(bytes, off, values.length);
+            for (double value : values) {
+                off = writeDouble(bytes, off, value);
+            }
+            return off;
+        }
+
+        /**
+         * Writes a Byte value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param val the Byte value to write
+         * @param features the features to apply
+         * @return the new offset
+         */
+        public static int writeInt8(byte[] bytes, int off, Byte val, long features) {
+            if (val == null) {
+                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0;
+                return off + 1;
+            }
+            putShortLE(bytes, off, (short) ((val << 8) | (BC_INT8 & 0xFF)));
+            return off + 2;
+        }
+
+        /**
+         * Writes a byte value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param val the byte value to write
+         * @return the new offset
+         */
+        public static int writeInt8(byte[] bytes, int off, byte val) {
+            putShortLE(bytes, off, (short) ((val << 8) | (BC_INT8 & 0xFF)));
+            return off + 2;
+        }
+
+        /**
+         * Writes a Short value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param val the Short value to write
+         * @param features the features to apply
+         * @return the new offset
+         */
+        public static int writeInt16(byte[] bytes, int off, Short val, long features) {
+            if (val == null) {
+                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0;
+                return off + 1;
+            }
+            bytes[off] = BC_INT16;
+            putShortBE(bytes, off + 1, val);
+            return off + 3;
+        }
+
+        /**
+         * Writes a short value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param val the short value to write
+         * @return the new offset
+         */
+        public static int writeInt16(byte[] bytes, int off, short val) {
+            bytes[off] = BC_INT16;
+            putShortBE(bytes, off + 1, val);
+            return off + 3;
+        }
+
+        /**
+         * Writes an Integer value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the Integer value to write
+         * @param features the features to apply
+         * @return the new offset
+         */
+        public static int writeInt32(byte[] bytes, int off, Integer value, long features) {
+            if (value == null) {
+                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : 0;
+                return off + 1;
+            }
+            return IO.writeInt32(bytes, off, value);
+        }
+
+        /**
+         * Writes a string with a symbol table to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param str the string to write
+         * @param symbolTable the symbol table to use
+         * @return the new offset
+         */
+        public static int writeSymbol(byte[] bytes, int off, String str, SymbolTable symbolTable) {
+            if (str == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            int ordinal = symbolTable.getOrdinal(str);
+            if (ordinal >= 0) {
+                bytes[off] = BC_STR_ASCII;
+                return writeInt32(bytes, off + 1, -ordinal);
+            }
+            return writeString(bytes, off, str);
+        }
+
+        /**
+         * Writes a symbol to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param symbol the symbol to write
+         * @return the new offset
+         */
+        public static int writeSymbol(byte[] bytes, int off, int symbol) {
+            bytes[off++] = BC_SYMBOL;
+
+            if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
+                bytes[off++] = (byte) symbol;
+            } else if (symbol >= INT32_BYTE_MIN && symbol <= INT32_BYTE_MAX) {
+                putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + symbol));
+                off += 2;
+            } else {
+                off = writeInt32(bytes, off, symbol);
+            }
+            return off;
+        }
+
+        /**
+         * Checks and writes a type name to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param object the object to check
+         * @param fieldClass the field class
+         * @param jsonWriter the JSON writer
+         * @return the new offset
+         */
+        public static int checkAndWriteTypeName(byte[] bytes, int off, Object object, Class<?> fieldClass, JSONWriter jsonWriter) {
+            long features = jsonWriter.getFeatures();
+            Class<?> objectClass;
+            if ((features & MASK_WRITE_CLASS_NAME) == 0
+                    || object == null
+                    || (objectClass = object.getClass()) == fieldClass
+                    || ((features & MASK_NOT_WRITE_HASHMAP_ARRAY_LIST_CLASS_NAME) != 0 && (objectClass == HashMap.class || objectClass == ArrayList.class))
+                    || ((features & MASK_NOT_WRITE_ROOT_CLASSNAME) != 0 && object == jsonWriter.rootObject)
+            ) {
+                return off;
+            }
+
+            return writeTypeName(bytes, off, getTypeName(objectClass), jsonWriter);
+        }
+
+        /**
+         * Writes a type name to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param typeName the type name to write
+         * @param jsonWriter the JSON writer
+         * @return the new offset
+         */
+        public static int writeTypeName(byte[] bytes, int off, String typeName, JSONWriter jsonWriter) {
+            JSONWriterJSONB jsonWriterJSONB = (JSONWriterJSONB) jsonWriter;
+            SymbolTable symbolTable = jsonWriter.symbolTable;
+            bytes[off++] = BC_TYPED_ANY;
+
+            long hash = Fnv.hashCode64(typeName);
+
+            int symbol = -1;
+            if (symbolTable != null) {
+                symbol = symbolTable.getOrdinalByHashCode(hash);
+                if (symbol == -1 && jsonWriterJSONB.symbols != null) {
+                    symbol = jsonWriterJSONB.symbols.get(hash);
+                }
+            } else if (jsonWriterJSONB.symbols != null) {
+                symbol = jsonWriterJSONB.symbols.get(hash);
+            }
+
+            if (symbol == -1) {
+                if (jsonWriterJSONB.symbols == null) {
+                    jsonWriterJSONB.symbols = new TLongIntHashMap();
+                }
+                jsonWriterJSONB.symbols.put(hash, symbol = jsonWriterJSONB.symbolIndex++);
+            } else {
+                return writeInt32(bytes, off, symbol);
+            }
+
+            off = writeString(bytes, off, typeName);
+            return writeInt32(bytes, off, symbol);
+        }
+
+        /**
+         * Writes an integer value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the integer value to write
+         * @return the new offset
+         */
+        public static int writeInt32(byte[] bytes, int off, int value) {
+            if (((value + 0x10) & ~0x3f) == 0) {
+                bytes[off++] = (byte) value;
+            } else if (((value + 0x800) & ~0xfff) == 0) {
+                putShortBE(bytes, off, (short) ((BC_INT32_BYTE_ZERO << 8) + value));
+                off += 2;
+            } else if (((value + 0x40000) & ~0x7ffff) == 0) {
+                bytes[off] = (byte) (BC_INT32_SHORT_ZERO + (value >> 16));
+                putShortBE(bytes, off + 1, (short) value);
+                off += 3;
+            } else {
+                bytes[off] = BC_INT32;
+                putIntBE(bytes, off + 1, value);
+                off += 5;
+            }
+            return off;
+        }
+
+        /**
+         * Writes a collection of Long values to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param values the collection of Long values to write
+         * @param features the features to apply
+         * @return the new offset
+         */
+        public static int writeInt64(byte[] bytes, int off, Collection<Long> values, long features) {
+            if (values == null) {
+                bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
+                return off + 1;
+            }
+            int size = values.size();
+            off = startArray(bytes, off, size);
+            for (Long value : values) {
+                if (value == null) {
+                    bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0
+                            ? BC_NULL
+                            : (byte) (BC_INT64_NUM_MIN - INT64_NUM_LOW_VALUE);
+                    off++;
+                } else {
+                    off = IO.writeInt64(bytes, off, value);
+                }
+            }
+            return off;
+        }
+
+        public static int writeInt64(byte[] bytes, int off, List<Long> values, long features) {
+            if (values == null) {
+                bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
+                return off + 1;
+            }
+            int size = values.size();
+            off = startArray(bytes, off, size);
+            for (int i = 0; i < values.size(); i++) {
+                Long value = values.get(i);
+                if (value == null) {
+                    bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0
+                            ? BC_NULL
+                            : (byte) (BC_INT64_NUM_MIN - INT64_NUM_LOW_VALUE);
+                    off++;
+                } else {
+                    off = IO.writeInt64(bytes, off, value);
+                }
+            }
+            return off;
+        }
+
+        /**
+         * Writes a Long value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the Long value to write
+         * @param features the features to apply
+         * @return the new offset
+         */
+        public static int writeInt64(byte[] bytes, int off, Long value, long features) {
+            if (value == null) {
+                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0
+                        ? BC_NULL
+                        : (byte) (BC_INT64_NUM_MIN - INT64_NUM_LOW_VALUE);
+                return off + 1;
+            }
+            return IO.writeInt64(bytes, off, value);
+        }
+
+        /**
+         * Writes a long value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the long value to write
+         * @return the new offset
+         */
+        public static int writeInt64(byte[] bytes, int off, long value) {
+            if (value >= INT64_NUM_LOW_VALUE && value <= INT64_NUM_HIGH_VALUE) {
+                bytes[off++] = (byte) (BC_INT64_NUM_MIN + (value - INT64_NUM_LOW_VALUE));
+            } else if (((value + 0x800) & ~0xfffL) == 0) {
+                putShortBE(bytes, off, (short) ((BC_INT64_BYTE_ZERO << 8) + value));
+                off += 2;
+            } else if (((value + 0x40000) & ~0x7ffffL) == 0) {
+                bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (value >> 16));
+                putShortBE(bytes, off + 1, (short) value);
+                off += 3;
+            } else if ((((value + 0x80000000L) & ~0xffffffffL) == 0)) {
+                bytes[off] = BC_INT64_INT;
+                putIntBE(bytes, off + 1, (int) value);
+                off += 5;
+            } else {
+                bytes[off] = BC_INT64;
+                putLongBE(bytes, off + 1, value);
+                off += 9;
+            }
+            return off;
+        }
+
+        /**
+         * Starts an array in a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param size the size of the array
+         * @return the new offset
+         */
+        public static int startArray(byte[] bytes, int off, int size) {
+            boolean tinyInt = size <= ARRAY_FIX_LEN;
+            bytes[off++] = tinyInt ? (byte) (BC_ARRAY_FIX_MIN + size) : BC_ARRAY;
+            if (!tinyInt) {
+                off = writeInt32(bytes, off, size);
+            }
+            return off;
+        }
+
+        public static int writeStringJDK8(byte[] bytes, int off, Collection<String> strings, long features) {
+            if (strings == null) {
+                bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
+                return off + 1;
+            }
+            int size = strings.size();
+            off = startArray(bytes, off, size);
+            for (String string : strings) {
+                off = writeStringJDK8(bytes, off, string);
+            }
+            return off;
+        }
+
+        public static int writeStringJDK11(byte[] bytes, int off, Collection<String> strings, long features) {
+            if (strings == null) {
+                bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
+                return off + 1;
+            }
+            int size = strings.size();
+            off = startArray(bytes, off, size);
+            for (String string : strings) {
+                off = writeStringJDK11(bytes, off, string);
+            }
+            return off;
+        }
+
+        public static int writeStringJDK8(byte[] bytes, int off, List<String> strings, long features) {
+            if (strings == null) {
+                bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
+                return off + 1;
+            }
+            int size = strings.size();
+            off = startArray(bytes, off, size);
+            for (int i = 0; i < strings.size(); i++) {
+                off = writeStringJDK8(bytes, off, strings.get(i));
+            }
+            return off;
+        }
+
+        public static int writeStringJDK11(byte[] bytes, int off, List<String> strings, long features) {
+            if (strings == null) {
+                bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
+                return off + 1;
+            }
+            int size = strings.size();
+            off = startArray(bytes, off, size);
+            for (int i = 0; i < strings.size(); i++) {
+                off = writeStringJDK11(bytes, off, strings.get(i));
+            }
+            return off;
+        }
+
+        public static int writeStringJDK8(byte[] bytes, int off, String[] strings, long features) {
+            if (strings == null) {
+                bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
+                return off + 1;
+            }
+            int size = strings.length;
+            off = startArray(bytes, off, size);
+            for (String string : strings) {
+                off = writeStringJDK8(bytes, off, string);
+            }
+            return off;
+        }
+
+        public static int writeStringJDK11(byte[] bytes, int off, String[] strings, long features) {
+            if (strings == null) {
+                bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
+                return off + 1;
+            }
+            int size = strings.length;
+            off = startArray(bytes, off, size);
+            for (String string : strings) {
+                off = writeStringJDK11(bytes, off, string);
+            }
+            return off;
+        }
+
+        /**
+         * Writes a string to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param str the string to write
+         * @return the new offset
+         */
+        public static int writeString(byte[] bytes, int off, String str) {
+            if (str == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            if (STRING_CODER != null && STRING_VALUE != null) {
+                int coder = STRING_CODER.applyAsInt(str);
+                byte[] value = STRING_VALUE.apply(str);
+                if (coder == 0) {
+                    return writeStringLatin1(bytes, off, value);
+                } else {
+                    return writeStringUTF16(bytes, off, value);
+                }
+            } else {
+                return writeString(bytes, off, JDKUtils.getCharArray(str));
+            }
+        }
+
+        public static int writeStringJDK8(byte[] bytes, int off, String str) {
+            if (str == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            return writeString(bytes, off, JDKUtils.getCharArray(str));
+        }
+
+        public static int writeStringJDK11(byte[] bytes, int off, String str) {
+            if (str == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            int coder = STRING_CODER.applyAsInt(str);
+            byte[] value = STRING_VALUE.apply(str);
+            if (coder == 0) {
+                return writeStringLatin1(bytes, off, value);
+            } else {
+                return writeStringUTF16(bytes, off, value);
+            }
+        }
+
+        /**
+         * Writes a UTF-16 string to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the UTF-16 byte array to write
+         * @return the new offset
+         */
+        public static int writeStringUTF16(byte[] bytes, int off, byte[] value) {
+            final int strlen = value.length;
+            bytes[off] = JDKUtils.BIG_ENDIAN ? BC_STR_UTF16BE : BC_STR_UTF16LE;
+            off = writeInt32(bytes, off + 1, strlen);
+            System.arraycopy(value, 0, bytes, off, strlen);
+            return off + strlen;
+        }
+
+        /**
+         * Writes a Latin-1 string to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the Latin-1 byte array to write
+         * @return the new offset
+         */
+        public static int writeStringLatin1(byte[] bytes, int off, byte[] value) {
+            int strlen = value.length;
+            if (strlen <= STR_ASCII_FIX_LEN) {
+                bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            } else if (strlen <= INT32_BYTE_MAX) {
+                off = putStringSizeSmall(bytes, off, strlen);
+            } else {
+                off = putStringSizeLarge(bytes, off, strlen);
+            }
+            System.arraycopy(value, 0, bytes, off, value.length);
+            return off + strlen;
+        }
+
+        public static int stringCapacityJDK8(List<String> strings) {
+            if (strings == null) {
+                return 1;
+            }
+            int size = strings.getClass().getName().length() * 3 + 13;
+            for (int i = 0; i < strings.size(); i++) {
+                String str = strings.get(i);
+                size += str == null ? 0 : str.length() * 3 + 6;
+            }
+            return size;
+        }
+
+        public static int stringCapacityJDK11(List<String> strings) {
+            if (strings == null) {
+                return 1;
+            }
+            int size = strings.getClass().getName().length() * 3 + 13;
+            for (int i = 0; i < strings.size(); i++) {
+                String str = strings.get(i);
+                size += str == null ? 0 : (str.length() << STRING_CODER.applyAsInt(str)) + 6;
+            }
+            return size;
+        }
+
+        public static int stringCapacityJDK8(Collection<String> strings) {
+            if (strings == null) {
+                return 1;
+            }
+            int size = strings.getClass().getName().length() * 3 + 13;
+            for (String str : strings) {
+                size += str == null ? 0 : str.length() * 3 + 6;
+            }
+            return size;
+        }
+
+        public static int stringCapacityJDK11(Collection<String> strings) {
+            if (strings == null) {
+                return 1;
+            }
+            int size = strings.getClass().getName().length() * 3 + 13;
+            for (String str : strings) {
+                size += str == null ? 0 : (str.length() << STRING_CODER.applyAsInt(str)) + 6;
+            }
+            return size;
+        }
+
+        public static int stringCapacityJDK8(String[] strings) {
+            if (strings == null) {
+                return 1;
+            }
+            int size = 6;
+            for (String str : strings) {
+                size += str == null ? 0 : str.length() * 3 + 6;
+            }
+            return size;
+        }
+
+        public static int stringCapacityJDK11(String[] strings) {
+            if (strings == null) {
+                return 1;
+            }
+            int size = 6;
+            for (String str : strings) {
+                size += str == null ? 0 : (str.length() << STRING_CODER.applyAsInt(str)) + 6;
+            }
+            return size;
+        }
+
+        /**
+         * Calculates the capacity needed for a collection of Long values
+         *
+         * @param values the collection of Long values
+         * @return the capacity needed
+         */
+        public static int int64Capacity(Collection<Long> values) {
+            return values == null ? 1 : values.getClass().getName().length() * 3 + 13 + values.size() * 9;
+        }
+
+        /**
+         * Calculates the capacity needed for a string
+         *
+         * @param str the string
+         * @return the capacity needed
+         */
+        public static int stringCapacity(String str) {
+            return JVM_VERSION > 8 ? stringCapacityJDK11(str) : stringCapacityJDK8(str);
+        }
+
+        public static int stringCapacityJDK8(String str) {
+            return str == null ? 0 : str.length() * 3 + 6;
+        }
+
+        public static int stringCapacityJDK11(String str) {
+            return str == null ? 0 : (str.length() << STRING_CODER.applyAsInt(str)) + 6;
+        }
+
+        /**
+         * Puts a small string size to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param val the size value to write
+         * @return the new offset
+         */
+        public static int putStringSizeSmall(byte[] bytes, int off, int val) {
+            bytes[off] = BC_STR_ASCII;
+            putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + val));
+            return off + 3;
+        }
+
+        /**
+         * Puts a large string size to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param strlen the size value to write
+         * @return the new offset
+         */
+        public static int putStringSizeLarge(byte[] bytes, int off, int strlen) {
+            if (strlen <= INT32_SHORT_MAX) {
+                putIntBE(bytes, off, (BC_STR_ASCII << 24) + (BC_INT32_SHORT_ZERO << 16) + strlen);
+                return off + 4;
+            }
+
+            putShortBE(bytes, off, (short) ((BC_STR_ASCII << 8) | BC_INT32));
+            putIntBE(bytes, off + 2, strlen);
+            return off + 6;
+        }
+
+        /**
+         * Writes a character array to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param chars the character array to write
+         * @return the new offset
+         */
+        public static int writeString(byte[] bytes, int off, char[] chars) {
+            return writeString(bytes, off, chars, 0, chars.length);
+        }
+
+        /**
+         * Writes a character array with offset and length to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param chars the character array to write
+         * @param coff the offset in the character array
+         * @param strlen the length of characters to write
+         * @return the new offset
+         */
+        public static int writeString(byte[] bytes, int off, char[] chars, int coff, int strlen) {
+            int start = off;
+            boolean ascii = true;
+            if (strlen < STR_ASCII_FIX_LEN) {
+                bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+                for (int i = coff, end = coff + strlen; i < end; i++) {
+                    char ch = chars[i];
+                    if (ch > 0x00FF) {
+                        ascii = false;
+                        break;
+                    }
+                    bytes[off++] = (byte) ch;
+                }
+
+                if (ascii) {
+                    return off;
+                }
+
+                off = start;
+            } else {
+                ascii = isLatin1(chars, coff, strlen);
+            }
+
+            if (ascii) {
+                off = writeStringLatin1(bytes, off, chars, coff, strlen);
+            } else {
+                off = writeUTF8(bytes, off, chars, coff, strlen);
+            }
+            return off;
+        }
+
+        /**
+         * Writes a Latin-1 character array to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param chars the character array to write
+         * @param coff the offset in the character array
+         * @param strlen the length of characters to write
+         * @return the new offset
+         */
+        public static int writeStringLatin1(byte[] bytes, int off, char[] chars, int coff, int strlen) {
+            if (strlen <= STR_ASCII_FIX_LEN) {
+                bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            } else {
+                bytes[off] = BC_STR_ASCII;
+                if (strlen <= INT32_BYTE_MAX) {
+                    putShortBE(bytes, off + 1, (short) ((BC_INT32_BYTE_ZERO << 8) + strlen));
+                    off += 3;
+                } else {
+                    off = writeInt32(bytes, off + 1, strlen);
+                }
+            }
+            for (int i = 0; i < strlen; i++) {
+                bytes[off++] = (byte) chars[coff + i];
+            }
+            return off;
+        }
+
+        /**
+         * Writes a UTF-8 character array to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param chars the character array to write
+         * @param coff the offset in the character array
+         * @param strlen the length of characters to write
+         * @return the new offset
+         */
+        public static int writeUTF8(byte[] bytes, int off, char[] chars, int coff, int strlen) {
+            int maxSize = strlen * 3;
+            int lenByteCnt = sizeOfInt(maxSize);
+            int result = IOUtils.encodeUTF8(chars, coff, strlen, bytes, off + lenByteCnt + 1);
+
+            int utf8len = result - off - lenByteCnt - 1;
+            int utf8lenByteCnt = sizeOfInt(utf8len);
+            if (lenByteCnt != utf8lenByteCnt) {
+                System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
+            }
+            bytes[off] = BC_STR_UTF8;
+            return writeInt32(bytes, off + 1, utf8len) + utf8len;
+        }
+
+        /**
+         * Calculates the size needed for an integer value
+         *
+         * @param i the integer value
+         * @return the size needed
+         */
+        public static int sizeOfInt(int i) {
+            if (i >= BC_INT32_NUM_MIN && i <= BC_INT32_NUM_MAX) {
+                return 1;
+            }
+
+            if (i >= INT32_BYTE_MIN && i <= INT32_BYTE_MAX) {
+                return 2;
+            }
+
+            if (i >= INT32_SHORT_MIN && i <= INT32_SHORT_MAX) {
+                return 3;
+            }
+
+            return 5;
+        }
+
+        /**
+         * Writes a UUID value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the UUID value to write
+         * @return the new offset
+         */
+        public static int writeUUID(byte[] bytes, int off, UUID value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            putShortLE(bytes, off, (short) ((BC_BINARY & 0xFF) | ((BC_INT32_NUM_16 & 0xFF) << 8)));
+            putLongBE(bytes, off + 2, value.getMostSignificantBits());
+            putLongBE(bytes, off + 10, value.getLeastSignificantBits());
+            return off + 18;
+        }
+
+        /**
+         * Writes an Instant value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the Instant value to write
+         * @return the new offset
+         */
+        public static int writeInstant(byte[] bytes, int off, Instant value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            bytes[off] = BC_TIMESTAMP;
+            off = writeInt64(bytes, off + 1, value.getEpochSecond());
+            return writeInt32(bytes, off, value.getNano());
+        }
+
+        /**
+         * Writes a LocalDate value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the LocalDate value to write
+         * @return the new offset
+         */
+        public static int writeLocalDate(byte[] bytes, int off, LocalDate value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            bytes[off] = BC_LOCAL_DATE;
+            int year = value.getYear();
+            putIntBE(bytes, off + 1, (year << 16) | (value.getMonthValue() << 8) | value.getDayOfMonth());
+            return off + 5;
+        }
+
+        /**
+         * Writes a LocalTime value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the LocalTime value to write
+         * @return the new offset
+         */
+        public static int writeLocalTime(byte[] bytes, int off, LocalTime value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            putIntBE(bytes,
+                    off,
+                    (BC_LOCAL_TIME << 24) | (value.getHour() << 16) | (value.getMinute() << 8) | value.getSecond());
+            return writeInt32(bytes, off + 4, value.getNano());
+        }
+
+        /**
+         * Writes a LocalDateTime value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the LocalDateTime value to write
+         * @return the new offset
+         */
+        public static int writeLocalDateTime(byte[] bytes, int off, LocalDateTime value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            putIntBE(bytes,
+                    off,
+                    (BC_LOCAL_DATETIME << 24) | (value.getYear() << 8) | value.getMonthValue());
+            putIntBE(bytes,
+                    off + 4,
+                    (value.getDayOfMonth() << 24)
+                            | (value.getHour() << 16)
+                            | (value.getMinute() << 8)
+                            | value.getSecond());
+            return writeInt32(bytes, off + 8, value.getNano());
+        }
+
+        /**
+         * Writes an OffsetDateTime value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the OffsetDateTime value to write
+         * @return the new offset
+         */
+        public static int writeOffsetDateTime(byte[] bytes, int off, OffsetDateTime value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            putIntBE(bytes,
+                    off,
+                    (BC_TIMESTAMP_WITH_TIMEZONE << 24) | (value.getYear() << 8) | value.getMonthValue());
+            putIntBE(bytes,
+                    off + 4,
+                    (value.getDayOfMonth() << 24)
+                            | (value.getHour() << 16)
+                            | (value.getMinute() << 8)
+                            | value.getSecond());
+
+            off = writeInt32(bytes, off + 8, value.getNano());
+
+            String zoneIdStr = value.getOffset().getId();
+            int strlen = zoneIdStr.length();
+            bytes[off] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            zoneIdStr.getBytes(0, strlen, bytes, off + 1);
+            return off + strlen + 1;
+        }
+
+        /**
+         * Writes an OffsetTime value to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param value the OffsetTime value to write
+         * @return the new offset
+         */
+        public static int writeOffsetTime(byte[] bytes, int off, OffsetTime value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+
+            int year = 1970, month = 1, dayOfMonth = 1;
+            putIntBE(bytes,
+                    off,
+                    (BC_TIMESTAMP_WITH_TIMEZONE << 24) | (year << 8) | month);
+            putIntBE(bytes,
+                    off + 4,
+                    (dayOfMonth << 24)
+                            | (value.getHour() << 16)
+                            | (value.getMinute() << 8)
+                            | value.getSecond());
+
+            off = writeInt32(bytes, off + 8, value.getNano());
+
+            String zoneIdStr = value.getOffset().getId();
+            int strlen = zoneIdStr.length();
+            bytes[off] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            zoneIdStr.getBytes(0, strlen, bytes, off + 1);
+            return off + strlen + 1;
+        }
+
+        /**
+         * Writes a reference to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param path the reference path
+         * @param jsonWriter the JSON writer
+         * @return the new offset
+         */
+        public static int writeReference(byte[] bytes, int off, String path, JSONWriter jsonWriter) {
+            if (jsonWriter.lastReference == path) {
+                path = "#-1";
+            } else {
+                jsonWriter.lastReference = path;
+            }
+            bytes[off] = BC_REFERENCE;
+            return writeString(bytes, off + 1, path);
+        }
+
+        /**
+         * Writes a raw name to a byte array
+         *
+         * @param bytes the byte array to write to
+         * @param off the offset in the byte array
+         * @param name the name byte array to write
+         * @param nameHash the name hash
+         * @param jsonWriter the JSON writer
+         * @return the new offset
+         */
+        public static int writeNameRaw(byte[] bytes, int off, byte[] name, long nameHash, JSONWriter jsonWriter) {
+            SymbolTable symbolTable = jsonWriter.symbolTable;
+            JSONWriterJSONB jsonWriterJSONB = (JSONWriterJSONB) jsonWriter;
+            int symbol;
+            if (symbolTable == null
+                    || (symbol = symbolTable.getOrdinalByHashCode(nameHash)) == -1
+            ) {
+                if ((jsonWriter.context.features & WriteNameAsSymbol.mask) == 0) {
+                    System.arraycopy(name, 0, bytes, off, name.length);
+                    return off + name.length;
+                }
+
+                boolean symbolExists = false;
+                if (jsonWriterJSONB.symbols != null) {
+                    if ((symbol = jsonWriterJSONB.symbols.putIfAbsent(nameHash, jsonWriterJSONB.symbolIndex)) != jsonWriterJSONB.symbolIndex) {
+                        symbolExists = true;
+                    } else {
+                        jsonWriterJSONB.symbolIndex++;
+                    }
+                } else {
+                    (jsonWriterJSONB.symbols = new TLongIntHashMap())
+                            .put(nameHash, symbol = jsonWriterJSONB.symbolIndex++);
+                }
+
+                if (!symbolExists) {
+                    bytes[off++] = BC_SYMBOL;
+                    System.arraycopy(name, 0, bytes, off, name.length);
+                    off += name.length;
+
+                    if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
+                        bytes[off++] = (byte) symbol;
+                    } else {
+                        off = writeInt32(bytes, off, symbol);
+                    }
+                    return off;
+                }
+                symbol = -symbol;
+            }
+
+            bytes[off++] = BC_SYMBOL;
+            int intValue = -symbol;
+            if (intValue >= BC_INT32_NUM_MIN && intValue <= BC_INT32_NUM_MAX) {
+                bytes[off++] = (byte) intValue;
+            } else {
+                off = writeInt32(bytes, off, intValue);
+            }
+            return off;
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
@@ -151,7 +152,7 @@ final class FieldWriterObjectArrayMethod<T>
 
         boolean writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
 
-        if (jsonWriter.jsonb) {
+        if (jsonWriter instanceof JSONWriterJSONB) {
             Class arrayClass = array.getClass();
             if (arrayClass != this.fieldClass) {
                 jsonWriter.writeTypeName(
@@ -192,7 +193,7 @@ final class FieldWriterObjectArrayMethod<T>
                     }
                 }
 
-                itemObjectWriter.writeJSONB(jsonWriter, item, i, this.itemType, this.features);
+                itemObjectWriter.writeJSONB((JSONWriterJSONB) jsonWriter, item, i, this.itemType, this.features);
 
                 if (itemRefDetect) {
                     jsonWriter.popPath(item);

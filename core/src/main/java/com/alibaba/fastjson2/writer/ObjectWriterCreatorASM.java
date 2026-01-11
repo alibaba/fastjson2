@@ -23,6 +23,7 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.internal.asm.ASMUtils.*;
+import static com.alibaba.fastjson2.internal.asm.ASMUtils.TYPE_JSON_WRITER;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.isFunction;
 import static com.alibaba.fastjson2.writer.ObjectWriterProvider.TYPE_INT64_MASK;
@@ -44,8 +45,10 @@ public class ObjectWriterCreatorASM
 
     static final String METHOD_DESC_WRITE_VALUE = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;)V";
     static final String METHOD_DESC_WRITE = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V";
+    static final String METHOD_DESC_WRITE_JSONB = "(" + DESC_JSONB_WRITER + "Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V";
     static final String METHOD_DESC_WRITE_FIELD_NAME = "(" + DESC_JSON_WRITER + ")V";
     static final String METHOD_DESC_WRITE_OBJECT = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V";
+    static final String METHOD_DESC_WRITE_OBJECT_JSONB = "(" + DESC_JSONB_WRITER + "Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V";
     static final String METHOD_DESC_WRITE_J = "(" + DESC_JSON_WRITER + "J)V";
     static final String METHOD_DESC_WRITE_D = "(" + DESC_JSON_WRITER + "D)V";
     static final String METHOD_DESC_WRITE_F = "(" + DESC_JSON_WRITER + "F)V";
@@ -59,8 +62,11 @@ public class ObjectWriterCreatorASM
     static final String METHOD_DESC_WRITE_BArray = "(" + DESC_JSON_WRITER + "[B)V";
     static final String METHOD_DESC_WRITE_CArray = "(" + DESC_JSON_WRITER + "[C)V";
     static final String METHOD_DESC_WRITE_ENUM = "(" + DESC_JSON_WRITER + "Ljava/lang/Enum;)V";
+    static final String METHOD_DESC_WRITE_ENUM_JSONB = "(" + DESC_JSONB_WRITER + "Ljava/lang/Enum;)V";
     static final String METHOD_DESC_WRITE_LIST = "(" + DESC_JSON_WRITER + "Ljava/util/List;)V";
+    static final String METHOD_DESC_WRITE_LIST_JSONB = "(" + DESC_JSONB_WRITER + "Ljava/util/List;)V";
     static final String METHOD_DESC_FIELD_WRITE_OBJECT = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;)Z";
+    static final String METHOD_DESC_FIELD_WRITE_OBJECT_JSONB = "(" + DESC_JSONB_WRITER + "Ljava/lang/Object;)Z";
     static final String METHOD_DESC_GET_OBJECT_WRITER = "(" + DESC_JSON_WRITER + "Ljava/lang/Class;)" + DESC_OBJECT_WRITER;
     static final String METHOD_DESC_GET_ITEM_WRITER = "(" + DESC_JSON_WRITER + "Ljava/lang/reflect/Type;)" + DESC_OBJECT_WRITER;
     static final String METHOD_DESC_WRITE_TYPE_INFO = "(" + DESC_JSON_WRITER + ")Z";
@@ -68,10 +74,10 @@ public class ObjectWriterCreatorASM
     static final String METHOD_DESC_SET_PATH2 = "(" + DESC_FIELD_WRITER + "Ljava/lang/Object;)Ljava/lang/String;";
     static final String METHOD_DESC_WRITE_REFERENCE = "(Ljava/lang/String;)V";
     static final String METHOD_DESC_IO_WRITE_REFERENCE = "([BILjava/lang/String;" + DESC_JSON_WRITER + ")I";
-    static final String METHOD_DESC_WRITE_CLASS_INFO = "(" + DESC_JSON_WRITER + ")V";
+    static final String METHOD_DESC_WRITE_CLASS_INFO = "(" + DESC_JSONB_WRITER + ")V";
     static final String METHOD_DESC_WRITE_FIELD_NAME_JSONB = "([BI" + DESC_JSON_WRITER + ")I";
     static final String METHOD_DESC_WRITE_NAME_SYMBOL = "(" + DESC_SYMBOL + ")I";
-    static final String METHOD_DESC_WRITE_LIST_VALUE_JSONB = "(" + DESC_JSON_WRITER + "Ljava/util/List;)V";
+    static final String METHOD_DESC_WRITE_LIST_VALUE_JSONB = "(" + DESC_JSONB_WRITER + "Ljava/util/List;)V";
 
     static final int THIS = 0;
     static final int JSON_WRITER = 1;
@@ -661,11 +667,12 @@ public class ObjectWriterCreatorASM
 
                 mw.aload(THIS);
                 mw.aload(JSON_WRITER);
+                mw.checkcast(TYPE_JSONB_WRITER);
                 mw.aload(OBJECT);
                 mw.aload(FIELD_NAME);
                 mw.aload(FIELD_TYPE);
                 mw.lload(FIELD_FEATURES);
-                mw.invokevirtual(classNameType, "writeArrayMappingJSONB", METHOD_DESC_WRITE_OBJECT);
+                mw.invokevirtual(classNameType, "writeArrayMappingJSONB", METHOD_DESC_WRITE_OBJECT_JSONB);
                 mw.return_();
 
                 mw.visitLabel(jsonb_);
@@ -673,11 +680,12 @@ public class ObjectWriterCreatorASM
 
             mw.aload(THIS);
             mw.aload(JSON_WRITER);
+            mw.checkcast(TYPE_JSONB_WRITER);
             mw.aload(OBJECT);
             mw.aload(FIELD_NAME);
             mw.aload(FIELD_TYPE);
             mw.lload(FIELD_FEATURES);
-            mw.invokevirtual(classNameType, "writeJSONB", METHOD_DESC_WRITE_OBJECT);
+            mw.invokevirtual(classNameType, "writeJSONB", METHOD_DESC_WRITE_OBJECT_JSONB);
             mw.return_();
 
             mw.visitLabel(json_);
@@ -806,7 +814,7 @@ public class ObjectWriterCreatorASM
         MethodWriter mw = cw.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 "writeJSONB",
-                METHOD_DESC_WRITE,
+                METHOD_DESC_WRITE_JSONB,
                 fieldWriters.size() < 6 ? 512 : 1024
         );
 
@@ -817,6 +825,23 @@ public class ObjectWriterCreatorASM
 
         MethodWriterContext mwc = new MethodWriterContext(provider, objectType, objectFeatures, classNameType, mw, 7, true);
         mwc.genVariantsMethodBefore(true);
+
+        {
+            Label L0 = new Label();
+
+            mwc.genIsEnabled(JSONWriter.Feature.BeanToArray.mask, L0);
+
+            mw.aload(THIS);
+            mw.aload(JSON_WRITER);
+            mw.aload(OBJECT);
+            mw.aload(FIELD_NAME);
+            mw.aload(FIELD_TYPE);
+            mw.lload(FIELD_FEATURES);
+            mw.invokevirtual(classNameType, "writeArrayMappingJSONB", METHOD_DESC_WRITE_OBJECT_JSONB);
+            mw.return_();
+
+            mw.visitLabel(L0);
+        }
 
         Label return_ = new Label();
         if (objectType == null || !java.io.Serializable.class.isAssignableFrom(objectType)) {
@@ -986,7 +1011,7 @@ public class ObjectWriterCreatorASM
             mw.iload(OFFSET);
             mw.iload(SYMBOL);
             mw.ineg();
-            mw.invokestatic(TYPE_JSONB_IO, "writeSymbol", "([BII)I", true);
+            mw.invokestatic(TYPE_JSONB_IO, "writeSymbol", "([BII)I");
             mw.istore(OFFSET);
             mw.goto_(L_NAME_END);
 
@@ -1157,7 +1182,7 @@ public class ObjectWriterCreatorASM
             mw.iload(OFFSET);
             mw.aload(REF_PATH);
             mw.aload(JSON_WRITER);
-            mw.invokestatic(TYPE_JSONB_IO, "writeReference", METHOD_DESC_IO_WRITE_REFERENCE, true);
+            mw.invokestatic(TYPE_JSONB_IO, "writeReference", METHOD_DESC_IO_WRITE_REFERENCE);
             mw.istore(OFFSET);
 
             mw.aload(JSON_WRITER);
@@ -1219,7 +1244,7 @@ public class ObjectWriterCreatorASM
             mw.getfield(TYPE_FIELD_WRITER, "fieldClass", "Ljava/lang/Class;");
             mw.aload(JSON_WRITER);
             String methodDesc = "([BILjava/lang/Object;Ljava/lang/Class;" + DESC_JSON_WRITER + ")I";
-            mw.invokestatic(TYPE_JSONB_IO, "checkAndWriteTypeName", methodDesc, true);
+            mw.invokestatic(TYPE_JSONB_IO, "checkAndWriteTypeName", methodDesc);
             mw.istore(OFFSET);
         }
 
@@ -1303,7 +1328,7 @@ public class ObjectWriterCreatorASM
             methodName = "writeDouble";
             methodDesc = "([BILjava/lang/Double;J)I";
         } else if (fieldClass == String.class) {
-            methodName = "writeString";
+            methodName = STRING_VALUE != null ? "writeStringJDK11" : "writeStringJDK8";
             methodDesc = "([BILjava/lang/String;)I";
         } else if (fieldWriter instanceof FieldWriterEnum) {
             methodName = "writeEnum";
@@ -1330,16 +1355,16 @@ public class ObjectWriterCreatorASM
             methodName = "writeInstant";
             methodDesc = "([BILjava/time/Instant;)I";
         } else if (fieldClass == String[].class) {
-            methodName = "writeString";
+            methodName = STRING_VALUE != null ? "writeStringJDK11" : "writeStringJDK8";
             methodDesc = "([BI[Ljava/lang/String;J)I";
         } else if (Collection.class.isAssignableFrom(fieldClass)) {
             Class<?> itemClass = fieldWriter.getItemClass();
             if (itemClass == String.class) {
-                methodName = "writeString";
-                methodDesc = "([BILjava/util/Collection;J)I";
+                methodName = STRING_VALUE != null ? "writeStringJDK11" : "writeStringJDK8";
+                methodDesc = Collection.class.isAssignableFrom(fieldClass) ? "([BILjava/util/List;J)I" : "([BILjava/util/Collection;J)I";
             } else if (itemClass == Long.class) {
                 methodName = "writeInt64";
-                methodDesc = "([BILjava/util/Collection;J)I";
+                methodDesc = Collection.class.isAssignableFrom(fieldClass) ? "([BILjava/util/List;J)I" : "([BILjava/util/Collection;J)I";
             } else {
                 throw new JSONException("assert error " + fieldClass.getName());
             }
@@ -1365,7 +1390,7 @@ public class ObjectWriterCreatorASM
             }
         }
 
-        mw.invokestatic(TYPE_JSONB_IO, methodName, methodDesc, true);
+        mw.invokestatic(TYPE_JSONB_IO, methodName, methodDesc);
 
         mw.istore(OFFSET);
 
@@ -1418,12 +1443,12 @@ public class ObjectWriterCreatorASM
             if (fieldWriter.fieldClass == String.class) {
                 int FIELD_VALUE = mwc.var("field_" + item.ordinal);
                 mw.aload(FIELD_VALUE);
-                mw.invokestatic(TYPE_JSONB_IO, "stringCapacity", "(Ljava/lang/String;)I", true);
+                mw.invokestatic(TYPE_JSONB_IO, JVM_VERSION > 8 ? "stringCapacityJDK11" : "stringCapacityJDK8", "(Ljava/lang/String;)I");
                 mw.iadd();
             } else if (fieldWriter.fieldClass == String[].class) {
                 int FIELD_VALUE = mwc.var("field_" + item.ordinal);
                 mw.aload(FIELD_VALUE);
-                mw.invokestatic(TYPE_JSONB_IO, "stringCapacity", "([Ljava/lang/String;)I", true);
+                mw.invokestatic(TYPE_JSONB_IO, JVM_VERSION > 8 ? "stringCapacityJDK11" : "stringCapacityJDK8", "([Ljava/lang/String;)I");
                 mw.iadd();
             } else if (fieldWriter instanceof FieldWriterEnum) {
                 int FIELD_VALUE = mwc.var("field_" + item.ordinal);
@@ -1434,17 +1459,19 @@ public class ObjectWriterCreatorASM
                     mw.visitLdcInsn(fieldFeatures);
                     mw.lor();
                 }
-                mw.invokestatic(TYPE_JSONB_IO, "enumCapacity", "(Ljava/lang/Enum;J)I", true);
+                mw.invokestatic(TYPE_JSONB_IO, "enumCapacity", "(Ljava/lang/Enum;J)I");
                 mw.iadd();
             } else if (Collection.class.isAssignableFrom(fieldWriter.fieldClass)) {
                 int FIELD_VALUE = mwc.var("field_" + item.ordinal);
                 mw.aload(FIELD_VALUE);
                 Class<?> itemClass = fieldWriter.getItemClass();
                 if (itemClass == String.class) {
-                    mw.invokestatic(TYPE_JSONB_IO, "stringCapacity", "(Ljava/util/Collection;)I", true);
+                    mw.invokestatic(TYPE_JSONB_IO,
+                            JVM_VERSION > 8 ? "stringCapacityJDK11" : "stringCapacityJDK8",
+                            List.class.isAssignableFrom(fieldWriter.fieldClass) ? "(Ljava/util/List;)I" : "(Ljava/util/Collection;)I");
                     mw.iadd();
                 } else if (itemClass == Long.class) {
-                    mw.invokestatic(TYPE_JSONB_IO, "int64Capacity", "(Ljava/util/Collection;)I", true);
+                    mw.invokestatic(TYPE_JSONB_IO, "int64Capacity", "(Ljava/util/Collection;)I");
                     mw.iadd();
                 } else {
                     throw new JSONException("assert error itemClass " + itemClass.getName());
@@ -1466,7 +1493,7 @@ public class ObjectWriterCreatorASM
         MethodWriter mw = cw.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 "writeArrayMappingJSONB",
-                METHOD_DESC_WRITE,
+                METHOD_DESC_WRITE_JSONB,
                 512
         );
         MethodWriterContext mwc = new MethodWriterContext(provider, objectType, objectFeatures, classNameType, mw, 7, true);
@@ -1524,15 +1551,14 @@ public class ObjectWriterCreatorASM
 
                 fieldValueCapacity(objectFeatures, group.fieldWriters, mwc, mw, FEATURES);
 
-                mw.invokevirtual(TYPE_JSON_WRITER, "ensureCapacity", "(I)Ljava/lang/Object;");
-                mw.checkcast("[B");
+                mw.invokevirtual(TYPE_JSONB_WRITER, "ensureCapacity", "(I)[B");
                 mw.astore(BYTES);
 
                 if (group.start) {
                     mw.aload(BYTES);
                     mw.iload(OFFSET);
                     mw.visitLdcInsn(fieldWriters.size());
-                    mw.invokestatic(TYPE_JSONB_IO, "startArray", "([BII)I", true);
+                    mw.invokestatic(TYPE_JSONB_IO, "startArray", "([BII)I");
                     mw.istore(OFFSET);
                 }
 
@@ -1738,7 +1764,7 @@ public class ObjectWriterCreatorASM
         mw.invokeinterface(
                 TYPE_OBJECT_WRITER,
                 beanToArray ? "writeJSONB" : "writeArrayMappingJSONB",
-                METHOD_DESC_WRITE_OBJECT);
+                METHOD_DESC_WRITE_OBJECT_JSONB);
 
         if (refDetection) {
             mw.aload(JSON_WRITER);
@@ -1857,7 +1883,7 @@ public class ObjectWriterCreatorASM
             mw.invokevirtual(
                     TYPE_FIELD_WRITER,
                     "writeListValueJSONB",
-                    METHOD_DESC_WRITE_LIST);
+                    METHOD_DESC_WRITE_LIST_JSONB);
         }
 
         if (!disableReferenceDetect) {
@@ -2052,23 +2078,6 @@ public class ObjectWriterCreatorASM
         final int FIELD_NAME = 3;
         final int FIELD_TYPE = 4;
         final int FIELD_FEATURES = 5;
-
-        Label jsonb_ = new Label();
-
-        mw.aload(JSON_WRITER);
-        mw.getfield(TYPE_JSON_WRITER, "jsonb", "Z");
-        mw.ifeq(jsonb_);
-
-        mw.aload(THIS);
-        mw.aload(JSON_WRITER);
-        mw.aload(OBJECT);
-        mw.aload(FIELD_NAME);
-        mw.aload(FIELD_TYPE);
-        mw.lload(FIELD_FEATURES);
-        mw.invokevirtual(classNameType, "writeArrayMappingJSONB", METHOD_DESC_WRITE_OBJECT);
-        mw.return_();
-
-        mw.visitLabel(jsonb_);
 
         Label object_ = new Label();
         hashFilter(mw, fieldWriters, object_);
@@ -2593,8 +2602,11 @@ public class ObjectWriterCreatorASM
             mw.getfield(mwc.classNameType, fieldWriter(i), DESC_FIELD_WRITER);
             mw.aload(JSON_WRITER);
             mw.aload(OBJECT);
-            mw.invokevirtual(TYPE_FIELD_WRITER,
-                    "write", METHOD_DESC_FIELD_WRITE_OBJECT);
+            if (jsonb) {
+                mw.invokevirtual(TYPE_FIELD_WRITER, "writeJSONB", METHOD_DESC_FIELD_WRITE_OBJECT_JSONB);
+            } else {
+                mw.invokevirtual(TYPE_FIELD_WRITER, "write", METHOD_DESC_FIELD_WRITE_OBJECT);
+            }
             mw.pop();
             mw.goto_(notNull_);
         }
@@ -2793,16 +2805,19 @@ public class ObjectWriterCreatorASM
             mwc.loadFieldType(i, fieldType);
             mw.visitLdcInsn(features);
 
+            String writeMethodDesc;
             String writeMethod;
             if (jsonb) {
                 writeMethod = (features & JSONWriter.Feature.BeanToArray.mask) != 0 ? "writeArrayMappingJSONB" : "writeJSONB";
+                writeMethodDesc = METHOD_DESC_WRITE_OBJECT_JSONB;
             } else {
                 writeMethod = (features & JSONWriter.Feature.BeanToArray.mask) != 0 ? "writeArrayMapping" : "write";
+                writeMethodDesc = METHOD_DESC_WRITE_OBJECT;
             }
             mw.invokeinterface(
                     TYPE_OBJECT_WRITER,
                     writeMethod,
-                    METHOD_DESC_WRITE_OBJECT);
+                    writeMethodDesc);
         }
 
         if (refDetection) {
@@ -3605,7 +3620,7 @@ public class ObjectWriterCreatorASM
             methodDesc = METHOD_DESC_WRITE_DARRAY;
         } else if (fieldClass.isEnum()) {
             methodName = "writeEnumJSONB";
-            methodDesc = METHOD_DESC_WRITE_ENUM;
+            methodDesc = METHOD_DESC_WRITE_ENUM_JSONB;
         } else {
             throw new UnsupportedOperationException();
         }
@@ -4745,7 +4760,7 @@ public class ObjectWriterCreatorASM
             mw.aload(BYTES);
             mw.iload(OFFSET);
             mw.iload(SIZE);
-            mw.invokestatic(TYPE_JSONB_IO, "startArray", "([BII)I", true);
+            mw.invokestatic(TYPE_JSONB_IO, "startArray", "([BII)I");
             mw.istore(OFFSET);
 
             Label L0 = new Label(), L1 = new Label(), L3 = new Label();
@@ -4761,7 +4776,7 @@ public class ObjectWriterCreatorASM
             mw.aload(BYTES);
             mw.iload(OFFSET);
             mw.visitLdcInsn(fieldWriters.size());
-            mw.invokestatic(TYPE_JSONB_IO, "startArray", "([BII)I", true);
+            mw.invokestatic(TYPE_JSONB_IO, "startArray", "([BII)I");
             mw.istore(OFFSET);
 
             int ITEM = mwc.var("ITEM");

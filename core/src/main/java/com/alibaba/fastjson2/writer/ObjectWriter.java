@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.Fnv;
 
@@ -124,8 +125,8 @@ public interface ObjectWriter<T> {
      * @param fieldType the type of the field being written
      * @param features the features to use for writing
      */
-    default void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        write(jsonWriter, object, fieldName, fieldType, features);
+    default void writeJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        write((JSONWriter) jsonWriter, object, fieldName, fieldType, features);
     }
 
     /**
@@ -134,7 +135,7 @@ public interface ObjectWriter<T> {
      * @param jsonWriter the JSONWriter to which the object should be written
      * @param object the object to write
      */
-    default void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object) {
+    default void writeArrayMappingJSONB(JSONWriterJSONB jsonWriter, Object object) {
         writeArrayMappingJSONB(jsonWriter, object, null, null, 0);
     }
 
@@ -147,7 +148,7 @@ public interface ObjectWriter<T> {
      * @param fieldType the type of the field being written
      * @param features the features to use for writing
      */
-    default void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    default void writeArrayMappingJSONB(JSONWriterJSONB jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         List<FieldWriter> fieldWriters = getFieldWriters();
         int size = fieldWriters.size();
         jsonWriter.startArray(size);
@@ -167,8 +168,8 @@ public interface ObjectWriter<T> {
      * @param features the features to use for writing
      */
     default void writeArrayMapping(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        if (jsonWriter.jsonb) {
-            writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
+        if (jsonWriter instanceof JSONWriterJSONB) {
+            writeArrayMappingJSONB((JSONWriterJSONB) jsonWriter, object, fieldName, fieldType, features);
             return;
         }
 
@@ -247,6 +248,10 @@ public interface ObjectWriter<T> {
      */
     default void write(JSONWriter jsonWriter, Object object) {
         write(jsonWriter, object, null, null, 0);
+    }
+
+    default void writeJSONB(JSONWriterJSONB jsonWriter, Object object) {
+        writeJSONB(jsonWriter, object, null, null, 0);
     }
 
     /**

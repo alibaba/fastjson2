@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.arraymapping;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -29,7 +30,7 @@ public class AutoType0 {
         Bean1 bean = new Bean1();
         bean.id = 100;
 
-        JSONWriter jsonWriter = JSONWriter.ofJSONB(writerFeatures);
+        JSONWriterJSONB jsonWriter = JSONWriter.ofJSONB(writerFeatures);
         ObjectWriter objectWriter = ObjectWriterCreator.INSTANCE.createObjectWriter(Bean1.class);
         objectWriter.writeArrayMappingJSONB(jsonWriter, bean, null, null, 0);
 
@@ -63,7 +64,7 @@ public class AutoType0 {
         bean.id0 = 1000;
         bean.id1 = 1001;
 
-        JSONWriter jsonWriter = JSONWriter.ofJSONB(writerFeatures);
+        JSONWriterJSONB jsonWriter = JSONWriter.ofJSONB(writerFeatures);
         ObjectWriter objectWriter = ObjectWriterCreator.INSTANCE.createObjectWriter(Bean2.class);
         objectWriter.writeArrayMappingJSONB(jsonWriter, bean, null, null, 0);
 
@@ -102,7 +103,7 @@ public class AutoType0 {
         bean.id1 = 1001;
         bean.id2 = 1002;
 
-        JSONWriter jsonWriter = JSONWriter.ofJSONB(writerFeatures);
+        JSONWriterJSONB jsonWriter = JSONWriter.ofJSONB(writerFeatures);
         ObjectWriter objectWriter = ObjectWriterCreator.INSTANCE.createObjectWriter(Bean3.class);
         objectWriter.writeArrayMappingJSONB(jsonWriter, bean, null, null, 0);
 
@@ -146,7 +147,7 @@ public class AutoType0 {
         bean.id2 = 1002;
         bean.id3 = 1003;
 
-        JSONWriter jsonWriter = JSONWriter.ofJSONB(writerFeatures);
+        JSONWriterJSONB jsonWriter = JSONWriter.ofJSONB(writerFeatures);
         ObjectWriter objectWriter = ObjectWriterCreator.INSTANCE.createObjectWriter(Bean4.class);
         objectWriter.writeArrayMappingJSONB(jsonWriter, bean, null, null, 0);
 
@@ -195,7 +196,7 @@ public class AutoType0 {
         bean.id3 = 1003;
         bean.id4 = 1004;
 
-        JSONWriter jsonWriter = JSONWriter.ofJSONB(writerFeatures);
+        JSONWriterJSONB jsonWriter = JSONWriter.ofJSONB(writerFeatures);
         ObjectWriter objectWriter = ObjectWriterCreator.INSTANCE.createObjectWriter(Bean5.class);
         objectWriter.writeArrayMappingJSONB(jsonWriter, bean, null, null, 0);
 
@@ -249,7 +250,7 @@ public class AutoType0 {
         bean.id4 = 1004;
         bean.id5 = 1005;
 
-        JSONWriter jsonWriter = JSONWriter.ofJSONB(writerFeatures);
+        JSONWriterJSONB jsonWriter = JSONWriter.ofJSONB(writerFeatures);
         ObjectWriter objectWriter = ObjectWriterCreator.INSTANCE.createObjectWriter(Bean6.class);
         objectWriter.writeArrayMappingJSONB(jsonWriter, bean, null, null, 0);
 
@@ -308,7 +309,7 @@ public class AutoType0 {
         bean.id5 = 1005;
         bean.id6 = 1006;
 
-        JSONWriter jsonWriter = JSONWriter.ofJSONB(writerFeatures);
+        JSONWriterJSONB jsonWriter = JSONWriter.ofJSONB(writerFeatures);
         ObjectWriter objectWriter = ObjectWriterCreator.INSTANCE.createObjectWriter(Bean7.class);
         objectWriter.writeArrayMappingJSONB(jsonWriter, bean, null, null, 0);
 

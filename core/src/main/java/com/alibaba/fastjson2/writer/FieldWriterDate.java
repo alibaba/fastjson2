@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.util.DateUtils;
 
 import java.lang.reflect.Field;
@@ -115,7 +116,7 @@ abstract class FieldWriterDate<T>
 
     @Override
     public void writeDate(JSONWriter jsonWriter, long timeMillis) {
-        if (jsonWriter.jsonb) {
+        if (jsonWriter instanceof JSONWriterJSONB) {
             writeFieldName(jsonWriter);
             jsonWriter.writeMillis(timeMillis);
             return;

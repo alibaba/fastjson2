@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -83,8 +84,8 @@ abstract class FieldWriterObjectFinal<T>
         }
 
         writeFieldName(jsonWriter);
-        if (jsonWriter.jsonb) {
-            valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldType, features);
+        if (jsonWriter instanceof JSONWriterJSONB) {
+            valueWriter.writeJSONB((JSONWriterJSONB) jsonWriter, value, fieldName, fieldType, features);
         } else {
             valueWriter.write(jsonWriter, value, fieldName, fieldType, features);
         }
@@ -120,11 +121,11 @@ abstract class FieldWriterObjectFinal<T>
         ObjectWriter valueWriter = getObjectWriter(jsonWriter, fieldClass);
 
         boolean beanToArray = (jsonWriter.getFeatures(features) & BeanToArray.mask) != 0;
-        if (jsonWriter.jsonb) {
+        if (jsonWriter instanceof JSONWriterJSONB) {
             if (beanToArray) {
-                valueWriter.writeArrayMappingJSONB(jsonWriter, value, fieldName, fieldType, features);
+                valueWriter.writeArrayMappingJSONB((JSONWriterJSONB) jsonWriter, value, fieldName, fieldType, features);
             } else {
-                valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldType, features);
+                valueWriter.writeJSONB((JSONWriterJSONB) jsonWriter, value, fieldName, fieldType, features);
             }
         } else {
             if (beanToArray) {

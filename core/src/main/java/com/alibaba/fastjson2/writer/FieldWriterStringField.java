@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 
 import java.lang.reflect.Field;
 
@@ -47,7 +48,7 @@ final class FieldWriterStringField<T>
 
         writeFieldName(jsonWriter);
 
-        if (symbol && jsonWriter.jsonb) {
+        if (symbol && jsonWriter instanceof JSONWriterJSONB) {
             jsonWriter.writeSymbol(value);
         } else {
             if (raw) {

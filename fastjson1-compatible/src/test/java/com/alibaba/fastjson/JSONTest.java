@@ -8,6 +8,7 @@ import com.alibaba.fastjson.util.TypeUtils;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.jupiter.api.Test;
@@ -99,7 +100,7 @@ public class JSONTest {
         {
             ObjectWriter objectWriter = SerializeConfig.DEFAULT_PROVIDER.getObjectWriter(BeanAware.class);
             JSONWriter jsonWriter = JSONWriter.ofJSONB();
-            objectWriter.writeJSONB(jsonWriter, null, null, null, 0);
+            objectWriter.writeJSONB((JSONWriterJSONB) jsonWriter, null, null, null, 0);
             byte[] bytes = jsonWriter.getBytes();
             assertNull(JSONB.parse(bytes));
         }

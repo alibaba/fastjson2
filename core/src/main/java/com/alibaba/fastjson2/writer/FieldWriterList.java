@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -12,6 +13,8 @@ import java.util.Date;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.MASK_BEAN_TO_ARRAY;
+import static com.alibaba.fastjson2.JSONWriter.MASK_REFERENCE_DETECTION;
 
 public abstract class FieldWriterList<T>
         extends FieldWriter<T> {
@@ -121,16 +124,16 @@ public abstract class FieldWriterList<T>
     }
 
     @Override
-    public void writeListValueJSONB(JSONWriter jsonWriter, List list) {
+    public void writeListValueJSONB(JSONWriterJSONB jsonWriter, List list) {
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
         long features = jsonWriter.getFeatures(this.features);
-        boolean beanToArray = (features & JSONWriter.Feature.BeanToArray.mask) != 0;
+        boolean beanToArray = (features & MASK_BEAN_TO_ARRAY) != 0;
 
         int size = list.size();
 
-        boolean refDetect = (features & ReferenceDetection.mask) != 0;
+        boolean refDetect = (features & MASK_REFERENCE_DETECTION) != 0;
 
         if (jsonWriter.isWriteTypeInfo(list, fieldClass)) {
             jsonWriter.writeTypeName(
@@ -182,8 +185,8 @@ public abstract class FieldWriterList<T>
 
     @Override
     public final void writeListValue(JSONWriter jsonWriter, List list) {
-        if (jsonWriter.jsonb) {
-            writeListValueJSONB(jsonWriter, list);
+        if (jsonWriter instanceof JSONWriterJSONB) {
+            writeListValueJSONB((JSONWriterJSONB) jsonWriter, list);
             return;
         }
 
@@ -250,7 +253,8 @@ public abstract class FieldWriterList<T>
         jsonWriter.endArray();
     }
 
-    public final void writeListJSONB(JSONWriter jsonWriter, List list) {
+    @Override
+    public final void writeListJSONB(JSONWriterJSONB jsonWriter, List list) {
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -303,9 +307,9 @@ public abstract class FieldWriterList<T>
             }
 
             if (beanToArray) {
-                itemObjectWriter.writeArrayMappingJSONB(jsonWriter, item, i, itemType, features);
+                itemObjectWriter.writeArrayMappingJSONB((JSONWriterJSONB) jsonWriter, item, i, itemType, features);
             } else {
-                itemObjectWriter.writeJSONB(jsonWriter, item, i, itemType, features);
+                itemObjectWriter.writeJSONB((JSONWriterJSONB) jsonWriter, item, i, itemType, features);
             }
 
             if (refDetect) {
@@ -316,8 +320,8 @@ public abstract class FieldWriterList<T>
 
     @Override
     public final void writeList(JSONWriter jsonWriter, List list) {
-        if (jsonWriter.jsonb) {
-            writeListJSONB(jsonWriter, list);
+        if (jsonWriter instanceof JSONWriterJSONB) {
+            writeListJSONB((JSONWriterJSONB) jsonWriter, list);
             return;
         }
 
@@ -390,7 +394,7 @@ public abstract class FieldWriterList<T>
             writeFieldName(jsonWriter);
         }
 
-        if (jsonWriter.jsonb) {
+        if (jsonWriter instanceof JSONWriterJSONB) {
             if (jsonWriter.isWriteTypeInfo(list, fieldClass)) {
                 jsonWriter.writeTypeName(
                         TypeUtils.getTypeName(list.getClass()));

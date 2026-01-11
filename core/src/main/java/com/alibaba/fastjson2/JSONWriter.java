@@ -608,7 +608,7 @@ public abstract class JSONWriter
      * @return true if the IgnoreErrorGetter feature is enabled, false otherwise
      */
     public final boolean isIgnoreErrorGetter() {
-        return (context.features & IgnoreErrorGetter.mask) != 0;
+        return (context.features & MASK_IGNORE_ERROR_GETTER) != 0;
     }
 
     /**
@@ -620,7 +620,7 @@ public abstract class JSONWriter
      */
     public final boolean isWriteTypeInfo(Object object, Class fieldClass) {
         long features = context.features;
-        if ((features & WriteClassName.mask) == 0) {
+        if ((features & MASK_WRITE_CLASS_NAME) == 0) {
             return false;
         }
 
@@ -633,13 +633,13 @@ public abstract class JSONWriter
             return false;
         }
 
-        if ((features & NotWriteHashMapArrayListClassName.mask) != 0) {
+        if ((features & MASK_NOT_WRITE_HASHMAP_ARRAY_LIST_CLASS_NAME) != 0) {
             if (objectClass == HashMap.class || objectClass == ArrayList.class) {
                 return false;
             }
         }
 
-        return (features & NotWriteRootClassName.mask) == 0
+        return (features & MASK_NOT_WRITE_ROOT_CLASSNAME) == 0
                 || object != this.rootObject;
     }
 
@@ -652,7 +652,7 @@ public abstract class JSONWriter
      */
     public final boolean isWriteTypeInfo(Object object, Type fieldType) {
         long features = context.features;
-        if ((features & WriteClassName.mask) == 0
+        if ((features & MASK_WRITE_CLASS_NAME) == 0
                 || object == null
         ) {
             return false;
@@ -676,13 +676,13 @@ public abstract class JSONWriter
             return false;
         }
 
-        if ((features & NotWriteHashMapArrayListClassName.mask) != 0) {
+        if ((features & MASK_NOT_WRITE_HASHMAP_ARRAY_LIST_CLASS_NAME) != 0) {
             if (objectClass == HashMap.class || objectClass == ArrayList.class) {
                 return false;
             }
         }
 
-        return (features & NotWriteRootClassName.mask) == 0
+        return (features & MASK_NOT_WRITE_ROOT_CLASSNAME) == 0
                 || object != this.rootObject;
     }
 
@@ -707,11 +707,11 @@ public abstract class JSONWriter
      */
     public final boolean isWriteTypeInfo(Object object) {
         long features = context.features;
-        if ((features & WriteClassName.mask) == 0) {
+        if ((features & MASK_WRITE_CLASS_NAME) == 0) {
             return false;
         }
 
-        if ((features & NotWriteHashMapArrayListClassName.mask) != 0
+        if ((features & MASK_NOT_WRITE_HASHMAP_ARRAY_LIST_CLASS_NAME) != 0
                 && object != null) {
             Class objectClass = object.getClass();
             if (objectClass == HashMap.class || objectClass == ArrayList.class) {
@@ -719,7 +719,7 @@ public abstract class JSONWriter
             }
         }
 
-        return (features & NotWriteRootClassName.mask) == 0
+        return (features & MASK_NOT_WRITE_ROOT_CLASSNAME) == 0
                 || object != this.rootObject;
     }
 
@@ -1046,7 +1046,7 @@ public abstract class JSONWriter
      *
      * @return a new JSONWriter instance for JSONB format
      */
-    public static JSONWriter ofJSONB() {
+    public static JSONWriterJSONB ofJSONB() {
         return new JSONWriterJSONB(
                 new JSONWriter.Context(defaultObjectWriterProvider),
                 null
@@ -1059,7 +1059,7 @@ public abstract class JSONWriter
      * @param context the context to use for the new JSONWriter
      * @return a new JSONWriter instance for JSONB format
      */
-    public static JSONWriter ofJSONB(JSONWriter.Context context) {
+    public static JSONWriterJSONB ofJSONB(JSONWriter.Context context) {
         return new JSONWriterJSONB(context, null);
     }
 
@@ -1070,7 +1070,7 @@ public abstract class JSONWriter
      * @param symbolTable the symbol table to use for the new JSONWriter
      * @return a new JSONWriter instance for JSONB format
      */
-    public static JSONWriter ofJSONB(JSONWriter.Context context, SymbolTable symbolTable) {
+    public static JSONWriterJSONB ofJSONB(JSONWriter.Context context, SymbolTable symbolTable) {
         return new JSONWriterJSONB(context, symbolTable);
     }
 
@@ -1080,7 +1080,7 @@ public abstract class JSONWriter
      * @param features the features to enable for the new JSONWriter
      * @return a new JSONWriter instance for JSONB format
      */
-    public static JSONWriter ofJSONB(Feature... features) {
+    public static JSONWriterJSONB ofJSONB(Feature... features) {
         return new JSONWriterJSONB(
                 new JSONWriter.Context(defaultObjectWriterProvider, features),
                 null
@@ -1093,7 +1093,7 @@ public abstract class JSONWriter
      * @param symbolTable the symbol table to use for the new JSONWriter
      * @return a new JSONWriter instance for JSONB format
      */
-    public static JSONWriter ofJSONB(SymbolTable symbolTable) {
+    public static JSONWriterJSONB ofJSONB(SymbolTable symbolTable) {
         return new JSONWriterJSONB(
                 new JSONWriter.Context(defaultObjectWriterProvider),
                 symbolTable
@@ -3874,28 +3874,37 @@ public abstract class JSONWriter
         }
     }
 
-    protected static final long MASK_WRITE_MAP_NULL_VALUE = 1 << 4;
-    protected static final long MASK_BROWSER_COMPATIBLE = 1 << 5;
-    protected static final long MASK_NULL_AS_DEFAULT_VALUE = 1 << 6;
-    protected static final long MASK_WRITE_BOOLEAN_AS_NUMBER = 1 << 7;
-    protected static final long MASK_WRITE_NON_STRING_VALUE_AS_STRING = 1L << 8;
-    protected static final long MASK_WRITE_CLASS_NAME = 1 << 9;
-    protected static final long MASK_NOT_WRITE_DEFAULT_VALUE = 1 << 12;
-    protected static final long MASK_WRITE_ENUMS_USING_NAME = 1 << 13;
-    protected static final long MASK_WRITE_ENUM_USING_TO_STRING = 1 << 14;
-    protected static final long MASK_PRETTY_FORMAT = 1 << 16;
-    protected static final long MASK_REFERENCE_DETECTION = 1 << 17;
-    protected static final long MASK_USE_SINGLE_QUOTES = 1 << 20;
-    protected static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
-    protected static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
-    protected static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
-    protected static final long MASK_WRITE_NULL_BOOLEAN_AS_FALSE = 1 << 25;
-    protected static final long MASK_NOT_WRITE_EMPTY_ARRAY = 1 << 26;
-    protected static final long MASK_ESCAPE_NONE_ASCII = 1L << 30;
-    protected static final long MASK_IGNORE_NON_FIELD_GETTER = 1L << 32;
-    protected static final long MASK_WRITE_LONG_AS_STRING = 1L << 34;
-    protected static final long MASK_BROWSER_SECURE = 1L << 35;
-    protected static final long MASK_NOT_WRITE_NUMBER_CLASS_NAME = 1L << 40;
+    public static final long MASK_IGNORE_NONE_SERIALIZABLE = 1 << 1;
+    public static final long MAKS_ERROR_ON_NONE_SERIALIZABLE = 1 << 2;
+    public static final long MASK_BEAN_TO_ARRAY = 1 << 3;
+    public static final long MASK_WRITE_MAP_NULL_VALUE = 1 << 4;
+    public static final long MASK_BROWSER_COMPATIBLE = 1 << 5;
+    public static final long MASK_NULL_AS_DEFAULT_VALUE = 1 << 6;
+    public static final long MASK_WRITE_BOOLEAN_AS_NUMBER = 1 << 7;
+    public static final long MASK_WRITE_NON_STRING_VALUE_AS_STRING = 1L << 8;
+    public static final long MASK_WRITE_CLASS_NAME = 1 << 9;
+    public static final long MASK_NOT_WRITE_ROOT_CLASSNAME = 1 << 10;
+    public static final long MASK_NOT_WRITE_HASHMAP_ARRAY_LIST_CLASS_NAME = 1 << 11;
+    public static final long MASK_NOT_WRITE_DEFAULT_VALUE = 1 << 12;
+    public static final long MASK_WRITE_ENUMS_USING_NAME = 1 << 13;
+    public static final long MASK_WRITE_ENUM_USING_TO_STRING = 1 << 14;
+    public static final long MASK_IGNORE_ERROR_GETTER = 1L << 15;
+    public static final long MASK_PRETTY_FORMAT = 1 << 16;
+    public static final long MASK_REFERENCE_DETECTION = 1 << 17;
+    public static final long MASK_USE_SINGLE_QUOTES = 1 << 20;
+    public static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
+    public static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
+    public static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
+    public static final long MASK_WRITE_NULL_BOOLEAN_AS_FALSE = 1 << 25;
+    public static final long MASK_NOT_WRITE_EMPTY_ARRAY = 1 << 26;
+    public static final long MASK_ESCAPE_NONE_ASCII = 1L << 30;
+    public static final long MASK_IGNORE_NON_FIELD_GETTER = 1L << 32;
+    public static final long MASK_WRITE_LONG_AS_STRING = 1L << 34;
+    public static final long MASK_BROWSER_SECURE = 1L << 35;
+    public static final long MASK_WRITE_ENUM_USING_ORDINAL = 1L << 36;
+    public static final long MASK_UNQUOTE_FIELD_NAME = 1L << 38;
+    public static final long MASK_NOT_WRITE_NUMBER_CLASS_NAME = 1L << 40;
+    public static final long MASK_WRITE_FLOAT_SPECIAL_AS_STRING = 1L << 45;
 
     /**
      * Feature is used to control the behavior of JSON writing and serialization in FASTJSON2.
@@ -3965,7 +3974,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        IgnoreNoneSerializable(1 << 1),
+        IgnoreNoneSerializable(MASK_IGNORE_NONE_SERIALIZABLE),
 
         /**
          * Feature that determines whether to throw an exception when encountering non-serializable classes
@@ -3976,7 +3985,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        ErrorOnNoneSerializable(1 << 2),
+        ErrorOnNoneSerializable(MAKS_ERROR_ON_NONE_SERIALIZABLE),
 
         /**
          * Feature that determines whether to serialize Java beans as JSON arrays instead of JSON objects.
@@ -3987,7 +3996,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        BeanToArray(1 << 3),
+        BeanToArray(MASK_BEAN_TO_ARRAY),
 
         /**
          * Feature that determines whether to write null values during serialization.
@@ -4069,7 +4078,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        NotWriteRootClassName(1 << 10),
+        NotWriteRootClassName(MASK_NOT_WRITE_ROOT_CLASSNAME),
 
         /**
          * Feature that determines whether to write class names for HashMap and ArrayList during serialization.
@@ -4079,7 +4088,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        NotWriteHashMapArrayListClassName(1 << 11),
+        NotWriteHashMapArrayListClassName(MASK_NOT_WRITE_HASHMAP_ARRAY_LIST_CLASS_NAME),
 
         /**
          * Feature that determines whether to write default values during serialization.
@@ -4120,7 +4129,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        IgnoreErrorGetter(1 << 15),
+        IgnoreErrorGetter(MASK_IGNORE_ERROR_GETTER),
 
         /**
          * Feature that enables pretty-printed JSON output with formatting and indentation.
@@ -4343,7 +4352,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.20
          */
-        WriteEnumUsingOrdinal(1L << 36),
+        WriteEnumUsingOrdinal(MASK_WRITE_ENUM_USING_ORDINAL),
 
         /**
          * Feature that determines whether to write the class name of Throwable objects during serialization.
@@ -4363,7 +4372,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.33
          */
-        UnquoteFieldName(1L << 38),
+        UnquoteFieldName(MASK_UNQUOTE_FIELD_NAME),
 
         /**
          * Feature that determines whether to write class names for Set collections during serialization.
@@ -4430,7 +4439,7 @@ public abstract class JSONWriter
          *
          * @since 2.0.61
          */
-        WriteFloatSpecialAsString(1L << 45);
+        WriteFloatSpecialAsString(MASK_WRITE_FLOAT_SPECIAL_AS_STRING);
 
         public final long mask;
 
@@ -5009,7 +5018,7 @@ public abstract class JSONWriter
      *
      * @return the current offset
      */
-    public int getOffset() {
+    public final int getOffset() {
         return off;
     }
 
@@ -5019,7 +5028,7 @@ public abstract class JSONWriter
      *
      * @param offset the offset to set
      */
-    public void setOffset(int offset) {
+    public final void setOffset(int offset) {
         this.off = offset;
     }
 

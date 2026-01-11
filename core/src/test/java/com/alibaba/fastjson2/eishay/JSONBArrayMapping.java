@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.eishay;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.eishay.vo.MediaContent;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +45,7 @@ public class JSONBArrayMapping {
                 JSONWriter.Feature.BeanToArray
         };
 
-        JSONWriter writer = JSONWriter.ofJSONB(jsonbWriteFeaturesArrayMapping);
+        JSONWriterJSONB writer = JSONWriter.ofJSONB(jsonbWriteFeaturesArrayMapping);
         JSONWriter.Context context = writer.getContext();
 
         writer.setRootObject(object);
@@ -87,7 +84,7 @@ public class JSONBArrayMapping {
                 JSONWriter.Feature.WriteNameAsSymbol
         };
 
-        JSONWriter writer = JSONWriter.ofJSONB(jsonbWriteFeatures);
+        JSONWriterJSONB writer = JSONWriter.ofJSONB(jsonbWriteFeatures);
         JSONWriter.Context context = writer.getContext();
 
         writer.setRootObject(object);

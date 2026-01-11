@@ -88,8 +88,8 @@ public class ByteTest {
             {
                 Byte1 vo = new Byte1();
                 vo.setV0000((byte) 1);
-                JSONWriter jsonWriter = JSONWriter.ofJSONB();
-                objectWriter.write(jsonWriter, vo);
+                JSONWriterJSONB jsonWriter = JSONWriter.ofJSONB();
+                objectWriter.writeJSONB(jsonWriter, vo);
                 byte[] jsonbBytes = jsonWriter.getBytes();
                 assertEquals("{\n" +
                         "\t\"v0000\":1\n" +
@@ -98,17 +98,17 @@ public class ByteTest {
             {
                 Byte1 vo = new Byte1();
                 vo.setV0000((byte) 1);
-                JSONWriter jsonWriter = JSONWriter.ofJSONB();
+                JSONWriterJSONB jsonWriter = JSONWriter.ofJSONB();
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
-                objectWriter.write(jsonWriter, vo);
+                objectWriter.writeJSONB(jsonWriter, vo);
                 byte[] jsonbBytes = jsonWriter.getBytes();
                 assertEquals("[1]", JSONB.toJSONString(jsonbBytes));
             }
             {
                 Byte1 vo = new Byte1();
-                JSONWriter jsonWriter = JSONWriter.ofJSONB();
+                JSONWriterJSONB jsonWriter = JSONWriter.ofJSONB();
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
-                objectWriter.write(jsonWriter, vo);
+                objectWriter.writeJSONB(jsonWriter, vo);
                 byte[] jsonbBytes = jsonWriter.getBytes();
                 assertEquals("[null]", JSONB.toJSONString(jsonbBytes));
             }

@@ -184,7 +184,7 @@ public abstract class FieldWriter<T>
         throw new UnsupportedOperationException();
     }
 
-    public void writeEnumJSONB(JSONWriter jsonWriter, Enum e) {
+    public void writeEnumJSONB(JSONWriterJSONB jsonWriter, Enum e) {
         throw new UnsupportedOperationException();
     }
 
@@ -210,11 +210,11 @@ public abstract class FieldWriter<T>
     }
 
     public final int writeFieldNameJSONB(byte[] bytes, int off, JSONWriter jsonWriter) {
-        return JSONB.IO.writeNameRaw(bytes, off, nameJSONB, hashCode, jsonWriter);
+        return JSONWriterJSONB.IO.writeNameRaw(bytes, off, nameJSONB, hashCode, jsonWriter);
     }
 
     public final void writeFieldName(JSONWriter jsonWriter) {
-        if (jsonWriter.jsonb) {
+        if (jsonWriter instanceof JSONWriterJSONB) {
             SymbolTable symbolTable = jsonWriter.symbolTable;
             if (symbolTable != null && writeFieldNameSymbol(jsonWriter, symbolTable)) {
                 return;
@@ -620,7 +620,7 @@ public abstract class FieldWriter<T>
             value = value.trim();
         }
 
-        if (symbol && jsonWriter.jsonb) {
+        if (symbol && jsonWriter instanceof JSONWriterJSONB) {
             jsonWriter.writeSymbol(value);
         } else {
             if (raw) {
@@ -749,7 +749,7 @@ public abstract class FieldWriter<T>
     }
 
     public void writeDate(JSONWriter jsonWriter, boolean writeFieldName, long millis) {
-        if (jsonWriter.jsonb) {
+        if (jsonWriter instanceof JSONWriterUTF8) {
             jsonWriter.writeMillis(millis);
             return;
         }
@@ -871,6 +871,10 @@ public abstract class FieldWriter<T>
 
     public abstract boolean write(JSONWriter jsonWriter, T o);
 
+    public boolean writeJSONB(JSONWriterJSONB jsonWriter, T o) {
+        return write(jsonWriter, o);
+    }
+
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (valueClass == Float[].class) {
             if (decimalFormat != null) {
@@ -899,7 +903,7 @@ public abstract class FieldWriter<T>
         return jsonWriter.getObjectWriter(valueClass);
     }
 
-    public void writeListValueJSONB(JSONWriter jsonWriter, List list) {
+    public void writeListValueJSONB(JSONWriterJSONB jsonWriter, List list) {
         throw new UnsupportedOperationException();
     }
 
@@ -907,7 +911,7 @@ public abstract class FieldWriter<T>
         throw new UnsupportedOperationException();
     }
 
-    public void writeListJSONB(JSONWriter jsonWriter, List list) {
+    public void writeListJSONB(JSONWriterJSONB jsonWriter, List list) {
         throw new UnsupportedOperationException();
     }
 
