@@ -2351,7 +2351,7 @@ public final class JSONWriterJSONB
             }
             int size = values.size();
             off = startArray(bytes, off, size);
-            for (int i = 0; i < values.size(); i++) {
+            for (int i = 0; i < size; i++) {
                 Long value = values.get(i);
                 if (value == null) {
                     bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0

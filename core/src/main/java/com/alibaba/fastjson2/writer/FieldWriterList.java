@@ -85,6 +85,14 @@ public abstract class FieldWriterList<T>
 
     @Override
     public final ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
+        if ((itemType == null || itemType == this.itemType) && contentAs == null && itemObjectWriter != null) {
+            return itemObjectWriter;
+        }
+
+        return getItemWriter0(jsonWriter, itemType);
+    }
+
+    private ObjectWriter getItemWriter0(JSONWriter jsonWriter, Type itemType) {
         if (contentAs != null) {
             ObjectWriter itemObjectWriter = this.itemObjectWriter;
             if (itemObjectWriter != null) {
@@ -480,7 +488,7 @@ public abstract class FieldWriterList<T>
     public final boolean isRefDetect(Object object, long features) {
         Class<?> objectClass;
         features |= this.features;
-        return (features & ReferenceDetection.mask) != 0
+        return (features & MASK_REFERENCE_DETECTION) != 0
                 && (features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
                 && object != null
                 && ((objectClass = object.getClass()) != EMPTY_LIST_CLASS) && (objectClass != EMPTY_SET_CLASS);

@@ -18,6 +18,7 @@ import java.util.function.Function;
 import java.util.zip.GZIPOutputStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.MASK_REFERENCE_DETECTION;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;
 import static java.time.temporal.ChronoField.YEAR;
@@ -302,7 +303,7 @@ public abstract class FieldWriter<T>
 
     public boolean isRefDetect(Object object, long features) {
         features |= this.features;
-        return (features & ReferenceDetection.mask) != 0
+        return (features & MASK_REFERENCE_DETECTION) != 0
                 && (features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
                 && object != null
                 && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
