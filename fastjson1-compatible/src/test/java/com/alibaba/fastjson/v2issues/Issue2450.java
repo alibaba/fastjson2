@@ -21,7 +21,7 @@ public class Issue2450 {
 
         serializer.write(bean);
 
-        assertEquals("{\"name\":\"\",\"self\":{\"$ref\":\"..\"}}", serializer.toString());
+        assertEquals("{\"self\":{\"$ref\":\"..\"}}", serializer.toString());
         serializer.println();
         serializer.writeReference(bean);
     }
