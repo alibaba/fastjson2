@@ -11,9 +11,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class Issue3949 {
-
     @Test
     public void testSerializeWriterWithoutWriteMapNullValue() {
         Map<String, Object> map = new HashMap<>();
@@ -35,7 +33,6 @@ public class Issue3949 {
         assertEquals("{\"b\":\"2\"}", result);
         assertFalse(result.contains("\"a\""));
     }
-
 
     @Test
     public void testSerializeWriterWithWriteMapNullValue() {
