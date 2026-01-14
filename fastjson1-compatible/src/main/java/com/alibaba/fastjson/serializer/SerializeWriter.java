@@ -31,7 +31,7 @@ public class SerializeWriter
                 JSONWriter.of(
                         JSON.createWriteContext(
                                 SerializeConfig.global,
-                                JSON.DEFAULT_PARSER_FEATURE,
+                                JSON.DEFAULT_GENERATE_FEATURE,
                                 features
                         )
                 )
@@ -43,7 +43,7 @@ public class SerializeWriter
                 JSONWriter.of(
                         JSON.createWriteContext(
                                 config,
-                                JSON.DEFAULT_PARSER_FEATURE,
+                                JSON.DEFAULT_GENERATE_FEATURE,
                                 features
                         )
                 )
