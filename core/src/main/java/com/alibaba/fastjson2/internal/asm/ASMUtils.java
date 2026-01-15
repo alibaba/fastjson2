@@ -70,6 +70,8 @@ public final class ASMUtils {
     public static final String TYPE_JSON_WRITER_UTF16 = JSONWriterUTF16.class.getName().replace('.', '/');
     public static final String TYPE_JSONB_WRITER = JSONWriterJSONB.class.getName().replace('.', '/');
     public static final String TYPE_JSONB_IO = JSONWriterJSONB.IO.class.getName().replace('.', '/');
+    public static final String TYPE_JSON_UTF8_IO = JSONWriterUTF8.IO.class.getName().replace('.', '/');
+    public static final String TYPE_JSON_UTF16_IO = JSONWriterUTF16.IO.class.getName().replace('.', '/');
     public static final String TYPE_FIELD_WRITER = FieldWriter.class.getName().replace('.', '/');
     public static final String TYPE_IO_UTILS = IOUtils.class.getName().replace('.', '/');
     public static final String TYPE_OBJECT = "java/lang/Object";

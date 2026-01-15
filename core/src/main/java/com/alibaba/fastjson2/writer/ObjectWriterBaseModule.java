@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.*;
@@ -1153,7 +1154,7 @@ public class ObjectWriterBaseModule
                                 return buffer.array();
                             }
                             // For DirectByteBuffer or read-only buffers that don't have a backing array
-                            int position = buffer.position();
+                            int position = ((Buffer) buffer).position();
                             byte[] bytes = new byte[buffer.remaining()];
                             buffer.get(bytes);
                             buffer.position(position); // restore position

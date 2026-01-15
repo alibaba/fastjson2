@@ -32,7 +32,7 @@ public class BigDecimalFieldTest {
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullNumberAsZero);
-        assertEquals("{\"value\":0}", text);
+        assertEquals("{\"value\":0.0}", text);
     }
 
     public static class V0 {

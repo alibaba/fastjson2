@@ -135,6 +135,14 @@ public interface ObjectWriter<T> {
         return false;
     }
 
+    default int writeTypeInfo(char[] buf, int offset) {
+        return offset;
+    }
+
+    default int writeTypeInfo(byte[] buf, int offset) {
+        return offset;
+    }
+
     /**
      * Writes an object to the JSONWriter in JSONB format.
      *

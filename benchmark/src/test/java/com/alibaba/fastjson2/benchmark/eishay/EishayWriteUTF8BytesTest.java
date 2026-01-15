@@ -7,6 +7,7 @@ public class EishayWriteUTF8BytesTest {
     static final EishayWriteUTF8Bytes benchmark = new EishayWriteUTF8Bytes();
 
     public static void fastjson2() {
+        System.out.println("EishayWriteString-fastjson2 size " + benchmark.fastjson2_size());
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 10_000_000; ++i) {

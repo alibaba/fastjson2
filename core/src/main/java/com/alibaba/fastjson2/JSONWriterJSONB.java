@@ -2594,7 +2594,7 @@ public final class JSONWriterJSONB
             return off + strlen;
         }
 
-        public static int stringCapacityJDK8(List<String> strings) {
+        public static int stringCapacityJDK8(JSONWriterJSONB writer, List<String> strings) {
             if (strings == null) {
                 return 1;
             }
@@ -2606,7 +2606,7 @@ public final class JSONWriterJSONB
             return size;
         }
 
-        public static int stringCapacityJDK11(List<String> strings) {
+        public static int stringCapacityJDK11(JSONWriterJSONB writer, List<String> strings) {
             if (strings == null) {
                 return 1;
             }
@@ -2618,7 +2618,7 @@ public final class JSONWriterJSONB
             return size;
         }
 
-        public static int stringCapacityJDK8(Collection<String> strings) {
+        public static int stringCapacityJDK8(JSONWriterJSONB writer, Collection<String> strings) {
             if (strings == null) {
                 return 1;
             }
@@ -2629,7 +2629,7 @@ public final class JSONWriterJSONB
             return size;
         }
 
-        public static int stringCapacityJDK11(Collection<String> strings) {
+        public static int stringCapacityJDK11(JSONWriterJSONB writer, Collection<String> strings) {
             if (strings == null) {
                 return 1;
             }
@@ -2640,7 +2640,7 @@ public final class JSONWriterJSONB
             return size;
         }
 
-        public static int stringCapacityJDK8(String[] strings) {
+        public static int stringCapacityJDK8(JSONWriterJSONB writer, String[] strings) {
             if (strings == null) {
                 return 1;
             }
@@ -2651,7 +2651,7 @@ public final class JSONWriterJSONB
             return size;
         }
 
-        public static int stringCapacityJDK11(String[] strings) {
+        public static int stringCapacityJDK11(JSONWriterJSONB writer, String[] strings) {
             if (strings == null) {
                 return 1;
             }
@@ -2668,7 +2668,7 @@ public final class JSONWriterJSONB
          * @param values the collection of Long values
          * @return the capacity needed
          */
-        public static int int64Capacity(Collection<Long> values) {
+        public static int int64Capacity(JSONWriterJSONB writer, Collection<Long> values) {
             return values == null ? 1 : values.getClass().getName().length() * 3 + 13 + values.size() * 9;
         }
 
@@ -2867,6 +2867,84 @@ public final class JSONWriterJSONB
             putLongBE(bytes, off + 2, value.getMostSignificantBits());
             putLongBE(bytes, off + 10, value.getLeastSignificantBits());
             return off + 18;
+        }
+
+        public static int writeDecimal(byte[] bytes, int off, BigDecimal value) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+            int precision = value.precision();
+            int scale = value.scale();
+            if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
+                long intCompact = UNSAFE.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
+                if (scale == 0) {
+                    bytes[off] = BC_DECIMAL_LONG;
+                    return IO.writeInt64(bytes, off + 1, intCompact);
+                }
+
+                bytes[off] = BC_DECIMAL;
+                off = IO.writeInt32(bytes, off + 1, scale);
+                if (intCompact >= Integer.MIN_VALUE && intCompact <= Integer.MAX_VALUE) {
+                    off = IO.writeInt32(bytes, off, (int) intCompact);
+                } else {
+                    off = IO.writeInt64(bytes, off, intCompact);
+                }
+                return off;
+            }
+
+            BigInteger unscaledValue = value.unscaledValue();
+            if (scale == 0
+                    && isInt64(unscaledValue)) {
+                bytes[off] = BC_DECIMAL_LONG;
+                return IO.writeInt64(bytes, off + 1, unscaledValue.longValue());
+            }
+
+            bytes[off] = BC_DECIMAL;
+            off = IO.writeInt32(bytes, off + 1, scale);
+
+            if (isInt32(unscaledValue)) {
+                off = IO.writeInt32(bytes, off, unscaledValue.intValue());
+            } else if (isInt64(unscaledValue)) {
+                off = IO.writeInt64(bytes, off, unscaledValue.longValue());
+            } else {
+                off = writeBigInt(bytes, off, unscaledValue, 0);
+            }
+            return off;
+        }
+
+        public static int writeBigInt(byte[] bytes, int off, BigInteger value, long features) {
+            if (value == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
+
+            if (isInt64(value)) {
+                bytes[off] = BC_BIGINT_LONG;
+                return IO.writeInt64(bytes, off + 1, value.longValue());
+            }
+
+            byte[] valueBytes = value.toByteArray();
+            bytes[off] = BC_BIGINT;
+            off = IO.writeInt32(bytes, off + 1, valueBytes.length);
+            System.arraycopy(valueBytes, 0, bytes, off, valueBytes.length);
+            return off + valueBytes.length;
+        }
+
+        public static int writeInt64(byte[] bytes, int off, long[] values, long features) {
+            if (values == null) {
+                return writeArrayNull(bytes, off, features);
+            }
+            off = startArray(bytes, off, values.length);
+            for (long value : values) {
+                off = IO.writeInt64(bytes, off, value);
+            }
+            return off;
+        }
+
+        public static int writeArrayNull(byte[] bytes, int off, long features) {
+            bytes[off] = (features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
+            return off + 1;
         }
 
         /**

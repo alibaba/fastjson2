@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.writer;
 
 import static com.alibaba.fastjson2.internal.asm.ASMUtils.*;
+import static com.alibaba.fastjson2.internal.asm.ASMUtils.TYPE_JSON_UTF16_IO;
+import static com.alibaba.fastjson2.internal.asm.ASMUtils.TYPE_JSON_UTF8_IO;
 import static com.alibaba.fastjson2.writer.ObjectWriterCreatorASM.*;
 
 public enum JSONWriterType {
@@ -146,5 +148,42 @@ public enum JSONWriterType {
 
     public String bufType() {
         return this == JSON_UTF16 ? "[C" : "[B";
+    }
+
+    public String ioType() {
+        switch (this) {
+            case JSONB:
+                return TYPE_JSONB_IO;
+            case JSON_UTF8:
+                return TYPE_JSON_UTF8_IO;
+            default:
+                return TYPE_JSON_UTF16_IO;
+        }
+    }
+
+    public String fieldNameMethodName() {
+        switch (this) {
+            case JSONB:
+                return "fieldNameJSONB";
+            case JSON_UTF8:
+                return "fieldNameUTF8Quote";
+            default:
+                return "fieldNameUTF16Quote";
+        }
+    }
+
+    public String fieldNameMethodDesc() {
+        return this == JSON_UTF16 ? "(J)[C" : "(J)[B";
+    }
+
+    public String fieldNameUnquote() {
+        switch (this) {
+            case JSONB:
+                return "nameJSONB";
+            case JSON_UTF8:
+                return "nameWithColonUTF8Unquote";
+            default:
+                return "nameWithColonUTF16Unquote";
+        }
     }
 }

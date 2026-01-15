@@ -314,6 +314,8 @@ public class FieldWriterObject<T>
                         || fieldClass == Double.class
                         || fieldClass == BigDecimal.class) {
                     jsonWriter.writeDecimalNull();
+                } else if (fieldClass == Long.class) {
+                    jsonWriter.writeInt64Null();
                 } else {
                     jsonWriter.writeNumberNull();
                 }

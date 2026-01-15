@@ -133,6 +133,7 @@ public class LocalDateTimeFieldTest {
 
         String str = JSON.toJSONString(bean, "millis");
         assertEquals("{\"value\":1654686106602}", str);
+        assertEquals("{\"value\":1654686106602}", new String(JSON.toJSONBytes(bean, "millis")));
 
         Bean bean1 = JSON.parseObject(str, Bean.class, "millis");
         assertEquals(1654686106602L, millis(bean1.value));

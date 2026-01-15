@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,7 +19,9 @@ public class Issue3200 {
         SecondMenuGroupUI secondMenuGroupUI = new SecondMenuGroupUI();
         secondMenuGroupUI.setGroupId("group1");
         secondMenuGroupUI.setGroupName("分组");
-        assertEquals("{\"groupId\":\"group1\",\"groupName\":\"分组\",\"secondList\":[]}", JSON.toJSONString(secondMenuGroupUI));
+        String expected = "{\"groupId\":\"group1\",\"groupName\":\"分组\",\"secondList\":[]}";
+        assertEquals(expected, JSON.toJSONString(secondMenuGroupUI));
+        assertEquals(expected, new String(JSON.toJSONBytes(secondMenuGroupUI), StandardCharsets.UTF_8));
     }
 
     @Test

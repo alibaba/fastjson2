@@ -2,8 +2,16 @@ package com.alibaba.fastjson.issue_3300;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONCreator;
-import org.joda.time.LocalDateTime;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.util.DateUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -13,12 +21,31 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * @Date ：Created in 19:07 2020/7/21
  */
 public class Issue3358 {
+    @BeforeEach
+    protected void setUp() throws Exception {
+        JSON.defaultTimeZone = TimeZone.getTimeZone(DateUtils.DEFAULT_ZONE_ID);
+        JSON.defaultLocale = Locale.US;
+    }
+
     @Test
     public void test_for_issue() throws Exception {
+        ZoneId zoneId = JSONFactory.createWriteContext().getZoneId();
+        ZoneId zoneIdReader = JSONFactory.createReadContext().getZoneId();
         Model validateCode = new Model("111", 600);
         String jsonString = JSON.toJSONString(validateCode);
+        LocalDateTime expireTime = validateCode.getExpireTime();
+        long millis = expireTime.atZone(zoneId)
+                .toInstant()
+                .toEpochMilli();
+        String expected = "{\"code\":\"111\",\"expireTime\":" + millis + ",\"expried\":false}";
+        assertEquals(expected, jsonString,
+                () -> "writerId " + zoneId + ", readerZonedI " + zoneIdReader);
+        assertEquals(expected, new String(JSON.toJSONBytes(validateCode)));
         Model backModel = JSON.parseObject(jsonString, Model.class);
-        assertEquals(validateCode.getExpireTime(), backModel.getExpireTime());
+        assertEquals(
+                expireTime.truncatedTo(ChronoUnit.MILLIS),
+                backModel.getExpireTime(),
+                () -> "writerId " + zoneId + ", readerZonedI " + zoneIdReader);
 
         jsonString = "{\"code\":\"111\"}";
         backModel = JSON.parseObject(jsonString, Model.class);

@@ -67,6 +67,7 @@ public class JDKUtils {
     static volatile Throwable initErrorLast;
     static volatile Throwable reflectErrorLast;
     static final AtomicInteger reflectErrorCount = new AtomicInteger();
+    public static final MethodHandle STRING_INFLATE;
 
     static {
         Unsafe unsafe;
@@ -350,6 +351,7 @@ public class JDKUtils {
         }
         INDEX_OF_CHAR_LATIN1 = indexOfCharLatin1;
 
+        MethodHandle inflate = null;
         Boolean compact_strings = null;
         try {
             if (JVM_VERSION == 8) {
@@ -380,6 +382,13 @@ public class JDKUtils {
                     initErrorLast = e;
                 }
                 lookupLambda = compact_strings != null && compact_strings;
+
+                try {
+                    Class<?> classLatin1 = Class.forName("java.lang.StringLatin1");
+                    inflate = IMPL_LOOKUP.findStatic(classLatin1, "inflate", methodType(void.class, byte[].class, int.class, char[].class, int.class, int.class));
+                } catch (Throwable e) {
+                    initErrorLast = e;
+                }
             }
 
             if (lookupLambda) {
@@ -437,6 +446,7 @@ public class JDKUtils {
             stringCoder = (str) -> 1;
         }
 
+        STRING_INFLATE = inflate;
         STRING_CREATOR_JDK8 = stringCreatorJDK8;
         STRING_CREATOR_JDK11 = stringCreatorJDK11;
         STRING_CODER = stringCoder;
@@ -465,6 +475,10 @@ public class JDKUtils {
         }
 
         return str.toCharArray();
+    }
+
+    public static char[] toCharArrayJDK8(String str) {
+        return str == null ? null : (char[]) UNSAFE.getObject(str, FIELD_STRING_VALUE_OFFSET);
     }
 
     public static MethodHandles.Lookup trustedLookup(Class objectClass) {

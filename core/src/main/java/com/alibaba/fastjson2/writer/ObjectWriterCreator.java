@@ -431,10 +431,13 @@ public class ObjectWriterCreator {
 
         provider.getBeanInfo(beanInfo, objectClass);
 
-        if (beanInfo.serializer != null && ObjectWriter.class.isAssignableFrom(beanInfo.serializer)) {
+        Class serializer = beanInfo.serializer;
+        if (serializer != null && ObjectWriter.class.isAssignableFrom(serializer)) {
             try {
-                return (ObjectWriter) beanInfo.serializer.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+                Constructor constructor = serializer.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                return (ObjectWriter) constructor.newInstance();
+            } catch (Exception e) {
                 throw new JSONException("create serializer error", e);
             }
         }

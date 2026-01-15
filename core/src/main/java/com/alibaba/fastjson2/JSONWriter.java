@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.*;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
@@ -79,7 +80,7 @@ public abstract class JSONWriter
     public final SymbolTable symbolTable;
 
     protected final Charset charset;
-    protected final char quote;
+    public final char quote;
     protected final int maxArraySize;
 
     protected boolean startObject;
@@ -2279,10 +2280,8 @@ public abstract class JSONWriter
      * @param features the features to use for serialization
      */
     public final void writeDecimalNull(long features) {
-        if ((features & MASK_NULL_AS_DEFAULT_VALUE) != 0) {
+        if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
             writeDouble(0.0);
-        } else if ((features & MASK_WRITE_NULL_NUMBER_AS_ZERO) != 0) {
-            writeInt32(0);
         } else {
             writeNull();
         }
@@ -2857,7 +2856,9 @@ public abstract class JSONWriter
         }
 
         String str = DateTimeFormatter.ISO_INSTANT.format(instant);
-        writeString(str);
+        writeRaw(this.quote);
+        writeRaw(str);
+        writeRaw(this.quote);
     }
 
     /**
@@ -3243,8 +3244,6 @@ public abstract class JSONWriter
      * @since 2.0.0
      */
     public static final class Context {
-        static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
-
         public final ObjectWriterProvider provider;
         DateTimeFormatter dateFormatter;
         String dateFormat;
@@ -3547,7 +3546,7 @@ public abstract class JSONWriter
          */
         public ZoneId getZoneId() {
             if (zoneId == null) {
-                zoneId = DEFAULT_ZONE_ID;
+                zoneId = DateUtils.DEFAULT_ZONE_ID;
             }
             return zoneId;
         }
@@ -5069,4 +5068,8 @@ public abstract class JSONWriter
      * @since 2.0.51
      */
     public abstract Object ensureCapacity(int minCapacity);
+
+    protected static JSONException overflowLevel(int level) {
+        return new JSONException("level too large : " + level);
+    }
 }

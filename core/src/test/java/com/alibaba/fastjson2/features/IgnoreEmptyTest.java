@@ -19,6 +19,13 @@ public class IgnoreEmptyTest {
     }
 
     @Test
+    public void test_null() {
+        Bean bean = new Bean();
+        assertEquals("{\"name\":null}", JSON.toJSONString(bean, JSONWriter.Feature.WriteNulls));
+        assertEquals("{\"name\":null}", JSON.toJSONString(bean, JSONWriter.Feature.IgnoreEmpty, JSONWriter.Feature.WriteNulls));
+    }
+
+    @Test
     public void testReflect() {
         Bean bean = new Bean();
         bean.name = "";

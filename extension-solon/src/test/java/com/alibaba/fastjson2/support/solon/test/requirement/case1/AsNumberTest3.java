@@ -17,7 +17,11 @@ public class AsNumberTest3 {
                 JSONWriter.Feature.WriteBooleanAsNumber);
 
         System.out.println(json);
-        assertEquals("{\"value\":0}", json);
+        String expected = "{\"value\":0}";
+        assertEquals(expected, json);
+        assertEquals(expected, new String(JSON.toJSONBytes(new Bean(),
+                JSONWriter.Feature.WriteNullBooleanAsFalse,
+                JSONWriter.Feature.WriteBooleanAsNumber)));
     }
 
     public static class Bean {

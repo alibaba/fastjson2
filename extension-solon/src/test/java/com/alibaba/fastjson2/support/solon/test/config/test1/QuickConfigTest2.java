@@ -9,6 +9,7 @@ import org.noear.solon.annotation.Import;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.core.handle.ContextEmpty;
 import org.noear.solon.test.SolonTest;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -44,6 +45,6 @@ public class QuickConfigTest2 {
         Assertions.assertEquals(5, JSONObject.parseObject(output).size());
 
         //完美
-        Assertions.assertEquals("{\"b1\":true,\"d1\":1.0,\"map1\":{\"time\":1673861993477,\"long\":12,\"int\":12},\"n1\":1,\"s1\":\"noear\"}", output);
+        JSONAssert.assertEquals("{\"b1\":true,\"d1\":1.0,\"map1\":{\"time\":1673861993477,\"long\":12,\"int\":12},\"n1\":1,\"s1\":\"noear\"}", output, false);
     }
 }

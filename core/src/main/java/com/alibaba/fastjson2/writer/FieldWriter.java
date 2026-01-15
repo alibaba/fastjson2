@@ -41,7 +41,9 @@ public abstract class FieldWriter<T>
 
     final long hashCode;
     final byte[] nameWithColonUTF8;
+    public final byte[] nameWithColonUTF8Unquote;
     final char[] nameWithColonUTF16;
+    public final char[] nameWithColonUTF16Unquote;
     final byte[] nameJSONB;
     long nameSymbolCache;
 
@@ -160,6 +162,7 @@ public abstract class FieldWriter<T>
         bytes[off++] = '"';
         bytes[off] = ':';
         nameWithColonUTF8 = bytes;
+        nameWithColonUTF8Unquote = Arrays.copyOfRange(bytes, 1, bytes.length - 2);
 
         char[] chars = new char[nameLength + 3];
         chars[0] = '"';
@@ -167,6 +170,7 @@ public abstract class FieldWriter<T>
         chars[chars.length - 2] = '"';
         chars[chars.length - 1] = ':';
         nameWithColonUTF16 = chars;
+        nameWithColonUTF16Unquote = Arrays.copyOfRange(chars, 1, chars.length - 2);
     }
 
     public boolean isFieldClassSerializable() {
@@ -212,6 +216,14 @@ public abstract class FieldWriter<T>
 
     public final int writeFieldNameJSONB(byte[] bytes, int off, JSONWriter jsonWriter) {
         return JSONWriterJSONB.IO.writeNameRaw(bytes, off, nameJSONB, hashCode, jsonWriter);
+    }
+
+    public final byte[] fieldNameUTF8Quote(long features) {
+        return nameWithColonUTF8;
+    }
+
+    public final char[] fieldNameUTF16Quote(long features) {
+        return nameWithColonUTF16;
     }
 
     public final void writeFieldName(JSONWriter jsonWriter) {
@@ -759,7 +771,7 @@ public abstract class FieldWriter<T>
                     && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) == 0
             ) {
                 writeFieldName(jsonWriter);
-                jsonWriter.writeNumberNull();
+                writeFloatNull(jsonWriter);
             }
             return;
         }
@@ -1106,10 +1118,8 @@ public abstract class FieldWriter<T>
             return false;
         }
         writeFieldName(jsonWriter);
-        if ((features & NullAsDefaultValue.mask) != 0) {
+        if ((features & (NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) != 0) {
             jsonWriter.writeFloat(0.0F);
-        } else if ((features & WriteNullNumberAsZero.mask) != 0) {
-            jsonWriter.writeInt32(0);
         } else {
             jsonWriter.writeNull();
         }

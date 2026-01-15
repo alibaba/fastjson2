@@ -422,6 +422,26 @@ public class ObjectWriterAdapter<T>
     }
 
     @Override
+    public int writeTypeInfo(char[] buf, int offset) {
+        if (nameWithColonUTF16 == null) {
+            int typeKeyLength = typeKey.length();
+            int typeNameLength = typeName.length();
+            char[] chars = new char[typeKeyLength + typeNameLength + 5];
+            chars[0] = '"';
+            typeKey.getChars(0, typeKeyLength, chars, 1);
+            chars[typeKeyLength + 1] = '"';
+            chars[typeKeyLength + 2] = ':';
+            chars[typeKeyLength + 3] = '"';
+            typeName.getChars(0, typeNameLength, chars, typeKeyLength + 4);
+            chars[typeKeyLength + typeNameLength + 4] = '"';
+
+            nameWithColonUTF16 = chars;
+        }
+        System.arraycopy(nameWithColonUTF16, 0, buf, offset, nameWithColonUTF16.length);
+        return offset + nameWithColonUTF16.length;
+    }
+
+    @Override
     public boolean writeTypeInfo(JSONWriterUTF8 jsonWriter) {
         if (nameWithColonUTF8 == null) {
             int typeKeyLength = typeKey.length();
@@ -439,6 +459,26 @@ public class ObjectWriterAdapter<T>
         }
         jsonWriter.writeNameRaw(nameWithColonUTF8);
         return true;
+    }
+
+    @Override
+    public int writeTypeInfo(byte[] buf, int offset) {
+        if (nameWithColonUTF8 == null) {
+            int typeKeyLength = typeKey.length();
+            int typeNameLength = typeName.length();
+            byte[] chars = new byte[typeKeyLength + typeNameLength + 5];
+            chars[0] = '"';
+            typeKey.getBytes(0, typeKeyLength, chars, 1);
+            chars[typeKeyLength + 1] = '"';
+            chars[typeKeyLength + 2] = ':';
+            chars[typeKeyLength + 3] = '"';
+            typeName.getBytes(0, typeNameLength, chars, typeKeyLength + 4);
+            chars[typeKeyLength + typeNameLength + 4] = '"';
+
+            nameWithColonUTF8 = chars;
+        }
+        System.arraycopy(nameWithColonUTF8, 0, buf, offset, nameWithColonUTF8.length);
+        return offset + nameWithColonUTF8.length;
     }
 
     @Override

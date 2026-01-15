@@ -3,16 +3,18 @@ package com.alibaba.fastjson2.support.solon.test.config.test0;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.support.solon.Fastjson2EntityConverter;
 import com.alibaba.fastjson2.support.solon.test._model.UserDo;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.noear.solon.annotation.Import;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.core.handle.ContextEmpty;
 import org.noear.solon.test.SolonTest;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author noear 2023/1/16 created
@@ -41,8 +43,8 @@ public class QuickConfigTest {
 
         System.out.println(output);
 
-        Assertions.assertEquals(5, JSONObject.parseObject(output).size());
+        assertEquals(5, JSONObject.parseObject(output).size());
 
-        Assertions.assertEquals("{\"b1\":true,\"d1\":1.0,\"map1\":{\"time\":1673861993477,\"long\":12,\"int\":12},\"n1\":1,\"s1\":\"noear\"}", output);
+        JSONAssert.assertEquals("{\"b1\":true,\"d1\":1.0,\"map1\":{\"time\":1673861993477,\"long\":12,\"int\":12},\"n1\":1,\"s1\":\"noear\"}", output, false);
     }
 }

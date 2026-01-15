@@ -55,6 +55,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @since 2.0.0
  */
+@SuppressWarnings("ALL")
 public class ObjectWriterProvider
         implements ObjectCodecProvider {
     static final int TYPE_INT32_MASK = 1 << 1;
@@ -210,6 +211,35 @@ public class ObjectWriterProvider
     public ObjectWriter register(Type type, ObjectWriter objectWriter) {
         boolean fieldBased = (JSONFactory.getDefaultWriterFeatures() & JSONWriter.Feature.FieldBased.mask) != 0;
         return register(type, objectWriter, fieldBased);
+    }
+
+    public boolean isDefaultWriter(Type type) {
+        boolean fieldBased = (JSONFactory.getDefaultWriterFeatures() & JSONWriter.Feature.FieldBased.mask) != 0;
+        ConcurrentMap<Type, ObjectWriter> cache = fieldBased ? this.cacheFieldBased : this.cache;
+        if (type == Long[].class || type == long[].class) {
+            ObjectWriter cached = cache.get(Long.class);
+            return cached == null || cached == ObjectWriterImplInt64.INSTANCE;
+        }
+        ObjectWriter cached = cache.get(type);
+        if (cached == null) {
+            return true;
+        }
+        if (type == LocalDate.class) {
+            return cached == ObjectWriterImplLocalDate.INSTANCE;
+        }
+        if (type == LocalDate.class) {
+            return cached == ObjectWriterImplLocalDate.INSTANCE;
+        }
+        if (type == LocalDateTime.class) {
+            return cached == ObjectWriterImplLocalDateTime.INSTANCE;
+        }
+        if (type == LocalTime.class) {
+            return cached == ObjectWriterImplLocalTime.INSTANCE;
+        }
+        if (type == Long.class) {
+            return cached == ObjectWriterImplInt64.INSTANCE;
+        }
+        return true;
     }
 
     /**

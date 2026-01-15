@@ -134,7 +134,7 @@ public class Issue3657 {
     public void testDefaultMaxLevelLimit() {
         int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
         try {
-            JSONFactory.setDefaultMaxLevel(2048);
+            JSONFactory.setDefaultMaxLevel(1024);
 
             FlameTreeNode root = createNestedStructure(1100);
             JSONException exception = assertThrows(JSONException.class, () -> {

@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -46,7 +47,7 @@ public class ByteBufferTest {
         byte[] bytes = new byte[]{1, 2, 3};
         ByteBuffer directBuffer = ByteBuffer.allocateDirect(3);
         directBuffer.put(bytes);
-        directBuffer.flip();
+        ((Buffer) directBuffer).flip();
 
         String str = JSON.toJSONString(directBuffer);
         assertEquals("[1,2,3]", str);

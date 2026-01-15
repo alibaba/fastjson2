@@ -6,6 +6,8 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalTime;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
@@ -189,6 +191,37 @@ public class IOUtils {
             p = 10 * p;
         }
         return 19;
+    }
+
+    public static int stringSize(BigInteger value) {
+        if (value == null) {
+            return 4;
+        }
+        int[] mag = (int[]) UNSAFE.getObject(value, FIELD_BIGINTEGER_MAG_OFFSET);
+        return mag.length * 13;
+    }
+
+    public static int stringSize(BigDecimal value) {
+        if (value == null) {
+            return 4;
+        }
+
+        int scale = value.scale();
+
+        long intCompact = UNSAFE.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
+        if (intCompact == Long.MIN_VALUE) {
+            return Math.max(26, scale);
+        }
+
+        int[] mag = (int[]) UNSAFE.getObject(value, FIELD_BIGINTEGER_MAG_OFFSET);
+        int size = mag.length * 13;
+
+        if (scale < 0) {
+            size -= scale;
+        } else {
+            size = Math.max(size, scale) + 2 /* 0. */;
+        }
+        return size;
     }
 
     /**

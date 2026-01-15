@@ -241,12 +241,24 @@ public final class MethodWriter {
         visitInsn(Opcodes.LCMP);
     }
 
+    public void fcmpg() {
+        visitInsn(Opcodes.FCMPG);
+    }
+
+    public void dcmpg() {
+        visitInsn(Opcodes.DCMPG);
+    }
+
     public void land() {
         visitInsn(Opcodes.LAND);
     }
 
     public void iadd() {
         visitInsn(Opcodes.IADD);
+    }
+
+    public void ishl() {
+        visitInsn(Opcodes.ISHL);
     }
 
     public void ladd() {
@@ -407,6 +419,10 @@ public final class MethodWriter {
 
     public void iload(final int var) {
         visitVarInsn(Opcodes.ILOAD, var);
+    }
+
+    public void iinc(final int var, final int increment) {
+        visitIincInsn(var, increment);
     }
 
     public void istore(final int var) {

@@ -14,7 +14,9 @@ public class LocalTimeTest {
         Bean bean = new Bean();
         bean.time = LocalTime.of(12, 13, 14);
         String str = JSON.toJSONString(bean, "yyyy-MM-dd HH:mm:ss");
-        assertEquals("{\"time\":\"1970-01-01 12:13:14\"}", str);
+        String expected = "{\"time\":\"1970-01-01 12:13:14\"}";
+        assertEquals(expected, str);
+        assertEquals(expected, new String(JSON.toJSONBytes(bean, "yyyy-MM-dd HH:mm:ss")));
     }
 
     public static class Bean {

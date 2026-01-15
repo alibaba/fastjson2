@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
@@ -26,7 +27,11 @@ final class FieldWriterInt32ValFunc
 
     @Override
     public Object getFieldValue(Object object) {
-        return function.applyAsInt(object);
+        try {
+            return function.applyAsInt(object);
+        } catch (RuntimeException e) {
+            throw new JSONException(e.getMessage(), e);
+        }
     }
 
     @Override

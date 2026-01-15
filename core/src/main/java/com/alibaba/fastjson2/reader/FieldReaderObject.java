@@ -6,10 +6,7 @@ import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -141,6 +138,8 @@ public class FieldReaderObject<T>
                         value = getObjectReader(jsonReader).createInstance();
                     } else if (Temporal.class.isAssignableFrom(fieldClass)) {
                         value = null;
+                    } else if (fieldClass == byte[].class) {
+                        value = new byte[0];
                     } else {
                         value = "";
                     }

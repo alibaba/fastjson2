@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.NumberUtils;
-import com.alibaba.fastjson2.util.StringUtils;
+import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import sun.misc.Unsafe;
 
@@ -13,11 +11,10 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.time.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -475,48 +472,15 @@ public class JSONWriterUTF16
     }
 
     @Override
-    public void writeString(String str) {
-        if (str == null) {
-            writeStringNull();
-            return;
+    public void writeString(String value) {
+        int off = this.off;
+        char[] buf = ensureCapacity(off + JSONWriterUTF8.IO.stringCapacity(value));
+        if (STRING_VALUE != null) {
+            off = IO.writeValue(this, buf, off, value, context.features);
+        } else {
+            off = IO.writeValue(this, buf, off, value, context.features);
         }
-
-        boolean escapeNoneAscii = (context.features & MASK_ESCAPE_NONE_ASCII) != 0;
-        boolean browserSecure = (context.features & MASK_BROWSER_SECURE) != 0;
-        boolean escape = false;
-        final char quote = this.quote;
-
-        final int strlen = str.length();
-        int minCapacity = off + strlen + 2;
-        if (minCapacity >= chars.length) {
-            grow(minCapacity);
-        }
-
-        for (int i = 0; i < strlen; i++) {
-            char c = str.charAt(i);
-            if (c == '\\'
-                    || c == quote
-                    || c < ' '
-                    || (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')'))
-                    || (escapeNoneAscii && c > 0x007F)
-            ) {
-                escape = true;
-                break;
-            }
-        }
-
-        if (!escape) {
-            int off = this.off;
-            final char[] chars = this.chars;
-            chars[off++] = quote;
-            str.getChars(0, strlen, chars, off);
-            off += strlen;
-            chars[off] = quote;
-            this.off = off + 1;
-            return;
-        }
-
-        writeStringEscape(str);
+        this.off = off;
     }
 
     protected final void writeStringEscape(String str) {
@@ -876,32 +840,15 @@ public class JSONWriterUTF16
         this.off = off;
     }
 
-    public final void writeString(String[] strings) {
-        if (pretty != PRETTY_NON || strings == null) {
-            super.writeString(strings);
-            return;
+    public final void writeString(String[] value) {
+        int off = this.off;
+        char[] buf = ensureCapacity(off + IO.stringCapacity(this, value));
+        if (STRING_VALUE != null) {
+            off = IO.writeValueJDK11(this, buf, off, value, context.features);
+        } else {
+            off = IO.writeValueJDK8(this, buf, off, value, context.features);
         }
-        // startArray();
-        if (off == chars.length) {
-            grow(off + 1);
-        }
-        chars[off++] = '[';
-
-        for (int i = 0; i < strings.length; i++) {
-            if (i != 0) {
-                if (off == chars.length) {
-                    grow(off + 1);
-                }
-                chars[off++] = ',';
-            }
-
-            writeString(strings[i]);
-        }
-
-        if (off == chars.length) {
-            grow(off + 1);
-        }
-        chars[off++] = ']';
+        this.off = off;
     }
 
     @Override
@@ -1104,36 +1051,9 @@ public class JSONWriterUTF16
 
     @Override
     public final void writeUUID(UUID value) {
-        if (value == null) {
-            writeNull();
-            return;
-        }
-
-        long msb = value.getMostSignificantBits();
-        long lsb = value.getLeastSignificantBits();
-
-        int minCapacity = off + 38;
-        char[] buf = this.chars;
-        if (minCapacity > chars.length) {
-            buf = grow(minCapacity);
-        }
-
-        final int off = this.off;
-        buf[off] = '"';
-        putLong(buf, off + 1, (int) (msb >> 56), (int) (msb >> 48));
-        putLong(buf, off + 5, (int) (msb >> 40), (int) (msb >> 32));
-        buf[off + 9] = '-';
-        putLong(buf, off + 10, ((int) msb) >> 24, ((int) msb) >> 16);
-        buf[off + 14] = '-';
-        putLong(buf, off + 15, ((int) msb) >> 8, (int) msb);
-        buf[off + 19] = '-';
-        putLong(buf, off + 20, (int) (lsb >> 56), (int) (lsb >> 48));
-        buf[off + 24] = '-';
-        putLong(buf, off + 25, ((int) (lsb >> 40)), (int) (lsb >> 32));
-        putLong(buf, off + 29, ((int) lsb) >> 24, ((int) lsb) >> 16);
-        putLong(buf, off + 33, ((int) lsb) >> 8, (int) lsb);
-        buf[off + 37] = '"';
-        this.off += 38;
+        int off = this.off;
+        char[] buf = ensureCapacity(off + IO.valueSize(value));
+        this.off = IO.writeValue(this, buf, off, value, context.features);
     }
 
     @Override
@@ -1718,7 +1638,7 @@ public class JSONWriterUTF16
         this.off = off + len;
     }
 
-    public final Object ensureCapacity(int minCapacity) {
+    public final char[] ensureCapacity(int minCapacity) {
         char[] chars = this.chars;
         if (minCapacity >= chars.length) {
             this.chars = chars = Arrays.copyOf(chars, newCapacity(minCapacity, chars.length));
@@ -2291,44 +2211,17 @@ public class JSONWriterUTF16
     }
 
     @Override
-    public final void writeLocalDate(LocalDate date) {
-        if (date == null) {
-            writeNull();
-            return;
-        }
-
-        if (context.dateFormat != null
-                && writeLocalDateWithFormat(date)) {
-            return;
-        }
-
+    public final void writeLocalDate(LocalDate value) {
         int off = this.off;
-        int minCapacity = off + 18;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-        chars[off++] = quote;
-        off = IOUtils.writeLocalDate(chars, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
-        chars[off] = quote;
-        this.off = off + 1;
+        char[] buf = ensureCapacity(off + IO.valueSize(value));
+        this.off = IO.writeValue(this, buf, off, value, context.features);
     }
 
     @Override
-    public final void writeLocalDateTime(LocalDateTime dateTime) {
+    public final void writeLocalDateTime(LocalDateTime value) {
         int off = this.off;
-        int minCapacity = off + 38;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-        chars[off++] = quote;
-        LocalDate localDate = dateTime.toLocalDate();
-        off = IOUtils.writeLocalDate(chars, off, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
-        chars[off++] = ' ';
-        off = IOUtils.writeLocalTime(chars, off, dateTime.toLocalTime());
-        chars[off] = quote;
-        this.off = off + 1;
+        char[] buf = ensureCapacity(off + IO.valueSize(value));
+        this.off = IO.writeValue(this, buf, off, value, context.features);
     }
 
     @Override
@@ -2459,17 +2352,10 @@ public class JSONWriterUTF16
     }
 
     @Override
-    public final void writeLocalTime(LocalTime time) {
+    public final void writeLocalTime(LocalTime value) {
         int off = this.off;
-        int minCapacity = off + 20;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-        chars[off++] = quote;
-        off = IOUtils.writeLocalTime(chars, off, time);
-        chars[off] = quote;
-        this.off = off + 1;
+        char[] buf = ensureCapacity(off + IO.valueSize(value));
+        this.off = IO.writeValue(this, buf, off, value, context.features);
     }
 
     @Override
@@ -2520,35 +2406,10 @@ public class JSONWriterUTF16
     }
 
     @Override
-    public final void writeOffsetDateTime(OffsetDateTime dateTime) {
-        if (dateTime == null) {
-            writeNull();
-            return;
-        }
-
+    public final void writeOffsetDateTime(OffsetDateTime value) {
         int off = this.off;
-        int minCapacity = off + 45;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-        chars[off] = quote;
-        LocalDateTime ldt = dateTime.toLocalDateTime();
-        LocalDate date = ldt.toLocalDate();
-        off = IOUtils.writeLocalDate(chars, off + 1, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
-        chars[off] = 'T';
-        off = IOUtils.writeLocalTime(chars, off + 1, ldt.toLocalTime());
-
-        ZoneOffset offset = dateTime.getOffset();
-        if (offset.getTotalSeconds() == 0) {
-            chars[off++] = 'Z';
-        } else {
-            String zoneId = offset.getId();
-            zoneId.getChars(0, zoneId.length(), chars, off);
-            off += zoneId.length();
-        }
-        chars[off] = quote;
-        this.off = off + 1;
+        char[] buf = ensureCapacity(off + IO.valueSize(value));
+        this.off = IO.writeValue(this, buf, off, value, context.features);
     }
 
     @Override
@@ -3042,5 +2903,2266 @@ public class JSONWriterUTF16
             }
         }
         this.off = off;
+    }
+
+    public abstract static class IO {
+        public static int startObject(JSONWriterUTF16 writer, char[] buf, int off) {
+            int level = writer.level++;
+            if (level > writer.context.maxLevel) {
+                throw overflowLevel(level);
+            }
+
+            writer.startObject = true;
+
+            buf[off++] = '{';
+
+            if (writer.pretty != PRETTY_NON) {
+                off = writer.indent(buf, off);
+            }
+            return off;
+        }
+
+        public static int endObject(JSONWriterUTF16 writer, char[] buf, int off) {
+            writer.level--;
+            if (writer.pretty != PRETTY_NON) {
+                off = writer.indent(buf, off);
+            }
+
+            buf[off] = '}';
+            writer.startObject = false;
+            return off + 1;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, byte value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+            off = IOUtils.writeInt8(buf, off, value);
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Byte value, long features) {
+            if (value == null) {
+                return writeNumberNull(writer, buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.byteValue(), features);
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, byte[] value, long features) {
+            if (value == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+
+            buf[off++] = '[';
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+                off = IOUtils.writeInt8(buf, off, value[i]);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+            }
+            buf[off] = ']';
+
+            return off + 1;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, short value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+            off = IOUtils.writeInt16(buf, off, value);
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Short value, long features) {
+            if (value == null) {
+                return writeNumberNull(writer, buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.shortValue(), features);
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, int value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+            off = IOUtils.writeInt32(buf, off, value);
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Integer value, long features) {
+            if (value == null) {
+                return writeNumberNull(writer, buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.intValue(), features);
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, int[] value, long features) {
+            if (value == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+
+            buf[off++] = '[';
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+                off = IOUtils.writeInt32(buf, off, value[i]);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+            }
+            buf[off] = ']';
+
+            return off + 1;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, long value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = isWriteAsString(value, features);
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+            off = IOUtils.writeInt64(buf, off, value);
+            if (writeAsString) {
+                buf[off++] = quote;
+            } else if ((features & MASK_WRITE_CLASS_NAME) != 0
+                    && (features & MASK_NOT_WRITE_NUMBER_CLASS_NAME) == 0
+                    && value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE
+            ) {
+                buf[off++] = 'L';
+            }
+
+            return off;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Long value, long features) {
+            if (value == null) {
+                return writeLongNull(writer, buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.longValue(), features);
+        }
+
+        public static int writeInt64(JSONWriterUTF16 writer, char[] buf, int off, List<Long> value, long features) {
+            if (value == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            char quote = writer.quote;
+
+            buf[off++] = '[';
+
+            for (int i = 0; i < value.size(); i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+                Long v = value.get(i);
+                if (v == null) {
+                    off = writeNumberNull(writer, buf, off, features);
+                    continue;
+                }
+                boolean writeAsString = isWriteAsString(v, features);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+                off = IOUtils.writeInt64(buf, off, v);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+            }
+
+            buf[off] = ']';
+
+            return off + 1;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, long[] value, long features) {
+            if (value == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            char quote = writer.quote;
+
+            buf[off++] = '[';
+
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+                long v = value[i];
+                boolean writeAsString = isWriteAsString(v, features);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+                off = IOUtils.writeInt64(buf, off, v);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+            }
+
+            buf[off] = ']';
+
+            return off + 1;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, BigInteger value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+
+            if (isInt64(value) && features == 0) {
+                return writeValue(writer, buf, off, value.longValue(), features);
+            }
+
+            String str = value.toString(10);
+
+            boolean writeAsString = isWriteAsString(value, features);
+
+            int strlen = str.length();
+            if (writeAsString) {
+                buf[off++] = '"';
+            }
+            str.getChars(0, strlen, buf, off);
+            off += strlen;
+            if (writeAsString) {
+                buf[off++] = '"';
+            }
+            return off;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, BigDecimal value, long features) {
+            if (value == null) {
+                return writeDoubleNull(writer, buf, off, features);
+            }
+
+            char quote = writer.quote;
+            boolean writeAsString = isWriteAsString(value, features);
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            boolean asPlain = (features & WriteBigDecimalAsPlain.mask) != 0;
+            long unscaleValue;
+            int scale;
+            int precision = value.precision();
+            if (precision < 19
+                    && (scale = value.scale()) >= 0
+                    && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1
+                    && (unscaleValue = UNSAFE.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET)) != Long.MIN_VALUE
+                    && !asPlain
+            ) {
+                off = IOUtils.writeDecimal(buf, off, unscaleValue, scale);
+            } else {
+                String str = asPlain ? value.toPlainString() : value.toString();
+                str.getChars(0, str.length(), buf, off);
+                off += str.length();
+            }
+
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, float value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            boolean writeSpecialAsString = (features & MASK_WRITE_FLOAT_SPECIAL_AS_STRING) != 0;
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            off = NumberUtils.writeFloat(buf, off, value, true, writeSpecialAsString);
+
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Float value, long features) {
+            if (value == null) {
+                return writeDoubleNull(writer, buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.floatValue(), features);
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, float[] value, long features) {
+            if (value == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            boolean writeSpecialAsString = (features & MASK_WRITE_FLOAT_SPECIAL_AS_STRING) != 0;
+            buf[off++] = '[';
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+
+                if (!Float.isFinite(value[i])) {
+                    off = NumberUtils.writeFloat(buf, off, value[i], true, writeSpecialAsString);
+                    continue;
+                }
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+                off = NumberUtils.writeFloat(buf, off, value[i], true, false);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+            }
+            buf[off] = ']';
+
+            return off + 1;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, double value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            boolean writeSpecialAsString = (features & MASK_WRITE_FLOAT_SPECIAL_AS_STRING) != 0;
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            off = NumberUtils.writeDouble(buf, off, value, true, writeSpecialAsString);
+
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Double value, long features) {
+            if (value == null) {
+                return writeDoubleNull(writer, buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.doubleValue(), features);
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, double[] value, long features) {
+            if (value == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            boolean writeSpecialAsString = (features & MASK_WRITE_FLOAT_SPECIAL_AS_STRING) != 0;
+            buf[off++] = '[';
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+
+                if (!Double.isFinite(value[i])) {
+                    off = NumberUtils.writeDouble(buf, off, value[i], true, writeSpecialAsString);
+                    continue;
+                }
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+                off = NumberUtils.writeDouble(buf, off, value[i], true, false);
+                if (writeAsString) {
+                    buf[off++] = quote;
+                }
+            }
+            buf[off] = ']';
+
+            return off + 1;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, LocalDate value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+            if (writer.context.dateFormat != null) {
+                return writeValueWithFormat(writer, buf, off, value, features);
+            }
+            char quote = writer.quote;
+            buf[off] = quote;
+            off = IOUtils.writeLocalDate(buf, off + 1, value.getYear(), value.getMonthValue(), value.getDayOfMonth());
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        private static int writeValueWithFormat(JSONWriterUTF16 writer, char[] buf, int off, LocalDate value, long features) {
+            Context context = writer.context;
+            if (context.isDateFormatUnixTime()) {
+                long millis = value.atStartOfDay(context.getZoneId())
+                        .toInstant()
+                        .toEpochMilli();
+                return writeValue(writer, buf, off, millis / 1000, features);
+            }
+            if (context.isDateFormatMillis()) {
+                long millis = value.atStartOfDay(context.getZoneId())
+                        .toInstant()
+                        .toEpochMilli();
+                return writeValue(writer, buf, off, millis, features);
+            }
+            if (context.isFormatyyyyMMddhhmmss19()) {
+                return writeDateTime19(writer, buf, off, value.getYear(), value.getMonthValue(), value.getDayOfMonth(), 0, 0, 0);
+            }
+            switch (context.dateFormat) {
+                case "yyyyMMdd":
+                    return writeDateTime8(writer, buf, off, value.getYear(), value.getMonthValue(), value.getDayOfMonth());
+                case "iso8601":
+                case "yyyy-MM-dd":
+                    return writeDateTime10(writer, buf, off, value.getYear(), value.getMonthValue(), value.getDayOfMonth());
+                default: {
+                    DateTimeFormatter formatter = context.getDateFormatter();
+                    String str;
+                    if (context.isDateFormatHasHour()) {
+                        str = formatter.format(LocalDateTime.of(value, LocalTime.MIN));
+                    } else {
+                        str = formatter.format(value);
+                    }
+                    return writeValue(writer, buf, off, str, features);
+                }
+            }
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, LocalTime value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+            if (writer.context.dateFormat != null) {
+                return writeValueWithFormat(writer, buf, off, value, features);
+            }
+            char quote = writer.quote;
+            buf[off] = quote;
+            off = IOUtils.writeLocalTime(buf, off + 1, value);
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        public static int writeValueWithFormat(JSONWriterUTF16 writer, char[] buf, int off, LocalTime value, long features) {
+            Context context = writer.context;
+            switch (context.dateFormat) {
+                case "millis": {
+                    LocalDateTime dateTime = LocalDateTime.of(
+                            LocalDate.of(1970, 1, 1),
+                            value
+                    );
+                    Instant instant = dateTime.atZone(context.getZoneId()).toInstant();
+                    long millis = instant.toEpochMilli();
+                    return writeValue(writer, buf, off, millis, features);
+                }
+                case "unixtime": {
+                    LocalDateTime dateTime = LocalDateTime.of(
+                            LocalDate.of(1970, 1, 1),
+                            value
+                    );
+                    Instant instant = dateTime.atZone(context.getZoneId()).toInstant();
+                    long millis = instant.toEpochMilli();
+                    return writeValue(writer, buf, off, millis / 1000, features);
+                }
+                default:
+                    DateTimeFormatter formatter = context.getDateFormatter();
+                    String str;
+                    if (context.formatHasDay) {
+                        str = formatter.format(LocalDateTime.of(LocalDate.of(1970, 1, 1), value));
+                    } else {
+                        str = formatter.format(value);
+                    }
+                    return writeValue(writer, buf, off, str, features);
+            }
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, LocalDateTime value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+            if (writer.context.dateFormat != null) {
+                return writeLocalDateTimeWithFormat(writer, buf, off, value, features);
+            }
+            return writeLocalDateTime(writer, buf, off, value);
+        }
+
+        private static int writeLocalDateTime(JSONWriterUTF16 writer, char[] buf, int off, LocalDateTime value) {
+            char quote = writer.quote;
+            buf[off] = quote;
+            LocalDate localDate = value.toLocalDate();
+            off = IOUtils.writeLocalDate(buf, off + 1, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+            buf[off] = ' ';
+            off = IOUtils.writeLocalTime(buf, off + 1, value.toLocalTime());
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        private static int writeLocalDateTimeWithFormat(
+                JSONWriterUTF16 writer,
+                char[] buf,
+                int off,
+                LocalDateTime ldt,
+                long features) {
+            Context ctx = writer.context;
+            if (ctx.dateFormatUnixTime) {
+                long millis = ldt.atZone(ctx.getZoneId())
+                        .toInstant()
+                        .toEpochMilli();
+                return writeValue(writer, buf, off, millis / 1000, features);
+            }
+
+            String format = ctx.dateFormat;
+
+            if (ctx.dateFormat == null && ctx.isDateFormatMillis()) {
+                long millis = ldt.atZone(ctx.getZoneId())
+                        .toInstant()
+                        .toEpochMilli();
+                return writeValue(writer, buf, off, millis, features);
+            }
+
+            int year = ldt.getYear();
+            if (year >= 0 && year <= 9999) {
+                if (ctx.isDateFormatISO8601()) {
+                    int nano = ldt.getNano() / 1000_000;
+                    int offsetSeconds = ctx.getZoneId().getRules().getOffset(ldt).getTotalSeconds();
+                    return writeDateTimeISO8601(writer, buf, off, year,
+                            ldt.getMonthValue(), ldt.getDayOfMonth(), ldt.getHour(), ldt.getMinute(), ldt.getSecond(), nano, offsetSeconds, true);
+                }
+
+                switch (format) {
+                    case "yyyy-MM-dd HH:mm:ss":
+                        return writeDateTime19(
+                                writer, buf, off,
+                                year,
+                                ldt.getMonthValue(),
+                                ldt.getDayOfMonth(),
+                                ldt.getHour(),
+                                ldt.getMinute(),
+                                ldt.getSecond());
+                    case "yyyyMMddHHmmss":
+                        return writeDateTime19(
+                                writer, buf, off,
+                                year,
+                                ldt.getMonthValue(),
+                                ldt.getDayOfMonth(),
+                                ldt.getHour(),
+                                ldt.getMinute(),
+                                ldt.getSecond());
+                    case "yyyy-MM-dd":
+                        return writeDateTime10(
+                                writer, buf, off,
+                                year,
+                                ldt.getMonthValue(),
+                                ldt.getDayOfMonth());
+                    case "yyyyMMdd":
+                        return writeDateTime8(
+                                writer, buf, off,
+                                year,
+                                ldt.getMonthValue(),
+                                ldt.getDayOfMonth());
+                    case "iso8601":
+                        return writeDateTimeISO8601(writer, buf, off, year,
+                                ldt.getMonthValue(), ldt.getDayOfMonth(), ldt.getHour(), ldt.getMinute(), ldt.getSecond(), ldt.getNano() / 1000_000, 0, false);
+                    case "millis":
+                        return writeValue(writer, buf, off, ldt.atZone(ctx.getZoneId())
+                                .toInstant()
+                                .toEpochMilli(), features);
+                    default:
+                        break;
+                }
+            }
+
+            DateTimeFormatter formatter = ctx.getDateFormatter();
+            if (formatter == null) {
+                return writeLocalDateTime(writer, buf, off, ldt);
+            }
+
+            boolean useSimpleDateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX".equals(format);
+            String str;
+            if (useSimpleDateFormat) {
+                Instant instant = ldt.toInstant(ctx.getZoneId().getRules().getOffset(ldt));
+                Date date = new Date(instant.toEpochMilli());
+                str = new SimpleDateFormat(format).format(date);
+            } else {
+                if (ctx.locale != null) {
+                    ZonedDateTime zdt = ZonedDateTime.of(ldt, ctx.getZoneId());
+                    str = formatter.format(zdt);
+                } else {
+                    str = formatter.format(ldt);
+                }
+            }
+            return writeValue(writer, buf, off, str, features);
+        }
+
+        public static int writeDateTime10(
+                JSONWriterUTF16 writer,
+                char[] chars,
+                int off,
+                int year,
+                int month,
+                int dayOfMonth
+        ) {
+            chars[off] = writer.quote;
+            off = IOUtils.writeLocalDate(chars, off + 1, year, month, dayOfMonth);
+            chars[off] = writer.quote;
+            return off + 1;
+        }
+
+        public static int writeDateTime8(
+                JSONWriterUTF16 writer,
+                char[] chars,
+                int off,
+                int year,
+                int month,
+                int dayOfMonth
+        ) {
+            chars[off] = writer.quote;
+            if (year < 0 || year > 9999) {
+                throw illegalYear(year);
+            }
+            int y01 = year / 100;
+            int y23 = year - y01 * 100;
+            writeDigitPair(chars, off + 1, y01);
+            writeDigitPair(chars, off + 3, y23);
+            writeDigitPair(chars, off + 5, month);
+            writeDigitPair(chars, off + 7, dayOfMonth);
+            chars[off + 9] = writer.quote;
+            return off + 10;
+        }
+
+        public static int writeDateTime14(
+                JSONWriterUTF16 writer,
+                char[] chars,
+                int off,
+                int year,
+                int month,
+                int dayOfMonth,
+                int hour,
+                int minute,
+                int second
+        ) {
+            chars[off] = writer.quote;
+            if (year < 0 || year > 9999) {
+                throw illegalYear(year);
+            }
+            int y01 = year / 100;
+            int y23 = year - y01 * 100;
+            writeDigitPair(chars, off + 1, y01);
+            writeDigitPair(chars, off + 3, y23);
+            writeDigitPair(chars, off + 5, month);
+            writeDigitPair(chars, off + 7, dayOfMonth);
+            writeDigitPair(chars, off + 9, hour);
+            writeDigitPair(chars, off + 11, minute);
+            writeDigitPair(chars, off + 13, second);
+            chars[off + 15] = writer.quote;
+            return off + 16;
+        }
+
+        public static int writeDateTime19(
+                JSONWriterUTF16 writer,
+                char[] chars,
+                int off,
+                int year,
+                int month,
+                int dayOfMonth,
+                int hour,
+                int minute,
+                int second
+        ) {
+            chars[off] = writer.quote;
+            if (year < 0 || year > 9999) {
+                throw illegalYear(year);
+            }
+            off = IOUtils.writeLocalDate(chars, off + 1, year, month, dayOfMonth);
+            chars[off] = ' ';
+            IOUtils.writeLocalTime(chars, off + 1, hour, minute, second);
+            chars[off + 9] = writer.quote;
+            return off + 10;
+        }
+
+        public static int writeDateTimeISO8601(
+                JSONWriterUTF16 writer,
+                char[] chars,
+                int off,
+                int year,
+                int month,
+                int dayOfMonth,
+                int hour,
+                int minute,
+                int second,
+                int millis,
+                int offsetSeconds,
+                boolean timeZone
+        ) {
+            chars[off] = writer.quote;
+            off = IOUtils.writeLocalDate(chars, off + 1, year, month, dayOfMonth);
+            chars[off] = timeZone ? 'T' : ' ';
+            IOUtils.writeLocalTime(chars, off + 1, hour, minute, second);
+            off += 9;
+
+            if (millis > 0) {
+                int div = millis / 10;
+                int div2 = div / 10;
+                final int rem1 = millis - div * 10;
+
+                if (rem1 != 0) {
+                    IOUtils.putLongLE(chars, off, (DIGITS_K_64[millis & 0x3ff] & 0xffffffffffff0000L) | DOT_X0);
+                    off += 4;
+                } else {
+                    chars[off++] = '.';
+                    final int rem2 = div - div2 * 10;
+                    if (rem2 != 0) {
+                        writeDigitPair(chars, off, div);
+                        off += 2;
+                    } else {
+                        chars[off++] = (char) (byte) (div2 + '0');
+                    }
+                }
+            }
+
+            if (timeZone) {
+                int offset = offsetSeconds / 3600;
+                if (offsetSeconds == 0) {
+                    chars[off++] = 'Z';
+                } else {
+                    int offsetAbs = Math.abs(offset);
+                    chars[off] = offset >= 0 ? '+' : '-';
+                    writeDigitPair(chars, off + 1, offsetAbs);
+                    chars[off + 3] = ':';
+                    int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
+                    if (offsetMinutes < 0) {
+                        offsetMinutes = -offsetMinutes;
+                    }
+                    writeDigitPair(chars, off + 4, offsetMinutes);
+                    off += 6;
+                }
+            }
+            chars[off] = writer.quote;
+            return off + 1;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, OffsetDateTime value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+            LocalDateTime ldt = value.toLocalDateTime();
+            LocalDate date = ldt.toLocalDate();
+            buf[off] = writer.quote;
+            off = IOUtils.writeLocalDate(buf, off + 1, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+            buf[off++] = 'T';
+            LocalTime time = ldt.toLocalTime();
+            IOUtils.writeLocalTime(buf, off, time.getHour(), time.getMinute(), time.getSecond());
+            off += 8;
+            int nano = time.getNano();
+            if (nano != 0) {
+                off = IOUtils.writeNano(buf, off, nano);
+            }
+
+            ZoneOffset offset = value.getOffset();
+            if (offset.getTotalSeconds() == 0) {
+                buf[off++] = 'Z';
+            } else {
+                String zoneId = offset.getId();
+                zoneId.getChars(0, zoneId.length(), buf, off);
+                off += zoneId.length();
+            }
+            buf[off] = writer.quote;
+            return off + 1;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, OffsetTime value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+            char quote = writer.quote;
+            buf[off] = quote;
+            off = IOUtils.writeLocalTime(buf, off + 1, value.toLocalTime());
+
+            ZoneOffset offset = value.getOffset();
+            if (offset.getTotalSeconds() == 0) {
+                buf[off++] = 'Z';
+            } else {
+                String zoneId = offset.getId();
+                zoneId.getChars(0, zoneId.length(), buf, off);
+                off += zoneId.length();
+            }
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, ZonedDateTime value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+
+            ZoneId zone = value.getZone();
+            String zoneId = zone.getId();
+            int zoneIdLength = zoneId.length();
+            char firstZoneChar = '\0';
+            int zoneSize;
+            if (ZoneOffset.UTC == zone || (zoneIdLength <= 3 && ("UTC".equals(zoneId) || "Z".equals(zoneId)))) {
+                zoneId = "Z";
+                zoneSize = 1;
+            } else if (zoneIdLength != 0 && ((firstZoneChar = zoneId.charAt(0)) == '+' || firstZoneChar == '-')) {
+                zoneSize = zoneIdLength;
+            } else {
+                zoneSize = 2 + zoneIdLength;
+            }
+
+            char quote = writer.quote;
+            buf[off] = quote;
+            LocalDate localDate = value.toLocalDate();
+            off = IOUtils.writeLocalDate(buf, off + 1, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+            buf[off] = 'T';
+            off = IOUtils.writeLocalTime(buf, off + 1, value.toLocalTime());
+            if (zoneSize == 1) {
+                buf[off++] = 'Z';
+            } else if (firstZoneChar == '+' || firstZoneChar == '-') {
+                zoneId.getChars(0, zoneIdLength, buf, off);
+                off += zoneIdLength;
+            } else {
+                buf[off++] = '[';
+                zoneId.getChars(0, zoneIdLength, buf, off);
+                off += zoneIdLength;
+                buf[off++] = ']';
+            }
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Instant value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+            if (writer.context.dateFormat != null) {
+                return writeInstanceWithFormat(writer, buf, off, value, features);
+            }
+            char quote = writer.quote;
+            buf[off] = quote;
+            String str = DateTimeFormatter.ISO_INSTANT.format(value);
+            str.getChars(0, str.length(), buf, off + 1);
+            off += str.length() + 1;
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        private static int writeInstanceWithFormat(JSONWriterUTF16 writer, char[] buf, int off, Instant value, long features) {
+            Context context = writer.context;
+            String format = context.dateFormat;
+            boolean yyyyMMddhhmmss14 = false, yyyyMMdd10 = false, yyyyMMdd8 = false;
+            boolean formatyyyyMMddhhmmss19 = context.isFormatyyyyMMddhhmmss19();
+            if (formatyyyyMMddhhmmss19
+                    || (yyyyMMddhhmmss14 = "yyyyMMddHHmmss".equals(format))
+                    || (yyyyMMdd10 = ("yyyy-MM-dd".equals(format)))
+                    || (yyyyMMdd8 = ("yyyyMMdd".equals(format)))
+            ) {
+                final long SECONDS_PER_DAY = 60 * 60 * 24;
+                ZoneId zoneId = context.getZoneId();
+                long epochSecond = value.getEpochSecond();
+                int offsetTotalSeconds;
+                if (zoneId == DateUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == DateUtils.SHANGHAI_ZONE_RULES) {
+                    offsetTotalSeconds = DateUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
+                } else {
+                    offsetTotalSeconds = zoneId.getRules().getOffset(value).getTotalSeconds();
+                }
+
+                long localSecond = epochSecond + offsetTotalSeconds;
+                long localEpochDay = Math.floorDiv(localSecond, SECONDS_PER_DAY);
+                int secsOfDay = (int) Math.floorMod(localSecond, SECONDS_PER_DAY);
+                int year, month, dayOfMonth;
+                {
+                    final int DAYS_PER_CYCLE = 146097;
+                    final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+
+                    long zeroDay = localEpochDay + DAYS_0000_TO_1970;
+                    // find the march-based year
+                    zeroDay -= 60;  // adjust to 0000-03-01 so leap day is at end of four year cycle
+                    long adjust = 0;
+                    if (zeroDay < 0) {
+                        // adjust negative years to positive for calculation
+                        long adjustCycles = (zeroDay + 1) / DAYS_PER_CYCLE - 1;
+                        adjust = adjustCycles * 400;
+                        zeroDay += -adjustCycles * DAYS_PER_CYCLE;
+                    }
+                    long yearEst = (400 * zeroDay + 591) / DAYS_PER_CYCLE;
+                    long doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
+                    if (doyEst < 0) {
+                        // fix estimate
+                        yearEst--;
+                        doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
+                    }
+                    yearEst += adjust;  // reset any negative year
+                    int marchDoy0 = (int) doyEst;
+
+                    // convert march-based values back to january-based
+                    int marchMonth0 = (marchDoy0 * 5 + 2) / 153;
+                    month = (marchMonth0 + 2) % 12 + 1;
+                    dayOfMonth = marchDoy0 - (marchMonth0 * 306 + 5) / 10 + 1;
+                    yearEst += marchMonth0 / 10;
+
+                    // check year now we are certain it is correct
+                    if (yearEst < Year.MIN_VALUE || yearEst > Year.MAX_VALUE) {
+                        throw new DateTimeException("Invalid year " + yearEst);
+                    }
+
+                    year = (int) yearEst;
+                }
+
+                int hour, minute, second;
+                {
+                    final int MINUTES_PER_HOUR = 60;
+                    final int SECONDS_PER_MINUTE = 60;
+                    final int SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+
+                    long secondOfDay = secsOfDay;
+                    if (secondOfDay < 0 || secondOfDay > 86399) {
+                        throw new DateTimeException("Invalid secondOfDay " + secondOfDay);
+                    }
+                    int hours = (int) (secondOfDay / SECONDS_PER_HOUR);
+                    secondOfDay -= hours * SECONDS_PER_HOUR;
+                    int minutes = (int) (secondOfDay / SECONDS_PER_MINUTE);
+                    secondOfDay -= minutes * SECONDS_PER_MINUTE;
+
+                    hour = hours;
+                    minute = minutes;
+                    second = (int) secondOfDay;
+                }
+
+                if (formatyyyyMMddhhmmss19) {
+                    return writeDateTime19(
+                            writer,
+                            buf,
+                            off,
+                            year,
+                            month,
+                            dayOfMonth,
+                            hour,
+                            minute,
+                            second
+                    );
+                }
+
+                if (yyyyMMddhhmmss14) {
+                    return writeDateTime14(
+                            writer,
+                            buf,
+                            off,
+                            year,
+                            month,
+                            dayOfMonth,
+                            hour,
+                            minute,
+                            second
+                    );
+                }
+
+                if (yyyyMMdd10) {
+                    return writeDateTime10(
+                            writer,
+                            buf,
+                            off,
+                            year,
+                            month,
+                            dayOfMonth
+                    );
+                }
+
+                return writeDateTime8(
+                        writer,
+                        buf,
+                        off,
+                        year,
+                        month,
+                        dayOfMonth
+                );
+            }
+
+            if (context.isDateFormatUnixTime()) {
+                return writeValue(writer, buf, off, value.toEpochMilli() / 1000, features);
+            }
+
+            if (context.isDateFormatMillis()) {
+                return writeValue(writer, buf, off, value.toEpochMilli(), features);
+            }
+
+            ZonedDateTime zdt = ZonedDateTime.ofInstant(value, context.getZoneId());
+            int year = zdt.getYear();
+            if (year >= 0 && year <= 9999) {
+                if (context.isDateFormatISO8601()) {
+                    return writeDateTimeISO8601(
+                            writer,
+                            buf,
+                            off,
+                            year,
+                            zdt.getMonthValue(),
+                            zdt.getDayOfMonth(),
+                            zdt.getHour(),
+                            zdt.getMinute(),
+                            zdt.getSecond(),
+                            zdt.getNano() / 1000_000,
+                            zdt.getOffset().getTotalSeconds(),
+                            true
+                    );
+                }
+            }
+            DateTimeFormatter formatter = context.getDateFormatter();
+            return writeValue(writer, buf, off, formatter.format(zdt), features);
+        }
+
+        public static int writeLongNull(JSONWriterUTF16 writer, char[] buf, int off, long features) {
+            if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
+                if ((features & (MASK_WRITE_NON_STRING_VALUE_AS_STRING | MASK_WRITE_LONG_AS_STRING)) != 0) {
+                    char quote = writer.quote;
+                    buf[off] = quote;
+                    buf[off + 1] = '0';
+                    buf[off + 2] = quote;
+                    return off + 3;
+                } else {
+                    buf[off] = '0';
+                    return off + 1;
+                }
+            } else {
+                return writeNull(buf, off);
+            }
+        }
+
+        public static int writeDoubleNull(JSONWriterUTF16 writer, char[] buf, int off, long features) {
+            if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
+                if ((features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0) {
+                    char quote = writer.quote;
+                    buf[off] = quote;
+                    buf[off + 1] = '0';
+                    buf[off + 2] = '.';
+                    buf[off + 3] = '0';
+                    buf[off + 4] = quote;
+                    return off + 5;
+                } else {
+                    buf[off] = '0';
+                    buf[off + 1] = '.';
+                    buf[off + 2] = '0';
+                    return off + 3;
+                }
+            } else {
+                return writeNull(buf, off);
+            }
+        }
+
+        public static int writeNumberNull(JSONWriterUTF16 writer, char[] buf, int off, long features) {
+            if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
+                if ((features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0) {
+                    char quote = writer.quote;
+                    buf[off] = quote;
+                    buf[off + 1] = '0';
+                    buf[off + 2] = quote;
+                    return off + 3;
+                } else {
+                    buf[off] = '0';
+                    return off + 1;
+                }
+            } else {
+                return writeNull(buf, off);
+            }
+        }
+
+        public static int writeArrayNull(char[] buf, int off, long features) {
+            if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_LIST_AS_EMPTY)) != 0) {
+                return writeEmptyArray(buf, off);
+            } else {
+                return writeNull(buf, off);
+            }
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Boolean value, long features) {
+            if (value == null) {
+                return writeBooleanNull(buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.booleanValue(), features);
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, boolean value, long features) {
+            char quote = writer.quote;
+
+            boolean writeAsString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0;
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+            if ((features & MASK_WRITE_BOOLEAN_AS_NUMBER) != 0) {
+                buf[off++] = value ? '1' : '0';
+            } else {
+                off = IOUtils.putBoolean(buf, off, value);
+            }
+            if (writeAsString) {
+                buf[off++] = quote;
+            }
+
+            return off;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Character value, long features) {
+            if (value == null) {
+                return writeStringNull(buf, off, features);
+            }
+            return writeValue(writer, buf, off, value.charValue(), features);
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, char value, long features) {
+            char quote = writer.quote;
+            buf[off++] = quote;
+            switch (value) {
+                case '"':
+                case '\'':
+                    if (value == quote) {
+                        buf[off++] = '\\';
+                    }
+                    buf[off++] = value;
+                    break;
+                case '\\':
+                case '\r':
+                case '\n':
+                case '\b':
+                case '\f':
+                case '\t':
+                    StringUtils.writeEscapedChar(buf, off, value);
+                    off += 2;
+                    break;
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    buf[off] = '\\';
+                    buf[off + 1] = 'u';
+                    buf[off + 2] = '0';
+                    buf[off + 3] = '0';
+                    buf[off + 4] = '0';
+                    buf[off + 5] = (char) ('0' + (int) value);
+                    off += 6;
+                    break;
+                case 11:
+                case 14:
+                case 15:
+                    buf[off] = '\\';
+                    buf[off + 1] = 'u';
+                    buf[off + 2] = '0';
+                    buf[off + 3] = '0';
+                    buf[off + 4] = '0';
+                    buf[off + 5] = (char) ('a' + (value - 10));
+                    off += 6;
+                    break;
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                case 21:
+                case 22:
+                case 23:
+                case 24:
+                case 25:
+                    buf[off] = '\\';
+                    buf[off + 1] = 'u';
+                    buf[off + 2] = '0';
+                    buf[off + 3] = '0';
+                    buf[off + 4] = '1';
+                    buf[off + 5] = (char) ('0' + (value - 16));
+                    off += 6;
+                    break;
+                case 26:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 31:
+                    buf[off] = '\\';
+                    buf[off + 1] = 'u';
+                    buf[off + 2] = '0';
+                    buf[off + 3] = '0';
+                    buf[off + 4] = '1';
+                    buf[off + 5] = (char) ('a' + (value - 26));
+                    off += 6;
+                    break;
+                default:
+                    buf[off++] = value;
+                    break;
+            }
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        public static int writeValue(JSONWriterUTF8 writer, char[] buf, int off, UUID value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+
+            long msb = value.getMostSignificantBits();
+            long lsb = value.getLeastSignificantBits();
+
+            char quote = writer.quote;
+
+            buf[off] = quote;
+            putLong(buf, off + 1, (int) (msb >> 56), (int) (msb >> 48));
+            putLong(buf, off + 5, (int) (msb >> 40), (int) (msb >> 32));
+            buf[off + 9] = '-';
+            putLong(buf, off + 10, ((int) msb) >> 24, ((int) msb) >> 16);
+            buf[off + 14] = '-';
+            putLong(buf, off + 15, ((int) msb) >> 8, (int) msb);
+            buf[off + 19] = '-';
+            putLong(buf, off + 20, (int) (lsb >> 56), (int) (lsb >> 48));
+            buf[off + 24] = '-';
+            putLong(buf, off + 25, ((int) (lsb >> 40)), (int) (lsb >> 32));
+            putLong(buf, off + 29, ((int) lsb) >> 24, ((int) lsb) >> 16);
+            putLong(buf, off + 33, ((int) lsb) >> 8, (int) lsb);
+            buf[off + 37] = quote;
+
+            return off + 38;
+        }
+
+        public static int valueSize(boolean value) {
+            return 5;
+        }
+
+        public static int valueSize(byte value) {
+            return 5;
+        }
+
+        public static int valueSize(Byte value) {
+            return 5;
+        }
+
+        public static int valueSize(short value) {
+            return 7;
+        }
+
+        public static int valueSize(Short value) {
+            return 7;
+        }
+
+        public static int valueSize(int value) {
+            return 13;
+        }
+
+        public static int valueSize(Integer value) {
+            return 13;
+        }
+
+        public static int valueSize(long value) {
+            return 23;
+        }
+
+        public static int valueSize(Long value) {
+            return 23;
+        }
+
+        public static int valueSize(float value) {
+            return 17;
+        }
+
+        public static int valueSize(double value) {
+            return 26;
+        }
+
+        public static int valueSize(UUID value) {
+            return 38;
+        }
+
+        public static int valueSize(float[] value) {
+            return value == null ? 4 : value.length * (17 /* float value size */ + 1);
+        }
+
+        public static int valueSize(double[] value) {
+            return value == null ? 4 : value.length * (26 /* double value size */ + 1);
+        }
+
+        public static int valueSize(int[] value) {
+            return value == null ? 4 : value.length * (13 /* int value size */ + 1);
+        }
+
+        public static int valueSize(byte[] value) {
+            return value == null ? 4 : value.length * (23 /* long value size */ + 1);
+        }
+
+        public static int valueSize(long[] value) {
+            return value == null ? 4 : value.length * (23 /* long value size */ + 1);
+        }
+
+        public static int valueSize(LocalDate value) {
+            return 18;
+        }
+
+        public static int valueSize(LocalDateTime value) {
+            return 38;
+        }
+
+        public static int valueSize(LocalTime value) {
+            return 20;
+        }
+
+        public static int valueSize(OffsetDateTime value) {
+            return 45;
+        }
+
+        public static int valueSize(OffsetTime value) {
+            return 28;
+        }
+
+        public static int valueSize(ZonedDateTime value) {
+            if (value == null) {
+                return 4;
+            }
+            return value.getZone().getId().length() + 38;
+        }
+
+        public static int valueSize(BigInteger value) {
+            return IOUtils.stringSize(value);
+        }
+
+        public static int valueSize(BigDecimal value) {
+            return IOUtils.stringSize(value);
+        }
+
+        public static int nameSize(JSONWriterUTF8 writer, byte[] name) {
+            return name.length + 2 + writer.pretty * writer.level;
+        }
+
+        public static int stringCapacity(String value) {
+            if (value == null) {
+                return 4;
+            }
+            return value.length() * 6 + 2;
+        }
+
+        public static int stringCapacityJDK8(String value) {
+            if (value == null) {
+                return 4;
+            }
+            return value.length() * 6 + 2;
+        }
+
+        public static int stringCapacityJDK11(String value) {
+            if (value == null) {
+                return 4;
+            }
+            return value.length() * 6 + 2;
+        }
+
+        public static int stringCapacity(JSONWriterUTF16 writer, String[] value) {
+            int base = writer.pretty * writer.level;
+            if (value == null) {
+                return base + 4;
+            }
+            int size = (value.length + 1) * base + 5;
+            for (String str : value) {
+                size += str == null ? 4 : str.length() * 6 + 2;
+            }
+            return size;
+        }
+
+        public static int stringCapacityJDK8(JSONWriterUTF16 writer, String[] value) {
+            int base = writer.pretty * writer.level;
+            if (value == null) {
+                return base + 4;
+            }
+            int size = (value.length + 1) * base + 5;
+            for (String str : value) {
+                size += str == null ? 4 : str.length() * 6 + 2;
+            }
+            return size;
+        }
+
+        public static int stringCapacityJDK11(JSONWriterUTF16 writer, String[] value) {
+            int base = writer.pretty * writer.level;
+            if (value == null) {
+                return base + 4;
+            }
+            int size = (value.length + 1) * base + 5;
+            for (String str : value) {
+                size += str == null ? 4 : str.length() * 6 + 2;
+            }
+            return size;
+        }
+
+        public static int stringCapacityJDK11(JSONWriterUTF16 writer, Collection<String> value) {
+            int base = writer.pretty * writer.level;
+            if (value == null) {
+                return base + 4;
+            }
+            int size = (value.size() + 1) * base + 5;
+            for (String str : value) {
+                size += str == null ? 4 : str.length() * 6 + 2;
+            }
+            return size;
+        }
+
+        public static int stringCapacityJDK8(JSONWriterUTF16 writer, List<String> value) {
+            int base = writer.pretty * writer.level;
+            if (value == null) {
+                return base + 4;
+            }
+            int size = (value.size() + 1) * base + 5;
+            for (String str : value) {
+                size += str == null ? 4 : str.length() * 6 + 2;
+            }
+            return size;
+        }
+
+        public static int stringCapacityJDK11(JSONWriterUTF16 writer, List<String> value) {
+            int base = writer.pretty * writer.level;
+            if (value == null) {
+                return base + 4;
+            }
+            int size = (value.size() + 1) * base + 5;
+            for (int i = 0; i < value.size(); i++) {
+                String str = value.get(i);
+                size += str == null ? 4 : str.length() * 6 + 2;
+            }
+            return size;
+        }
+
+        public static int stringCapacity(JSONWriterUTF16 writer, List<String> value) {
+            int base = writer.pretty * writer.level;
+            if (value == null) {
+                return base + 4;
+            }
+            int size = (value.size() + 1) * base + 5;
+            for (int i = 0; i < value.size(); i++) {
+                String str = value.get(i);
+                size += str == null ? 4 : str.length() * 6 + 2;
+            }
+            return size;
+        }
+
+        public static int int64Capacity(JSONWriterUTF16 writer, Collection<Long> values) {
+            return values == null ? 4 : values.size() * (23 /* long value size */ + 1);
+        }
+
+        public static int enumCapacity(Enum value, long features) {
+            if (value == null) {
+                return 4;
+            }
+            return value.name().length() * 6 + 2;
+        }
+
+        public static int valueSizeString(byte[] value, byte coder, boolean escaped) {
+            if (value == null) {
+                return 4;
+            }
+            int multi;
+            if (coder == 0) {
+                multi = escaped ? 1 : 6;
+            } else {
+                multi = escaped ? 3 : 6;
+            }
+            return value.length * multi + 2;
+        }
+
+        public static char[] buffer(JSONWriterUTF16 writer) {
+            return writer.chars;
+        }
+
+        public static char[] ensureCapacity(JSONWriterUTF16 writer, char[] buf, int minCapacity) {
+            buf = Arrays.copyOf(buf, writer.newCapacity(minCapacity, buf.length));
+            writer.chars = buf;
+            return buf;
+        }
+
+        public static char[] ensureCapacity(JSONWriterUTF16 writer, int minCapacity) {
+            char[] buf = writer.chars;
+            if (minCapacity > buf.length) {
+                buf = ensureCapacity(writer, buf, minCapacity);
+            }
+            return buf;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, Enum value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+
+            String str;
+            if ((features & MASK_WRITE_ENUM_USING_TO_STRING) == 0) {
+                final int ordinal = value.ordinal();
+                if ((features & MASK_WRITE_ENUM_USING_ORDINAL) != 0) {
+                    return writeValue(writer, buf, off, ordinal, features);
+                }
+                str = value.name();
+            } else {
+                str = value.toString();
+            }
+
+            char quote = writer.quote;
+            buf[off++] = quote;
+            str.getChars(0, str.length(), buf, off);
+            off += str.length();
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        public static int writeValueJDK11(JSONWriterUTF16 writer, char[] buf, int off, List<String> values, long features) {
+            if (values == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            off = startArray(writer, buf, off);
+            for (int i = 0; i < values.size(); i++) {
+                if (i != 0) {
+                    off = writeComma(writer, buf, off);
+                }
+                String value = values.get(i);
+                if (value == null) {
+                    off = writeStringNull(buf, off, features);
+                } else {
+                    byte[] valueBytes = STRING_VALUE.apply(value);
+                    if (STRING_CODER.applyAsInt(value) == 0) {
+                        off = writeStringLatin1(writer, buf, off, valueBytes, features);
+                    } else {
+                        off = writeStringUTF16(writer, buf, off, valueBytes, features);
+                    }
+                }
+            }
+            return endArray(writer, buf, off);
+        }
+
+        public static int writeValueJDK8(JSONWriterUTF16 writer, char[] buf, int off, List<String> values, long features) {
+            if (values == null) {
+                return writeArrayNull(buf, off, features);
+            }
+            off = startArray(writer, buf, off);
+            for (int i = 0; i < values.size(); i++) {
+                if (i != 0) {
+                    off = writeComma(writer, buf, off);
+                }
+                off = writeValueJDK8(writer, buf, off, values.get(i), features);
+            }
+            return endArray(writer, buf, off);
+        }
+
+        public static int startArray(JSONWriterUTF16 writer, char[] buf, int off) {
+            int level = ++writer.level;
+            if (level > writer.context.maxLevel) {
+                throw overflowLevel(level);
+            }
+            buf[off++] = '[';
+            if (writer.pretty != PRETTY_NON) {
+                off = indent(writer, buf, off);
+            }
+            return off;
+        }
+
+        public static int endArray(JSONWriterUTF16 writer, char[] buf, int off) {
+            writer.level--;
+            if (writer.pretty != PRETTY_NON) {
+                off = indent(writer, buf, off);
+            }
+            buf[off] = ']';
+            writer.startObject = false;
+            return off + 1;
+        }
+
+        public static int writeComma(JSONWriterUTF16 writer, char[] buf, int off) {
+            buf[off++] = ',';
+            if (writer.pretty != PRETTY_NON) {
+                off = indent(writer, buf, off);
+            }
+            return off;
+        }
+
+        private static int indent(JSONWriterUTF16 writer, char[] chars, int off) {
+            chars[off] = '\n';
+            int toIndex = off + 1 + writer.pretty * writer.level;
+            Arrays.fill(chars, off + 1, toIndex, writer.pretty == PRETTY_TAB ? '\t' : ' ');
+            return toIndex;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, String str, long features) {
+            if (STRING_VALUE == null) {
+                return writeValueJDK8(writer, buf, off, str, features);
+            } else {
+                return writeValueJDK11(writer, buf, off, str, features);
+            }
+        }
+
+        public static int writeValueJDK8(JSONWriterUTF16 writer, char[] buf, int off, char[] value, long features) {
+            if (value == null) {
+                return writeStringNull(buf, off, features);
+            }
+
+            if ((features & (MASK_BROWSER_SECURE | MASK_ESCAPE_NONE_ASCII)) != 0) {
+                return writeStringBrowserSecure(writer, buf, off, value, features);
+            }
+
+            final long vecQuote = writer.byteVectorQuote;
+            char quote = writer.quote;
+            buf[off++] = quote;
+            int i = 0, char_len = value.length;
+            while (i < char_len) {
+                if (i + 8 < char_len) {
+                    long v0 = getLongLE(value, i);
+                    long v1 = getLongLE(value, i + 4);
+                    if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && StringUtils.noneEscaped((v0 << 8) | v1, vecQuote)) {
+                        putLongLE(buf, off, v0);
+                        putLongLE(buf, off + 4, v1);
+                        i += 8;
+                        off += 8;
+                        continue;
+                    }
+                }
+                char c = getChar(value, i);
+                if (c == '\\' || c == quote || c < ' ') {
+                    break;
+                }
+                buf[off++] = c;
+                i++;
+            }
+
+            if (i != char_len) {
+                off = writeStringEscapeRest(writer, buf, off, value, features, i);
+            }
+
+            buf[off] = quote;
+            return off + 1;
+        }
+
+        public static int writeValueJDK8(JSONWriterUTF16 writer, char[] buf, int off, String str, long features) {
+            if (str == null) {
+                return writeStringNull(buf, off, features);
+            }
+
+            boolean escapeNoneAscii = (features & MASK_ESCAPE_NONE_ASCII) != 0;
+            boolean browserSecure = (features & MASK_BROWSER_SECURE) != 0;
+            boolean escape = false;
+            final char quote = writer.quote;
+
+            final int strlen = str.length();
+            for (int i = 0; i < strlen; i++) {
+                char c = str.charAt(i);
+                if (c == '\\'
+                        || c == quote
+                        || c < ' '
+                        || (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')'))
+                        || (escapeNoneAscii && c > 0x007F)
+                ) {
+                    escape = true;
+                    break;
+                }
+            }
+
+            if (!escape) {
+                buf[off++] = quote;
+                str.getChars(0, strlen, buf, off);
+                off += strlen;
+                buf[off] = quote;
+                return off + 1;
+            }
+
+            return writeStringEscape(writer, buf, off, str, features);
+        }
+
+        public static int writeValueJDK8(JSONWriterUTF16 writer, char[] buf, int off, String[] values, long features) {
+            if (values == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            buf[off++] = '[';
+            for (int i = 0; i < values.length; i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+                String value = values[i];
+                if (value == null) {
+                    off = writeStringNull(buf, off, features);
+                } else {
+                    off = writeValueJDK8(writer, buf, off, value, features);
+                }
+            }
+            buf[off] = ']';
+            return off + 1;
+        }
+
+        public static int writeValueJDK11(JSONWriterUTF16 writer, char[] buf, int off, String[] values, long features) {
+            if (values == null) {
+                return writeArrayNull(buf, off, features);
+            }
+
+            byte quote = (byte) writer.quote;
+            buf[off++] = '[';
+            for (int i = 0; i < values.length; i++) {
+                if (i != 0) {
+                    buf[off++] = ',';
+                }
+                String value = values[i];
+                if (value == null) {
+                    off = writeStringNull(buf, off, features);
+                } else {
+                    byte[] valueBytes = STRING_VALUE.apply(value);
+                    if (STRING_CODER.applyAsInt(value) == 0) {
+                        off = writeStringLatin1(writer, buf, off, valueBytes, features);
+                    } else {
+                        off = writeStringUTF16(writer, buf, off, valueBytes, features);
+                    }
+                }
+            }
+            buf[off] = ']';
+            return off + 1;
+        }
+
+        public static int writeValueJDK11(JSONWriterUTF16 writer, char[] buf, int off, String value, long features) {
+            if (value == null) {
+                return writeStringNull(buf, off, features);
+            }
+
+            byte[] valueBytes = STRING_VALUE.apply(value);
+            if (STRING_CODER.applyAsInt(value) == 0) {
+                return writeStringLatin1(writer, buf, off, valueBytes, features);
+            } else {
+                return writeStringUTF16(writer, buf, off, valueBytes, features);
+            }
+        }
+
+        public static int writeStringLatin1(JSONWriterUTF16 writer, char[] chars, int off, byte[] value, long features) {
+            if ((features & MASK_BROWSER_SECURE) != 0) {
+                return writeStringLatin1BrowserSecure(writer, chars, off, value, features);
+            }
+
+            boolean escape = false;
+            char quote = writer.quote;
+            chars[off++] = quote;
+
+            int coff = 0;
+            final long vecQuote = writer.byteVectorQuote;
+            final int upperBound = (value.length - coff) & ~7;
+            long vec64;
+            if (STRING_INFLATE != null) {
+                int start_coff = coff;
+                int len_inflate = 0;
+                for (; coff < upperBound && StringUtils.noneEscaped(getLongLE(value, coff), vecQuote); coff += 8) {
+                    len_inflate += 8;
+                }
+                try {
+                    STRING_INFLATE.invokeExact(value, start_coff, chars, off, len_inflate);
+                } catch (Throwable e) {
+                    throw new JSONException("inflate error", e);
+                }
+                off += len_inflate;
+            } else {
+                for (; coff < upperBound && StringUtils.noneEscaped(vec64 = getLongLE(value, coff), vecQuote); coff += 8) {
+                    IOUtils.putLongLE(chars, off, expand(vec64));
+                    IOUtils.putLongLE(chars, off + 4, expand(vec64 >>> 32));
+                    off += 8;
+                }
+            }
+            if (!escape) {
+                for (; coff < value.length; coff++) {
+                    byte c = value[coff];
+                    if (c == '\\' || c == quote || c < ' ') {
+                        escape = true;
+                        break;
+                    }
+
+                    chars[off++] = (char) c;
+                }
+            }
+
+            if (!escape) {
+                chars[off] = quote;
+                return off + 1;
+            }
+
+            return StringUtils.writeLatin1EscapedRest(chars, off, value, coff, quote, features);
+        }
+
+        public static int writeStringLatin1BrowserSecure(JSONWriterUTF16 writer, char[] chars, int off, byte[] value, long features) {
+            final int start = off;
+            char quote = writer.quote;
+            chars[off++] = quote;
+            boolean escape = false;
+            for (byte c : value) {
+                if (c == '\\' || c == quote || c < ' ' || c == '<' || c == '>' || c == '(' || c == ')') {
+                    escape = true;
+                    break;
+                }
+
+                chars[off++] = (char) c;
+            }
+
+            if (!escape) {
+                chars[off] = quote;
+                return off + 1;
+            }
+
+            return writeStringEscape(writer, chars, start, value, features);
+        }
+
+        protected static int writeStringEscape(JSONWriterUTF16 writer, char[] chars, int off, byte[] value, long features) {
+            char quote = writer.quote;
+            chars[off++] = quote;
+            return StringUtils.writeLatin1EscapedRest(chars, off, value, 0, quote, features);
+        }
+
+        protected static int writeStringBrowserSecure(JSONWriterUTF16 writer, char[] chars, int off, char[] str, long features) {
+            boolean escapeNoneAscii = (features & MASK_ESCAPE_NONE_ASCII) != 0;
+
+            char quote = writer.quote;
+            chars[off++] = quote;
+            int i = 0, char_len = str.length;
+            for (; i < char_len; i++) {
+                char c = getChar(str, i);
+                if (c == '\\'
+                        || c == quote
+                        || c < ' '
+                        || c == '<'
+                        || c == '>'
+                        || c == '('
+                        || c == ')'
+                        || (escapeNoneAscii && c > 0x007F)
+                ) {
+                    break;
+                }
+
+                chars[off++] = c;
+            }
+
+            if (i != char_len) {
+                off = writeStringEscapeRest(writer, chars, off, str, features, i);
+            }
+            chars[off] = quote;
+            return off + 1;
+        }
+
+        protected static int writeStringEscapeRest(JSONWriterUTF16 writer, char[] chars, int off, char[] str, long features, int i) {
+            final char quote = writer.quote;
+            boolean escapeNoneAscii = (features & MASK_ESCAPE_NONE_ASCII) != 0;
+            boolean browserSecure = (features & MASK_BROWSER_SECURE) != 0;
+
+            for (; i < str.length; i++) {
+                char ch = str[i];
+                switch (ch) {
+                    case '"':
+                    case '\'':
+                        if (ch == quote) {
+                            chars[off++] = '\\';
+                        }
+                        chars[off++] = ch;
+                        break;
+                    case '\\':
+                    case '\r':
+                    case '\n':
+                    case '\b':
+                    case '\f':
+                    case '\t':
+                        StringUtils.writeEscapedChar(chars, off, ch);
+                        off += 2;
+                        break;
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 11:
+                    case 14:
+                    case 15:
+                    case 16:
+                    case 17:
+                    case 18:
+                    case 19:
+                    case 20:
+                    case 21:
+                    case 22:
+                    case 23:
+                    case 24:
+                    case 25:
+                    case 26:
+                    case 27:
+                    case 28:
+                    case 29:
+                    case 30:
+                    case 31:
+                        StringUtils.writeU4Hex2(chars, off, ch);
+                        off += 6;
+                        break;
+                    case '<':
+                    case '>':
+                    case '(':
+                    case ')':
+                        if (browserSecure) {
+                            StringUtils.writeU4HexU(chars, off, ch);
+                            off += 6;
+                        } else {
+                            chars[off++] = ch;
+                        }
+                        break;
+                    default:
+                        if (escapeNoneAscii && ch > 0x007F) {
+                            StringUtils.writeU4HexU(chars, off, ch);
+                            off += 6;
+                        } else {
+                            chars[off++] = ch;
+                        }
+                        break;
+                }
+            }
+            return off;
+        }
+
+        protected static int writeStringEscape(JSONWriterUTF16 writer, char[] chars, int off, String str, long features) {
+            final int strlen = str.length();
+            final char quote = writer.quote;
+            boolean escapeNoneAscii = (features & MASK_ESCAPE_NONE_ASCII) != 0;
+            boolean browserSecure = (features & MASK_BROWSER_SECURE) != 0;
+
+            chars[off++] = quote;
+            for (int i = 0; i < strlen; ++i) {
+                char ch = str.charAt(i);
+                switch (ch) {
+                    case '"':
+                    case '\'':
+                        if (ch == quote) {
+                            chars[off++] = '\\';
+                        }
+                        chars[off++] = ch;
+                        break;
+                    case '\\':
+                    case '\r':
+                    case '\n':
+                    case '\b':
+                    case '\f':
+                    case '\t':
+                        StringUtils.writeEscapedChar(chars, off, ch);
+                        off += 2;
+                        break;
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 11:
+                    case 14:
+                    case 15:
+                    case 16:
+                    case 17:
+                    case 18:
+                    case 19:
+                    case 20:
+                    case 21:
+                    case 22:
+                    case 23:
+                    case 24:
+                    case 25:
+                    case 26:
+                    case 27:
+                    case 28:
+                    case 29:
+                    case 30:
+                    case 31:
+                        StringUtils.writeU4Hex2(chars, off, ch);
+                        off += 6;
+                        break;
+                    case '<':
+                    case '>':
+                    case '(':
+                    case ')':
+                        if (browserSecure) {
+                            StringUtils.writeU4HexU(chars, off, ch);
+                            off += 6;
+                        } else {
+                            chars[off++] = ch;
+                        }
+                        break;
+                    default:
+                        if (escapeNoneAscii && ch > 0x007F) {
+                            StringUtils.writeU4HexU(chars, off, ch);
+                            off += 6;
+                        } else {
+                            chars[off++] = ch;
+                        }
+                        break;
+                }
+            }
+            chars[off] = quote;
+            return off + 1;
+        }
+
+        public static int writeStringUTF16(JSONWriterUTF16 writer, char[] chars, int off, byte[] value, long features) {
+            if (value == null) {
+                return writeStringNull(chars, off, features);
+            }
+
+            if ((features & (BrowserSecure.mask | EscapeNoneAscii.mask)) != 0) {
+                return writeStringUTF16BrowserSecure(writer, chars, off, value, features);
+            }
+
+            int start = off;
+            final long vecQuote = writer.byteVectorQuote;
+            char quote = writer.quote;
+            boolean escape = false;
+            chars[off++] = quote;
+            for (int i = 0, char_len = value.length >> 1; i < char_len;) {
+                if (i + 8 < char_len) {
+                    long v0 = getLongLE(value, i << 1);
+                    long v1 = getLongLE(value, (i + 4) << 1);
+                    if (((v0 | v1) & 0xFF00FF00FF00FF00L) == 0 && StringUtils.noneEscaped((v0 << 8) | v1, vecQuote)) {
+                        IOUtils.putLongLE(chars, off, v0);
+                        IOUtils.putLongLE(chars, off + 4, v1);
+                        i += 8;
+                        off += 8;
+                        continue;
+                    }
+                }
+                char c = getChar(value, i++);
+                if (c == '\\' || c == quote || c < ' ') {
+                    escape = true;
+                    break;
+                }
+
+                chars[off++] = c;
+            }
+
+            if (!escape) {
+                chars[off] = quote;
+                return off + 1;
+            }
+
+            return writeStringEscapeUTF16(writer, chars, start, value, features);
+        }
+
+        static int writeStringUTF16BrowserSecure(JSONWriterUTF16 writer, char[] chars, int off, byte[] value, long features) {
+            boolean escapeNoneAscii = (features & EscapeNoneAscii.mask) != 0;
+            int start = off;
+            boolean escape = false;
+            char quote = writer.quote;
+            chars[off++] = quote;
+            for (int i = 0, char_len = value.length >> 1; i < char_len; i++) {
+                char c = getChar(value, i);
+                if (c == '\\'
+                        || c == quote
+                        || c < ' '
+                        || c == '<'
+                        || c == '>'
+                        || c == '('
+                        || c == ')'
+                        || (escapeNoneAscii && c > 0x007F)
+                ) {
+                    escape = true;
+                    break;
+                }
+
+                chars[off++] = c;
+            }
+
+            if (!escape) {
+                chars[off] = quote;
+                return off + 1;
+            }
+
+            return writeStringEscapeUTF16(writer, chars, start, value, features);
+        }
+
+        protected static int writeStringEscapeUTF16(JSONWriterUTF16 writer, char[] chars, int off, byte[] value, long features) {
+            final int strlen = value.length >> 1;
+            final char quote = writer.quote;
+            boolean escapeNoneAscii = (features & EscapeNoneAscii.mask) != 0;
+            boolean browserSecure = (features & BrowserSecure.mask) != 0;
+
+            chars[off++] = quote;
+            for (int charIndex = 0; charIndex < strlen; charIndex++) {
+                char ch = UNSAFE.getChar(value, (long) Unsafe.ARRAY_CHAR_BASE_OFFSET + ((long) charIndex << 1));
+                switch (ch) {
+                    case '"':
+                    case '\'':
+                        if (ch == quote) {
+                            chars[off++] = '\\';
+                        }
+                        chars[off++] = ch;
+                        break;
+                    case '\\':
+                    case '\r':
+                    case '\n':
+                    case '\b':
+                    case '\f':
+                    case '\t':
+                        StringUtils.writeEscapedChar(chars, off, ch);
+                        off += 2;
+                        break;
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 11:
+                    case 14:
+                    case 15:
+                    case 16:
+                    case 17:
+                    case 18:
+                    case 19:
+                    case 20:
+                    case 21:
+                    case 22:
+                    case 23:
+                    case 24:
+                    case 25:
+                    case 26:
+                    case 27:
+                    case 28:
+                    case 29:
+                    case 30:
+                    case 31:
+                        StringUtils.writeU4Hex2(chars, off, ch);
+                        off += 6;
+                        break;
+                    case '<':
+                    case '>':
+                    case '(':
+                    case ')':
+                        if (browserSecure) {
+                            StringUtils.writeU4HexU(chars, off, ch);
+                            off += 6;
+                        } else {
+                            chars[off++] = ch;
+                        }
+                        break;
+                    default:
+                        if (escapeNoneAscii && ch > 0x007F) {
+                            StringUtils.writeU4HexU(chars, off, ch);
+                            off += 6;
+                        } else {
+                            chars[off++] = ch;
+                        }
+                        break;
+                }
+            }
+            chars[off] = quote;
+            return off + 1;
+        }
+
+        public static int writeNameBefore(JSONWriterUTF16 writer, char[] buf, int off) {
+            if (writer.startObject) {
+                writer.startObject = false;
+            } else {
+                buf[off++] = ',';
+                if (writer.pretty != PRETTY_NON) {
+                    off = writer.indent(buf, off);
+                }
+            }
+            return off;
+        }
+
+        public static int writeValue(JSONWriterUTF16 writer, char[] buf, int off, UUID value, long features) {
+            if (value == null) {
+                return writeNull(buf, off);
+            }
+
+            long msb = value.getMostSignificantBits();
+            long lsb = value.getLeastSignificantBits();
+
+            char quote = writer.quote;
+
+            buf[off] = quote;
+            putLong(buf, off + 1, (int) (msb >> 56), (int) (msb >> 48));
+            putLong(buf, off + 5, (int) (msb >> 40), (int) (msb >> 32));
+            buf[off + 9] = '-';
+            putLong(buf, off + 10, ((int) msb) >> 24, ((int) msb) >> 16);
+            buf[off + 14] = '-';
+            putLong(buf, off + 15, ((int) msb) >> 8, (int) msb);
+            buf[off + 19] = '-';
+            putLong(buf, off + 20, (int) (lsb >> 56), (int) (lsb >> 48));
+            buf[off + 24] = '-';
+            putLong(buf, off + 25, ((int) (lsb >> 40)), (int) (lsb >> 32));
+            putLong(buf, off + 29, ((int) lsb) >> 24, ((int) lsb) >> 16);
+            putLong(buf, off + 33, ((int) lsb) >> 8, (int) lsb);
+            buf[off + 37] = quote;
+            return off + 38;
+        }
+
+        public static int writeName(JSONWriterUTF16 writer, char[] buf, int off, char[] name) {
+            if (writer.startObject) {
+                writer.startObject = false;
+            } else {
+                buf[off++] = ',';
+                if (writer.pretty != PRETTY_NON) {
+                    off = writer.indent(buf, off);
+                }
+            }
+            System.arraycopy(name, 0, buf, off, name.length);
+            return off + name.length;
+        }
+
+        public static int writeBooleanNull(char[] buf, int off, long features) {
+            String raw = (features & WriteBooleanAsNumber.mask) != 0 ? "0"
+                    : ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_BOOLEAN_AS_FALSE)) != 0 ? "false" : "null");
+            raw.getChars(0, raw.length(), buf, off);
+            return off + raw.length();
+        }
+
+        public static int writeStringNull(char[] buf, int off, long features) {
+            String raw;
+            if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_STRING_AS_EMPTY)) != 0) {
+                raw = (features & MASK_USE_SINGLE_QUOTES) != 0 ? "''" : "\"\"";
+            } else {
+                raw = "null";
+            }
+            raw.getChars(0, raw.length(), buf, off);
+            return off + raw.length();
+        }
+
+        public static int writeNull(char[] buf, int off) {
+            IOUtils.putNULL(buf, off);
+            return off + 4;
+        }
+
+        public static int writeEmptyArray(char[] buf, int off) {
+            buf[off] = '[';
+            buf[off + 1] = ']';
+            return off + 2;
+        }
     }
 }

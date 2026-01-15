@@ -51,7 +51,9 @@ public class EishayWriteString {
     }
 
     public int fastjson2_size() {
-        return JSON.toJSONString(mc).length();
+        String str = JSON.toJSONString(mc);
+        System.out.println(str);
+        return str.length();
     }
 
     @Benchmark

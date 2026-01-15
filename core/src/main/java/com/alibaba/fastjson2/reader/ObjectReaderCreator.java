@@ -30,16 +30,7 @@ import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -1292,16 +1283,23 @@ public class ObjectReaderCreator {
             if (parameterNames == null || parameterNames.length == 0) {
                 parameterNames = ASMUtils.lookupParameterNames(creatorConstructor);
 
-                Parameter[] parameters = creatorConstructor.getParameters();
-                FieldInfo fieldInfo = new FieldInfo();
-                for (int i = 0; i < parameters.length && i < parameterNames.length; i++) {
-                    fieldInfo.init();
+                Parameter[] parameters = null;
+                try {
+                    parameters = creatorConstructor.getParameters();
+                } catch (Exception ignored) {
+                    // ignore
+                }
+                if (parameters != null) {
+                    FieldInfo fieldInfo = new FieldInfo();
+                    for (int i = 0; i < parameters.length && i < parameterNames.length; i++) {
+                        fieldInfo.init();
 
-                    Parameter parameter = parameters[i];
+                        Parameter parameter = parameters[i];
 
-                    provider.getFieldInfo(fieldInfo, objectClass, creatorConstructor, i, parameter);
-                    if (fieldInfo.fieldName != null) {
-                        parameterNames[i] = fieldInfo.fieldName;
+                        provider.getFieldInfo(fieldInfo, objectClass, creatorConstructor, i, parameter);
+                        if (fieldInfo.fieldName != null) {
+                            parameterNames[i] = fieldInfo.fieldName;
+                        }
                     }
                 }
             }
@@ -1332,7 +1330,13 @@ public class ObjectReaderCreator {
                     && matchCount != parameterNames.length) {
                 if (creatorConstructor.getParameterCount() == 1) {
                     FieldInfo fieldInfo = new FieldInfo();
-                    provider.getFieldInfo(fieldInfo, objectClass, creatorConstructor, 0, creatorConstructor.getParameters()[0]);
+                    Parameter parameter = null;
+                    try {
+                        parameter = creatorConstructor.getParameters()[0];
+                    } catch (Exception ignored) {
+                        // ignore
+                    }
+                    provider.getFieldInfo(fieldInfo, objectClass, creatorConstructor, 0, parameter);
                     if (record) {
                         Field field = getField(objectClass, fieldInfo.fieldName);
                         if (field != null) {

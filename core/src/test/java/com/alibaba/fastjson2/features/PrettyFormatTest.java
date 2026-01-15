@@ -8,6 +8,7 @@ import lombok.Data;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -224,7 +225,7 @@ public class PrettyFormatTest {
                         "\t\t\"a02\"\n" +
                         "\t]\n" +
                         "}",
-                JSON.toJSONString(bean, PrettyFormat, OptimizedForAscii));
+                new String(JSON.toJSONBytes(bean, PrettyFormat), StandardCharsets.UTF_8));
     }
 
     public static class Bean3 {
