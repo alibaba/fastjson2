@@ -15,7 +15,7 @@ public class RocketMQTest {
         brokerData.getBrokerAddrs().put(0L, "0.0.0.0");
 
         String str = JSON.toJSONString(brokerData);
-        assertEquals("{\"brokerAddrs\":{0:\"0.0.0.0\"}}", str);
+        assertEquals("{\"brokerAddrs\":{\"0\":\"0.0.0.0\"}}", str);
 
         BrokerData brokerData1 = JSON.parseObject(str, BrokerData.class);
         assertEquals("0.0.0.0", brokerData1.getBrokerAddrs().get(0L));
