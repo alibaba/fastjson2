@@ -437,7 +437,11 @@ public final class ObjectWriterImplMap
                 if (key instanceof Integer) {
                     jsonWriter.writeName((Integer) key);
                 } else if (key instanceof Long) {
-                    jsonWriter.writeName((Long) key);
+                    if ((features & JSONWriter.Feature.WriteClassName.mask) != 0) {
+                        jsonWriter.writeName((Long) key);
+                    } else {
+                        jsonWriter.writeName(strKey = key.toString());
+                    }
                 } else {
                     jsonWriter.writeNameAny(key);
                 }
