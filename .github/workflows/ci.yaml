@@ -35,12 +35,18 @@ jobs:
           distribution: zulu
           java-version: ${{ matrix.java }}
           cache: maven
-      - name: Build with Maven and generate code coverage
+      - name: Build with Maven and generate code coverage (default)
         run: ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
+        env:
+          JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Shanghai
+      - name: Build with Maven and generate code coverage (reflect creator)
+        if: ${{ (matrix.java == 8 || matrix.java == 21) && matrix.os-arch.os == 'ubuntu-24.04' && matrix.os-arch.arch == 'x64' }}
+        run: ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package -Dfastjson2.creator=reflect
         env:
           JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Shanghai
       # https://github.com/marketplace/actions/codecov
       - uses: codecov/codecov-action@v3
+        if: ${{ matrix.java == 21 && matrix.os-arch.os == 'ubuntu-24.04' && matrix.os-arch.arch == 'x64' }}
         with:
           name: codecov-umbrella
           token: ${{ secrets.CODECOV_TOKEN }}
