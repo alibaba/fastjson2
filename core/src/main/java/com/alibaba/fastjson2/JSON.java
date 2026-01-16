@@ -4069,8 +4069,23 @@ public interface JSON {
         if (object == null) {
             return null;
         }
-        if (object instanceof JSONObject || object instanceof JSONArray) {
-            return object;
+
+        if (object instanceof JSONObject) {
+            if (features == null || features.length == 0) {
+                return object;
+            }
+            JSONObject jsonObject = (JSONObject) object;
+            jsonObject.setContextFeatures(features);
+            return jsonObject;
+        }
+
+        if (object instanceof JSONArray) {
+            if (features == null || features.length == 0) {
+                return object;
+            }
+            JSONArray jsonArray = (JSONArray) object;
+            jsonArray.setContextFeatures(features);
+            return jsonArray;
         }
 
         JSONWriter.Context writeContext = features == null ?
@@ -4081,7 +4096,14 @@ public interface JSON {
                 && !writeContext.isEnabled(JSONWriter.Feature.ReferenceDetection)
                 && (objectWriter.getFeatures() & JSONWriter.Feature.WriteClassName.mask) == 0) {
             ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) objectWriter;
-            return objectWriterAdapter.toJSONObject(object, writeContext.features);
+
+            JSONObject jsonObject = objectWriterAdapter.toJSONObject(object, writeContext.features);
+
+            long mask = writeContext.getFeatures();
+            if (mask != 0) {
+                jsonObject.setContextFeatures(mask);
+            }
+            return jsonObject;
         }
 
         String str;
@@ -4092,7 +4114,18 @@ public interface JSON {
             throw new JSONException("toJSONString error", ex);
         }
 
-        return parse(str);
+        Object result = parse(str);
+
+        long mask = writeContext.getFeatures();
+        if (mask != 0) {
+            if (result instanceof JSONObject) {
+                ((JSONObject) result).setContextFeatures(mask);
+            } else if (result instanceof JSONArray) {
+                ((JSONArray) result).setContextFeatures(mask);
+            }
+        }
+
+        return result;
     }
 
     /**
