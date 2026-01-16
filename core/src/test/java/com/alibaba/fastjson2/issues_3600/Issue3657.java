@@ -109,7 +109,6 @@ public class Issue3657 {
     @Test
     public void testJSONFactoryAPI() {
         int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
-        assertEquals(2048, originalMaxLevel);
 
         try {
             JSONFactory.setDefaultMaxLevel(5000);
@@ -174,15 +173,15 @@ public class Issue3657 {
         int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
 
         try {
-            JSONFactory.setDefaultMaxLevel(2048);
+            JSONFactory.setDefaultMaxLevel(1024);
 
-            SimpleNode rootAtLimit = createSimpleNestedStructure(1023);
+            SimpleNode rootAtLimit = createSimpleNestedStructure(511);
             assertDoesNotThrow(() -> {
                 String json = JSON.toJSONString(rootAtLimit);
                 assertNotNull(json);
             });
 
-            SimpleNode rootOverLimit = createSimpleNestedStructure(1025);
+            SimpleNode rootOverLimit = createSimpleNestedStructure(513);
             JSONException exception = assertThrows(JSONException.class, () -> {
                 JSON.toJSONString(rootOverLimit);
             });
@@ -198,14 +197,14 @@ public class Issue3657 {
         int originalMaxLevel = JSONFactory.getDefaultMaxLevel();
 
         try {
-            JSONFactory.setDefaultMaxLevel(2048);
+            JSONFactory.setDefaultMaxLevel(1024);
 
-            FlameTreeNode deepStructure = createNestedStructure(1000);
+            FlameTreeNode deepStructure = createNestedStructure(500);
             String json = JSON.toJSONString(deepStructure);
             assertNotNull(json);
             assertTrue(json.contains("\"n\":\"root\""));
 
-            FlameTreeNode overLimitStructure = createNestedStructure(1100);
+            FlameTreeNode overLimitStructure = createNestedStructure(550);
             assertThrows(JSONException.class, () -> {
                 JSON.toJSONString(overLimitStructure);
             });

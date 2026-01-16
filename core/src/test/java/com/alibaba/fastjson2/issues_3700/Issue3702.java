@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -14,12 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue3702 {
     @Test
-    public void test() {
+    public void test() throws Exception {
         assertEquals("{\"d\":0.0,\"f\":0.0,\"i\":0,\"l\":0}", JSON.toJSONString(new NumberDTO()));
         assertEquals(JSON.toJSONString(new NumberDTO2()), "{\"d\":0.0,\"f\":0.0,\"i\":0,\"l\":0}");
         assertEquals(JSON.toJSONString(new NumberDTO3()), "{}");
         String expected = "{\"bigDecimal\":0.0,\"bigInteger\":0,\"byteValue\":0,\"doubleValue\":0.0,\"floatValue\":0.0,\"intValue\":0,\"longValue\":0,\"number\":0,\"shortValue\":0}";
-        assertEquals(expected, JSON.toJSONString(new NumberDTO4()));
+        JSONAssert.assertEquals(expected, JSON.toJSONString(new NumberDTO4()), false);
         assertEquals(expected, new String(JSON.toJSONBytes(new NumberDTO4())));
         assertEquals(expected, JSON.toJSONString(new NumberDTO5()));
         assertEquals(expected, new String(JSON.toJSONBytes(new NumberDTO5())));

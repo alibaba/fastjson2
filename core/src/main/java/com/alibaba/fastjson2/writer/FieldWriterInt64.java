@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import static com.alibaba.fastjson2.JSONWriter.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
 abstract class FieldWriterInt64<T>
@@ -58,11 +59,15 @@ abstract class FieldWriterInt64<T>
 
         if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullNumberAsZero.mask)) == 0) {
+            if ((features & (MASK_WRITE_MAP_NULL_VALUE | MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0) {
                 return false;
             }
             writeFieldName(jsonWriter);
-            jsonWriter.writeInt64Null();
+            if ((features & (MASK_WRITE_NULL_NUMBER_AS_ZERO | MASK_NULL_AS_DEFAULT_VALUE)) != 0) {
+                jsonWriter.writeInt64(0);
+            } else {
+                jsonWriter.writeInt64Null();
+            }
             return true;
         }
 

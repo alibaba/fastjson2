@@ -2084,7 +2084,7 @@ public final class JSONWriterUTF8
     @Override
     public final void writeBigInt(BigInteger value, long features) {
         if (value == null) {
-            writeNumberNull();
+            writeNumberNull(features);
             return;
         }
 

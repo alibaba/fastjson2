@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
@@ -228,7 +229,7 @@ public class ObjectWriterCreator {
             FieldInfo fieldInfo,
             Field field
     ) {
-        fieldInfo.features = writerFeatures;
+        fieldInfo.features = writerFeatures & ~BeanToArray.mask;
         provider.getFieldInfo(beanInfo, fieldInfo, objectClass, field);
 
         if (fieldInfo.ignore || isFunction(field.getType())) {
@@ -488,7 +489,7 @@ public class ObjectWriterCreator {
                 if (!record) {
                     BeanUtils.declaredFields(objectClass, field -> {
                         fieldInfo.init();
-                        fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
+                        fieldInfo.ignore = fieldInfo.isPrivate = (field.getModifiers() & Modifier.PUBLIC) == 0;
                         FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
                             if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {

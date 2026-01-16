@@ -221,7 +221,7 @@ public final class JSONFactory {
         useGsonAnnotation = getPropertyBool(properties, "fastjson2.useGsonAnnotation", true);
         defaultWriterAlphabetic = getPropertyBool(properties, "fastjson2.writer.alphabetic", true);
         defaultSkipTransient = getPropertyBool(properties, "fastjson2.writer.skipTransient", true);
-        defaultMaxLevel = getPropertyInt(properties, "fastjson2.writer.maxLevel", 2048);
+        defaultMaxLevel = getPropertyInt(properties, "fastjson2.writer.maxLevel", "asm".equals(CREATOR) ? 2048 : 1024);
     }
 
     private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {

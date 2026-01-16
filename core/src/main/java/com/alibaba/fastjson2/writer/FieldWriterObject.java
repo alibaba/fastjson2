@@ -369,6 +369,8 @@ public class FieldWriterObject<T>
                 jsonWriter.popPath(value);
                 return true;
             }
+        } else if (fieldName.startsWith("this$")) {
+            return false;
         }
 
         Class<?> valueClass = value.getClass();
@@ -504,6 +506,8 @@ public class FieldWriterObject<T>
                 jsonWriter.popPath(value);
                 return true;
             }
+        } else if (fieldName.startsWith("this$")) {
+            return false;
         }
 
         Class<?> valueClass = value.getClass();

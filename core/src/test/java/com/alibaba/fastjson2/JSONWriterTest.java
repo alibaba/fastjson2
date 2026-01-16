@@ -70,7 +70,7 @@ public class JSONWriterTest {
 
     @Test
     public void test_str_startArray() {
-        final int COUNT = 2000;
+        final int COUNT = JSONFactory.defaultMaxLevel - 1;
         JSONWriter jsonWriter = JSONWriter.of();
         for (int i = 0; i < COUNT; ++i) {
             jsonWriter.startArray();
@@ -84,7 +84,7 @@ public class JSONWriterTest {
 
     @Test
     public void test_utf8_startArray() {
-        final int COUNT = 2000;
+        final int COUNT = JSONFactory.defaultMaxLevel - 1;
         JSONWriter jsonWriter = JSONWriter.ofUTF8();
         for (int i = 0; i < COUNT; ++i) {
             jsonWriter.startArray();
@@ -98,7 +98,7 @@ public class JSONWriterTest {
 
     @Test
     public void test_str_startObject() {
-        final int COUNT = 2000;
+        final int COUNT = JSONFactory.defaultMaxLevel - 1;
         JSONWriter jsonWriter = JSONWriter.of();
         for (int i = 0; i < COUNT; ++i) {
             jsonWriter.startObject();
@@ -112,7 +112,7 @@ public class JSONWriterTest {
 
     @Test
     public void test_utf8_startObject() {
-        final int COUNT = 2000;
+        final int COUNT = JSONFactory.defaultMaxLevel - 1;
         JSONWriter jsonWriter = JSONWriter.ofUTF8();
         for (int i = 0; i < COUNT; ++i) {
             jsonWriter.startObject();

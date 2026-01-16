@@ -308,7 +308,7 @@ public class ObjectWriterAdapter<T>
 
         jsonWriter.startObject();
 
-        if (((features | this.features) & WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
+        if (jsonWriter.isWriteTypeInfo(object, this.features | features)) {
             writeTypeInfo(jsonWriter);
         }
 
@@ -362,7 +362,7 @@ public class ObjectWriterAdapter<T>
 
         jsonWriter.startObject();
 
-        if (((features | this.features) & WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
+        if (jsonWriter.isWriteTypeInfo(object, this.features | features)) {
             writeTypeInfo(jsonWriter);
         }
 

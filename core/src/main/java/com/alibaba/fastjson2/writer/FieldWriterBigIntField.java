@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
 
+import static com.alibaba.fastjson2.JSONWriter.*;
+
 final class FieldWriterBigIntField<T>
         extends FieldWriter<T> {
     FieldWriterBigIntField(
@@ -21,9 +23,9 @@ final class FieldWriterBigIntField<T>
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
         BigInteger value = (BigInteger) getFieldValue(object);
+        long features = this.features | jsonWriter.getFeatures();
         if (value == null) {
-            long features = this.features | jsonWriter.getFeatures();
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {
+            if ((features & (MASK_WRITE_MAP_NULL_VALUE | MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0) {
                 return false;
             }
         }

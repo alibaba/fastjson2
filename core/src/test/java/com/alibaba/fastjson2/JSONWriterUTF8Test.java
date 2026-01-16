@@ -160,7 +160,7 @@ public class JSONWriterUTF8Test {
 
     @Test
     public void startObject() {
-        final int COUNT = 2048;
+        final int COUNT = JSONFactory.defaultMaxLevel;
         JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
         for (int i = 0; i < COUNT; i++) {
             jsonWriter.startObject();
@@ -188,7 +188,7 @@ public class JSONWriterUTF8Test {
 
     @Test
     public void startArray() {
-        final int COUNT = 2048;
+        final int COUNT = JSONFactory.defaultMaxLevel;
         JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
         for (int i = 0; i < COUNT; i++) {
             jsonWriter.startArray();
