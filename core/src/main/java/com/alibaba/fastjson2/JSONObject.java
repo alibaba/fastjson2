@@ -2222,6 +2222,13 @@ public class JSONObject
     }
 
     /**
+     * See {@link JSON#parseObject} for details
+     */
+    public static JSONObject from(String text) {
+        return JSON.parseObject(text);
+    }
+
+    /**
      * See {@link JSON#toJSON} for details
      */
     public static JSONObject from(Object obj) {
