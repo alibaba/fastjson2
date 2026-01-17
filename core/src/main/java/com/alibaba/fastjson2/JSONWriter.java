@@ -84,12 +84,22 @@ public abstract class JSONWriter
 
     protected boolean startObject;
     protected int level;
+    /**
+     * Bitmask tracking which nesting levels are arrays (vs objects).
+     * Bit N is set if level N is an array context.
+     */
+    protected long levelArray;
     protected int off;
     protected Object rootObject;
     protected IdentityHashMap<Object, Path> refs;
     protected Path path;
     protected String lastReference;
     protected byte pretty;
+    /**
+     * When true and pretty formatting is enabled, arrays are written inline
+     * (on a single line) rather than with line breaks between elements.
+     */
+    protected boolean prettyInlineArrays;
     protected Object attachment;
 
     protected JSONWriter(
@@ -119,6 +129,7 @@ public abstract class JSONWriter
         } else {
             pretty = PRETTY_NON;
         }
+        prettyInlineArrays = context.prettyFormatInlineArrays;
     }
 
     /**
@@ -3245,6 +3256,7 @@ public abstract class JSONWriter
         LabelFilter labelFilter;
         ContextValueFilter contextValueFilter;
         ContextNameFilter contextNameFilter;
+        boolean prettyFormatInlineArrays;
 
         /**
          * Creates a new Context with the specified object writer provider.
@@ -3261,6 +3273,7 @@ public abstract class JSONWriter
             this.provider = provider;
             this.zoneId = defaultWriterZoneId;
             this.maxLevel = defaultMaxLevel;
+            this.prettyFormatInlineArrays = JSONFactory.defaultWriterPrettyFormatInlineArrays;
 
             String format = defaultWriterFormat;
             if (format != null) {
@@ -3278,6 +3291,7 @@ public abstract class JSONWriter
             this.provider = getDefaultObjectWriterProvider();
             this.zoneId = defaultWriterZoneId;
             this.maxLevel = defaultMaxLevel;
+            this.prettyFormatInlineArrays = JSONFactory.defaultWriterPrettyFormatInlineArrays;
 
             String format = defaultWriterFormat;
             if (format != null) {
@@ -3300,6 +3314,7 @@ public abstract class JSONWriter
             this.provider = getDefaultObjectWriterProvider();
             this.zoneId = defaultWriterZoneId;
             this.maxLevel = defaultMaxLevel;
+            this.prettyFormatInlineArrays = JSONFactory.defaultWriterPrettyFormatInlineArrays;
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
@@ -3329,6 +3344,7 @@ public abstract class JSONWriter
             this.provider = provider;
             this.zoneId = defaultWriterZoneId;
             this.maxLevel = defaultMaxLevel;
+            this.prettyFormatInlineArrays = JSONFactory.defaultWriterPrettyFormatInlineArrays;
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
@@ -3871,6 +3887,26 @@ public abstract class JSONWriter
          */
         public void setMaxLevel(int maxLevel) {
             this.maxLevel = maxLevel;
+        }
+
+        /**
+         * Checks if inline arrays is enabled for pretty formatting.
+         *
+         * @return true if inline arrays is enabled, false otherwise
+         * @since 2.0.61
+         */
+        public boolean isPrettyFormatInlineArrays() {
+            return prettyFormatInlineArrays;
+        }
+
+        /**
+         * Sets whether to use inline arrays when pretty formatting.
+         *
+         * @param prettyFormatInlineArrays true to enable inline arrays, false to disable
+         * @since 2.0.61
+         */
+        public void setPrettyFormatInlineArrays(boolean prettyFormatInlineArrays) {
+            this.prettyFormatInlineArrays = prettyFormatInlineArrays;
         }
     }
 
