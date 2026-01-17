@@ -2613,7 +2613,9 @@ final class JSONReaderUTF16
                     } else {
                         result = 1; // invalid
                     }
-                } else if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                }
+
+                if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
                     ch = offset == end ? EOI : chars[offset++];
                 }
             }
@@ -2789,7 +2791,9 @@ final class JSONReaderUTF16
                     } else {
                         result = 1; // invalid
                     }
-                } else if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                }
+
+                if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
                     ch = offset == end ? EOI : chars[offset++];
                 }
             }
