@@ -63,12 +63,15 @@ public class ObjectWriters {
 
     public static <T> ObjectWriter ofToInt(ToIntFunction function) {
         return INSTANCE.createObjectWriter(
-                new FieldWriterInt32ValFunc(
+                new FieldWriterInt32Value<>(
                         "toInt",
                         0,
                         FieldInfo.VALUE_MASK,
                         null,
                         null,
+                        null,
+                        int.class,
+                        int.class,
                         null,
                         null,
                         function

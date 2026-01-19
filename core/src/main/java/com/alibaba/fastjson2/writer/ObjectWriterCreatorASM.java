@@ -4626,7 +4626,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == int.class) {
-            return new FieldWriterInt32Val(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterInt32Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == long.class) {
