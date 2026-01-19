@@ -4622,7 +4622,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == short.class) {
-            return new FieldWriterInt16ValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterInt16Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == int.class) {

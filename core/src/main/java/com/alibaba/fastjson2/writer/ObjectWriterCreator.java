@@ -1060,7 +1060,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == short.class) {
-            return new FieldWriterInt16ValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterInt16Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == int.class) {
@@ -1332,8 +1332,10 @@ public class ObjectWriterCreator {
             return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
         }
 
-        if (fieldClass == short.class || fieldClass == Short.class) {
-            return new FieldWriterInt16Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+        if (fieldClass == short.class) {
+            return new FieldWriterInt16Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        } else if (fieldClass == Short.class) {
+            return new FieldWriterInt16<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == byte.class) {
@@ -1444,7 +1446,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToShortFunction<T> function) {
-        return new FieldWriterInt16ValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterInt16Value<>(fieldName, 0, 0, null, null, null, short.class, short.class, null, null, function);
     }
 
     /**
@@ -1769,7 +1771,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == Short.class) {
-            return new FieldWriterInt16Func(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterInt16<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, function);
         }
 
         if (fieldClass == Integer.class) {
@@ -2029,7 +2031,11 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == short.class) {
-            return new FieldWriterInt16ValFunc(fieldName, ordinal, features, format, label, field, method, (ToShortFunction) lambda);
+            return new FieldWriterInt16Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (ToShortFunction) lambda);
+        }
+
+        if (fieldClass == Short.class) {
+            return new FieldWriterInt16<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (Function) lambda);
         }
 
         if (fieldClass == byte.class) {
