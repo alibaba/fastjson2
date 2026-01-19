@@ -452,6 +452,10 @@ public abstract class FieldWriter<T>
         defaultValue = fieldValue;
     }
 
+    protected JSONException errorOnGet(Throwable e) {
+        return new JSONException("field.get error, " + fieldName, e);
+    }
+
     public Object getFieldValue(T object) {
         if (object == null) {
             throw new JSONException("field.get error, " + fieldName);

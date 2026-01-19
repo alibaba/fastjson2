@@ -34,12 +34,16 @@ class FieldWriterInt32<T>
 
     @Override
     public Object getFieldValue(T object) {
-        return propertyAccessor.getObject(object);
+        try {
+            return propertyAccessor.getObject(object);
+        } catch (Throwable e) {
+            throw errorOnGet(e);
+        }
     }
 
     public int getFieldValueInt(T object) {
         if (object == null) {
-            throw new JSONException("field.get error, " + fieldName);
+            throw new JSONException("field.get error, ".concat(fieldName));
         }
         return propertyAccessor.getIntValue(object);
     }
