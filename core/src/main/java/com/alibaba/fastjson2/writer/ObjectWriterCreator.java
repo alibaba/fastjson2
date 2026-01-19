@@ -1091,7 +1091,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == char.class) {
-            return new FieldWriterCharValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterCharValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == BigInteger.class) {
@@ -1348,8 +1348,10 @@ public class ObjectWriterCreator {
             return new FieldWriterInt8<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == char.class || fieldClass == Character.class) {
-            return new FieldWriterCharMethod(fieldName, ordinal, features, format, label, field, method, fieldClass);
+        if (fieldClass == char.class) {
+            return new FieldWriterCharValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        } else if (fieldClass == Character.class) {
+            return new FieldWriterChar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == BigDecimal.class) {
@@ -1498,7 +1500,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToCharFunction<T> function) {
-        return new FieldWriterCharValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterCharValue<>(fieldName, 0, 0, null, null, null, char.class, char.class, null, null, function);
     }
 
     /**
@@ -2067,7 +2069,11 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == char.class) {
-            return new FieldWriterCharValFunc(fieldName, ordinal, features, format, label, field, method, (ToCharFunction) lambda);
+            return new FieldWriterCharValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (ToCharFunction) lambda);
+        }
+
+        if (fieldClass == Character.class) {
+            return new FieldWriterChar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (Function) lambda);
         }
 
         Function function = (Function) lambda;
