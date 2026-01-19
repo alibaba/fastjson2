@@ -2295,8 +2295,8 @@ public abstract class JSONWriter
      *   <li>Otherwise, a null value is written</li>
      * </ul>
      */
-    public final void writeInt64Null() {
-        if ((this.context.features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
+    public final void writeInt64Null(long features) {
+        if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
             writeInt64(0);
         } else {
             writeNull();

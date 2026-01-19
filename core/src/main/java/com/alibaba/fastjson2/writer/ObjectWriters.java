@@ -81,12 +81,15 @@ public class ObjectWriters {
 
     public static <T> ObjectWriter ofToLong(ToLongFunction function) {
         return INSTANCE.createObjectWriter(
-                new FieldWriterInt64ValFunc(
+                new FieldWriterInt64Value<>(
                         "toLong",
                         0,
                         FieldInfo.VALUE_MASK,
                         null,
                         null,
+                        null,
+                        long.class,
+                        long.class,
                         null,
                         null,
                         function

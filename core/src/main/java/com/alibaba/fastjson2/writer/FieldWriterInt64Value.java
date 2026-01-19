@@ -11,11 +11,11 @@ import java.util.Locale;
 import static com.alibaba.fastjson2.JSONWriter.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
-class FieldWriterInt64<T>
+final class FieldWriterInt64Value<T>
         extends FieldWriter<T> {
     final boolean browserCompatible;
 
-    FieldWriterInt64(
+    FieldWriterInt64Value(
             String name,
             int ordinal,
             long features,
@@ -36,6 +36,13 @@ class FieldWriterInt64<T>
         return propertyAccessor.getObject(object);
     }
 
+    public long getFieldValueLong(T object) {
+        if (object == null) {
+            throw new RuntimeException("field.get error, " + fieldName);
+        }
+        return propertyAccessor.getLongValue(object);
+    }
+
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         Long value = (Long) propertyAccessor.getObject(object);
@@ -49,9 +56,9 @@ class FieldWriterInt64<T>
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
         long features = this.features | jsonWriter.getFeatures();
-        Long value;
+        long value;
         try {
-            value = (Long) propertyAccessor.getObject(object);
+            value = propertyAccessor.getLongValue(object);
         } catch (RuntimeException error) {
             if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
                 return false;
@@ -59,31 +66,25 @@ class FieldWriterInt64<T>
             throw error;
         }
 
-        if (value == null) {
-            if ((features & (MASK_WRITE_MAP_NULL_VALUE | MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
-                writeFieldName(jsonWriter);
-                jsonWriter.writeInt64Null(features);
-                return true;
-            }
+        if (value == 0L
+                && defaultValue == null
+                && (features & MASK_NOT_WRITE_DEFAULT_VALUE) != 0) {
             return false;
         }
 
-        writeInt64(jsonWriter, value);
+        writeLong(jsonWriter, value);
         return true;
     }
 
-    public final void writeInt64(JSONWriter jsonWriter, long value) {
+    protected final void writeLong(JSONWriter jsonWriter, long value) {
         long features = jsonWriter.getFeatures() | this.features;
-        if (value == 0 && (features & NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
-            return;
-        }
         boolean writeAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
-        writeFieldName(jsonWriter);
         if (!writeAsString) {
             writeAsString = browserCompatible && !TypeUtils.isJavaScriptSupport(value) && !jsonWriter.jsonb;
         }
+        writeFieldName(jsonWriter);
         if (writeAsString) {
-            jsonWriter.writeString(value);
+            jsonWriter.writeString(Long.toString(value));
         } else {
             jsonWriter.writeInt64(value);
         }

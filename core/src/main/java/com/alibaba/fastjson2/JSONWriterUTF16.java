@@ -1956,7 +1956,7 @@ public class JSONWriterUTF16
     @Override
     public final void writeInt64(Long i) {
         if (i == null) {
-            writeInt64Null();
+            writeInt64Null(context.features);
         } else {
             writeInt64(i.longValue());
         }

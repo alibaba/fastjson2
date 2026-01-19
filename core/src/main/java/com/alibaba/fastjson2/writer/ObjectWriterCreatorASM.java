@@ -4631,7 +4631,7 @@ public class ObjectWriterCreatorASM
 
         if (fieldClass == long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
-                return new FieldWriterInt64ValField(fieldName, ordinal, features, format, label, field);
+                return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
             }
             return new FieldWriterMillisField(fieldName, ordinal, features, format, label, field);
         }

@@ -1069,7 +1069,7 @@ public class ObjectWriterCreator {
 
         if (fieldClass == long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
-                return new FieldWriterInt64ValField(fieldName, ordinal, features, format, label, field);
+                return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
             }
             return new FieldWriterMillisField(fieldName, ordinal, features, format, label, field);
         }
@@ -1328,11 +1328,15 @@ public class ObjectWriterCreator {
             return new FieldWriterDouble<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == long.class || fieldClass == Long.class) {
+        if (fieldClass == long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
-                return new FieldWriterInt64Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+                return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
             }
-
+            return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
+        } else if (fieldClass == Long.class) {
+            if (format == null || format.isEmpty() || "string".equals(format)) {
+                return new FieldWriterInt64<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+            }
             return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
         }
 
@@ -1414,7 +1418,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToLongFunction<T> function) {
-        return new FieldWriterInt64ValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterInt64Value<>(fieldName, 0, 0, null, null, null, long.class, long.class, null, null, function);
     }
 
     /**
@@ -1784,8 +1788,10 @@ public class ObjectWriterCreator {
             return new FieldWriterInt32<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (Function) function);
         }
 
-        if (fieldClass == Long.class) {
-            return new FieldWriterInt64Func(fieldName, ordinal, features, format, label, field, method, function);
+        if (fieldClass == long.class) {
+            return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (ToLongFunction) function);
+        } else if (fieldClass == Long.class) {
+            return new FieldWriterInt64<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (Function) function);
         }
 
         if (fieldClass == BigInteger.class) {
@@ -2022,7 +2028,7 @@ public class ObjectWriterCreator {
 
         if (fieldClass == long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
-                return new FieldWriterInt64ValFunc(fieldName, ordinal, features, format, label, field, method, (ToLongFunction) lambda);
+                return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (ToLongFunction) lambda);
             }
 
             return new FieldWriterMillisFunc(fieldName, ordinal, features, format, label, field, method, (ToLongFunction) lambda);

@@ -315,7 +315,7 @@ public class FieldWriterObject<T>
                         || fieldClass == BigDecimal.class) {
                     jsonWriter.writeDecimalNull();
                 } else if (fieldClass == Long.class) {
-                    jsonWriter.writeInt64Null();
+                    jsonWriter.writeInt64Null(features);
                 } else {
                     jsonWriter.writeNumberNull();
                 }
