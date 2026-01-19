@@ -21,7 +21,7 @@ final class FieldWriterCalendarFunc<T>
             Method method,
             Function<T, Calendar> function
     ) {
-        super(fieldName, ordinal, features, dateTimeFormat, label, Calendar.class, Calendar.class, field, method);
+        super(fieldName, ordinal, features, dateTimeFormat, null, label, Calendar.class, Calendar.class, field, method, function);
         this.function = function;
     }
 

@@ -3639,7 +3639,8 @@ public class ObjectWriterCreatorASM
             gwFieldName(mwc, fieldWriter, i);
 
             mw.aload(JSON_WRITER);
-            mw.invokevirtual(TYPE_JSON_WRITER, "writeInt64Null", "()V");
+            mw.lload(mwc.var(CONTEXT_FEATURES));
+            mw.invokevirtual(TYPE_JSON_WRITER, "writeInt64Null", "(J)V");
         } else {
             gwFieldName(mwc, fieldWriter, i);
             mw.aload(JSON_WRITER);
@@ -4633,7 +4634,7 @@ public class ObjectWriterCreatorASM
             if (format == null || format.isEmpty() || "string".equals(format)) {
                 return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
             }
-            return new FieldWriterMillisField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterMillis<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == float.class) {

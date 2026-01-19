@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 abstract class FieldWriterDate<T>
         extends FieldWriter<T> {
@@ -27,13 +28,15 @@ abstract class FieldWriterDate<T>
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Object function
     ) {
-        super(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
+        super(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
 
         boolean formatMillis = false, formatISO8601 = false, formatUnixTime = false;
         boolean formatyyyyMMdd8 = false, formatyyyyMMddhhmmss14 = false, formatyyyyMMddhhmmss19 = false;

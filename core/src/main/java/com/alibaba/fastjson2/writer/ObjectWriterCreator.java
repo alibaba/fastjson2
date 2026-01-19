@@ -1071,7 +1071,7 @@ public class ObjectWriterCreator {
             if (format == null || format.isEmpty() || "string".equals(format)) {
                 return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
             }
-            return new FieldWriterMillisField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterMillis<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == float.class) {
@@ -1332,12 +1332,12 @@ public class ObjectWriterCreator {
             if (format == null || format.isEmpty() || "string".equals(format)) {
                 return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
             }
-            return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
+            return new FieldWriterMillis<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         } else if (fieldClass == Long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
                 return new FieldWriterInt64<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
             }
-            return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
+            return new FieldWriterMillis<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == short.class) {
@@ -2031,7 +2031,7 @@ public class ObjectWriterCreator {
                 return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (ToLongFunction) lambda);
             }
 
-            return new FieldWriterMillisFunc(fieldName, ordinal, features, format, label, field, method, (ToLongFunction) lambda);
+            return new FieldWriterMillis<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (ToLongFunction) lambda);
         }
 
         if (fieldClass == boolean.class) {

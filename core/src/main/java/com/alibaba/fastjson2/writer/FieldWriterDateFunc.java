@@ -23,7 +23,7 @@ final class FieldWriterDateFunc<T>
             Method method,
             Function<T, Date> function
     ) {
-        super(fieldName, ordinal, features, dateTimeFormat, label, Date.class, Date.class, field, method);
+        super(fieldName, ordinal, features, dateTimeFormat, null, label, Date.class, Date.class, field, method, function);
         this.function = function;
     }
 

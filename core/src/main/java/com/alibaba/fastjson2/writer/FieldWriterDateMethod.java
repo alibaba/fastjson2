@@ -20,7 +20,7 @@ final class FieldWriterDateMethod<T>
             Field field,
             Method method
     ) {
-        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method);
+        super(fieldName, ordinal, features, format, null, label, fieldClass, fieldClass, field, method, null);
     }
 
     @Override

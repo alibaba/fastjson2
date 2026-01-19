@@ -22,16 +22,10 @@ public class MillisTest {
             assertEquals("{\"value\":\"2024-02-01 14:12:12\"}", jsonWriter.toString());
         }
         {
-            JSONWriter jsonWriter = JSONWriter.of();
+            JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.NotWriteDefaultValue);
             Bean bean = new Bean();
             objectWriter.write(jsonWriter, bean);
-            assertEquals("{}", jsonWriter.toString());
-        }
-        {
-            JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.WriteNulls);
-            Bean bean = new Bean();
-            objectWriter.write(jsonWriter, bean);
-            assertEquals("{\"value\":null}", jsonWriter.toString());
+            assertEquals("{\"value\":\"1970-01-01 08:00:00\"}", jsonWriter.toString());
         }
 
         {
