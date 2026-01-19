@@ -4657,7 +4657,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldWriterBigIntField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterBigInt(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
         if (fieldClass == BigDecimal.class) {

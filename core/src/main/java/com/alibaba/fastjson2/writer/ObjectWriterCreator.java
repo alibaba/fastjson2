@@ -1095,7 +1095,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldWriterBigIntField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterBigInt(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
         if (fieldClass == BigDecimal.class) {
@@ -1775,7 +1775,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldWriterBigIntFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterBigInt(fieldName, ordinal, features, format, locale, label, field, method, function);
         }
 
         if (fieldClass == BigDecimal.class) {
