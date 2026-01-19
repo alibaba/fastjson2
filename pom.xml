@@ -583,6 +583,7 @@
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                             <configLocation>src/checkstyle/fastjson2-checks.xml</configLocation>
                             <excludes>module-info.java,
+                                com/alibaba/fastjson2/benchmark/jmh_generated/*,
                                 com/alibaba/fastjson2/fieldbased/Case1.java,
                                 com/alibaba/fastjson2/codec/UnicodeClassNameTest.java,
                                 com/alibaba/fastjson2/hsf/UCaseNameTest.java,
