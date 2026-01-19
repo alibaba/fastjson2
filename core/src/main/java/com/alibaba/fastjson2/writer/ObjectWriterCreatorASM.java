@@ -4677,7 +4677,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == String.class) {
-            return new FieldWriterStringField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterString(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
         if (fieldClass.isEnum()) {
