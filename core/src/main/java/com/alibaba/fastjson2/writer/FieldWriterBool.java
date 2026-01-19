@@ -1,14 +1,18 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Locale;
 
-abstract class FieldWriterBoolean
-        extends FieldWriter {
+import static com.alibaba.fastjson2.JSONWriter.*;
+
+class FieldWriterBool<T>
+        extends FieldWriter<T> {
     final byte[] utf8ValueTrue;
     final byte[] utf8ValueFalse;
     final byte[] utf8Value1;
@@ -18,18 +22,21 @@ abstract class FieldWriterBoolean
     final char[] utf16Value1;
     final char[] utf16Value0;
 
-    FieldWriterBoolean(
+    FieldWriterBool(
             String name,
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Object function
     ) {
-        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+
         {
             byte[] bytes = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + 4);
             bytes[nameWithColonUTF8.length] = 't';
@@ -88,8 +95,20 @@ abstract class FieldWriterBoolean
     }
 
     @Override
-    public void writeValue(JSONWriter jsonWriter, Object object) {
-        Boolean value = (Boolean) getFieldValue(object);
+    public Object getFieldValue(T object) {
+        return propertyAccessor.getObject(object);
+    }
+
+    public boolean getFieldValueBoolean(T object) {
+        if (object == null) {
+            throw new JSONException("field.get error, " + fieldName);
+        }
+        return (Boolean) propertyAccessor.getObject(object);
+    }
+
+    @Override
+    public void writeValue(JSONWriter jsonWriter, T object) {
+        Boolean value = (Boolean) propertyAccessor.getObject(object);
         if (value == null) {
             jsonWriter.writeNull();
             return;
@@ -132,36 +151,29 @@ abstract class FieldWriterBoolean
     }
 
     @Override
-    public boolean write(JSONWriter jsonWriter, Object object) {
+    public boolean write(JSONWriter jsonWriter, T object) {
+        long features = this.features | jsonWriter.getFeatures();
         Boolean value;
         try {
-            value = (Boolean) getFieldValue(object);
+            value = (Boolean) propertyAccessor.getObject(object);
         } catch (RuntimeException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
+            if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
                 return false;
             }
             throw error;
         }
 
         if (value == null) {
-            long features = this.features | jsonWriter.getFeatures();
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullBooleanAsFalse.mask)) == 0) {
+            if ((features & (MASK_WRITE_MAP_NULL_VALUE | MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_BOOLEAN_AS_FALSE)) == 0) {
                 return false;
             }
             writeFieldName(jsonWriter);
-            if ((features & JSONWriter.Feature.WriteNullBooleanAsFalse.mask) != 0) {
+            if ((features & MASK_WRITE_NULL_BOOLEAN_AS_FALSE) != 0) {
                 jsonWriter.writeBool(false);
             } else {
                 jsonWriter.writeBooleanNull();
             }
             return true;
-        }
-
-        if (fieldClass == boolean.class
-                && !value
-                && (jsonWriter.getFeatures(features) & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0
-        ) {
-            return false;
         }
 
         writeBool(jsonWriter, value);
