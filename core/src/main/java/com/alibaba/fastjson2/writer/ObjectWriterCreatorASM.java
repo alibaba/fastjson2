@@ -4637,11 +4637,11 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == float.class) {
-            return new FieldWriterFloatValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterFloatValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == Float.class) {
-            return new FieldWriterFloatField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterFloat<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == double.class) {

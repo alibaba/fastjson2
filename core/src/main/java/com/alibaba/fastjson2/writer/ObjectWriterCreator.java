@@ -1075,11 +1075,11 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == float.class) {
-            return new FieldWriterFloatValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterFloatValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == Float.class) {
-            return new FieldWriterFloatField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterFloat<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == double.class) {
@@ -1316,8 +1316,10 @@ public class ObjectWriterCreator {
             return new FieldWriterInt32<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == float.class || fieldClass == Float.class) {
-            return new FieldWriterFloatMethod<>(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method);
+        if (fieldClass == float.class) {
+            return new FieldWriterFloatValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        } else if (fieldClass == Float.class) {
+            return new FieldWriterFloat<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == double.class || fieldClass == Double.class) {
@@ -1470,7 +1472,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToFloatFunction<T> function) {
-        return new FieldWriterFloatValueFunc(fieldName, 0, 0L, null, null, null, null, function);
+        return new FieldWriterFloatValue<>(fieldName, 0, 0L, null, null, null, float.class, float.class, null, null, function);
     }
 
     /**
@@ -2047,11 +2049,11 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == float.class) {
-            return new FieldWriterFloatValueFunc(fieldName, ordinal, features, format, label, field, method, (ToFloatFunction) lambda);
+            return new FieldWriterFloatValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (ToFloatFunction) lambda);
         }
 
         if (fieldClass == Float.class) {
-            return new FieldWriterFloatFunc(fieldName, ordinal, features, format, label, field, method, (Function) lambda);
+            return new FieldWriterFloat<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (Function) lambda);
         }
 
         if (fieldClass == double.class) {
