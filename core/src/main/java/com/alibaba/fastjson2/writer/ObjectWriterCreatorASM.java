@@ -4618,7 +4618,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == byte.class) {
-            return new FieldWriterInt8ValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterInt8Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == short.class) {
