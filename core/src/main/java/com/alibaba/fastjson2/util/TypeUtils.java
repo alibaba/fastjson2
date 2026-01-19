@@ -27,55 +27,58 @@ import java.util.function.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.lang.invoke.MethodType.methodType;
 
+@SuppressWarnings("rawtypes")
 public class TypeUtils {
     public static final Class CLASS_JSON_OBJECT_1x;
     public static final Field FIELD_JSON_OBJECT_1x_map;
     public static final Class CLASS_JSON_ARRAY_1x;
 
-    public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
-    public static final Class CLASS_SINGLE_LIST = Collections.singletonList(1).getClass();
-    public static final Class CLASS_UNMODIFIABLE_COLLECTION = Collections.unmodifiableCollection(new ArrayList<>()).getClass();
-    public static final Class CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(new ArrayList<>()).getClass();
-    public static final Class CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(new HashSet<>()).getClass();
-    public static final Class CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(new TreeSet<>()).getClass();
-    public static final Class CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
+    public static final Class
+            CLASS_SINGLE_SET = Collections.singleton(1).getClass(),
+            CLASS_SINGLE_LIST = Collections.singletonList(1).getClass(),
+            CLASS_UNMODIFIABLE_COLLECTION = Collections.unmodifiableCollection(new ArrayList<>()).getClass(),
+            CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(new ArrayList<>()).getClass(),
+            CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(new HashSet<>()).getClass(),
+            CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(new TreeSet<>()).getClass(),
+            CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
     public static final ParameterizedType PARAM_TYPE_LIST_STR = new ParameterizedTypeImpl(List.class, String.class);
 
-    public static final MethodType METHOD_TYPE_SUPPLIER = MethodType.methodType(Supplier.class);
-    public static final MethodType METHOD_TYPE_FUNCTION = MethodType.methodType(Function.class);
-    public static final MethodType METHOD_TYPE_TO_INT_FUNCTION = MethodType.methodType(ToIntFunction.class);
-    public static final MethodType METHOD_TYPE_TO_LONG_FUNCTION = MethodType.methodType(ToLongFunction.class);
-    public static final MethodType METHOD_TYPE_OBJECT_INT_CONSUMER = MethodType.methodType(ObjIntConsumer.class);
-    public static final MethodType METHOD_TYPE_INT_FUNCTION = MethodType.methodType(IntFunction.class);
-    public static final MethodType METHOD_TYPE_LONG_FUNCTION = MethodType.methodType(LongFunction.class);
-    public static final MethodType METHOD_TYPE_BI_FUNCTION = MethodType.methodType(BiFunction.class);
-    public static final MethodType METHOD_TYPE_BI_CONSUMER = MethodType.methodType(BiConsumer.class);
-    public static final MethodType METHOD_TYPE_VOO = MethodType.methodType(void.class, Object.class, Object.class);
-
-    public static final MethodType METHOD_TYPE_OBJECT = MethodType.methodType(Object.class);
-    public static final MethodType METHOD_TYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class);
-    public static final MethodType METHOD_TYPE_INT_OBJECT = MethodType.methodType(int.class, Object.class);
-    public static final MethodType METHOD_TYPE_LONG_OBJECT = MethodType.methodType(long.class, Object.class);
-    public static final MethodType METHOD_TYPE_VOID_OBJECT_INT = MethodType.methodType(void.class, Object.class, int.class);
-    public static final MethodType METHOD_TYPE_OBJECT_LONG = MethodType.methodType(Object.class, long.class);
-    public static final MethodType METHOD_TYPE_VOID_LONG = MethodType.methodType(void.class, long.class);
-    public static final MethodType METHOD_TYPE_OBJECT_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class, Object.class);
-
-    public static final MethodType METHOD_TYPE_VOID = MethodType.methodType(void.class);
-    public static final MethodType METHOD_TYPE_VOID_INT = MethodType.methodType(void.class, int.class);
-    public static final MethodType METHOD_TYPE_VOID_STRING = MethodType.methodType(void.class, String.class);
-    public static final MethodType METHOD_TYPE_OBJECT_INT = MethodType.methodType(Object.class, int.class);
-
-    public static final BigInteger BIGINT_INT32_MIN = BigInteger.valueOf(Integer.MIN_VALUE);
-    public static final BigInteger BIGINT_INT32_MAX = BigInteger.valueOf(Integer.MAX_VALUE);
-    public static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
-    public static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
+    public static final MethodType
+            METHOD_TYPE_SUPPLIER = MethodType.methodType(Supplier.class),
+            METHOD_TYPE_FUNCTION = MethodType.methodType(Function.class),
+            METHOD_TYPE_TO_INT_FUNCTION = MethodType.methodType(ToIntFunction.class),
+            METHOD_TYPE_TO_LONG_FUNCTION = MethodType.methodType(ToLongFunction.class),
+            METHOD_TYPE_OBJECT_INT_CONSUMER = MethodType.methodType(ObjIntConsumer.class),
+            METHOD_TYPE_INT_FUNCTION = MethodType.methodType(IntFunction.class),
+            METHOD_TYPE_LONG_FUNCTION = MethodType.methodType(LongFunction.class),
+            METHOD_TYPE_DOUBLE_FUNCTION = MethodType.methodType(DoubleFunction.class),
+            METHOD_TYPE_BI_FUNCTION = MethodType.methodType(BiFunction.class),
+            METHOD_TYPE_BI_CONSUMER = MethodType.methodType(BiConsumer.class),
+            METHOD_TYPE_VOO = MethodType.methodType(void.class, Object.class, Object.class),
+            METHOD_TYPE_OBJECT = MethodType.methodType(Object.class),
+            METHOD_TYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class),
+            METHOD_TYPE_INT_OBJECT = MethodType.methodType(int.class, Object.class),
+            METHOD_TYPE_LONG_OBJECT = MethodType.methodType(long.class, Object.class),
+            METHOD_TYPE_VOID_OBJECT_INT = MethodType.methodType(void.class, Object.class, int.class),
+            METHOD_TYPE_OBJECT_LONG = MethodType.methodType(Object.class, long.class),
+            METHOD_TYPE_OBJECT_DOUBLE = MethodType.methodType(Object.class, double.class),
+            METHOD_TYPE_VOID_LONG = MethodType.methodType(void.class, long.class),
+            METHOD_TYPE_OBJECT_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class, Object.class),
+            METHOD_TYPE_VOID = MethodType.methodType(void.class),
+            METHOD_TYPE_VOID_INT = MethodType.methodType(void.class, int.class),
+            METHOD_TYPE_VOID_STRING = MethodType.methodType(void.class, String.class),
+            METHOD_TYPE_OBJECT_INT = MethodType.methodType(Object.class, int.class);
 
     static final long LONG_JAVASCRIPT_LOW = -9007199254740991L;
     static final long LONG_JAVASCRIPT_HIGH = 9007199254740991L;
 
-    static final BigInteger BIGINT_JAVASCRIPT_LOW = BigInteger.valueOf(LONG_JAVASCRIPT_LOW);
-    static final BigInteger BIGINT_JAVASCRIPT_HIGH = BigInteger.valueOf(LONG_JAVASCRIPT_HIGH);
+    public static final BigInteger
+            BIGINT_INT32_MIN = BigInteger.valueOf(Integer.MIN_VALUE),
+            BIGINT_INT32_MAX = BigInteger.valueOf(Integer.MAX_VALUE),
+            BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE),
+            BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE),
+            BIGINT_JAVASCRIPT_LOW = BigInteger.valueOf(LONG_JAVASCRIPT_LOW),
+            BIGINT_JAVASCRIPT_HIGH = BigInteger.valueOf(LONG_JAVASCRIPT_HIGH);
 
     /**
      * All the positive powers of 10 that can be
