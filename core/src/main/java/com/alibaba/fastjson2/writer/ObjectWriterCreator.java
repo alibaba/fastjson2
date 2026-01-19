@@ -1110,6 +1110,10 @@ public class ObjectWriterCreator {
             return new FieldWriterString(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
+        if (Calendar.class.isAssignableFrom(fieldClass)) {
+            return new FieldWriterCalendar<>(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
+        }
+
         if (fieldClass.isEnum()) {
             BeanInfo beanInfo = provider.createBeanInfo();
             provider.getBeanInfo(beanInfo, fieldClass);
@@ -1386,6 +1390,10 @@ public class ObjectWriterCreator {
 
         if (fieldClass == String.class) {
             return new FieldWriterString(fieldName, ordinal, features, format, locale, label, field, method, null);
+        }
+
+        if (Calendar.class.isAssignableFrom(fieldClass)) {
+            return new FieldWriterCalendar<>(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
         }
 
         if (fieldClass == List.class || fieldClass == ArrayList.class || fieldClass == Iterable.class) {
@@ -1823,7 +1831,7 @@ public class ObjectWriterCreator {
         }
 
         if (Calendar.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterCalendarFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterCalendar<>(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass.isEnum()) {
