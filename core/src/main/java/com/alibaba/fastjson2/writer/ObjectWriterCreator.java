@@ -1099,7 +1099,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterBigDecimal(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
         if (fieldClass == java.util.Date.class) {
@@ -1341,7 +1341,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalMethod<>(fieldName, ordinal, features, format, label, field, method);
+            return new FieldWriterBigDecimal<>(fieldName, ordinal, features, format, locale, label, field, method, null);
         }
 
         if (fieldClass.isEnum()
@@ -1779,7 +1779,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterBigDecimal(fieldName, ordinal, features, format, locale, label, field, method, function);
         }
 
         if (fieldClass == String.class) {

@@ -1,39 +1,37 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.util.Locale;
+import java.util.function.Function;
 
-final class FieldWriterBigDecimalMethod<T>
+final class FieldWriterBigDecimal<T>
         extends FieldWriter<T> {
-    FieldWriterBigDecimalMethod(
+    FieldWriterBigDecimal(
             String fieldName,
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Field field,
-            Method method
+            Method method,
+            Function<T, BigDecimal> function
     ) {
-        super(fieldName, ordinal, features, format, null, label, BigDecimal.class, BigDecimal.class, null, method);
+        super(fieldName, ordinal, features, format, locale, label, BigDecimal.class, BigDecimal.class, field, method, function);
     }
 
     @Override
     public Object getFieldValue(T object) {
-        try {
-            return method.invoke(object);
-        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw new JSONException("invoke getter method error, " + fieldName, e);
-        }
+        return propertyAccessor.getObject(object);
     }
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        BigDecimal value = (BigDecimal) getFieldValue(object);
+        BigDecimal value = (BigDecimal) propertyAccessor.getObject(object);
         jsonWriter.writeDecimal(value, features, decimalFormat);
     }
 
@@ -41,7 +39,7 @@ final class FieldWriterBigDecimalMethod<T>
     public boolean write(JSONWriter jsonWriter, T object) {
         BigDecimal value;
         try {
-            value = (BigDecimal) getFieldValue(object);
+            value = (BigDecimal) propertyAccessor.getObject(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;

@@ -4661,7 +4661,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterBigDecimal(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
         if (fieldClass == java.util.Date.class) {
