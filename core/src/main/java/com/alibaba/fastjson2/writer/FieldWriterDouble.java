@@ -10,9 +10,9 @@ import java.util.Locale;
 
 import static com.alibaba.fastjson2.JSONWriter.*;
 
-class FieldWriterInt16<T>
+class FieldWriterDouble<T>
         extends FieldWriter<T> {
-    FieldWriterInt16(
+    FieldWriterDouble(
             String name,
             int ordinal,
             long features,
@@ -32,44 +32,34 @@ class FieldWriterInt16<T>
         return propertyAccessor.getObject(object);
     }
 
-    public short getFieldValueShort(T object) {
+    public double getFieldValueDouble(T object) {
         if (object == null) {
             throw new JSONException("field.get error, " + fieldName);
         }
-        return propertyAccessor.getShortValue(object);
-    }
-
-    protected final void writeInt16(JSONWriter jsonWriter, short value) {
-        long features = jsonWriter.getFeatures(this.features);
-        if (value == 0 && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
-            return;
-        }
-        boolean writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
-        if (writeNonStringValueAsString) {
-            writeFieldName(jsonWriter);
-            jsonWriter.writeString(Short.toString(value));
-            return;
-        }
-        writeFieldName(jsonWriter);
-        jsonWriter.writeInt16(value);
+        return propertyAccessor.getDoubleValue(object);
     }
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        Short value = (Short) propertyAccessor.getObject(object);
+        Double value = (Double) propertyAccessor.getObject(object);
         if (value == null) {
             jsonWriter.writeNumberNull();
-            return;
+        } else {
+            double doubleValue = value;
+            if (decimalFormat != null) {
+                jsonWriter.writeDouble(doubleValue, decimalFormat);
+            } else {
+                jsonWriter.writeDouble(doubleValue);
+            }
         }
-        jsonWriter.writeInt32(value);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
         long features = this.features | jsonWriter.getFeatures();
-        Short value;
+        Double value;
         try {
-            value = (Short) propertyAccessor.getObject(object);
+            value = (Double) propertyAccessor.getObject(object);
         } catch (RuntimeException error) {
             if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
                 return false;
@@ -78,18 +68,30 @@ class FieldWriterInt16<T>
         }
 
         if (value == null) {
-            return writeIntNull(jsonWriter);
+            return writeFloatNull(jsonWriter);
         }
 
-        writeInt16(jsonWriter, value);
+        writeDoubleValue(jsonWriter, value, features);
         return true;
     }
 
-    @Override
-    public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        if (valueClass == fieldClass) {
-            return ObjectWriterImplInt16.INSTANCE;
+    protected final void writeDoubleValue(JSONWriter jsonWriter, Double value, long features) {
+        double doubleValue = value;
+        if (doubleValue == 0.0 && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
+            return;
         }
-        return jsonWriter.getObjectWriter(valueClass);
+
+        writeFieldName(jsonWriter);
+
+        if (decimalFormat != null) {
+            jsonWriter.writeDouble(doubleValue, decimalFormat);
+        } else {
+            boolean writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+            if (writeNonStringValueAsString) {
+                jsonWriter.writeString(Double.toString(doubleValue));
+            } else {
+                jsonWriter.writeDouble(doubleValue);
+            }
+        }
     }
 }

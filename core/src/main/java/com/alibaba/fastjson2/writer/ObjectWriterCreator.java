@@ -1083,11 +1083,11 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == double.class) {
-            return new FieldWriterDoubleValField(fieldName, ordinal, format, label, field);
+            return new FieldWriterDoubleValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == Double.class) {
-            return new FieldWriterDoubleField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterDouble<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == char.class) {
@@ -1322,8 +1322,10 @@ public class ObjectWriterCreator {
             return new FieldWriterFloat<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == double.class || fieldClass == Double.class) {
-            return new FieldWriterDoubleMethod<>(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method);
+        if (fieldClass == double.class) {
+            return new FieldWriterDoubleValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        } else if (fieldClass == Double.class) {
+            return new FieldWriterDouble<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == long.class || fieldClass == Long.class) {
@@ -1484,7 +1486,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToDoubleFunction<T> function) {
-        return new FieldWriterDoubleValueFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterDoubleValue<>(fieldName, 0, 0, null, null, null, double.class, double.class, null, null, function);
     }
 
     /**
@@ -2057,11 +2059,11 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == double.class) {
-            return new FieldWriterDoubleValueFunc(fieldName, ordinal, features, format, label, field, method, (ToDoubleFunction) lambda);
+            return new FieldWriterDoubleValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (ToDoubleFunction) lambda);
         }
 
         if (fieldClass == Double.class) {
-            return new FieldWriterDoubleFunc(fieldName, ordinal, features, format, label, field, method, (Function) lambda);
+            return new FieldWriterDouble<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, (Function) lambda);
         }
 
         if (fieldClass == char.class) {
