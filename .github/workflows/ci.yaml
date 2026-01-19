@@ -52,7 +52,7 @@ jobs:
       max-parallel: 16
       matrix:
         java: [ 8, 11, 17, 21, 25 ]
-        os: [ ubuntu-24.04, macos-latest ]
+        os: [ ubuntu-24.04, windows-latest, macos-latest ]
         exclude:
           - java: 25
             os: macos-latest
@@ -72,6 +72,7 @@ jobs:
 
       - name: Build with Maven
         run: ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package
+        shell: bash
 
   coverage:
     timeout-minutes: 20
