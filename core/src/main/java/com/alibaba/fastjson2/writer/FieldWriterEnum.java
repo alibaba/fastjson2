@@ -9,11 +9,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.*;
 
-class FieldWriterEnum
-        extends FieldWriter {
+class FieldWriterEnum<T>
+        extends FieldWriter<T> {
     final byte[][] valueNameCacheUTF8;
     final char[][] valueNameCacheUTF16;
 
@@ -25,18 +27,20 @@ class FieldWriterEnum
     final long[] hashCodes;
     final long[] hashCodesSymbolCache;
 
-    protected FieldWriterEnum(
+    FieldWriterEnum(
             String name,
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Type fieldType,
             Class<? extends Enum> enumClass,
             Field field,
-            Method method
+            Method method,
+            Function<T, Enum> function
     ) {
-        super(name, ordinal, features, format, null, label, fieldType, enumClass, field, method);
+        super(name, ordinal, features, format, locale, label, fieldType, enumClass, field, method, function);
 
         this.enumType = enumClass;
         this.enumConstants = enumClass.getEnumConstants();
@@ -325,14 +329,14 @@ class FieldWriterEnum
     }
 
     @Override
-    public final void writeValue(JSONWriter jsonWriter, Object object) {
-        Enum value = (Enum) getFieldValue(object);
+    public final void writeValue(JSONWriter jsonWriter, T object) {
+        Enum value = (Enum) propertyAccessor.getObject(object);
         jsonWriter.writeEnum(value);
     }
 
     @Override
-    public boolean write(JSONWriter jsonWriter, Object object) {
-        Enum value = (Enum) getFieldValue(object);
+    public boolean write(JSONWriter jsonWriter, T object) {
+        Enum value = (Enum) propertyAccessor.getObject(object);
         long features = this.features | jsonWriter.getFeatures();
         if (value == null) {
             if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
