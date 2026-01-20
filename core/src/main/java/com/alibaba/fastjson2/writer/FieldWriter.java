@@ -457,25 +457,11 @@ public abstract class FieldWriter<T>
     }
 
     public Object getFieldValue(T object) {
-        if (object == null) {
-            throw new JSONException("field.get error, " + fieldName);
+        try {
+            return propertyAccessor.getObject(object);
+        } catch (Throwable e) {
+            throw new JSONException("field.get error, " + fieldName, e);
         }
-
-        if (field != null) {
-            try {
-                Object value;
-                if (fieldOffset != -1 && !primitive) {
-                    value = UNSAFE.getObject(object, fieldOffset);
-                } else {
-                    value = field.get(object);
-                }
-                return value;
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                throw new JSONException("field.get error, " + fieldName, e);
-            }
-        }
-
-        throw new UnsupportedOperationException();
     }
 
     @Override

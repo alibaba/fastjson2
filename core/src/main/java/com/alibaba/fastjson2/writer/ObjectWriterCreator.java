@@ -1292,7 +1292,7 @@ public class ObjectWriterCreator {
         }
 
         if (initObjectWriter != null) {
-            FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
+            FieldWriterObject objMethod = new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
             objMethod.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objMethod.initObjectWriter = initObjectWriter;
@@ -1414,7 +1414,7 @@ public class ObjectWriterCreator {
             return new FieldWriterObjectArray(fieldName, fieldClass.getComponentType(), ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
         }
 
-        return new FieldWriterObjectMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
+        return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
     }
 
     /**
@@ -1878,7 +1878,7 @@ public class ObjectWriterCreator {
             return new FieldWriterObjectFuncFinal(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
-        return new FieldWriterObjectFunc(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+        return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
     }
 
     static class LambdaInfo {
