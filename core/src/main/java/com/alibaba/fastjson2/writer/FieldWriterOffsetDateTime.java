@@ -9,9 +9,9 @@ import java.time.OffsetDateTime;
 import java.util.Locale;
 import java.util.function.Function;
 
-final class FieldWriterOffsetDateTimeFunc<T>
+final class FieldWriterOffsetDateTime<T>
         extends FieldWriterObjectFinal<T> {
-    FieldWriterOffsetDateTimeFunc(
+    FieldWriterOffsetDateTime(
             String name,
             int ordinal,
             long features,
@@ -29,12 +29,12 @@ final class FieldWriterOffsetDateTimeFunc<T>
 
     @Override
     public Object getFieldValue(Object object) {
-        return function.apply(object);
+        return propertyAccessor.getObject(object);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
-        OffsetDateTime dateTime = (OffsetDateTime) function.apply(object);
+        OffsetDateTime dateTime = (OffsetDateTime) propertyAccessor.getObject(object);
         if (dateTime == null) {
             long features = this.features | jsonWriter.getFeatures();
             if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
@@ -58,10 +58,5 @@ final class FieldWriterOffsetDateTimeFunc<T>
             jsonWriter.writeOffsetDateTime(dateTime);
         }
         return true;
-    }
-
-    @Override
-    public Function getFunction() {
-        return function;
     }
 }
