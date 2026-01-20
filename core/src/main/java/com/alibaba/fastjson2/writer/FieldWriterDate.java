@@ -9,9 +9,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Locale;
 
-abstract class FieldWriterDate<T>
+import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_MAP_NULL_VALUE;
+
+class FieldWriterDate<T>
         extends FieldWriter<T> {
     protected DateTimeFormatter formatter;
     final boolean formatMillis;
@@ -308,5 +311,40 @@ abstract class FieldWriterDate<T>
         } else {
             jsonWriter.writeZonedDateTime(zdt);
         }
+    }
+
+    @Override
+    public Object getFieldValue(T object) {
+        return propertyAccessor.getObject(object);
+    }
+
+    @Override
+    public void writeValue(JSONWriter jsonWriter, T object) {
+        Date value = (Date) propertyAccessor.getObject(object);
+
+        if (value == null) {
+            jsonWriter.writeNull();
+            return;
+        }
+        writeDate(jsonWriter, false, value.getTime());
+    }
+
+    @Override
+    public boolean write(JSONWriter jsonWriter, T object) {
+        Date value = (Date) propertyAccessor.getObject(object);
+
+        if (value == null) {
+            long features = this.features | jsonWriter.getFeatures();
+            if ((features & MASK_WRITE_MAP_NULL_VALUE) != 0) {
+                writeFieldName(jsonWriter);
+                jsonWriter.writeNull();
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        writeDate(jsonWriter, value.getTime());
+        return true;
     }
 }

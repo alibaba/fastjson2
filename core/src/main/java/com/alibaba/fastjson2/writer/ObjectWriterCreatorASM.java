@@ -4674,7 +4674,7 @@ public class ObjectWriterCreatorASM
                 }
             }
 
-            return new FieldWriterDateField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
         }
 
         if (fieldClass == String.class) {

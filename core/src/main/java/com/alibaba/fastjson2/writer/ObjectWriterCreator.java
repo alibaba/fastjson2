@@ -1103,7 +1103,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == java.util.Date.class) {
-            return new FieldWriterDateField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
         }
 
         if (fieldClass == String.class) {
@@ -1385,7 +1385,7 @@ public class ObjectWriterCreator {
                 }
             }
 
-            return new FieldWriterDateMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
+            return new FieldWriterDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
         }
 
         if (fieldClass == String.class) {
@@ -1815,7 +1815,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == Date.class) {
-            return new FieldWriterDateFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == LocalDate.class) {

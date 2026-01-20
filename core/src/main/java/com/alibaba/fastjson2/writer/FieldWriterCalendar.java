@@ -73,4 +73,12 @@ final class FieldWriterCalendar<T>
         writeDate(jsonWriter, value.getTimeInMillis());
         return true;
     }
+
+    @Override
+    public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+        if (format == null) {
+            return dateWriter = ObjectWriterImplCalendar.INSTANCE;
+        }
+        return dateWriter = new ObjectWriterImplCalendar(format, null);
+    }
 }
