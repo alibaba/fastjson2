@@ -1106,6 +1106,10 @@ public class ObjectWriterCreator {
             return new FieldWriterDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
         }
 
+        if (fieldClass == OffsetDateTime.class) {
+            return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
+        }
+
         if (fieldClass == String.class) {
             return new FieldWriterString(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
@@ -1386,6 +1390,10 @@ public class ObjectWriterCreator {
             }
 
             return new FieldWriterDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == OffsetDateTime.class) {
+            return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
         }
 
         if (fieldClass == String.class) {
@@ -1823,7 +1831,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == OffsetDateTime.class) {
-            return new FieldWriterOffsetDateTimeFunc(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == UUID.class) {
@@ -1875,7 +1883,7 @@ public class ObjectWriterCreator {
         }
 
         if (Modifier.isFinal(fieldClass.getModifiers())) {
-            return new FieldWriterObjectFuncFinal(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterObjectFinal(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);

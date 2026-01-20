@@ -2107,7 +2107,7 @@ public class ObjectWriterCreatorASM
 
             mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, endDetect_);
 
-            if (fieldClass.isAssignableFrom(mwc.objectClass)) {
+            if (mwc.objectClass != null && fieldClass.isAssignableFrom(mwc.objectClass)) {
                 mw.aload(OBJECT);
                 mw.aload(FIELD_VALUE);
                 mw.if_acmpne(refSetPath_);
@@ -2661,7 +2661,7 @@ public class ObjectWriterCreatorASM
                 mw.invokevirtual(TYPE_JSON_WRITER, "isRefDetect", "()Z");
                 mw.ifeq(endDetect_);
 
-                if (fieldClass.isAssignableFrom(mwc.objectClass)) {
+                if (mwc.objectClass != null && fieldClass.isAssignableFrom(mwc.objectClass)) {
                     mw.aload(OBJECT);
                     mw.aload(FIELD_VALUE);
                     mw.if_acmpne(refSetPath_);
@@ -3070,7 +3070,7 @@ public class ObjectWriterCreatorASM
             mw.istore(REF_DETECT);
             mw.ifeq(endDetect_);
 
-            if (fieldClass.isAssignableFrom(mwc.objectClass)) {
+            if (mwc.objectClass != null && fieldClass.isAssignableFrom(mwc.objectClass)) {
                 mw.aload(OBJECT);
                 mw.aload(FIELD_VALUE);
                 mw.if_acmpne(refSetPath_);

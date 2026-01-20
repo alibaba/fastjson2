@@ -10,8 +10,6 @@ import java.util.function.Function;
 
 final class FieldWriterUUIDFunc<T>
         extends FieldWriterObjectFinal<T> {
-    final Function function;
-
     FieldWriterUUIDFunc(
             String name,
             int ordinal,
@@ -24,8 +22,7 @@ final class FieldWriterUUIDFunc<T>
             Method method,
             Function function
     ) {
-        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
-        this.function = function;
+        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function);
     }
 
     @Override

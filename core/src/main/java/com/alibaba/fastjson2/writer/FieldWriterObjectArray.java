@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.MASK_NOT_WRITE_EMPTY_ARRAY;
 
 final class FieldWriterObjectArray<T>
         extends FieldWriter<T> {
@@ -99,7 +100,7 @@ final class FieldWriterObjectArray<T>
                     .getObjectWriter(this.itemType, itemClass);
         }
         return jsonWriter
-                .getObjectWriter(itemType, null);
+                .getObjectWriter(itemType, TypeUtils.getClass(itemType));
     }
 
     @Override
@@ -134,6 +135,10 @@ final class FieldWriterObjectArray<T>
     }
 
     public void writeArray(JSONWriter jsonWriter, boolean writeFieldName, Object[] array) {
+        long features = this.features | jsonWriter.getFeatures();
+        if (array.length == 0 && (features & MASK_NOT_WRITE_EMPTY_ARRAY) != 0) {
+            return;
+        }
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
