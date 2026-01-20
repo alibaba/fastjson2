@@ -39,17 +39,17 @@ final class FieldWriterBigInt<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
+        long features = this.features | jsonWriter.getFeatures();
         BigInteger value;
         try {
             value = (BigInteger) propertyAccessor.getObject(object);
         } catch (RuntimeException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
+            if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
                 return false;
             }
             throw error;
         }
 
-        long features = this.features | jsonWriter.getFeatures();
         if (value == null) {
             if ((features & (MASK_WRITE_MAP_NULL_VALUE | MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0) {
                 return false;

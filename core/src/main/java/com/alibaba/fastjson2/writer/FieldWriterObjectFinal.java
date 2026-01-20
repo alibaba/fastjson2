@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray;
+import static com.alibaba.fastjson2.JSONWriter.MASK_IGNORE_ERROR_GETTER;
 
 class FieldWriterObjectFinal<T>
         extends FieldWriterObject<T> {
@@ -52,18 +53,18 @@ class FieldWriterObjectFinal<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
+        long features = this.features | jsonWriter.getFeatures();
         Object value;
         try {
             value = getFieldValue(object);
         } catch (RuntimeException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
+            if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
                 return false;
             }
             throw error;
         }
 
         if (value == null) {
-            long features = this.features | jsonWriter.getFeatures();
             if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {
                 return false;
             }

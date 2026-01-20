@@ -65,7 +65,7 @@ final class FieldWriterString<T>
 
         if (value == null) {
             if ((features & (MASK_WRITE_MAP_NULL_VALUE | MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_STRING_AS_EMPTY)) == 0
-                    || (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0) {
+                    || (features & MASK_NOT_WRITE_DEFAULT_VALUE) != 0) {
                 return false;
             }
         } else if (trim) {

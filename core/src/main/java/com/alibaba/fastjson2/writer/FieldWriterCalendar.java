@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Locale;
 
+import static com.alibaba.fastjson2.JSONWriter.MASK_IGNORE_ERROR_GETTER;
 import static com.alibaba.fastjson2.JSONWriter.MASK_WRITE_MAP_NULL_VALUE;
 
 final class FieldWriterCalendar<T>
@@ -48,19 +49,18 @@ final class FieldWriterCalendar<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
+        long features = this.features | jsonWriter.getFeatures();
         Calendar value;
         try {
             value = (Calendar) propertyAccessor.getObject(object);
         } catch (RuntimeException error) {
-            long features = this.features | jsonWriter.getFeatures();
-            if ((features & JSONWriter.Feature.IgnoreErrorGetter.mask) != 0) {
+            if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
                 return false;
             }
             throw error;
         }
 
         if (value == null) {
-            long features = this.features | jsonWriter.getFeatures();
             if ((features & MASK_WRITE_MAP_NULL_VALUE) != 0) {
                 writeFieldName(jsonWriter);
                 jsonWriter.writeNull();

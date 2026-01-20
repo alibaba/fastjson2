@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.MASK_IGNORE_ERROR_GETTER;
+
 final class FieldWriterBigDecimal<T>
         extends FieldWriter<T> {
     FieldWriterBigDecimal(
@@ -37,11 +39,12 @@ final class FieldWriterBigDecimal<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
+        long features = this.features | jsonWriter.getFeatures();
         BigDecimal value;
         try {
             value = (BigDecimal) propertyAccessor.getObject(object);
         } catch (RuntimeException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
+            if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
                 return false;
             }
             throw error;

@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.MASK_IGNORE_ERROR_GETTER;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 
 public class FieldWriterObject<T>
@@ -280,7 +281,7 @@ public class FieldWriterObject<T>
     }
 
     private boolean writeInternal(JSONWriter jsonWriter, T object) {
-        long features = jsonWriter.getFeatures();
+        long features = this.features | jsonWriter.getFeatures();
 
         if (!fieldClassSerializable && (features & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
             return false;
@@ -294,7 +295,7 @@ public class FieldWriterObject<T>
         try {
             value = getFieldValue(object);
         } catch (RuntimeException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
+            if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
                 return false;
             }
             throw error;
@@ -419,7 +420,7 @@ public class FieldWriterObject<T>
         return true;
     }
     private boolean writeInternal(JSONWriterJSONB jsonWriter, T object) {
-        long features = jsonWriter.getFeatures();
+        long features = this.features | jsonWriter.getFeatures();
 
         if (!fieldClassSerializable && (features & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
             return false;
@@ -433,7 +434,7 @@ public class FieldWriterObject<T>
         try {
             value = getFieldValue(object);
         } catch (RuntimeException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
+            if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
                 return false;
             }
             throw error;
