@@ -1149,7 +1149,7 @@ public class ObjectWriterCreator {
 
         if (fieldClass.isArray() && !fieldClass.getComponentType().isPrimitive()) {
             Class<?> itemClass = fieldClass.getComponentType();
-            return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, label, fieldType, fieldClass, field);
+            return new FieldWriterObjectArray(fieldName, itemClass, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
         }
 
         return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null);
@@ -1411,7 +1411,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == Float[].class || fieldClass == Double[].class || fieldClass == BigDecimal[].class) {
-            return new FieldWriterObjectArrayMethod(fieldName, fieldClass.getComponentType(), ordinal, features, format, label, fieldType, fieldClass, field, method);
+            return new FieldWriterObjectArray(fieldName, fieldClass.getComponentType(), ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
         }
 
         return new FieldWriterObjectMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);

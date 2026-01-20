@@ -4721,7 +4721,7 @@ public class ObjectWriterCreatorASM
             if (declaringClass == Throwable.class && "stackTrace".equals(fieldName)) {
                 try {
                     Method method = Throwable.class.getMethod("getStackTrace");
-                    return new FieldWriterObjectArrayMethod(fieldName, itemClass, ordinal, features, format, label, fieldType, fieldClass, field, method);
+                    return new FieldWriterObjectArray(fieldName, itemClass, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
                 } catch (NoSuchMethodException ignored) {
                 }
             }
@@ -4733,15 +4733,15 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == BigDecimal[].class) {
-            return new FieldWriterObjectArrayField<>(fieldName, BigDecimal.class, ordinal, features, format, label, BigDecimal[].class, BigDecimal[].class, field);
+            return new FieldWriterObjectArray<>(fieldName, BigDecimal.class, ordinal, features, format, locale, label, BigDecimal[].class, BigDecimal[].class, field, null, null);
         }
 
         if (fieldClass == Float[].class) {
-            return new FieldWriterObjectArrayField<>(fieldName, Float.class, ordinal, features, format, label, Float[].class, Float[].class, field);
+            return new FieldWriterObjectArray<>(fieldName, Float.class, ordinal, features, format, locale, label, Float[].class, Float[].class, field, null, null);
         }
 
         if (fieldClass == Double[].class) {
-            return new FieldWriterObjectArrayField<>(fieldName, Float.class, ordinal, features, format, label, Double[].class, Double[].class, field);
+            return new FieldWriterObjectArray<>(fieldName, Double.class, ordinal, features, format, locale, label, Double[].class, Double[].class, field, null, null);
         }
 
         if (isFunction(fieldClass)) {

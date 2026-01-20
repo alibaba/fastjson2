@@ -5,34 +5,49 @@ import com.alibaba.fastjson2.JSONWriterJSONB;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
+import java.util.Locale;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
-final class FieldWriterObjectArrayField<T>
+final class FieldWriterObjectArray<T>
         extends FieldWriter<T> {
     final Type itemType;
     final Class itemClass;
     ObjectWriter itemObjectWriter;
-    FieldWriterObjectArrayField(
+
+    FieldWriterObjectArray(
             String fieldName,
             Type itemType,
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Type fieldType,
             Class fieldClass,
-            Field field
+            Field field,
+            Method method,
+            Function function
     ) {
-        super(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, null);
+        super(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         this.itemType = itemType;
         if (itemType instanceof Class) {
             itemClass = (Class) itemType;
         } else {
             itemClass = TypeUtils.getMapping(itemType);
+        }
+    }
+
+    @Override
+    public Object getFieldValue(Object object) {
+        try {
+            return propertyAccessor.getObject(object);
+        } catch (Throwable e) {
+            throw errorOnGet(e);
         }
     }
 
@@ -43,20 +58,48 @@ final class FieldWriterObjectArrayField<T>
                 return itemObjectWriter;
             }
 
-            if (itemType == Double.class) {
-                itemObjectWriter = new ObjectWriterImplDouble(new DecimalFormat(format));
+            if (itemType == Float[].class) {
+                if (decimalFormat != null) {
+                    return new ObjectWriterArrayFinal(Float.class, decimalFormat);
+                } else {
+                    return ObjectWriterArrayFinal.FLOAT_ARRAY;
+                }
+            } else if (itemType == Double[].class) {
+                if (decimalFormat != null) {
+                    return new ObjectWriterArrayFinal(Double.class, decimalFormat);
+                } else {
+                    return ObjectWriterArrayFinal.DOUBLE_ARRAY;
+                }
+            } else if (itemType == BigDecimal[].class) {
+                if (decimalFormat != null) {
+                    return new ObjectWriterArrayFinal(BigDecimal.class, decimalFormat);
+                } else {
+                    return ObjectWriterArrayFinal.DECIMAL_ARRAY;
+                }
             } else if (itemType == Float.class) {
-                itemObjectWriter = new ObjectWriterImplFloat(new DecimalFormat(format));
-            } else if (itemType == BigDecimal.class && decimalFormat != null) {
-                itemObjectWriter = new ObjectWriterImplBigDecimal(decimalFormat, null);
-            } else {
-                itemObjectWriter = jsonWriter
-                        .getObjectWriter(this.itemType, itemClass);
+                if (decimalFormat != null) {
+                    return new ObjectWriterImplFloat(decimalFormat);
+                } else {
+                    return ObjectWriterImplFloat.INSTANCE;
+                }
+            } else if (itemType == Double.class) {
+                if (decimalFormat != null) {
+                    return new ObjectWriterImplDouble(decimalFormat);
+                } else {
+                    return ObjectWriterImplDouble.INSTANCE;
+                }
+            } else if (itemType == BigDecimal.class) {
+                if (decimalFormat != null) {
+                    return new ObjectWriterImplBigDecimal(decimalFormat, null);
+                } else {
+                    return ObjectWriterImplBigDecimal.INSTANCE;
+                }
             }
-            return itemObjectWriter;
+            return itemObjectWriter = jsonWriter
+                    .getObjectWriter(this.itemType, itemClass);
         }
         return jsonWriter
-                .getObjectWriter(itemType, TypeUtils.getClass(itemType));
+                .getObjectWriter(itemType, null);
     }
 
     @Override
@@ -94,17 +137,12 @@ final class FieldWriterObjectArrayField<T>
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
-        long features = jsonWriter.getFeatures();
-        boolean refDetect = (features & JSONWriter.Feature.ReferenceDetection.mask) != 0;
-        boolean previousItemRefDetect = refDetect;
-
         if (writeFieldName) {
-            if (array.length == 0 && (features & JSONWriter.Feature.NotWriteEmptyArray.mask) != 0) {
-                return;
-            }
-
             writeFieldName(jsonWriter);
         }
+
+        boolean refDetect = jsonWriter.isRefDetect();
+        boolean previousItemRefDetect = refDetect;
 
         if (refDetect) {
             String path = jsonWriter.setPath(fieldName, array);
@@ -113,6 +151,8 @@ final class FieldWriterObjectArrayField<T>
                 return;
             }
         }
+
+        boolean writeAsString = (features & WriteNonStringValueAsString.mask) != 0;
 
         if (jsonWriter instanceof JSONWriterJSONB) {
             Class arrayClass = array.getClass();
@@ -144,7 +184,6 @@ final class FieldWriterObjectArrayField<T>
                 } else {
                     itemRefDetect = previousItemRefDetect;
                 }
-
                 itemObjectWriter = previousObjectWriter;
 
                 if (itemRefDetect) {
@@ -181,6 +220,11 @@ final class FieldWriterObjectArrayField<T>
                 jsonWriter.writeNull();
                 continue;
             }
+            if (writeAsString) {
+                jsonWriter.writeString(item.toString());
+                continue;
+            }
+
             Class<?> itemClass = item.getClass();
             ObjectWriter itemObjectWriter;
             if (itemClass == previousClass) {
@@ -191,37 +235,8 @@ final class FieldWriterObjectArrayField<T>
                 previousObjectWriter = itemObjectWriter;
             }
 
-            itemObjectWriter.write(jsonWriter, item, i, this.itemType, this.features);
+            itemObjectWriter.write(jsonWriter, item);
         }
         jsonWriter.endArray();
-    }
-
-    @Override
-    public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        if (valueClass == String[].class) {
-            return ObjectWriterImplStringArray.INSTANCE;
-        }
-
-        if (valueClass == Float[].class) {
-            if (decimalFormat != null) {
-                return new ObjectWriterArrayFinal(Float.class, decimalFormat);
-            } else {
-                return ObjectWriterArrayFinal.FLOAT_ARRAY;
-            }
-        } else if (valueClass == Double[].class) {
-            if (decimalFormat != null) {
-                return new ObjectWriterArrayFinal(Double.class, decimalFormat);
-            } else {
-                return ObjectWriterArrayFinal.DOUBLE_ARRAY;
-            }
-        } else if (valueClass == BigDecimal[].class) {
-            if (decimalFormat != null) {
-                return new ObjectWriterArrayFinal(BigDecimal.class, decimalFormat);
-            } else {
-                return ObjectWriterArrayFinal.DECIMAL_ARRAY;
-            }
-        }
-
-        return jsonWriter.getObjectWriter(valueClass);
     }
 }
