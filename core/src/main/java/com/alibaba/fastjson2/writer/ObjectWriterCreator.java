@@ -1106,8 +1106,16 @@ public class ObjectWriterCreator {
             return new FieldWriterDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
         }
 
+        if (fieldClass == LocalDate.class) {
+            return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
+        }
+
         if (fieldClass == OffsetDateTime.class) {
             return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == UUID.class) {
+            return new FieldWriterUUID(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, null);
         }
 
         if (fieldClass == String.class) {
@@ -1148,7 +1156,7 @@ public class ObjectWriterCreator {
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterMapField(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, contentAs);
+            return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, null, contentAs);
         }
 
         if (fieldClass.isArray() && !fieldClass.getComponentType().isPrimitive()) {
@@ -1392,8 +1400,16 @@ public class ObjectWriterCreator {
             return new FieldWriterDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
         }
 
+        if (fieldClass == LocalDate.class) {
+            return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
+        }
+
         if (fieldClass == OffsetDateTime.class) {
             return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == UUID.class) {
+            return new FieldWriterUUID(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, null);
         }
 
         if (fieldClass == String.class) {
@@ -1415,7 +1431,7 @@ public class ObjectWriterCreator {
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterMapMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method, contentAs);
+            return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method, null, contentAs);
         }
 
         if (fieldClass == Float[].class || fieldClass == Double[].class || fieldClass == BigDecimal[].class) {
@@ -1827,7 +1843,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == LocalDate.class) {
-            return new FieldWriterLocalDateFunc(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == OffsetDateTime.class) {
@@ -1835,7 +1851,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == UUID.class) {
-            return new FieldWriterUUIDFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterUUID(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
         }
 
         if (Calendar.class.isAssignableFrom(fieldClass)) {
@@ -1878,7 +1894,7 @@ public class ObjectWriterCreator {
             }
 
             if (rawType instanceof Class && Map.class.isAssignableFrom((Class) rawType)) {
-                return new FieldWriterMapFunction(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function, contentAs);
+                return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function, contentAs);
             }
         }
 

@@ -5,16 +5,18 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.Locale;
 import java.util.function.Function;
 
-final class FieldWriterUUIDFunc<T>
+final class FieldWriterLocalDate<T>
         extends FieldWriterObjectFinal<T> {
-    FieldWriterUUIDFunc(
+    FieldWriterLocalDate(
             String name,
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Type fieldType,
             Class fieldClass,
@@ -22,18 +24,18 @@ final class FieldWriterUUIDFunc<T>
             Method method,
             Function function
     ) {
-        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function);
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
     }
 
     @Override
     public Object getFieldValue(Object object) {
-        return function.apply(object);
+        return propertyAccessor.getObject(object);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
-        UUID uuid = (UUID) function.apply(object);
-        if (uuid == null) {
+        LocalDate localDate = (LocalDate) propertyAccessor.getObject(object);
+        if (localDate == null) {
             long features = this.features | jsonWriter.getFeatures();
             if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
                 writeFieldName(jsonWriter);
@@ -47,13 +49,13 @@ final class FieldWriterUUIDFunc<T>
         writeFieldName(jsonWriter);
 
         if (objectWriter == null) {
-            objectWriter = getObjectWriter(jsonWriter, UUID.class);
+            objectWriter = getObjectWriter(jsonWriter, LocalDate.class);
         }
 
-        if (objectWriter != ObjectWriterImplUUID.INSTANCE) {
-            objectWriter.write(jsonWriter, uuid, fieldName, fieldClass, features);
+        if (objectWriter != ObjectWriterImplLocalDate.INSTANCE) {
+            objectWriter.write(jsonWriter, localDate, fieldName, fieldClass, features);
         } else {
-            jsonWriter.writeUUID(uuid);
+            jsonWriter.writeLocalDate(localDate);
         }
         return true;
     }
