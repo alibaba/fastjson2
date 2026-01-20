@@ -4766,16 +4766,19 @@ public class ObjectWriterCreatorASM
     ) {
         FieldWriter fieldWriter = jitFieldWriterList(provider, fieldName, ordinal, features, format, label, field, contentAs, itemType, fieldType, fieldClass);
         if (fieldWriter == null) {
-            fieldWriter = new FieldWriterListField(
+            fieldWriter = new FieldWriterList(
                     fieldName,
                     itemType,
                     ordinal,
                     features,
                     format,
+                    null,
                     label,
                     fieldType,
                     fieldClass,
                     field,
+                    null,
+                    null,
                     contentAs
             );
         }
@@ -4868,7 +4871,7 @@ public class ObjectWriterCreatorASM
                 classNameFull = className;
             }
 
-            String supperType = type(FieldWriterListField.class);
+            String supperType = type(FieldWriterList.class);
             cw.visit(Opcodes.V1_8,
                     Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER,
                     classNameType,
@@ -4877,7 +4880,7 @@ public class ObjectWriterCreatorASM
             );
 
             {
-                String initDesc = "(Ljava/lang/String;Ljava/lang/reflect/Type;IJLjava/lang/String;Ljava/lang/String;Ljava/lang/reflect/Type;Ljava/lang/Class;Ljava/lang/reflect/Field;Ljava/lang/Class;)V";
+                String initDesc = "(Ljava/lang/String;Ljava/lang/reflect/Type;IJLjava/lang/String;Ljava/util/Locale;Ljava/lang/String;Ljava/lang/reflect/Type;Ljava/lang/Class;Ljava/lang/reflect/Field;Ljava/lang/reflect/Method;Ljava/util/function/Function;Ljava/lang/Class;)V";
                 MethodWriter mw = cw.visitMethod(
                         Opcodes.ACC_PUBLIC,
                         "<init>",
@@ -4895,10 +4898,13 @@ public class ObjectWriterCreatorASM
                 mw.aload(9);
                 mw.aload(10);
                 mw.aload(11);
+                mw.aload(12);
+                mw.aload(13);
+                mw.aload(14);
                 mw.invokespecial(supperType, "<init>", initDesc);
 
                 mw.return_();
-                mw.visitMaxs(12, 12);
+                mw.visitMaxs(14, 14);
             }
 
             genMethodWriteListValueJSONB(provider, features, cw, fieldWriters, itemClass, classNameType, capacity);
@@ -4914,22 +4920,28 @@ public class ObjectWriterCreatorASM
                         int.class,
                         long.class,
                         String.class,
+                        Locale.class,
                         String.class,
                         Type.class,
                         Class.class,
                         Field.class,
+                        Method.class,
+                        Function.class,
                         Class.class
                 );
-                return (FieldWriterListField) constructor.newInstance(
+                return (FieldWriterList) constructor.newInstance(
                         fieldName,
                         itemType,
                         ordinal,
                         features,
                         format,
+                        null,
                         label,
                         fieldType,
                         fieldClass,
                         field,
+                        null,
+                        null,
                         contentAs
                 );
             } catch (Throwable e) {
