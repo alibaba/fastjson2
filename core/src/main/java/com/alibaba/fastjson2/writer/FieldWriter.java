@@ -362,6 +362,10 @@ public abstract class FieldWriter<T>
         defaultValue = fieldValue;
     }
 
+    protected JSONException errorOnGet(Throwable e) {
+        return new JSONException("field.get error, " + fieldName, e);
+    }
+
     public Object getFieldValue(T object) {
         if (object == null) {
             throw new JSONException("field.get error, " + fieldName);
@@ -1049,10 +1053,8 @@ public abstract class FieldWriter<T>
             return false;
         }
         writeFieldName(jsonWriter);
-        if ((features & NullAsDefaultValue.mask) != 0) {
+        if ((features & (NullAsDefaultValue.mask | WriteNullNumberAsZero.mask)) != 0) {
             jsonWriter.writeFloat(0.0F);
-        } else if ((features & WriteNullNumberAsZero.mask) != 0) {
-            jsonWriter.writeInt32(0);
         } else {
             jsonWriter.writeNull();
         }

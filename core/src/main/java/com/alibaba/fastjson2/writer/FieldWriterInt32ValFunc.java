@@ -26,7 +26,11 @@ final class FieldWriterInt32ValFunc
 
     @Override
     public Object getFieldValue(Object object) {
-        return function.applyAsInt(object);
+        try {
+            return function.applyAsInt(object);
+        } catch (Throwable e) {
+            throw errorOnGet(e);
+        }
     }
 
     @Override

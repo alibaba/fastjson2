@@ -1955,8 +1955,12 @@ public class ObjectReaderCreator {
 
         final Constructor<T> constructor;
         try {
-            constructor = objectClass.getDeclaredConstructor();
-            constructor.setAccessible(true);
+            boolean innerClass = objectClass.getName().indexOf('$') != -1;
+            if (innerClass && !Modifier.isStatic(objectClass.getModifiers())) {
+                constructor = objectClass.getDeclaredConstructor(objectClass.getDeclaringClass());
+            } else {
+                constructor = objectClass.getDeclaredConstructor();
+            }
         } catch (NoSuchMethodException ignored) {
             return null;
         } catch (Throwable e) {
