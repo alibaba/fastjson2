@@ -3,6 +3,10 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.function.ToCharFunction;
+import com.alibaba.fastjson2.function.ToFloatFunction;
+import com.alibaba.fastjson2.introspect.PropertyAccessor;
+import com.alibaba.fastjson2.introspect.PropertyAccessorFactory;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.ByteArrayOutputStream;
@@ -15,6 +19,8 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
 import java.util.zip.GZIPOutputStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -24,6 +30,7 @@ import static java.time.temporal.ChronoField.YEAR;
 
 public abstract class FieldWriter<T>
         implements Comparable {
+    protected final PropertyAccessor propertyAccessor;
     public final String fieldName;
     public final Type fieldType;
     public final Class fieldClass;
@@ -35,6 +42,7 @@ public abstract class FieldWriter<T>
     public final String label;
     public final Field field;
     public final Method method;
+    protected Function function;
     protected final long fieldOffset;
     protected final boolean primitive;
 
@@ -75,6 +83,22 @@ public abstract class FieldWriter<T>
             Class fieldClass,
             Field field,
             Method method
+    ) {
+        this(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
+    }
+
+    FieldWriter(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method,
+            Object function
     ) {
         if ("string".equals(format) && fieldClass != String.class) {
             features |= WriteNonStringValueAsString.mask;
@@ -166,6 +190,40 @@ public abstract class FieldWriter<T>
         chars[chars.length - 2] = '"';
         chars[chars.length - 1] = ':';
         nameWithColonUTF16 = chars;
+
+        propertyAccessor = createPropertyAccessor(name, fieldType, fieldClass, field, method, function);
+        if (function instanceof Function) {
+            this.function = (Function) function;
+        }
+    }
+
+    private static PropertyAccessor createPropertyAccessor(String name, Type fieldType, Class fieldClass, Field field, Method method, Object function) {
+        PropertyAccessor propertyAccessor;
+        PropertyAccessorFactory factory = JSONFactory.PROPERTY_ACCESSOR_FACTORY;
+        if (function instanceof Function) {
+            propertyAccessor = factory.create(name, fieldClass, fieldType, (Function) function, null);
+        } else if (function instanceof Predicate) {
+            propertyAccessor = factory.create(name, (Predicate) function, null);
+        } else if (function instanceof ToFloatFunction) {
+            propertyAccessor = factory.create(name, (ToFloatFunction) function, null);
+        } else if (function instanceof ToDoubleFunction) {
+            propertyAccessor = factory.create(name, (ToDoubleFunction) function, null);
+        } else if (function instanceof ToCharFunction) {
+            propertyAccessor = factory.create(name, (ToCharFunction) function, null);
+        } else if (function instanceof java.util.function.ToIntFunction) {
+            propertyAccessor = factory.create(name, (java.util.function.ToIntFunction) function, null);
+        } else if (function instanceof com.alibaba.fastjson2.function.ToByteFunction) {
+            propertyAccessor = factory.create(name, (com.alibaba.fastjson2.function.ToByteFunction) function, null);
+        } else if (function instanceof com.alibaba.fastjson2.function.ToShortFunction) {
+            propertyAccessor = factory.create(name, (com.alibaba.fastjson2.function.ToShortFunction) function, null);
+        } else if (function instanceof java.util.function.ToLongFunction) {
+            propertyAccessor = factory.create(name, (java.util.function.ToLongFunction) function, null);
+        } else if (method != null) {
+            propertyAccessor = factory.create(method);
+        } else {
+            propertyAccessor = field != null ? factory.create(field) : null;
+        }
+        return propertyAccessor;
     }
 
     public boolean isFieldClassSerializable() {
@@ -367,25 +425,11 @@ public abstract class FieldWriter<T>
     }
 
     public Object getFieldValue(T object) {
-        if (object == null) {
-            throw new JSONException("field.get error, " + fieldName);
+        try {
+            return propertyAccessor.getObject(object);
+        } catch (Throwable e) {
+            throw errorOnGet(e);
         }
-
-        if (field != null) {
-            try {
-                Object value;
-                if (fieldOffset != -1 && !primitive) {
-                    value = UNSAFE.getObject(object, fieldOffset);
-                } else {
-                    value = field.get(object);
-                }
-                return value;
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                throw new JSONException("field.get error, " + fieldName, e);
-            }
-        }
-
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -605,8 +649,8 @@ public abstract class FieldWriter<T>
 
     public void writeInt64(JSONWriter jsonWriter, long value) {
         writeFieldName(jsonWriter);
-        if ((features & WriteNonStringValueAsString.mask) != 0) {
-            jsonWriter.writeString(Long.toString(value));
+        if (JSONWriter.isWriteAsString(value, features)) {
+            jsonWriter.writeString(value);
         } else {
             jsonWriter.writeInt64(value);
         }
@@ -1044,7 +1088,7 @@ public abstract class FieldWriter<T>
     }
 
     public Function getFunction() {
-        return null;
+        return function;
     }
 
     protected final boolean writeFloatNull(JSONWriter jsonWriter) {

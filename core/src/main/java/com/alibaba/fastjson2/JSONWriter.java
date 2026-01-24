@@ -1476,7 +1476,7 @@ public abstract class JSONWriter
         throw new JSONException("UnsupportedOperation");
     }
 
-    protected static boolean isWriteAsString(long value, long features) {
+    public static boolean isWriteAsString(long value, long features) {
         return (features & (MASK_WRITE_NON_STRING_VALUE_AS_STRING | MASK_WRITE_LONG_AS_STRING)) != 0
                 || ((features & MASK_BROWSER_COMPATIBLE) != 0 && !isJavaScriptSupport(value));
     }
@@ -3880,28 +3880,41 @@ public abstract class JSONWriter
         }
     }
 
+    public static final long MASK_FIELD_BASED = 1;
+    public static final long MASK_IGNORE_NONE_SERIALIZABLE = 1 << 1;
+    public static final long MAKS_ERROR_ON_NONE_SERIALIZABLE = 1 << 2;
+    public static final long MASK_BEAN_TO_ARRAY = 1 << 3;
     public static final long MASK_WRITE_MAP_NULL_VALUE = 1 << 4;
-    protected static final long MASK_BROWSER_COMPATIBLE = 1 << 5;
+    public static final long MASK_BROWSER_COMPATIBLE = 1 << 5;
     public static final long MASK_NULL_AS_DEFAULT_VALUE = 1 << 6;
-    protected static final long MASK_WRITE_BOOLEAN_AS_NUMBER = 1 << 7;
-    protected static final long MASK_WRITE_NON_STRING_VALUE_AS_STRING = 1L << 8;
-    protected static final long MASK_WRITE_CLASS_NAME = 1 << 9;
-    protected static final long MASK_NOT_WRITE_DEFAULT_VALUE = 1 << 12;
-    protected static final long MASK_WRITE_ENUMS_USING_NAME = 1 << 13;
-    protected static final long MASK_WRITE_ENUM_USING_TO_STRING = 1 << 14;
-    protected static final long MASK_PRETTY_FORMAT = 1 << 16;
-    protected static final long MASK_REFERENCE_DETECTION = 1 << 17;
-    protected static final long MASK_USE_SINGLE_QUOTES = 1 << 20;
-    protected static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
-    protected static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
+    public static final long MASK_WRITE_BOOLEAN_AS_NUMBER = 1 << 7;
+    public static final long MASK_WRITE_NON_STRING_VALUE_AS_STRING = 1L << 8;
+    public static final long MASK_WRITE_CLASS_NAME = 1 << 9;
+    public static final long MASK_NOT_WRITE_ROOT_CLASSNAME = 1 << 10;
+    public static final long MASK_NOT_WRITE_HASHMAP_ARRAY_LIST_CLASS_NAME = 1 << 11;
+    public static final long MASK_NOT_WRITE_DEFAULT_VALUE = 1 << 12;
+    public static final long MASK_WRITE_ENUMS_USING_NAME = 1 << 13;
+    public static final long MASK_WRITE_ENUM_USING_TO_STRING = 1 << 14;
+    public static final long MASK_IGNORE_ERROR_GETTER = 1L << 15;
+    public static final long MASK_PRETTY_FORMAT = 1 << 16;
+    public static final long MASK_REFERENCE_DETECTION = 1 << 17;
+    public static final long MASK_WRITE_BIG_DECIMAL_AS_PLAIN = 1 << 19;
+    public static final long MASK_USE_SINGLE_QUOTES = 1 << 20;
+    public static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
+    public static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
     public static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
-    protected static final long MASK_WRITE_NULL_BOOLEAN_AS_FALSE = 1 << 25;
-    protected static final long MASK_NOT_WRITE_EMPTY_ARRAY = 1 << 26;
-    protected static final long MASK_ESCAPE_NONE_ASCII = 1L << 30;
-    protected static final long MASK_IGNORE_NON_FIELD_GETTER = 1L << 32;
-    protected static final long MASK_WRITE_LONG_AS_STRING = 1L << 34;
-    protected static final long MASK_BROWSER_SECURE = 1L << 35;
-    protected static final long MASK_NOT_WRITE_NUMBER_CLASS_NAME = 1L << 40;
+    public static final long MASK_WRITE_NULL_BOOLEAN_AS_FALSE = 1 << 25;
+    public static final long MASK_NOT_WRITE_EMPTY_ARRAY = 1 << 26;
+    public static final long MASK_WRITE_NON_STRING_KEY_AS_STRING = 1 << 27;
+    public static final long MASK_WRITE_PAIR_AS_JAVA_BEAN = 1 << 28;
+    public static final long MASK_ESCAPE_NONE_ASCII = 1L << 30;
+    public static final long MASK_IGNORE_NON_FIELD_GETTER = 1L << 32;
+    public static final long MASK_WRITE_LONG_AS_STRING = 1L << 34;
+    public static final long MASK_BROWSER_SECURE = 1L << 35;
+    public static final long MASK_WRITE_ENUM_USING_ORDINAL = 1L << 36;
+    public static final long MASK_UNQUOTE_FIELD_NAME = 1L << 38;
+    public static final long MASK_NOT_WRITE_NUMBER_CLASS_NAME = 1L << 40;
+    public static final long MASK_WRITE_FLOAT_SPECIAL_AS_STRING = 1L << 45;
 
     /**
      * Feature is used to control the behavior of JSON writing and serialization in FASTJSON2.

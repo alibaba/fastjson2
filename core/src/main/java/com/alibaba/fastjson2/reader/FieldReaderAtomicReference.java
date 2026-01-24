@@ -4,8 +4,9 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
 import java.lang.reflect.*;
+import java.util.concurrent.atomic.AtomicReference;
 
-public abstract class FieldReaderAtomicReference<T>
+public class FieldReaderAtomicReference<T>
         extends FieldReader<T> {
     final Type referenceType;
 
@@ -46,5 +47,21 @@ public abstract class FieldReaderAtomicReference<T>
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.read(referenceType);
+    }
+
+    @Override
+    public void accept(T object, Object value) {
+        if (value == null) {
+            return;
+        }
+
+        if (readOnly) {
+            AtomicReference atomic = (AtomicReference) propertyAccessor.getObject(object);
+            atomic.set(value);
+        } else {
+            propertyAccessor.setObject(
+                    object,
+                    new AtomicReference(value));
+        }
     }
 }

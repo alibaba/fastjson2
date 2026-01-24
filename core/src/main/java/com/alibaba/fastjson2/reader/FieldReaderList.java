@@ -9,15 +9,19 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class FieldReaderList<T, V>
         extends FieldReaderObject<T> {
     final long fieldClassHash;
     final long itemClassHash;
+    final Supplier<List<V>> listCreator;
+    final ObjectReader<V> itemObjectReader;
 
     public FieldReaderList(
             String fieldName,
@@ -33,13 +37,19 @@ public class FieldReaderList<T, V>
             JSONSchema schema,
             Method method,
             Field field,
-            BiConsumer function
+            BiConsumer function,
+            String paramName,
+            Parameter parameter,
+            Supplier<List<V>> listCreator,
+            ObjectReader<V> itemObjectReader
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
         this.itemType = itemType;
         this.itemClass = itemClass;
         this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
         this.fieldClassHash = fieldClass == null ? 0 : Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));
+        this.listCreator = listCreator;
+        this.itemObjectReader = itemObjectReader;
 
         if (format != null) {
             if (itemType == Date.class) {
@@ -54,6 +64,10 @@ public class FieldReaderList<T, V>
     }
 
     public Collection<V> createList(JSONReader.Context context) {
+        if (listCreator != null) {
+            return listCreator.get();
+        }
+
         if (fieldClass == List.class || fieldClass == Collection.class || fieldClass == ArrayList.class) {
             return new ArrayList<>();
         }
