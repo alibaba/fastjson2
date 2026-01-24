@@ -207,8 +207,7 @@ public class FieldReaderDateTest {
         assertEquals(bean.date, fieldReader.apply(zdt.toLocalDateTime()));
         assertEquals(bean.date, fieldReader.apply(new Date(epochMilli)));
 
-        fieldReader.field.setAccessible(false);
-        assertThrows(Exception.class, () -> fieldReader.accept(bean, epochMilli));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, new Object()));
     }
 
     public static class Bean1 {
@@ -311,8 +310,7 @@ public class FieldReaderDateTest {
         assertEquals(bean.date, fieldReader.apply(zdt.toLocalDateTime()));
         assertEquals(bean.date, fieldReader.apply(new Date(epochMilli)));
 
-        fieldReader.field.setAccessible(false);
-        assertThrows(Exception.class, () -> fieldReader.accept(bean, epochMilli));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, new Object()));
     }
 
     public static class Bean2 {
@@ -418,8 +416,7 @@ public class FieldReaderDateTest {
         assertEquals(bean.date, fieldReader.apply(zdt.toLocalDateTime()));
         assertEquals(bean.date, fieldReader.apply(new Date(epochMilli)));
 
-        fieldReader.field.setAccessible(false);
-        assertThrows(Exception.class, () -> fieldReader.accept(bean, epochMilli));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, new Object()));
     }
 
     public static class Bean3 {

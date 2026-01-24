@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
+import java.util.function.ObjLongConsumer;
 
 public final class ASMUtils {
     public static final String TYPE_UNSAFE_UTILS = JDKUtils.class.getName().replace('.', '/');

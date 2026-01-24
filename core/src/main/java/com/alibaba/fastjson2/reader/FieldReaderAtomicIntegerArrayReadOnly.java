@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -16,9 +17,10 @@ final class FieldReaderAtomicIntegerArrayReadOnly<T>
             Class fieldType,
             int ordinal,
             JSONSchema jsonSchema,
-            Method method
+            Method method,
+            Field field
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, jsonSchema, method, null);
+        super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, jsonSchema, method, field);
     }
 
     @Override
@@ -33,7 +35,7 @@ final class FieldReaderAtomicIntegerArrayReadOnly<T>
         }
 
         try {
-            AtomicIntegerArray atomic = (AtomicIntegerArray) method.invoke(object);
+            AtomicIntegerArray atomic = (AtomicIntegerArray) propertyAccessor.getObject(object);
             if (value instanceof AtomicIntegerArray) {
                 AtomicIntegerArray array = (AtomicIntegerArray) value;
                 for (int i = 0; i < array.length(); i++) {

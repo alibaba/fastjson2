@@ -401,8 +401,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
 
             long hash;
-            if (fieldReader instanceof FieldReaderObjectParam) {
-                hash = ((FieldReaderObjectParam<?>) fieldReader).paramNameHash;
+            if (fieldReader.isParameter()) {
+                hash = fieldReader.paramNameHash;
             } else {
                 hash = fieldReader.fieldNameHash;
             }
@@ -495,8 +495,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
 
             long hash;
-            if (fieldReader instanceof FieldReaderObjectParam) {
-                hash = ((FieldReaderObjectParam<?>) fieldReader).paramNameHash;
+            if (fieldReader.isParameter()) {
+                hash = fieldReader.paramNameHash;
             } else {
                 hash = fieldReader.fieldNameHash;
             }
@@ -556,8 +556,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 }
 
                 long hash;
-                if (fieldReader instanceof FieldReaderObjectParam) {
-                    hash = ((FieldReaderObjectParam<?>) fieldReader).paramNameHash;
+                if (fieldReader.isParameter()) {
+                    hash = fieldReader.paramNameHash;
                 } else {
                     hash = fieldReader.fieldNameHash;
                 }

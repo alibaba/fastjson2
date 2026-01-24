@@ -5,27 +5,71 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.Locale;
 
 import static com.alibaba.fastjson2.JSONWriter.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
-abstract class FieldWriterInt64<T>
+class FieldWriterInt64<T>
         extends FieldWriter<T> {
     final boolean browserCompatible;
-    boolean writeAsMillis;
 
     FieldWriterInt64(
             String name,
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
+            Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Object function
     ) {
-        super(name, ordinal, features, format, null, label, fieldClass, fieldClass, field, method);
-        browserCompatible = (features & JSONWriter.Feature.BrowserCompatible.mask) != 0;
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+        browserCompatible = (features & Feature.BrowserCompatible.mask) != 0;
+    }
+
+    public Object getFieldValue(T object) {
+        return propertyAccessor.getObject(object);
+    }
+
+    @Override
+    public void writeValue(JSONWriter jsonWriter, T object) {
+        Long value = (Long) propertyAccessor.getObject(object);
+        if (value == null) {
+            jsonWriter.writeNumberNull();
+        } else {
+            jsonWriter.writeInt64(value);
+        }
+    }
+
+    @Override
+    public boolean write(JSONWriter jsonWriter, T object) {
+        long features = this.features | jsonWriter.getFeatures();
+        Long value;
+        try {
+            value = (Long) propertyAccessor.getObject(object);
+        } catch (RuntimeException error) {
+            if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
+                return false;
+            }
+            throw error;
+        }
+
+        if (value == null) {
+            if ((features & (MASK_WRITE_MAP_NULL_VALUE | MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
+                writeFieldName(jsonWriter);
+                jsonWriter.writeInt64Null(features);
+                return true;
+            }
+            return false;
+        }
+
+        writeInt64(jsonWriter, value);
+        return true;
     }
 
     public final void writeInt64(JSONWriter jsonWriter, long value) {
@@ -39,51 +83,9 @@ abstract class FieldWriterInt64<T>
             writeAsString = browserCompatible && !TypeUtils.isJavaScriptSupport(value) && !jsonWriter.jsonb;
         }
         if (writeAsString) {
-            jsonWriter.writeString(Long.toString(value));
+            jsonWriter.writeString(value);
         } else {
             jsonWriter.writeInt64(value);
         }
-    }
-
-    @Override
-    public boolean write(JSONWriter jsonWriter, T object) {
-        Long value;
-        try {
-            value = (Long) getFieldValue(object);
-        } catch (RuntimeException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
-                return false;
-            }
-            throw error;
-        }
-
-        if (value == null) {
-            long features = this.features | jsonWriter.getFeatures();
-            if ((features & (MASK_WRITE_MAP_NULL_VALUE | MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0) {
-                return false;
-            }
-            writeFieldName(jsonWriter);
-            if ((features & (MASK_WRITE_NULL_NUMBER_AS_ZERO | MASK_NULL_AS_DEFAULT_VALUE)) != 0) {
-                jsonWriter.writeInt64(0);
-            } else {
-                jsonWriter.writeInt64Null();
-            }
-            return true;
-        }
-
-        writeInt64(jsonWriter, value);
-        return true;
-    }
-
-    @Override
-    public void writeValue(JSONWriter jsonWriter, T object) {
-        Long value = (Long) getFieldValue(object);
-
-        if (value == null) {
-            jsonWriter.writeNumberNull();
-            return;
-        }
-
-        jsonWriter.writeInt64(value);
     }
 }

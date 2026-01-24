@@ -2,6 +2,8 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.ExtraProcessor;
 import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.introspect.PropertyAccessorFactory;
+import com.alibaba.fastjson2.introspect.PropertyAccessorFactoryUnsafe;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
@@ -94,6 +96,7 @@ public final class JSONFactory {
 
     static int defaultDecimalMaxScale = 2048;
     static int defaultMaxLevel;
+    public static final PropertyAccessorFactory PROPERTY_ACCESSOR_FACTORY;
 
     interface JSONReaderUTF8Creator {
         JSONReader create(JSONReader.Context ctx, String str, byte[] bytes, int offset, int length);
@@ -222,6 +225,20 @@ public final class JSONFactory {
         defaultWriterAlphabetic = getPropertyBool(properties, "fastjson2.writer.alphabetic", true);
         defaultSkipTransient = getPropertyBool(properties, "fastjson2.writer.skipTransient", true);
         defaultMaxLevel = getPropertyInt(properties, "fastjson2.writer.maxLevel", 2048);
+        PropertyAccessorFactory propertyAccessorFactory = null;
+        if (JDKUtils.JVM_VERSION >= 11) {
+            try {
+                String factoryClassNameJDK11 = "com.alibaba.fastjson2.reflect.PropertyAccessorFactoryMethodHandle";
+                Class<?> classV = Conf.class.getClassLoader().loadClass(factoryClassNameJDK11);
+                propertyAccessorFactory = (PropertyAccessorFactory) classV.newInstance();
+            } catch (Exception ignored) {
+                // ignore
+            }
+        }
+        if (propertyAccessorFactory == null) {
+            propertyAccessorFactory = JDKUtils.UNSAFE != null ? new PropertyAccessorFactoryUnsafe() : new PropertyAccessorFactory();
+        }
+        PROPERTY_ACCESSOR_FACTORY = propertyAccessorFactory;
     }
 
     private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {

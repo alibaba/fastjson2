@@ -27,7 +27,8 @@ public class Issue1563 {
         MyData myData = new MyData(data, strData);
         String expected = "{\"data\":[[\"i_0_j_0\",\"i_0_j_1\"],[\"i_1_j_0\",\"i_1_j_1\"]],\"strData\":[\"i_0_j_0\",\"i_0_j_1\",\"i_1_j_0\",\"i_1_j_1\"]}";
         assertEquals(expected, JSON.toJSONString(myData));
-        assertEquals(expected, ObjectWriterCreator.INSTANCE.createObjectWriter(myData.getClass()).toJSONString(myData));
+        assertEquals(expected, ObjectWriterCreator.INSTANCE.createObjectWriter(myData.getClass())
+                .toJSONString(myData));
     }
 
     public static class MyData {

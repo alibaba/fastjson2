@@ -1,0 +1,58 @@
+package com.alibaba.fastjson2.reader;
+
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.schema.JSONSchema;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Locale;
+import java.util.function.BiConsumer;
+
+final class FieldReaderInt16<T, V>
+        extends FieldReader<T> {
+    FieldReaderInt16(
+            String fieldName,
+            Class<V> fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            Field field,
+            BiConsumer<T, V> function,
+            String paramName,
+            Parameter parameter
+    ) {
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+    }
+
+    @Override
+    public void accept(T object, Object value) {
+        propertyAccessor.setObject(object, value);
+    }
+
+    @Override
+    public void readFieldValue(JSONReader jsonReader, T object) {
+        Short value;
+        try {
+            Integer intValue = jsonReader.readInt32();
+            value = intValue == null ? null : intValue.shortValue();
+        } catch (Exception e) {
+            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
+                value = null;
+            } else {
+                throw e;
+            }
+        }
+
+        propertyAccessor.setObject(object, value);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readInt32();
+    }
+}

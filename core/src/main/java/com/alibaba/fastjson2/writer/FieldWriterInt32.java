@@ -1,37 +1,57 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Locale;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+import static com.alibaba.fastjson2.JSONWriter.*;
 
-abstract class FieldWriterInt32<T>
+class FieldWriterInt32<T>
         extends FieldWriter<T> {
     final boolean toString;
 
-    protected FieldWriterInt32(
+    FieldWriterInt32(
             String name,
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Object function
     ) {
-        super(name, ordinal, features, format, null, label, fieldType, fieldClass, field, method);
-        toString = (features & WriteNonStringValueAsString.mask) != 0
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+        toString = (features & MASK_WRITE_NON_STRING_VALUE_AS_STRING) != 0
                 || "string".equals(format);
+    }
+
+    @Override
+    public Object getFieldValue(T object) {
+        try {
+            return propertyAccessor.getObject(object);
+        } catch (Throwable e) {
+            throw errorOnGet(e);
+        }
+    }
+
+    public int getFieldValueInt(T object) {
+        if (object == null) {
+            throw new JSONException("field.get error, ".concat(fieldName));
+        }
+        return propertyAccessor.getIntValue(object);
     }
 
     @Override
     public final void writeInt32(JSONWriter jsonWriter, int value) {
         long features = jsonWriter.getFeatures() | this.features;
-        if (value == 0 && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
+        if (value == 0 && (features & MASK_NOT_WRITE_DEFAULT_VALUE) != 0 && defaultValue == null) {
             return;
         }
         if (toString) {
@@ -49,11 +69,12 @@ abstract class FieldWriterInt32<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
+        long features = this.features | jsonWriter.getFeatures();
         Integer value;
         try {
-            value = (Integer) getFieldValue(object);
+            value = (Integer) propertyAccessor.getObject(object);
         } catch (RuntimeException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
+            if ((features & MASK_IGNORE_ERROR_GETTER) != 0) {
                 return false;
             }
             throw error;
@@ -69,7 +90,7 @@ abstract class FieldWriterInt32<T>
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        Integer value = (Integer) getFieldValue(object);
+        Integer value = (Integer) propertyAccessor.getObject(object);
 
         if (value == null) {
             jsonWriter.writeNumberNull();
