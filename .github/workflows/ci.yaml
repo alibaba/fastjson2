@@ -12,6 +12,9 @@ on:
       - '**.md'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Shanghai
 
