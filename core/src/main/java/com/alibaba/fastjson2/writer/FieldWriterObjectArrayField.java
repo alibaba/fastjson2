@@ -190,7 +190,7 @@ final class FieldWriterObjectArrayField<T>
                 previousObjectWriter = itemObjectWriter;
             }
 
-            itemObjectWriter.write(jsonWriter, item);
+            itemObjectWriter.write(jsonWriter, item, i, this.itemType, this.features);
         }
         jsonWriter.endArray();
     }

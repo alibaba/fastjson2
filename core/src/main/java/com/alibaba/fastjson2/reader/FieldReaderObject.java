@@ -141,6 +141,8 @@ public class FieldReaderObject<T>
                         value = getObjectReader(jsonReader).createInstance();
                     } else if (Temporal.class.isAssignableFrom(fieldClass)) {
                         value = null;
+                    } else if (fieldClass == byte[].class) {
+                        value = new byte[0];
                     } else {
                         value = "";
                     }

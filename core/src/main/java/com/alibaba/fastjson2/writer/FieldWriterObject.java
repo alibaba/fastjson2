@@ -303,6 +303,8 @@ public class FieldWriterObject<T>
                         || fieldClass == Double.class
                         || fieldClass == BigDecimal.class) {
                     jsonWriter.writeDecimalNull();
+                } else if (fieldClass == Long.class) {
+                    jsonWriter.writeInt64Null(features);
                 } else {
                     jsonWriter.writeNumberNull();
                 }
@@ -356,6 +358,8 @@ public class FieldWriterObject<T>
                 jsonWriter.popPath(value);
                 return true;
             }
+        } else if (fieldName.startsWith("this$")) {
+            return false;
         }
 
         Class<?> valueClass = value.getClass();

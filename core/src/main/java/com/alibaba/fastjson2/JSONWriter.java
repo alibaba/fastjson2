@@ -2256,10 +2256,16 @@ public abstract class JSONWriter
      * @param features the features to use for serialization
      */
     public final void writeDecimalNull(long features) {
-        if ((features & MASK_NULL_AS_DEFAULT_VALUE) != 0) {
+        if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
             writeDouble(0.0);
-        } else if ((features & MASK_WRITE_NULL_NUMBER_AS_ZERO) != 0) {
-            writeInt32(0);
+        } else {
+            writeNull();
+        }
+    }
+
+    public final void writeInt64Null(long features) {
+        if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
+            writeInt64(0);
         } else {
             writeNull();
         }
@@ -3874,9 +3880,9 @@ public abstract class JSONWriter
         }
     }
 
-    protected static final long MASK_WRITE_MAP_NULL_VALUE = 1 << 4;
+    public static final long MASK_WRITE_MAP_NULL_VALUE = 1 << 4;
     protected static final long MASK_BROWSER_COMPATIBLE = 1 << 5;
-    protected static final long MASK_NULL_AS_DEFAULT_VALUE = 1 << 6;
+    public static final long MASK_NULL_AS_DEFAULT_VALUE = 1 << 6;
     protected static final long MASK_WRITE_BOOLEAN_AS_NUMBER = 1 << 7;
     protected static final long MASK_WRITE_NON_STRING_VALUE_AS_STRING = 1L << 8;
     protected static final long MASK_WRITE_CLASS_NAME = 1 << 9;
@@ -3888,7 +3894,7 @@ public abstract class JSONWriter
     protected static final long MASK_USE_SINGLE_QUOTES = 1 << 20;
     protected static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
     protected static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
-    protected static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
+    public static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
     protected static final long MASK_WRITE_NULL_BOOLEAN_AS_FALSE = 1 << 25;
     protected static final long MASK_NOT_WRITE_EMPTY_ARRAY = 1 << 26;
     protected static final long MASK_ESCAPE_NONE_ASCII = 1L << 30;

@@ -1519,6 +1519,13 @@ public class TypeUtils {
 
         if (obj instanceof String) {
             String json = (String) obj;
+            if (json.isEmpty()) {
+                if (targetClass == StringBuffer.class) {
+                    return (T) new StringBuffer();
+                } else if (targetClass == StringBuilder.class) {
+                    return (T) new StringBuilder();
+                }
+            }
             if (json.isEmpty() || "null".equals(json)) {
                 return null;
             }

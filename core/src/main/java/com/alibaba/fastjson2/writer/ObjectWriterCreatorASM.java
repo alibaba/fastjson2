@@ -3302,10 +3302,7 @@ public class ObjectWriterCreatorASM
             gwFieldName(mwc, fieldWriter, i);
             mw.aload(JSON_WRITER);
             long features = fieldWriter.features;
-            if ((features & WriteNullNumberAsZero.mask) != 0) {
-                mw.visitLdcInsn(0);
-                mw.invokevirtual(TYPE_JSON_WRITER, "writeInt32", "(I)V");
-            } else if ((features & NullAsDefaultValue.mask) != 0) {
+            if ((features & (WriteNullNumberAsZero.mask | NullAsDefaultValue.mask)) != 0) {
                 mw.visitLdcInsn(0);
                 mw.i2d();
                 mw.invokevirtual(TYPE_JSON_WRITER, "writeDouble", "(D)V");
@@ -3379,10 +3376,7 @@ public class ObjectWriterCreatorASM
             gwFieldName(mwc, fieldWriter, i);
             mw.aload(JSON_WRITER);
             long features = fieldWriter.features;
-            if ((features & WriteNullNumberAsZero.mask) != 0) {
-                mw.visitLdcInsn(0);
-                mw.invokevirtual(TYPE_JSON_WRITER, "writeInt32", "(I)V");
-            } else if ((features & NullAsDefaultValue.mask) != 0) {
+            if ((features & (WriteNullNumberAsZero.mask | NullAsDefaultValue.mask)) != 0) {
                 mw.visitLdcInsn(0);
                 mw.i2f();
                 mw.invokevirtual(TYPE_JSON_WRITER, "writeFloat", "(F)V");

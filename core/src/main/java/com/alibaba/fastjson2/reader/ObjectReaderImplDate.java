@@ -189,6 +189,8 @@ public class ObjectReaderImplDate
                 millis = jsonReader.readInt64Value();
                 jsonReader.nextIfObjectEnd();
                 jsonReader.setTypeRedirect(false);
+            } else if (jsonReader.isObject()) {
+                millis = jsonReader.readDate().getTime();
             } else {
                 millis = jsonReader.readMillisFromString();
             }
