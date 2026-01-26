@@ -9280,19 +9280,6 @@ public class DateUtils {
         return ((d & 0x00F_0000_0F00_000FL) << 3) + ((d & 0x00F_0000_0F00_000FL) << 1) + ((d & 0xF00_000F_0000_0F00L) >> 8);
     }
 
-    public static long ymd(byte[] bytes, int off) {
-        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + off);
-        if (BIG_ENDIAN) {
-            v = Long.reverseBytes(v);
-        }
-        long d;
-        if (((v & 0x0000FF00_00FF0000L) != 0x00002d00_002d0000L) // yy-mm-dd
-                || (((v & 0xF0F000F0_F000F0F0L) - 0x30300030_30003030L) | (((d = v & 0x0F0F000F_0F000F0FL) + 0x06060006_06000606L) & 0xF0F000F0_F000F0F0L)) != 0) {
-            return -1;
-        }
-        return ((d & 0x00F_0000_0F00_000FL) << 3) + ((d & 0x00F_0000_0F00_000FL) << 1) + ((d & 0xF00_000F_0000_0F00L) >> 8);
-    }
-
     public static int yy(byte[] bytes, int off) {
         short x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
         if (BIG_ENDIAN) {
@@ -9304,5 +9291,30 @@ public class DateUtils {
             return -1;
         }
         return (d & 0xF) * 1000 + (d >> 8) * 100;
+    }
+
+    public static LocalDate localDateYMD(byte[] bytes, int off) {
+        short x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
+        int d0;
+        if ((((x & 0xF0F0) - 0x3030) | (((d0 = x & 0x0F0F) + 0x0606) & 0xF0F0)) != 0
+        ) {
+            return null;
+        }
+
+        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 2);
+        if (BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
+        long d1;
+        if (((v & 0x0000FF00_00FF0000L) != 0x00002d00_002d0000L) // yy-mm-dd
+                || (((v & 0xF0F000F0_F000F0F0L) - 0x30300030_30003030L) | (((d1 = v & 0x0F0F000F_0F000F0FL) + 0x06060006_06000606L) & 0xF0F000F0_F000F0F0L)) != 0) {
+            return null;
+        }
+        long ymd = ((d1 & 0x00F_0000_0F00_000FL) << 3) + ((d1 & 0x00F_0000_0F00_000FL) << 1) + ((d1 & 0xF00_000F_0000_0F00L) >> 8);
+
+        int year = (d0 & 0xF) * 1000 + (d0 >> 8) * 100 + ((int) ymd & 0xFF);
+        int month = (int) (ymd >> 24) & 0xFF;
+        int dayOfMonth = (int) (ymd >> 48) & 0xFF;
+        return year == 0 && month == 0 && dayOfMonth == 0 ? null : LocalDate.of(year, month, dayOfMonth);
     }
 }

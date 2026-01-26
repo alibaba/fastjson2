@@ -2927,4 +2927,12 @@ public class DateUtilsTest {
         System.out.println((t >> 48) & 0xFF);
 //        System.out.println(Integer.toString('-') + "\t" + Integer.toBinaryString('-'));
     }
+
+    @Test
+    public void ymdTest() {
+        String str = "2019-10-14T10:28:31.669682461Z";
+        byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
+        LocalDate localDate = DateUtils.localDateYMD(utf8, 0);
+        assertEquals("2019-10-14", localDate.toString());
+    }
 }
