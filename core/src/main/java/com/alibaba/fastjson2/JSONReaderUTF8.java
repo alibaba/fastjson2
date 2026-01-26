@@ -5862,36 +5862,30 @@ class JSONReaderUTF8
 
     public final LocalDate readLocalDate() {
         final byte[] bytes = this.bytes;
-        int offset = this.offset;
+        int offset = this.offset, end = this.end;
         char quote = ch;
         if (quote == '"' || quote == '\'') {
             if (!this.context.formatComplex) {
-                int yy;
-                long ymd;
+                LocalDate ldt;
                 int c10 = offset + 10;
                 if (c10 < bytes.length
                         && c10 < end
-                        && (yy = yy(bytes, offset)) != -1
-                        && ((ymd = ymd(bytes, offset + 2))) != -1L
+                        && ((ldt = localDateYMD(bytes, offset))) != null
                         && bytes[offset + 10] == quote
                 ) {
-                    int year = yy + ((int) ymd & 0xFF);
-                    int month = (int) (ymd >> 24) & 0xFF;
-                    int dom = (int) (ymd >> 48) & 0xFF;
-
-                    LocalDate ldt;
-                    try {
-                        ldt = (year | month | dom) == 0
-                                ? null
-                                : LocalDate.of(year, month, dom);
-                    } catch (DateTimeException ex) {
-                        throw error("read date error", ex);
+                    offset = offset + 11;
+                    int ch = offset >= end ? EOI : bytes[offset++];
+                    if (comma = (ch == ',')) {
+                        ch = offset == end ? EOI : (char) bytes[offset++];
+                        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                            ch = offset == end ? EOI : bytes[offset++];
+                        }
                     }
-
-                    this.offset = offset + 11;
-                    next();
-                    if (comma = (this.ch == ',')) {
-                        next();
+                    if (ch < 0) {
+                        char_utf8(ch, offset);
+                    } else {
+                        this.offset = offset;
+                        this.ch = (char) ch;
                     }
                     return ldt;
                 }
@@ -5920,7 +5914,7 @@ class JSONReaderUTF8
             int year = TypeUtils.parseInt(bytes, offset, nextQuoteOffset - offset - 6);
             int month = IOUtils.digit2(bytes, nextQuoteOffset - 5);
             int dayOfMonth = IOUtils.digit2(bytes, nextQuoteOffset - 2);
-            LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
+            LocalDate localDate = year == 0 && month == 0 && dayOfMonth == 0 ? null : LocalDate.of(year, month, dayOfMonth);
             this.offset = nextQuoteOffset + 1;
             next();
             if (comma = (this.ch == ',')) {
@@ -5931,21 +5925,23 @@ class JSONReaderUTF8
         return null;
     }
 
+    private static boolean isDateTImeSpace(byte c) {
+        return c == 'T' || c == ' ';
+    }
+
     public final OffsetDateTime readOffsetDateTime() {
         final byte[] bytes = this.bytes;
         int offset = this.offset, end = this.end;
         char quote = this.ch;
         if (quote == '"' || quote == '\'') {
             if (!this.context.formatComplex) {
-                byte c10;
                 int off21 = offset + 19;
-                int yy;
-                long ymd, hms;
+                LocalDate localDate;
+                long hms;
                 if (off21 < bytes.length
                         && off21 < end
-                        && (yy = yy(bytes, offset)) != -1
-                        && ((ymd = ymd(bytes, offset + 2))) != -1L
-                        && ((c10 = bytes[offset + 10]) == ' ' || c10 == 'T')
+                        && (localDate = DateUtils.localDateYMD(bytes, offset)) != null
+                        && (isDateTImeSpace(bytes[offset + 10]))
                         && ((hms = hms(bytes, offset + 11))) != -1L
                 ) {
                     int nanos = 0, nanoSize = 0;
@@ -5995,13 +5991,10 @@ class JSONReaderUTF8
                             this.ch = (char) ch;
                         }
                         return OffsetDateTime.of(
-                                yy + ((int) ymd & 0xFF),
-                                (int) (ymd >> 24) & 0xFF,
-                                (int) (ymd >> 48) & 0xFF,
-                                (int) hms & 0xFF,
-                                (int) (hms >> 24) & 0xFF,
-                                (int) (hms >> 48) & 0xFF,
-                                nanos,
+                                localDate,
+                                LocalTime.of((int) hms & 0xFF,
+                                        (int) (hms >> 24) & 0xFF,
+                                        (int) (hms >> 48) & 0xFF, nanos),
                                 zoneOffset);
                     }
                 }
