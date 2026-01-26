@@ -39,7 +39,7 @@ public class ClientsParseUTF8Bytes {
         bh.consume(JSON.parseObject(utf8Bytes, Clients.class));
     }
 
-    @Benchmark
+//    @Benchmark
     public void dsljson(Blackhole bh) throws IOException {
         bh.consume(dslJson.deserialize(Clients.class, utf8Bytes, utf8Bytes.length));
     }
