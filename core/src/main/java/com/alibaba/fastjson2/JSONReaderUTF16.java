@@ -374,7 +374,7 @@ final class JSONReaderUTF16
         comma = true;
 
         ch = offset == end ? EOI : chars[offset++];
-        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : chars[offset++];
         }
         this.offset = offset;
@@ -514,7 +514,7 @@ final class JSONReaderUTF16
         }
 
         ch = offset == end ? EOI : chars[offset++];
-        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : chars[offset++];
         }
         this.offset = offset;
@@ -541,7 +541,7 @@ final class JSONReaderUTF16
         }
 
         ch = offset == end ? EOI : chars[offset++];
-        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : chars[offset++];
         }
 
@@ -563,7 +563,7 @@ final class JSONReaderUTF16
         char[] chars = this.chars;
         int offset = this.offset;
         ch = offset == end ? EOI : chars[offset++];
-        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : chars[offset++];
         }
 
@@ -585,14 +585,14 @@ final class JSONReaderUTF16
         int offset = this.offset;
         char[] chars = this.chars;
         ch = offset == end ? EOI : chars[offset++];
-        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : chars[offset++];
         }
 
         if (ch == ',') {
             comma = true;
             ch = offset == end ? EOI : chars[offset++];
-            while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 ch = offset == end ? EOI : chars[offset++];
             }
         }
@@ -848,7 +848,7 @@ final class JSONReaderUTF16
         char[] chars = this.chars;
         int offset = this.offset;
         ch = offset == end ? EOI : chars[offset++];
-        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : chars[offset++];
         }
 
@@ -871,14 +871,14 @@ final class JSONReaderUTF16
         int offset = this.offset;
         char[] chars = this.chars;
         ch = offset == end ? EOI : chars[offset++];
-        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : chars[offset++];
         }
 
         if (ch == ',') {
             comma = true;
             ch = offset == end ? EOI : chars[offset++];
-            while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 ch = offset == end ? EOI : chars[offset++];
             }
         }
@@ -897,7 +897,7 @@ final class JSONReaderUTF16
         int offset = this.offset;
         final char[] chars = this.chars;
         char ch = offset >= end ? EOI : chars[offset++];
-        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : chars[offset++];
         }
         this.offset = offset;
@@ -912,7 +912,7 @@ final class JSONReaderUTF16
         int offset = this.offset;
         final char[] chars = this.chars;
         char ch = offset >= end ? EOI : chars[offset++];
-        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : chars[offset++];
         }
         this.offset = offset;
@@ -3414,7 +3414,7 @@ final class JSONReaderUTF16
 
     public static int next(JSONReaderUTF16 jsonReader, char[] bytes, int offset, int end) {
         int ch = offset == end ? EOI : bytes[offset++];
-        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             ch = offset == end ? EOI : bytes[offset++];
         }
 
@@ -4885,7 +4885,7 @@ final class JSONReaderUTF16
                     }
                     if (ch == quote) {
                         ch = offset >= end ? EOI : chars[offset++];
-                        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                             ch = offset == end ? EOI : chars[offset++];
                         }
                         if (comma = (ch == ',')) {

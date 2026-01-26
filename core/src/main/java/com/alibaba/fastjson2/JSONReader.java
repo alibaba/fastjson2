@@ -72,7 +72,7 @@ public abstract class JSONReader
             JSON_TYPE_NaN = 14;
 
     static final char EOI = 0x1A;
-    static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
+    static final long SPACE = 1L | (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
 
     static final boolean[] INT_VALUE_END = new boolean[256];
     static {
