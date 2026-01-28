@@ -27,19 +27,21 @@ final class Not
     }
 
     @Override
-    protected ValidateResult validateInternal(Object value) {
+    protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         if (schema != null) {
-            if (schema.validate(value).isSuccess()) {
-                return FAIL_NOT;
+            if (schema.validateInternal(value, null, path).isSuccess()) {
+                ValidateResult result = handleError(handler, value, path, FAIL_NOT);
+                return result != null ? result : FAIL_NOT;
             }
         }
 
         if (types != null) {
             for (Type type : types) {
+                boolean match = false;
                 switch (type) {
                     case String:
                         if (value instanceof String) {
-                            return FAIL_NOT;
+                            match = true;
                         }
                         break;
                     case Integer:
@@ -51,49 +53,58 @@ final class Not
                                 || value instanceof AtomicInteger
                                 || value instanceof AtomicLong
                         ) {
-                            return FAIL_NOT;
+                            match = true;
                         }
                         break;
                     case Number:
                         if (value instanceof Number) {
-                            return FAIL_NOT;
+                            match = true;
                         }
                         break;
                     case Null:
                         if (value == null) {
-                            return FAIL_NOT;
+                            match = true;
                         }
                         break;
                     case Array:
                         if (value instanceof Object[] || value instanceof Collection || (value != null && value.getClass().isArray())) {
-                            return FAIL_NOT;
+                            match = true;
                         }
                         break;
                     case Object:
                         if (value instanceof Map) {
-                            return FAIL_NOT;
+                            match = true;
                         }
                         if (value != null && JSONSchema.CONTEXT.getObjectReader(value.getClass()) instanceof ObjectReaderBean) {
-                            return FAIL_NOT;
+                            match = true;
                         }
                         break;
                     case Boolean:
                         if (value instanceof Boolean) {
-                            return FAIL_NOT;
+                            match = true;
                         }
                         break;
                     case Any:
-                        return FAIL_NOT;
+                        match = true;
                     default:
                         break;
+                }
+
+                if (match) {
+                    ValidateResult result = handleError(handler, value, path, FAIL_NOT);
+                    return result != null ? result : FAIL_NOT;
                 }
             }
         }
 
         if (result != null) {
-            return result ? FAIL_NOT : SUCCESS;
+            if (result) {
+                ValidateResult result = handleError(handler, value, path, FAIL_NOT);
+                return result != null ? result : FAIL_NOT;
+            } else {
+                return SUCCESS;
+            }
         }
-
         return SUCCESS;
     }
 }

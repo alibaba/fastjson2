@@ -65,9 +65,13 @@ public final class IntegerSchema
     }
 
     @Override
-    protected ValidateResult validateInternal(Object value) {
+    protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         if (value == null) {
-            return typed ? FAIL_INPUT_NULL : SUCCESS;
+            if (typed) {
+                ValidateResult result = handleError(handler, null, path, FAIL_INPUT_NULL);
+                return result != null ? result : FAIL_INPUT_NULL;
+            }
+            return SUCCESS;
         }
 
         Class valueClass = value.getClass();
@@ -88,25 +92,33 @@ public final class IntegerSchema
 
             if (minimum != Long.MIN_VALUE) {
                 if (exclusiveMinimum ? longValue <= minimum : longValue < minimum) {
-                    return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect > %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+                    ValidateResult result = new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect > %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+                    ValidateResult r = handleError(handler, value, path, result);
+                    return r != null ? r : result;
                 }
             }
 
             if (maximum != Long.MIN_VALUE) {
                 if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
-                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect < %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
+                    ValidateResult result = new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect < %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
+                    ValidateResult r = handleError(handler, value, path, result);
+                    return r != null ? r : result;
                 }
             }
 
             if (multipleOf != 0) {
                 if (longValue % multipleOf != 0) {
-                    return new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, value);
+                    ValidateResult result = new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, value);
+                    ValidateResult r = handleError(handler, value, path, result);
+                    return r != null ? r : result;
                 }
             }
 
             if (constValue != null) {
                 if (this.constValue != longValue || !isInt64) {
-                    return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                    ValidateResult result = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                    ValidateResult r = handleError(handler, value, path, result);
+                    return r != null ? r : result;
                 }
             }
 
@@ -124,7 +136,9 @@ public final class IntegerSchema
                         equals = this.constValue == unscaleValue.longValue();
                     }
                     if (!equals) {
-                        return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                        ValidateResult result = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                        ValidateResult r = handleError(handler, value, path, result);
+                        return r != null ? r : result;
                     }
                 }
 
@@ -132,7 +146,9 @@ public final class IntegerSchema
             }
 
             if (constValue != null) {
-                return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                ValidateResult result = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                ValidateResult r = handleError(handler, value, path, result);
+                return r != null ? r : result;
             }
         }
 
@@ -140,12 +156,16 @@ public final class IntegerSchema
             if (value instanceof Float) {
                 float floatValue = (Float) value;
                 if (this.constValue != floatValue) {
-                    return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                    ValidateResult result = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                    ValidateResult r = handleError(handler, value, path, result);
+                    return r != null ? r : result;
                 }
             } else if (value instanceof Double) {
                 double doubleValue = (Double) value;
                 if (this.constValue != doubleValue) {
-                    return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                    ValidateResult result = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                    ValidateResult r = handleError(handler, value, path, result);
+                    return r != null ? r : result;
                 }
             } else if (value instanceof String) {
                 String str = (String) value;
@@ -159,12 +179,20 @@ public final class IntegerSchema
                     }
                 }
                 if (!equals) {
-                    return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                    ValidateResult result = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                    ValidateResult r = handleError(handler, value, path, result);
+                    return r != null ? r : result;
                 }
             }
         }
 
-        return typed ? new ValidateResult(false, "expect type %s, but %s", Type.Integer, valueClass) : SUCCESS;
+        if (typed) {
+            ValidateResult result = new ValidateResult(false, "expect type %s, but %s", Type.Integer, valueClass);
+            ValidateResult r = handleError(handler, value, path, result);
+            return r != null ? r : result;
+        }
+
+        return SUCCESS;
     }
 
     @Override

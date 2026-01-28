@@ -37,14 +37,15 @@ final class AnyOf
     }
 
     @Override
-    protected ValidateResult validateInternal(Object value) {
+    protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         for (JSONSchema item : items) {
-            ValidateResult result = item.validate(value);
-            if (result == SUCCESS) {
+            if (item.validateInternal(value, null, path) == SUCCESS) {
                 return SUCCESS;
             }
         }
-        return FAIL_ANY_OF;
+
+        ValidateResult result = handleError(handler, value, path, FAIL_ANY_OF);
+        return result != null ? result : FAIL_ANY_OF;
     }
 
     public JSONObject toJSONObject() {

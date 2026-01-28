@@ -40,7 +40,7 @@ public final class EnumSchema
     }
 
     @Override
-    protected ValidateResult validateInternal(Object value) {
+    protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         if (value instanceof BigDecimal) {
             BigDecimal decimal = (BigDecimal) value;
             value = decimal.stripTrailingZeros();
@@ -67,10 +67,13 @@ public final class EnumSchema
 
         if (!items.contains(value)) {
             if (value == null) {
-                return FAIL_INPUT_NULL;
+                ValidateResult result = handleError(handler, null, path, FAIL_INPUT_NULL);
+                return result != null ? result : FAIL_INPUT_NULL;
             }
 
-            return new ValidateResult(false, "expect type %s, but %s", Type.Enum, value.getClass());
+            ValidateResult result = new ValidateResult(false, "expect type %s, but %s", Type.Enum, value.getClass());
+            ValidateResult r = handleError(handler, value, path, result);
+            return r != null ? r : result;
         }
 
         return SUCCESS;

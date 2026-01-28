@@ -138,10 +138,11 @@ public final class StringSchema
     }
 
     @Override
-    protected ValidateResult validateInternal(Object value) {
+    protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         if (value == null) {
             if (typed) {
-                return REQUIRED_NOT_MATCH;
+                ValidateResult result = handleError(handler, null, path, REQUIRED_NOT_MATCH);
+                return result != null ? result : REQUIRED_NOT_MATCH;
             }
             return SUCCESS;
         }
@@ -152,35 +153,43 @@ public final class StringSchema
             if (minLength >= 0 || maxLength >= 0) {
                 int count = str.codePointCount(0, str.length());
                 if (minLength >= 0 && count < minLength) {
-                    return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, str.length());
+                    ValidateResult result = new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, str.length());
+                    ValidateResult r = handleError(handler, value, path, result);
+                    return r != null ? r : result;
                 }
 
                 if (maxLength >= 0 && count > maxLength) {
-                    return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, str.length());
+                    ValidateResult result = new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, str.length());
+                    ValidateResult r = handleError(handler, value, path, result);
+                    return r != null ? r : result;
                 }
             }
 
             if (pattern != null) {
                 if (!pattern.matcher(str).find()) {
-                    return new ValidateResult(false, "pattern not match, expect %s, but %s", patternFormat, str);
+                    ValidateResult result = new ValidateResult(false, "pattern not match, expect %s, but %s", patternFormat, str);
+                    ValidateResult r = handleError(handler, value, path, result);
+                    return r != null ? r : result;
                 }
             }
 
             if (formatValidator != null) {
                 if (!formatValidator.test(str)) {
-                    return new ValidateResult(false, "format not match, expect %s, but %s", format, str);
+                    ValidateResult result = new ValidateResult(false, "format not match, expect %s, but %s", format, str);
+                    ValidateResult r = handleError(handler, value, path, result);
+                    return r != null ? r : result;
                 }
             }
 
             if (anyOf != null) {
-                ValidateResult result = anyOf.validate(str);
+                ValidateResult result = anyOf.validateInternal(str, handler, path);
                 if (!result.isSuccess()) {
                     return result;
                 }
             }
 
             if (oneOf != null) {
-                ValidateResult result = oneOf.validate(str);
+                ValidateResult result = oneOf.validateInternal(str, handler, path);
                 if (!result.isSuccess()) {
                     return result;
                 }
@@ -188,13 +197,17 @@ public final class StringSchema
 
             if (constValue != null) {
                 if (!constValue.equals(str)) {
-                    return new ValidateResult(false, "must be const %s, but %s", constValue, str);
+                    ValidateResult result = new ValidateResult(false, "must be const %s, but %s", constValue, str);
+                    ValidateResult r = handleError(handler, value, path, result);
+                    return r != null ? r : result;
                 }
             }
 
             if (enumValues != null) {
                 if (!enumValues.contains(str)) {
-                    return new ValidateResult(false, "not in enum values, %s", str);
+                    ValidateResult result = new ValidateResult(false, "not in enum values, %s", str);
+                    ValidateResult r = handleError(handler, value, path, result);
+                    return r != null ? r : result;
                 }
             }
 
@@ -205,7 +218,9 @@ public final class StringSchema
             return SUCCESS;
         }
 
-        return new ValidateResult(false, "expect type %s, but %s", Type.String, value.getClass());
+        ValidateResult result = new ValidateResult(false, "expect type %s, but %s", Type.String, value.getClass());
+        ValidateResult r = handleError(handler, value, path, result);
+        return r != null ? r : result;
     }
 
     public static boolean isEmail(String email) {

@@ -689,7 +689,60 @@ public abstract class JSONSchema {
 
     public abstract Type getType();
 
-    protected abstract ValidateResult validateInternal(Object value);
+    /**
+     * Handles validation errors by consulting the provided {@link ValidationHandler}.
+     * This method determines whether the validation process should stop immediately (abort) or continue despite the error (fail-safe).
+     *
+     * The handler's return value determines the flow:
+     * <ul>
+     *     <li>If {@code handler.handle()} returns {@code false}: Returns a new {@link ValidateResult} with {@code abort=true}, indicating validation should stop.</li>
+     *     <li>If {@code handler.handle()} returns {@code true}: Returns {@code null}, indicating validation should continue.</li>
+     * </ul>
+     * <p>If no handler is provided (Fail-Fast mode), the original failure result is returned immediately.
+     *
+     * @param handler The validation handler (nullable).
+     * @param value   The value that failed validation.
+     * @param path    The path to the value.
+     * @param result  The original validation failure result.
+     * @return A non-null {@link ValidateResult} if validation should abort; {@code null} if validation should continue.
+     */
+    protected final ValidateResult handleError(ValidationHandler handler, Object value, String path, ValidateResult result) {
+        if (handler == null) {
+            return result; // should abort
+        }
+        if (!handler.handle(this, value, result.getMessage(), path)) {
+            ValidateResult r = new ValidateResult(false, result.getMessage());
+            r.setAbort(true);
+            return r; // should abort
+        }
+        return null; // should continue
+    }
+
+    @FunctionalInterface
+    public interface ValidationHandler {
+        /**
+         * Handles validation errors without interrupting the process, providing a callback mechanism
+         * to collect all error information.
+         *
+         * @param schema  The schema rule that failed (e.g., ObjectSchema, IntegerSchema).
+         * @param value   The value that failed validation.
+         * @param message The error message.
+         * @param path    The path to the value where the error occurred (e.g., "$.users[0].name").
+         * @return true: Indicates the error is handled, continue validation (Fail-Safe);
+         *         false: Indicates the validation should stop immediately (Fail-Fast).
+         */
+        boolean handle(JSONSchema schema, Object value, String message, String path);
+    }
+
+    protected abstract ValidateResult validateInternal(Object value, ValidationHandler handler, String path);
+
+    protected ValidateResult validateInternal(Object value) {
+        return validateInternal(value, null, "$");
+    }
+
+    public final ValidateResult validate(Object value, ValidationHandler handler) {
+        return validateInternal(value, handler, "$");
+    }
 
     public final ValidateResult validate(Object value) {
         ValidateResult result = validateInternal(value);
