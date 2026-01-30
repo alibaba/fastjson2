@@ -401,7 +401,7 @@ public class ObjectWriterBaseModule
                         break;
                     case "com.fasterxml.jackson.annotation.JsonBackReference":
                         if (useJacksonAnnotation) {
-                            fieldInfo.features |= FieldInfo.BACKR_EFERENCE;
+                            fieldInfo.features |= FieldInfo.BACKR_REFERENCE;
                         }
                         break;
                     default:
