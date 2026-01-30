@@ -690,32 +690,30 @@ public abstract class JSONSchema {
     public abstract Type getType();
 
     /**
-     * Handles validation errors by consulting the provided {@link ValidationHandler}.
-     * This method determines whether the validation process should stop immediately (abort) or continue despite the error (fail-safe).
-     *
-     * The handler's return value determines the flow:
-     * <ul>
-     *     <li>If {@code handler.handle()} returns {@code false}: Returns a new {@link ValidateResult} with {@code abort=true}, indicating validation should stop.</li>
-     *     <li>If {@code handler.handle()} returns {@code true}: Returns {@code null}, indicating validation should continue.</li>
-     * </ul>
-     * <p>If no handler is provided (Fail-Fast mode), the original failure result is returned immediately.
-     *
-     * @param handler The validation handler (nullable).
-     * @param value   The value that failed validation.
-     * @param path    The path to the value.
-     * @param result  The original validation failure result.
-     * @return A non-null {@link ValidateResult} if validation should abort; {@code null} if validation should continue.
+     * Resolves custom error messages and delegates failure handling to the provided {@link ValidationHandler}.
+     * Returns a {@link ValidateResult} with the updated message and abort status, indicating whether validation should stop or continue.
      */
-    protected final ValidateResult handleError(ValidationHandler handler, Object value, String path, ValidateResult result) {
+    protected final ValidateResult handleError(ValidationHandler handler, Object value, String path, ValidateResult rawResult) {
+        // Resolve customError message
+        ValidateResult finalResult = rawResult;
+        if (this.customErrorMessage != null) {
+            finalResult = new ValidateResult(false, this.customErrorMessage);
+        }
+
+        // Handle Fail-Fast
         if (handler == null) {
-            return result; // should abort
+            return finalResult;
         }
-        if (!handler.handle(this, value, result.getMessage(), path)) {
-            ValidateResult r = new ValidateResult(false, result.getMessage());
-            r.setAbort(true);
-            return r; // should abort
+
+        // Handle Callback
+        if (!handler.handle(this, value, finalResult.getMessage(), path)) {
+            if (finalResult == rawResult) {
+                finalResult = new ValidateResult(false, finalResult.getMessage());
+            }
+            finalResult.setAbort(true);
         }
-        return null; // should continue
+
+        return finalResult;
     }
 
     @FunctionalInterface

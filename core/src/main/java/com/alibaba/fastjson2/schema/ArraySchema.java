@@ -145,11 +145,7 @@ public final class ArraySchema
     @Override
     protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         if (value == null) {
-            if (typed) {
-                ValidateResult result = handleError(handler, null, path, FAIL_INPUT_NULL);
-                return result != null ? result : FAIL_INPUT_NULL;
-            }
-            return SUCCESS;
+            return typed ? handleError(handler, null, path, FAIL_INPUT_NULL) : SUCCESS;
         }
 
         if (encoded) {
@@ -157,12 +153,10 @@ public final class ArraySchema
                 try {
                     value = JSON.parseArray((String) value);
                 } catch (JSONException e) {
-                    ValidateResult result = handleError(handler, value, path, FAIL_INPUT_NOT_ENCODED);
-                    return result != null ? result : FAIL_INPUT_NOT_ENCODED;
+                    return handleError(handler, value, path, FAIL_INPUT_NOT_ENCODED);
                 }
             } else {
-                ValidateResult result = handleError(handler, value, path, FAIL_INPUT_NOT_ENCODED);
-                return result != null ? result : FAIL_INPUT_NOT_ENCODED;
+                return handleError(handler, value, path, FAIL_INPUT_NOT_ENCODED);
             }
         }
 
@@ -183,12 +177,7 @@ public final class ArraySchema
             return validateItems(value, items.size(), i -> iterator.next(), handler, path);
         }
 
-        if (typed) {
-            ValidateResult result = handleError(handler, value, path, FAIL_TYPE_NOT_MATCH);
-            return result != null ? result : FAIL_TYPE_NOT_MATCH;
-        }
-
-        return SUCCESS;
+        return typed ? handleError(handler, value, path, FAIL_TYPE_NOT_MATCH) : SUCCESS;
     }
 
     private ValidateResult validateItems(final Object value, final int size, IntFunction<Object> itemGetter, ValidationHandler handler, String path) {
@@ -196,41 +185,41 @@ public final class ArraySchema
         ValidateResult firstFail = null;
 
         if (minLength >= 0 && size < minLength) {
-            ValidateResult result = new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
-            ValidateResult r = handleError(handler, value, path, result);
-            if (r != null) {
+            ValidateResult raw = new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
+            ValidateResult r = handleError(handler, value, path, raw);
+            if (handler == null || r.isAbort()) {
                 return r;
             }
 
             totalSuccess = false;
             if (firstFail == null) {
-                firstFail = result;
+                firstFail = r;
             }
         }
 
         if (maxLength >= 0 && size > maxLength) {
-            ValidateResult result = new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
-            ValidateResult r = handleError(handler, value, path, result);
-            if (r != null) {
+            ValidateResult raw = new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
+            ValidateResult r = handleError(handler, value, path, raw);
+            if (handler == null || r.isAbort()) {
                 return r;
             }
 
             totalSuccess = false;
             if (firstFail == null) {
-                firstFail = result;
+                firstFail = r;
             }
         }
 
         if (!additionalItems && size > prefixItems.length) {
-            ValidateResult result = new ValidateResult(false, "additional items not match, max size %s, but %s", prefixItems.length, size);
-            ValidateResult r = handleError(handler, value, path, result);
-            if (r != null) {
+            ValidateResult raw = new ValidateResult(false, "additional items not match, max size %s, but %s", prefixItems.length, size);
+            ValidateResult r = handleError(handler, value, path, raw);
+            if (handler == null || r.isAbort()) {
                 return r;
             }
 
             totalSuccess = false;
             if (firstFail == null) {
-                firstFail = result;
+                firstFail = r;
             }
         }
 
@@ -301,7 +290,7 @@ public final class ArraySchema
 
                 if (!uniqueItemsSet.add(item)) {
                     ValidateResult r = handleError(handler, item, itemPath, UNIQUE_ITEMS_NOT_MATCH);
-                    if (r != null) {
+                    if (handler == null || r.isAbort()) {
                         return r;
                     }
 
@@ -325,7 +314,7 @@ public final class ArraySchema
 
             if (containsError != null) {
                 ValidateResult r = handleError(handler, value, path, containsError);
-                if (r != null) {
+                if (handler == null || r.isAbort()) {
                     return r;
                 }
 

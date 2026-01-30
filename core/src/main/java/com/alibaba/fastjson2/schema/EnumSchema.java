@@ -67,13 +67,11 @@ public final class EnumSchema
 
         if (!items.contains(value)) {
             if (value == null) {
-                ValidateResult result = handleError(handler, null, path, FAIL_INPUT_NULL);
-                return result != null ? result : FAIL_INPUT_NULL;
+                return handleError(handler, null, path, FAIL_INPUT_NULL);
             }
 
-            ValidateResult result = new ValidateResult(false, "expect type %s, but %s", Type.Enum, value.getClass());
-            ValidateResult r = handleError(handler, value, path, result);
-            return r != null ? r : result;
+            ValidateResult raw = new ValidateResult(false, "expect type %s, but %s", Type.Enum, value.getClass());
+            return handleError(handler, value, path, raw);
         }
 
         return SUCCESS;

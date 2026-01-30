@@ -67,11 +67,7 @@ public final class IntegerSchema
     @Override
     protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         if (value == null) {
-            if (typed) {
-                ValidateResult result = handleError(handler, null, path, FAIL_INPUT_NULL);
-                return result != null ? result : FAIL_INPUT_NULL;
-            }
-            return SUCCESS;
+            return typed ? handleError(handler, null, path, FAIL_INPUT_NULL) : SUCCESS;
         }
 
         Class valueClass = value.getClass();
@@ -92,33 +88,29 @@ public final class IntegerSchema
 
             if (minimum != Long.MIN_VALUE) {
                 if (exclusiveMinimum ? longValue <= minimum : longValue < minimum) {
-                    ValidateResult result = new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect > %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
-                    ValidateResult r = handleError(handler, value, path, result);
-                    return r != null ? r : result;
+                    ValidateResult raw = new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect > %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+                    return handleError(handler, value, path, raw);
                 }
             }
 
             if (maximum != Long.MIN_VALUE) {
                 if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
-                    ValidateResult result = new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect < %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
-                    ValidateResult r = handleError(handler, value, path, result);
-                    return r != null ? r : result;
+                    ValidateResult raw = new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect < %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
+                    return handleError(handler, value, path, raw);
                 }
             }
 
             if (multipleOf != 0) {
                 if (longValue % multipleOf != 0) {
-                    ValidateResult result = new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, value);
-                    ValidateResult r = handleError(handler, value, path, result);
-                    return r != null ? r : result;
+                    ValidateResult raw = new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, value);
+                    return handleError(handler, value, path, raw);
                 }
             }
 
             if (constValue != null) {
                 if (this.constValue != longValue || !isInt64) {
-                    ValidateResult result = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
-                    ValidateResult r = handleError(handler, value, path, result);
-                    return r != null ? r : result;
+                    ValidateResult raw = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                    return handleError(handler, value, path, raw);
                 }
             }
 
@@ -136,9 +128,8 @@ public final class IntegerSchema
                         equals = this.constValue == unscaleValue.longValue();
                     }
                     if (!equals) {
-                        ValidateResult result = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
-                        ValidateResult r = handleError(handler, value, path, result);
-                        return r != null ? r : result;
+                        ValidateResult raw = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                        return handleError(handler, value, path, raw);
                     }
                 }
 
@@ -146,9 +137,8 @@ public final class IntegerSchema
             }
 
             if (constValue != null) {
-                ValidateResult result = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
-                ValidateResult r = handleError(handler, value, path, result);
-                return r != null ? r : result;
+                ValidateResult raw = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                return handleError(handler, value, path, raw);
             }
         }
 
@@ -156,16 +146,14 @@ public final class IntegerSchema
             if (value instanceof Float) {
                 float floatValue = (Float) value;
                 if (this.constValue != floatValue) {
-                    ValidateResult result = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
-                    ValidateResult r = handleError(handler, value, path, result);
-                    return r != null ? r : result;
+                    ValidateResult raw = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                    return handleError(handler, value, path, raw);
                 }
             } else if (value instanceof Double) {
                 double doubleValue = (Double) value;
                 if (this.constValue != doubleValue) {
-                    ValidateResult result = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
-                    ValidateResult r = handleError(handler, value, path, result);
-                    return r != null ? r : result;
+                    ValidateResult raw = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                    return handleError(handler, value, path, raw);
                 }
             } else if (value instanceof String) {
                 String str = (String) value;
@@ -179,17 +167,15 @@ public final class IntegerSchema
                     }
                 }
                 if (!equals) {
-                    ValidateResult result = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
-                    ValidateResult r = handleError(handler, value, path, result);
-                    return r != null ? r : result;
+                    ValidateResult raw = new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                    return handleError(handler, value, path, raw);
                 }
             }
         }
 
         if (typed) {
-            ValidateResult result = new ValidateResult(false, "expect type %s, but %s", Type.Integer, valueClass);
-            ValidateResult r = handleError(handler, value, path, result);
-            return r != null ? r : result;
+            ValidateResult raw = new ValidateResult(false, "expect type %s, but %s", Type.Integer, valueClass);
+            return handleError(handler, value, path, raw);
         }
 
         return SUCCESS;

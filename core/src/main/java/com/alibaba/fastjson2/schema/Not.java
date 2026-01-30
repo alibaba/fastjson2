@@ -30,8 +30,7 @@ final class Not
     protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         if (schema != null) {
             if (schema.validateInternal(value, null, path).isSuccess()) {
-                ValidateResult result = handleError(handler, value, path, FAIL_NOT);
-                return result != null ? result : FAIL_NOT;
+                return handleError(handler, value, path, FAIL_NOT);
             }
         }
 
@@ -91,19 +90,13 @@ final class Not
                 }
 
                 if (match) {
-                    ValidateResult result = handleError(handler, value, path, FAIL_NOT);
-                    return result != null ? result : FAIL_NOT;
+                    return handleError(handler, value, path, FAIL_NOT);
                 }
             }
         }
 
         if (result != null) {
-            if (result) {
-                ValidateResult result = handleError(handler, value, path, FAIL_NOT);
-                return result != null ? result : FAIL_NOT;
-            } else {
-                return SUCCESS;
-            }
+            return result ? handleError(handler, value, path, FAIL_NOT) : SUCCESS;
         }
         return SUCCESS;
     }

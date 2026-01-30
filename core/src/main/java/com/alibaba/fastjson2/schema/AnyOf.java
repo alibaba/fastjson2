@@ -44,8 +44,7 @@ final class AnyOf
             }
         }
 
-        ValidateResult result = handleError(handler, value, path, FAIL_ANY_OF);
-        return result != null ? result : FAIL_ANY_OF;
+        return handleError(handler, value, path, FAIL_ANY_OF);
     }
 
     public JSONObject toJSONObject() {

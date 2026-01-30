@@ -16,17 +16,15 @@ public final class BooleanSchema
     @Override
     protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         if (value == null) {
-            ValidateResult result = handleError(handler, null, path, FAIL_INPUT_NULL);
-            return result != null ? result : FAIL_INPUT_NULL;
+            return handleError(handler, null, path, FAIL_INPUT_NULL);
         }
 
         if (value instanceof Boolean) {
             return SUCCESS;
         }
 
-        ValidateResult result = new ValidateResult(false, "expect type %s, but %s", Type.Boolean, value.getClass());
-        ValidateResult r = handleError(handler, value, path, result);
-        return r != null ? r : result;
+        ValidateResult raw = new ValidateResult(false, "expect type %s, but %s", Type.Boolean, value.getClass());
+        return handleError(handler, value, path, raw);
     }
 
     @Override

@@ -44,15 +44,13 @@ final class OneOf
             if (result.isSuccess()) {
                 count++;
                 if (count > 1) {
-                    ValidateResult stopResult = handleError(handler, value, path, FAIL_ONE_OF);
-                    return stopResult != null ? stopResult : FAIL_ONE_OF;
+                    return handleError(handler, value, path, FAIL_ONE_OF);
                 }
             }
         }
 
         if (count != 1) {
-            ValidateResult stopResult = handleError(handler, value, path, FAIL_ONE_OF);
-            return stopResult != null ? stopResult : FAIL_ONE_OF;
+            return handleError(handler, value, path, FAIL_ONE_OF);
         }
         return SUCCESS;
     }

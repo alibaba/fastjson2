@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.issues_3900;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.schema.JSONSchema;
@@ -209,5 +210,81 @@ public class Issue3912 {
 
         assertEquals(1, errors.size());
         assertEquals("Path:$[2], Value:10", errors.get(0));
+    }
+
+    @Test
+    public void testFullCollectionWithCustomErrors() {
+        // Root (Object)
+        //  |-- id (Integer): required, min=1000 [Error: ID无效]
+        //  |-- tags (Array): minItems=3 [Error: 标签太少]
+        //       |-- item (String): maxLength=5 [No Custom Error]
+        //  |-- info (Object): required
+        //       |-- email (String): minLength=10 [Error: 邮箱太短]
+        String schemaStr = "{\n" +
+                "  \"type\": \"object\",\n" +
+                "  \"required\": [\"id\", \"info\"],\n" +
+                "  \"properties\": {\n" +
+                "    \"id\": {\n" +
+                "      \"type\": \"integer\",\n" +
+                "      \"minimum\": 1000,\n" +
+                "      \"error\": \"ID无效\"\n" +
+                "    },\n" +
+                "    \"tags\": {\n" +
+                "      \"type\": \"array\",\n" +
+                "      \"minItems\": 3,\n" +
+                "      \"error\": \"标签太少\",\n" +
+                "      \"items\": {\n" +
+                "        \"type\": \"string\",\n" +
+                "        \"maxLength\": 5\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"info\": {\n" +
+                "      \"type\": \"object\",\n" +
+                "      \"properties\": {\n" +
+                "        \"email\": {\n" +
+                "          \"type\": \"string\",\n" +
+                "          \"minLength\": 10,\n" +
+                "          \"error\": \"邮箱太短\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        JSONSchema schema = JSONSchema.parseSchema(schemaStr);
+
+        // 构造全是错误的数据
+        String jsonStr = "{\n" +
+                "  \"id\": 1, \n" +               // 错误1: < 1000 (自定义)
+                "  \"tags\": [\"verylongstring\", \"ok\"], \n" + // 错误2: item[0]太长 (默认); 错误3: size<3 (自定义)
+                "  \"info\": {\n" +
+                "    \"email\": \"a@b.c\"\n" +    // 错误4: len < 10 (自定义)
+                "  }\n" +
+                "}";
+        JSONObject data = JSON.parseObject(jsonStr);
+
+        List<String> errorMessages = new ArrayList<>();
+        JSONSchema.ValidationHandler handler = (s, v, msg, path) -> {
+            String log = String.format("[%s] %s", path, msg);
+            System.out.println("Captured: " + log);
+            errorMessages.add(msg);
+            return true;
+        };
+
+        ValidateResult result = schema.validate(data, handler);
+
+        assertEquals(false, result.isSuccess());
+
+        // 1. 验证 ID 错误 (自定义)
+        assertTrue(errorMessages.contains("ID无效"));
+
+        // 2. 验证 Array Item 错误 (默认错误，无 customError)
+        assertTrue(errorMessages.stream().anyMatch(m -> m.contains("maxLength")));
+
+        // 3. 验证 Array minItems 错误 (自定义)
+        assertTrue(errorMessages.contains("标签太少"));
+
+        // 4. 验证 Nested Object email 错误 (自定义)
+        assertTrue(errorMessages.contains("邮箱太短"));
     }
 }

@@ -60,7 +60,7 @@ public class CustomErrorMessageTest {
         ValidateResult result = schema.validate(data);
 
         assertFalse(result.isSuccess());
-//        assertTrue(result.getMessage().contains("未成年人禁止入内"));
+        assertTrue(result.getMessage().contains("未成年人禁止入内"));
     }
 
     @Test

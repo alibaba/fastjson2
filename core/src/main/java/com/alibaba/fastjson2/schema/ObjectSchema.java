@@ -236,15 +236,15 @@ public final class ObjectSchema
 
         for (String item : required) {
             if (!map.containsKey(item)) {
-                ValidateResult result = new ValidateResult(false, "required %s", item);
-                ValidateResult r = handleError(handler, null, path + "." + item, result);
-                if (r != null) {
+                ValidateResult raw = new ValidateResult(false, "required %s", item);
+                ValidateResult r = handleError(handler, null, path + "." + item, raw);
+                if (handler == null || r.isAbort()) {
                     return r;
                 }
 
                 totalSuccess = false;
                 if (firstFail == null) {
-                    firstFail = result;
+                    firstFail = r;
                 }
             }
         }
@@ -330,15 +330,15 @@ public final class ObjectSchema
                     continue;
                 }
 
-                ValidateResult result = new ValidateResult(false, "add additionalProperties %s", key);
-                ValidateResult r = handleError(handler, entry.getValue(), path + "." + key, result);
-                if (r != null) {
+                ValidateResult raw = new ValidateResult(false, "add additionalProperties %s", key);
+                ValidateResult r = handleError(handler, entry.getValue(), path + "." + key, raw);
+                if (handler == null || r.isAbort()) {
                     return r;
                 }
 
                 totalSuccess = false;
                 if (firstFail == null) {
-                    firstFail = result;
+                    firstFail = r;
                 }
             }
         }
@@ -348,7 +348,7 @@ public final class ObjectSchema
                 ValidateResult result = propertyNames.validateInternal(key, handler, path + ".key[" + key + "]");
                 if (!result.isSuccess()) {
                     ValidateResult r = handleError(handler, key, path + ".key[" + key + "]", FAIL_PROPERTY_NAME);
-                    if (r != null) {
+                    if (handler == null || r.isAbort()) {
                         return r;
                     }
 
@@ -362,30 +362,30 @@ public final class ObjectSchema
 
         if (minProperties >= 0) {
             if (map.size() < minProperties) {
-                ValidateResult result = new ValidateResult(false, "minProperties not match, expect %s, but %s", minProperties, map.size());
-                ValidateResult r = handleError(handler, map, path, result);
-                if (r != null) {
+                ValidateResult raw = new ValidateResult(false, "minProperties not match, expect %s, but %s", minProperties, map.size());
+                ValidateResult r = handleError(handler, map, path, raw);
+                if (handler == null || r.isAbort()) {
                     return r;
                 }
 
                 totalSuccess = false;
                 if (firstFail == null) {
-                    firstFail = result;
+                    firstFail = r;
                 }
             }
         }
 
         if (maxProperties >= 0) {
             if (map.size() > maxProperties) {
-                ValidateResult result = new ValidateResult(false, "maxProperties not match, expect %s, but %s", maxProperties, map.size());
-                ValidateResult r = handleError(handler, map, path, result);
-                if (r != null) {
+                ValidateResult raw = new ValidateResult(false, "maxProperties not match, expect %s, but %s", maxProperties, map.size());
+                ValidateResult r = handleError(handler, map, path, raw);
+                if (handler == null || r.isAbort()) {
                     return r;
                 }
 
                 totalSuccess = false;
                 if (firstFail == null) {
-                    firstFail = result;
+                    firstFail = r;
                 }
             }
         }
@@ -398,15 +398,15 @@ public final class ObjectSchema
                     String[] dependentRequiredProperties = entry.getValue();
                     for (String dependentRequiredProperty : dependentRequiredProperties) {
                         if (!map.containsKey(dependentRequiredProperty)) {
-                            ValidateResult result = new ValidateResult(false, "property %s, dependentRequired property %s", key, dependentRequiredProperty);
-                            ValidateResult r = handleError(handler, null, path + "." + dependentRequiredProperty, result);
-                            if (r != null) {
+                            ValidateResult raw = new ValidateResult(false, "property %s, dependentRequired property %s", key, dependentRequiredProperty);
+                            ValidateResult r = handleError(handler, null, path + "." + dependentRequiredProperty, raw);
+                            if (handler == null || r.isAbort()) {
                                 return r;
                             }
 
                             totalSuccess = false;
                             if (firstFail == null) {
-                                firstFail = result;
+                                firstFail = r;
                             }
                         }
                     }
@@ -519,11 +519,7 @@ public final class ObjectSchema
     @Override
     protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         if (value == null) {
-            if (typed) {
-                ValidateResult result = handleError(handler, null, path, FAIL_INPUT_NULL);
-                return result != null ? result : FAIL_INPUT_NULL;
-            }
-            return SUCCESS;
+            return typed ? handleError(handler, null, path, FAIL_INPUT_NULL) : SUCCESS;
         }
 
         if (encoded) {
@@ -531,12 +527,10 @@ public final class ObjectSchema
                 try {
                     value = JSON.parseObject((String) value);
                 } catch (JSONException e) {
-                    ValidateResult result = handleError(handler, value, path, FAIL_INPUT_NOT_ENCODED);
-                    return result != null ? result : FAIL_INPUT_NOT_ENCODED;
+                    return handleError(handler, value, path, FAIL_INPUT_NOT_ENCODED);
                 }
             } else {
-                ValidateResult result = handleError(handler, value, path, FAIL_INPUT_NOT_ENCODED);
-                return result != null ? result : FAIL_INPUT_NOT_ENCODED;
+                return handleError(handler, value, path, FAIL_INPUT_NOT_ENCODED);
             }
         }
 
@@ -549,9 +543,8 @@ public final class ObjectSchema
 
         if (!(objectWriter instanceof ObjectWriterAdapter)) {
             if (typed) {
-                ValidateResult result = new ValidateResult(false, "expect type %s, but %s", Type.Object, valueClass);
-                ValidateResult r = handleError(handler, value, path, result);
-                return r != null ? r : result;
+                ValidateResult raw = new ValidateResult(false, "expect type %s, but %s", Type.Object, valueClass);
+                return handleError(handler, value, path, raw);
             }
             return SUCCESS;
         }
@@ -577,15 +570,15 @@ public final class ObjectSchema
                     }
                     j++;
                 }
-                ValidateResult result = new ValidateResult(false, "required property %s", fieldName);
-                ValidateResult r = handleError(handler, null, path + "." + fieldName, result);
-                if (r != null) {
+                ValidateResult raw = new ValidateResult(false, "required property %s", fieldName);
+                ValidateResult r = handleError(handler, null, path + "." + fieldName, raw);
+                if (handler == null || r.isAbort()) {
                     return r;
                 }
 
                 totalSuccess = false;
                 if (firstFail == null) {
-                    firstFail = result;
+                    firstFail = r;
                 }
             }
         }
@@ -629,30 +622,30 @@ public final class ObjectSchema
 
             if (minProperties >= 0) {
                 if (fieldValueCount < minProperties) {
-                    ValidateResult result = new ValidateResult(false, "minProperties not match, expect %s, but %s", minProperties, fieldValueCount);
-                    ValidateResult r = handleError(handler, value, path, result);
-                    if (r != null) {
+                    ValidateResult raw = new ValidateResult(false, "minProperties not match, expect %s, but %s", minProperties, fieldValueCount);
+                    ValidateResult r = handleError(handler, value, path, raw);
+                    if (handler == null || r.isAbort()) {
                         return r;
                     }
 
                     totalSuccess = false;
                     if (firstFail == null) {
-                        firstFail = result;
+                        firstFail = r;
                     }
                 }
             }
 
             if (maxProperties >= 0) {
                 if (fieldValueCount > maxProperties) {
-                    ValidateResult result = new ValidateResult(false, "maxProperties not match, expect %s, but %s", maxProperties, fieldValueCount);
-                    ValidateResult r = handleError(handler, value, path, result);
-                    if (r != null) {
+                    ValidateResult raw = new ValidateResult(false, "maxProperties not match, expect %s, but %s", maxProperties, fieldValueCount);
+                    ValidateResult r = handleError(handler, value, path, raw);
+                    if (handler == null || r.isAbort()) {
                         return r;
                     }
 
                     totalSuccess = false;
                     if (firstFail == null) {
-                        firstFail = result;
+                        firstFail = r;
                     }
                 }
             }
@@ -685,15 +678,15 @@ public final class ObjectSchema
                                 dependentRequiredProperty = dependentRequiredEntry.getValue()[requiredIndex];
                             }
                         }
-                        ValidateResult result = new ValidateResult(false, "property %s, dependentRequired property %s", property, dependentRequiredProperty);
-                        ValidateResult r = handleError(handler, null, path + "." + dependentRequiredProperty, result);
-                        if (r != null) {
+                        ValidateResult raw = new ValidateResult(false, "property %s, dependentRequired property %s", property, dependentRequiredProperty);
+                        ValidateResult r = handleError(handler, null, path + "." + dependentRequiredProperty, raw);
+                        if (handler == null || r.isAbort()) {
                             return r;
                         }
 
                         totalSuccess = false;
                         if (firstFail == null) {
-                            firstFail = result;
+                            firstFail = r;
                         }
                     }
                 }

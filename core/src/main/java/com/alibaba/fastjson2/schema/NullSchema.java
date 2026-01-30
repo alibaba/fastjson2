@@ -19,8 +19,7 @@ final class NullSchema
             return SUCCESS;
         }
 
-        ValidateResult result = new ValidateResult(false, "expect type %s, but %s", Type.Null, value.getClass());
-        ValidateResult r = handleError(handler, value, path, result);
-        return r != null ? r : result;
+        ValidateResult raw = new ValidateResult(false, "expect type %s, but %s", Type.Null, value.getClass());
+        return handleError(handler, value, path, raw);
     }
 }
