@@ -25,6 +25,8 @@ import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 import static com.alibaba.fastjson2.JSONReader.EOI;
 
 abstract class JSONPathSegment {
+    private JSONPath parentPath;
+
     public abstract void accept(JSONReader jsonReader, JSONPath.Context context);
 
     public abstract void eval(JSONPath.Context context);
@@ -52,6 +54,18 @@ abstract class JSONPathSegment {
 
     public void setLong(JSONPath.Context context, long value) {
         set(context, value);
+    }
+
+    public JSONPath getParentPath() {
+        return parentPath;
+    }
+
+    public JSONPathSegment setParentPath(JSONPath parentPath) {
+        this.parentPath = parentPath;
+        return this;
+    }
+
+    public void convert(Object root) {
     }
 
     interface EvalSegment {

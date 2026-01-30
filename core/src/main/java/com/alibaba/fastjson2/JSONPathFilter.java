@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -1317,7 +1318,7 @@ abstract class JSONPathFilter
 
     static final class NameIntInSegment
             extends NameFilter {
-        private final long[] values;
+        private long[] values;
         private final boolean not;
 
         public NameIntInSegment(
@@ -1394,6 +1395,37 @@ abstract class JSONPathFilter
             }
 
             return not;
+        }
+
+        @Override
+        public void convert(Object root) {
+            JSONPath parentPath = getParentPath();
+            if (parentPath != null) {
+                Object eval = parentPath.eval(root);
+                int length = 1;
+                if (eval != null) {
+                    if (eval.getClass().isArray()) {
+                        length = Array.getLength(eval);
+                        values = new long[length];
+                        for (int i = 0; i < length; ++i) {
+                            values[i] = Long.parseLong(Array.get(eval, i).toString());
+                        }
+                    } else if (Collection.class.isAssignableFrom(eval.getClass())) {
+                        Long[] longs = new ArrayList<>((Collection<?>) eval).stream()
+                                .filter(Objects::nonNull)
+                                .map(v -> Long.parseLong(v.toString()))
+                                .toArray(Long[]::new);
+                        length = longs.length;
+                        values = new long[length];
+                        for (int i = 0; i < length; ++i) {
+                            values[i] = longs[i];
+                        }
+                    } else {
+                        values = new long[length];
+                        values[0] = Long.parseLong(eval.toString());
+                    }
+                }
+            }
         }
     }
 

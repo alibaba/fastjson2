@@ -95,6 +95,7 @@ class JSONPathTwoSegment
         }
 
         Context context1 = new Context(this, context0, second, null, 0);
+        second.convert(root);
         second.eval(context1);
         Object contextValue = context1.value;
         if ((features & Feature.AlwaysReturnList.mask) != 0) {
