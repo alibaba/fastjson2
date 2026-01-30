@@ -304,20 +304,41 @@ public abstract class FieldReader<T>
         jsonReader.addResolveTask(this, object, path);
     }
 
+    /**
+     * Compares this FieldReader with another for sorting purposes.
+     * <p>
+     * The comparison follows this priority order:
+     * <ol>
+     *   <li>Ordinal value (lower ordinal comes first)</li>
+     *   <li>Field name (alphabetical order)</li>
+     *   <li>Read-only status (writable fields come before read-only fields)</li>
+     *   <li>Declaring class hierarchy (superclass fields/methods come before subclass)</li>
+     *   <li>Parameter type hierarchy for methods</li>
+     *   <li>Method name characteristics (setters before non-setters)</li>
+     *   <li>Primitive types before non-primitive types</li>
+     *   <li>java.* classes before custom classes</li>
+     * </ol>
+     *
+     * @param o the FieldReader to compare with
+     * @return negative if this comes before o, positive if this comes after o, zero if equal
+     */
     @Override
     public int compareTo(FieldReader o) {
+        // 1. First priority: ordinal (lower ordinal comes first)
+        if (this.ordinal < o.ordinal) {
+            return -1;
+        }
+        if (this.ordinal > o.ordinal) {
+            return 1;
+        }
+
+        // 2. Second priority: field name (alphabetical order)
         int nameCompare = this.fieldName.compareTo(o.fieldName);
         if (nameCompare != 0) {
-            if (this.ordinal < o.ordinal) {
-                return -1;
-            }
-            if (this.ordinal > o.ordinal) {
-                return 1;
-            }
-
             return nameCompare;
         }
 
+        // 3. Third priority: read-only fields come after writable fields
         int cmp = (isReadOnly() == o.isReadOnly()) ? 0 : (isReadOnly() ? 1 : -1);
         if (cmp != 0) {
             return cmp;
@@ -358,72 +379,79 @@ public abstract class FieldReader<T>
         if (this.method != null && o.method != null) {
             Class<?> thisDeclaringClass = this.method.getDeclaringClass();
             Class<?> otherDeclaringClass = o.method.getDeclaringClass();
-            //declaring class compare
+            // Declaring class compare - methods from superclass should come first
             if (thisDeclaringClass != otherDeclaringClass) {
                 for (Class s = thisDeclaringClass.getSuperclass(); s != null && s != Object.class; s = s.getSuperclass()) {
                     if (s == otherDeclaringClass) {
-                        return -1;
+                        return 1; // this is subclass, comes after
                     }
                 }
                 for (Class s = otherDeclaringClass.getSuperclass(); s != null && s != Object.class; s = s.getSuperclass()) {
                     if (s == thisDeclaringClass) {
-                        return 1;
+                        return -1; // this is superclass, comes before
                     }
                 }
             }
 
             if (this.method.getParameterCount() == 1 && o.method.getParameterCount() == 1) {
-                Class<?> thisParamType = this.method.getParameterTypes()[0];
-                Class<?> otherParamType = o.method.getParameterTypes()[0];
+                Class<?>[] thisParamTypes = this.method.getParameterTypes();
+                Class<?>[] otherParamTypes = o.method.getParameterTypes();
 
-                if (thisParamType != otherParamType) {
-                    if (thisParamType.isAssignableFrom(otherParamType)) {
-                        return 1;
-                    }
+                // Add null safety check
+                if (thisParamTypes != null && thisParamTypes.length > 0
+                        && otherParamTypes != null && otherParamTypes.length > 0) {
+                    Class<?> thisParamType = thisParamTypes[0];
+                    Class<?> otherParamType = otherParamTypes[0];
 
-                    if (otherParamType.isAssignableFrom(thisParamType)) {
-                        return -1;
-                    }
-
-                    // Collection first
-                    if (Collection.class.isAssignableFrom(otherParamType) && !Collection.class.isAssignableFrom(thisParamType)) {
-                        return 1;
-                    }
-
-                    if (Collection.class.isAssignableFrom(thisParamType) && !Collection.class.isAssignableFrom(otherParamType)) {
-                        return -1;
-                    }
-
-                    // field class compare
-                    if (needCompareToActualFieldClass(thisParamType) || needCompareToActualFieldClass(otherParamType)) {
-                        Class actualFieldClass = null;
-                        try {
-                            actualFieldClass = thisDeclaringClass.getDeclaredField(this.fieldName).getType();
-                            if (actualFieldClass == null) {
-                                actualFieldClass = otherDeclaringClass.getDeclaredField(this.fieldName).getType();
-                            }
-                        } catch (NoSuchFieldException ignored) {
-                            // ignored
+                    if (thisParamType != otherParamType) {
+                        if (thisParamType.isAssignableFrom(otherParamType)) {
+                            return 1;
                         }
-                        if (actualFieldClass != null) {
-                            for (Class s = thisParamType; s != null && s != Object.class; s = s.getSuperclass()) {
-                                if (s == actualFieldClass) {
-                                    return -1;
+
+                        if (otherParamType.isAssignableFrom(thisParamType)) {
+                            return -1;
+                        }
+
+                        // Collection first
+                        if (Collection.class.isAssignableFrom(otherParamType) && !Collection.class.isAssignableFrom(thisParamType)) {
+                            return 1;
+                        }
+
+                        if (Collection.class.isAssignableFrom(thisParamType) && !Collection.class.isAssignableFrom(otherParamType)) {
+                            return -1;
+                        }
+
+                        // field class compare
+                        if (needCompareToActualFieldClass(thisParamType) || needCompareToActualFieldClass(otherParamType)) {
+                            Class actualFieldClass = null;
+                            try {
+                                actualFieldClass = thisDeclaringClass.getDeclaredField(this.fieldName).getType();
+                                if (actualFieldClass == null) {
+                                    actualFieldClass = otherDeclaringClass.getDeclaredField(this.fieldName).getType();
+                                }
+                            } catch (NoSuchFieldException ignored) {
+                                // ignored
+                            }
+                            if (actualFieldClass != null) {
+                                for (Class s = thisParamType; s != null && s != Object.class; s = s.getSuperclass()) {
+                                    if (s == actualFieldClass) {
+                                        return -1;
+                                    }
+                                }
+                                for (Class s = otherParamType; s != null && s != Object.class; s = s.getSuperclass()) {
+                                    if (s == actualFieldClass) {
+                                        return 1;
+                                    }
                                 }
                             }
-                            for (Class s = otherParamType; s != null && s != Object.class; s = s.getSuperclass()) {
-                                if (s == actualFieldClass) {
-                                    return 1;
-                                }
-                            }
                         }
-                    }
-                    //JSONField annotation priority over non JSONField annotation
-                    JSONField thisAnnotation = BeanUtils.findAnnotation(this.method, JSONField.class);
-                    JSONField otherAnnotation = BeanUtils.findAnnotation(o.method, JSONField.class);
-                    boolean thisAnnotatedWithJsonFiled = thisAnnotation != null;
-                    if (thisAnnotatedWithJsonFiled == (otherAnnotation == null)) {
-                        return thisAnnotatedWithJsonFiled ? -1 : 1;
+                        //JSONField annotation priority over non JSONField annotation
+                        JSONField thisAnnotation = BeanUtils.findAnnotation(this.method, JSONField.class);
+                        JSONField otherAnnotation = BeanUtils.findAnnotation(o.method, JSONField.class);
+                        boolean thisAnnotatedWithJsonFiled = thisAnnotation != null;
+                        if (thisAnnotatedWithJsonFiled == (otherAnnotation == null)) {
+                            return thisAnnotatedWithJsonFiled ? -1 : 1;
+                        }
                     }
                 }
             }
@@ -479,7 +507,8 @@ public abstract class FieldReader<T>
             return 1;
         }
 
-        return cmp;
+        // All comparison criteria are equal
+        return 0;
     }
 
     public boolean isUnwrapped() {
