@@ -3368,6 +3368,13 @@ public abstract class JSONReader
                 continue;
             }
 
+            if ((contextFeatures & Feature.SupportAutoType.mask) != 0
+                    && name.equals("@type")
+                    && object.getClass().getName().equals(value)
+            ) {
+                continue;
+            }
+
             Object origin = map.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -3641,6 +3648,13 @@ public abstract class JSONReader
                 continue;
             }
 
+            if ((contextFeatures & Feature.SupportAutoType.mask) != 0
+                    && name.equals("@type")
+                    && object.getClass().getName().equals(value)
+            ) {
+                continue;
+            }
+
             Object origin = object.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -3785,6 +3799,13 @@ public abstract class JSONReader
             }
 
             if (val == null && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
+            if ((context.features & Feature.SupportAutoType.mask) != 0
+                    && name.equals("@type")
+                    && object.getClass().getName().equals(val)
+            ) {
                 continue;
             }
 
