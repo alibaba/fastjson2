@@ -1190,8 +1190,26 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(hashCode64Start);
 
+        int min = 0;
+        int max = 0;
+        for (FieldReader fieldReader : fieldReaderArray) {
+            int length = fieldReader.fieldName.length();
+            if (min == 0) {
+                min = length;
+            } else {
+                min = Math.min(min, length);
+            }
+            max = Math.max(max, length);
+        }
+        String typeKey = context.objectReaderAdapter.typeKey;
+        int typeKeyLength = typeKey == null ? 5 : typeKey.length();
+
         mw.aload(JSON_READER);
-        mw.invokevirtual(TYPE_JSON_READER, "readFieldNameHashCode", "()J");
+        mw.iconst_n(typeKeyLength);
+        mw.iconst_n(min);
+        mw.iconst_n(max);
+        mw.invokevirtual(TYPE_JSON_READER, fieldReaderArray.length <= 2 ? "readFieldNameHashCodeE" : "readFieldNameHashCode", "(III)J");
+
         mw.dup2();
         mw.lstore(HASH_CODE64);
         mw.lconst_0();
@@ -1912,17 +1930,25 @@ public class ObjectReaderCreatorASM
              *     break;
              * }
              */
-            int min = context.fieldNameLengthMin;
-            int max = context.fieldNameLengthMax;
+            int min = 0;
+            int max = 0;
+            for (FieldReader fieldReader : fieldReaderArray) {
+                int length = fieldReader.fieldName.length();
+                if (min == 0) {
+                    min = length;
+                } else {
+                    min = Math.min(min, length);
+                }
+                max = Math.max(max, length);
+            }
             String typeKey = context.objectReaderAdapter.typeKey;
             int typeKeyLength = typeKey == null ? 5 : typeKey.length();
-            min = Math.min(min, typeKeyLength);
-            max = Math.max(max, typeKeyLength);
 
             mw.aload(JSON_READER);
+            mw.iconst_n(typeKeyLength);
             mw.iconst_n(min);
             mw.iconst_n(max);
-            mw.invokevirtual(TYPE_JSON_READER, "readFieldNameHashCode", "(II)J");
+            mw.invokevirtual(TYPE_JSON_READER, fieldReaderArray.length <= 2 ? "readFieldNameHashCodeE" : "readFieldNameHashCode", "(III)J");
             mw.dup2();
             mw.lstore(HASH_CODE64);
 

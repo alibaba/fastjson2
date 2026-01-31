@@ -181,7 +181,7 @@ final class JSONReaderASCII
     }
 
     @Override
-    public long readFieldNameHashCode(int min, int max) {
+    public long readFieldNameHashCode(int keySize, int min, int max) {
         final byte[] bytes = this.bytes;
         int ch = this.ch;
         if (ch == '/') {
@@ -221,7 +221,78 @@ final class JSONReaderASCII
 
         long nameHashCode;
         int name_len = index - start;
-        if (name_len < min || name_len > max) {
+        if ((name_len < min || name_len > max) && name_len != keySize) {
+            nameHashCode = Long.MAX_VALUE;
+        } else {
+            nameHashCode = Fnv.hashCode64(bytes, start, name_len, nameAscii);
+        }
+        this.nameEnd = index;
+
+        ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (ch != ':') {
+            throw new JSONException(info("expect ':', but " + ch));
+        }
+
+        ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+
+        this.nameAscii = true;
+        this.nameEscape = false;
+        this.nameLength = name_len;
+        return nameHashCode;
+    }
+
+    @Override
+    public long readFieldNameHashCodeE(int size0, int size1, int size3) {
+        final byte[] bytes = this.bytes;
+        int ch = this.ch;
+        if (ch == '/') {
+            skipComment();
+            ch = this.ch;
+        }
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
+        if (ch != '"' && ch != '\'') {
+            return readFieldNameHashCodeError(nameBegin, ch);
+        }
+
+        int offset = this.nameBegin = this.offset, end = this.end;
+        int start = offset;
+
+        int index;
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            index = IOUtils.indexOfQuoteV(bytes, ch, offset, end);
+        } else {
+            try {
+                index = (int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, ch, offset, end);
+            }
+            catch (Throwable e) {
+                throw new JSONException(e.getMessage());
+            }
+        }
+        if (index == -1) {
+            throw error("invalid escape character EOI");
+        }
+        int slashIndex = indexOfSlash(this, bytes, offset, end);
+        if ((slashIndex == -1 || slashIndex > index)) {
+            offset = index + 1;
+        } else {
+            return readFieldNameHashCode0();
+        }
+
+        long nameHashCode;
+        int name_len = index - start;
+        if (name_len != size1 && name_len != size3 && name_len != size0) {
             nameHashCode = Long.MAX_VALUE;
         } else {
             nameHashCode = Fnv.hashCode64(bytes, start, name_len, nameAscii);

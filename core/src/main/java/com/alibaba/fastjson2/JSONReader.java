@@ -1618,7 +1618,11 @@ public abstract class JSONReader
      */
     public abstract long readFieldNameHashCode();
 
-    public long readFieldNameHashCode(int min, int max) {
+    public long readFieldNameHashCode(int keySie, int min, int max) {
+        return readFieldNameHashCode();
+    }
+
+    public long readFieldNameHashCodeE(int size0, int size1, int size3) {
         return readFieldNameHashCode();
     }
 

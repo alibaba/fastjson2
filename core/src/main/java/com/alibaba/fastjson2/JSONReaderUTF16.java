@@ -1180,7 +1180,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final long readFieldNameHashCode(int min, int max) {
+    public final long readFieldNameHashCode(int keySize, int min, int max) {
         final char[] chars = this.chars;
         int ch = this.ch;
         if (ch == '/') {
@@ -1217,7 +1217,78 @@ final class JSONReaderUTF16
             offset += quoteIndex;
             int name_len = offset - start;
             long nameHashCode;
-            if (name_len < min || name_len > max) {
+            if ((name_len < min || name_len > max) && name_len != keySize) {
+                nameHashCode = Long.MAX_VALUE;
+            } else {
+                nameHashCode = Fnv.hashCode64(chars, start, name_len);
+            }
+            this.nameEnd = offset;
+            offset++;
+
+            ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            if (ch != ':') {
+                throw new JSONException(info("expect ':', but " + ch));
+            }
+
+            ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            this.ch = (char) ch;
+            this.offset = offset;
+
+            this.nameEscape = false;
+            this.nameLength = name_len;
+            return nameHashCode;
+        }
+
+        return readFieldNameHashCode0();
+    }
+
+    @Override
+    public long readFieldNameHashCodeE(int size0, int size1, int size3) {
+        final char[] chars = this.chars;
+        int ch = this.ch;
+        if (ch == '/') {
+            skipComment();
+            ch = this.ch;
+        }
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
+        if (ch != '"' && ch != '\'') {
+            return readFieldNameHashCodeError(nameBegin, ch);
+        }
+
+        int offset = this.nameBegin = this.offset, end = this.end;
+        int start = offset;
+
+        final char quote = (char) ch;
+
+        long quoteV = quote == '\'' ? 0x0027_0027_0027_0027L : 0x0022_0022_0022_0022L;
+        int upperBound = offset + ((end - offset) & ~7);
+        int quoteIndex = -1, slashIndex = -1;
+        while (offset < upperBound) {
+            long v = getLongLE(chars, offset);
+            if (containsSlashOrQuoteUTF16(v, quoteV)) {
+                slashIndex = indexOf(v, '\\');
+                quoteIndex = indexOf(v, quote);
+                break;
+            }
+
+            offset += 4;
+        }
+
+        if ((slashIndex == -1 || slashIndex > quoteIndex) && quoteIndex != -1) {
+            offset += quoteIndex;
+            int name_len = offset - start;
+            long nameHashCode;
+            if (name_len != size1 && name_len != size3 && name_len != size0) {
                 nameHashCode = Long.MAX_VALUE;
             } else {
                 nameHashCode = Fnv.hashCode64(chars, start, name_len);
