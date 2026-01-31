@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.AbstractMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue2430 {
     @Test
