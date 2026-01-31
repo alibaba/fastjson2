@@ -6,11 +6,29 @@ PR are always welcome, even if they only contain small fixes like typos, or a fe
 
 Please submit a PR broken down into small changes bit by bit. A PR consisting of a lot of features and code changes may be hard to review. It is recommended to submit PRs in an incremental fashion.
 
-Before submitting your PR, please ensure that your code adheres to the project's coding standards and that all tests pass. You can do this by running the following Maven commands:
+Before submitting your PR, please ensure that your code adheres to the project's coding standards and that all tests pass.
+
+### Required Pre-submission Checks
+
+The CI pipeline runs tests on multiple JDK versions (8, 11, 17, 21, 25) and operating systems (Ubuntu, Windows, macOS). Please run the following Maven commands locally to verify your changes:
+
+**1. Standard Build Test:**
+```bash
+./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
+```
+
+**2. Reflect Mode Test:**
+```bash
+./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package
+```
+
+Or use the shortcut (if available):
 ```bash
 mvn validate
 mvn test
 ```
+
+**Note:** Your PR should not break any existing tests. If your changes affect multiple modules, please ensure all related tests pass in both standard and reflect modes.
 
 This [Wiki](https://github.com/alibaba/fastjson2/wiki) contains information about scenarios structure, design and api documents, how to use, how to run it, and more.
 
