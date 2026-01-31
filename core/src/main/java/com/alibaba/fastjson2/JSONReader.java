@@ -146,6 +146,7 @@ public abstract class JSONReader
     protected int offset;
     protected char ch;
     protected boolean comma;
+    protected int nameBegin;
 
     protected boolean nameEscape;
     protected boolean valueEscape;
@@ -1332,7 +1333,7 @@ public abstract class JSONReader
         return (char) b;
     }
 
-    private JSONException char1Error(int c) {
+    protected JSONException char1Error(int c) {
         return new JSONException(info("unclosed.str '\\" + (char) c));
     }
 
@@ -1616,6 +1617,10 @@ public abstract class JSONReader
      * @return The hash code of the current field name
      */
     public abstract long readFieldNameHashCode();
+
+    public long readFieldNameHashCode(int min, int max) {
+        return readFieldNameHashCode();
+    }
 
     /**
      * Reads the hash code of the current field name in lowercase.
@@ -6826,5 +6831,23 @@ public abstract class JSONReader
             return null;
         }
         return str;
+    }
+
+    protected final long readFieldNameHashCodeError(int nameBegin, int ch) {
+        if ((context.features & MASK_ALLOW_UN_QUOTED_FIELD_NAMES) != 0 && isFirstIdentifier(ch)) {
+            return readFieldNameHashCodeUnquote();
+        }
+        if (ch == '}' || isNull()) {
+            return -1;
+        }
+
+        String errorMsg, preFieldName;
+        if (ch == '[' && nameBegin > 0 && (preFieldName = getFieldName()) != null) {
+            errorMsg = "illegal fieldName input " + ch + ", previous fieldName " + preFieldName;
+        } else {
+            errorMsg = "illegal fieldName input" + ch;
+        }
+
+        throw new JSONException(info(errorMsg));
     }
 }

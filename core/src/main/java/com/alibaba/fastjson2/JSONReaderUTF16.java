@@ -1007,35 +1007,7 @@ final class JSONReaderUTF16
                 break;
             }
 
-            byte c = (byte) ch;
-            switch (i) {
-                case 0:
-                    nameValue = c;
-                    break;
-                case 1:
-                    nameValue = (c << 8) + (nameValue & 0xFFL);
-                    break;
-                case 2:
-                    nameValue = (c << 16) + (nameValue & 0xFFFFL);
-                    break;
-                case 3:
-                    nameValue = (c << 24) + (nameValue & 0xFFFFFFL);
-                    break;
-                case 4:
-                    nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
-                    break;
-                case 5:
-                    nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                    break;
-                case 6:
-                    nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                    break;
-                case 7:
-                    nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                    break;
-                default:
-                    break;
-            }
+            nameValue = (((long) ch) << (i << 3)) | nameValue;
 
             ch = offset == end ? EOI : chars[offset++];
         }
@@ -1143,6 +1115,142 @@ final class JSONReaderUTF16
 
     @Override
     public final long readFieldNameHashCode() {
+        final char[] chars = this.chars;
+        int ch = this.ch;
+        if (ch == '/') {
+            skipComment();
+            ch = this.ch;
+        }
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
+        if (ch != '"' && ch != '\'') {
+            return readFieldNameHashCodeError(nameBegin, ch);
+        }
+
+        int offset = this.nameBegin = this.offset, end = this.end;
+        int start = offset;
+
+        final char quote = (char) ch;
+
+        long quoteV = quote == '\'' ? 0x0027_0027_0027_0027L : 0x0022_0022_0022_0022L;
+        int upperBound = offset + ((end - offset) & ~7);
+        int quoteIndex = -1, slashIndex = -1;
+        while (offset < upperBound) {
+            long v = getLongLE(chars, offset);
+            if (containsSlashOrQuoteUTF16(v, quoteV)) {
+                slashIndex = indexOf(v, '\\');
+                quoteIndex = indexOf(v, quote);
+                break;
+            }
+
+            offset += 4;
+        }
+
+        if ((slashIndex == -1 || slashIndex > quoteIndex) && quoteIndex != -1) {
+            offset += quoteIndex;
+            int name_len = offset - start;
+            long nameHashCode = Fnv.hashCode64(chars, start, name_len);
+            this.nameEnd = offset;
+            offset++;
+
+            ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            if (ch != ':') {
+                throw new JSONException(info("expect ':', but " + ch));
+            }
+
+            ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            this.ch = (char) ch;
+            this.offset = offset;
+
+            this.nameEscape = false;
+            this.nameLength = name_len;
+            return nameHashCode;
+        }
+
+        return readFieldNameHashCode0();
+    }
+
+    @Override
+    public final long readFieldNameHashCode(int min, int max) {
+        final char[] chars = this.chars;
+        int ch = this.ch;
+        if (ch == '/') {
+            skipComment();
+            ch = this.ch;
+        }
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
+        if (ch != '"' && ch != '\'') {
+            return readFieldNameHashCodeError(nameBegin, ch);
+        }
+
+        int offset = this.nameBegin = this.offset, end = this.end;
+        int start = offset;
+
+        final char quote = (char) ch;
+
+        long quoteV = quote == '\'' ? 0x0027_0027_0027_0027L : 0x0022_0022_0022_0022L;
+        int upperBound = offset + ((end - offset) & ~7);
+        int quoteIndex = -1, slashIndex = -1;
+        while (offset < upperBound) {
+            long v = getLongLE(chars, offset);
+            if (containsSlashOrQuoteUTF16(v, quoteV)) {
+                slashIndex = indexOf(v, '\\');
+                quoteIndex = indexOf(v, quote);
+                break;
+            }
+
+            offset += 4;
+        }
+
+        if ((slashIndex == -1 || slashIndex > quoteIndex) && quoteIndex != -1) {
+            offset += quoteIndex;
+            int name_len = offset - start;
+            long nameHashCode;
+            if (name_len < min || name_len > max) {
+                nameHashCode = Long.MAX_VALUE;
+            } else {
+                nameHashCode = Fnv.hashCode64(chars, start, name_len);
+            }
+            this.nameEnd = offset;
+            offset++;
+
+            ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            if (ch != ':') {
+                throw new JSONException(info("expect ':', but " + ch));
+            }
+
+            ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            this.ch = (char) ch;
+            this.offset = offset;
+
+            this.nameEscape = false;
+            this.nameLength = name_len;
+            return nameHashCode;
+        }
+
+        return readFieldNameHashCode0();
+    }
+
+    private final long readFieldNameHashCode0() {
         final char[] chars = this.chars;
         char ch = this.ch;
         if (ch == '/') {
@@ -1430,6 +1538,66 @@ final class JSONReaderUTF16
 
     @Override
     public final long readValueHashCode() {
+        final char[] chars = this.chars;
+        int ch = this.ch;
+        if (ch == '/') {
+            skipComment();
+            ch = this.ch;
+        }
+        if (ch != '"' && ch != '\'') {
+            return -1;
+        }
+
+        int offset = this.nameBegin = this.offset, end = this.end;
+        int start = offset;
+
+        final char quote = (char) ch;
+
+        long quoteV = quote == '\'' ? 0x0027_0027_0027_0027L : 0x0022_0022_0022_0022L;
+        int upperBound = offset + ((end - offset) & ~7);
+        int quoteIndex = -1, slashIndex = -1;
+        while (offset < upperBound) {
+            long v = getLongLE(chars, offset);
+            if (containsSlashOrQuoteUTF16(v, quoteV)) {
+                slashIndex = indexOf(v, '\\');
+                quoteIndex = indexOf(v, quote);
+                break;
+            }
+
+            offset += 4;
+        }
+
+        if ((slashIndex == -1 || slashIndex > quoteIndex) && quoteIndex != -1) {
+            offset += quoteIndex;
+            int name_len = offset - start;
+            long nameHashCode = Fnv.hashCode64(chars, start, name_len);
+            this.nameEnd = offset;
+            offset++;
+
+            ch = offset == end ? EOI : chars[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            if (comma = ch == ',') {
+                ch = offset == end ? EOI : chars[offset++];
+                while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                    ch = offset == end ? EOI : chars[offset++];
+                }
+            }
+
+            this.ch = (char) ch;
+            this.offset = offset;
+
+            this.nameEscape = false;
+            this.nameLength = name_len;
+            return nameHashCode;
+        }
+
+        return readValueHashCode0();
+    }
+
+    public final long readValueHashCode0() {
         final char quote = ch;
         if (quote != '"' && quote != '\'') {
             return -1;
@@ -1483,35 +1651,7 @@ final class JSONReaderUTF16
                 offset = this.nameBegin;
                 break;
             }
-
-            switch (i) {
-                case 0:
-                    nameValue = (byte) ch;
-                    break;
-                case 1:
-                    nameValue = (((byte) ch) << 8) + (nameValue & 0xFFL);
-                    break;
-                case 2:
-                    nameValue = (((byte) ch) << 16) + (nameValue & 0xFFFFL);
-                    break;
-                case 3:
-                    nameValue = (((byte) ch) << 24) + (nameValue & 0xFFFFFFL);
-                    break;
-                case 4:
-                    nameValue = (((long) (byte) ch) << 32) + (nameValue & 0xFFFFFFFFL);
-                    break;
-                case 5:
-                    nameValue = (((long) (byte) ch) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                    break;
-                case 6:
-                    nameValue = (((long) (byte) ch) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                    break;
-                case 7:
-                    nameValue = (((long) (byte) ch) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                    break;
-                default:
-                    break;
-            }
+            nameValue = (((long) ch) << (i << 3)) | nameValue;
         }
 
         long hashCode;
@@ -1645,34 +1785,7 @@ final class JSONReaderUTF16
                 c = (char) (c + 32);
             }
 
-            switch (i) {
-                case 0:
-                    nameValue = (byte) c;
-                    break;
-                case 1:
-                    nameValue = (((byte) c) << 8) + (nameValue & 0xFFL);
-                    break;
-                case 2:
-                    nameValue = (((byte) c) << 16) + (nameValue & 0xFFFFL);
-                    break;
-                case 3:
-                    nameValue = (((byte) c) << 24) + (nameValue & 0xFFFFFFL);
-                    break;
-                case 4:
-                    nameValue = (((long) (byte) c) << 32) + (nameValue & 0xFFFFFFFFL);
-                    break;
-                case 5:
-                    nameValue = (((long) (byte) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                    break;
-                case 6:
-                    nameValue = (((long) (byte) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                    break;
-                case 7:
-                    nameValue = (((long) (byte) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                    break;
-                default:
-                    break;
-            }
+            nameValue = (((long) c) << (i << 3)) | nameValue;
             ++i;
         }
 

@@ -166,6 +166,10 @@ public final class MethodWriter {
         visitInsn(Opcodes.RETURN);
     }
 
+    public void ireturn() {
+        visitInsn(Opcodes.IRETURN);
+    }
+
     public void areturn() {
         visitInsn(Opcodes.ARETURN);
     }
@@ -247,6 +251,10 @@ public final class MethodWriter {
 
     public void iadd() {
         visitInsn(Opcodes.IADD);
+    }
+
+    public void isub() {
+        visitInsn(Opcodes.ISUB);
     }
 
     public void imul() {

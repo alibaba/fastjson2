@@ -10,9 +10,9 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>fastjson2-benchmark_21</artifactId>
-    <name>fastjson2-benchmark_21</name>
-    <description>JMH Benchmark 21 for Fastjson2</description>
+    <artifactId>fastjson2-benchmark_25</artifactId>
+    <name>fastjson2-benchmark_25</name>
+    <description>JMH Benchmark 25 for Fastjson2</description>
     <packaging>jar</packaging>
 
     <properties>
@@ -138,7 +138,7 @@
         <dependency>
             <groupId>org.simdjson</groupId>
             <artifactId>simdjson-java</artifactId>
-            <version>0.3.0</version>
+            <version>0.4.0</version>
         </dependency>
         <dependency>
             <groupId>tools.jackson.core</groupId>

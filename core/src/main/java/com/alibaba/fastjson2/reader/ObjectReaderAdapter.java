@@ -201,6 +201,13 @@ public class ObjectReaderAdapter<T>
             this.seeAlsoNames = null;
         }
         this.seeAlsoDefault = seeAlsoDefault;
+
+        int min = 0, max = 0;
+        for (FieldReader fieldReader : fieldReaders) {
+            int length = fieldReader.fieldName.length();
+            min = Math.min(min, length);
+            max = Math.max(max, length);
+        }
     }
 
     @Override
