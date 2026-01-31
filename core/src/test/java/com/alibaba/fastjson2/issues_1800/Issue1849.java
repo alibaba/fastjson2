@@ -9,7 +9,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1849 {
     static final String str = "\"Indosat\",\"JAN6B41111111111\",\"1111111111\",\"1\",\"成功\",\"\",\"\",\"3\",\"3\",\"6\",\"1365000\",\"11\",\"15015000\"\n" +

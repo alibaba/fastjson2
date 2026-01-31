@@ -281,7 +281,7 @@ public class CSVReaderTest {
 
     @Test
     public void testFileAsStream() {
-        CSVReader csvReader = CSVReader.of(getClass().getResourceAsStream("/person.csv"), Person.class);
+        CSVReader csvReader = CSVReader.of(getClass().getResourceAsStream("/data/person.csv"), Person.class);
         System.out.println(csvReader.readHeader());
         Stream<Person> stream = readAsStream(csvReader);
         stream.forEach(System.out::println);
@@ -289,7 +289,7 @@ public class CSVReaderTest {
 
     @Test
     public void testFileAsStream1() {
-        CSVReader csvReader = CSVReader.of(new InputStreamReader(getClass().getResourceAsStream("/person.csv")), Person.class);
+        CSVReader csvReader = CSVReader.of(new InputStreamReader(getClass().getResourceAsStream("/data/person.csv")), Person.class);
         System.out.println(csvReader.readHeader());
         Stream<Person> stream = readAsStream(csvReader);
         stream.forEach(System.out::println);

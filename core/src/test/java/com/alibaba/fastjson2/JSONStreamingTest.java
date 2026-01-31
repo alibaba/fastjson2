@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class JSONStreamingTest {
     @Test
     public void test_stream_utf8() {
-        InputStream is = this.getClass().getClassLoader().getResourceAsStream("test1.txt");
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream("data/test1.txt");
         assertNotNull(is);
 
         List list = new ArrayList<>();
@@ -34,7 +34,7 @@ public class JSONStreamingTest {
 
     @Test
     public void test_stream_utf8_2() {
-        InputStream is = this.getClass().getClassLoader().getResourceAsStream("test1.txt");
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream("data/test1.txt");
         assertNotNull(is);
 
         List list = new ArrayList<>();
@@ -52,7 +52,7 @@ public class JSONStreamingTest {
 
     @Test
     public void test_stream_ascii() {
-        InputStream is = this.getClass().getClassLoader().getResourceAsStream("test1.txt");
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream("data/test1.txt");
         assertNotNull(is);
 
         List list = new ArrayList<>();
@@ -70,7 +70,7 @@ public class JSONStreamingTest {
 
     @Test
     public void test_stream_reader() {
-        Reader is = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("test1.txt"));
+        Reader is = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("data/test1.txt"));
         assertNotNull(is);
 
         List list = new ArrayList<>();

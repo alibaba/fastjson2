@@ -4,8 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.ToStringSerializer;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Issue3157测试类
@@ -22,7 +23,7 @@ public class Issue3157Test {
         stringSerializeConfig.put(Long.class, ToStringSerializer.instance);
         People people = new People("Test", 10, 10000000L);
         String jsonText = "{\"age\":\"10\",\"hairNums\":\"10000000\",\"name\":\"Test\"}";
-        Assert.assertEquals("JSON文本不一致", jsonText, JSON.toJSONString(people, stringSerializeConfig, new SerializerFeature[0]));
+        assertEquals(jsonText, JSON.toJSONString(people, stringSerializeConfig, new SerializerFeature[0]), "JSON文本不一致");
     }
 
     /**

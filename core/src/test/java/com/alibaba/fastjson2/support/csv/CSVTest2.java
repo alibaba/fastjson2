@@ -82,7 +82,7 @@ public class CSVTest2 {
 
     @Test
     public void testRowCount() throws IOException {
-        URL resource = this.getClass().getClassLoader().getResource("states.csv");
+        URL resource = this.getClass().getClassLoader().getResource("data/states.csv");
         if (resource == null) {
             return;
         }
@@ -93,7 +93,7 @@ public class CSVTest2 {
 
     @Test
     public void testRowCountFile() throws IOException {
-        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv.zip");
+        URL resource = this.getClass().getClassLoader().getResource("data/csv/organised_Gen.csv.zip");
         if (resource == null) {
             return;
         }
@@ -107,7 +107,7 @@ public class CSVTest2 {
 
     @Test
     public void testReadLines() throws IOException {
-        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv.zip");
+        URL resource = this.getClass().getClassLoader().getResource("data/csv/organised_Gen.csv.zip");
         if (resource == null) {
             return;
         }
@@ -135,7 +135,7 @@ public class CSVTest2 {
 
     @Test
     public void testReadLines1() throws IOException {
-        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv.zip");
+        URL resource = this.getClass().getClassLoader().getResource("data/csv/organised_Gen.csv.zip");
         if (resource == null) {
             return;
         }
@@ -165,7 +165,7 @@ public class CSVTest2 {
 
     @Test
     public void testReadLines2() throws IOException {
-        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        URL resource = this.getClass().getClassLoader().getResource("data/csv/organised_Gen.csv");
         if (resource == null) {
             return;
         }
@@ -193,7 +193,7 @@ public class CSVTest2 {
 
     @Test
     public void testReadLines3() throws IOException {
-        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        URL resource = this.getClass().getClassLoader().getResource("data/csv/organised_Gen.csv");
         if (resource == null) {
             return;
         }
@@ -221,7 +221,7 @@ public class CSVTest2 {
 
     @Test
     public void readLineValues() throws IOException {
-        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        URL resource = this.getClass().getClassLoader().getResource("data/csv/organised_Gen.csv");
         if (resource == null) {
             return;
         }
@@ -249,7 +249,7 @@ public class CSVTest2 {
 
     @Test
     public void readLineValues1() throws IOException {
-        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        URL resource = this.getClass().getClassLoader().getResource("data/csv/organised_Gen.csv");
         if (resource == null) {
             return;
         }
@@ -277,7 +277,7 @@ public class CSVTest2 {
 
     @Test
     public void readLineValues2() throws IOException {
-        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        URL resource = this.getClass().getClassLoader().getResource("data/csv/organised_Gen.csv");
         if (resource == null) {
             return;
         }
@@ -305,7 +305,7 @@ public class CSVTest2 {
 
     @Test
     public void readLineValues3() throws IOException {
-        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        URL resource = this.getClass().getClassLoader().getResource("data/csv/organised_Gen.csv");
         if (resource == null) {
             return;
         }
@@ -333,7 +333,7 @@ public class CSVTest2 {
 
     @Test
     public void readLineValues3ReadAndWrite() throws IOException {
-        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        URL resource = this.getClass().getClassLoader().getResource("data/csv/organised_Gen.csv");
         if (resource == null) {
             return;
         }

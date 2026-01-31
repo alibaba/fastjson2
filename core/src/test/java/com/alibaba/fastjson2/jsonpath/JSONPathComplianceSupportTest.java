@@ -12,7 +12,7 @@ public class JSONPathComplianceSupportTest {
     @Test
     public void filter() {
         Stat stat = new Stat();
-        String resource = "jsonpath_compliance.json";
+        String resource = "jsonpath/jsonpath_compliance.json";
         URL filterResource = JSONPathComplianceSupportTest.class.getClassLoader().getResource(resource);
         System.out.println();
         System.out.println("--------------" + resource + "--------------");

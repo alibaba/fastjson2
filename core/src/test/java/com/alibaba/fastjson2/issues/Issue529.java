@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class Issue529 {
     @Test
     public void test() {
-        URL resource = Issue529.class.getClassLoader().getResource("issue529.json");
+        URL resource = Issue529.class.getClassLoader().getResource("issues/issue529.json");
         DTO dto = JSON.parseObject(resource, DTO.class);
         assertNotNull(dto);
         assertEquals(1, dto.checkedSkuList.get(0).cartType);

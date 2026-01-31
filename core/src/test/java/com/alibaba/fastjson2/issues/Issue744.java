@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue744 {
     @Test
     public void test() {
-        URL url = this.getClass().getClassLoader().getResource("issue744.json");
+        URL url = this.getClass().getClassLoader().getResource("issues/issue744.json");
         JSONObject map = JSON.parseObject(url);
         byte[] jsonbBytes = JSONB.toBytes(map);
         JSONObject map2 = JSONB.parseObject(jsonbBytes);

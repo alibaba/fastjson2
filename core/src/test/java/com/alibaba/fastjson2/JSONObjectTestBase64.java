@@ -2,7 +2,7 @@ package com.alibaba.fastjson2;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;

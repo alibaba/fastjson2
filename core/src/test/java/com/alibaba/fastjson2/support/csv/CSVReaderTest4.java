@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CSVReaderTest4 {
     @Test
     public void test() throws IOException {
-        URL resource = this.getClass().getClassLoader().getResource("states.csv");
+        URL resource = this.getClass().getClassLoader().getResource("data/states.csv");
         if (resource == null) {
             return;
         }
