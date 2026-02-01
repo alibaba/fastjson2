@@ -58,7 +58,7 @@ public class ClientsParseUTF8Bytes {
         );
     }
 
-    @Benchmark
+//    @Benchmark
     public void wast(Blackhole bh) {
         bh.consume(io.github.wycst.wast.json.JSON.parseObject(utf8Bytes, Clients.class));
     }
