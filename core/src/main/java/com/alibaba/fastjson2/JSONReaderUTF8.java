@@ -4535,9 +4535,12 @@ class JSONReaderUTF8
         boolean num = false;
         if (!dot && (ch >= '0' && ch <= '9')) {
             num = true;
-            do {
-                ch = offset == end ? EOI : bytes[offset++];
-            } while (ch >= '0' && ch <= '9');
+            for (; offset < end; offset++) {
+                if ((ch = bytes[offset]) < '0' || ch > '9') {
+                    break;
+                }
+            }
+            ch = offset == end ? EOI : bytes[offset++];
         }
 
         if (num && (ch == 'L' | ch == 'F' | ch == 'D' | ch == 'B' | ch == 'S')) {
@@ -4546,11 +4549,12 @@ class JSONReaderUTF8
             boolean small = false;
             if (ch == '.') {
                 small = true;
-                ch = offset == end ? EOI : bytes[offset++];
-
-                while (ch >= '0' && ch <= '9') {
-                    ch = offset == end ? EOI : bytes[offset++];
+                for (; offset < end; offset++) {
+                    if ((ch = bytes[offset]) < '0' || ch > '9') {
+                        break;
+                    }
                 }
+                ch = offset == end ? EOI : bytes[offset++];
             }
 
             if (!num && !small) {
@@ -4571,9 +4575,12 @@ class JSONReaderUTF8
                 }
 
                 if (ch >= '0' && ch <= '9') {
-                    do {
-                        ch = offset == end ? EOI : bytes[offset++];
-                    } while (ch >= '0' && ch <= '9');
+                    for (; offset < end; offset++) {
+                        if ((ch = bytes[offset]) < '0' || ch > '9') {
+                            break;
+                        }
+                    }
+                    ch = offset == end ? EOI : bytes[offset++];
                 } else if (eSign) {
                     throw numberError(offset, ch);
                 }
