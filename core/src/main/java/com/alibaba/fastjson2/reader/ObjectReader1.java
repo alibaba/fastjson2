@@ -333,4 +333,9 @@ public class ObjectReader1<T>
         fieldReader0.accept(object, value);
         return true;
     }
+
+    @Override
+    public int getFieldOrdinal(long hashCode) {
+        return hashCode == this.hashCode0 ? 0 : -1;
+    }
 }

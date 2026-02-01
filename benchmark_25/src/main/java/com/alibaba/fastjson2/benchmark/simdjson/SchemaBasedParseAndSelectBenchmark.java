@@ -81,7 +81,7 @@ public class SchemaBasedParseAndSelectBenchmark {
         return defaultUsers.size();
     }
 
-    @Benchmark
+//    @Benchmark
     public int countUniqueUsersWithDefaultProfile_jackson() throws IOException {
         Set<String> defaultUsers = new HashSet<>();
         SimdJsonTwitter twitter = objectMapper.readValue(buffer, SimdJsonTwitter.class);

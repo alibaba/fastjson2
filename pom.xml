@@ -582,7 +582,9 @@
                             <failOnViolation>true</failOnViolation>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                             <configLocation>src/checkstyle/fastjson2-checks.xml</configLocation>
-                            <excludes>module-info.java,
+                            <excludes>
+                                **/jmh_generated/**,
+                                module-info.java,
                                 com/alibaba/fastjson2/fieldbased/Case1.java,
                                 com/alibaba/fastjson2/codec/UnicodeClassNameTest.java,
                                 com/alibaba/fastjson2/hsf/UCaseNameTest.java,
@@ -1038,10 +1040,10 @@
         <profile>
             <id>enable-for-jdk21+</id>
             <activation>
-                <jdk>[21,)</jdk>
+                <jdk>[25,)</jdk>
             </activation>
             <modules>
-                <module>benchmark_21</module>
+                <module>benchmark_25</module>
             </modules>
         </profile>
         <profile>

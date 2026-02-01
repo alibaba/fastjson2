@@ -12,6 +12,8 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.DateUtils.*;
+import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
+import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -648,35 +650,7 @@ class JSONReaderUTF8
                 break;
             }
 
-            byte c = (byte) ch;
-            switch (i) {
-                case 0:
-                    nameValue = c;
-                    break;
-                case 1:
-                    nameValue = (c << 8) + (nameValue & 0xFFL);
-                    break;
-                case 2:
-                    nameValue = (c << 16) + (nameValue & 0xFFFFL);
-                    break;
-                case 3:
-                    nameValue = (c << 24) + (nameValue & 0xFFFFFFL);
-                    break;
-                case 4:
-                    nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
-                    break;
-                case 5:
-                    nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                    break;
-                case 6:
-                    nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                    break;
-                case 7:
-                    nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                    break;
-                default:
-                    break;
-            }
+            nameValue = (((long) ch) << (i << 3)) | nameValue;
 
             ch = offset == end ? EOI : bytes[offset++];
         }
@@ -686,7 +660,7 @@ class JSONReaderUTF8
         if (nameValue != 0) {
             hashCode = nameValue;
         } else {
-            hashCode = Fnv.MAGIC_HASH_CODE;
+            hashCode = MAGIC_HASH_CODE;
             _for:
             for (int i = 0; ; ++i) {
                 if (ch == '\\') {
@@ -722,7 +696,7 @@ class JSONReaderUTF8
                     }
 
                     hashCode ^= ch;
-                    hashCode *= Fnv.MAGIC_PRIME;
+                    hashCode *= MAGIC_PRIME;
                     ch = offset == end ? EOI : bytes[offset++];
                     continue;
                 }
@@ -801,14 +775,14 @@ class JSONReaderUTF8
                 if (ch > 0xFFFF) {
                     int c0 = (ch >>> 10) + ('\uD800' - (0x010000 >>> 10)); // Character.highSurrogate(uc);
                     hashCode ^= c0;
-                    hashCode *= Fnv.MAGIC_PRIME;
+                    hashCode *= MAGIC_PRIME;
 
                     int c1 = (ch & 0x3ff) + '\uDC00'; // Character.lowSurrogate(uc);
                     hashCode ^= c1;
                 } else {
                     hashCode ^= ch;
                 }
-                hashCode *= Fnv.MAGIC_PRIME;
+                hashCode *= MAGIC_PRIME;
 
                 ch = offset == end ? EOI : bytes[offset++];
             }
@@ -2314,29 +2288,214 @@ class JSONReaderUTF8
             throw notSupportName();
         }
         if (ch != '"' && ch != '\'') {
-            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
-                return readFieldNameHashCodeUnquote();
-            }
-            if (ch == '}' || isNull()) {
-                return -1;
-            }
-
-            String errorMsg, preFieldName;
-            if (ch == '[' && nameBegin > 0 && (preFieldName = getFieldName()) != null) {
-                errorMsg = "illegal fieldName input " + ch + ", previous fieldName " + preFieldName;
-            } else {
-                errorMsg = "illegal fieldName input" + ch;
-            }
-
-            throw new JSONException(info(errorMsg));
+            return readFieldNameHashCodeError(nameBegin, ch);
         }
 
-        final int quote = ch;
+        int offset = this.nameBegin = this.offset, end = this.end;
+        int start = offset;
 
+        int index;
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            index = IOUtils.indexOfQuoteV(bytes, ch, offset, end);
+        } else {
+            try {
+                index = (int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, ch, offset, end);
+            }
+            catch (Throwable e) {
+                throw new JSONException(e.getMessage());
+            }
+        }
+        if (index == -1) {
+            throw error("invalid escape character EOI");
+        }
+        int slashIndex = indexOfSlash(this, bytes, offset, end);
+        if ((slashIndex == -1 || slashIndex > index)) {
+            offset = index + 1;
+        } else {
+            return readFieldNameHashCode0();
+        }
+
+        int name_len = index - start;
+        boolean nameAscii = IOUtils.isASCII(bytes, start, name_len);
+        long nameHashCode = Fnv.hashCode64(bytes, start, name_len, nameAscii);
+        this.nameEnd = index;
+
+        ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (ch != ':') {
+            throw new JSONException(info("expect ':', but " + ch));
+        }
+
+        ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+
+        this.nameAscii = nameAscii;
+        this.nameEscape = false;
+        this.nameLength = name_len;
+        return nameHashCode;
+    }
+
+    @Override
+    public long readFieldNameHashCode(int keySize, int min, int max) {
+        final byte[] bytes = this.bytes;
+        int ch = this.ch;
+        if (ch == '/') {
+            skipComment();
+            ch = this.ch;
+        }
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
+        if (ch != '"' && ch != '\'') {
+            return readFieldNameHashCodeError(nameBegin, ch);
+        }
+
+        int offset = this.nameBegin = this.offset, end = this.end;
+        int start = offset;
+
+        int index;
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            index = IOUtils.indexOfQuoteV(bytes, ch, offset, end);
+        } else {
+            try {
+                index = (int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, ch, offset, end);
+            }
+            catch (Throwable e) {
+                throw new JSONException(e.getMessage());
+            }
+        }
+        if (index == -1) {
+            throw error("invalid escape character EOI");
+        }
+        int slashIndex = indexOfSlash(this, bytes, offset, end);
+        if (slashIndex == -1 || slashIndex > index) {
+            offset = index + 1;
+        } else {
+            return readFieldNameHashCode0();
+        }
+
+        boolean nameAscii = false;
+        long nameHashCode;
+        int name_len = index - start;
+        if ((name_len < min || name_len > max) && name_len != keySize) {
+            nameHashCode = Long.MAX_VALUE;
+        } else {
+            nameAscii = IOUtils.isASCII(bytes, start, name_len);
+            nameHashCode = Fnv.hashCode64(bytes, start, name_len, nameAscii);
+        }
+        this.nameEnd = index;
+
+        ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (ch != ':') {
+            throw new JSONException(info("expect ':', but " + ch));
+        }
+
+        ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+
+        this.nameAscii = nameAscii;
+        this.nameEscape = false;
+        this.nameLength = name_len;
+        return nameHashCode;
+    }
+
+    @Override
+    public long readFieldNameHashCodeE(int size0, int size1, int size3) {
+        final byte[] bytes = this.bytes;
+        int ch = this.ch;
+        if (ch == '/') {
+            skipComment();
+            ch = this.ch;
+        }
+        if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
+            throw notSupportName();
+        }
+        if (ch != '"' && ch != '\'') {
+            return readFieldNameHashCodeError(nameBegin, ch);
+        }
+
+        int offset = this.nameBegin = this.offset, end = this.end;
+        int start = offset;
+
+        int index;
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            index = IOUtils.indexOfQuoteV(bytes, ch, offset, end);
+        } else {
+            try {
+                index = (int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, ch, offset, end);
+            }
+            catch (Throwable e) {
+                throw new JSONException(e.getMessage());
+            }
+        }
+        if (index == -1) {
+            throw error("invalid escape character EOI");
+        }
+        int slashIndex = indexOfSlash(this, bytes, offset, end);
+        if (slashIndex == -1 || slashIndex > index) {
+            offset = index + 1;
+        } else {
+            return readFieldNameHashCode0();
+        }
+
+        boolean nameAscii = false;
+        long nameHashCode;
+        int name_len = index - start;
+        if (name_len != size1 && name_len != size3 && name_len != size0) {
+            nameHashCode = Long.MAX_VALUE;
+        } else {
+            nameAscii = IOUtils.isASCII(bytes, start, name_len);
+            nameHashCode = Fnv.hashCode64(bytes, start, name_len, nameAscii);
+        }
+        this.nameEnd = index;
+
+        ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (ch != ':') {
+            throw new JSONException(info("expect ':', but " + ch));
+        }
+
+        ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+
+        this.nameAscii = nameAscii;
+        this.nameEscape = false;
+        this.nameLength = name_len;
+        return nameHashCode;
+    }
+
+    protected long readFieldNameHashCode0() {
+        final byte[] bytes = this.bytes;
+        final int quote = ch;
+        int offset = this.offset, end = this.end;
         this.nameAscii = true;
         this.nameEscape = false;
-        int offset = this.nameBegin = this.offset, end = this.end;
-
+        int ch;
         long nameValue = 0;
 
         if (offset + 9 < end) {
@@ -2494,34 +2653,7 @@ class JSONReaderUTF8
                     break;
                 }
 
-                switch (i) {
-                    case 0:
-                        nameValue = (byte) ch;
-                        break;
-                    case 1:
-                        nameValue = (((byte) ch) << 8) + (nameValue & 0xFFL);
-                        break;
-                    case 2:
-                        nameValue = (((byte) ch) << 16) + (nameValue & 0xFFFFL);
-                        break;
-                    case 3:
-                        nameValue = (((byte) ch) << 24) + (nameValue & 0xFFFFFFL);
-                        break;
-                    case 4:
-                        nameValue = (((long) (byte) ch) << 32) + (nameValue & 0xFFFFFFFFL);
-                        break;
-                    case 5:
-                        nameValue = (((long) (byte) ch) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                        break;
-                    case 6:
-                        nameValue = (((long) (byte) ch) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                        break;
-                    case 7:
-                        nameValue = (((long) (byte) ch) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                        break;
-                    default:
-                        break;
-                }
+                nameValue = (((long) ch) << (i << 3)) | nameValue;
             }
         }
 
@@ -2529,7 +2661,7 @@ class JSONReaderUTF8
         if (nameValue != 0) {
             hashCode = nameValue;
         } else {
-            hashCode = Fnv.MAGIC_HASH_CODE;
+            hashCode = MAGIC_HASH_CODE;
             for (int i = 0; ; ++i) {
                 ch = bytes[offset];
                 if (ch == '\\') {
@@ -2554,7 +2686,7 @@ class JSONReaderUTF8
                     }
                     offset++;
                     hashCode ^= ch;
-                    hashCode *= Fnv.MAGIC_PRIME;
+                    hashCode *= MAGIC_PRIME;
                     continue;
                 }
 
@@ -2591,7 +2723,7 @@ class JSONReaderUTF8
                 }
 
                 hashCode ^= ch;
-                hashCode *= Fnv.MAGIC_PRIME;
+                hashCode *= MAGIC_PRIME;
             }
         }
 
@@ -2617,6 +2749,67 @@ class JSONReaderUTF8
 
     @Override
     public long readValueHashCode() {
+        final byte[] bytes = this.bytes;
+        int ch = this.ch;
+        if (ch == '/') {
+            skipComment();
+            ch = this.ch;
+        }
+        if (ch != '"' && ch != '\'') {
+            return -1;
+        }
+
+        int offset = this.nameBegin = this.offset, end = this.end;
+        int start = offset;
+
+        int index;
+        if (INDEX_OF_CHAR_LATIN1 == null) {
+            index = IOUtils.indexOfQuoteV(bytes, ch, offset, end);
+        } else {
+            try {
+                index = (int) INDEX_OF_CHAR_LATIN1.invokeExact(bytes, ch, offset, end);
+            }
+            catch (Throwable e) {
+                throw new JSONException(e.getMessage());
+            }
+        }
+        if (index == -1) {
+            throw error("invalid escape character EOI");
+        }
+        int slashIndex = indexOfSlash(this, bytes, offset, end);
+        if ((slashIndex == -1 || slashIndex > index)) {
+            offset = index + 1;
+        } else {
+            return readValueHashCode0();
+        }
+
+        int name_len = index - start;
+        boolean nameAscii = IOUtils.isASCII(bytes, start, name_len);
+        long nameHashCode = Fnv.hashCode64(bytes, start, name_len, nameAscii);
+        this.nameEnd = index;
+
+        ch = offset == end ? EOI : bytes[offset++];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (comma = ch == ',') {
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+        }
+
+        this.offset = offset;
+        this.ch = (char) ch;
+
+        this.nameAscii = nameAscii;
+        this.nameEscape = false;
+        this.nameLength = name_len;
+        return nameHashCode;
+    }
+
+    private long readValueHashCode0() {
         int ch = this.ch;
         if (ch != '"' && ch != '\'') {
             return -1;
@@ -2676,41 +2869,14 @@ class JSONReaderUTF8
                 break;
             }
 
-            switch (i) {
-                case 0:
-                    nameValue = (byte) ch;
-                    break;
-                case 1:
-                    nameValue = (((byte) ch) << 8) + (nameValue & 0xFFL);
-                    break;
-                case 2:
-                    nameValue = (((byte) ch) << 16) + (nameValue & 0xFFFFL);
-                    break;
-                case 3:
-                    nameValue = (((byte) ch) << 24) + (nameValue & 0xFFFFFFL);
-                    break;
-                case 4:
-                    nameValue = (((long) (byte) ch) << 32) + (nameValue & 0xFFFFFFFFL);
-                    break;
-                case 5:
-                    nameValue = (((long) (byte) ch) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                    break;
-                case 6:
-                    nameValue = (((long) (byte) ch) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                    break;
-                case 7:
-                    nameValue = (((long) (byte) ch) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                    break;
-                default:
-                    break;
-            }
+            nameValue = (((long) ch) << (i << 3)) | nameValue;
         }
 
         long hashCode;
         if (nameValue != 0) {
             hashCode = nameValue;
         } else {
-            hashCode = Fnv.MAGIC_HASH_CODE;
+            hashCode = MAGIC_HASH_CODE;
             for (int i = 0; ; ++i) {
                 ch = bytes[offset];
                 if (ch == '\\') {
@@ -2735,7 +2901,7 @@ class JSONReaderUTF8
                     }
                     offset++;
                     hashCode ^= ch;
-                    hashCode *= Fnv.MAGIC_PRIME;
+                    hashCode *= MAGIC_PRIME;
                     continue;
                 }
 
@@ -2790,10 +2956,10 @@ class JSONReaderUTF8
                                     char x2 = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
 
                                     hashCode ^= x1;
-                                    hashCode *= Fnv.MAGIC_PRIME;
+                                    hashCode *= MAGIC_PRIME;
 
                                     hashCode ^= x2;
-                                    hashCode *= Fnv.MAGIC_PRIME;
+                                    hashCode *= MAGIC_PRIME;
                                     i++;
                                 }
                                 continue;
@@ -2803,7 +2969,7 @@ class JSONReaderUTF8
                 }
 
                 hashCode ^= ch;
-                hashCode *= Fnv.MAGIC_PRIME;
+                hashCode *= MAGIC_PRIME;
             }
         }
 
@@ -2827,7 +2993,7 @@ class JSONReaderUTF8
 
     @Override
     public long getNameHashCodeLCase() {
-        long hashCode = Fnv.MAGIC_HASH_CODE;
+        long hashCode = MAGIC_HASH_CODE;
         int offset = nameBegin, end = this.end;
         byte quote = '"';
         final byte[] bytes = this.bytes;
@@ -2880,34 +3046,7 @@ class JSONReaderUTF8
                 ch = (char) (ch + 32);
             }
 
-            switch (i) {
-                case 0:
-                    nameValue = (byte) ch;
-                    break;
-                case 1:
-                    nameValue = (((byte) ch) << 8) + (nameValue & 0xFFL);
-                    break;
-                case 2:
-                    nameValue = (((byte) ch) << 16) + (nameValue & 0xFFFFL);
-                    break;
-                case 3:
-                    nameValue = (((byte) ch) << 24) + (nameValue & 0xFFFFFFL);
-                    break;
-                case 4:
-                    nameValue = (((long) (byte) ch) << 32) + (nameValue & 0xFFFFFFFFL);
-                    break;
-                case 5:
-                    nameValue = (((long) (byte) ch) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                    break;
-                case 6:
-                    nameValue = (((long) (byte) ch) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                    break;
-                case 7:
-                    nameValue = (((long) (byte) ch) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                    break;
-                default:
-                    break;
-            }
+            nameValue = (((long) ch) << (i << 3)) | nameValue;
             ++i;
         }
 
@@ -2930,7 +3069,7 @@ class JSONReaderUTF8
                 }
 
                 hashCode ^= ch;
-                hashCode *= Fnv.MAGIC_PRIME;
+                hashCode *= MAGIC_PRIME;
             }
             return hashCode;
         }
@@ -2996,7 +3135,7 @@ class JSONReaderUTF8
             }
 
             hashCode ^= ch;
-            hashCode *= Fnv.MAGIC_PRIME;
+            hashCode *= MAGIC_PRIME;
         }
 
         return hashCode;
@@ -4383,10 +4522,6 @@ class JSONReaderUTF8
         return offset;
     }
 
-    private static int skipNumber(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
-        return skipNumber(jsonReader, bytes, offset, end, false);
-    }
-
     private static int skipNumber(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end, boolean allowColon) {
         int ch = jsonReader.ch;
         if (ch == '-' || ch == '+') {
@@ -4400,9 +4535,12 @@ class JSONReaderUTF8
         boolean num = false;
         if (!dot && (ch >= '0' && ch <= '9')) {
             num = true;
-            do {
-                ch = offset == end ? EOI : bytes[offset++];
-            } while (ch >= '0' && ch <= '9');
+            for (; offset < end; offset++) {
+                if ((ch = bytes[offset]) < '0' || ch > '9') {
+                    break;
+                }
+            }
+            ch = offset == end ? EOI : bytes[offset++];
         }
 
         if (num && (ch == 'L' | ch == 'F' | ch == 'D' | ch == 'B' | ch == 'S')) {
@@ -4411,11 +4549,12 @@ class JSONReaderUTF8
             boolean small = false;
             if (ch == '.') {
                 small = true;
-                ch = offset == end ? EOI : bytes[offset++];
-
-                while (ch >= '0' && ch <= '9') {
-                    ch = offset == end ? EOI : bytes[offset++];
+                for (; offset < end; offset++) {
+                    if ((ch = bytes[offset]) < '0' || ch > '9') {
+                        break;
+                    }
                 }
+                ch = offset == end ? EOI : bytes[offset++];
             }
 
             if (!num && !small) {
@@ -4436,9 +4575,12 @@ class JSONReaderUTF8
                 }
 
                 if (ch >= '0' && ch <= '9') {
-                    do {
-                        ch = offset == end ? EOI : bytes[offset++];
-                    } while (ch >= '0' && ch <= '9');
+                    for (; offset < end; offset++) {
+                        if ((ch = bytes[offset]) < '0' || ch > '9') {
+                            break;
+                        }
+                    }
+                    ch = offset == end ? EOI : bytes[offset++];
                 } else if (eSign) {
                     throw numberError(offset, ch);
                 }
@@ -4476,17 +4618,39 @@ class JSONReaderUTF8
     private static int skipString(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int end) {
         int ch = jsonReader.ch;
         int quote = ch;
-        int index = IOUtils.indexOfQuote(bytes, quote, offset, end);
-        if (index == -1) {
-            throw jsonReader.error("invalid escape character EOI");
+        int quoteIndex = IOUtils.indexOfQuote(bytes, quote, offset, end);
+        int slashIndex;
+        if (quoteIndex != -1) {
+            for (; ; ) {
+                slashIndex = indexOfSlash(jsonReader, bytes, offset, end);
+                if (slashIndex == -1 || slashIndex > quoteIndex) {
+                    offset = quoteIndex + 1;
+                    ch = offset == end ? EOI : bytes[offset++];
+                    break;
+                } else {
+                    ch = bytes[slashIndex + 1];
+                    if (ch == 'u') {
+                        offset = slashIndex + 6;
+                    } else if (ch == 'x') {
+                        offset = slashIndex + 4;
+                    } else {
+                        if (ch != '\\' && ch != '"' && ch != 'n') {
+                            jsonReader.char1(ch);
+                        }
+                        offset = slashIndex + 2;
+                    }
+
+                    if (offset > quoteIndex) {
+                        quoteIndex = IOUtils.indexOfQuote(bytes, quote, offset, end);
+                        if (quoteIndex == -1) {
+                            break;
+                        }
+                    }
+                }
+            }
         }
-        int slashIndex = indexOfSlash(jsonReader, bytes, offset, end);
-        if (slashIndex == -1 || slashIndex > index) {
-            offset = index + 1;
-            ch = offset == end ? EOI : bytes[offset++];
-        } else {
-            offset = skipStringEscaped(jsonReader, bytes, slashIndex, quote);
-            ch = offset == end ? EOI : bytes[offset++];
+        if (quoteIndex == -1) {
+            throw jsonReader.error("invalid escape character EOI");
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -4514,7 +4678,8 @@ class JSONReaderUTF8
     }
 
     private static int skipStringEscaped(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int quote) {
-        int ch = bytes[offset++];
+        int ch = '\\';
+        offset++;
         for (; ; ) {
             if (ch == '\\') {
                 ch = bytes[offset++];
@@ -4786,13 +4951,42 @@ class JSONReaderUTF8
             case 'S':
                 return skipSet(jsonReader, bytes, offset, end);
             default:
-                return skipNumber(jsonReader, bytes, offset, end);
+                return skipNumber(jsonReader, bytes, offset, end, false);
         }
     }
 
     @Override
     public final void skipValue() {
-        this.offset = skipValue(this, bytes, offset, end);
+        int offset = this.offset, end = this.end;
+        byte[] bytes = this.bytes;
+        switch (ch) {
+            case 't':
+                offset = skipTrue(this, bytes, offset, end);
+                break;
+            case 'f':
+                offset = skipFalse(this, bytes, offset, end);
+                break;
+            case 'n':
+                offset = skipNull(this, bytes, offset, end);
+                break;
+            case '"':
+            case '\'':
+                offset = skipString(this, bytes, offset, end);
+                break;
+            case '{':
+                offset = skipObject(this, bytes, offset, end);
+                break;
+            case '[':
+                offset = skipArray(this, bytes, offset, end);
+                break;
+            case 'S':
+                offset = skipSet(this, bytes, offset, end);
+                break;
+            default:
+                offset = skipNumber(this, bytes, offset, end, false);
+                break;
+        }
+        this.offset = offset;
     }
 
     @Override
