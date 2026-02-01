@@ -81,20 +81,28 @@ public final class NumberSchema
     }
 
     @Override
-    protected ValidateResult validateInternal(Object value) {
+    protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         if (value == null) {
-            return typed ? FAIL_INPUT_NULL : SUCCESS;
+            return typed ? handleError(handler, null, path, FAIL_INPUT_NULL) : SUCCESS;
         }
 
         if (value instanceof Number) {
             Number number = (Number) value;
 
             if (number instanceof Byte || number instanceof Short || number instanceof Integer || number instanceof Long) {
-                return validate(number.longValue());
+                ValidateResult result = validate(number.longValue());
+                if (!result.isSuccess()) {
+                    return handleError(handler, value, path, result);
+                }
+                return result;
             }
 
             if (number instanceof Float || number instanceof Double) {
-                return validate(number.doubleValue());
+                ValidateResult result = validate(number.doubleValue());
+                if (!result.isSuccess()) {
+                    return handleError(handler, value, path, result);
+                }
+                return result;
             }
 
             BigDecimal decimalValue;
@@ -103,14 +111,16 @@ public final class NumberSchema
             } else if (number instanceof BigDecimal) {
                 decimalValue = (BigDecimal) number;
             } else {
-                return new ValidateResult(false, "expect type %s, but %s", Type.Number, value.getClass());
+                ValidateResult raw = new ValidateResult(false, "expect type %s, but %s", Type.Number, value.getClass());
+                return handleError(handler, value, path, raw);
             }
 
             if (minimum != null) {
                 if (exclusiveMinimum
                         ? minimum.compareTo(decimalValue) >= 0
                         : minimum.compareTo(decimalValue) > 0) {
-                    return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect > %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+                    ValidateResult raw = new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect > %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+                    return handleError(handler, value, path, raw);
                 }
             }
 
@@ -118,20 +128,22 @@ public final class NumberSchema
                 if (exclusiveMaximum
                         ? maximum.compareTo(decimalValue) <= 0
                         : maximum.compareTo(decimalValue) < 0) {
-                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect < %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
+                    ValidateResult raw = new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect < %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
+                    return handleError(handler, value, path, raw);
                 }
             }
 
             if (multipleOf != null) {
                 if (decimalValue.divideAndRemainder(multipleOf)[1].abs().compareTo(BigDecimal.ZERO) > 0) {
-                    return new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, decimalValue);
+                    ValidateResult raw = new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, decimalValue);
+                    return handleError(handler, value, path, raw);
                 }
             }
 
             return SUCCESS;
         }
 
-        return typed ? FAIL_TYPE_NOT_MATCH : SUCCESS;
+        return typed ? handleError(handler, value, path, FAIL_TYPE_NOT_MATCH) : SUCCESS;
     }
 
     @Override
