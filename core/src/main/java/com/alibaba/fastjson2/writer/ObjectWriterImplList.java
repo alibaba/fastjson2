@@ -67,7 +67,7 @@ final class ObjectWriterImplList
             return;
         }
 
-        List list = (List) object;
+        List list = toList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -131,7 +131,7 @@ final class ObjectWriterImplList
             }
         }
 
-        List list = (List) object;
+        List list = toList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -238,8 +238,7 @@ final class ObjectWriterImplList
             return;
         }
 
-        List list = (List) object;
-
+        List list = toList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
         boolean previousRefDetect = true;
