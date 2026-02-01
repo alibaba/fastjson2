@@ -881,6 +881,7 @@ class JSONReaderUTF8
     }
 
     @Override
+
     public final boolean nextIfName4Match2() {
         byte[] bytes = this.bytes;
         int offset = this.offset + 4;
@@ -888,9 +889,17 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c;
+        // Fast path: no whitespace (common case for well-formed JSON)
+        int c = bytes[offset] & 0xff;
+        if (c > ' ') {
+            this.offset = offset + 1;
+            this.ch = (char) c;
+            return true;
+        }
+
+        // Slow path: skip whitespace
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -900,6 +909,7 @@ class JSONReaderUTF8
     }
 
     @Override
+
     public final boolean nextIfName4Match3() {
         byte[] bytes = this.bytes;
         int offset = this.offset + 5;
@@ -907,7 +917,15 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c;
+        // Fast path: no whitespace (common case)
+        int c = bytes[offset] & 0xff;
+        if (c > ' ') {
+            this.offset = offset + 1;
+            this.ch = (char) c;
+            return true;
+        }
+
+        // Slow path: skip whitespace
         while ((c = bytes[offset] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
         }
@@ -919,6 +937,7 @@ class JSONReaderUTF8
     }
 
     @Override
+
     public final boolean nextIfName4Match4(byte c4) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 6;
@@ -926,9 +945,17 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c;
+        // Fast path: no whitespace (common case)
+        int c = bytes[offset] & 0xff;
+        if (c > ' ') {
+            this.offset = offset + 1;
+            this.ch = (char) c;
+            return true;
+        }
+
+        // Slow path: skip whitespace
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -938,6 +965,7 @@ class JSONReaderUTF8
     }
 
     @Override
+
     public final boolean nextIfName4Match5(int name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 7;
@@ -945,9 +973,17 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c;
+        // Fast path: no whitespace (common case)
+        int c = bytes[offset] & 0xff;
+        if (c > ' ') {
+            this.offset = offset + 1;
+            this.ch = (char) c;
+            return true;
+        }
+
+        // Slow path: skip whitespace
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -957,6 +993,7 @@ class JSONReaderUTF8
     }
 
     @Override
+
     public final boolean nextIfName4Match6(int name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 8;
@@ -966,9 +1003,17 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c;
+        // Fast path: no whitespace (common case)
+        int c = bytes[offset] & 0xff;
+        if (c > ' ') {
+            this.offset = offset + 1;
+            this.ch = (char) c;
+            return true;
+        }
+
+        // Slow path: skip whitespace
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -978,6 +1023,7 @@ class JSONReaderUTF8
     }
 
     @Override
+
     public final boolean nextIfName4Match7(int name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 9;
@@ -989,9 +1035,17 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c;
+        // Fast path: no whitespace (common case)
+        int c = bytes[offset] & 0xff;
+        if (c > ' ') {
+            this.offset = offset + 1;
+            this.ch = (char) c;
+            return true;
+        }
+
+        // Slow path: skip whitespace
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1001,6 +1055,7 @@ class JSONReaderUTF8
     }
 
     @Override
+
     public final boolean nextIfName4Match8(int name1, byte c8) {
         int offset = this.offset + 10;
         byte[] bytes = this.bytes;
@@ -1012,9 +1067,17 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c;
+        // Fast path: no whitespace (common case)
+        int c = bytes[offset] & 0xff;
+        if (c > ' ') {
+            this.offset = offset + 1;
+            this.ch = (char) c;
+            return true;
+        }
+
+        // Slow path: skip whitespace
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1024,6 +1087,7 @@ class JSONReaderUTF8
     }
 
     @Override
+
     public final boolean nextIfName4Match9(long name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 11;
@@ -1031,9 +1095,17 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c;
+        // Fast path: no whitespace (common case)
+        int c = bytes[offset] & 0xff;
+        if (c > ' ') {
+            this.offset = offset + 1;
+            this.ch = (char) c;
+            return true;
+        }
+
+        // Slow path: skip whitespace
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1043,6 +1115,7 @@ class JSONReaderUTF8
     }
 
     @Override
+
     public final boolean nextIfName4Match10(long name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 12;
@@ -1053,9 +1126,17 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c;
+        // Fast path: no whitespace (common case)
+        int c = bytes[offset] & 0xff;
+        if (c > ' ') {
+            this.offset = offset + 1;
+            this.ch = (char) c;
+            return true;
+        }
+
+        // Slow path: skip whitespace
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1065,6 +1146,7 @@ class JSONReaderUTF8
     }
 
     @Override
+
     public final boolean nextIfName4Match11(long name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 13;
@@ -1075,9 +1157,17 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c;
+        // Fast path: no whitespace (common case)
+        int c = bytes[offset] & 0xff;
+        if (c > ' ') {
+            this.offset = offset + 1;
+            this.ch = (char) c;
+            return true;
+        }
+
+        // Slow path: skip whitespace
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1087,6 +1177,7 @@ class JSONReaderUTF8
     }
 
     @Override
+
     public final boolean nextIfName4Match12(long name1, byte name2) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 14;
@@ -1099,9 +1190,17 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c;
+        // Fast path: no whitespace (common case)
+        int c = bytes[offset] & 0xff;
+        if (c > ' ') {
+            this.offset = offset + 1;
+            this.ch = (char) c;
+            return true;
+        }
+
+        // Slow path: skip whitespace
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1111,6 +1210,7 @@ class JSONReaderUTF8
     }
 
     @Override
+
     public final boolean nextIfName4Match13(long name1, int name2) {
         byte[] bytes = this.bytes;
         int offset = this.offset + 15;
@@ -1121,9 +1221,17 @@ class JSONReaderUTF8
             return false;
         }
 
-        int c;
+        // Fast path: no whitespace (common case)
+        int c = bytes[offset] & 0xff;
+        if (c > ' ') {
+            this.offset = offset + 1;
+            this.ch = (char) c;
+            return true;
+        }
+
+        // Slow path: skip whitespace
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1146,7 +1254,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1170,7 +1278,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1195,7 +1303,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1220,7 +1328,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1246,7 +1354,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1273,7 +1381,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1301,7 +1409,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1327,7 +1435,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1354,7 +1462,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1382,7 +1490,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1411,7 +1519,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1433,7 +1541,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1456,7 +1564,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1480,7 +1588,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1505,7 +1613,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1528,7 +1636,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1552,7 +1660,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1578,7 +1686,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1608,7 +1716,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1631,7 +1739,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1656,7 +1764,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1685,7 +1793,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1715,7 +1823,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1742,7 +1850,7 @@ class JSONReaderUTF8
         }
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1771,7 +1879,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1801,7 +1909,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1832,7 +1940,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1860,7 +1968,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1889,7 +1997,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
@@ -1919,7 +2027,7 @@ class JSONReaderUTF8
 
         int c;
         while ((c = bytes[offset++] & 0xff) <= ' ' && ((1L << c) & SPACE) != 0) {
-            // empty  loop
+            // empty loop
         }
 
         this.offset = offset;
