@@ -6862,7 +6862,7 @@ public abstract class JSONReader
         if ((context.features & MASK_ALLOW_UN_QUOTED_FIELD_NAMES) != 0 && isFirstIdentifier(ch)) {
             return readFieldNameHashCodeUnquote();
         }
-        if (ch == '}' || isNull()) {
+        if (ch == '}' || nextIfNull()) {
             return -1;
         }
 

@@ -1335,7 +1335,7 @@ final class JSONReaderUTF16
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();
             }
-            if (ch == '}' || isNull()) {
+            if (ch == '}' || nextIfNull()) {
                 return -1;
             }
 
