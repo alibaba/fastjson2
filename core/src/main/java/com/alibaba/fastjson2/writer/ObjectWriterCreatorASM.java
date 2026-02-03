@@ -5194,7 +5194,7 @@ public class ObjectWriterCreatorASM
         }
 
         public boolean disableSmartMatch() {
-            return (objectFeatures & FieldInfo.DISABLE_ARRAY_MAPPING) != 0;
+            return (objectFeatures & FieldInfo.DISABLE_SMART_MATCH) != 0;
         }
 
         public boolean disableAutoType() {
