@@ -1516,6 +1516,15 @@ public abstract class JSONReader
     }
 
     /**
+     * Checks if the current character represents the start of a JSON boolean.
+     *
+     * @return true if the current character is 't' (true) or 'f' (false), false otherwise
+     */
+    public boolean isBool() {
+        return this.ch == 't' || this.ch == 'f';
+    }
+
+    /**
      * Advances the reader to the end of the current JSON array.
      */
     public void endArray() {
