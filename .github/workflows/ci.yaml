@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write  # Allow posting PR comments for coverage reports
 
 env:
   JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Shanghai
@@ -84,6 +85,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for better coverage analysis
 
       - name: Set up JDK 11
         uses: actions/setup-java@v4
@@ -92,11 +95,17 @@ jobs:
           java-version: 11
           cache: maven
 
-      - name: Build with Maven
+      - name: Build with Maven and generate coverage
         run: ./mvnw -V --no-transfer-progress clean package
+        env:
+          CI: true  # Explicitly set CI to ensure JaCoCo profile is activated
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           name: codecov-umbrella
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./core/target/site/jacoco/jacoco.xml,./fastjson1-compatible/target/site/jacoco/jacoco.xml,./extension/target/site/jacoco/jacoco.xml,./extension-spring5/target/site/jacoco/jacoco.xml,./kotlin/target/site/jacoco/jacoco.xml
+          flags: unittests
+          fail_ci_if_error: false
+          verbose: true
