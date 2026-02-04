@@ -32,10 +32,13 @@ final class FieldReaderBool<T, V>
 
     @Override
     public void accept(T object, Object value) {
+        Boolean boolValue = TypeUtils.toBoolean(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(boolValue);
         }
-        propertyAccessor.setObject(object, TypeUtils.toBoolean(value));
+
+        propertyAccessor.setObject(object, boolValue);
     }
 
     @Override
