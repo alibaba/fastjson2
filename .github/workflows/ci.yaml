@@ -105,7 +105,6 @@ jobs:
         with:
           name: codecov-umbrella
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./core/target/site/jacoco/jacoco.xml,./fastjson1-compatible/target/site/jacoco/jacoco.xml,./extension/target/site/jacoco/jacoco.xml,./extension-spring5/target/site/jacoco/jacoco.xml,./kotlin/target/site/jacoco/jacoco.xml
           flags: unittests
           fail_ci_if_error: false
           verbose: true
