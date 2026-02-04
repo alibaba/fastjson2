@@ -1292,12 +1292,7 @@ public class JSONObject
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
-
-        try {
-            return objectReader.createInstance(this, featuresValue);
-        } catch (UnsupportedOperationException e) {
-            return JSON.parseObject(this.toJSONString(), clazz, features);
-        }
+        return objectReader.createInstance(this, featuresValue);
     }
 
     public void copyTo(Object object, JSONReader.Feature... features) {
