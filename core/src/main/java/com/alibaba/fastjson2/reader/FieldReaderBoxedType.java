@@ -56,10 +56,6 @@ abstract class FieldReaderBoxedType<T, V> extends FieldReader<T> {
             }
         }
 
-        if (value == null && defaultValue != null) {
-            return;
-        }
-
         if (schema != null) {
             schema.assertValidate(value);
         }

@@ -30,6 +30,30 @@ final class FieldReaderDouble<T, V>
     }
 
     @Override
+    public void readFieldValue(JSONReader jsonReader, T object) {
+        Double value;
+        try {
+            value = readValue(jsonReader);
+        } catch (Exception e) {
+            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
+                value = null;
+            } else {
+                throw e;
+            }
+        }
+
+        if (value == null && defaultValue != null) {
+            return;
+        }
+
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
+        propertyAccessor.setObject(object, value);
+    }
+
+    @Override
     protected Double readValue(JSONReader jsonReader) {
         return jsonReader.readDouble();
     }
