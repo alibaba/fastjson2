@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderDouble<T, V>
-        extends FieldReader<T> {
+        extends FieldReaderBoxedType<T, Double> {
     FieldReaderDouble(
             String fieldName,
             Class<V> fieldClass,
@@ -26,36 +26,11 @@ final class FieldReaderDouble<T, V>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
     }
 
     @Override
-    public void accept(T object, Object value) {
-        propertyAccessor.setObject(object, value);
-    }
-
-    @Override
-    public void readFieldValue(JSONReader jsonReader, T object) {
-        Double value;
-        try {
-            value = jsonReader.readDouble();
-        } catch (Exception e) {
-            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
-                value = null;
-            } else {
-                throw e;
-            }
-        }
-
-        if (value == null && defaultValue != null) {
-            return;
-        }
-
-        propertyAccessor.setObject(object, value);
-    }
-
-    @Override
-    public Object readFieldValue(JSONReader jsonReader) {
+    protected Double readValue(JSONReader jsonReader) {
         return jsonReader.readDouble();
     }
 }
