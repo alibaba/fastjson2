@@ -89,7 +89,7 @@ Starting from Spring MVC 7.0, the `configureMessageConverters(List<HttpMessageCo
 
 ```java
 @Configuration
-public class WebMvcConfigurer extends WebMvcConfigurationSupport {
+public class FastJsonWebMvcConfiguration extends WebMvcConfigurationSupport {
 
     @Override
     protected void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
@@ -121,7 +121,7 @@ For Spring MVC 6.x and below, continue using the original configuration method:
 
 ```java
 @Configuration
-public class WebMvcConfigurer extends WebMvcConfigurationSupport {
+public class FastJsonWebMvcConfiguration extends WebMvcConfigurationSupport {
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
