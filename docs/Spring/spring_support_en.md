@@ -97,11 +97,11 @@ public class FastJsonWebMvcConfiguration extends WebMvcConfigurationSupport {
         FastJsonConfig config = new FastJsonConfig();
         config.setDateFormat("yyyy-MM-dd HH:mm:ss");
         config.setCharset(StandardCharsets.UTF_8);
-        
+
         converter.setFastJsonConfig(config);
         // From version 2.0.60, FastJsonHttpMessageConverter default charset is already UTF-8, no need to set manually
         // converter.setDefaultCharset(StandardCharsets.UTF_8);
-        
+
         // Use withJsonConverter to replace the default JSON converter
         builder.withJsonConverter(converter);
     }
@@ -129,7 +129,7 @@ public class FastJsonWebMvcConfiguration extends WebMvcConfigurationSupport {
         FastJsonConfig config = new FastJsonConfig();
         config.setDateFormat("yyyy-MM-dd HH:mm:ss");
         config.setCharset(StandardCharsets.UTF_8);
-        
+
         converter.setFastJsonConfig(config);
         // From version 2.0.60, FastJsonHttpMessageConverter default charset is already UTF-8, no need to set manually
         // converter.setDefaultCharset(StandardCharsets.UTF_8);

@@ -96,11 +96,11 @@ public class FastJsonWebMvcConfiguration extends WebMvcConfigurationSupport {
         FastJsonConfig config = new FastJsonConfig();
         config.setDateFormat("yyyy-MM-dd HH:mm:ss");
         config.setCharset(StandardCharsets.UTF_8);
-        
+
         converter.setFastJsonConfig(config);
         // 从2.0.60版本开始，FastJsonHttpMessageConverter默认charset已经是UTF-8，无需手动设置
         // converter.setDefaultCharset(StandardCharsets.UTF_8);
-        
+
         // 使用 withJsonConverter 方法替换默认的 JSON 转换器
         builder.withJsonConverter(converter);
     }
@@ -128,7 +128,7 @@ public class FastJsonWebMvcConfiguration extends WebMvcConfigurationSupport {
         FastJsonConfig config = new FastJsonConfig();
         config.setDateFormat("yyyy-MM-dd HH:mm:ss");
         config.setCharset(StandardCharsets.UTF_8);
-        
+
         converter.setFastJsonConfig(config);
         // 从2.0.60版本开始，FastJsonHttpMessageConverter默认charset已经是UTF-8，无需手动设置
         // converter.setDefaultCharset(StandardCharsets.UTF_8);
