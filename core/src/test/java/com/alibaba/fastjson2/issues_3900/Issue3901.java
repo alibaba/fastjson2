@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.issues_3900;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.util.TypeUtils;
 import lombok.AllArgsConstructor;
@@ -13,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class Issue3901 {
@@ -119,8 +123,25 @@ public class Issue3901 {
                 return null;
             }
             User user = new User();
-            Iterator<?> iterator = collection.iterator();
 
+            // 高性能路径
+            if (collection instanceof List) {
+                List<?> list = (List<?>) collection;
+                int size = list.size();
+
+                if (size > 0) {
+                    user.id = TypeUtils.toIntValue(list.get(0));
+                }
+
+                if (size > 1) {
+                    String nameStr = TypeUtils.cast(list.get(1), String.class);
+                    user.name = nameStr != null ? nameStr.toUpperCase() : null;
+                }
+
+                return user;
+            }
+
+            Iterator<?> iterator = collection.iterator();
             if (iterator.hasNext()) {
                 user.id = TypeUtils.toIntValue(iterator.next());
             }
