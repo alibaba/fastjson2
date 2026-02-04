@@ -83,6 +83,42 @@ experience for Web applications built with Spring MVC.
 
 ## 2. Configure FastJsonHttpMessageConverter
 
+### 2.1 Spring MVC 7.0 and Above
+
+Starting from Spring MVC 7.0, the `configureMessageConverters(List<HttpMessageConverter<?>>)` method has been deprecated in favor of the new `HttpMessageConverters.ServerBuilder` approach.
+
+```java
+@Configuration
+public class WebMvcConfigurer extends WebMvcConfigurationSupport {
+
+    @Override
+    protected void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+        FastJsonConfig config = new FastJsonConfig();
+        config.setDateFormat("yyyy-MM-dd HH:mm:ss");
+        config.setCharset(StandardCharsets.UTF_8);
+        
+        converter.setFastJsonConfig(config);
+        // From version 2.0.60, FastJsonHttpMessageConverter default charset is already UTF-8, no need to set manually
+        // converter.setDefaultCharset(StandardCharsets.UTF_8);
+        
+        // Use withJsonConverter to replace the default JSON converter
+        builder.withJsonConverter(converter);
+    }
+}
+```
+
+**Note**: Spring MVC 7.0's `HttpMessageConverters.ServerBuilder` provides different methods to configure different types of message converters:
+- `withJsonConverter()` - Configure JSON converter
+- `withXmlConverter()` - Configure XML converter
+- `withStringConverter()` - Configure String converter
+- `addCustomConverter()` - Add custom converter (will be added before default converters)
+- `configureMessageConverters()` - Configure all selected message converters
+
+### 2.2 Spring MVC 6.x and Below
+
+For Spring MVC 6.x and below, continue using the original configuration method:
+
 ```java
 @Configuration
 public class WebMvcConfigurer extends WebMvcConfigurationSupport {
