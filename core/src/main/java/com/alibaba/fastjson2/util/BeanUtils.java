@@ -470,6 +470,7 @@ public abstract class BeanUtils {
             return;
         }
 
+        boolean record = isRecord(objectClass);
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
             methods = getMethods(objectClass);
@@ -587,7 +588,8 @@ public abstract class BeanUtils {
             }
 
             final int methodNameLength = methodName.length();
-            boolean nameMatch = methodNameLength > 3 && (methodName.startsWith("set") || returnType == objectClass);
+            boolean nameMatch = methodNameLength > 3
+                    && (methodName.startsWith("set") || (!record && returnType == objectClass));
             if (!nameMatch) {
                 if (mixin != null) {
                     Method mixinMethod = getMethod(mixin, method);
