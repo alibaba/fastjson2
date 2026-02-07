@@ -405,7 +405,7 @@ public class ObjectWriterAdapter<T>
             return;
         }
 
-        if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
+        if (jsonWriter.isWriteTypeInfo(object, fieldType, this.features | features)) {
             if (jsonWriter.jsonb) {
                 writeClassInfo(jsonWriter);
                 jsonWriter.startObject();
