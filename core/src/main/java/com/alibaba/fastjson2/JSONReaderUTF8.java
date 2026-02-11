@@ -5248,7 +5248,10 @@ class JSONReaderUTF8
             CacheItem cacheItem = CACHE_ITEMS[System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1)];
             char[] strBuf = CHARS_UPDATER.getAndSet(cacheItem, null);
             if (strBuf == null) {
-                strBuf = new char[512];
+                strBuf = new char[stroff + 512];
+            } else if (stroff > strBuf.length) {
+                int newCapacity = newCapacity(stroff, strBuf.length);
+                strBuf = new char[newCapacity];
             }
 
             for (int i = 0; i < stroff; ++i) {
