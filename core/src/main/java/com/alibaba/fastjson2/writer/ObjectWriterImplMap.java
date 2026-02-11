@@ -615,6 +615,11 @@ public final class ObjectWriterImplMap
         }
 
         jsonWriter.startObject();
+
+        if (jsonWriter.isWriteTypeInfo(object, this.features | features)) {
+            writeTypeInfo(jsonWriter);
+        }
+
         Map map = (Map) object;
 
         features |= jsonWriter.getFeatures();
