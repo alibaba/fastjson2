@@ -245,6 +245,25 @@ public class TypeUtils {
     }
 
     public static double parseDouble(byte[] in, int off, int len) throws NumberFormatException {
+        // Try fast path first
+        try {
+            return FastDoubleParser.parseDouble(in, off, len);
+        } catch (NumberFormatException e) {
+            // Fall back to slower but more precise implementation for edge cases
+            return parseDoubleSlow(in, off, len);
+        }
+    }
+
+    private static boolean isStringNaN(byte[] in, int off, int len) {
+        if (len == 3) {
+            return (in[off] == 'N' || in[off] == 'n')
+                    && (in[off + 1] == 'a' || in[off + 1] == 'A')
+                    && (in[off + 2] == 'N' || in[off + 2] == 'n');
+        }
+        return false;
+    }
+
+    private static double parseDoubleSlow(byte[] in, int off, int len) throws NumberFormatException {
         boolean isNegative = false;
         boolean signSeen = false;
         int decExp;
@@ -378,6 +397,25 @@ public class TypeUtils {
     }
 
     public static double parseDouble(char[] in, int off, int len) throws NumberFormatException {
+        // Try fast path first
+        try {
+            return FastDoubleParser.parseDouble(in, off, len);
+        } catch (NumberFormatException e) {
+            // Fall back to slower but more precise implementation for edge cases
+            return parseDoubleSlow(in, off, len);
+        }
+    }
+
+    private static boolean isStringNaN(char[] in, int off, int len) {
+        if (len == 3) {
+            return (in[off] == 'N' || in[off] == 'n')
+                    && (in[off + 1] == 'a' || in[off + 1] == 'A')
+                    && (in[off + 2] == 'N' || in[off + 2] == 'n');
+        }
+        return false;
+    }
+
+    private static double parseDoubleSlow(char[] in, int off, int len) throws NumberFormatException {
         boolean isNegative = false;
         boolean signSeen = false;
         int decExp;
@@ -512,6 +550,16 @@ public class TypeUtils {
     }
 
     public static float parseFloat(byte[] in, int off, int len) throws NumberFormatException {
+        // Try fast path first
+        try {
+            return FastFloatParser.parseFloat(in, off, len);
+        } catch (NumberFormatException e) {
+            // Fall back to slower but more precise implementation for edge cases
+            return parseFloatSlow(in, off, len);
+        }
+    }
+
+    private static float parseFloatSlow(byte[] in, int off, int len) throws NumberFormatException {
         boolean isNegative = false;
         boolean signSeen = false;
         int decExp;
@@ -646,6 +694,16 @@ public class TypeUtils {
     }
 
     public static float parseFloat(char[] in, int off, int len) throws NumberFormatException {
+        // Try fast path first
+        try {
+            return FastFloatParser.parseFloat(in, off, len);
+        } catch (NumberFormatException e) {
+            // Fall back to slower but more precise implementation for edge cases
+            return parseFloatSlow(in, off, len);
+        }
+    }
+
+    private static float parseFloatSlow(char[] in, int off, int len) throws NumberFormatException {
         boolean isNegative = false;
         boolean signSeen = false;
         int decExp;
