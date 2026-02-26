@@ -69,6 +69,7 @@ public abstract class JSONWriter
         implements Closeable {
     static final long WRITE_ARRAY_NULL_MASK = NullAsDefaultValue.mask | WriteNullListAsEmpty.mask;
     static final byte PRETTY_NON = 0, PRETTY_TAB = 1, PRETTY_2_SPACE = 2, PRETTY_4_SPACE = 4;
+    static final int PRETTY_INLINE_ARRAY_MAX_LENGTH = 5;
     static final long NONE_DIRECT_FEATURES = ReferenceDetection.mask | NotWriteEmptyArray.mask | NotWriteDefaultValue.mask;
 
     public final Context context;
@@ -1804,6 +1805,10 @@ public abstract class JSONWriter
             writeArrayNull();
             return;
         }
+        boolean savedInline = prettyInlineArrays;
+        if (pretty != PRETTY_NON && !prettyInlineArrays && value.length < PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            prettyInlineArrays = true;
+        }
         startArray();
         for (int i = 0; i < value.length; i++) {
             if (i != 0) {
@@ -1812,6 +1817,7 @@ public abstract class JSONWriter
             writeInt16(value[i]);
         }
         endArray();
+        prettyInlineArrays = savedInline;
     }
 
     /**
@@ -1979,6 +1985,10 @@ public abstract class JSONWriter
             return;
         }
 
+        boolean savedInline = prettyInlineArrays;
+        if (pretty != PRETTY_NON && !prettyInlineArrays && value.length < PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            prettyInlineArrays = true;
+        }
         startArray();
         for (int i = 0; i < value.length; i++) {
             if (i != 0) {
@@ -1996,6 +2006,7 @@ public abstract class JSONWriter
             writeRaw(str);
         }
         endArray();
+        prettyInlineArrays = savedInline;
     }
 
     /**
@@ -2053,11 +2064,16 @@ public abstract class JSONWriter
      * @param value1 the second double value to write
      */
     public void writeDoubleArray(double value0, double value1) {
+        boolean savedInline = prettyInlineArrays;
+        if (pretty != PRETTY_NON && !prettyInlineArrays) {
+            prettyInlineArrays = true;
+        }
         startArray();
         writeDouble(value0);
         writeComma();
         writeDouble(value1);
         endArray();
+        prettyInlineArrays = savedInline;
     }
 
     /**
@@ -2078,6 +2094,10 @@ public abstract class JSONWriter
             return;
         }
 
+        boolean savedInline = prettyInlineArrays;
+        if (pretty != PRETTY_NON && !prettyInlineArrays && value.length < PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            prettyInlineArrays = true;
+        }
         startArray();
         for (int i = 0; i < value.length; i++) {
             if (i != 0) {
@@ -2095,6 +2115,7 @@ public abstract class JSONWriter
             writeRaw(str);
         }
         endArray();
+        prettyInlineArrays = savedInline;
     }
 
     /**
@@ -2124,6 +2145,10 @@ public abstract class JSONWriter
             return;
         }
 
+        boolean savedInline = prettyInlineArrays;
+        if (pretty != PRETTY_NON && !prettyInlineArrays && value.length < PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            prettyInlineArrays = true;
+        }
         startArray();
         for (int i = 0; i < value.length; i++) {
             if (i != 0) {
@@ -2132,6 +2157,7 @@ public abstract class JSONWriter
             writeBool(value[i]);
         }
         endArray();
+        prettyInlineArrays = savedInline;
     }
 
     /**

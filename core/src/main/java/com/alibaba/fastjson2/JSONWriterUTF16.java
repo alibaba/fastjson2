@@ -1755,6 +1755,18 @@ class JSONWriterUTF16
             return;
         }
 
+        if (pretty != PRETTY_NON && !prettyInlineArrays && value.length >= PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            startArray();
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    writeComma();
+                }
+                writeInt32(value[i]);
+            }
+            endArray();
+            return;
+        }
+
         boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
@@ -1807,6 +1819,18 @@ class JSONWriterUTF16
     public final void writeInt8(byte[] value) {
         if (value == null) {
             writeNull();
+            return;
+        }
+
+        if (pretty != PRETTY_NON && !prettyInlineArrays && value.length >= PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            startArray();
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    writeComma();
+                }
+                writeInt8(value[i]);
+            }
+            endArray();
             return;
         }
 
@@ -1893,6 +1917,18 @@ class JSONWriterUTF16
     public final void writeInt64(long[] values) {
         if (values == null) {
             writeNull();
+            return;
+        }
+
+        if (pretty != PRETTY_NON && !prettyInlineArrays && values.length >= PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            startArray();
+            for (int i = 0; i < values.length; i++) {
+                if (i != 0) {
+                    writeComma();
+                }
+                writeInt64(values[i]);
+            }
+            endArray();
             return;
         }
 
@@ -2089,6 +2125,18 @@ class JSONWriterUTF16
             return;
         }
 
+        if (pretty != PRETTY_NON && !prettyInlineArrays && values.length >= PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            startArray();
+            for (int i = 0; i < values.length; i++) {
+                if (i != 0) {
+                    writeComma();
+                }
+                writeFloat(values[i]);
+            }
+            endArray();
+            return;
+        }
+
         boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
         boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
@@ -2205,6 +2253,18 @@ class JSONWriterUTF16
     public final void writeDouble(double[] values) {
         if (values == null) {
             writeNull();
+            return;
+        }
+
+        if (pretty != PRETTY_NON && !prettyInlineArrays && values.length >= PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            startArray();
+            for (int i = 0; i < values.length; i++) {
+                if (i != 0) {
+                    writeComma();
+                }
+                writeDouble(values[i]);
+            }
+            endArray();
             return;
         }
 
