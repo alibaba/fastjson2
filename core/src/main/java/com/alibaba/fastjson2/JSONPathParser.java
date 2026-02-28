@@ -860,8 +860,10 @@ class JSONPathParser {
                     filterNests--;
                     segment = parseFilterRest(segment);
                 }
-                if (!jsonReader.nextIfMatch(')')) {
-                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                if (parentheses) {
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
                 }
 
                 return segment;
