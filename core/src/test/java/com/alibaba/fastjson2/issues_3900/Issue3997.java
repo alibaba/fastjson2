@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.jsonpath;
+package com.alibaba.fastjson2.issues_3900;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JSONPath_in_filter_issue3997 {
+public class Issue3997 {
     @Test
     public void testInFilterAfterOtherFilter() {
         JSONArray riskRequests = JSONArray.of(
