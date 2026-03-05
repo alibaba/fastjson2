@@ -268,7 +268,7 @@ public class FastJsonConfig {
         writerContext = null;
     }
 
-    public JSONReader.Context readerContext() {
+    public JSONReader.Context getReaderContext() {
         JSONReader.Context context = readerContext;
         if (context == null) { // Concurrency may occur, but it will not cause any problems
             context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider(), jsonb ? symbolTable : null, readerFilters, readerFeatures);
@@ -278,7 +278,7 @@ public class FastJsonConfig {
         return context;
     }
 
-    public JSONWriter.Context writerContext() {
+    public JSONWriter.Context getWriterContext() {
         JSONWriter.Context context = writerContext;
         if (context == null) {
             context = new JSONWriter.Context(dateFormat, writerFeatures);
@@ -292,5 +292,13 @@ public class FastJsonConfig {
             this.writerContext = context;
         }
         return context;
+    }
+
+    public void setReaderContext(JSONReader.Context context) {
+        this.readerContext = context;
+    }
+
+    public void setWriterContext(JSONWriter.Context context) {
+        this.writerContext = context;
     }
 }
