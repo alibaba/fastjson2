@@ -679,6 +679,14 @@ public final class ObjectReaderImplList
                 break;
             }
 
+            if (jsonReader.current() == '/') {
+                jsonReader.skipComment();
+            }
+
+            if (jsonReader.nextIfMatch(']')) {
+                break;
+            }
+
             Object item;
             if (itemType == String.class) {
                 item = jsonReader.readString();

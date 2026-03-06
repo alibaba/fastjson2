@@ -4,9 +4,9 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.lang.reflect.Type;
+import java.util.Base64;
 
 public class ByteArrayWriter implements ObjectWriter<byte[]> {
-
     public static final ByteArrayWriter INSTANCE = new ByteArrayWriter();
 
     @Override
@@ -14,8 +14,10 @@ public class ByteArrayWriter implements ObjectWriter<byte[]> {
         if (object == null) {
             jsonWriter.writeNull();
             return;
-
         }
-        jsonWriter.writeBase64((byte[]) object);
+
+        byte[] bytes = (byte[]) object;
+        String base64Str = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes); // 无填充的 Base64
+        jsonWriter.writeString(base64Str);
     }
 }

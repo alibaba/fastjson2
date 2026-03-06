@@ -8,7 +8,6 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 public class JsonArrayReader implements ObjectReader<JsonArray> {
-
     public static final JsonArrayReader INSTANCE = new JsonArrayReader();
 
     @Override

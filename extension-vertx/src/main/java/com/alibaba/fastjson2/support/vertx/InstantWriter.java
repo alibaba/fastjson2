@@ -7,7 +7,6 @@ import java.lang.reflect.Type;
 import java.time.Instant;
 
 public class InstantWriter implements ObjectWriter<Instant> {
-
     public static final InstantWriter INSTANCE = new InstantWriter();
 
     @Override
@@ -20,4 +19,3 @@ public class InstantWriter implements ObjectWriter<Instant> {
         jsonWriter.writeInstant((Instant) object);
     }
 }
-
