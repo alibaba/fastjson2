@@ -55,7 +55,7 @@
         <developer>
             <id>jujn</id>
             <name>jujn</name>
-            <email>jthxdu(at)gmail.com</email>
+            <email>jth_xdu(at)qq.com</email>
             <roles>
                 <role>Developer</role>
             </roles>
@@ -92,6 +92,11 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

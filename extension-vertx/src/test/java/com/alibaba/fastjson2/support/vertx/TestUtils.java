@@ -16,6 +16,9 @@ import io.vertx.core.buffer.Buffer;
 import java.util.Base64;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * vertx 官方内置测试类改写
+ */
 public class TestUtils {
     /**
      * Creates a Buffer of random bytes.

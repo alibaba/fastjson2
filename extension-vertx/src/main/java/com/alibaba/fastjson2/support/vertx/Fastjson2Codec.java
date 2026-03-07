@@ -3,12 +3,11 @@ package com.alibaba.fastjson2.support.vertx;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.vertx.core.buffer.Buffer;
@@ -24,6 +23,8 @@ import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -44,18 +45,22 @@ public class Fastjson2Codec implements JsonCodec {
         writerProvider.register(byte[].class, ByteArrayWriter.INSTANCE);
         writerProvider.register(Instant.class, InstantWriter.INSTANCE);
         writerProvider.register(BufferWriterModule.INSTANCE);
+        writerProvider.register(LocalDateTime.class, LocalDateTimeWriter.INSTANCE);
+        writerProvider.register(ZonedDateTime.class, ZonedDateTimeWriter.INSTANCE);
         writerProvider.setAlphabetic(false);
 
         this.writerContext = new JSONWriter.Context(
                 writerProvider,
-                JSONWriter.Feature.WriteNulls, // 对齐 vertx 默认行为输出 null
-                JSONWriter.Feature.WriteEnumsUsingName, // 对齐 vertx 默认枚举行为
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.WriteMapNullValue,
+                JSONWriter.Feature.WriteEnumsUsingName,
                 JSONWriter.Feature.WriteNonStringKeyAsString,
                 JSONWriter.Feature.WriteByteArrayAsBase64
         );
         this.prettyWriterContext = new JSONWriter.Context(
                 writerProvider,
                 JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.WriteMapNullValue,
                 JSONWriter.Feature.WriteEnumsUsingName,
                 JSONWriter.Feature.WriteByteArrayAsBase64,
                 JSONWriter.Feature.WriteNonStringKeyAsString,
@@ -71,8 +76,9 @@ public class Fastjson2Codec implements JsonCodec {
 
         this.readerContext = new JSONReader.Context(
                 readerProvider,
-                JSONReader.Feature.UseNativeObject, // 对齐 vertx，当目标类型为 Object.class 时，返回标准 JDK Map/List
-                JSONReader.Feature.Base64StringAsByteArray
+                JSONReader.Feature.UseNativeObject,
+                JSONReader.Feature.Base64StringAsByteArray,
+                JSONReader.Feature.UseDoubleForDecimals
         );
     }
 
@@ -161,10 +167,6 @@ public class Fastjson2Codec implements JsonCodec {
     @Override
     public <T> T fromValue(Object json, Class<T> clazz) {
         try {
-            if (clazz.isInstance(json)) {
-                return clazz.cast(json);
-            }
-
             byte[] bytes = JSON.toJSONBytes(json, StandardCharsets.UTF_8, writerContext);
             T value = JSON.parseObject(bytes, clazz, readerContext);
             return clazz == Object.class ? (T) adapt(value) : value;
@@ -175,7 +177,8 @@ public class Fastjson2Codec implements JsonCodec {
 
     public <T> T fromValue(Object json, TypeReference<T> type) {
         try {
-            T value = TypeUtils.cast(json, type.getType());
+            byte[] bytes = JSON.toJSONBytes(json, StandardCharsets.UTF_8, writerContext);
+            T value = JSON.parseObject(bytes, type.getType(), readerContext);
             return type.getType() == Object.class ? (T) adapt(value) : value;
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to map value: " + e.getMessage(), e);

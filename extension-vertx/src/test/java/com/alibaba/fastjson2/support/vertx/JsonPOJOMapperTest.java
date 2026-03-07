@@ -21,6 +21,9 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
+/**
+ * vertx 官方内置测试类改写（替换为 Fastjson2Codec）
+ */
 public class JsonPOJOMapperTest {
     private final Fastjson2Codec codec = new Fastjson2Codec();
 
@@ -35,20 +38,19 @@ public class JsonPOJOMapperTest {
 
     @Test
     public void testSerialization() {
-        MyType myObj0 = new MyType() {{
-                a = -1;
-                b = "obj0";
-                c.put("z", Arrays.asList(7, 8));
-                e.add(9);
-            }};
-        MyType myObj1 = new MyType() {{
-                a = 5;
-                b = "obj1";
-                c.put("x", "1");
-                c.put("y", 2);
-                d.add(myObj0);
-                e.add(3);
-            }};
+        MyType myObj0 = new MyType();
+        myObj0.a = -1;
+        myObj0.b = "obj0";
+        myObj0.c.put("z", Arrays.asList(7, 8));
+        myObj0.e.add(9);
+
+        MyType myObj1 = new MyType();
+        myObj1.a = 5;
+        myObj1.b = "obj1";
+        myObj1.c.put("x", "1");
+        myObj1.c.put("y", 2);
+        myObj1.d.add(myObj0);
+        myObj1.e.add(3);
 
         JsonObject jsonObject1 = codec.fromValue(myObj1, JsonObject.class);
         String jsonStr1 = codec.toString(jsonObject1, false);

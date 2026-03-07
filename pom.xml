@@ -71,7 +71,6 @@
         <module>extension-jaxrs</module>
         <module>extension-solon</module>
         <module>extension-spring5</module>
-        <module>extension-vertx</module>
         <module>fastjson1-compatible</module>
         <module>kotlin</module>
         <module>safemode-test</module>
@@ -1056,6 +1055,7 @@
             <modules>
                 <module>extension-spring6</module>
                 <module>example-spring6-test</module>
+                <module>extension-vertx</module>
             </modules>
         </profile>
         <profile>

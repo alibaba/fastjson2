@@ -10,7 +10,7 @@
  */
 package com.alibaba.fastjson2.support.vertx;
 
-import com.alibaba.fastjson2.TypeReference;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.WebSocketVersion;
@@ -33,6 +33,9 @@ import java.util.concurrent.TimeUnit;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import static org.junit.Assert.*;
 
+/**
+ * vertx 官方内置测试类改写（替换为 Fastjson2Codec）
+ */
 @RunWith(Parameterized.class)
 public class JsonCodecTest {
     private static final TypeReference<Integer> INTEGER_TYPE_REF = new TypeReference<Integer>() {

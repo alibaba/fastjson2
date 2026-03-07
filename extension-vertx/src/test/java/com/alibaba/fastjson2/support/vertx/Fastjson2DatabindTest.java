@@ -12,9 +12,9 @@
 package com.alibaba.fastjson2.support.vertx;
 
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.vertx.core.ThreadingModel;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.Json;
@@ -32,6 +32,9 @@ import java.util.Map;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * vertx 官方内置测试类改写（替换为 Fastjson2Codec）
+ */
 public class Fastjson2DatabindTest {
     private final Fastjson2Codec codec = new Fastjson2Codec();
 
