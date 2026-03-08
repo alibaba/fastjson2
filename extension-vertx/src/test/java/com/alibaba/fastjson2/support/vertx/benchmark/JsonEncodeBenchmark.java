@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
 
-package com.alibaba.fastjson2.benchmark.vertx;
+package com.alibaba.fastjson2.support.vertx.benchmark;
 
 import com.alibaba.fastjson2.support.vertx.Fastjson2Codec;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,9 +49,9 @@ public class JsonEncodeBenchmark extends BenchmarkBase {
     public void setup() {
         ClassLoader classLoader = getClass().getClassLoader();
         tiny = new JsonObject(Collections.singletonMap("message", "Hello, World!"));
-        small = loadJson(classLoader.getResource("vertx/small_bench.json"));
-        wide = loadJson(classLoader.getResource("vertx/wide_bench.json"));
-        deep = loadJson(classLoader.getResource("vertx/deep_bench.json"));
+        small = loadJson(classLoader.getResource("small_bench.json"));
+        wide = loadJson(classLoader.getResource("wide_bench.json"));
+        deep = loadJson(classLoader.getResource("deep_bench.json"));
         fastjson2Codec = new Fastjson2Codec();
         jacksonCodec = new JacksonCodec();
         databindCodec = new DatabindCodec();

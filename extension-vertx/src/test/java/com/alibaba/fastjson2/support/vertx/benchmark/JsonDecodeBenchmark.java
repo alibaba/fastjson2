@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
 
-package com.alibaba.fastjson2.benchmark.vertx;
+package com.alibaba.fastjson2.support.vertx.benchmark;
 
 import com.alibaba.fastjson2.support.vertx.Fastjson2Codec;
 import io.vertx.core.buffer.Buffer;
@@ -47,9 +47,9 @@ public class JsonDecodeBenchmark extends BenchmarkBase {
 
     @Setup
     public void setup() {
-        small = loadJsonAsBuffer("vertx/small_bench.json");
-        wide = loadJsonAsBuffer("vertx/wide_bench.json");
-        deep = loadJsonAsBuffer("vertx/deep_bench.json");
+        small = loadJsonAsBuffer("small_bench.json");
+        wide = loadJsonAsBuffer("wide_bench.json");
+        deep = loadJsonAsBuffer("deep_bench.json");
         smallString = small.toString();
         wideString = wide.toString();
         deepString = deep.toString();

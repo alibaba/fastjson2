@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
 
-package com.alibaba.fastjson2.benchmark.vertx;
+package com.alibaba.fastjson2.support.vertx.benchmark;
 
 import org.openjdk.jmh.annotations.*;
 
