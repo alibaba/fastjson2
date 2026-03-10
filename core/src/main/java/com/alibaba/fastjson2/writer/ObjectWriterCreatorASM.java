@@ -3008,6 +3008,8 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(endDetect_);
         }
 
+        Label writeEnd_ = !disableReferenceDetect ? new Label() : notNull_;
+
         {
             Label notWriteEmptyArrayEnd_ = new Label();
             mwc.genIsEnabled(JSONWriter.Feature.NotWriteEmptyArray.mask, notWriteEmptyArrayEnd_);
@@ -3016,7 +3018,7 @@ public class ObjectWriterCreatorASM
             mw.invokeinterface("java/util/Collection", "isEmpty", "()Z");
             mw.ifeq(notWriteEmptyArrayEnd_);
 
-            mw.goto_(notNull_);
+            mw.goto_(writeEnd_);
 
             mw.visitLabel(notWriteEmptyArrayEnd_);
         }
@@ -3048,6 +3050,8 @@ public class ObjectWriterCreatorASM
         }
 
         if (!disableReferenceDetect) {
+            mw.visitLabel(writeEnd_);
+
             mw.aload(JSON_WRITER);
             mw.aload(LIST);
             mw.invokevirtual(TYPE_JSON_WRITER, "popPath0", "(Ljava/lang/Object;)V");
