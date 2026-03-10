@@ -889,17 +889,24 @@ public class ObjectReaderCreatorASM
 
                 int hashCode32 = hashCode32Keys[i];
                 List<Long> hashCode64Array = map.get(hashCode32);
-                for (long hashCode64 : hashCode64Array) {
+                for (int j = 0, size = hashCode64Array.size(); j < size; j++) {
+                    long hashCode64 = hashCode64Array.get(j);
+
+                    Label next = size > 1 ? new Label() : dflt;
                     mw.lload(HASH_CODE_64);
                     mw.visitLdcInsn(hashCode64);
                     mw.lcmp();
-                    mw.ifne(dflt);
+                    mw.ifne(next);
 
                     int m = Arrays.binarySearch(objectReaderAdapter.hashCodesLCase, hashCode64);
                     int index = objectReaderAdapter.mappingLCase[m];
                     mw.aload(THIS);
                     mw.getfield(context.classNameType, fieldReader(index), DESC_FIELD_READER);
                     mw.goto_(rtnlt);
+
+                    if (next != dflt) {
+                        mw.visitLabel(next);
+                    }
                 }
 
                 mw.goto_(dflt);
