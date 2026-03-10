@@ -38,6 +38,17 @@ final class ObjectWriterImplInstant
 
         Instant instant = (Instant) object;
 
+        if (formatUnixTime || (format == null && context.isDateFormatUnixTime())) {
+            long millis = instant.toEpochMilli();
+            jsonWriter.writeInt64(millis / 1000);
+            return;
+        }
+
+        if (formatMillis || (format == null && context.isDateFormatMillis())) {
+            jsonWriter.writeInt64(instant.toEpochMilli());
+            return;
+        }
+
         boolean yyyyMMddhhmmss19 = this.yyyyMMddhhmmss19 || (context.isFormatyyyyMMddhhmmss19() && this.format == null);
         if (yyyyMMddhhmmss14 || yyyyMMddhhmmss19 || yyyyMMdd8 || yyyyMMdd10) {
             final long SECONDS_PER_DAY = 60 * 60 * 24;
@@ -150,19 +161,6 @@ final class ObjectWriterImplInstant
         }
 
         ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, context.getZoneId());
-
-        if (formatUnixTime || (format == null && context.isDateFormatUnixTime())) {
-            long millis = zdt.toInstant().toEpochMilli();
-            jsonWriter.writeInt64(millis / 1000);
-            return;
-        }
-
-        if (formatMillis || (format == null && context.isDateFormatMillis())) {
-            jsonWriter.writeInt64(zdt
-                    .toInstant()
-                    .toEpochMilli());
-            return;
-        }
 
         int year = zdt.getYear();
         if (year >= 0 && year <= 9999) {
