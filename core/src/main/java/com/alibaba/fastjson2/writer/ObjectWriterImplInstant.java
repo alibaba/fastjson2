@@ -189,7 +189,6 @@ final class ObjectWriterImplInstant
         if (formatter == null) {
             jsonWriter.writeInstant(instant);
         } else {
-            ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, context.getZoneId());
             String str = formatter.format(zdt);
             jsonWriter.writeString(str);
         }
