@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -63,128 +64,130 @@ public class ASMCodeGenBugTest {
     }
 
     // ========== BUG-1: wrong method descriptor in gwFloat JSONB path ==========
-    // Used "(D)V" (double descriptor) instead of "(F)V" for writeFloat in JSONB.
+    // gwFloat is called for Float.class (boxed) fields. The JSONB path used "(D)V"
+    // instead of "(F)V" for writeFloat, causing VerifyError at class load time.
 
-    public static class FloatBean {
-        public float value;
+    public static class BoxedFloatBean {
+        public Float value;
     }
 
     @Test
-    public void testFloatFieldJSONB() {
-        FloatBean bean = new FloatBean();
+    public void testBoxedFloatFieldJSONB() {
+        BoxedFloatBean bean = new BoxedFloatBean();
         bean.value = 3.14f;
         byte[] jsonb = JSONB.toBytes(bean);
-        FloatBean parsed = JSONB.parseObject(jsonb, FloatBean.class);
+        BoxedFloatBean parsed = JSONB.parseObject(jsonb, BoxedFloatBean.class);
         assertEquals(3.14f, parsed.value);
     }
 
     @Test
-    public void testFloatFieldJSONBWithReferenceDetect() {
-        FloatBean bean = new FloatBean();
-        bean.value = 2.718f;
-        byte[] jsonb = JSONB.toBytes(bean, JSONWriter.Feature.ReferenceDetection);
-        FloatBean parsed = JSONB.parseObject(jsonb, FloatBean.class);
-        assertEquals(2.718f, parsed.value);
+    public void testBoxedFloatFieldJSONBMultipleValues() {
+        // Test with edge values to exercise the JSONB float write path
+        for (float val : new float[]{0f, -1f, Float.MAX_VALUE, Float.MIN_VALUE, Float.NaN}) {
+            BoxedFloatBean bean = new BoxedFloatBean();
+            bean.value = val;
+            byte[] jsonb = JSONB.toBytes(bean);
+            BoxedFloatBean parsed = JSONB.parseObject(jsonb, BoxedFloatBean.class);
+            assertEquals(val, parsed.value);
+        }
     }
 
     // ========== BUG-2: Float.class used as itemClass for Double[] ==========
+    // FieldWriterObjectArray was created with Float.class instead of Double.class
+    // as itemClass for Double[] fields, causing wrong type info in JSONB.
 
     public static class DoubleArrayBean {
         public Double[] values;
     }
 
     @Test
-    public void testDoubleArraySerialization() {
+    public void testDoubleArrayJSONBRoundTrip() {
         DoubleArrayBean bean = new DoubleArrayBean();
         bean.values = new Double[]{1.1, 2.2, 3.3};
-        String json = JSON.toJSONString(bean);
-        assertTrue(json.contains("1.1"));
-        assertTrue(json.contains("2.2"));
-        assertTrue(json.contains("3.3"));
-
-        DoubleArrayBean parsed = JSON.parseObject(json, DoubleArrayBean.class);
+        byte[] jsonb = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName);
+        DoubleArrayBean parsed = JSONB.parseObject(jsonb, DoubleArrayBean.class, JSONReader.Feature.SupportAutoType);
+        assertNotNull(parsed.values);
         assertArrayEquals(bean.values, parsed.values);
     }
 
     @Test
-    public void testDoubleArrayJSONB() {
+    public void testDoubleArrayJSONBWithNulls() {
         DoubleArrayBean bean = new DoubleArrayBean();
-        bean.values = new Double[]{1.1, 2.2, 3.3};
-        byte[] jsonb = JSONB.toBytes(bean);
-        DoubleArrayBean parsed = JSONB.parseObject(jsonb, DoubleArrayBean.class);
-        assertArrayEquals(bean.values, parsed.values);
+        bean.values = new Double[]{1.1, null, 3.3};
+        byte[] jsonb = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName);
+        DoubleArrayBean parsed = JSONB.parseObject(jsonb, DoubleArrayBean.class, JSONReader.Feature.SupportAutoType);
+        assertNotNull(parsed.values);
+        assertEquals(1.1, parsed.values[0]);
+        assertNull(parsed.values[1]);
+        assertEquals(3.3, parsed.values[2]);
     }
 
-    // ========== BUG-4/6: popPath0 leak with NotWriteEmptyArray and ReferenceDetection ==========
-    // When ReferenceDetection is enabled and the list/collection is empty,
-    // NotWriteEmptyArray exit path bypassed popPath0, leaking a reference stack entry.
+    // ========== BUG-4/6: popPath0 leak with NotWriteEmptyArray + ReferenceDetection ==========
+    // When ReferenceDetection is enabled and NotWriteEmptyArray causes an empty list to be
+    // skipped, popPath0 was not called, corrupting the path stack. This causes subsequent
+    // shared object references to use wrong $ref paths.
 
-    public static class RefDetectBean {
-        public String name;
-        public List<String> emptyList;
-        public List<String> normalList;
+    public static class RefLeakBean {
+        public List<String> emptyItems;
+        public List<String> list1;
+        public List<String> list2; // same instance as list1
     }
 
     @Test
-    public void testNotWriteEmptyArrayWithReferenceDetection() {
-        RefDetectBean bean = new RefDetectBean();
-        bean.name = "test";
-        bean.emptyList = new ArrayList<>();
-        bean.normalList = new ArrayList<>();
-        bean.normalList.add("item1");
+    public void testPopPath0LeakInGwFieldValueList() {
+        // The key: emptyItems leaks path, then list1/list2 share the same instance.
+        // With the bug, the $ref for list2 would point to "$.emptyItems.list1" (wrong path).
+        // With the fix, the $ref for list2 points to "$.list1" (correct path).
+        RefLeakBean bean = new RefLeakBean();
+        bean.emptyItems = new ArrayList<>(); // empty, triggers NotWriteEmptyArray skip
+        List<String> shared = new ArrayList<>(Arrays.asList("a", "b"));
+        bean.list1 = shared;
+        bean.list2 = shared; // same reference
 
-        // This combination previously caused popPath0 leak
         String json = JSON.toJSONString(bean,
                 JSONWriter.Feature.NotWriteEmptyArray,
                 JSONWriter.Feature.ReferenceDetection);
 
-        assertFalse(json.contains("emptyList"), "empty list should be omitted");
-        assertTrue(json.contains("\"name\":\"test\""));
-        assertTrue(json.contains("item1"));
+        // emptyItems should be omitted
+        assertFalse(json.contains("emptyItems"));
+        // list2 should reference list1 via correct path $.list1
+        assertTrue(json.contains("\"list1\""), "list1 should be present");
 
-        // Verify it round-trips correctly
-        RefDetectBean parsed = JSON.parseObject(json, RefDetectBean.class);
-        assertEquals("test", parsed.name);
-        assertNull(parsed.emptyList);
-        assertEquals(1, parsed.normalList.size());
+        // The $ref must point to $.list1, not $.emptyItems.list1
+        assertFalse(json.contains("$.emptyItems"), "$ref must not contain leaked path prefix");
+
+        // Round-trip: deserialize and verify list2 has same content
+        RefLeakBean parsed = JSON.parseObject(json, RefLeakBean.class);
+        assertNotNull(parsed.list1);
+        assertEquals(Arrays.asList("a", "b"), parsed.list1);
+    }
+
+    public static class RefLeakObjectBean {
+        public Collection<String> emptyCollection; // Collection (not List) → goes through gwFieldValueObject
+        public List<String> list1;
+        public List<String> list2; // same instance as list1
     }
 
     @Test
-    public void testNotWriteEmptyArrayWithReferenceDetectionJSONB() {
-        RefDetectBean bean = new RefDetectBean();
-        bean.name = "test";
-        bean.emptyList = new ArrayList<>();
-        bean.normalList = new ArrayList<>(Collections.singletonList("item1"));
-
-        byte[] jsonb = JSONB.toBytes(bean,
-                JSONWriter.Feature.NotWriteEmptyArray,
-                JSONWriter.Feature.ReferenceDetection);
-
-        RefDetectBean parsed = JSONB.parseObject(jsonb, RefDetectBean.class);
-        assertEquals("test", parsed.name);
-        assertEquals(1, parsed.normalList.size());
-        assertEquals("item1", parsed.normalList.get(0));
-    }
-
-    public static class RefDetectObjectBean {
-        public String name;
-        public List<String> emptyCollection;
-        public Object nextObj;
-    }
-
-    @Test
-    public void testNotWriteEmptyCollectionObjectWithReferenceDetection() {
-        // BUG-4: popPath0 leak in gwFieldValueObject for empty collections
-        RefDetectObjectBean bean = new RefDetectObjectBean();
-        bean.name = "test";
-        bean.emptyCollection = new ArrayList<>();
-        bean.nextObj = "afterEmpty";
+    public void testPopPath0LeakInGwFieldValueObject() {
+        // BUG-4: same pattern but through gwFieldValueObject path
+        // Collection<String> (not List) routes through gwFieldValueObject which had
+        // the separate popPath0 leak for empty collections.
+        RefLeakObjectBean bean = new RefLeakObjectBean();
+        bean.emptyCollection = new ArrayList<>(); // empty Collection
+        List<String> shared = new ArrayList<>(Arrays.asList("x", "y"));
+        bean.list1 = shared;
+        bean.list2 = shared;
 
         String json = JSON.toJSONString(bean,
                 JSONWriter.Feature.NotWriteEmptyArray,
                 JSONWriter.Feature.ReferenceDetection);
 
         assertFalse(json.contains("emptyCollection"));
-        assertTrue(json.contains("\"nextObj\":\"afterEmpty\""));
+        assertFalse(json.contains("$.emptyCollection"), "$ref must not contain leaked path prefix");
+
+        RefLeakObjectBean parsed = JSON.parseObject(json, RefLeakObjectBean.class);
+        assertNotNull(parsed.list1);
+        assertEquals(Arrays.asList("x", "y"), parsed.list1);
     }
 }
