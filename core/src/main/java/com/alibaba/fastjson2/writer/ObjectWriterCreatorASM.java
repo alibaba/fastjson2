@@ -2698,6 +2698,8 @@ public class ObjectWriterCreatorASM
             }
         }
 
+        Label writeEnd_ = refDetection ? new Label() : notNull_;
+
         if (Object[].class.isAssignableFrom(fieldClass)) {
             Label notWriteEmptyArrayEnd_ = new Label();
             mwc.genIsEnabled(JSONWriter.Feature.NotWriteEmptyArray.mask, notWriteEmptyArrayEnd_);
@@ -2707,7 +2709,7 @@ public class ObjectWriterCreatorASM
             mw.arraylength();
             mw.ifne(notWriteEmptyArrayEnd_);
 
-            mw.goto_(notNull_);
+            mw.goto_(writeEnd_);
 
             mw.visitLabel(notWriteEmptyArrayEnd_);
         } else if (Collection.class.isAssignableFrom(fieldClass)) {
@@ -2721,7 +2723,7 @@ public class ObjectWriterCreatorASM
             mw.invokeinterface("java/util/Collection", "isEmpty", "()Z");
             mw.ifeq(notWriteEmptyArrayEnd_);
 
-            mw.goto_(notNull_);
+            mw.goto_(writeEnd_);
 
             mw.visitLabel(notWriteEmptyArrayEnd_);
         }
@@ -2806,6 +2808,8 @@ public class ObjectWriterCreatorASM
         }
 
         if (refDetection) {
+            mw.visitLabel(writeEnd_);
+
             int REF_DETECT = mwc.var("REF_DETECT");
 
             Label endDetect_ = new Label();
@@ -3004,6 +3008,8 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(endDetect_);
         }
 
+        Label writeEnd_ = !disableReferenceDetect ? new Label() : notNull_;
+
         {
             Label notWriteEmptyArrayEnd_ = new Label();
             mwc.genIsEnabled(JSONWriter.Feature.NotWriteEmptyArray.mask, notWriteEmptyArrayEnd_);
@@ -3012,7 +3018,7 @@ public class ObjectWriterCreatorASM
             mw.invokeinterface("java/util/Collection", "isEmpty", "()Z");
             mw.ifeq(notWriteEmptyArrayEnd_);
 
-            mw.goto_(notNull_);
+            mw.goto_(writeEnd_);
 
             mw.visitLabel(notWriteEmptyArrayEnd_);
         }
@@ -3044,6 +3050,8 @@ public class ObjectWriterCreatorASM
         }
 
         if (!disableReferenceDetect) {
+            mw.visitLabel(writeEnd_);
+
             mw.aload(JSON_WRITER);
             mw.aload(LIST);
             mw.invokevirtual(TYPE_JSON_WRITER, "popPath0", "(Ljava/lang/Object;)V");
@@ -3397,7 +3405,7 @@ public class ObjectWriterCreatorASM
             mw.aload(FIELD_VALUE);
             mw.invokevirtual("java/lang/Float", "floatValue", "()F");
 
-            mw.invokevirtual(TYPE_JSON_WRITER, "writeFloat", "(D)V");
+            mw.invokevirtual(TYPE_JSON_WRITER, "writeFloat", "(F)V");
         } else {
             mw.aload(THIS);
             mw.getfield(classNameType, fieldWriter(i), DESC_FIELD_WRITER);
@@ -4523,7 +4531,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == Double[].class) {
-            return new FieldWriterObjectArray<>(fieldName, Float.class, ordinal, features, format, label, Double[].class, Double[].class, field, null, null);
+            return new FieldWriterObjectArray<>(fieldName, Double.class, ordinal, features, format, label, Double[].class, Double[].class, field, null, null);
         }
 
         if (isFunction(fieldClass)) {
@@ -4623,7 +4631,7 @@ public class ObjectWriterCreatorASM
         if (direct) {
             int capacity = 6;
             for (FieldWriter fieldWriter : fieldWriters) {
-                capacity = fieldCapacity(fieldWriter.fieldClass);
+                capacity += fieldCapacity(fieldWriter.fieldClass);
             }
 
             ClassWriter cw = new ClassWriter(null);
