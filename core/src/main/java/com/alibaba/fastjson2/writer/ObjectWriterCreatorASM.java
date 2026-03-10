@@ -3397,7 +3397,7 @@ public class ObjectWriterCreatorASM
             mw.aload(FIELD_VALUE);
             mw.invokevirtual("java/lang/Float", "floatValue", "()F");
 
-            mw.invokevirtual(TYPE_JSON_WRITER, "writeFloat", "(D)V");
+            mw.invokevirtual(TYPE_JSON_WRITER, "writeFloat", "(F)V");
         } else {
             mw.aload(THIS);
             mw.getfield(classNameType, fieldWriter(i), DESC_FIELD_WRITER);
@@ -4523,7 +4523,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == Double[].class) {
-            return new FieldWriterObjectArray<>(fieldName, Float.class, ordinal, features, format, label, Double[].class, Double[].class, field, null, null);
+            return new FieldWriterObjectArray<>(fieldName, Double.class, ordinal, features, format, label, Double[].class, Double[].class, field, null, null);
         }
 
         if (isFunction(fieldClass)) {
@@ -4623,7 +4623,7 @@ public class ObjectWriterCreatorASM
         if (direct) {
             int capacity = 6;
             for (FieldWriter fieldWriter : fieldWriters) {
-                capacity = fieldCapacity(fieldWriter.fieldClass);
+                capacity += fieldCapacity(fieldWriter.fieldClass);
             }
 
             ClassWriter cw = new ClassWriter(null);
