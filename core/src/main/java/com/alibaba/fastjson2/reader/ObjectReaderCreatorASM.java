@@ -39,6 +39,39 @@ public class ObjectReaderCreatorASM
 
     protected final DynamicClassLoader classLoader;
 
+    /**
+     * Sanitizes a class simple name for use in generated ASM class names.
+     * Array types like "Class[]" become "ClassArray", and any other invalid
+     * characters are replaced with underscores.
+     */
+    static String sanitizeClassName(String simpleName) {
+        if (simpleName == null || simpleName.isEmpty()) {
+            return "";
+        }
+        // Handle array types like "Class[]" -> "ClassArray"
+        if (simpleName.endsWith("[]")) {
+            String baseName = simpleName.substring(0, simpleName.length() - 2);
+            return sanitizeClassName(baseName) + "Array";
+        }
+        // Replace any characters that are invalid in class names
+        StringBuilder sb = null;
+        for (int i = 0; i < simpleName.length(); i++) {
+            char c = simpleName.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
+                if (sb != null) {
+                    sb.append(c);
+                }
+            } else {
+                if (sb == null) {
+                    sb = new StringBuilder(simpleName.length());
+                    sb.append(simpleName, 0, i);
+                }
+                sb.append('_');
+            }
+        }
+        return sb != null ? sb.toString() : simpleName;
+    }
+
     static final String METHOD_DESC_GET_ITEM_OBJECT_READER = "(" + DESC_JSON_READER + ")" + DESC_OBJECT_READER;
     static final String METHOD_DESC_GET_OBJECT_READER_1 = "(" + DESC_JSON_READER + ")" + DESC_OBJECT_READER;
     static final String METHOD_DESC_INIT = "(Ljava/lang/Class;" + DESC_SUPPLIER + DESC_FIELD_READER_ARRAY + ")V";
@@ -4319,7 +4352,7 @@ public class ObjectReaderCreatorASM
             this.fieldNameLengthMin = fieldNameLengthMin;
             this.fieldNameLengthMax = fieldNameLengthMax;
 
-            String className = "ORG_" + seed.incrementAndGet() + "_" + fieldReaders.length + (objectClass == null ? "" : "_" + objectClass.getSimpleName());
+            String className = "ORG_" + seed.incrementAndGet() + "_" + fieldReaders.length + (objectClass == null ? "" : "_" + sanitizeClassName(objectClass.getSimpleName()));
 
             Package pkg = ObjectReaderCreatorASM.class.getPackage();
             if (pkg != null) {
@@ -4383,7 +4416,7 @@ public class ObjectReaderCreatorASM
         String className = (bytes ? "VBACG_" : "VCACG_")
                 + seed.incrementAndGet()
                 + "_" + fieldReaderArray.length
-                + "_" + objectClass.getSimpleName();
+                + "_" + sanitizeClassName(objectClass.getSimpleName());
         String classNameType;
         String classNameFull;
 
