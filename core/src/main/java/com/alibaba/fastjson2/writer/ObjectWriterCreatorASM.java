@@ -471,7 +471,7 @@ public class ObjectWriterCreatorASM
 
         ClassWriter cw = new ClassWriter(null);
 
-        String className = "OWG_" + seed.incrementAndGet() + "_" + fieldWriters.size() + (objectClass == null ? "" : ("_" + objectClass.getSimpleName()));
+        String className = "OWG_" + seed.incrementAndGet() + "_" + fieldWriters.size() + (objectClass == null ? "" : ("_" + sanitizeClassName(objectClass.getSimpleName())));
         String classNameType;
         String classNameFull;
 
@@ -4636,7 +4636,7 @@ public class ObjectWriterCreatorASM
 
             ClassWriter cw = new ClassWriter(null);
 
-            String className = "OWF_" + seed.incrementAndGet() + "_" + fieldWriters.size() + "_" + itemClass.getSimpleName();
+            String className = "OWF_" + seed.incrementAndGet() + "_" + fieldWriters.size() + "_" + sanitizeClassName(itemClass.getSimpleName());
             String classNameType;
             String classNameFull;
 
