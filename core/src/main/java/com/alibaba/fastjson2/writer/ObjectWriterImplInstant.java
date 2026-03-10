@@ -13,7 +13,6 @@ final class ObjectWriterImplInstant
         extends DateTimeCodec
         implements ObjectWriter {
     static final ObjectWriterImplInstant INSTANCE = new ObjectWriterImplInstant(null, null);
-
     public ObjectWriterImplInstant(String format, Locale locale) {
         super(format, locale);
     }
@@ -71,7 +70,7 @@ final class ObjectWriterImplInstant
 
                 long zeroDay = localEpochDay + DAYS_0000_TO_1970;
                 // find the march-based year
-                zeroDay -= 60; // adjust to 0000-03-01 so leap day is at end of four year cycle
+                zeroDay -= 60;// adjust to 0000-03-01 so leap day is at end of four year cycle
                 long adjust = 0;
                 if (zeroDay < 0) {
                     // adjust negative years to positive for calculation
@@ -86,7 +85,7 @@ final class ObjectWriterImplInstant
                     yearEst--;
                     doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
                 }
-                yearEst += adjust; // reset any negative year
+                yearEst += adjust;// reset any negative year
                 int marchDoy0 = (int) doyEst;
 
                 // convert march-based values back to january-based
@@ -130,7 +129,8 @@ final class ObjectWriterImplInstant
                         dayOfMonth,
                         hour,
                         minute,
-                        second);
+                        second
+                );
                 return;
             }
 
@@ -141,7 +141,8 @@ final class ObjectWriterImplInstant
                         dayOfMonth,
                         hour,
                         minute,
-                        second);
+                        second
+                );
                 return;
             }
 
@@ -149,14 +150,16 @@ final class ObjectWriterImplInstant
                 jsonWriter.writeDateYYYMMDD10(
                         year,
                         month,
-                        dayOfMonth);
+                        dayOfMonth
+                );
                 return;
             }
 
             jsonWriter.writeDateYYYMMDD8(
                     year,
                     month,
-                    dayOfMonth);
+                    dayOfMonth
+            );
             return;
         }
 
@@ -174,7 +177,8 @@ final class ObjectWriterImplInstant
                         zdt.getSecond(),
                         zdt.getNano() / 1000_000,
                         zdt.getOffset().getTotalSeconds(),
-                        true);
+                        true
+                );
                 return;
             }
         }
