@@ -1737,7 +1737,7 @@ public class ObjectWriterCreatorASM
         mw.visitLdcInsn(fieldWriter.features);
         mw.invokeinterface(
                 TYPE_OBJECT_WRITER,
-                beanToArray ? "writeArrayMappingJSONB" : "writeJSONB",
+                beanToArray ? "writeJSONB" : "writeArrayMappingJSONB",
                 METHOD_DESC_WRITE_OBJECT);
 
         if (refDetection) {
