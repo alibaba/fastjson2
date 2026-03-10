@@ -1737,7 +1737,7 @@ public class ObjectWriterCreatorASM
         mw.visitLdcInsn(fieldWriter.features);
         mw.invokeinterface(
                 TYPE_OBJECT_WRITER,
-                beanToArray ? "writeJSONB" : "writeArrayMappingJSONB",
+                beanToArray ? "writeArrayMappingJSONB" : "writeJSONB",
                 METHOD_DESC_WRITE_OBJECT);
 
         if (refDetection) {
@@ -2698,6 +2698,8 @@ public class ObjectWriterCreatorASM
             }
         }
 
+        Label writeEnd_ = refDetection ? new Label() : notNull_;
+
         if (Object[].class.isAssignableFrom(fieldClass)) {
             Label notWriteEmptyArrayEnd_ = new Label();
             mwc.genIsEnabled(JSONWriter.Feature.NotWriteEmptyArray.mask, notWriteEmptyArrayEnd_);
@@ -2707,7 +2709,7 @@ public class ObjectWriterCreatorASM
             mw.arraylength();
             mw.ifne(notWriteEmptyArrayEnd_);
 
-            mw.goto_(notNull_);
+            mw.goto_(writeEnd_);
 
             mw.visitLabel(notWriteEmptyArrayEnd_);
         } else if (Collection.class.isAssignableFrom(fieldClass)) {
@@ -2721,7 +2723,7 @@ public class ObjectWriterCreatorASM
             mw.invokeinterface("java/util/Collection", "isEmpty", "()Z");
             mw.ifeq(notWriteEmptyArrayEnd_);
 
-            mw.goto_(notNull_);
+            mw.goto_(writeEnd_);
 
             mw.visitLabel(notWriteEmptyArrayEnd_);
         }
@@ -2806,6 +2808,8 @@ public class ObjectWriterCreatorASM
         }
 
         if (refDetection) {
+            mw.visitLabel(writeEnd_);
+
             int REF_DETECT = mwc.var("REF_DETECT");
 
             Label endDetect_ = new Label();
