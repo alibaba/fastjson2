@@ -3255,6 +3255,10 @@ final class JSONReaderUTF16
             if (strBuf == null) {
                 strBuf = new char[stroff + 512];
                 this.strBuf = strBuf;
+            } else if (stroff > strBuf.length) {
+                int newCapacity = newCapacity(stroff, strBuf.length);
+                strBuf = new char[newCapacity];
+                this.strBuf = strBuf;
             }
             System.arraycopy(chars, start, strBuf, 0, stroff);
 
