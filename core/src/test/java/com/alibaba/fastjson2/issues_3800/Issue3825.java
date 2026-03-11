@@ -1,9 +1,12 @@
 package com.alibaba.fastjson2.issues_3800;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("jsonpath")
 public class Issue3825 {
     @Test
     public void jsonPathRead() {

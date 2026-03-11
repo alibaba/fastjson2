@@ -2,10 +2,12 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
+@Tag("reader")
 public class ValueConsumerEmptyTest {
     @Test
     public void test() {

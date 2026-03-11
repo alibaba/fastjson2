@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.util;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("util")
 public class PropertiesUtilsTest {
     @Test
     public void test() {

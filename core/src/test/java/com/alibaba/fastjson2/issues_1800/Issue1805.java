@@ -4,12 +4,16 @@ import com.alibaba.fastjson2.JSONB;
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("jsonb")
+@Tag("compat-jackson")
 public class Issue1805 {
     @Test
     public void test() {

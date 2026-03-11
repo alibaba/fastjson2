@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -9,6 +10,7 @@ import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("schema")
 public class EnumSchemaTest {
     @Test
     public void test() {

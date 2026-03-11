@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.util;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -9,6 +10,7 @@ import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("util")
 public class FnvTest {
     @Test
     public void test0() {

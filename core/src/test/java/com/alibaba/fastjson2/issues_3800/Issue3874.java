@@ -7,12 +7,16 @@ import com.alibaba.fastjson2.filter.LabelFilter;
 import com.alibaba.fastjson2.filter.PropertyFilter;
 import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
 import lombok.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("annotation")
+@Tag("filter")
 public class Issue3874 {
     @Test
     public void test() {

@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("codec")
 public class RefTest7 {
     @Test
     public void test_ref_0() {

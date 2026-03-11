@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @NoArgsConstructor
 @Data
 @JSONType(naming = PropertyNamingStrategy.SnakeCase)
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue2428 {
     private String myName;
     private NestedBean nestedBean;

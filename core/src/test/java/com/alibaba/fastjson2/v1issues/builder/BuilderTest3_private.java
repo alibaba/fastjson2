@@ -3,10 +3,13 @@ package com.alibaba.fastjson2.v1issues.builder;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class BuilderTest3_private {
     @Test
     public void test_create() throws Exception {

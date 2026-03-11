@@ -1,10 +1,12 @@
 package com.alibaba.fastjson2;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static com.alibaba.fastjson2.JSONWriter.PRETTY_2_SPACE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("writer")
 public class JSONWriterWriteNameRawTest {
     @Test
     public void test() {

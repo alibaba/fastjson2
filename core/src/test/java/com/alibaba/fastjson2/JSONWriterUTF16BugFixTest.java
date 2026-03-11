@@ -15,6 +15,7 @@
  */
 package com.alibaba.fastjson2;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * This test verifies that the fix works correctly.
  */
+@Tag("writer")
 public class JSONWriterUTF16BugFixTest {
     @Test
     public void testWriteStringWithOffsetAndLength() {

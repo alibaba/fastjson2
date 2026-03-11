@@ -5,11 +5,14 @@ import com.alibaba.fastjson2.JSONReader;
 import org.gitlab4j.api.models.AccessLevel;
 import org.gitlab4j.api.models.Permissions;
 import org.gitlab4j.api.models.Visibility;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue2040 {
     @Test
     public void test_for_issue_2040() {

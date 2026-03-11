@@ -4,11 +4,14 @@ import com.alibaba.fastjson.support.geo.FeatureCollection;
 import com.alibaba.fastjson.support.geo.Geometry;
 import com.alibaba.fastjson2.JSON;
 import org.json.JSONException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class FeatureCollectionTest {
     @Test
     public void test_geo() throws JSONException {

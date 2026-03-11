@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.Fnv;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -14,6 +15,9 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for ASM bytecode generation bugs fixed in ObjectWriterCreatorASM and ObjectReaderCreatorASM.
  */
+@Tag("regression")
+@Tag("jsonb")
+@Tag("autotype")
 public class ASMCodeGenBugTest {
     // ========== BUG-7: hash32 collision in genMethodGetFieldReaderLCase ==========
     // When >6 fields exist and two LCase field name hashes collide at 32-bit level,

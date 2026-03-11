@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.util.TypeUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -12,6 +13,7 @@ import java.util.zip.ZipInputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("util")
 public class CSVTest2 {
     @Test
     public void testRowCount1() {

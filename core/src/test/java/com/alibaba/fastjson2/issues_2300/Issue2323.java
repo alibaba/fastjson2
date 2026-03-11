@@ -7,11 +7,13 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
 
+@Tag("regression")
 public class Issue2323 {
     String errMsgStart = "Maximum array size exceeded. Try enabling LargeObject feature instead. Requested size: ";
 

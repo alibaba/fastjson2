@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues_1700;
 
 import com.alibaba.fastjson2.JSON;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.*;
@@ -10,6 +11,8 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("regression")
+@Tag("date")
 public class Issue1789 {
     @Test
     public void test() {

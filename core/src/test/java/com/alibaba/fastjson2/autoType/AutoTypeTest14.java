@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.autoType;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.Differ;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("autotype")
 public class AutoTypeTest14 {
     @Test
     public void test_0() throws Exception {

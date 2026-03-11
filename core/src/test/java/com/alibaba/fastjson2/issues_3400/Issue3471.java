@@ -3,11 +3,16 @@ package com.alibaba.fastjson2.issues_3400;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+@Tag("regression")
+@Tag("jsonb")
+@Tag("date")
+@Tag("autotype")
 public class Issue3471 {
     @Test
     public void test() throws Exception {

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues_3600;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.ElementType;
@@ -11,6 +12,8 @@ import java.lang.annotation.Target;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("annotation")
 public class Issue3652 {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)

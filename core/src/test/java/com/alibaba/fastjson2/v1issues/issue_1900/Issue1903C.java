@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.v1issues.issue_1900;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.beans.Transient;
@@ -14,6 +15,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue1903C {
     @Test
     public void test_issue() {

@@ -1,12 +1,14 @@
 package com.alibaba.fastjson2.issues_1700;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
 public class Issue1735 {
     String str = "{\"DG_GridMain\":[{\"PKFIELDNAME\":1},{\"FIELDNAME\":2}]}";
     String expected = "{\"DG_GridMain\":[{\"PKFIELDNAME\":1},{\"FIELDNAME\":2}]}";

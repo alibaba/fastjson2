@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_2300;
 import com.alibaba.fastjson2.JSONB;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Timestamp;
@@ -13,6 +14,10 @@ import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("jsonb")
+@Tag("date")
+@Tag("compat-jackson")
 public class Issue2332 {
     LocalDateTime now = LocalDateTime.of(2018, 7, 14, 12, 13, 14, 56789);
     LocalDateTime nowT = now.truncatedTo(ChronoUnit.SECONDS);

@@ -6,6 +6,7 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.ToStringSerializer;
 import com.alibaba.fastjson.serializer.ValueFilter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -19,6 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Issue3170测试类
  * @author changyi.ccy
  */
+@Tag("regression")
+@Tag("date")
+@Tag("annotation")
 public class Issue3170Test {
     /**
      * 测试: Issue3170

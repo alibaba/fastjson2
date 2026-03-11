@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -20,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author 张治保
  * @since 2024/1/11
  */
+@Tag("regression")
+@Tag("autotype")
 public class Index {
     @Getter
     @Setter

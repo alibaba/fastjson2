@@ -2,10 +2,13 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.*;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("jsonb")
 public class Issue608 {
     @Test
     public void pair_serialize() {
