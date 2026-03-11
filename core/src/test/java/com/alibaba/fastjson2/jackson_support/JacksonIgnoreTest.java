@@ -2,11 +2,13 @@ package com.alibaba.fastjson2.jackson_support;
 
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@Tag("compat-jackson")
 public class JacksonIgnoreTest {
     @Test
     public void test_0() throws Exception {

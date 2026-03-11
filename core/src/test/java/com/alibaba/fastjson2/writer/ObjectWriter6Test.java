@@ -1,11 +1,19 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONPath;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@Tag("writer")
 public class ObjectWriter6Test {
     @Test
     public void test() {

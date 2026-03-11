@@ -7,10 +7,12 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("reader")
 public class AutoType0 {
     static final JSONWriter.Feature[] writerFeatures = {
             JSONWriter.Feature.WriteClassName,

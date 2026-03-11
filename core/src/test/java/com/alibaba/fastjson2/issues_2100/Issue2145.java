@@ -2,10 +2,13 @@ package com.alibaba.fastjson2.issues_2100;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+@Tag("regression")
+@Tag("jsonpath")
 public class Issue2145 {
     @Test
     public void test() {

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.v1issues.issue_3300;
 import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -14,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @Author ：Nanqi
  * @Date ：Created in 18:28 2020/7/19
  */
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue3344 {
     private TimeZone defaultTimeZone;
 

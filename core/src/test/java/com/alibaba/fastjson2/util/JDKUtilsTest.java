@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.function.ToByteFunction;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.invoke.*;
@@ -9,6 +10,7 @@ import java.util.function.ToIntFunction;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class JDKUtilsTest {
     @Test
     public void test17() {

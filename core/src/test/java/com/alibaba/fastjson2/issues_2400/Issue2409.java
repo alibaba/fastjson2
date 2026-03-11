@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_2400;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -11,6 +12,7 @@ import java.nio.charset.StandardCharsets;
  * @author milabi
  * @since 2024-04-08
  */
+@Tag("regression")
 public class Issue2409 {
     @Test
     void test() {

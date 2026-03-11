@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import lombok.Data;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -14,6 +15,7 @@ import java.util.List;
  * @author 张治保
  * @since 2024/2/5
  */
+@Tag("regression")
 public class Issue2230 {
     @Test
     void test() {

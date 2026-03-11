@@ -1,12 +1,14 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
 public class Issue554 {
     @Test
     public void test() {

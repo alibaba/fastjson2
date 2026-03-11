@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.util.DateUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -16,6 +17,7 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
+@Tag("util")
 public class CSVTest3 {
     @Test
     public void test() throws Exception {

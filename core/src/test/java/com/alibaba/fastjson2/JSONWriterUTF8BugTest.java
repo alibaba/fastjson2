@@ -1,9 +1,11 @@
 package com.alibaba.fastjson2;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("writer")
 public class JSONWriterUTF8BugTest {
     @Test
     public void testWriteStringWithOffset() {

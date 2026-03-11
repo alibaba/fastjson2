@@ -3,11 +3,13 @@ package com.alibaba.fastjson2.jsonb.basic;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("jsonb")
 public class NameSizeTest {
     @Test
     public void name1() {

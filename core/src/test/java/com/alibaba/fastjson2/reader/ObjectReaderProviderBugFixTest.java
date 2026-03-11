@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.util.Fnv;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -14,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("reader")
 public class ObjectReaderProviderBugFixTest {
     // =========================================================================
     // Bug 1: registerSeeAlsoSubType used subTypeClass as cache key instead of superClass

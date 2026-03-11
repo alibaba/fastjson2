@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -16,6 +17,8 @@ import java.util.Map;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("annotation")
 public class Issue971 {
     @Test
     public void test() {

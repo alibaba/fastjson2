@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_3800;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -10,6 +11,9 @@ import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("jsonb")
+@Tag("autotype")
 public class Issue3828 {
     @Test
     public void test() {

@@ -1,9 +1,11 @@
 package com.alibaba.fastjson2.util;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("util")
 public class RyuTest {
     @Test
     public void test_toString() {

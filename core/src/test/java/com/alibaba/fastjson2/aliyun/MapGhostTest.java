@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("integration")
 public class MapGhostTest {
     @Test
     public void test() {

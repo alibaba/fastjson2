@@ -4,12 +4,16 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.util.DateUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("jsonb")
+@Tag("date")
 public class Issue1620 {
     @Test
     public void test() {

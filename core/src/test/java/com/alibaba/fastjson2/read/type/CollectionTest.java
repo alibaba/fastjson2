@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.read.type;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.LinkedList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("reader")
 public class CollectionTest {
     @Test
     public void arrayList() {

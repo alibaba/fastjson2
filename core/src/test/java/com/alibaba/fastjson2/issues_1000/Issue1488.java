@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues_1000;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONType;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -9,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("regression")
+@Tag("annotation")
 public class Issue1488 {
     @JSONType(seeAlso = {Dog.class, Cat.class}, typeKey = "aniType")
     public static class Animal {

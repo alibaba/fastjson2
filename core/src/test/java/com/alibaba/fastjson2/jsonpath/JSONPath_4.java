@@ -3,8 +3,10 @@ package com.alibaba.fastjson2.jsonpath;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+@Tag("jsonpath")
 public class JSONPath_4 {
     @Test
     public void test_path() throws Exception {

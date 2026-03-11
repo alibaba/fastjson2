@@ -3,12 +3,15 @@ package com.alibaba.fastjson2.v1issues.issue_2600;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.TestUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue2689 {
     @Test
     public void test_0() throws Exception {

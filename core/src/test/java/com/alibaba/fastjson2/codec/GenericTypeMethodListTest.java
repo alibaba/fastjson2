@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("codec")
 public class GenericTypeMethodListTest {
     @Test
     public void testRead_0() {

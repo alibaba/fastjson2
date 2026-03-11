@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.util.Fnv;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -16,6 +17,7 @@ import java.util.UUID;
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("jsonb")
 public class JSONWriterJSONBTest {
     @Test
     public void test_startObject() {

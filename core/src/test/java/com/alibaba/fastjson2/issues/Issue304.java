@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -12,6 +13,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+@Tag("regression")
+@Tag("jsonb")
 public class Issue304 {
     List<Bean> list;
     String result;

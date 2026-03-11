@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.reader.ByteArrayValueConsumer;
 import com.alibaba.fastjson2.reader.CharArrayValueConsumer;
 import com.alibaba.fastjson2.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -21,6 +22,7 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("util")
 public class CSVWriterTest {
     @Test
     public void writeDecimals() {

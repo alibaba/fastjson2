@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_2100;
 import com.alibaba.fastjson2.*;
 import com.google.common.collect.Lists;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("regression")
 public class Issue2187 {
     @Test
     public void test() throws Exception {
