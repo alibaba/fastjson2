@@ -660,6 +660,82 @@ abstract class JSONPathFilter
             return false;
         }
 
+        protected Object extractFieldValue(JSONPath.Context context, Object object) {
+            JSONWriter.Context writerContext = context.path.getWriterContext();
+
+            if (object instanceof Map) {
+                Object fieldValue = fieldName == null ? object : ((Map<?, ?>) object).get(fieldName);
+                if (fieldValue == null) {
+                    return null;
+                }
+
+                if (fieldName2 != null) {
+                    for (int i = 0; i < fieldName2.length; i++) {
+                        String name = fieldName2[i];
+                        if (fieldValue instanceof Map) {
+                            fieldValue = ((Map) fieldValue).get(name);
+                        } else {
+                            ObjectWriter objectWriter2 = writerContext.getObjectWriter(fieldValue.getClass());
+                            if (objectWriter2 instanceof ObjectWriterAdapter) {
+                                FieldWriter fieldWriter2 = objectWriter2.getFieldWriter(fieldNameNameHash2[i]);
+                                if (fieldWriter2 == null) {
+                                    return null;
+                                }
+                                fieldValue = fieldWriter2.getFieldValue(fieldValue);
+                            } else {
+                                return null;
+                            }
+                        }
+
+                        if (fieldValue == null) {
+                            return null;
+                        }
+                    }
+                }
+                return fieldValue;
+            }
+
+            ObjectWriter objectWriter = writerContext.getObjectWriter(object.getClass());
+            if (objectWriter instanceof ObjectWriterAdapter) {
+                FieldWriter fieldWriter = objectWriter.getFieldWriter(fieldNameNameHash);
+                if (fieldWriter == null) {
+                    return null;
+                }
+                Object fieldValue = fieldWriter.getFieldValue(object);
+
+                if (fieldValue == null) {
+                    return null;
+                }
+
+                if (fieldName2 != null) {
+                    for (int i = 0; i < fieldName2.length; i++) {
+                        String name = fieldName2[i];
+                        if (fieldValue instanceof Map) {
+                            fieldValue = ((Map) fieldValue).get(name);
+                        } else {
+                            ObjectWriter objectWriter2 = writerContext.getObjectWriter(fieldValue.getClass());
+                            if (objectWriter2 instanceof ObjectWriterAdapter) {
+                                FieldWriter fieldWriter2 = objectWriter2.getFieldWriter(fieldNameNameHash2[i]);
+                                if (fieldWriter2 == null) {
+                                    return null;
+                                }
+                                fieldValue = fieldWriter2.getFieldValue(fieldValue);
+                            } else {
+                                return null;
+                            }
+                        }
+
+                        if (fieldValue == null) {
+                            return null;
+                        }
+                    }
+                }
+                return fieldValue;
+            }
+
+            return null;
+        }
+
         @Override
         public boolean apply(JSONPath.Context context, Object object) {
             if (object == null) {
@@ -667,78 +743,28 @@ abstract class JSONPathFilter
             }
 
             JSONWriter.Context writerContext = context.path.getWriterContext();
+            boolean isMap = object instanceof Map;
+            boolean isObjAdapter = false;
 
-            if (object instanceof Map) {
-                Object fieldValue = fieldName == null ? object : ((Map<?, ?>) object).get(fieldName);
+            if (!isMap) {
+                ObjectWriter objectWriter = writerContext.getObjectWriter(object.getClass());
+                isObjAdapter = objectWriter instanceof ObjectWriterAdapter;
+            }
+
+            if (isMap || isObjAdapter) {
+                Object fieldValue = extractFieldValue(context, object);
+
                 if (fieldValue == null) {
-                    return applyNull();
-                }
-
-                if (fieldName2 != null) {
-                    for (int i = 0; i < fieldName2.length; i++) {
-                        String name = fieldName2[i];
-                        if (fieldValue instanceof Map) {
-                            fieldValue = ((Map) fieldValue).get(name);
-                        } else {
-                            ObjectWriter objectWriter2 = writerContext.getObjectWriter(fieldValue.getClass());
-                            if (objectWriter2 instanceof ObjectWriterAdapter) {
-                                FieldWriter fieldWriter2 = objectWriter2.getFieldWriter(fieldNameNameHash2[i]);
-                                if (fieldWriter2 == null) {
-                                    return false;
-                                }
-                                fieldValue = fieldWriter2.getFieldValue(fieldValue);
-                            } else {
-                                return false;
-                            }
+                    if (isMap) {
+                        Object firstLevelValue = fieldName == null ? object : ((Map<?, ?>) object).get(fieldName);
+                        if (firstLevelValue == null) {
+                            return applyNull();
                         }
-
-                        if (fieldValue == null) {
+                        if (fieldName2 != null) {
                             return this instanceof NameIsNull;
                         }
                     }
-                }
-
-                if (function != null) {
-                    fieldValue = function.apply(fieldValue);
-                }
-
-                return apply(fieldValue);
-            }
-
-            ObjectWriter objectWriter = writerContext.getObjectWriter(object.getClass());
-            if (objectWriter instanceof ObjectWriterAdapter) {
-                FieldWriter fieldWriter = objectWriter.getFieldWriter(fieldNameNameHash);
-                if (fieldWriter == null) {
                     return false;
-                }
-                Object fieldValue = fieldWriter.getFieldValue(object);
-
-                if (fieldValue == null) {
-                    return false;
-                }
-
-                if (fieldName2 != null) {
-                    for (int i = 0; i < fieldName2.length; i++) {
-                        String name = fieldName2[i];
-                        if (fieldValue instanceof Map) {
-                            fieldValue = ((Map) fieldValue).get(name);
-                        } else {
-                            ObjectWriter objectWriter2 = writerContext.getObjectWriter(fieldValue.getClass());
-                            if (objectWriter2 instanceof ObjectWriterAdapter) {
-                                FieldWriter fieldWriter2 = objectWriter2.getFieldWriter(fieldNameNameHash2[i]);
-                                if (fieldWriter2 == null) {
-                                    return false;
-                                }
-                                fieldValue = fieldWriter2.getFieldValue(fieldValue);
-                            } else {
-                                return false;
-                            }
-                        }
-
-                        if (fieldValue == null) {
-                            return false;
-                        }
-                    }
                 }
 
                 if (function != null) {
@@ -1043,78 +1069,7 @@ abstract class JSONPathFilter
                 return false;
             }
 
-            JSONWriter.Context writerContext = context.path.getWriterContext();
-            Object fieldValue;
-
-            if (object instanceof Map) {
-                fieldValue = fieldName == null ? object : ((Map<?, ?>) object).get(fieldName);
-                if (fieldValue == null) {
-                    return applyNull();
-                }
-
-                if (fieldName2 != null) {
-                    for (int i = 0; i < fieldName2.length; i++) {
-                        String name = fieldName2[i];
-                        if (fieldValue instanceof Map) {
-                            fieldValue = ((Map) fieldValue).get(name);
-                        } else {
-                            ObjectWriter objectWriter2 = writerContext.getObjectWriter(fieldValue.getClass());
-                            if (objectWriter2 instanceof ObjectWriterAdapter) {
-                                FieldWriter fieldWriter2 = objectWriter2.getFieldWriter(fieldNameNameHash2[i]);
-                                if (fieldWriter2 == null) {
-                                    return false;
-                                }
-                                fieldValue = fieldWriter2.getFieldValue(fieldValue);
-                            } else {
-                                return false;
-                            }
-                        }
-
-                        if (fieldValue == null) {
-                            return false;
-                        }
-                    }
-                }
-            } else {
-                ObjectWriter objectWriter = writerContext.getObjectWriter(object.getClass());
-                if (objectWriter instanceof ObjectWriterAdapter) {
-                    FieldWriter fieldWriter = objectWriter.getFieldWriter(fieldNameNameHash);
-                    if (fieldWriter == null) {
-                        return false;
-                    }
-                    fieldValue = fieldWriter.getFieldValue(object);
-
-                    if (fieldValue == null) {
-                        return false;
-                    }
-
-                    if (fieldName2 != null) {
-                        for (int i = 0; i < fieldName2.length; i++) {
-                            String name = fieldName2[i];
-                            if (fieldValue instanceof Map) {
-                                fieldValue = ((Map) fieldValue).get(name);
-                            } else {
-                                ObjectWriter objectWriter2 = writerContext.getObjectWriter(fieldValue.getClass());
-                                if (objectWriter2 instanceof ObjectWriterAdapter) {
-                                    FieldWriter fieldWriter2 = objectWriter2.getFieldWriter(fieldNameNameHash2[i]);
-                                    if (fieldWriter2 == null) {
-                                        return false;
-                                    }
-                                    fieldValue = fieldWriter2.getFieldValue(fieldValue);
-                                } else {
-                                    return false;
-                                }
-                            }
-
-                            if (fieldValue == null) {
-                                return false;
-                            }
-                        }
-                    }
-                } else {
-                    return false;
-                }
-            }
+            Object fieldValue = extractFieldValue(context, object);
 
             if (fieldValue == null) {
                 return false;
@@ -1131,17 +1086,6 @@ abstract class JSONPathFilter
 
             if (fieldValue instanceof Object[]) {
                 for (Object item : (Object[]) fieldValue) {
-                    if (subFilter.apply(context, item)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            if (fieldValue.getClass().isArray()) {
-                int length = java.lang.reflect.Array.getLength(fieldValue);
-                for (int i = 0; i < length; i++) {
-                    Object item = java.lang.reflect.Array.get(fieldValue, i);
                     if (subFilter.apply(context, item)) {
                         return true;
                     }
