@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -9,6 +10,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("jsonb")
 public class JSONReaderJSONBTest2 {
     char[] ascii = "a234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890".toCharArray();
     byte[] latin = "¹²³©®½¼¾£¢¹²³©®½¼¾£¢¹²³©®½¼¾£¢¹²³©®½¼¾£¢¹²³©®½¼¾£¢¹²³©®½¼¾£¢¹²³©®½¼¾£¢¹²³©®½¼¾£¢¹²³©®½¼¾£¢¹²³©®½¼¾£¢".getBytes(StandardCharsets.ISO_8859_1);

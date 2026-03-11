@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author kraity
  */
+@Tag("regression")
+@Tag("annotation")
 public class Issue1578 {
     @Getter
     @AllArgsConstructor

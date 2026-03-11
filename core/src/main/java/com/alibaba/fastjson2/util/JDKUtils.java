@@ -89,9 +89,11 @@ public class JDKUtils {
         int jvmVersion = -1, android_sdk_int = -1;
         boolean openj9 = false, android = false, graal = false;
         try {
-            String jmvName = System.getProperty("java.vm.name");
-            openj9 = jmvName.contains("OpenJ9");
-            android = "Dalvik".equals(jmvName);
+            String jvmName = System.getProperty("java.vm.name");
+            if (jvmName != null) {
+                openj9 = jvmName.contains("OpenJ9");
+                android = "Dalvik".equals(jvmName);
+            }
             graal = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
             if (openj9 || android || graal) {
                 FIELD_STRING_VALUE_ERROR = true;
@@ -99,10 +101,10 @@ public class JDKUtils {
 
             String javaSpecVer = System.getProperty("java.specification.version");
             // android is 0.9
-            if (javaSpecVer.startsWith("1.")) {
+            if (javaSpecVer != null && javaSpecVer.startsWith("1.")) {
                 javaSpecVer = javaSpecVer.substring(2);
             }
-            if (javaSpecVer.indexOf('.') == -1) {
+            if (javaSpecVer != null && javaSpecVer.indexOf('.') == -1) {
                 jvmVersion = Integer.parseInt(javaSpecVer);
             }
 

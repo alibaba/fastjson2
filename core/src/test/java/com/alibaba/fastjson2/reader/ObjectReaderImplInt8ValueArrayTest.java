@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONReader.Feature;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Base64;
@@ -9,6 +10,7 @@ import java.util.Base64;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("reader")
 public class ObjectReaderImplInt8ValueArrayTest {
     @Test
     public void testBase64WithJpegPrefix() {

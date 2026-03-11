@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.v1issues.issue_3300;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -13,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @Author ：Nanqi
  * @Date ：Created in 22:29 2020/7/15
  */
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue3347 {
     @Test
     public void test_for_issue() throws Exception {

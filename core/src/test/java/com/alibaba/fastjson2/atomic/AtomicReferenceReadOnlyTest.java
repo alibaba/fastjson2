@@ -1,12 +1,14 @@
 package com.alibaba.fastjson2.atomic;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("primitives")
 public class AtomicReferenceReadOnlyTest {
     @Test
     public void test_readOnly_method() {

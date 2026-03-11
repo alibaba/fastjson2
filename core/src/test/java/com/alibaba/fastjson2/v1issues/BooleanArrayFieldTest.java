@@ -2,10 +2,13 @@ package com.alibaba.fastjson2.v1issues;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class BooleanArrayFieldTest {
     @Test
     public void test_codec_null() throws Exception {

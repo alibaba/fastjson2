@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.v1issues.issue_3300;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,8 @@ import java.util.Date;
  * @Author ：Nanqi
  * @Date ：Created in 16:32 2020/8/16
  */
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue3397 {
     @Test
     public void test_for_issue() throws Exception {

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues_2400;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -12,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author hnyyghk
  * @since 2024-04-24
  */
+@Tag("regression")
+@Tag("autotype")
 public class Issue2475 {
     @Test
     void testList() {

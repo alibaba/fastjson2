@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.StringUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -21,6 +22,7 @@ import static com.alibaba.fastjson2.JSONWriterUTF16.BYTE_VEC_64_SINGLE_QUOTE;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("writer")
 public class JSONWriterUTF16Test {
     @Test
     public void test_write() {

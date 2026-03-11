@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.jsonb.basic;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.SymbolTable;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -10,6 +11,7 @@ import java.util.Map;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("jsonb")
 public class SymbolTest {
     /**
      * 0x7f

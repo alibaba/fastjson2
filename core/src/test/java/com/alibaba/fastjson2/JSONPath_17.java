@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("jsonpath")
 public class JSONPath_17 {
     @Test
     public void test_for_jsonpath() throws Exception {

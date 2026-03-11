@@ -2,12 +2,15 @@ package com.alibaba.fastjson2.v1issues.issue_1200;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.LinkedMultiValueMap;
 
 /**
  * Created by wenshao on 01/06/2017.
  */
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue1240 {
     @Test
     public void test_for_issue() throws Exception {

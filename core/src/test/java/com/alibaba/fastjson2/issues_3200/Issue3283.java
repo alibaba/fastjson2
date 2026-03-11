@@ -2,8 +2,10 @@ package com.alibaba.fastjson2.issues_3200;
 
 import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+@Tag("regression")
 public class Issue3283 {
     static class Bean {
         private boolean test;

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.jsonb.basic;
 
 import com.alibaba.fastjson2.JSONB;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -10,6 +11,7 @@ import static com.alibaba.fastjson2.JSONB.Constants.BC_INT32_NUM_0;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("jsonb")
 public class BinaryTest {
     @Test
     public void test() {

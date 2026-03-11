@@ -9,12 +9,16 @@ import com.alibaba.fastjson2.filter.Filter;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.commons.lang3.SerializationException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("autotype")
+@Tag("annotation")
 public class Issue1190 {
     static final Filter autoTypeFilter = JSONReader.autoTypeFilter(B.class, B1.class);
 

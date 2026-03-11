@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.autoType;
 
 import com.alibaba.fastjson2.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("autotype")
 public class AutoTypeFilterTest2 {
     @Test
     public void test() {

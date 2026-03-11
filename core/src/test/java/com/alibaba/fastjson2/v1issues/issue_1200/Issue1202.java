@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -18,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 /**
  * Created by wenshao on 16/05/2017.
  */
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue1202 {
     private final String dateText = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
 

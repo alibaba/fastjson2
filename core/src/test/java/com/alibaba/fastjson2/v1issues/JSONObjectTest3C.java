@@ -4,11 +4,14 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.TestUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class JSONObjectTest3C {
     @Test
     public void test_0() {

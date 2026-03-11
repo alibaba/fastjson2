@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -11,6 +12,9 @@ import java.util.Date;
  * Test for issue #3758
  * Date format compatibility between fastjson1 and fastjson2
  */
+@Tag("regression")
+@Tag("date")
+@Tag("annotation")
 public class Issue3758Test {
     /**
      * Test case 1: yyyy-MM-dd format with datetime string.

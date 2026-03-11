@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.write;
 
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2_vo.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("writer")
 public class PrettyTest {
     @Test
     public void test_pretty_0() {

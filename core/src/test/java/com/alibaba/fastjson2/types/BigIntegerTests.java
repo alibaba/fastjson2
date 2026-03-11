@@ -5,12 +5,14 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriters;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("types")
 public class BigIntegerTests {
     @Test
     public void test() throws Exception {
