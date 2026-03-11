@@ -5,14 +5,18 @@ import com.alibaba.fastjson2.codec.DateTimeCodec;
 import com.alibaba.fastjson2.util.DateUtils;
 
 import java.lang.reflect.Type;
-import java.time.*;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 final class ObjectWriterImplInstant
         extends DateTimeCodec
         implements ObjectWriter {
-    static final ObjectWriterImplInstant INSTANCE = new ObjectWriterImplInstant(null, null);
+    static final ObjectWriterImplInstant INSTANCE =
+            new ObjectWriterImplInstant(null, null);
+
     public ObjectWriterImplInstant(String format, Locale locale) {
         super(format, locale);
     }
