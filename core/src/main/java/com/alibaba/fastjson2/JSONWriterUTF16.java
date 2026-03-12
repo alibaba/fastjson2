@@ -188,7 +188,11 @@ class JSONWriterUTF16
 
         chars[off++] = (byte) ',';
         if (pretty != PRETTY_NON) {
-            off = indent(chars, off);
+            // Check if we're in an array context with inline arrays enabled
+            boolean inArrayContext = (levelArray & (1L << level)) != 0;
+            if (!(prettyInlineArrays && inArrayContext)) {
+                off = indent(chars, off);
+            }
         }
         this.off = off;
     }
@@ -198,6 +202,8 @@ class JSONWriterUTF16
         if (++level > context.maxLevel) {
             overflowLevel();
         }
+        // Mark current level as array context
+        levelArray |= (1L << level);
 
         int off = this.off;
         int minCapacity = off + 3 + pretty * level;
@@ -207,7 +213,7 @@ class JSONWriterUTF16
         }
 
         chars[off++] = (byte) '[';
-        if (pretty != PRETTY_NON) {
+        if (pretty != PRETTY_NON && !prettyInlineArrays) {
             off = indent(chars, off);
         }
         this.off = off;
@@ -215,6 +221,8 @@ class JSONWriterUTF16
 
     @Override
     public final void endArray() {
+        // Clear array context for current level before decrementing
+        levelArray &= ~(1L << level);
         level--;
         int off = this.off;
         int minCapacity = off + 1 + (pretty == 0 ? 0 : pretty * level + 1);
@@ -223,7 +231,7 @@ class JSONWriterUTF16
             chars = grow(minCapacity);
         }
 
-        if (pretty != PRETTY_NON) {
+        if (pretty != PRETTY_NON && !prettyInlineArrays) {
             off = indent(chars, off);
         }
         chars[off] = (byte) ']';
@@ -1747,6 +1755,18 @@ class JSONWriterUTF16
             return;
         }
 
+        if (pretty != PRETTY_NON && !prettyInlineArrays && value.length >= PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            startArray();
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    writeComma();
+                }
+                writeInt32(value[i]);
+            }
+            endArray();
+            return;
+        }
+
         boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
@@ -1799,6 +1819,18 @@ class JSONWriterUTF16
     public final void writeInt8(byte[] value) {
         if (value == null) {
             writeNull();
+            return;
+        }
+
+        if (pretty != PRETTY_NON && !prettyInlineArrays && value.length >= PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            startArray();
+            for (int i = 0; i < value.length; i++) {
+                if (i != 0) {
+                    writeComma();
+                }
+                writeInt8(value[i]);
+            }
+            endArray();
             return;
         }
 
@@ -1885,6 +1917,18 @@ class JSONWriterUTF16
     public final void writeInt64(long[] values) {
         if (values == null) {
             writeNull();
+            return;
+        }
+
+        if (pretty != PRETTY_NON && !prettyInlineArrays && values.length >= PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            startArray();
+            for (int i = 0; i < values.length; i++) {
+                if (i != 0) {
+                    writeComma();
+                }
+                writeInt64(values[i]);
+            }
+            endArray();
             return;
         }
 
@@ -2081,6 +2125,18 @@ class JSONWriterUTF16
             return;
         }
 
+        if (pretty != PRETTY_NON && !prettyInlineArrays && values.length >= PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            startArray();
+            for (int i = 0; i < values.length; i++) {
+                if (i != 0) {
+                    writeComma();
+                }
+                writeFloat(values[i]);
+            }
+            endArray();
+            return;
+        }
+
         boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
         boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
@@ -2197,6 +2253,18 @@ class JSONWriterUTF16
     public final void writeDouble(double[] values) {
         if (values == null) {
             writeNull();
+            return;
+        }
+
+        if (pretty != PRETTY_NON && !prettyInlineArrays && values.length >= PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            startArray();
+            for (int i = 0; i < values.length; i++) {
+                if (i != 0) {
+                    writeComma();
+                }
+                writeDouble(values[i]);
+            }
+            endArray();
             return;
         }
 

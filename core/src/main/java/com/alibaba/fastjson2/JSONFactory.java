@@ -81,6 +81,7 @@ public final class JSONFactory {
     static String defaultWriterFormat;
     static ZoneId defaultWriterZoneId;
     static boolean defaultWriterAlphabetic;
+    static boolean defaultWriterPrettyFormatInlineArrays;
     static boolean defaultSkipTransient;
     static final boolean disableReferenceDetect;
     static final boolean disableArrayMapping;
@@ -758,6 +759,26 @@ public final class JSONFactory {
     public static void setDefaultWriterAlphabetic(boolean defaultWriterAlphabetic) {
         JSONFactory.defaultWriterAlphabetic = defaultWriterAlphabetic;
         defaultObjectWriterProvider.setAlphabetic(defaultWriterAlphabetic);
+    }
+
+    /**
+     * Checks if the default writer uses inline arrays when pretty formatting.
+     *
+     * @return true if inline arrays is enabled, false otherwise
+     * @since 2.0.61
+     */
+    public static boolean isDefaultWriterPrettyFormatInlineArrays() {
+        return defaultWriterPrettyFormatInlineArrays;
+    }
+
+    /**
+     * Sets whether the default writer should use inline arrays when pretty formatting.
+     *
+     * @param inlineArrays true to enable inline arrays, false to disable
+     * @since 2.0.61
+     */
+    public static void setDefaultWriterPrettyFormatInlineArrays(boolean inlineArrays) {
+        JSONFactory.defaultWriterPrettyFormatInlineArrays = inlineArrays;
     }
 
     /**
