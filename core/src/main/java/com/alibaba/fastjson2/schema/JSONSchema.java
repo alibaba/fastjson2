@@ -689,7 +689,58 @@ public abstract class JSONSchema {
 
     public abstract Type getType();
 
-    protected abstract ValidateResult validateInternal(Object value);
+    /**
+     * Resolves custom error messages and delegates failure handling to the provided {@link ValidationHandler}.
+     * Returns a {@link ValidateResult} with the updated message and abort status, indicating whether validation should stop or continue.
+     */
+    protected final ValidateResult handleError(ValidationHandler handler, Object value, String path, ValidateResult rawResult) {
+        // Resolve customError message
+        ValidateResult finalResult = rawResult;
+        if (this.customErrorMessage != null) {
+            finalResult = new ValidateResult(false, this.customErrorMessage);
+        }
+
+        // Handle Fail-Fast
+        if (handler == null) {
+            return finalResult;
+        }
+
+        // Handle Callback
+        if (!handler.handle(this, value, finalResult.getMessage(), path)) {
+            if (finalResult == rawResult) {
+                finalResult = new ValidateResult(false, finalResult.getMessage());
+            }
+            finalResult.setAbort(true);
+        }
+
+        return finalResult;
+    }
+
+    @FunctionalInterface
+    public interface ValidationHandler {
+        /**
+         * Handles validation errors without interrupting the process, providing a callback mechanism
+         * to collect all error information.
+         *
+         * @param schema  The schema rule that failed (e.g., ObjectSchema, IntegerSchema).
+         * @param value   The value that failed validation.
+         * @param message The error message.
+         * @param path    The path to the value where the error occurred (e.g., "$.users[0].name").
+         * @return true: Indicates the error is handled, continue validation (Fail-Safe);
+         *         false: Indicates the validation should stop immediately (Fail-Fast).
+         */
+        boolean handle(JSONSchema schema, Object value, String message, String path);
+    }
+
+    protected abstract ValidateResult validateInternal(Object value, ValidationHandler handler, String path);
+
+    protected ValidateResult validateInternal(Object value) {
+        return validateInternal(value, null, "$");
+    }
+
+    public final ValidateResult validate(Object value, ValidationHandler handler) {
+        return validateInternal(value, handler, "$");
+    }
 
     public final ValidateResult validate(Object value) {
         ValidateResult result = validateInternal(value);

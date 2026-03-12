@@ -227,9 +227,25 @@ public final class ObjectSchema
     }
 
     public ValidateResult validate(Map map) {
+        return validateMapInternal(map, null, "$");
+    }
+
+    private ValidateResult validateMapInternal(Map map, ValidationHandler handler, String path) {
+        boolean totalSuccess = true;
+        ValidateResult firstFail = null;
+
         for (String item : required) {
             if (!map.containsKey(item)) {
-                return new ValidateResult(false, "required %s", item);
+                ValidateResult raw = new ValidateResult(false, "required %s", item);
+                ValidateResult r = handleError(handler, null, path + "." + item, raw);
+                if (handler == null || r.isAbort()) {
+                    return r;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = r;
+                }
             }
         }
 
@@ -242,9 +258,20 @@ public final class ObjectSchema
                 continue;
             }
 
-            ValidateResult result = schema.validate(propertyValue);
+            ValidateResult result = schema.validateInternal(propertyValue, handler, path + "." + key);
             if (!result.isSuccess()) {
-                return new ValidateResult(result, "property %s invalid", key);
+                if (handler == null || result.isAbort()) {
+                    ValidateResult wrapped = new ValidateResult(result, "property %s invalid", key);
+                    if (result.isAbort()) {
+                        wrapped.setAbort(true);
+                    }
+                    return wrapped;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = new ValidateResult(result, "property %s invalid", key);
+                }
             }
         }
 
@@ -254,9 +281,16 @@ public final class ObjectSchema
                 if (entryKey instanceof String) {
                     String strKey = (String) entryKey;
                     if (patternProperty.pattern.matcher(strKey).find()) {
-                        ValidateResult result = patternProperty.schema.validate(entry.getValue());
+                        ValidateResult result = patternProperty.schema.validateInternal(entry.getValue(), handler, path + "." + strKey);
                         if (!result.isSuccess()) {
-                            return result;
+                            if (handler == null || result.isAbort()) {
+                                return result;
+                            }
+
+                            totalSuccess = false;
+                            if (firstFail == null) {
+                                firstFail = result;
+                            }
                         }
                     }
                 }
@@ -282,35 +316,77 @@ public final class ObjectSchema
                 }
 
                 if (additionalPropertySchema != null) {
-                    ValidateResult result = additionalPropertySchema.validate(entry.getValue());
+                    ValidateResult result = additionalPropertySchema.validateInternal(entry.getValue(), handler, path + "." + key);
                     if (!result.isSuccess()) {
-                        return result;
+                        if (handler == null || result.isAbort()) {
+                            return result;
+                        }
+
+                        totalSuccess = false;
+                        if (firstFail == null) {
+                            firstFail = result;
+                        }
                     }
                     continue;
                 }
 
-                return new ValidateResult(false, "add additionalProperties %s", key);
+                ValidateResult raw = new ValidateResult(false, "add additionalProperties %s", key);
+                ValidateResult r = handleError(handler, entry.getValue(), path + "." + key, raw);
+                if (handler == null || r.isAbort()) {
+                    return r;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = r;
+                }
             }
         }
 
         if (propertyNames != null) {
             for (Object key : map.keySet()) {
-                ValidateResult result = propertyNames.validate(key);
+                ValidateResult result = propertyNames.validateInternal(key, handler, path + ".key[" + key + "]");
                 if (!result.isSuccess()) {
-                    return FAIL_PROPERTY_NAME;
+                    ValidateResult r = handleError(handler, key, path + ".key[" + key + "]", FAIL_PROPERTY_NAME);
+                    if (handler == null || r.isAbort()) {
+                        return r;
+                    }
+
+                    totalSuccess = false;
+                    if (firstFail == null) {
+                        firstFail = FAIL_PROPERTY_NAME;
+                    }
                 }
             }
         }
 
         if (minProperties >= 0) {
             if (map.size() < minProperties) {
-                return new ValidateResult(false, "minProperties not match, expect %s, but %s", minProperties, map.size());
+                ValidateResult raw = new ValidateResult(false, "minProperties not match, expect %s, but %s", minProperties, map.size());
+                ValidateResult r = handleError(handler, map, path, raw);
+                if (handler == null || r.isAbort()) {
+                    return r;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = r;
+                }
             }
         }
 
         if (maxProperties >= 0) {
             if (map.size() > maxProperties) {
-                return new ValidateResult(false, "maxProperties not match, expect %s, but %s", maxProperties, map.size());
+                ValidateResult raw = new ValidateResult(false, "maxProperties not match, expect %s, but %s", maxProperties, map.size());
+                ValidateResult r = handleError(handler, map, path, raw);
+                if (handler == null || r.isAbort()) {
+                    return r;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = r;
+                }
             }
         }
 
@@ -322,7 +398,16 @@ public final class ObjectSchema
                     String[] dependentRequiredProperties = entry.getValue();
                     for (String dependentRequiredProperty : dependentRequiredProperties) {
                         if (!map.containsKey(dependentRequiredProperty)) {
-                            return new ValidateResult(false, "property %s, dependentRequired property %s", key, dependentRequiredProperty);
+                            ValidateResult raw = new ValidateResult(false, "property %s, dependentRequired property %s", key, dependentRequiredProperty);
+                            ValidateResult r = handleError(handler, null, path + "." + dependentRequiredProperty, raw);
+                            if (handler == null || r.isAbort()) {
+                                return r;
+                            }
+
+                            totalSuccess = false;
+                            if (firstFail == null) {
+                                firstFail = r;
+                            }
                         }
                     }
                 }
@@ -338,60 +423,103 @@ public final class ObjectSchema
                 }
 
                 JSONSchema schema = entry.getValue();
-                ValidateResult result = schema.validate(map);
+                ValidateResult result = schema.validateInternal(map, handler, path);
                 if (!result.isSuccess()) {
-                    return result;
+                    if (handler == null || result.isAbort()) {
+                        return result;
+                    }
+
+                    totalSuccess = false;
+                    if (firstFail == null) {
+                        firstFail = result;
+                    }
                 }
             }
         }
 
         if (ifSchema != null) {
-            ValidateResult ifResult = ifSchema.validate(map);
+            // if 判断时不需要触发 handler
+            ValidateResult ifResult = ifSchema.validateInternal(map, null, path);
             if (ifResult == SUCCESS) {
                 if (thenSchema != null) {
-                    ValidateResult thenResult = thenSchema.validate(map);
+                    ValidateResult thenResult = thenSchema.validateInternal(map, handler, path);
                     if (!thenResult.isSuccess()) {
-                        return thenResult;
+                        if (handler == null || thenResult.isAbort()) {
+                            return thenResult;
+                        }
+
+                        totalSuccess = false;
+                        if (firstFail == null) {
+                            firstFail = thenResult;
+                        }
                     }
                 }
             } else {
                 if (elseSchema != null) {
-                    ValidateResult elseResult = elseSchema.validate(map);
+                    ValidateResult elseResult = elseSchema.validateInternal(map, handler, path);
                     if (!elseResult.isSuccess()) {
-                        return elseResult;
+                        if (handler == null || elseResult.isAbort()) {
+                            return elseResult;
+                        }
+
+                        totalSuccess = false;
+                        if (firstFail == null) {
+                            firstFail = elseResult;
+                        }
                     }
                 }
             }
         }
 
         if (allOf != null) {
-            ValidateResult result = allOf.validate(map);
+            ValidateResult result = allOf.validateInternal(map, handler, path);
             if (!result.isSuccess()) {
-                return result;
+                if (handler == null || result.isAbort()) {
+                    return result;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = result;
+                }
             }
         }
 
         if (anyOf != null) {
-            ValidateResult result = anyOf.validate(map);
+            ValidateResult result = anyOf.validateInternal(map, handler, path);
             if (!result.isSuccess()) {
-                return result;
+                if (handler == null || result.isAbort()) {
+                    return result;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = result;
+                }
             }
         }
 
         if (oneOf != null) {
-            ValidateResult result = oneOf.validate(map);
+            ValidateResult result = oneOf.validateInternal(map, handler, path);
             if (!result.isSuccess()) {
-                return result;
+                if (handler == null || result.isAbort()) {
+                    return result;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = result;
+                }
             }
         }
 
-        return SUCCESS;
+        return totalSuccess ? SUCCESS : (firstFail != null ? firstFail : new ValidateResult(false, "Object validation failed"));
     }
 
     @Override
-    protected ValidateResult validateInternal(Object value) {
+    protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         if (value == null) {
-            return typed ? FAIL_INPUT_NULL : SUCCESS;
+            return typed ? handleError(handler, null, path, FAIL_INPUT_NULL) : SUCCESS;
         }
 
         if (encoded) {
@@ -399,23 +527,30 @@ public final class ObjectSchema
                 try {
                     value = JSON.parseObject((String) value);
                 } catch (JSONException e) {
-                    return FAIL_INPUT_NOT_ENCODED;
+                    return handleError(handler, value, path, FAIL_INPUT_NOT_ENCODED);
                 }
             } else {
-                return FAIL_INPUT_NOT_ENCODED;
+                return handleError(handler, value, path, FAIL_INPUT_NOT_ENCODED);
             }
         }
 
         if (value instanceof Map) {
-            return validate((Map) value);
+            return validateMapInternal((Map) value, handler, path);
         }
 
         Class valueClass = value.getClass();
         ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
 
         if (!(objectWriter instanceof ObjectWriterAdapter)) {
-            return typed ? new ValidateResult(false, "expect type %s, but %s", Type.Object, valueClass) : SUCCESS;
+            if (typed) {
+                ValidateResult raw = new ValidateResult(false, "expect type %s, but %s", Type.Object, valueClass);
+                return handleError(handler, value, path, raw);
+            }
+            return SUCCESS;
         }
+
+        boolean totalSuccess = true;
+        ValidateResult firstFail = null;
 
         for (int i = 0; i < this.requiredHashCode.length; i++) {
             long nameHash = requiredHashCode[i];
@@ -435,7 +570,16 @@ public final class ObjectSchema
                     }
                     j++;
                 }
-                return new ValidateResult(false, "required property %s", fieldName);
+                ValidateResult raw = new ValidateResult(false, "required property %s", fieldName);
+                ValidateResult r = handleError(handler, null, path + "." + fieldName, raw);
+                if (handler == null || r.isAbort()) {
+                    return r;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = r;
+                }
             }
         }
 
@@ -452,9 +596,16 @@ public final class ObjectSchema
                     continue;
                 }
 
-                ValidateResult result = schema.validate(propertyValue);
+                ValidateResult result = schema.validateInternal(propertyValue, handler, path + "." + key);
                 if (!result.isSuccess()) {
-                    return result;
+                    if (handler == null || result.isAbort()) {
+                        return result;
+                    }
+
+                    totalSuccess = false;
+                    if (firstFail == null) {
+                        firstFail = result;
+                    }
                 }
             }
         }
@@ -471,13 +622,31 @@ public final class ObjectSchema
 
             if (minProperties >= 0) {
                 if (fieldValueCount < minProperties) {
-                    return new ValidateResult(false, "minProperties not match, expect %s, but %s", minProperties, fieldValueCount);
+                    ValidateResult raw = new ValidateResult(false, "minProperties not match, expect %s, but %s", minProperties, fieldValueCount);
+                    ValidateResult r = handleError(handler, value, path, raw);
+                    if (handler == null || r.isAbort()) {
+                        return r;
+                    }
+
+                    totalSuccess = false;
+                    if (firstFail == null) {
+                        firstFail = r;
+                    }
                 }
             }
 
             if (maxProperties >= 0) {
                 if (fieldValueCount > maxProperties) {
-                    return new ValidateResult(false, "maxProperties not match, expect %s, but %s", maxProperties, fieldValueCount);
+                    ValidateResult raw = new ValidateResult(false, "maxProperties not match, expect %s, but %s", maxProperties, fieldValueCount);
+                    ValidateResult r = handleError(handler, value, path, raw);
+                    if (handler == null || r.isAbort()) {
+                        return r;
+                    }
+
+                    totalSuccess = false;
+                    if (firstFail == null) {
+                        firstFail = r;
+                    }
                 }
             }
         }
@@ -509,7 +678,16 @@ public final class ObjectSchema
                                 dependentRequiredProperty = dependentRequiredEntry.getValue()[requiredIndex];
                             }
                         }
-                        return new ValidateResult(false, "property %s, dependentRequired property %s", property, dependentRequiredProperty);
+                        ValidateResult raw = new ValidateResult(false, "property %s, dependentRequired property %s", property, dependentRequiredProperty);
+                        ValidateResult r = handleError(handler, null, path + "." + dependentRequiredProperty, raw);
+                        if (handler == null || r.isAbort()) {
+                            return r;
+                        }
+
+                        totalSuccess = false;
+                        if (firstFail == null) {
+                            firstFail = r;
+                        }
                     }
                 }
 
@@ -527,54 +705,97 @@ public final class ObjectSchema
                 }
 
                 JSONSchema schema = entry.getValue();
-                ValidateResult result = schema.validate(value);
+                ValidateResult result = schema.validateInternal(value, handler, path);
                 if (!result.isSuccess()) {
-                    return result;
+                    if (handler == null || result.isAbort()) {
+                        return result;
+                    }
+
+                    totalSuccess = false;
+                    if (firstFail == null) {
+                        firstFail = result;
+                    }
                 }
             }
         }
 
         if (ifSchema != null) {
-            ValidateResult ifResult = ifSchema.validate(value);
+            // if 判断时不需要触发 handler
+            ValidateResult ifResult = ifSchema.validateInternal(value, null, path);
             if (ifResult.isSuccess()) {
                 if (thenSchema != null) {
-                    ValidateResult thenResult = thenSchema.validate(value);
+                    ValidateResult thenResult = thenSchema.validateInternal(value, handler, path);
                     if (!thenResult.isSuccess()) {
-                        return thenResult;
+                        if (handler == null || thenResult.isAbort()) {
+                            return thenResult;
+                        }
+
+                        totalSuccess = false;
+                        if (firstFail == null) {
+                            firstFail = thenResult;
+                        }
                     }
                 }
             } else {
                 if (elseSchema != null) {
-                    ValidateResult elseResult = elseSchema.validate(value);
+                    ValidateResult elseResult = elseSchema.validateInternal(value, handler, path);
                     if (!elseResult.isSuccess()) {
-                        return elseResult;
+                        if (handler == null || elseResult.isAbort()) {
+                            return elseResult;
+                        }
+
+                        totalSuccess = false;
+                        if (firstFail == null) {
+                            firstFail = elseResult;
+                        }
                     }
                 }
             }
         }
 
         if (allOf != null) {
-            ValidateResult result = allOf.validate(value);
+            ValidateResult result = allOf.validateInternal(value, handler, path);
             if (!result.isSuccess()) {
-                return result;
+                if (handler == null || result.isAbort()) {
+                    return result;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = result;
+                }
             }
         }
 
         if (anyOf != null) {
-            ValidateResult result = anyOf.validate(value);
+            ValidateResult result = anyOf.validateInternal(value, handler, path);
             if (!result.isSuccess()) {
-                return result;
+                if (handler == null || result.isAbort()) {
+                    return result;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = result;
+                }
             }
         }
 
         if (oneOf != null) {
-            ValidateResult result = oneOf.validate(value);
+            ValidateResult result = oneOf.validateInternal(value, handler, path);
             if (!result.isSuccess()) {
-                return result;
+                if (handler == null || result.isAbort()) {
+                    return result;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = result;
+                }
             }
         }
 
-        return SUCCESS;
+        return totalSuccess ? SUCCESS : (firstFail != null ? firstFail : new ValidateResult(false, "Object validation failed"));
     }
 
     public Map<String, JSONSchema> getProperties() {

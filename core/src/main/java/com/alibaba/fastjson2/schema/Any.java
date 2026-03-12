@@ -15,7 +15,7 @@ final class Any
     }
 
     @Override
-    protected ValidateResult validateInternal(Object value) {
+    protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         return SUCCESS;
     }
 }
