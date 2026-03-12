@@ -314,7 +314,7 @@ public class DateUtils {
         } else {
             char[] chars = new char[len];
             str.getChars(off, off + len, chars, 0);
-            ldt = parseLocalDateTime(chars, off, len);
+            ldt = parseLocalDateTime(chars, 0, len);
         }
 
         if (ldt == null) {
@@ -483,7 +483,7 @@ public class DateUtils {
      * @return the parsed LocalTime object, or null if the input array is null or too short
      */
     public static LocalTime parseLocalTime6(byte[] str, int off) {
-        if (off + 5 > str.length) {
+        if (off + 6 > str.length) {
             return null;
         }
 
@@ -519,7 +519,7 @@ public class DateUtils {
      * @return the parsed LocalTime object, or null if the input array is null or too short
      */
     public static LocalTime parseLocalTime6(char[] str, int off) {
-        if (off + 5 > str.length) {
+        if (off + 6 > str.length) {
             return null;
         }
 
@@ -547,7 +547,7 @@ public class DateUtils {
     }
 
     public static LocalTime parseLocalTime7(byte[] str, int off) {
-        if (off + 5 > str.length) {
+        if (off + 7 > str.length) {
             return null;
         }
 
@@ -575,7 +575,7 @@ public class DateUtils {
     }
 
     public static LocalTime parseLocalTime7(char[] str, int off) {
-        if (off + 5 > str.length) {
+        if (off + 7 > str.length) {
             return null;
         }
 
@@ -678,7 +678,7 @@ public class DateUtils {
             if (millis > 0) {
                 millis *= 100000000;
             }
-            return ((hour | minute | second | minute) < 0)
+            return ((hour | minute | second | millis) < 0)
                     ? null
                     : LocalTime.of(hour, minute, second, millis);
         }
@@ -695,7 +695,7 @@ public class DateUtils {
             if (millis > 0) {
                 millis *= 100000000;
             }
-            return ((hour | minute | second | minute) < 0)
+            return ((hour | minute | second | millis) < 0)
                     ? null
                     : LocalTime.of(hour, minute, second, millis);
         }
@@ -728,7 +728,7 @@ public class DateUtils {
             if (millis > 0) {
                 millis *= 10000000;
             }
-            return ((hour | minute | second | minute) < 0)
+            return ((hour | minute | second | millis) < 0)
                     ? null
                     : LocalTime.of(hour, minute, second, millis);
         }
@@ -761,7 +761,7 @@ public class DateUtils {
             if (millis > 0) {
                 millis *= 1000000;
             }
-            return ((hour | minute | second | minute) < 0)
+            return ((hour | minute | second | millis) < 0)
                     ? null
                     : LocalTime.of(hour, minute, second, millis);
         }
@@ -1015,7 +1015,7 @@ public class DateUtils {
         ) {
             ZonedDateTime zdt = parseZonedDateTime(chars, off, len, zoneId);
             if (zdt == null) {
-                String input = new String(chars, off, len - off);
+                String input = new String(chars, off, len);
                 throw new DateTimeParseException("illegal input " + input, input, 0);
             }
             millis = zdt.toInstant().toEpochMilli();
@@ -1107,7 +1107,7 @@ public class DateUtils {
         ) {
             ZonedDateTime zdt = parseZonedDateTime(chars, off, len, zoneId);
             if (zdt == null) {
-                String input = new String(chars, off, len - off);
+                String input = new String(chars, off, len);
                 throw new DateTimeParseException("illegal input " + input, input, 0);
             }
             millis = zdt.toInstant().toEpochMilli();
@@ -1157,7 +1157,7 @@ public class DateUtils {
             }
 
             if (ldt == null) {
-                String input = new String(chars, off, len - off);
+                String input = new String(chars, off, len);
                 throw new DateTimeParseException("illegal input " + input, input, 0);
             }
 
