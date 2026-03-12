@@ -76,7 +76,7 @@ public class ObjectReaderCreatorASM
         infos.put(Integer.class, new FieldReaderInfo(ASMUtils.type(BiConsumer.class), "(Ljava/lang/Object;Ljava/lang/Integer;)V", "(Ljava/lang/Integer;)V", Opcodes.ALOAD, "readInt32", "()Ljava/lang/Integer;", Opcodes.ASTORE));
     }
 
-    static final String[] TYPE_OBJECT_READERS = {
+    private static final String[] TYPE_OBJECT_READERS = {
             TYPE_OBJECT_READER_ADAPTER, // index 0: fallback
             TYPE_OBJECT_READER_1,
             TYPE_OBJECT_READER_2,
@@ -157,7 +157,7 @@ public class ObjectReaderCreatorASM
     /**
      * Build a sorted map from hashCode32 to list of hashCode64 values, and return sorted hashCode32 keys.
      */
-    static int[] buildHashCode32Map(long[] hashCodes, Map<Integer, List<Long>> outMap) {
+    private static int[] buildHashCode32Map(long[] hashCodes, Map<Integer, List<Long>> outMap) {
         for (long hashCode64 : hashCodes) {
             int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
             outMap.computeIfAbsent(hashCode32, k -> new ArrayList<>()).add(hashCode64);
@@ -4143,13 +4143,12 @@ public class ObjectReaderCreatorASM
                 }
 
                 int charLen = fieldReader.fieldName.length();
-                if (i == 0) {
+                if (charLenMin == 0) {
                     charLenMin = charLen;
-                    charLenMax = charLen;
                 } else {
                     charLenMin = Math.min(charLen, charLenMin);
-                    charLenMax = Math.max(charLen, charLenMax);
                 }
+                charLenMax = Math.max(charLen, charLenMax);
 
                 byte[] nameUTF8 = fieldReader.fieldName.getBytes(StandardCharsets.UTF_8);
                 int fieldNameLength = nameUTF8.length;
