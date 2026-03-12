@@ -6825,18 +6825,12 @@ class JSONReaderUTF8
         }
 
         valueType = JSON_TYPE_INT;
-        boolean overflow = false;
+        int digitCount = 0; // Total digit count for overflow detection
         long longValue = 0;
         while (ch >= '0' && ch <= '9') {
             valid = true;
-            if (!overflow) {
-                long r = longValue * 10;
-                if ((longValue | 10) >>> 31 == 0L || (r / 10 == longValue)) {
-                    longValue = r + (ch - '0');
-                } else {
-                    overflow = true;
-                }
-            }
+            longValue = (longValue << 3) + (longValue << 1) + (ch & 0xf);
+            digitCount++;
 
             if (offset == end) {
                 ch = EOI;
@@ -6846,10 +6840,6 @@ class JSONReaderUTF8
             ch = bytes[offset++];
         }
 
-        if (longValue < 0) {
-            overflow = true;
-        }
-
         this.scale = 0;
         if (ch == '.') {
             valueType = JSON_TYPE_DEC;
@@ -6857,14 +6847,8 @@ class JSONReaderUTF8
             while (ch >= '0' && ch <= '9') {
                 valid = true;
                 this.scale++;
-                if (!overflow) {
-                    long r = longValue * 10;
-                    if ((longValue | 10) >>> 31 == 0L || (r / 10 == longValue)) {
-                        longValue = r + (ch - '0');
-                    } else {
-                        overflow = true;
-                    }
-                }
+                longValue = (longValue << 3) + (longValue << 1) + (ch & 0xf);
+                digitCount++;
 
                 if (offset == end) {
                     ch = EOI;
@@ -6874,6 +6858,9 @@ class JSONReaderUTF8
                 ch = bytes[offset++];
             }
         }
+
+        // Check overflow: more than 18 digits, or 19 digits with negative value (sign bit set)
+        boolean overflow = digitCount > 18 && (digitCount > 19 || longValue < 0);
 
         int expValue = 0;
         if (ch == 'e' || ch == 'E') {
@@ -6962,8 +6949,12 @@ class JSONReaderUTF8
             }
         }
         if (!value) {
-            if (expValue == 0 && !overflow && longValue != 0) {
-                decimal = BigDecimal.valueOf(negative ? -longValue : longValue, scale);
+            if (!overflow && longValue != 0) {
+                // Combine scale and exponent: scale - expValue
+                // For 1.5E3: scale=1, exp=3 => combined=-2 => 1500
+                // For 1.5E-3: scale=1, exp=-3 => combined=4 => 0.0015
+                int combinedScale = scale - expValue;
+                decimal = BigDecimal.valueOf(negative ? -longValue : longValue, combinedScale);
                 value = true;
             }
 
