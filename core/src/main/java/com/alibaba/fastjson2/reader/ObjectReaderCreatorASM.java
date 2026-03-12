@@ -76,6 +76,22 @@ public class ObjectReaderCreatorASM
         infos.put(Integer.class, new FieldReaderInfo(ASMUtils.type(BiConsumer.class), "(Ljava/lang/Object;Ljava/lang/Integer;)V", "(Ljava/lang/Integer;)V", Opcodes.ALOAD, "readInt32", "()Ljava/lang/Integer;", Opcodes.ASTORE));
     }
 
+    static final String[] TYPE_OBJECT_READERS = {
+            TYPE_OBJECT_READER_ADAPTER, // index 0: fallback
+            TYPE_OBJECT_READER_1,
+            TYPE_OBJECT_READER_2,
+            TYPE_OBJECT_READER_3,
+            TYPE_OBJECT_READER_4,
+            TYPE_OBJECT_READER_5,
+            TYPE_OBJECT_READER_6,
+            TYPE_OBJECT_READER_7,
+            TYPE_OBJECT_READER_8,
+            TYPE_OBJECT_READER_9,
+            TYPE_OBJECT_READER_10,
+            TYPE_OBJECT_READER_11,
+            TYPE_OBJECT_READER_12,
+    };
+
     static final String[] fieldItemObjectReader = new String[1024];
 
     static String fieldObjectReader(int i) {
@@ -136,6 +152,23 @@ public class ObjectReaderCreatorASM
         IOUtils.getChars(i, chars.length, chars);
         fieldItemObjectReader[i] = fieldName = new String(chars);
         return fieldName;
+    }
+
+    /**
+     * Build a sorted map from hashCode32 to list of hashCode64 values, and return sorted hashCode32 keys.
+     */
+    static int[] buildHashCode32Map(long[] hashCodes, Map<Integer, List<Long>> outMap) {
+        for (long hashCode64 : hashCodes) {
+            int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
+            outMap.computeIfAbsent(hashCode32, k -> new ArrayList<>()).add(hashCode64);
+        }
+        int[] hashCode32Keys = new int[outMap.size()];
+        int off = 0;
+        for (Integer key : outMap.keySet()) {
+            hashCode32Keys[off++] = key;
+        }
+        Arrays.sort(hashCode32Keys);
+        return hashCode32Keys;
     }
 
     private static class FieldReaderInfo {
@@ -543,48 +576,10 @@ public class ObjectReaderCreatorASM
 
         final boolean generatedFields = fieldReaderArray.length <= 96;
 
-        String objectReaderSuper;
-        switch (fieldReaderArray.length) {
-            case 1:
-                objectReaderSuper = TYPE_OBJECT_READER_1;
-                break;
-            case 2:
-                objectReaderSuper = TYPE_OBJECT_READER_2;
-                break;
-            case 3:
-                objectReaderSuper = TYPE_OBJECT_READER_3;
-                break;
-            case 4:
-                objectReaderSuper = TYPE_OBJECT_READER_4;
-                break;
-            case 5:
-                objectReaderSuper = TYPE_OBJECT_READER_5;
-                break;
-            case 6:
-                objectReaderSuper = TYPE_OBJECT_READER_6;
-                break;
-            case 7:
-                objectReaderSuper = TYPE_OBJECT_READER_7;
-                break;
-            case 8:
-                objectReaderSuper = TYPE_OBJECT_READER_8;
-                break;
-            case 9:
-                objectReaderSuper = TYPE_OBJECT_READER_9;
-                break;
-            case 10:
-                objectReaderSuper = TYPE_OBJECT_READER_10;
-                break;
-            case 11:
-                objectReaderSuper = TYPE_OBJECT_READER_11;
-                break;
-            case 12:
-                objectReaderSuper = TYPE_OBJECT_READER_12;
-                break;
-            default:
-                objectReaderSuper = TYPE_OBJECT_READER_ADAPTER;
-                break;
-        }
+        int fieldCount = fieldReaderArray.length;
+        String objectReaderSuper = (fieldCount >= 1 && fieldCount <= 12)
+                ? TYPE_OBJECT_READERS[fieldCount]
+                : TYPE_OBJECT_READER_ADAPTER;
 
         if (generatedFields) {
             genFields(fieldReaderArray, cw, objectReaderSuper);
@@ -680,23 +675,9 @@ public class ObjectReaderCreatorASM
 
             genMethodReadObject(context, readerFeatures);
 
-            if (objectReaderSuper == TYPE_OBJECT_READER_ADAPTER
-                    || objectReaderSuper == TYPE_OBJECT_READER_1
-                    || objectReaderSuper == TYPE_OBJECT_READER_2
-                    || objectReaderSuper == TYPE_OBJECT_READER_3
-                    || objectReaderSuper == TYPE_OBJECT_READER_4
-                    || objectReaderSuper == TYPE_OBJECT_READER_5
-                    || objectReaderSuper == TYPE_OBJECT_READER_6
-                    || objectReaderSuper == TYPE_OBJECT_READER_7
-                    || objectReaderSuper == TYPE_OBJECT_READER_8
-                    || objectReaderSuper == TYPE_OBJECT_READER_9
-                    || objectReaderSuper == TYPE_OBJECT_READER_10
-                    || objectReaderSuper == TYPE_OBJECT_READER_11
-                    || objectReaderSuper == TYPE_OBJECT_READER_12
-            ) {
-                genMethodGetFieldReader(context);
-                genMethodGetFieldReaderLCase(context);
-            }
+            // objectReaderSuper is always one of TYPE_OBJECT_READERS or TYPE_OBJECT_READER_ADAPTER here
+            genMethodGetFieldReader(context);
+            genMethodGetFieldReaderLCase(context);
         }
 
         byte[] code = cw.toByteArray();
@@ -709,7 +690,10 @@ public class ObjectReaderCreatorASM
         } catch (Throwable e) {
             throw new JSONException(
                     "create objectReader error"
-                            + (objectType == null ? "" : ", objectType " + objectType.getTypeName()),
+                            + (objectType == null ? "" : ", objectType " + objectType.getTypeName())
+                            + ", fields " + fieldReaderArray.length
+                            + ", super " + objectReaderSuper
+                            + ", external " + externalClass,
                     e
             );
         }
@@ -729,117 +713,33 @@ public class ObjectReaderCreatorASM
 
     private void genMethodGetFieldReader(ObjectReadContext context) {
         ObjectReaderAdapter objectReaderAdapter = context.objectReaderAdapter;
-        FieldReader[] fieldReaderArray = context.fieldReaders;
-        MethodWriter mw = context.cw.visitMethod(
-                Opcodes.ACC_PUBLIC,
-                "getFieldReader",
-                "(J)" + DESC_FIELD_READER,
-                512
+        genMethodGetFieldReaderImpl(
+                context, "getFieldReader",
+                objectReaderAdapter.hashCodes, objectReaderAdapter.mapping,
+                fr -> fr.fieldNameHash
         );
-
-        final int HASH_CODE_64 = 1;
-        final int HASH_CODE_32 = 3;
-
-        Label rtnlt = new Label();
-        if (fieldReaderArray.length > 6) {
-            Map<Integer, List<Long>> map = new TreeMap();
-
-            for (int i = 0; i < objectReaderAdapter.hashCodes.length; i++) {
-                long hashCode64 = objectReaderAdapter.hashCodes[i];
-                int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
-                List<Long> hashCode64List = map.computeIfAbsent(hashCode32, k -> new ArrayList<>());
-                hashCode64List.add(hashCode64);
-            }
-            int[] hashCode32Keys = new int[map.size()];
-            {
-                int off = 0;
-                for (Integer key : map.keySet()) {
-                    hashCode32Keys[off++] = key;
-                }
-            }
-            Arrays.sort(hashCode32Keys);
-
-            // // int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
-            mw.lload(HASH_CODE_64);
-            mw.lload(HASH_CODE_64);
-            mw.bipush(32);
-            mw.lushr();
-            mw.lxor();
-            mw.l2i();
-            mw.istore(HASH_CODE_32);
-
-            Label dflt = new Label();
-            Label[] labels = new Label[hashCode32Keys.length];
-            for (int i = 0; i < labels.length; i++) {
-                labels[i] = new Label();
-            }
-
-            mw.iload(HASH_CODE_32);
-            mw.visitLookupSwitchInsn(dflt, hashCode32Keys, labels);
-
-            for (int i = 0; i < labels.length; i++) {
-                mw.visitLabel(labels[i]);
-
-                int hashCode32 = hashCode32Keys[i];
-                List<Long> hashCode64Array = map.get(hashCode32);
-                for (int j = 0, size = hashCode64Array.size(); j < size; j++) {
-                    long hashCode64 = hashCode64Array.get(j);
-
-                    Label next = size > 1 ? new Label() : dflt;
-                    mw.lload(HASH_CODE_64);
-                    mw.visitLdcInsn(hashCode64);
-                    mw.lcmp();
-                    mw.ifne(next);
-
-                    int m = Arrays.binarySearch(objectReaderAdapter.hashCodes, hashCode64);
-                    int index = objectReaderAdapter.mapping[m];
-                    mw.aload(THIS);
-                    mw.getfield(context.classNameType, fieldReader(index), DESC_FIELD_READER);
-                    mw.goto_(rtnlt);
-
-                    if (next != dflt) {
-                        mw.visitLabel(next);
-                    }
-                }
-
-                mw.goto_(dflt);
-            }
-
-            mw.visitLabel(dflt);
-        } else {
-            for (int i = 0; i < fieldReaderArray.length; ++i) {
-                Label next_ = new Label(), get_ = new Label();
-                String fieldName = fieldReaderArray[i].fieldName;
-                long hashCode64 = fieldReaderArray[i].fieldNameHash;
-
-                mw.lload(HASH_CODE_64);
-                mw.visitLdcInsn(hashCode64);
-                mw.lcmp();
-                mw.ifne(next_);
-
-                mw.visitLabel(get_);
-                mw.aload(THIS);
-                mw.getfield(context.classNameType, fieldReader(i), DESC_FIELD_READER);
-                mw.goto_(rtnlt);
-
-                mw.visitLabel(next_);
-            }
-        }
-        mw.aconst_null();
-        mw.areturn();
-
-        mw.visitLabel(rtnlt);
-        mw.areturn();
-
-        mw.visitMaxs(5, 5);
     }
 
     private void genMethodGetFieldReaderLCase(ObjectReadContext context) {
         ObjectReaderAdapter objectReaderAdapter = context.objectReaderAdapter;
+        genMethodGetFieldReaderImpl(
+                context, "getFieldReaderLCase",
+                objectReaderAdapter.hashCodesLCase, objectReaderAdapter.mappingLCase,
+                fr -> fr.fieldNameHashLCase
+        );
+    }
+
+    private void genMethodGetFieldReaderImpl(
+            ObjectReadContext context,
+            String methodName,
+            long[] hashCodes,
+            short[] mapping,
+            java.util.function.ToLongFunction<FieldReader> hashExtractor
+    ) {
         FieldReader[] fieldReaderArray = context.fieldReaders;
         MethodWriter mw = context.cw.visitMethod(
                 Opcodes.ACC_PUBLIC,
-                "getFieldReaderLCase",
+                methodName,
                 "(J)" + DESC_FIELD_READER,
                 512
         );
@@ -849,24 +749,10 @@ public class ObjectReaderCreatorASM
 
         Label rtnlt = new Label();
         if (fieldReaderArray.length > 6) {
-            Map<Integer, List<Long>> map = new TreeMap();
+            Map<Integer, List<Long>> map = new TreeMap<>();
+            int[] hashCode32Keys = buildHashCode32Map(hashCodes, map);
 
-            for (int i = 0; i < objectReaderAdapter.hashCodesLCase.length; i++) {
-                long hashCode64 = objectReaderAdapter.hashCodesLCase[i];
-                int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
-                List<Long> hashCode64List = map.computeIfAbsent(hashCode32, k -> new ArrayList<>());
-                hashCode64List.add(hashCode64);
-            }
-            int[] hashCode32Keys = new int[map.size()];
-            {
-                int off = 0;
-                for (Integer key : map.keySet()) {
-                    hashCode32Keys[off++] = key;
-                }
-            }
-            Arrays.sort(hashCode32Keys);
-
-            // // int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
+            // int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
             mw.lload(HASH_CODE_64);
             mw.lload(HASH_CODE_64);
             mw.bipush(32);
@@ -898,8 +784,8 @@ public class ObjectReaderCreatorASM
                     mw.lcmp();
                     mw.ifne(next);
 
-                    int m = Arrays.binarySearch(objectReaderAdapter.hashCodesLCase, hashCode64);
-                    int index = objectReaderAdapter.mappingLCase[m];
+                    int m = Arrays.binarySearch(hashCodes, hashCode64);
+                    int index = mapping[m];
                     mw.aload(THIS);
                     mw.getfield(context.classNameType, fieldReader(index), DESC_FIELD_READER);
                     mw.goto_(rtnlt);
@@ -915,16 +801,14 @@ public class ObjectReaderCreatorASM
             mw.visitLabel(dflt);
         } else {
             for (int i = 0; i < fieldReaderArray.length; ++i) {
-                Label next_ = new Label(), get_ = new Label();
-                String fieldName = fieldReaderArray[i].fieldName;
-                long hashCode64 = fieldReaderArray[i].fieldNameHashLCase;
+                Label next_ = new Label();
+                long hashCode64 = hashExtractor.applyAsLong(fieldReaderArray[i]);
 
                 mw.lload(HASH_CODE_64);
                 mw.visitLdcInsn(hashCode64);
                 mw.lcmp();
                 mw.ifne(next_);
 
-                mw.visitLabel(get_);
                 mw.aload(THIS);
                 mw.getfield(context.classNameType, fieldReader(i), DESC_FIELD_READER);
                 mw.goto_(rtnlt);
@@ -1197,24 +1081,13 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(hashCode64Start);
 
-        int min = 0;
-        int max = 0;
-        for (FieldReader fieldReader : fieldReaderArray) {
-            int length = fieldReader.fieldName.length();
-            if (min == 0) {
-                min = length;
-            } else {
-                min = Math.min(min, length);
-            }
-            max = Math.max(max, length);
-        }
         String typeKey = context.objectReaderAdapter.typeKey;
         int typeKeyLength = typeKey == null ? 5 : typeKey.length();
 
         mw.aload(JSON_READER);
         mw.iconst_n(typeKeyLength);
-        mw.iconst_n(min);
-        mw.iconst_n(max);
+        mw.iconst_n(context.fieldNameCharLengthMin);
+        mw.iconst_n(context.fieldNameCharLengthMax);
         mw.invokevirtual(TYPE_JSON_READER, fieldReaderArray.length <= 2 ? "readFieldNameHashCodeE" : "readFieldNameHashCode", "(III)J");
 
         mw.dup2();
@@ -1269,22 +1142,8 @@ public class ObjectReaderCreatorASM
             // continue
         } else if (fieldReaderArray.length > 6) {
             // use switch
-            Map<Integer, List<Long>> map = new TreeMap();
-
-            for (int i = 0; i < objectReaderAdapter.hashCodes.length; i++) {
-                long hashCode64 = objectReaderAdapter.hashCodes[i];
-                int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
-                List<Long> hashCode64List = map.computeIfAbsent(hashCode32, k -> new ArrayList<>());
-                hashCode64List.add(hashCode64);
-            }
-            int[] hashCode32Keys = new int[map.size()];
-            {
-                int off = 0;
-                for (Integer key : map.keySet()) {
-                    hashCode32Keys[off++] = key;
-                }
-            }
-            Arrays.sort(hashCode32Keys);
+            Map<Integer, List<Long>> map = new TreeMap<>();
+            int[] hashCode32Keys = buildHashCode32Map(objectReaderAdapter.hashCodes, map);
 
             // int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
             mw.lload(HASH_CODE64);
@@ -1937,24 +1796,13 @@ public class ObjectReaderCreatorASM
              *     break;
              * }
              */
-            int min = 0;
-            int max = 0;
-            for (FieldReader fieldReader : fieldReaderArray) {
-                int length = fieldReader.fieldName.length();
-                if (min == 0) {
-                    min = length;
-                } else {
-                    min = Math.min(min, length);
-                }
-                max = Math.max(max, length);
-            }
             String typeKey = context.objectReaderAdapter.typeKey;
             int typeKeyLength = typeKey == null ? 5 : typeKey.length();
 
             mw.aload(JSON_READER);
             mw.iconst_n(typeKeyLength);
-            mw.iconst_n(min);
-            mw.iconst_n(max);
+            mw.iconst_n(context.fieldNameCharLengthMin);
+            mw.iconst_n(context.fieldNameCharLengthMax);
             mw.invokevirtual(TYPE_JSON_READER, fieldReaderArray.length <= 2 ? "readFieldNameHashCodeE" : "readFieldNameHashCode", "(III)J");
             mw.dup2();
             mw.lstore(HASH_CODE64);
@@ -2012,22 +1860,8 @@ public class ObjectReaderCreatorASM
             mw.goto_(L_FOR_INC); // continue
         } else if (fieldReaderArray.length > 6) {
             // use switch
-            Map<Integer, List<Long>> map = new TreeMap();
-
-            for (int i = 0; i < context.objectReaderAdapter.hashCodes.length; i++) {
-                long hashCode64 = context.objectReaderAdapter.hashCodes[i];
-                int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
-                List<Long> hashCode64List = map.computeIfAbsent(hashCode32, k -> new ArrayList<>());
-                hashCode64List.add(hashCode64);
-            }
-            int[] hashCode32Keys = new int[map.size()];
-            {
-                int off = 0;
-                for (Integer key : map.keySet()) {
-                    hashCode32Keys[off++] = key;
-                }
-            }
-            Arrays.sort(hashCode32Keys);
+            Map<Integer, List<Long>> map = new TreeMap<>();
+            int[] hashCode32Keys = buildHashCode32Map(context.objectReaderAdapter.hashCodes, map);
 
             // int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
             mw.lload(HASH_CODE64);
@@ -4274,6 +4108,8 @@ public class ObjectReaderCreatorASM
         final boolean hasStringField;
         final int fieldNameLengthMin;
         final int fieldNameLengthMax;
+        final int fieldNameCharLengthMin;
+        final int fieldNameCharLengthMax;
         final String classNameType;
         final String classNameFull;
         final Constructor defaultConstructor;
@@ -4298,11 +4134,21 @@ public class ObjectReaderCreatorASM
             this.objectType = objectClass == null ? ASMUtils.TYPE_OBJECT : ASMUtils.type(objectClass);
 
             int fieldNameLengthMin = 0, fieldNameLengthMax = 0;
+            int charLenMin = 0, charLenMax = 0;
             boolean hasStringField = false;
             for (int i = 0; i < fieldReaders.length; i++) {
                 FieldReader fieldReader = fieldReaders[i];
                 if (fieldReader.fieldClass == String.class) {
                     hasStringField = true;
+                }
+
+                int charLen = fieldReader.fieldName.length();
+                if (i == 0) {
+                    charLenMin = charLen;
+                    charLenMax = charLen;
+                } else {
+                    charLenMin = Math.min(charLen, charLenMin);
+                    charLenMax = Math.max(charLen, charLenMax);
                 }
 
                 byte[] nameUTF8 = fieldReader.fieldName.getBytes(StandardCharsets.UTF_8);
@@ -4325,6 +4171,8 @@ public class ObjectReaderCreatorASM
             this.hasStringField = hasStringField;
             this.fieldNameLengthMin = fieldNameLengthMin;
             this.fieldNameLengthMax = fieldNameLengthMax;
+            this.fieldNameCharLengthMin = charLenMin;
+            this.fieldNameCharLengthMax = charLenMax;
 
             String className = "ORG_" + seed.incrementAndGet() + "_" + fieldReaders.length + (objectClass == null ? "" : "_" + objectClass.getSimpleName());
 
