@@ -2155,6 +2155,7 @@ public class TypeUtils {
     }
 
     public static int parseInt(char[] chars, int off, int len) {
+        int start = off;
         int max = off + len;
         int fc = chars[off++];
         int result = IOUtils.isDigit(fc)
@@ -2180,10 +2181,11 @@ public class TypeUtils {
                 & (Integer.MIN_VALUE < result || fc == '-')) {
             return fc == '-' ? result : -result;
         }
-        throw new NumberFormatException("parseInt error " + new String(chars, off, len));
+        throw new NumberFormatException("parseInt error " + new String(chars, start, len));
     }
 
     public static long parseLong(byte[] bytes, int off, int len) {
+        int start = off;
         int max = off + len;
         int fc = bytes[off++];
         long result = IOUtils.isDigit(fc)
@@ -2209,10 +2211,11 @@ public class TypeUtils {
                 & (Long.MIN_VALUE < result || fc == '-')) {
             return fc == '-' ? result : -result;
         }
-        throw new NumberFormatException("parseInt error " + new String(bytes, off, len));
+        throw new NumberFormatException("parseInt error " + new String(bytes, start, len));
     }
 
     public static long parseLong(char[] chars, int off, int len) {
+        int start = off;
         int max = off + len;
         int fc = chars[off++];
         long result = IOUtils.isDigit(fc)
@@ -2238,7 +2241,7 @@ public class TypeUtils {
                 & (Long.MIN_VALUE < result || fc == '-')) {
             return fc == '-' ? result : -result;
         }
-        throw new NumberFormatException("parseInt error " + new String(chars, off, len));
+        throw new NumberFormatException("parseInt error " + new String(chars, start, len));
     }
 
     public static BigDecimal parseBigDecimal(char[] bytes, int off, int len) {
