@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -80,6 +81,7 @@ public class ObjectReaderCreatorASMRefactorTest {
     }
 
     @Test
+    @DisabledIfSystemProperty(named = "fastjson2.creator", matches = "reflect")
     public void testSuperClassSelection() {
         // 1 field -> ObjectReader1
         ObjectReader<?> reader1 = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Fields1.class);
@@ -399,6 +401,7 @@ public class ObjectReaderCreatorASMRefactorTest {
     }
 
     @Test
+    @DisabledIfSystemProperty(named = "fastjson2.creator", matches = "reflect")
     public void testClientSuperClass() {
         ObjectReader<?> reader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Client.class);
         // 20 fields -> ObjectReaderAdapter
@@ -529,6 +532,7 @@ public class ObjectReaderCreatorASMRefactorTest {
     // ============================================================
 
     @Test
+    @DisabledIfSystemProperty(named = "fastjson2.creator", matches = "reflect")
     public void testPartnerLe6() {
         ObjectReader<?> reader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Partner.class);
         assertEquals("ObjectReader3", reader.getClass().getSuperclass().getSimpleName());
