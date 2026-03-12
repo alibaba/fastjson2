@@ -38,6 +38,39 @@ public class ObjectWriterCreatorASM
     protected static final AtomicLong seed = new AtomicLong();
     protected final DynamicClassLoader classLoader;
 
+    /**
+     * Sanitizes a class simple name for use in generated ASM class names.
+     * Array types like "Class[]" become "ClassArray", and any other invalid
+     * characters are replaced with underscores.
+     */
+    static String sanitizeClassName(String simpleName) {
+        if (simpleName == null || simpleName.isEmpty()) {
+            return "";
+        }
+        // Handle array types like "Class[]" -> "ClassArray"
+        if (simpleName.endsWith("[]")) {
+            String baseName = simpleName.substring(0, simpleName.length() - 2);
+            return sanitizeClassName(baseName) + "Array";
+        }
+        // Replace any characters that are invalid in class names
+        StringBuilder sb = null;
+        for (int i = 0; i < simpleName.length(); i++) {
+            char c = simpleName.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
+                if (sb != null) {
+                    sb.append(c);
+                }
+            } else {
+                if (sb == null) {
+                    sb = new StringBuilder(simpleName.length());
+                    sb.append(simpleName, 0, i);
+                }
+                sb.append('_');
+            }
+        }
+        return sb != null ? sb.toString() : simpleName;
+    }
+
     static final String[] INTERFACES = {TYPE_OBJECT_WRITER};
 
     static final String DESC_SYMBOL = desc(SymbolTable.class);
@@ -471,7 +504,7 @@ public class ObjectWriterCreatorASM
 
         ClassWriter cw = new ClassWriter(null);
 
-        String className = "OWG_" + seed.incrementAndGet() + "_" + fieldWriters.size() + (objectClass == null ? "" : ("_" + objectClass.getSimpleName()));
+        String className = "OWG_" + seed.incrementAndGet() + "_" + fieldWriters.size() + (objectClass == null ? "" : ("_" + sanitizeClassName(objectClass.getSimpleName())));
         String classNameType;
         String classNameFull;
 
@@ -4636,7 +4669,7 @@ public class ObjectWriterCreatorASM
 
             ClassWriter cw = new ClassWriter(null);
 
-            String className = "OWF_" + seed.incrementAndGet() + "_" + fieldWriters.size() + "_" + itemClass.getSimpleName();
+            String className = "OWF_" + seed.incrementAndGet() + "_" + fieldWriters.size() + "_" + sanitizeClassName(itemClass.getSimpleName());
             String classNameType;
             String classNameFull;
 
