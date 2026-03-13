@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.util;
 import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -18,6 +19,7 @@ import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID;
 import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class DateUtilsTest {
     Locale locale;
     @BeforeEach

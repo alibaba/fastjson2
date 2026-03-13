@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2_vo.Int1;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("jsonpath")
 public class JSONPath_9 {
     @Test
     public void test_remove_error() throws Exception {

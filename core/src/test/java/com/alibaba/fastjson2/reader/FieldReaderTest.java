@@ -1,12 +1,16 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -23,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("reader")
 public class FieldReaderTest {
     @Test
     public void test() {

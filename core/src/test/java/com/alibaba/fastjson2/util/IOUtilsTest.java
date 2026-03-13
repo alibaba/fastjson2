@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -10,6 +11,7 @@ import java.util.Random;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class IOUtilsTest {
     @Test
     public void size() {
@@ -552,5 +554,57 @@ public class IOUtilsTest {
         byte[] bytes6 = "abc123def".getBytes(StandardCharsets.UTF_8);
         assertTrue(IOUtils.isNumber(bytes6, 3, 3)); // "123" part
         assertFalse(IOUtils.isNumber(bytes6, 0, bytes6.length)); // entire string
+    }
+
+    @Test
+    public void regionMatches_prefixAtEnd() {
+        // Bug #2: regionMatches used >= instead of >, rejecting valid match at array end
+        byte[] bytes = "base64".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.regionMatches(bytes, 0, "base64"),
+                "should match when prefix covers exactly the whole array");
+
+        byte[] bytes2 = "xxbase64".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.regionMatches(bytes2, 2, "base64"),
+                "should match when prefix ends exactly at array end");
+
+        // Still works for normal cases
+        byte[] bytes3 = "base64,data".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.regionMatches(bytes3, 0, "base64"));
+
+        // Still rejects overflow
+        byte[] bytes4 = "base6".getBytes(StandardCharsets.UTF_8);
+        assertFalse(IOUtils.regionMatches(bytes4, 0, "base64"),
+                "should reject when prefix extends beyond array");
+
+        // Still rejects mismatch
+        byte[] bytes5 = "base65".getBytes(StandardCharsets.UTF_8);
+        assertFalse(IOUtils.regionMatches(bytes5, 0, "base64"));
+    }
+
+    @Test
+    public void parseInt_errorMessageShowsOriginalInput() {
+        // Bug #4: parseInt used mutated off in error message, causing wrong substring or AIOOBE
+        byte[] buf = "12abc".getBytes(StandardCharsets.UTF_8);
+        NumberFormatException ex = assertThrows(NumberFormatException.class,
+                () -> IOUtils.parseInt(buf, 0, buf.length));
+        // The error message should contain the original input "12abc", not a shifted substring
+        assertEquals("12abc", ex.getMessage());
+    }
+
+    @Test
+    public void parseInt_errorMessageWithOffset() {
+        // Test with non-zero starting offset
+        byte[] buf = "xx99xyz".getBytes(StandardCharsets.UTF_8);
+        NumberFormatException ex = assertThrows(NumberFormatException.class,
+                () -> IOUtils.parseInt(buf, 2, 5));  // "99xyz"
+        assertEquals("99xyz", ex.getMessage());
+    }
+
+    @Test
+    public void parseInt_errorMessageSingleCharNonDigit() {
+        byte[] buf = "a".getBytes(StandardCharsets.UTF_8);
+        NumberFormatException ex = assertThrows(NumberFormatException.class,
+                () -> IOUtils.parseInt(buf, 0, 1));
+        assertEquals("a", ex.getMessage());
     }
 }

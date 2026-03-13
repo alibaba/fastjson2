@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -8,6 +9,7 @@ import java.util.Arrays;
 import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("writer")
 public class JSONWriterUTF8JDK9Test {
     @Test
     public void test_writeString_1() {

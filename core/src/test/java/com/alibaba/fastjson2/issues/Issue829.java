@@ -4,12 +4,15 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.annotation.JSONType;
 import lombok.Getter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+@Tag("regression")
+@Tag("annotation")
 public class Issue829 {
     @Test
     public void test() {

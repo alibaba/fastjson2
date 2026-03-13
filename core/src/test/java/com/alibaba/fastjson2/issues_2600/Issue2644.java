@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -13,6 +14,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("compat-jackson")
 public class Issue2644 {
     final ObjectMapper mapper = new ObjectMapper();
 

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.DateUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -14,6 +15,7 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("reader")
 public class FieldReaderDateTest {
     @Test
     public void test() throws Exception {

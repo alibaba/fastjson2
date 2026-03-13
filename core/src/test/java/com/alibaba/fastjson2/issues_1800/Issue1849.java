@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues_1800;
 
 import com.alibaba.fastjson2.support.csv.CSVReader;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
 public class Issue1849 {
     static final String str = "\"Indosat\",\"JAN6B41111111111\",\"1111111111\",\"1\",\"成功\",\"\",\"\",\"3\",\"3\",\"6\",\"1365000\",\"11\",\"15015000\"\n" +
             "\"Indosat\",\"JAZ6A72222222222\",\"2222222222\",\"1\",\"失败\",\"3\",\"IOT_SHell_Login: err: connect rt:-215\",\"\",\"\",\"\",\"\",\"\",\"\"\n";

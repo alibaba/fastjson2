@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;
@@ -13,6 +14,7 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("compat-jackson")
 public class JsonFormatTest {
     @Test
     public void test() {

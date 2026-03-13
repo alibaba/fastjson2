@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.dubbo;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
 import com.alibaba.fastjson2.util.DateUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -10,6 +11,7 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("integration")
 public class DubboTest7 {
     static final JSONWriter.Feature[] writerFeatures = {
             JSONWriter.Feature.WriteClassName,

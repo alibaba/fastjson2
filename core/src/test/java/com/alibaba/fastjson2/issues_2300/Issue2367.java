@@ -10,6 +10,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -19,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+@Tag("regression")
+@Tag("autotype")
 public class Issue2367 {
     @Data
     public static final class AttributeKey<T extends Serializable>

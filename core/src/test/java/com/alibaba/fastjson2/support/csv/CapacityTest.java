@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.support.csv;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.Random;
 
+@Tag("util")
 public class CapacityTest {
     @Test
     public void writeString_utf16() throws Exception {

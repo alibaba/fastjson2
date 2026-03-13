@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues_2100;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author 张治保
  * @since 2024/1/6
  */
+@Tag("regression")
+@Tag("annotation")
 public class Issue2154 {
     // failure
     @Test

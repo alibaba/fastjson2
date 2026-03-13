@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("autotype")
 public class AutoTypeTest0 {
     @Test
     public void test_0() throws Exception {

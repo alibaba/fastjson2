@@ -1948,7 +1948,7 @@ final class JSONWriterUTF8
         boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
         int off = this.off;
-        int minCapacity = off + values.length * (writeAsString ? 16 : 18) + 1;
+        int minCapacity = off + values.length * 18 + 2;
         byte[] bytes = this.bytes;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);

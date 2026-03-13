@@ -785,6 +785,9 @@ class JSONPathParser {
         }
         if (operator == null) {
             if (parentheses && jsonReader.nextIfMatch(')')) {
+                if (function instanceof JSONPathFunction.FilterFunction) {
+                    return new JSONPathFilter.NameSubFilterSegment(fieldName, hashCode, fieldName2, hashCode2, ((JSONPathFunction.FilterFunction) function).filter);
+                }
                 return new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
             }
             operator = JSONPath.parseOperator(jsonReader);

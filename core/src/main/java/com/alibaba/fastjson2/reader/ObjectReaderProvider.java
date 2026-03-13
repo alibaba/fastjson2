@@ -196,7 +196,7 @@ public class ObjectReaderProvider
     boolean disableAutoType = JSONFactory.isDisableAutoType();
     boolean disableSmartMatch = JSONFactory.isDisableSmartMatch();
 
-    private long[] acceptHashCodes;
+    private volatile long[] acceptHashCodes;
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
     private Consumer<Class> autoTypeHandler = DEFAULT_AUTO_TYPE_HANDLER;
@@ -253,13 +253,14 @@ public class ObjectReaderProvider
      *
      * @param name the type name to add to the accept list
      */
-    public void addAutoTypeAccept(String name) {
+    public synchronized void addAutoTypeAccept(String name) {
         if (name != null && name.length() != 0) {
             long hash = Fnv.hashCode64(name);
-            if (Arrays.binarySearch(this.acceptHashCodes, hash) < 0) {
-                long[] hashCodes = new long[this.acceptHashCodes.length + 1];
+            long[] current = this.acceptHashCodes;
+            if (Arrays.binarySearch(current, hash) < 0) {
+                long[] hashCodes = new long[current.length + 1];
                 hashCodes[hashCodes.length - 1] = hash;
-                System.arraycopy(this.acceptHashCodes, 0, hashCodes, 0, this.acceptHashCodes.length);
+                System.arraycopy(current, 0, hashCodes, 0, current.length);
                 Arrays.sort(hashCodes);
                 this.acceptHashCodes = hashCodes;
             }
@@ -354,7 +355,7 @@ public class ObjectReaderProvider
                 if (cache.containsKey(superClass)) {
                     cache.put(superClass, readerSeeAlsoNew);
                 } else {
-                    cacheFieldBased.put(subTypeClass, readerSeeAlsoNew);
+                    cacheFieldBased.put(superClass, readerSeeAlsoNew);
                 }
             }
         }
@@ -862,7 +863,9 @@ public class ObjectReaderProvider
                         throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
                     }
 
-                    afterAutoType(typeName, clazz);
+                    if (clazz != null) {
+                        afterAutoType(typeName, clazz);
+                    }
                     return clazz;
                 }
             }
@@ -908,7 +911,9 @@ public class ObjectReaderProvider
             }
         }
 
-        afterAutoType(typeName, clazz);
+        if (clazz != null) {
+            afterAutoType(typeName, clazz);
+        }
         return clazz;
     }
 

@@ -2,10 +2,12 @@ package com.alibaba.fastjson2.gson;
 
 import com.alibaba.fastjson2.JSON;
 import com.google.gson.annotations.SerializedName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("compat-gson")
 public class SerializedNameTest {
     @Test
     public void test() {

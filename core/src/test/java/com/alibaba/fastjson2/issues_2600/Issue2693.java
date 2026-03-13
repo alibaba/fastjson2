@@ -6,6 +6,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -15,6 +16,8 @@ import java.util.Map;
  * @author 张治保
  * @since 2024/6/12
  */
+@Tag("regression")
+@Tag("autotype")
 public class Issue2693 {
     @Test
     @SneakyThrows

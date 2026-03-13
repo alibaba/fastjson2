@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplFromString;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2_vo.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
@@ -20,6 +21,7 @@ import java.util.*;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("reader")
 public class JSONReaderTest1 {
     @Test
     public void test() {
