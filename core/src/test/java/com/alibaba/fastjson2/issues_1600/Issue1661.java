@@ -5,10 +5,13 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.BeanContext;
 import com.alibaba.fastjson2.filter.ContextValueFilter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("jsonb")
 public class Issue1661 {
     @Test
     public void test() throws Exception {

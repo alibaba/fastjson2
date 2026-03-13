@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -12,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @Author ：Nanqi
  * @Date ：Created in 21:54 2020/6/30
  */
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue3313 {
     @Test
     public void test_for_issue() throws Exception {

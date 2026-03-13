@@ -5,10 +5,12 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("compat-jackson")
 public class JsonTypeInfoTest {
     @Test
     public void test() throws Exception {

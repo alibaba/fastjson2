@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues_2400;
 
 import com.alibaba.fastjson.JSON;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.EnumMap;
@@ -11,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("regression")
 public class Issue2423 {
     @Test
     void test() {

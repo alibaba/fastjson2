@@ -2,10 +2,13 @@ package com.alibaba.fastjson2.issues_1700;
 
 import com.alibaba.fastjson2.JSON;
 import org.joda.time.DateTime;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
+@Tag("regression")
+@Tag("date")
 public class Issue1770 {
     @Test
     public void test() {

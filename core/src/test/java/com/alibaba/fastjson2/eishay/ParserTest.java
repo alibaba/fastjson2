@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.eishay.vo.Media;
 import com.alibaba.fastjson2.eishay.vo.MediaContent;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaders;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import static com.alibaba.fastjson2.reader.ObjectReaders.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("benchmark")
 public class ParserTest {
     ObjectReader<MediaContent> mediaContentConsumer;
 

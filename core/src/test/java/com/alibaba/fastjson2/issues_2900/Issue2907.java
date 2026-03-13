@@ -1,12 +1,16 @@
 package com.alibaba.fastjson2.issues_2900;
 
 import com.alibaba.fastjson2.JSONB;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("regression")
+@Tag("jsonb")
+@Tag("date")
 public class Issue2907 {
     @Test
     public void test() {

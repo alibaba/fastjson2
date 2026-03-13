@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.support.csv;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.reader.ByteArrayValueConsumer;
 import com.alibaba.fastjson2.reader.CharArrayValueConsumer;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;
@@ -12,6 +13,7 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@Tag("util")
 public class CSVReaderTest3 {
     @Test
     public void test() {

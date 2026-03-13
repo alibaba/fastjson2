@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues_3900;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("regression")
 public class Issue3918 {
     @Test
     public void testUnquotedKeyWithExistingField() {

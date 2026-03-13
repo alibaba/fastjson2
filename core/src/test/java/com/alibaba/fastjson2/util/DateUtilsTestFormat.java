@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.*;
@@ -16,6 +17,7 @@ import java.util.Locale;
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class DateUtilsTestFormat {
     Locale locale;
     @BeforeEach

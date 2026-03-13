@@ -2,12 +2,16 @@ package com.alibaba.fastjson2.issues_2200;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("jsonb")
+@Tag("autotype")
 public class Issue2279 {
     @Test
     public void test01() {

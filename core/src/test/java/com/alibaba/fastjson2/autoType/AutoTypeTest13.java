@@ -4,12 +4,14 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.Differ;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Currency;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("autotype")
 public class AutoTypeTest13 {
     @Test
     public void test_0() throws Exception {

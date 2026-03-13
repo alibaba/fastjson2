@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
@@ -15,6 +16,7 @@ import java.lang.reflect.Type;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("writer")
 public class ObjectWriterProviderTest {
     @Test
     public void testWriter() {

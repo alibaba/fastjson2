@@ -2462,7 +2462,7 @@ public class IOUtils {
      */
     public static boolean regionMatches(byte[] bytes, int off, String prefix) {
         int len = prefix.length();
-        if (off + len >= bytes.length) {
+        if (off + len > bytes.length) {
             return false;
         }
         for (int i = 0; i < len; i++) {
@@ -3078,6 +3078,7 @@ public class IOUtils {
      * @throws NumberFormatException if the byte array segment does not contain a valid integer representation
      */
     public static int parseInt(byte[] buf, int off, int len) {
+        int start = off;
         int fc = buf[off];
         int result = isDigitLatin1(fc)
                 ? '0' - fc
@@ -3104,6 +3105,6 @@ public class IOUtils {
                 & (Integer.MIN_VALUE < result || fc == '-')) {
             return fc == '-' ? result : -result;
         }
-        throw new NumberFormatException(new String(buf, off, len));
+        throw new NumberFormatException(new String(buf, start, len));
     }
 }

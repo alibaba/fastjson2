@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import lombok.Getter;
 import lombok.Setter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -15,6 +16,8 @@ import java.util.Objects;
 import static com.alibaba.fastjson2.issues_2700.Issue2726.ElementType.DIV;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("annotation")
 public class Issue2726 {
     @Test
     public void test() {

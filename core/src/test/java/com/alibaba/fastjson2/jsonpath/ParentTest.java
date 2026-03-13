@@ -1,10 +1,12 @@
 package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.JSONPath;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("jsonpath")
 public class ParentTest {
     @Test
     public void test() {

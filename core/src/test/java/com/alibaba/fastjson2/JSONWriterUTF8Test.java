@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONWriter.Context;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.StringUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -18,6 +19,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("writer")
 public class JSONWriterUTF8Test {
     @Test
     public void test_writeString() {

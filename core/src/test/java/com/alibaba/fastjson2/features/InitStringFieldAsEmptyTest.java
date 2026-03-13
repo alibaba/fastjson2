@@ -3,12 +3,14 @@ package com.alibaba.fastjson2.features;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("features")
 public class InitStringFieldAsEmptyTest {
     @Test
     public void test() throws Exception {

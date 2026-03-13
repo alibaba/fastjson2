@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.internal.asm.ClassWriter;
 import com.alibaba.fastjson2.internal.asm.MethodWriter;
 import com.alibaba.fastjson2.internal.asm.Opcodes;
 import com.alibaba.fastjson2.util.DynamicClassLoader;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("codec")
 public class NameTest {
     DynamicClassLoader classLoader = DynamicClassLoader.getInstance();
     String[] names = new String[256];

@@ -3,12 +3,14 @@ package com.alibaba.fastjson2.jsonpath;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("jsonpath")
 public class JSONPathSetTest {
     @Test
     public void test_for_issue() throws Exception {

@@ -3,10 +3,12 @@ package com.alibaba.fastjson2.jackson_support;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("compat-jackson")
 public class JsonPropertyTest2 {
     @Test
     public void test() {
