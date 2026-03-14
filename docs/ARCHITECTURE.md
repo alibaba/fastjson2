@@ -63,10 +63,10 @@ fastjson2/
 │   └──────────────┘  └──────────────┘  └──────────────────┘      │
 │                                                                  │
 │   ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐      │
-│   │  JSONPath     │  │  Support     │  │  Introspect      │      │
+│   │  JSONPath     │  │  Support     │  │  Utilities       │      │
 │   │  Segment     │  │  CSV         │  │  BeanUtils       │      │
-│   │  Filter      │  │  GeoJSON     │  │  FieldInfo       │      │
-│   │  Parser      │  │  Retrofit    │  │  TypeUtils       │      │
+│   │  Filter      │  │  GeoJSON     │  │  TypeUtils       │      │
+│   │  Parser      │  │  Retrofit    │  │  FieldInfo       │      │
 │   └──────────────┘  └──────────────┘  └──────────────────┘      │
 └──────────────────────────────────────────────────────────────────┘
 ```
@@ -201,7 +201,7 @@ Serialization filters applied during the write phase:
 ### Strategy Pattern
 - `JSONReader` implementations for different encodings (UTF-8, UTF-16, ASCII, JSONB)
 - `JSONWriter` implementations for different output formats
-- `ObjectReaderCreator` variants (ASM, Lambda, Reflect) selected by environment
+- `ObjectReaderCreator` (base, uses Lambda/reflection) and `ObjectReaderCreatorASM` (bytecode) selected by environment
 
 ### Visitor Pattern
 - `JSONPath` segment traversal through document structure
@@ -309,7 +309,7 @@ core (JDK 8+)
 ## Build System
 
 - **Build tool**: Maven with multi-module structure
-- **Java baseline**: JDK 8 (core), JDK 11 (core-jdk11)
+- **Java baseline**: JDK 8 (core)
 - **Kotlin**: Version 2.1.20
 - **ASM**: Embedded internally in `com.alibaba.fastjson2.internal.asm` (for bytecode generation)
 - **Testing**: JUnit 5, Kotest (Kotlin module)

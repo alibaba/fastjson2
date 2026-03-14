@@ -20,7 +20,7 @@ Yes. Because they use different package names (`com.alibaba.fastjson2` vs `com.a
 ### What Java versions are supported?
 
 - **Core library**: Java 8+
-- **Full feature set**: Java 11+ (for `core-jdk11` module with compact string optimizations)
+- **Full feature set**: Java 11+ (compact string optimizations)
 - **Vector API optimizations**: Java 17+
 - **Android**: Android 8+ (API level 26+)
 
