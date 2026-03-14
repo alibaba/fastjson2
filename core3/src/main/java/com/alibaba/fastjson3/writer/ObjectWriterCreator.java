@@ -28,14 +28,18 @@ public final class ObjectWriterCreator {
      * @return a new ObjectWriter that serializes instances of the given type
      */
     public static <T> ObjectWriter<T> createObjectWriter(Class<T> type) {
-        if (com.alibaba.fastjson3.util.JDKUtils.isRecord(type)) {
-            return createRecordWriter(type);
-        }
-
-        return createPojoWriter(type);
+        return createObjectWriter(type, null);
     }
 
-    private static <T> ObjectWriter<T> createRecordWriter(Class<T> type) {
+    public static <T> ObjectWriter<T> createObjectWriter(Class<T> type, Class<?> mixIn) {
+        if (com.alibaba.fastjson3.util.JDKUtils.isRecord(type)) {
+            return createRecordWriter(type, mixIn);
+        }
+
+        return createPojoWriter(type, mixIn);
+    }
+
+    private static <T> ObjectWriter<T> createRecordWriter(Class<T> type, Class<?> mixIn) {
         JSONType jsonType = type.getAnnotation(JSONType.class);
         NamingStrategy naming = jsonType != null ? jsonType.naming() : NamingStrategy.NoneStrategy;
         Set<String> includes = jsonType != null ? Set.of(jsonType.includes()) : Set.of();
@@ -58,6 +62,10 @@ public final class ObjectWriterCreator {
             }
 
             JSONField jsonField = accessor.getAnnotation(JSONField.class);
+            // Check mixin for annotation
+            if (jsonField == null && mixIn != null) {
+                jsonField = findMixInAnnotation(mixIn, accessor, propertyName, JSONField.class);
+            }
             // Also check field-level annotation
             if (jsonField == null) {
                 try {
@@ -65,6 +73,10 @@ public final class ObjectWriterCreator {
                     jsonField = f.getAnnotation(JSONField.class);
                 } catch (NoSuchFieldException ignored) {
                 }
+            }
+            // Check mixin field annotation
+            if (jsonField == null && mixIn != null) {
+                jsonField = findMixInFieldAnnotation(mixIn, propertyName, JSONField.class);
             }
             if (jsonField != null && !jsonField.serialize()) {
                 continue;
@@ -110,7 +122,7 @@ public final class ObjectWriterCreator {
         return buildObjectWriter(writers);
     }
 
-    private static <T> ObjectWriter<T> createPojoWriter(Class<T> type) {
+    private static <T> ObjectWriter<T> createPojoWriter(Class<T> type, Class<?> mixIn) {
         JSONType jsonType = type.getAnnotation(JSONType.class);
         NamingStrategy naming = jsonType != null ? jsonType.naming() : NamingStrategy.NoneStrategy;
         Set<String> includes = jsonType != null ? Set.of(jsonType.includes()) : Set.of();
@@ -140,6 +152,10 @@ public final class ObjectWriterCreator {
             }
 
             JSONField jsonField = method.getAnnotation(JSONField.class);
+            // Check mixin for getter annotation
+            if (jsonField == null && mixIn != null) {
+                jsonField = findMixInAnnotation(mixIn, method, propertyName, JSONField.class);
+            }
             if (jsonField != null && !jsonField.serialize()) {
                 continue;
             }
@@ -163,6 +179,10 @@ public final class ObjectWriterCreator {
                     Field f = findDeclaredField(type, propertyName);
                     if (f != null) {
                         JSONField fieldAnnotation = f.getAnnotation(JSONField.class);
+                        // Also check mixin field
+                        if (fieldAnnotation == null && mixIn != null) {
+                            fieldAnnotation = findMixInFieldAnnotation(mixIn, propertyName, JSONField.class);
+                        }
                         if (fieldAnnotation != null) {
                             if (!fieldAnnotation.serialize()) {
                                 continue;
@@ -208,6 +228,10 @@ public final class ObjectWriterCreator {
             }
 
             JSONField jsonField = field.getAnnotation(JSONField.class);
+            // Check mixin for field annotation
+            if (jsonField == null && mixIn != null) {
+                jsonField = findMixInFieldAnnotation(mixIn, propertyName, JSONField.class);
+            }
             if (jsonField != null && !jsonField.serialize()) {
                 continue;
             }
@@ -405,6 +429,63 @@ public final class ObjectWriterCreator {
             } catch (NoSuchFieldException e) {
                 current = current.getSuperclass();
             }
+        }
+        return null;
+    }
+
+    // ==================== Mixin support ====================
+
+    /**
+     * Find an annotation on the corresponding method in the mixin class.
+     * Matches by method name and parameter types.
+     */
+    static <A extends java.lang.annotation.Annotation> A findMixInAnnotation(
+            Class<?> mixIn, Method targetMethod, String propertyName, Class<A> annotationType) {
+        // Try matching method by name and signature
+        for (Method m : mixIn.getMethods()) {
+            if (m.getName().equals(targetMethod.getName())
+                    && m.getParameterCount() == targetMethod.getParameterCount()
+                    && java.util.Arrays.equals(m.getParameterTypes(), targetMethod.getParameterTypes())) {
+                A ann = m.getAnnotation(annotationType);
+                if (ann != null) {
+                    return ann;
+                }
+            }
+        }
+        // Try matching by getter/setter naming convention for the property
+        String getterName = "get" + Character.toUpperCase(propertyName.charAt(0)) + propertyName.substring(1);
+        String isName = "is" + Character.toUpperCase(propertyName.charAt(0)) + propertyName.substring(1);
+        for (Method m : mixIn.getMethods()) {
+            String mn = m.getName();
+            if ((mn.equals(getterName) || mn.equals(isName)) && m.getParameterCount() == 0) {
+                A ann = m.getAnnotation(annotationType);
+                if (ann != null) {
+                    return ann;
+                }
+            }
+        }
+        // Also check declared methods (including non-public in interfaces/abstract classes)
+        for (Method m : mixIn.getDeclaredMethods()) {
+            String mn = m.getName();
+            if ((mn.equals(getterName) || mn.equals(isName)) && m.getParameterCount() == 0) {
+                A ann = m.getAnnotation(annotationType);
+                if (ann != null) {
+                    return ann;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find an annotation on the corresponding field in the mixin class.
+     */
+    static <A extends java.lang.annotation.Annotation> A findMixInFieldAnnotation(
+            Class<?> mixIn, String fieldName, Class<A> annotationType) {
+        try {
+            Field f = mixIn.getDeclaredField(fieldName);
+            return f.getAnnotation(annotationType);
+        } catch (NoSuchFieldException ignored) {
         }
         return null;
     }

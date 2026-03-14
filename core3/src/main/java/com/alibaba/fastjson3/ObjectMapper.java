@@ -13,7 +13,9 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -68,7 +70,8 @@ public final class ObjectMapper {
             Collections.<ObjectReaderModule>emptyList(),
             Collections.<ObjectWriterModule>emptyList(),
             null, null,
-            NO_PROPERTY_FILTERS, NO_VALUE_FILTERS, NO_NAME_FILTERS);
+            NO_PROPERTY_FILTERS, NO_VALUE_FILTERS, NO_NAME_FILTERS,
+            Collections.<Class<?>, Class<?>>emptyMap());
 
     private final long readFeatures;
     private final long writeFeatures;
@@ -85,6 +88,9 @@ public final class ObjectMapper {
     private final ValueFilter[] valueFilters;
     private final NameFilter[] nameFilters;
 
+    // Mixin mappings: target class → mixin source class
+    private final Map<Class<?>, Class<?>> mixInCache;
+
     // Thread-safe caches for ObjectReader/ObjectWriter instances
     private final ConcurrentHashMap<Type, ObjectReader<?>> readerCache;
     private final ConcurrentHashMap<Type, ObjectWriter<?>> writerCache;
@@ -98,7 +104,8 @@ public final class ObjectMapper {
             Function<Class<?>, ObjectWriter<?>> writerCreator,
             PropertyFilter[] propertyFilters,
             ValueFilter[] valueFilters,
-            NameFilter[] nameFilters
+            NameFilter[] nameFilters,
+            Map<Class<?>, Class<?>> mixInCache
     ) {
         this.readFeatures = readFeatures;
         this.writeFeatures = writeFeatures;
@@ -109,6 +116,7 @@ public final class ObjectMapper {
         this.propertyFilters = propertyFilters;
         this.valueFilters = valueFilters;
         this.nameFilters = nameFilters;
+        this.mixInCache = mixInCache;
         this.readerCache = new ConcurrentHashMap<Type, ObjectReader<?>>();
         this.writerCache = new ConcurrentHashMap<Type, ObjectWriter<?>>();
     }
@@ -145,6 +153,7 @@ public final class ObjectMapper {
         Collections.addAll(b.propertyFilters, this.propertyFilters);
         Collections.addAll(b.valueFilters, this.valueFilters);
         Collections.addAll(b.nameFilters, this.nameFilters);
+        b.mixIns.putAll(this.mixInCache);
         return b;
     }
 
@@ -466,7 +475,8 @@ public final class ObjectMapper {
             if (readerCreator != null) {
                 reader = readerCreator.apply(clazz);
             } else {
-                reader = ObjectReaderCreator.createObjectReader(clazz);
+                Class<?> mixIn = mixInCache.get(clazz);
+                reader = ObjectReaderCreator.createObjectReader(clazz, mixIn);
             }
         } catch (Exception e) {
             return null;
@@ -511,7 +521,8 @@ public final class ObjectMapper {
                 if (writerCreator != null) {
                     writer = writerCreator.apply(rawType);
                 } else {
-                    writer = ObjectWriterCreator.createObjectWriter(rawType);
+                    Class<?> mixIn = mixInCache.get(rawType);
+                    writer = ObjectWriterCreator.createObjectWriter(rawType, mixIn);
                 }
             } catch (Exception e) {
                 return null;
@@ -555,6 +566,13 @@ public final class ObjectMapper {
 
     public long getWriteFeatures() {
         return writeFeatures;
+    }
+
+    /**
+     * Get the mixin source class for the given target class, or null if none registered.
+     */
+    public Class<?> getMixIn(Class<?> target) {
+        return mixInCache.get(target);
     }
 
     // ==================== Internal ====================
@@ -777,6 +795,7 @@ public final class ObjectMapper {
         final List<PropertyFilter> propertyFilters = new ArrayList<PropertyFilter>();
         final List<ValueFilter> valueFilters = new ArrayList<ValueFilter>();
         final List<NameFilter> nameFilters = new ArrayList<NameFilter>();
+        final Map<Class<?>, Class<?>> mixIns = new LinkedHashMap<Class<?>, Class<?>>();
 
         Builder() {
         }
@@ -875,6 +894,20 @@ public final class ObjectMapper {
             return this;
         }
 
+        // ---- Mixins ----
+
+        /**
+         * Register a mixin class for a target type. Annotations from the mixin class
+         * will be applied to the target class during serialization/deserialization.
+         *
+         * @param target the target class to augment
+         * @param mixIn  the mixin class providing annotations
+         */
+        public Builder addMixIn(Class<?> target, Class<?> mixIn) {
+            mixIns.put(target, mixIn);
+            return this;
+        }
+
         // ---- Custom readers/writers ----
 
         /**
@@ -908,7 +941,8 @@ public final class ObjectMapper {
                     writerCreator,
                     propertyFilters.toArray(NO_PROPERTY_FILTERS),
                     valueFilters.toArray(NO_VALUE_FILTERS),
-                    nameFilters.toArray(NO_NAME_FILTERS)
+                    nameFilters.toArray(NO_NAME_FILTERS),
+                    Collections.unmodifiableMap(new LinkedHashMap<Class<?>, Class<?>>(mixIns))
             );
             // Initialize modules
             for (ObjectReaderModule module : mapper.readerModules) {

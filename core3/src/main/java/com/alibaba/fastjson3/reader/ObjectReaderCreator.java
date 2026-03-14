@@ -22,15 +22,19 @@ public final class ObjectReaderCreator {
     }
 
     public static <T> ObjectReader<T> createObjectReader(Class<T> type) {
+        return createObjectReader(type, null);
+    }
+
+    public static <T> ObjectReader<T> createObjectReader(Class<T> type, Class<?> mixIn) {
         if (JDKUtils.isRecord(type)) {
             return createRecordReader(type);
         }
 
-        Constructor<T> constructor = resolveConstructor(type);
+        Constructor<T> constructor = resolveConstructor(type, mixIn);
         constructor.setAccessible(true);
         boolean useUnsafeAlloc = JDKUtils.UNSAFE_AVAILABLE;
 
-        FieldReaderCollection collection = collectFieldReaders(type);
+        FieldReaderCollection collection = collectFieldReaders(type, mixIn);
 
         return new ReflectionObjectReader<>(type, constructor, collection.fieldReaders,
                 collection.fieldReaderMap, collection.matcher, useUnsafeAlloc);
@@ -139,6 +143,10 @@ public final class ObjectReaderCreator {
      * Package-private so ObjectReaderCreatorASM can reuse this logic.
      */
     static FieldReaderCollection collectFieldReaders(Class<?> type) {
+        return collectFieldReaders(type, null);
+    }
+
+    static FieldReaderCollection collectFieldReaders(Class<?> type, Class<?> mixIn) {
         JSONType jsonType = type.getAnnotation(JSONType.class);
         NamingStrategy naming = jsonType != null ? jsonType.naming() : NamingStrategy.NoneStrategy;
         Set<String> includes = jsonType != null && jsonType.includes().length > 0
@@ -152,6 +160,10 @@ public final class ObjectReaderCreator {
         // Collect from fields
         for (Field field : getDeclaredFields(type)) {
             JSONField annotation = field.getAnnotation(JSONField.class);
+            // Check mixin for field annotation
+            if (annotation == null && mixIn != null) {
+                annotation = findMixInFieldAnnotation(mixIn, field.getName(), JSONField.class);
+            }
             if (annotation != null && !annotation.deserialize()) {
                 continue;
             }
@@ -198,11 +210,15 @@ public final class ObjectReaderCreator {
             }
 
             JSONField annotation = method.getAnnotation(JSONField.class);
+            // Check mixin for setter annotation
+            String rawName = extractPropertyName(method);
+            if (annotation == null && mixIn != null && rawName != null) {
+                annotation = findMixInSetterAnnotation(mixIn, method, rawName, JSONField.class);
+            }
             if (annotation != null && !annotation.deserialize()) {
                 continue;
             }
 
-            String rawName = extractPropertyName(method);
             if (rawName == null && annotation == null) {
                 continue;
             }
@@ -1220,7 +1236,8 @@ public final class ObjectReaderCreator {
     // ==================== Helper methods ====================
 
     @SuppressWarnings("unchecked")
-    private static <T> Constructor<T> resolveConstructor(Class<T> type) {
+    private static <T> Constructor<T> resolveConstructor(Class<T> type, Class<?> mixIn) {
+        // Check target class constructors
         for (Constructor<?> ctor : type.getDeclaredConstructors()) {
             if (ctor.isAnnotationPresent(JSONCreator.class)) {
                 if (ctor.getParameterCount() == 0) {
@@ -1229,6 +1246,20 @@ public final class ObjectReaderCreator {
                 throw new JSONException(
                         "@JSONCreator with parameters is not yet supported: " + type.getName()
                 );
+            }
+        }
+        // Check mixin constructors for @JSONCreator (match by parameter types)
+        if (mixIn != null) {
+            for (Constructor<?> mixCtor : mixIn.getDeclaredConstructors()) {
+                if (mixCtor.isAnnotationPresent(JSONCreator.class)) {
+                    if (mixCtor.getParameterCount() == 0) {
+                        // Find matching no-arg constructor on target
+                        try {
+                            return type.getDeclaredConstructor();
+                        } catch (NoSuchMethodException ignored) {
+                        }
+                    }
+                }
             }
         }
         try {
@@ -1288,5 +1319,49 @@ public final class ObjectReaderCreator {
             }
         }
         return sb.toString();
+    }
+
+    // ==================== Mixin support ====================
+
+    /**
+     * Find an annotation on the corresponding field in the mixin class.
+     */
+    static <A extends java.lang.annotation.Annotation> A findMixInFieldAnnotation(
+            Class<?> mixIn, String fieldName, Class<A> annotationType) {
+        try {
+            Field f = mixIn.getDeclaredField(fieldName);
+            return f.getAnnotation(annotationType);
+        } catch (NoSuchFieldException ignored) {
+        }
+        return null;
+    }
+
+    /**
+     * Find annotation on the corresponding setter method in the mixin class.
+     */
+    static <A extends java.lang.annotation.Annotation> A findMixInSetterAnnotation(
+            Class<?> mixIn, Method targetMethod, String propertyName, Class<A> annotationType) {
+        // Try matching by exact method signature
+        for (Method m : mixIn.getDeclaredMethods()) {
+            if (m.getName().equals(targetMethod.getName())
+                    && m.getParameterCount() == targetMethod.getParameterCount()
+                    && java.util.Arrays.equals(m.getParameterTypes(), targetMethod.getParameterTypes())) {
+                A ann = m.getAnnotation(annotationType);
+                if (ann != null) {
+                    return ann;
+                }
+            }
+        }
+        // Try matching by setter naming convention
+        String setterName = "set" + Character.toUpperCase(propertyName.charAt(0)) + propertyName.substring(1);
+        for (Method m : mixIn.getDeclaredMethods()) {
+            if (m.getName().equals(setterName) && m.getParameterCount() == 1) {
+                A ann = m.getAnnotation(annotationType);
+                if (ann != null) {
+                    return ann;
+                }
+            }
+        }
+        return null;
     }
 }
