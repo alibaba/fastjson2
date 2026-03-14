@@ -22,6 +22,10 @@ public final class ObjectReaderCreator {
     }
 
     public static <T> ObjectReader<T> createObjectReader(Class<T> type) {
+        if (JDKUtils.isRecord(type)) {
+            return createRecordReader(type);
+        }
+
         Constructor<T> constructor = resolveConstructor(type);
         constructor.setAccessible(true);
         boolean useUnsafeAlloc = JDKUtils.UNSAFE_AVAILABLE;
@@ -30,6 +34,87 @@ public final class ObjectReaderCreator {
 
         return new ReflectionObjectReader<>(type, constructor, collection.fieldReaders,
                 collection.fieldReaderMap, collection.matcher, useUnsafeAlloc);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> ObjectReader<T> createRecordReader(Class<T> type) {
+        String[] componentNames = JDKUtils.getRecordComponentNames(type);
+        Class<?>[] componentTypes = JDKUtils.getRecordComponentTypes(type);
+        java.lang.reflect.Type[] genericTypes = JDKUtils.getRecordComponentGenericTypes(type);
+
+        // Find canonical constructor
+        Constructor<T> constructor;
+        try {
+            constructor = type.getDeclaredConstructor(componentTypes);
+            constructor.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            throw new JSONException("no canonical constructor found for record " + type.getName(), e);
+        }
+
+        // Build FieldReaders from record components
+        JSONType jsonType = type.getAnnotation(JSONType.class);
+        NamingStrategy naming = jsonType != null ? jsonType.naming() : com.alibaba.fastjson3.annotation.NamingStrategy.NoneStrategy;
+
+        List<FieldReader> fieldReaderList = new ArrayList<>();
+        for (int i = 0; i < componentNames.length; i++) {
+            String rawName = componentNames[i];
+            Field field = null;
+            try {
+                field = type.getDeclaredField(rawName);
+                field.setAccessible(true);
+            } catch (NoSuchFieldException ignored) {
+            }
+
+            JSONField annotation = field != null ? field.getAnnotation(JSONField.class) : null;
+            String jsonName = resolveFieldName(rawName, annotation, naming);
+            String[] alternateNames = annotation != null ? annotation.alternateNames() : new String[0];
+            int ordinal = annotation != null ? annotation.ordinal() : 0;
+            String defaultValue = annotation != null ? annotation.defaultValue() : "";
+            boolean required = annotation != null && annotation.required();
+
+            fieldReaderList.add(new FieldReader(
+                    jsonName, alternateNames,
+                    genericTypes[i], componentTypes[i],
+                    ordinal, defaultValue, required,
+                    field, null
+            ));
+        }
+
+        Collections.sort(fieldReaderList);
+
+        FieldReader[] fieldReaders = fieldReaderList.toArray(new FieldReader[0]);
+        FieldNameMatcher matcher = FieldNameMatcher.build(fieldReaders);
+
+        Map<String, FieldReader> fieldReaderMap = HashMap.newHashMap(fieldReaders.length * 2);
+        for (int i = 0; i < fieldReaders.length; i++) {
+            FieldReader fr = fieldReaders[i];
+            fr.index = i;
+            fieldReaderMap.put(fr.fieldName, fr);
+            for (String alt : fr.alternateNames) {
+                fieldReaderMap.putIfAbsent(alt, fr);
+            }
+        }
+
+        FieldReaderCollection collection = new FieldReaderCollection(fieldReaders, matcher, fieldReaderMap);
+
+        // Build component index mapping: fieldReader index → constructor param index
+        // After sorting, fieldReader order may differ from constructor param order
+        int[] paramMapping = new int[fieldReaders.length];
+        for (int i = 0; i < fieldReaders.length; i++) {
+            String name = fieldReaders[i].fieldName;
+            // Find original component index
+            for (int j = 0; j < componentNames.length; j++) {
+                String resolvedName = resolveFieldName(componentNames[j],
+                        null, naming);
+                if (resolvedName.equals(name) || componentNames[j].equals(name)) {
+                    paramMapping[i] = j;
+                    break;
+                }
+            }
+        }
+
+        return new RecordObjectReader<>(type, constructor, collection.fieldReaders,
+                collection.fieldReaderMap, collection.matcher, componentTypes.length, paramMapping);
     }
 
     /**
@@ -892,6 +977,243 @@ public final class ObjectReaderCreator {
                 return Boolean.parseBoolean(defaultValue);
             }
             return defaultValue;
+        }
+    }
+
+    // ==================== Record ObjectReader ====================
+
+    /**
+     * ObjectReader for Java Record types. Records require all component values
+     * to be provided to the canonical constructor — individual field setting is not possible.
+     * This reader uses Unsafe to allocate the instance and set fields directly,
+     * then validates that all required fields were provided.
+     */
+    private static final class RecordObjectReader<T> implements ObjectReader<T> {
+        private final Class<T> objectClass;
+        private final Constructor<T> constructor;
+        private final FieldReader[] fieldReaders;
+        private final Map<String, FieldReader> fieldReaderMap;
+        private final FieldNameMatcher matcher;
+        private final int componentCount;
+        private final int[] paramMapping; // fieldReader index → constructor param index
+
+        private volatile boolean fieldReadersResolved;
+        private ObjectReader<?>[] fieldObjectReaders;
+        private ObjectReader<?>[] fieldElementReaders;
+
+        RecordObjectReader(
+                Class<T> objectClass,
+                Constructor<T> constructor,
+                FieldReader[] fieldReaders,
+                Map<String, FieldReader> fieldReaderMap,
+                FieldNameMatcher matcher,
+                int componentCount,
+                int[] paramMapping
+        ) {
+            this.objectClass = objectClass;
+            this.constructor = constructor;
+            this.fieldReaders = fieldReaders;
+            this.fieldReaderMap = fieldReaderMap;
+            this.matcher = matcher;
+            this.componentCount = componentCount;
+            this.paramMapping = paramMapping;
+        }
+
+        private void ensureFieldReaders() {
+            if (fieldReadersResolved) {
+                return;
+            }
+            ObjectMapper mapper = ObjectMapper.shared();
+            int len = fieldReaders.length;
+            ObjectReader<?>[] objReaders = new ObjectReader<?>[len];
+            ObjectReader<?>[] elemReaders = new ObjectReader<?>[len];
+            for (int i = 0; i < len; i++) {
+                FieldReader fr = fieldReaders[i];
+                if (fr.typeTag == FieldReader.TAG_GENERIC) {
+                    ObjectReader<?> r = mapper.getObjectReader(fr.fieldClass);
+                    if (r != null) {
+                        objReaders[i] = r;
+                        fr.typeTag = FieldReader.TAG_POJO;
+                    }
+                }
+                if (fr.elementClass != null && fr.elementClass != String.class) {
+                    elemReaders[i] = mapper.getObjectReader(fr.elementClass);
+                }
+            }
+            this.fieldElementReaders = elemReaders;
+            this.fieldObjectReaders = objReaders;
+            this.fieldReadersResolved = true;
+        }
+
+        @Override
+        public T readObject(JSONParser parser, java.lang.reflect.Type fieldType, Object fieldName, long features) {
+            ensureFieldReaders();
+            // Handle null
+            parser.skipWS();
+            if (parser.readNull()) {
+                return null;
+            }
+            if (parser instanceof JSONParser.UTF8 utf8) {
+                return readRecordUTF8(utf8, features);
+            }
+            return readRecordGeneric(parser, features);
+        }
+
+        @Override
+        public T readObjectUTF8(JSONParser.UTF8 utf8, long features) {
+            ensureFieldReaders();
+            return readRecordUTF8(utf8, features);
+        }
+
+        @SuppressWarnings("unchecked")
+        private T readRecordUTF8(JSONParser.UTF8 utf8, long features) {
+            int peek = utf8.skipWSAndPeek();
+            if (peek == 'n' && utf8.readNull()) {
+                return null;
+            }
+            if (peek != '{') {
+                throw new JSONException("expected '{' at offset " + utf8.getOffset());
+            }
+            utf8.advance(1);
+
+            peek = utf8.skipWSAndPeek();
+            if (peek == '}') {
+                utf8.advance(1);
+                return constructRecord(new Object[componentCount]);
+            }
+
+            // Collect values into array, then call canonical constructor
+            Object[] values = new Object[componentCount];
+            final FieldNameMatcher m = this.matcher;
+            final boolean errorOnUnknown = (features & ReadFeature.ErrorOnUnknownProperties.mask) != 0;
+            final boolean usePLHV = m.strategy == FieldNameMatcher.STRATEGY_PLHV;
+
+            final byte[] b = utf8.getBytes();
+            int off = utf8.getOffset();
+            int nextExpected = 0;
+            final int frLen = fieldReaders.length;
+
+            for (;;) {
+                FieldReader reader = null;
+
+                // Ordered field speculation
+                if (nextExpected < frLen) {
+                    FieldReader candidate = fieldReaders[nextExpected];
+                    byte[] hdr = candidate.fieldNameHeader;
+                    while (b[off] <= ' ') {
+                        off++;
+                    }
+                    if (b[off] == '"') {
+                        int hdrLen = hdr.length;
+                        boolean match = true;
+                        for (int i = 1; i < hdrLen; i++) {
+                            if (b[off + i] != hdr[i]) {
+                                match = false;
+                                break;
+                            }
+                        }
+                        if (match) {
+                            off += hdrLen;
+                            while (b[off] <= ' ') {
+                                off++;
+                            }
+                            reader = candidate;
+                            nextExpected++;
+                        }
+                    }
+                }
+
+                if (reader == null) {
+                    utf8.setOffset(off);
+                    long hash = usePLHV ? utf8.readFieldNameHashPLHV() : utf8.readFieldNameHash(m);
+                    off = utf8.getOffset();
+                    reader = m.matchFlat(hash);
+                    if (reader != null) {
+                        nextExpected = reader.index + 1;
+                    } else {
+                        nextExpected = 0;
+                    }
+                }
+
+                if (reader != null) {
+                    // Read value and store in values array at the correct constructor param index
+                    utf8.setOffset(off);
+                    Object value = utf8.readAny();
+                    off = utf8.getOffset();
+                    int paramIdx = paramMapping[reader.index];
+                    values[paramIdx] = reader.convertValue(value);
+                } else {
+                    if (errorOnUnknown) {
+                        throw new JSONException("unknown property in " + objectClass.getName());
+                    }
+                    utf8.setOffset(off);
+                    utf8.skipValue();
+                    off = utf8.getOffset();
+                }
+
+                while (b[off] <= ' ') {
+                    off++;
+                }
+                if (b[off] == ',') {
+                    off++;
+                    continue;
+                }
+                if (b[off] == '}') {
+                    off++;
+                    break;
+                }
+                throw new JSONException("expected ',' or '}' in " + objectClass.getName());
+            }
+            utf8.setOffset(off);
+            return constructRecord(values);
+        }
+
+        @SuppressWarnings("unchecked")
+        private T readRecordGeneric(JSONParser parser, long features) {
+            Object obj = parser.readObject();
+            if (obj == null) {
+                return null;
+            }
+            if (obj instanceof Map<?, ?> map) {
+                Object[] values = new Object[componentCount];
+                for (FieldReader fr : fieldReaders) {
+                    Object value = map.get(fr.fieldName);
+                    if (value != null) {
+                        values[paramMapping[fr.index]] = fr.convertValue(value);
+                    }
+                }
+                return constructRecord(values);
+            }
+            throw new JSONException("expected object for " + objectClass.getName());
+        }
+
+        @SuppressWarnings("unchecked")
+        private T constructRecord(Object[] values) {
+            try {
+                return constructor.newInstance(values);
+            } catch (Exception e) {
+                throw new JSONException(
+                        "cannot construct record " + objectClass.getName() + ": " + e.getMessage(), e
+                );
+            }
+        }
+
+        @Override
+        public Class<T> getObjectClass() {
+            return objectClass;
+        }
+
+        @Override
+        public T createInstance(long features) {
+            throw new UnsupportedOperationException("Record instances require all component values");
+        }
+
+        @Override
+        public void readFieldUTF8(JSONParser.UTF8 utf8, Object instance, int fieldIndex, long features) {
+            ensureFieldReaders();
+            FieldReader reader = fieldReaders[fieldIndex];
+            Object value = utf8.readAny();
+            reader.setFieldValue(instance, reader.convertValue(value));
         }
     }
 

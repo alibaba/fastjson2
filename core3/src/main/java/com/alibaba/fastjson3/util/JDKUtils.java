@@ -30,6 +30,10 @@ public final class JDKUtils {
     private static final boolean COMPACT_STRINGS; // JDK 9+ uses byte[] internally
     public static final boolean FAST_STRING_CREATION;
 
+    // Vector API support (jdk.incubator.vector)
+    public static final boolean VECTOR_SUPPORT;
+    public static final int VECTOR_BYTE_SIZE;
+
     static {
         JDK_VERSION = Runtime.version().feature();
 
@@ -98,6 +102,20 @@ public final class JDKUtils {
             }
         }
         FAST_STRING_CREATION = fsc;
+
+        // Detect Vector API: try to load VectorizedScanner which imports jdk.incubator.vector.
+        // If the module is not available, the class won't load and we fall back to SWAR.
+        boolean vs = false;
+        int vbs = 0;
+        try {
+            // Force class loading to verify jdk.incubator.vector is accessible
+            vbs = VectorizedScanner.VECTOR_SIZE;
+            vs = vbs >= 16;
+        } catch (Throwable ignored) {
+            // NoClassDefFoundError / UnsupportedOperationException / etc.
+        }
+        VECTOR_SUPPORT = vs;
+        VECTOR_BYTE_SIZE = vbs;
     }
 
     private JDKUtils() {
@@ -265,7 +283,12 @@ public final class JDKUtils {
      */
     public static long objectFieldOffset(Field field) {
         if (UNSAFE_AVAILABLE) {
-            return UNSAFE.objectFieldOffset(field);
+            try {
+                return UNSAFE.objectFieldOffset(field);
+            } catch (UnsupportedOperationException e) {
+                // JDK 16+ blocks Unsafe access to Record fields
+                return -1;
+            }
         }
         return -1;
     }
@@ -379,5 +402,133 @@ public final class JDKUtils {
             }
         }
         return true;
+    }
+
+    // ==================== Record support (JDK 16+) ====================
+
+    private static volatile Class<?> RECORD_CLASS;
+    private static volatile java.lang.reflect.Method RECORD_GET_COMPONENTS;
+    private static volatile java.lang.reflect.Method COMPONENT_GET_NAME;
+    private static volatile java.lang.reflect.Method COMPONENT_GET_TYPE;
+    private static volatile java.lang.reflect.Method COMPONENT_GET_GENERIC_TYPE;
+    private static volatile java.lang.reflect.Method COMPONENT_GET_ACCESSOR;
+
+    /**
+     * Check if a class is a Java Record.
+     */
+    public static boolean isRecord(Class<?> type) {
+        Class<?> superclass = type.getSuperclass();
+        if (superclass == null) {
+            return false;
+        }
+        if (RECORD_CLASS != null) {
+            return superclass == RECORD_CLASS;
+        }
+        if ("java.lang.Record".equals(superclass.getName())) {
+            RECORD_CLASS = superclass;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get record component names in declaration order.
+     */
+    public static String[] getRecordComponentNames(Class<?> recordType) {
+        Object[] components = getRecordComponentsRaw(recordType);
+        if (components == null) {
+            return new String[0];
+        }
+        try {
+            ensureComponentMethods();
+            String[] names = new String[components.length];
+            for (int i = 0; i < components.length; i++) {
+                names[i] = (String) COMPONENT_GET_NAME.invoke(components[i]);
+            }
+            return names;
+        } catch (Exception e) {
+            throw new RuntimeException("failed to get record component names", e);
+        }
+    }
+
+    /**
+     * Get record component types in declaration order.
+     */
+    public static Class<?>[] getRecordComponentTypes(Class<?> recordType) {
+        Object[] components = getRecordComponentsRaw(recordType);
+        if (components == null) {
+            return new Class[0];
+        }
+        try {
+            ensureComponentMethods();
+            Class<?>[] types = new Class[components.length];
+            for (int i = 0; i < components.length; i++) {
+                types[i] = (Class<?>) COMPONENT_GET_TYPE.invoke(components[i]);
+            }
+            return types;
+        } catch (Exception e) {
+            throw new RuntimeException("failed to get record component types", e);
+        }
+    }
+
+    /**
+     * Get record component generic types in declaration order.
+     */
+    public static java.lang.reflect.Type[] getRecordComponentGenericTypes(Class<?> recordType) {
+        Object[] components = getRecordComponentsRaw(recordType);
+        if (components == null) {
+            return new java.lang.reflect.Type[0];
+        }
+        try {
+            ensureComponentMethods();
+            java.lang.reflect.Type[] types = new java.lang.reflect.Type[components.length];
+            for (int i = 0; i < components.length; i++) {
+                types[i] = (java.lang.reflect.Type) COMPONENT_GET_GENERIC_TYPE.invoke(components[i]);
+            }
+            return types;
+        } catch (Exception e) {
+            throw new RuntimeException("failed to get record component generic types", e);
+        }
+    }
+
+    /**
+     * Get accessor methods for each record component in declaration order.
+     */
+    public static java.lang.reflect.Method[] getRecordComponentAccessors(Class<?> recordType) {
+        Object[] components = getRecordComponentsRaw(recordType);
+        if (components == null) {
+            return new java.lang.reflect.Method[0];
+        }
+        try {
+            ensureComponentMethods();
+            java.lang.reflect.Method[] accessors = new java.lang.reflect.Method[components.length];
+            for (int i = 0; i < components.length; i++) {
+                accessors[i] = (java.lang.reflect.Method) COMPONENT_GET_ACCESSOR.invoke(components[i]);
+            }
+            return accessors;
+        } catch (Exception e) {
+            throw new RuntimeException("failed to get record component accessors", e);
+        }
+    }
+
+    private static Object[] getRecordComponentsRaw(Class<?> recordType) {
+        try {
+            if (RECORD_GET_COMPONENTS == null) {
+                RECORD_GET_COMPONENTS = Class.class.getMethod("getRecordComponents");
+            }
+            return (Object[]) RECORD_GET_COMPONENTS.invoke(recordType);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static void ensureComponentMethods() throws Exception {
+        if (COMPONENT_GET_NAME == null) {
+            Class<?> rcClass = Class.forName("java.lang.reflect.RecordComponent");
+            COMPONENT_GET_NAME = rcClass.getMethod("getName");
+            COMPONENT_GET_TYPE = rcClass.getMethod("getType");
+            COMPONENT_GET_GENERIC_TYPE = rcClass.getMethod("getGenericType");
+            COMPONENT_GET_ACCESSOR = rcClass.getMethod("getAccessor");
+        }
     }
 }

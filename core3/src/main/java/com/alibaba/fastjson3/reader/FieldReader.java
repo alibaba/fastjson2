@@ -338,6 +338,13 @@ public final class FieldReader implements Comparable<FieldReader> {
             }
         }
 
+        // Map → POJO/Record conversion (for nested objects parsed via readAny())
+        if (value instanceof java.util.Map<?, ?> map && !fieldClass.isInterface()
+                && !java.util.Map.class.isAssignableFrom(fieldClass)) {
+            String json = com.alibaba.fastjson3.JSON.toJSONString(value);
+            return com.alibaba.fastjson3.JSON.parseObject(json, fieldClass);
+        }
+
         // No conversion found; return as-is
         return value;
     }

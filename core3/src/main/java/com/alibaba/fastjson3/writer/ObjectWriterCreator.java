@@ -28,6 +28,89 @@ public final class ObjectWriterCreator {
      * @return a new ObjectWriter that serializes instances of the given type
      */
     public static <T> ObjectWriter<T> createObjectWriter(Class<T> type) {
+        if (com.alibaba.fastjson3.util.JDKUtils.isRecord(type)) {
+            return createRecordWriter(type);
+        }
+
+        return createPojoWriter(type);
+    }
+
+    private static <T> ObjectWriter<T> createRecordWriter(Class<T> type) {
+        JSONType jsonType = type.getAnnotation(JSONType.class);
+        NamingStrategy naming = jsonType != null ? jsonType.naming() : NamingStrategy.NoneStrategy;
+        Set<String> includes = jsonType != null ? Set.of(jsonType.includes()) : Set.of();
+        Set<String> ignores = jsonType != null ? Set.of(jsonType.ignores()) : Set.of();
+        boolean alphabetic = jsonType == null || jsonType.alphabetic();
+
+        String[] componentNames = com.alibaba.fastjson3.util.JDKUtils.getRecordComponentNames(type);
+        java.lang.reflect.Method[] accessors = com.alibaba.fastjson3.util.JDKUtils.getRecordComponentAccessors(type);
+
+        Map<String, FieldWriter> writerMap = new LinkedHashMap<>();
+        for (int i = 0; i < componentNames.length; i++) {
+            String propertyName = componentNames[i];
+            java.lang.reflect.Method accessor = accessors[i];
+
+            if (!includes.isEmpty() && !includes.contains(propertyName)) {
+                continue;
+            }
+            if (ignores.contains(propertyName)) {
+                continue;
+            }
+
+            JSONField jsonField = accessor.getAnnotation(JSONField.class);
+            // Also check field-level annotation
+            if (jsonField == null) {
+                try {
+                    java.lang.reflect.Field f = type.getDeclaredField(propertyName);
+                    jsonField = f.getAnnotation(JSONField.class);
+                } catch (NoSuchFieldException ignored) {
+                }
+            }
+            if (jsonField != null && !jsonField.serialize()) {
+                continue;
+            }
+
+            String jsonName;
+            int ordinal = 0;
+            if (jsonField != null && !jsonField.name().isEmpty()) {
+                jsonName = jsonField.name();
+            } else {
+                jsonName = applyNamingStrategy(propertyName, naming);
+            }
+            if (jsonField != null) {
+                ordinal = jsonField.ordinal();
+            }
+
+            // Prefer backing field for Unsafe direct access
+            java.lang.reflect.Field backingField = null;
+            try {
+                backingField = type.getDeclaredField(propertyName);
+                backingField.setAccessible(true);
+            } catch (NoSuchFieldException ignored) {
+            }
+
+            if (backingField != null) {
+                writerMap.put(propertyName, createFieldWriterForField(
+                        jsonName, ordinal, accessor.getGenericReturnType(), accessor.getReturnType(), backingField
+                ));
+            } else {
+                accessor.setAccessible(true);
+                writerMap.put(propertyName, createFieldWriterForGetter(
+                        jsonName, ordinal, accessor.getGenericReturnType(), accessor.getReturnType(), accessor
+                ));
+            }
+        }
+
+        List<FieldWriter> fieldWriters = new ArrayList<>(writerMap.values());
+        if (alphabetic) {
+            Collections.sort(fieldWriters);
+        }
+        FieldWriter[] writers = fieldWriters.toArray(new FieldWriter[0]);
+
+        return buildObjectWriter(writers);
+    }
+
+    private static <T> ObjectWriter<T> createPojoWriter(Class<T> type) {
         JSONType jsonType = type.getAnnotation(JSONType.class);
         NamingStrategy naming = jsonType != null ? jsonType.naming() : NamingStrategy.NoneStrategy;
         Set<String> includes = jsonType != null ? Set.of(jsonType.includes()) : Set.of();
@@ -179,6 +262,11 @@ public final class ObjectWriterCreator {
 
         FieldWriter[] writers = fieldWriters.toArray(new FieldWriter[0]);
 
+        return buildObjectWriter(writers);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> ObjectWriter<T> buildObjectWriter(FieldWriter[] writers) {
         return (generator, object, fieldName, fieldType, features) -> {
             generator.startObject();
             if (generator.hasFilters()) {

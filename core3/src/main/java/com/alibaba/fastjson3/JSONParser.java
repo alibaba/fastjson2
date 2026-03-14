@@ -1322,6 +1322,12 @@ public abstract sealed class JSONParser implements Closeable
             off++; // skip opening quote
             // Inline readStringContent fast path for ASCII
             int start = off;
+
+            // Vector API: scan VECTOR_SIZE bytes at a time
+            if (com.alibaba.fastjson3.util.JDKUtils.VECTOR_SUPPORT) {
+                off = com.alibaba.fastjson3.util.VectorizedScanner.scanStringSimple(b, off, e);
+            }
+
             while (off < e) {
                 byte c = b[off];
                 if (c == '"') {
@@ -1346,7 +1352,7 @@ public abstract sealed class JSONParser implements Closeable
         }
 
         /**
-         * Read a string value directly from byte[], using SWAR for fast scanning.
+         * Read a string value directly from byte[], using SWAR/Vector for fast scanning.
          * Assumes whitespace already skipped by caller.
          */
         public String readStringDirect() {
@@ -1360,19 +1366,24 @@ public abstract sealed class JSONParser implements Closeable
             off++;
             int start = off;
 
-            // SWAR: scan 8 bytes at a time for '"', '\\', or non-ASCII (>= 0x80)
-            while (off + 8 <= e) {
-                long word = com.alibaba.fastjson3.util.JDKUtils.getLongDirect(b, off);
-                long v1 = word ^ SWAR_QUOTE;
-                long v2 = word ^ SWAR_ESCAPE;
-                long detect = ((v1 - SWAR_LO) & ~v1)
-                        | ((v2 - SWAR_LO) & ~v2)
-                        | word; // non-ASCII bytes have high bit set
-                if ((detect & SWAR_HI) != 0) {
-                    off += Long.numberOfTrailingZeros(detect & SWAR_HI) >> 3;
-                    break;
+            // Vector API: scan VECTOR_SIZE bytes at a time (32/64 bytes)
+            if (com.alibaba.fastjson3.util.JDKUtils.VECTOR_SUPPORT) {
+                off = com.alibaba.fastjson3.util.VectorizedScanner.scanStringSimple(b, off, e);
+            } else {
+                // SWAR fallback: scan 8 bytes at a time for '"', '\\', or non-ASCII (>= 0x80)
+                while (off + 8 <= e) {
+                    long word = com.alibaba.fastjson3.util.JDKUtils.getLongDirect(b, off);
+                    long v1 = word ^ SWAR_QUOTE;
+                    long v2 = word ^ SWAR_ESCAPE;
+                    long detect = ((v1 - SWAR_LO) & ~v1)
+                            | ((v2 - SWAR_LO) & ~v2)
+                            | word; // non-ASCII bytes have high bit set
+                    if ((detect & SWAR_HI) != 0) {
+                        off += Long.numberOfTrailingZeros(detect & SWAR_HI) >> 3;
+                        break;
+                    }
+                    off += 8;
                 }
-                off += 8;
             }
 
             // Per-byte scan for the found/remaining bytes
@@ -1566,19 +1577,24 @@ public abstract sealed class JSONParser implements Closeable
             off++; // skip opening '"'
             int start = off;
 
-            // SWAR scan for '"', '\\', or non-ASCII (>= 0x80)
-            while (off + 8 <= end) {
-                long word = com.alibaba.fastjson3.util.JDKUtils.getLongDirect(b, off);
-                long v1 = word ^ SWAR_QUOTE;
-                long v2 = word ^ SWAR_ESCAPE;
-                long detect = ((v1 - SWAR_LO) & ~v1)
-                        | ((v2 - SWAR_LO) & ~v2)
-                        | word;
-                if ((detect & SWAR_HI) != 0) {
-                    off += Long.numberOfTrailingZeros(detect & SWAR_HI) >> 3;
-                    break;
+            // Vector API: scan VECTOR_SIZE bytes at a time (32/64 bytes)
+            if (com.alibaba.fastjson3.util.JDKUtils.VECTOR_SUPPORT) {
+                off = com.alibaba.fastjson3.util.VectorizedScanner.scanStringSimple(b, off, end);
+            } else {
+                // SWAR fallback: scan 8 bytes at a time for '"', '\\', or non-ASCII (>= 0x80)
+                while (off + 8 <= end) {
+                    long word = com.alibaba.fastjson3.util.JDKUtils.getLongDirect(b, off);
+                    long v1 = word ^ SWAR_QUOTE;
+                    long v2 = word ^ SWAR_ESCAPE;
+                    long detect = ((v1 - SWAR_LO) & ~v1)
+                            | ((v2 - SWAR_LO) & ~v2)
+                            | word;
+                    if ((detect & SWAR_HI) != 0) {
+                        off += Long.numberOfTrailingZeros(detect & SWAR_HI) >> 3;
+                        break;
+                    }
+                    off += 8;
                 }
-                off += 8;
             }
 
             // Per-byte tail scan

@@ -14,6 +14,7 @@
  */
 module com.alibaba.fastjson3 {
     requires jdk.unsupported; // for sun.misc.Unsafe (fast String creation, field access)
+    requires static jdk.incubator.vector; // optional: SIMD-accelerated string scanning
 
     // Public API
     exports com.alibaba.fastjson3;
