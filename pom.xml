@@ -1057,6 +1057,15 @@
             </modules>
         </profile>
         <profile>
+            <id>enable-for-17+core3</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <modules>
+                <module>core3</module>
+            </modules>
+        </profile>
+        <profile>
             <id>enable-codegen</id>
             <activation>
                 <jdk>(,22]</jdk>
