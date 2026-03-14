@@ -425,21 +425,34 @@ public final class ObjectReaderCreator {
             for (;;) {
                 FieldReader reader = null;
 
-                // Fast path: ordered field speculation — inline header matching
+                // Fast path: ordered field speculation — long-word header matching
                 if (nextExpected < frLen) {
                     FieldReader candidate = frs[nextExpected];
-                    byte[] hdr = candidate.fieldNameHeader;
                     // Skip whitespace
                     while (off < end && b[off] <= ' ') {
                         off++;
                     }
-                    int hdrLen = hdr.length;
-                    if (off < end && b[off] == '"' && off + hdrLen <= end) {
-                        boolean match = true;
-                        for (int i = 1; i < hdrLen; i++) {
-                            if (b[off + i] != hdr[i]) {
-                                match = false;
-                                break;
+                    int hdrLen = candidate.fieldNameHeader.length;
+                    if (off + hdrLen <= end) {
+                        // Compare using pre-computed long words (8 bytes at a time)
+                        boolean match;
+                        if (hdrLen <= 8 && off + 8 <= b.length) {
+                            long w = com.alibaba.fastjson3.util.JDKUtils.getLongDirect(b, off);
+                            match = (w & candidate.hdrMask0) == candidate.hdrWord0;
+                        } else if (hdrLen <= 16 && off + 16 <= b.length) {
+                            long w0 = com.alibaba.fastjson3.util.JDKUtils.getLongDirect(b, off);
+                            long w1 = com.alibaba.fastjson3.util.JDKUtils.getLongDirect(b, off + 8);
+                            match = w0 == candidate.hdrWord0
+                                    && (w1 & candidate.hdrMask1) == candidate.hdrWord1;
+                        } else {
+                            // Fallback for very long field names (> 13 chars)
+                            byte[] hdr = candidate.fieldNameHeader;
+                            match = true;
+                            for (int i = 0; i < hdrLen; i++) {
+                                if (b[off + i] != hdr[i]) {
+                                    match = false;
+                                    break;
+                                }
                             }
                         }
                         if (match) {
@@ -470,16 +483,32 @@ public final class ObjectReaderCreator {
                     int fi = reader.index;
                     int tt = reader.typeTag;
                     // Inline primitive types — avoid heap sync (setOffset/getOffset)
-                    if (tt == FieldReader.TAG_STRING && b[off] == '"') {
-                        off = utf8.readStringOff(off, instance, reader);
-                    } else if (tt == FieldReader.TAG_LONG) {
-                        off = utf8.readLongOff(off, instance, reader);
+                    if (tt == FieldReader.TAG_STRING) {
+                        if (b[off] == '"') {
+                            off = utf8.readStringOff(off, instance, reader);
+                        } else if (off + 3 < end && b[off] == 'n' && b[off + 1] == 'u' && b[off + 2] == 'l' && b[off + 3] == 'l') {
+                            off += 4;
+                        } else {
+                            utf8.setOffset(off);
+                            reader.setObjectValue(instance, utf8.readStringDirect());
+                            off = utf8.getOffset();
+                        }
                     } else if (tt == FieldReader.TAG_INT) {
                         off = utf8.readIntOff(off, instance, reader);
+                    } else if (tt == FieldReader.TAG_LONG) {
+                        off = utf8.readLongOff(off, instance, reader);
                     } else if (tt == FieldReader.TAG_DOUBLE) {
                         off = utf8.readDoubleOff(off, instance, reader);
                     } else if (tt == FieldReader.TAG_BOOLEAN) {
                         off = utf8.readBooleanOff(off, instance, reader);
+                    } else if (tt == FieldReader.TAG_STRING_ARRAY && b[off] == '[') {
+                        utf8.setOffset(off);
+                        reader.setObjectValue(instance, utf8.readStringArrayInline());
+                        off = utf8.getOffset();
+                    } else if (tt == FieldReader.TAG_LONG_ARRAY && b[off] == '[') {
+                        utf8.setOffset(off);
+                        reader.setObjectValue(instance, utf8.readLongArrayInline());
+                        off = utf8.getOffset();
                     } else {
                         // Sync offset for complex types (POJO, LIST, ARRAY, etc.)
                         utf8.setOffset(off);
