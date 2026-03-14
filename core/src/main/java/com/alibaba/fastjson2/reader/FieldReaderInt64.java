@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderInt64<T, V>
-        extends FieldReader<T> {
+        extends FieldReaderBoxedType<T, Long> {
     FieldReaderInt64(
             String fieldName,
             Class<V> fieldClass,
@@ -27,11 +27,14 @@ final class FieldReaderInt64<T, V>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
     }
 
     @Override
     public void accept(T object, Object value) {
+        // Convert to Long for schema validation, but set original value
+        // This preserves the original behavior where validation used converted value
+        // but the original value was set (to preserve type information)
         Long longValue = TypeUtils.toLong(value);
 
         if (schema != null) {
@@ -42,27 +45,7 @@ final class FieldReaderInt64<T, V>
     }
 
     @Override
-    public void readFieldValue(JSONReader jsonReader, T object) {
-        Long value;
-        try {
-            value = jsonReader.readInt64();
-        } catch (Exception e) {
-            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
-                value = null;
-            } else {
-                throw e;
-            }
-        }
-
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        propertyAccessor.setObject(object, value);
-    }
-
-    @Override
-    public Object readFieldValue(JSONReader jsonReader) {
+    protected Long readValue(JSONReader jsonReader) {
         return jsonReader.readInt64();
     }
 }
