@@ -69,7 +69,7 @@ User user = JSONB.parseObject(bytes, User.class);
 
 // 配合 BeanToArray 更快
 byte[] bytes = JSONB.toBytes(user, JSONWriter.Feature.BeanToArray);
-User user = JSONB.parseObject(bytes, User.class, JSONReader.Feature.SupportBeanArrayMapping);
+User user = JSONB.parseObject(bytes, User.class, JSONReader.Feature.SupportArrayToBean);
 ```
 
 ### 3. 大文档使用 JSONPath 部分解析

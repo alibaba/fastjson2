@@ -69,7 +69,7 @@ User user = JSONB.parseObject(bytes, User.class);
 
 // Even faster with BeanToArray
 byte[] bytes = JSONB.toBytes(user, JSONWriter.Feature.BeanToArray);
-User user = JSONB.parseObject(bytes, User.class, JSONReader.Feature.SupportBeanArrayMapping);
+User user = JSONB.parseObject(bytes, User.class, JSONReader.Feature.SupportArrayToBean);
 ```
 
 ### 3. Use JSONPath for Partial Parsing

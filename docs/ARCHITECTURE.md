@@ -115,9 +115,8 @@ Encoding-specific writers that convert Java objects to output:
 | `ObjectReaderProvider` | Manages reader instances with concurrent caching |
 | `FieldReader` | Handles individual field deserialization |
 | `ObjectReaderBaseModule` | Base module for reader extensions |
-| `ObjectReaderCreator` | Base factory for creating readers |
+| `ObjectReaderCreator` | Base factory for creating readers (uses LambdaMetafactory internally for field access) |
 | `ObjectReaderCreatorASM` | ASM bytecode-generated readers (highest performance) |
-| `ObjectReaderCreatorLambda` | LambdaMetafactory-based readers (JDK 8+) |
 | `ObjectReaderAdapter` | Adapter pattern for readers |
 
 #### Writer Package (`com.alibaba.fastjson2.writer`)
@@ -138,7 +137,7 @@ FASTJSON 2 selects the optimal ObjectReader/ObjectWriter creator based on the ru
 ```
 JDK 8 server  → ObjectReaderCreatorASM (best performance)
 JDK 17 server → ObjectReaderCreatorASM + Vector API optimizations
-Android        → ObjectReaderCreatorLambda (no ASM on Android)
+Android        → ObjectReaderCreator (LambdaMetafactory-based, no ASM on Android)
 GraalVM Native → ObjectReaderCreator (reflection-based, no dynamic bytecode)
 SafeMode       → ObjectReaderCreator (reflection-based)
 ```
@@ -223,7 +222,7 @@ Serialization filters applied during the write phase:
 ### 2. Lambda Metafactory
 - Uses `LambdaMetafactory` for method handles on JDK 8+
 - Near-native-call performance for getter/setter invocations
-- Located in `ObjectReaderCreatorLambda`
+- Used by `ObjectReaderCreator` and `ObjectWriterCreator` for field access
 
 ### 3. Vector API (JDK 17+)
 - SIMD optimizations for bulk character processing in UTF-8/UTF-16 parsers
@@ -312,7 +311,7 @@ core (JDK 8+)
 - **Build tool**: Maven with multi-module structure
 - **Java baseline**: JDK 8 (core), JDK 11 (core-jdk11)
 - **Kotlin**: Version 2.1.20
-- **ASM**: Version 9.2 (for bytecode generation)
+- **ASM**: Embedded internally in `com.alibaba.fastjson2.internal.asm` (for bytecode generation)
 - **Testing**: JUnit 5, Kotest (Kotlin module)
 - **Code style**: Checkstyle (`src/checkstyle/fastjson2-checks.xml`)
 - **CI**: GitHub Actions across JDK 8/11/17/21/25 on Ubuntu/Windows/macOS
