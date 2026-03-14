@@ -2,229 +2,329 @@
 
 ## Overview
 
-Fastjson2 is a high-performance JSON library for Java, designed as the next-generation version of Fastjson. It supports both JSON and JSONB (binary JSON) formats, with optimized parsing and serialization capabilities.
+Fastjson2 is a high-performance JSON library for Java, designed as the next-generation version of Fastjson. It supports both JSON and JSONB (binary JSON) formats, with deeply optimized parsing and serialization capabilities targeting JDK 8 through 21+.
 
 ## Project Structure
 
 ```
 fastjson2/
-├── core                    # Core library
-├── core-jdk11              # JDK 11+ specific extensions
-├── extension               # Extension modules
-├── extension-jaxrs         # JAX-RS integration
-├── extension-solon         # Solon framework integration
-├── extension-spring5       # Spring 5 integration
-├── extension-spring6       # Spring 6 integration
-├── fastjson1-compatible    # Fastjson 1.x compatibility layer
-├── kotlin                  # Kotlin support module
-├── codegen                 # Code generation tools
-├── benchmark               # Performance benchmarks
-└── docs                    # Documentation
+├── core/                      # Core library (JDK 8+)
+├── extension/                 # Base extensions (Arrow, ClickHouse, Geo, Retrofit, etc.)
+├── extension-jaxrs/           # JAX-RS integration
+├── extension-solon/           # Solon framework integration
+├── extension-spring5/         # Spring 5 integration (Web MVC, WebFlux, Data Redis, Messaging)
+├── extension-spring6/         # Spring 6 integration
+├── fastjson1-compatible/      # Fastjson 1.x API compatibility layer
+├── kotlin/                    # Kotlin extension functions and DSL
+├── codegen/                   # Compile-time code generation (APT)
+├── benchmark/                 # JMH performance benchmarks
+├── safemode-test/             # SafeMode test suite
+├── android-test/              # Android compatibility tests
+├── test-jdk17/                # JDK 17 feature tests (Records, sealed classes)
+├── test-jdk25/                # JDK 25 feature tests
+└── docs/                      # Documentation
 ```
 
 ## Core Module Architecture
 
-### Main Components
+### Component Overview
 
-The core module (`com.alibaba.fastjson2`) consists of the following key components:
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                        JSON API Layer                            │
+│          JSON.java  │  JSONB.java  │  JSONPath.java              │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   ┌─────────────────────┐         ┌─────────────────────┐       │
+│   │    Reader Layer      │         │    Writer Layer      │       │
+│   │                     │         │                     │       │
+│   │  JSONReaderUTF8     │         │  JSONWriterUTF8     │       │
+│   │  JSONReaderUTF16    │         │  JSONWriterUTF16    │       │
+│   │  JSONReaderASCII    │         │  JSONWriterJSONB    │       │
+│   │  JSONReaderJSONB    │         │                     │       │
+│   └────────┬────────────┘         └────────┬────────────┘       │
+│            │                               │                     │
+│   ┌────────┴────────────┐         ┌────────┴────────────┐       │
+│   │  Object Mapping      │         │  Object Mapping      │       │
+│   │                     │         │                     │       │
+│   │  ObjectReader       │         │  ObjectWriter       │       │
+│   │  FieldReader        │         │  FieldWriter        │       │
+│   │  ObjectReaderCreator│         │  ObjectWriterCreator│       │
+│   │    ├── ASM          │         │    ├── ASM          │       │
+│   │    ├── Lambda       │         │    └── Reflect      │       │
+│   │    └── Reflect      │         │                     │       │
+│   └─────────────────────┘         └─────────────────────┘       │
+│                                                                  │
+│   ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐      │
+│   │  Annotations  │  │   Filters    │  │   JSON Schema    │      │
+│   │  @JSONField  │  │  ValueFilter │  │   JSONSchema     │      │
+│   │  @JSONType   │  │  NameFilter  │  │                  │      │
+│   │  @JSONCreator│  │  Property... │  │                  │      │
+│   └──────────────┘  └──────────────┘  └──────────────────┘      │
+│                                                                  │
+│   ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐      │
+│   │  JSONPath     │  │  Support     │  │  Introspect      │      │
+│   │  Segment     │  │  CSV         │  │  BeanUtils       │      │
+│   │  Filter      │  │  GeoJSON     │  │  FieldInfo       │      │
+│   │  Parser      │  │  Retrofit    │  │  TypeUtils       │      │
+│   └──────────────┘  └──────────────┘  └──────────────────┘      │
+└──────────────────────────────────────────────────────────────────┘
+```
 
-#### 1. JSON API Layer
-- **`JSON.java`** - Main entry point providing static methods for parsing and serialization
-- **`JSONObject.java`** - JSON object implementation (Map-like structure)
-- **`JSONArray.java`** - JSON array implementation (List-like structure)
+### 1. JSON API Layer
+
+The public-facing API through which users interact with the library:
+
+- **`JSON.java`** - Main entry point with static methods (`parseObject`, `parseArray`, `toJSONString`, `toJSONBytes`)
+- **`JSONObject.java`** - JSON object (extends `LinkedHashMap<String, Object>`, maintains insertion order)
+- **`JSONArray.java`** - JSON array (extends `ArrayList<Object>`)
 - **`JSONB.java`** - Binary JSON format support
+- **`JSONPath.java`** - JSONPath query engine with SQL:2016 compatibility
+- **`JSONFactory.java`** - Factory for creating reader/writer instances with thread-local caching
 
-#### 2. Reader Layer (Parsing)
-- **`JSONReader.java`** - Abstract reader for JSON parsing
-- **`JSONReaderUTF8.java`** - UTF-8 encoding JSON parser
-- **`JSONReaderUTF16.java`** - UTF-16 encoding JSON parser
-- **`JSONReaderASCII.java`** - ASCII optimized parser
-- **`JSONReaderJSONB.java`** - Binary JSON (JSONB) parser
+### 2. Reader Layer (Parsing / Deserialization)
 
-#### 3. Writer Layer (Serialization)
-- **`JSONWriter.java`** - Abstract writer for JSON serialization
-- **`JSONWriterUTF8.java`** - UTF-8 encoding JSON writer
-- **`JSONWriterUTF16.java`** - UTF-16 encoding JSON writer
-- **`JSONWriterJSONB.java`** - Binary JSON (JSONB) writer
+Encoding-specific parsers that convert input to Java objects:
 
-#### 4. JSONPath Layer
-- **`JSONPath.java`** - JSONPath query implementation
-- **`JSONPathSegment.java`** - Path segment handling
-- **`JSONPathParser.java`** - JSONPath expression parser
-- **`JSONPathFilter.java`** - Filter operations for JSONPath
-- **`JSONPathSegmentIndex.java`** - Array index segment
-- **`JSONPathSegmentName.java`** - Object property segment
+| Class | Input | Optimization |
+|-------|-------|-------------|
+| `JSONReaderUTF8` | UTF-8 `byte[]` | SIMD via Vector API (JDK 17+) |
+| `JSONReaderUTF16` | UTF-16 `char[]` / `String` | Compact string optimization (JDK 9+) |
+| `JSONReaderASCII` | ASCII `byte[]` | Fast path for ASCII-only content |
+| `JSONReaderJSONB` | JSONB `byte[]` | Binary format decoder |
 
-#### 5. Object Mapping Layer
+The abstract `JSONReader` base class defines the parsing contract. `JSONFactory` selects the appropriate implementation based on input type and JDK version.
 
-##### Reader Package (`com.alibaba.fastjson2.reader`)
-- **`ObjectReader.java`** - Interface for object deserialization
-- **`ObjectReaderProvider.java`** - Reader instance management
-- **`FieldReader.java`** - Field-level deserialization
-- **`ObjectReaderBaseModule.java`** - Base module for reader extensions
-- **`ObjectReaderCreator.java`** - Factory for creating readers
-- **`ObjectReaderCreatorASM.java`** - ASM-based optimized reader creation
-- **`ObjectReaderCreatorLambda.java`** - Lambda-based reader creation
-- **`ObjectReaderAdapter.java`** - Adapter pattern for readers
+### 3. Writer Layer (Serialization)
 
-##### Writer Package (`com.alibaba.fastjson2.writer`)
-- **`ObjectWriter.java`** - Interface for object serialization
-- **`ObjectWriterProvider.java`** - Writer instance management
-- **`FieldWriter.java`** - Field-level serialization
-- **`ObjectWriterBaseModule.java`** - Base module for writer extensions
-- **`ObjectWriterCreator.java`** - Factory for creating writers
-- **`ObjectWriterCreatorASM.java`** - ASM-based optimized writer creation
+Encoding-specific writers that convert Java objects to output:
 
-##### Introspect Package (`com.alibaba.fastjson2.introspect`)
-- **`BeanUtils.java`** - JavaBean introspection utilities
-- **`FieldInfo.java`** - Field metadata
-- **`TypeUtils.java`** - Type handling utilities
+| Class | Output | Notes |
+|-------|--------|-------|
+| `JSONWriterUTF8` | UTF-8 `byte[]` | Default for `toJSONBytes()` |
+| `JSONWriterUTF16` | UTF-16 `String` | Default for `toJSONString()` |
+| `JSONWriterJSONB` | JSONB `byte[]` | Binary format encoder |
 
-#### 6. Annotation Layer (`com.alibaba.fastjson2.annotation`)
-- **`JSONField.java`** - Field-level configuration annotation
-- **`JSONType.java`** - Class-level configuration annotation
-- **`JSONCompiler.java`** - Compile-time code generation annotation
+### 4. Object Mapping Layer
 
-#### 7. Filter Layer (`com.alibaba.fastjson2.filter`)
-- **`ValueFilter.java`** - Value transformation filter
-- **`NameFilter.java`** - Property name transformation filter
-- **`PropertyFilter.java`** - Property inclusion filter
-- **`ContextValueFilter.java`** - Context-aware value filter
-- **`ContextNameFilter.java`** - Context-aware name filter
-- **`AutoTypeBeforeHandler.java`** - Auto-type handling before parsing
+#### Reader Package (`com.alibaba.fastjson2.reader`)
 
-#### 8. Schema Layer (`com.alibaba.fastjson2.schema`)
-- **`JSONSchema.java`** - JSON Schema validation
+| Class | Purpose |
+|-------|---------|
+| `ObjectReader<T>` | Interface for type-specific deserialization |
+| `ObjectReaderProvider` | Manages reader instances with concurrent caching |
+| `FieldReader` | Handles individual field deserialization |
+| `ObjectReaderBaseModule` | Base module for reader extensions |
+| `ObjectReaderCreator` | Base factory for creating readers |
+| `ObjectReaderCreatorASM` | ASM bytecode-generated readers (highest performance) |
+| `ObjectReaderCreatorLambda` | LambdaMetafactory-based readers (JDK 8+) |
+| `ObjectReaderAdapter` | Adapter pattern for readers |
 
-#### 9. Support Package (`com.alibaba.fastjson2.support`)
-- **`csv/`** - CSV parsing and writing support
-- **`geo/`** - GeoJSON support
-- **`retrofit/`** - Retrofit integration
+#### Writer Package (`com.alibaba.fastjson2.writer`)
+
+| Class | Purpose |
+|-------|---------|
+| `ObjectWriter<T>` | Interface for type-specific serialization |
+| `ObjectWriterProvider` | Manages writer instances with concurrent caching |
+| `FieldWriter` | Handles individual field serialization |
+| `ObjectWriterBaseModule` | Base module for writer extensions |
+| `ObjectWriterCreator` | Base factory for creating writers |
+| `ObjectWriterCreatorASM` | ASM bytecode-generated writers (highest performance) |
+
+#### Creator Selection Strategy
+
+FASTJSON 2 selects the optimal ObjectReader/ObjectWriter creator based on the runtime environment:
+
+```
+JDK 8 server  → ObjectReaderCreatorASM (best performance)
+JDK 17 server → ObjectReaderCreatorASM + Vector API optimizations
+Android        → ObjectReaderCreatorLambda (no ASM on Android)
+GraalVM Native → ObjectReaderCreator (reflection-based, no dynamic bytecode)
+SafeMode       → ObjectReaderCreator (reflection-based)
+```
+
+### 5. JSONPath Layer
+
+Full JSONPath implementation compatible with SQL:2016:
+
+- **`JSONPath`** - Query compilation and execution
+- **`JSONPathSegment`** - Base class for path segments
+- **`JSONPathSegmentIndex`** - Array index access (`$[0]`, `$[-1]`)
+- **`JSONPathSegmentName`** - Object property access (`$.name`)
+- **`JSONPathParser`** - JSONPath expression parser
+- **`JSONPathFilter`** - Filter operations (`$[?(@.price > 10)]`)
+
+JSONPath instances are immutable and thread-safe after construction. They should be cached and reused.
+
+### 6. Annotation Layer (`com.alibaba.fastjson2.annotation`)
+
+| Annotation | Target | Purpose |
+|------------|--------|---------|
+| `@JSONField` | Field, Method, Parameter | Field-level config (name, format, features, ordinal) |
+| `@JSONType` | Class, Interface | Class-level config (naming, ignores, features, ordering) |
+| `@JSONCreator` | Constructor, Method | Specify deserialization constructor or factory method |
+| `@JSONCompiler` | Class | Enable compile-time code generation |
+
+### 7. Filter Layer (`com.alibaba.fastjson2.filter`)
+
+Serialization filters applied during the write phase:
+
+| Filter | Description |
+|--------|-------------|
+| `ValueFilter` | Transform property values before output |
+| `NameFilter` | Rename properties before output |
+| `ContextNameFilter` | Context-aware property renaming |
+| `ContextValueFilter` | Context-aware value transformation |
+| `PropertyFilter` | Conditionally include/exclude properties |
+| `PropertyPreFilter` | Pre-serialization property filtering |
+| `AfterFilter` | Append content after object serialization |
+| `BeforeFilter` | Prepend content before object serialization |
+| `LabelFilter` | Label-based selective serialization |
+| `AutoTypeBeforeHandler` | Whitelist-based AutoType control for deserialization |
+
+### 8. Schema Layer (`com.alibaba.fastjson2.schema`)
+
+- **`JSONSchema`** - JSON Schema validation (draft support)
+- Validates `JSONObject`, JavaBeans, and raw JSON data
+- Can be configured via `@JSONField(schema = "...")` annotations
 
 ## Key Design Patterns
 
-### 1. Factory Pattern
-- `JSONFactory` - Creates reader/writer instances
-- `ObjectReaderCreator` - Creates object readers
-- `ObjectWriterCreator` - Creates object writers
+### Factory Pattern
+- `JSONFactory` creates reader/writer instances with thread-local recycling
+- `ObjectReaderCreator` / `ObjectWriterCreator` create type-specific readers/writers
 
-### 2. Provider Pattern
-- `ObjectReaderProvider` - Manages reader instances with caching
-- `ObjectWriterProvider` - Manages writer instances with caching
+### Provider Pattern
+- `ObjectReaderProvider` manages reader instances with `ConcurrentHashMap` caching
+- `ObjectWriterProvider` manages writer instances with `ConcurrentHashMap` caching
+- First access triggers creation; subsequent accesses retrieve from cache
 
-### 3. Strategy Pattern
-- `JSONReader` implementations for different encodings
-- `JSONWriter` implementations for different encodings
-- `ObjectReaderCreator` variants (ASM, Lambda, Reflect)
+### Strategy Pattern
+- `JSONReader` implementations for different encodings (UTF-8, UTF-16, ASCII, JSONB)
+- `JSONWriter` implementations for different output formats
+- `ObjectReaderCreator` variants (ASM, Lambda, Reflect) selected by environment
 
-### 4. Visitor Pattern
-- `JSONPath` segment traversal
-- `JSONReader` event-driven parsing
+### Visitor Pattern
+- `JSONPath` segment traversal through document structure
+- `JSONReader` token-based parsing
+
+### Module Pattern
+- `ObjectReaderModule` / `ObjectWriterModule` allow extensions to register custom type handlers
+- Framework integrations (Spring, JAX-RS) use modules to hook into the serialization pipeline
 
 ## Performance Optimizations
 
 ### 1. ASM Code Generation
-- Generates optimized bytecode for object readers/writers at runtime
-- Reduces reflection overhead
+- Generates optimized bytecode at runtime for object readers/writers
+- Switch-case on field name hash for O(1) field lookup during deserialization
+- Eliminates reflection overhead for field access
 - Located in `ObjectReaderCreatorASM` and `ObjectWriterCreatorASM`
 
 ### 2. Lambda Metafactory
 - Uses `LambdaMetafactory` for method handles on JDK 8+
-- Alternative to reflection for method invocation
+- Near-native-call performance for getter/setter invocations
 - Located in `ObjectReaderCreatorLambda`
 
 ### 3. Vector API (JDK 17+)
-- SIMD optimizations for UTF-8/UTF-16 processing
+- SIMD optimizations for bulk character processing in UTF-8/UTF-16 parsers
+- Accelerates string scanning, whitespace skipping, and validation
 - Located in `JSONReaderUTF8` and `JSONReaderUTF16`
 
 ### 4. String Interning
-- Symbol table for frequently used strings
-- `SymbolTable.java` for efficient string reuse
+- `SymbolTable` for efficient string reuse of field names
+- Reduces memory allocation and GC pressure during parsing
+- Keys are interned on first encounter and reused on subsequent parses
 
 ### 5. Lazy Parsing
-- Partial parsing support for large JSON documents
-- `JSONPath` for selective data extraction
+- JSONPath supports partial parsing without full document deserialization
+- Only the targeted path is parsed; rest of the document is skipped
+- Critical for extracting fields from large JSON documents
+
+### 6. Thread-Local Buffers
+- `JSONFactory` provides thread-local reader/writer instances
+- Buffer recycling reduces allocation overhead in high-throughput scenarios
 
 ## JSONB Binary Format
 
-JSONB is a binary representation of JSON with the following characteristics:
-- Compact binary encoding
-- Schema-less format
-- Support for all JSON types plus binary data
-- Fast parsing and serialization
+JSONB is a binary representation of JSON with the following design:
+
+- **Compact encoding**: Small integers (-16 to 47) require only 1 byte
+- **Schema-less**: No pre-defined schema needed
+- **Type-rich**: Supports all JSON types plus binary data
+- **Symbol table**: Optional key compression for repeated field names
+- **Multi-encoding**: Strings can be stored as UTF-8, UTF-16, ASCII, or GB18030
 
 Format specification: [JSONB Format Documentation](https://alibaba.github.io/fastjson2/JSONB/jsonb_format_en)
 
 ## Thread Safety
 
-- `JSONReader` and `JSONWriter` instances are NOT thread-safe
-- `ObjectReader` and `ObjectWriter` instances are thread-safe after initialization
-- `JSONFactory` provides thread-local instances where appropriate
-- Static methods in `JSON` class are thread-safe
+| Component | Thread-Safe? | Notes |
+|-----------|:---:|-------|
+| `JSON` static methods | Yes | Main entry point |
+| `JSONObject` / `JSONArray` | No | Like `HashMap`/`ArrayList` |
+| `JSONReader` / `JSONWriter` | No | Create per-operation |
+| `ObjectReader` / `ObjectWriter` | Yes | After initialization |
+| `JSONPath` | Yes | Immutable after construction |
+| `ObjectReaderProvider` / `ObjectWriterProvider` | Yes | ConcurrentHashMap-based |
+| `JSONFactory` | Yes | Thread-local instances |
 
 ## Extension Points
 
 ### 1. Module System
-- `JSONReader.Module` - Custom deserialization modules
-- `JSONWriter.Module` - Custom serialization modules
-- `ObjectReaderModule` - Object reader customization
-- `ObjectWriterModule` - Object writer customization
+- `ObjectReaderModule` - Register custom deserialization modules
+- `ObjectWriterModule` - Register custom serialization modules
+- Modules are registered via `JSONFactory.getDefaultObjectReaderProvider().register(module)`
 
-### 2. Filters
-- Value transformation
-- Property name mapping
-- Property filtering
-- Context-aware processing
+### 2. Custom ObjectReader/ObjectWriter
+- Implement `ObjectReader<T>` for custom deserialization logic
+- Implement `ObjectWriter<T>` for custom serialization logic
+- Register via `JSON.register(Class, ObjectReader/ObjectWriter)`
 
-### 3. MixIn Annotations
-- Configure serialization/deserialization for third-party classes
-- `JSON.mixIn()` API
+### 3. Filters
+- Apply during serialization for value transformation, name mapping, property filtering
+- Register per-call via `JSON.toJSONString(obj, filter)` or globally
 
-## Security Features
+### 4. MixIn Annotations
+- Inject annotations on third-party classes without modifying source
+- `JSON.mixIn(TargetClass.class, MixInClass.class)`
 
-### 1. AutoType Security
-- `@type` field handling with whitelist/blacklist
-- `AutoTypeBeforeHandler` for custom type checking
-- `JSONReader.Feature.SafeMode` for secure parsing
-
-### 2. JSON Schema Validation
-- JSON Schema draft support
-- Validation before parsing
+### 5. AutoType Handlers
+- `AutoTypeBeforeHandler` - Custom type validation before deserialization
+- `JSONReader.autoTypeFilter(...)` - Whitelist-based type filtering per call
 
 ## Module Dependencies
 
 ```
-core
-  ├── extension (depends on core)
-  ├── extension-spring5 (depends on core, extension)
-  ├── extension-spring6 (depends on core, extension)
-  ├── extension-solon (depends on core, extension)
-  ├── extension-jaxrs (depends on core, extension)
-  ├── fastjson1-compatible (depends on core)
-  ├── kotlin (depends on core)
-  └── core-jdk11 (depends on core)
+core (JDK 8+)
+├── extension (core)
+│   ├── extension-spring5 (core, extension)
+│   ├── extension-spring6 (core, extension)
+│   ├── extension-solon (core, extension)
+│   └── extension-jaxrs (core, extension)
+├── fastjson1-compatible (core)
+├── kotlin (core)
+├── codegen (core)
+└── benchmark (core)
 ```
 
 ## Build System
 
-- Maven-based multi-module project
-- Java 8+ baseline (core)
-- Java 11+ for core-jdk11 module
-- Kotlin support in separate module
-
-## Testing
-
-- JUnit 5 for unit tests
-- Test categories organized by issue numbers:
-  - `issues/` - General issues
-  - `issues_1000/` - Issues 1000-1999
-  - `issues_2000/` - Issues 2000-2999
-  - etc.
+- **Build tool**: Maven with multi-module structure
+- **Java baseline**: JDK 8 (core), JDK 11 (core-jdk11)
+- **Kotlin**: Version 2.1.20
+- **ASM**: Version 9.2 (for bytecode generation)
+- **Testing**: JUnit 5, Kotest (Kotlin module)
+- **Code style**: Checkstyle (`src/checkstyle/fastjson2-checks.xml`)
+- **CI**: GitHub Actions across JDK 8/11/17/21/25 on Ubuntu/Windows/macOS
 
 ## Documentation
 
-- [Features](https://alibaba.github.io/fastjson2/features_en)
-- [JSONB Format](https://alibaba.github.io/fastjson2/JSONB/jsonb_format_en)
-- [JSONPath](https://alibaba.github.io/fastjson2/JSONPath/json_path_en)
-- [Kotlin Support](https://alibaba.github.io/fastjson2/Kotlin/kotlin_en)
-- [Benchmarks](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark)
+- [Features Reference](features_en.md) - All JSONReader/JSONWriter features
+- [Annotations Guide](annotations_en.md) - @JSONField, @JSONType, @JSONCreator
+- [JSONB Format](https://alibaba.github.io/fastjson2/JSONB/jsonb_format_en) - Binary format specification
+- [JSONPath Guide](JSONPath/jsonpath_en.md) - JSONPath syntax and examples
+- [Kotlin Support](Kotlin/kotlin_en.md) - Kotlin API extensions
+- [Spring Integration](Spring/spring_support_en.md) - Spring Framework setup
+- [Performance Guide](performance_en.md) - Tuning tips and best practices
+- [FAQ](FAQ_en.md) - Frequently asked questions
+- [Benchmarks](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark) - Performance data
