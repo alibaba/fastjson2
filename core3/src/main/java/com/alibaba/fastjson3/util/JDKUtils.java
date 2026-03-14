@@ -233,9 +233,9 @@ public final class JDKUtils {
     public static String createLatin1String(byte[] src, int off, int len) {
         // Arrays.copyOfRange is a JIT intrinsic — single allocation + bulk copy
         byte[] value = java.util.Arrays.copyOfRange(src, off, off + len);
-        // new String() initializes coder=0 (LATIN1) — no need to set coder explicitly
         String s = new String();
         UNSAFE.putObject(s, STRING_VALUE_OFFSET, value);
+        UNSAFE.putByte(s, STRING_CODER_OFFSET, (byte) 0); // LATIN1 = 0
         return s;
     }
 

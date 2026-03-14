@@ -502,6 +502,9 @@ public final class ObjectMapper {
         Class<?> rawType;
         if (type instanceof Class) {
             rawType = (Class<?>) type;
+        } else if (type instanceof java.lang.reflect.ParameterizedType pt) {
+            java.lang.reflect.Type raw = pt.getRawType();
+            rawType = raw instanceof Class<?> c ? c : null;
         } else {
             rawType = null;
         }

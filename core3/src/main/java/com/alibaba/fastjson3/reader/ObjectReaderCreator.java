@@ -27,7 +27,7 @@ public final class ObjectReaderCreator {
 
     public static <T> ObjectReader<T> createObjectReader(Class<T> type, Class<?> mixIn) {
         if (JDKUtils.isRecord(type)) {
-            return createRecordReader(type);
+            return createRecordReader(type, mixIn);
         }
 
         Constructor<T> constructor = resolveConstructor(type, mixIn);
@@ -41,7 +41,7 @@ public final class ObjectReaderCreator {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> ObjectReader<T> createRecordReader(Class<T> type) {
+    private static <T> ObjectReader<T> createRecordReader(Class<T> type, Class<?> mixIn) {
         String[] componentNames = JDKUtils.getRecordComponentNames(type);
         Class<?>[] componentTypes = JDKUtils.getRecordComponentTypes(type);
         java.lang.reflect.Type[] genericTypes = JDKUtils.getRecordComponentGenericTypes(type);
@@ -57,6 +57,9 @@ public final class ObjectReaderCreator {
 
         // Build FieldReaders from record components
         JSONType jsonType = type.getAnnotation(JSONType.class);
+        if (jsonType == null && mixIn != null) {
+            jsonType = mixIn.getAnnotation(JSONType.class);
+        }
         NamingStrategy naming = jsonType != null ? jsonType.naming() : com.alibaba.fastjson3.annotation.NamingStrategy.NoneStrategy;
 
         List<FieldReader> fieldReaderList = new ArrayList<>();
@@ -69,7 +72,15 @@ public final class ObjectReaderCreator {
             } catch (NoSuchFieldException ignored) {
             }
 
+            // Check mixIn class for annotation on matching field
             JSONField annotation = field != null ? field.getAnnotation(JSONField.class) : null;
+            if (annotation == null && mixIn != null) {
+                try {
+                    Field mixInField = mixIn.getDeclaredField(rawName);
+                    annotation = mixInField.getAnnotation(JSONField.class);
+                } catch (NoSuchFieldException ignored) {
+                }
+            }
             String jsonName = resolveFieldName(rawName, annotation, naming);
             String[] alternateNames = annotation != null ? annotation.alternateNames() : new String[0];
             int ordinal = annotation != null ? annotation.ordinal() : 0;
@@ -419,11 +430,11 @@ public final class ObjectReaderCreator {
                     FieldReader candidate = frs[nextExpected];
                     byte[] hdr = candidate.fieldNameHeader;
                     // Skip whitespace
-                    while (b[off] <= ' ') {
+                    while (off < end && b[off] <= ' ') {
                         off++;
                     }
-                    if (b[off] == '"') {
-                        int hdrLen = hdr.length;
+                    int hdrLen = hdr.length;
+                    if (off < end && b[off] == '"' && off + hdrLen <= end) {
                         boolean match = true;
                         for (int i = 1; i < hdrLen; i++) {
                             if (b[off + i] != hdr[i]) {
@@ -433,7 +444,7 @@ public final class ObjectReaderCreator {
                         }
                         if (match) {
                             off += hdrLen;
-                            while (b[off] <= ' ') {
+                            while (off < end && b[off] <= ' ') {
                                 off++;
                             }
                             reader = candidate;

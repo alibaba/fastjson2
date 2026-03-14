@@ -53,8 +53,11 @@ public abstract sealed class JSONParser implements Closeable
         }
     }
 
+    static final int MAX_NESTING_DEPTH = 512;
+
     protected final long features;
     protected int offset;
+    protected int depth;
 
     protected JSONParser(long features) {
         this.features = features;
@@ -162,6 +165,9 @@ public abstract sealed class JSONParser implements Closeable
         if (offset >= end() || ch(offset) != '{') {
             throw new JSONException("expected '{' at offset " + offset);
         }
+        if (++depth > MAX_NESTING_DEPTH) {
+            throw new JSONException("nesting depth " + depth + " exceeds maximum " + MAX_NESTING_DEPTH);
+        }
         offset++;
 
         JSONObject obj = new JSONObject();
@@ -169,6 +175,7 @@ public abstract sealed class JSONParser implements Closeable
 
         if (offset < end() && ch(offset) == '}') {
             offset++;
+            depth--;
             return obj;
         }
 
@@ -188,6 +195,7 @@ public abstract sealed class JSONParser implements Closeable
             }
             if (c == '}') {
                 offset++;
+                depth--;
                 return obj;
             }
             throw new JSONException("expected ',' or '}' at offset " + offset);
@@ -199,6 +207,9 @@ public abstract sealed class JSONParser implements Closeable
         if (offset >= end() || ch(offset) != '[') {
             throw new JSONException("expected '[' at offset " + offset);
         }
+        if (++depth > MAX_NESTING_DEPTH) {
+            throw new JSONException("nesting depth " + depth + " exceeds maximum " + MAX_NESTING_DEPTH);
+        }
         offset++;
 
         JSONArray arr = new JSONArray();
@@ -206,6 +217,7 @@ public abstract sealed class JSONParser implements Closeable
 
         if (offset < end() && ch(offset) == ']') {
             offset++;
+            depth--;
             return arr;
         }
 
@@ -224,6 +236,7 @@ public abstract sealed class JSONParser implements Closeable
             }
             if (c == ']') {
                 offset++;
+                depth--;
                 return arr;
             }
             throw new JSONException("expected ',' or ']' at offset " + offset);
@@ -1121,7 +1134,8 @@ public abstract sealed class JSONParser implements Closeable
                     off++;
                     break;
                 }
-                if (c1 == '\\') {
+                if (c1 == '\\' || c1 >= 0x80) {
+                    // Non-ASCII or escape: fall through to slow path for correct char-based hashing
                     this.offset = off;
                     return readFieldNameHashEscape(off);
                 }
@@ -1131,7 +1145,7 @@ public abstract sealed class JSONParser implements Closeable
                     off += 2;
                     break;
                 }
-                if (c2 == '\\') {
+                if (c2 == '\\' || c2 >= 0x80) {
                     hash += c1;
                     this.offset = off + 1;
                     return readFieldNameHashEscape(off + 1);
@@ -1198,72 +1212,59 @@ public abstract sealed class JSONParser implements Closeable
             long hash = 0;
             int start = off;
 
-            if (strategy == com.alibaba.fastjson3.reader.FieldNameMatcher.STRATEGY_BIHV) {
-                final int bits = matcher.bits;
-                while (off < e) {
-                    byte c = b[off];
-                    if (c == '"') {
+            while (off < e) {
+                byte c = b[off];
+                if (c == '"') {
+                    off++;
+                    while (off < e && b[off] <= ' ') {
                         off++;
-                        while (off < e && b[off] <= ' ') {
-                            off++;
-                        }
-                        if (off >= e || b[off] != ':') {
-                            throw new JSONException("expected ':' at offset " + off);
-                        }
-                        off++; // skip ':'
-                        while (off < e && b[off] <= ' ') {
-                            off++;
-                        }
-                        this.offset = off;
-                        return hash;
                     }
-                    if (c == '\\') {
-                        this.offset = start;
-                        String name = readStringContent();
-                        skipWhitespace();
-                        if (this.offset >= e || b[this.offset] != ':') {
-                            throw new JSONException("expected ':' at offset " + this.offset);
-                        }
-                        this.offset++;
-                        skipWhitespace(); // skip WS after ':'
-                        return matcher.hash(name);
+                    if (off >= e || b[off] != ':') {
+                        throw new JSONException("expected ':' at offset " + off);
                     }
-                    hash = (hash << bits) + (c & 0xFF);
+                    off++; // skip ':'
+                    while (off < e && b[off] <= ' ') {
+                        off++;
+                    }
+                    this.offset = off;
+                    return hash;
+                }
+                if (c == '\\') {
+                    this.offset = start;
+                    String name = readStringContent();
+                    skipWhitespace();
+                    if (this.offset >= e || b[this.offset] != ':') {
+                        throw new JSONException("expected ':' at offset " + this.offset);
+                    }
+                    this.offset++;
+                    skipWhitespace();
+                    return matcher.hash(name);
+                }
+
+                // Decode UTF-8 to char for hash (must match FieldNameMatcher.hash which uses chars)
+                int ch;
+                if (c >= 0) {
+                    // ASCII
+                    ch = c;
+                    off++;
+                } else if ((c & 0xE0) == 0xC0 && off + 1 < e) {
+                    ch = ((c & 0x1F) << 6) | (b[off + 1] & 0x3F);
+                    off += 2;
+                } else if ((c & 0xF0) == 0xE0 && off + 2 < e) {
+                    ch = ((c & 0x0F) << 12) | ((b[off + 1] & 0x3F) << 6) | (b[off + 2] & 0x3F);
+                    off += 3;
+                } else if ((c & 0xF8) == 0xF0 && off + 3 < e) {
+                    // 4-byte UTF-8 → surrogate pair (two chars)
+                    int cp = ((c & 0x07) << 18) | ((b[off + 1] & 0x3F) << 12)
+                            | ((b[off + 2] & 0x3F) << 6) | (b[off + 3] & 0x3F);
+                    off += 4;
+                    hash = matcher.hashStep(hash, Character.highSurrogate(cp));
+                    ch = Character.lowSurrogate(cp);
+                } else {
+                    ch = c & 0xFF;
                     off++;
                 }
-            } else {
-                final long prime = matcher.primeValue;
-                while (off < e) {
-                    byte c = b[off];
-                    if (c == '"') {
-                        off++;
-                        while (off < e && b[off] <= ' ') {
-                            off++;
-                        }
-                        if (off >= e || b[off] != ':') {
-                            throw new JSONException("expected ':' at offset " + off);
-                        }
-                        off++; // skip ':'
-                        while (off < e && b[off] <= ' ') {
-                            off++;
-                        }
-                        this.offset = off;
-                        return hash;
-                    }
-                    if (c == '\\') {
-                        this.offset = start;
-                        String name = readStringContent();
-                        skipWhitespace();
-                        if (this.offset >= e || b[this.offset] != ':') {
-                            throw new JSONException("expected ':' at offset " + this.offset);
-                        }
-                        this.offset++;
-                        skipWhitespace(); // skip WS after ':'
-                        return matcher.hash(name);
-                    }
-                    hash = hash * prime + (c & 0xFF);
-                    off++;
-                }
+                hash = matcher.hashStep(hash, ch);
             }
             throw new JSONException("unterminated field name");
         }
@@ -1472,7 +1473,14 @@ public abstract sealed class JSONParser implements Closeable
                 neg = true;
                 c = b[++off] & 0xFF;
             }
+            if (c < '0' || c > '9') {
+                // Non-numeric value: fall back to readAny + conversion
+                this.offset = off - (neg ? 1 : 0);
+                Object val = readAny();
+                return val instanceof Number n ? n.intValue() : Integer.parseInt(val.toString());
+            }
             int value = c - '0';
+            int start = off;
             off++;
             while (off < e) {
                 c = b[off] & 0xFF;
@@ -1481,6 +1489,11 @@ public abstract sealed class JSONParser implements Closeable
                 }
                 value = value * 10 + (c - '0');
                 off++;
+            }
+            // Overflow guard: int has at most 10 digits
+            if (off - start >= 10) {
+                this.offset = start - (neg ? 1 : 0);
+                return readNumber().intValue();
             }
             this.offset = off;
             return neg ? -value : value;
@@ -1507,6 +1520,12 @@ public abstract sealed class JSONParser implements Closeable
             if (off < e && b[off] == '-') {
                 neg = true;
                 off++;
+            }
+
+            if (off >= e || b[off] < '0' || b[off] > '9') {
+                this.offset = start;
+                Object val = readAny();
+                return val instanceof Number n ? n.doubleValue() : Double.parseDouble(val.toString());
             }
 
             // Parse integer part
@@ -1583,6 +1602,11 @@ public abstract sealed class JSONParser implements Closeable
             if (c == '-') {
                 neg = true;
                 c = b[++off] & 0xFF;
+            }
+            if (c < '0' || c > '9') {
+                this.offset = off - (neg ? 1 : 0);
+                Object val = readAny();
+                return val instanceof Number n ? n.longValue() : Long.parseLong(val.toString());
             }
             int start = off;
             long value = c - '0';
@@ -1675,6 +1699,12 @@ public abstract sealed class JSONParser implements Closeable
                 neg = true;
                 c = b[++off] & 0xFF;
             }
+            if (c < '0' || c > '9') {
+                this.offset = off - (neg ? 1 : 0);
+                Object val = readAny();
+                reader.setFieldValue(bean, reader.convertValue(val));
+                return this.offset;
+            }
             int start = off;
             long value = c - '0';
             off++;
@@ -1710,11 +1740,23 @@ public abstract sealed class JSONParser implements Closeable
                 neg = true;
                 c = b[++off] & 0xFF;
             }
+            if (c < '0' || c > '9') {
+                this.offset = off - (neg ? 1 : 0);
+                Object val = readAny();
+                reader.setFieldValue(bean, reader.convertValue(val));
+                return this.offset;
+            }
             int value = c - '0';
+            int digitStart = off;
             off++;
             while ((c = b[off] & 0xFF) >= '0' && c <= '9') {
                 value = value * 10 + (c - '0');
                 off++;
+            }
+            if (off - digitStart >= 10) {
+                this.offset = digitStart - (neg ? 1 : 0);
+                reader.setIntValue(bean, readNumber().intValue());
+                return this.offset;
             }
             reader.setIntValue(bean, neg ? -value : value);
             return off;
@@ -1731,6 +1773,13 @@ public abstract sealed class JSONParser implements Closeable
             if (b[off] == '-') {
                 neg = true;
                 off++;
+            }
+            if (b[off] < '0' || b[off] > '9') {
+                // Non-numeric (null, string, boolean, etc.) — fallback
+                this.offset = start;
+                Object val = readAny();
+                reader.setFieldValue(bean, reader.convertValue(val));
+                return this.offset;
             }
             long mantissa = 0;
             while (b[off] >= '0' && b[off] <= '9') {
@@ -1798,11 +1847,24 @@ public abstract sealed class JSONParser implements Closeable
                 neg = true;
                 c = b[++off] & 0xFF;
             }
+            if (c < '0' || c > '9') {
+                this.offset = off - (neg ? 1 : 0);
+                Object val = readAny();
+                com.alibaba.fastjson3.util.JDKUtils.putInt(bean, fieldOffset,
+                        val instanceof Number n ? n.intValue() : Integer.parseInt(val.toString()));
+                return this.offset;
+            }
             int value = c - '0';
+            int digitStart = off;
             off++;
             while ((c = b[off] & 0xFF) >= '0' && c <= '9') {
                 value = value * 10 + (c - '0');
                 off++;
+            }
+            if (off - digitStart >= 10) {
+                this.offset = digitStart - (neg ? 1 : 0);
+                com.alibaba.fastjson3.util.JDKUtils.putInt(bean, fieldOffset, readNumber().intValue());
+                return this.offset;
             }
             com.alibaba.fastjson3.util.JDKUtils.putInt(bean, fieldOffset, neg ? -value : value);
             return off;
@@ -1815,6 +1877,13 @@ public abstract sealed class JSONParser implements Closeable
             if (c == '-') {
                 neg = true;
                 c = b[++off] & 0xFF;
+            }
+            if (c < '0' || c > '9') {
+                this.offset = off - (neg ? 1 : 0);
+                Object val = readAny();
+                com.alibaba.fastjson3.util.JDKUtils.putLongField(bean, fieldOffset,
+                        val instanceof Number n ? n.longValue() : Long.parseLong(val.toString()));
+                return this.offset;
             }
             int start = off;
             long value = c - '0';
@@ -1843,6 +1912,13 @@ public abstract sealed class JSONParser implements Closeable
             if (b[off] == '-') {
                 neg = true;
                 off++;
+            }
+            if (b[off] < '0' || b[off] > '9') {
+                this.offset = start;
+                Object val = readAny();
+                com.alibaba.fastjson3.util.JDKUtils.putDouble(bean, fieldOffset,
+                        val instanceof Number n ? n.doubleValue() : Double.parseDouble(val.toString()));
+                return this.offset;
             }
             long mantissa = 0;
             while (b[off] >= '0' && b[off] <= '9') {
@@ -2223,11 +2299,12 @@ public abstract sealed class JSONParser implements Closeable
          */
         public int tryMatchFieldHeaderOff(int off, byte[] header) {
             final byte[] b = this.bytes;
-            while (b[off] <= ' ') {
+            final int e = this.end;
+            while (off < e && b[off] <= ' ') {
                 off++;
             }
             int len = header.length;
-            if (b[off] != '"') {
+            if (off >= e || b[off] != '"' || off + len > e) {
                 this.offset = off;
                 return -1;
             }
@@ -2238,7 +2315,7 @@ public abstract sealed class JSONParser implements Closeable
                 }
             }
             off += len;
-            while (b[off] <= ' ') {
+            while (off < e && b[off] <= ' ') {
                 off++;
             }
             return off;
@@ -2252,8 +2329,12 @@ public abstract sealed class JSONParser implements Closeable
          */
         public int readFieldSepOff(int off) {
             final byte[] b = this.bytes;
-            while (b[off] <= ' ') {
+            final int e = this.end;
+            while (off < e && b[off] <= ' ') {
                 off++;
+            }
+            if (off >= e) {
+                throw new JSONException("unexpected end of input at offset " + off);
             }
             if (b[off] == ',') {
                 return off + 1;

@@ -112,15 +112,17 @@ public final class FieldReader implements Comparable<FieldReader> {
         // Pre-compute type tag
         this.typeTag = resolveTypeTag(fieldClass);
 
-        // Pre-encode '"fieldName":' for fast ordered matching
-        byte[] hdr = new byte[fieldName.length() + 3];
-        hdr[0] = '"';
-        for (int j = 0; j < fieldName.length(); j++) {
-            hdr[j + 1] = (byte) fieldName.charAt(j);
+        // Pre-encode '"fieldName":' as UTF-8 bytes for fast ordered matching
+        {
+            byte[] nameBytes = fieldName.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            byte[] h = new byte[nameBytes.length + 3];
+            h[0] = '"';
+            System.arraycopy(nameBytes, 0, h, 1, nameBytes.length);
+            h[nameBytes.length + 1] = '"';
+            h[nameBytes.length + 2] = ':';
+            this.fieldNameHeader = h;
         }
-        hdr[fieldName.length() + 1] = '"';
-        hdr[fieldName.length() + 2] = ':';
-        this.fieldNameHeader = hdr;
+        byte[] hdr = this.fieldNameHeader;
 
         // Pre-compute long words for fast header comparison
         int hdrLen = hdr.length;
@@ -295,7 +297,7 @@ public final class FieldReader implements Comparable<FieldReader> {
             return value;
         }
 
-        // Numeric narrowing / widening
+        // Numeric narrowing / widening / temporal conversion
         if (value instanceof Number number) {
             if (fieldClass == int.class || fieldClass == Integer.class) {
                 return number.intValue();
@@ -321,6 +323,26 @@ public final class FieldReader implements Comparable<FieldReader> {
             if (fieldClass == AtomicLong.class) {
                 return new AtomicLong(number.longValue());
             }
+            // Number → temporal type conversion (millis timestamp)
+            long millis = number.longValue();
+            if (fieldClass == Date.class) {
+                return new Date(millis);
+            }
+            if (fieldClass == Instant.class) {
+                return Instant.ofEpochMilli(millis);
+            }
+            if (fieldClass == LocalDateTime.class) {
+                return LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), com.alibaba.fastjson3.util.DateUtils.DEFAULT_ZONE_ID);
+            }
+            if (fieldClass == LocalDate.class) {
+                return LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), com.alibaba.fastjson3.util.DateUtils.DEFAULT_ZONE_ID).toLocalDate();
+            }
+            if (fieldClass == ZonedDateTime.class) {
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), com.alibaba.fastjson3.util.DateUtils.DEFAULT_ZONE_ID);
+            }
+            if (fieldClass == OffsetDateTime.class) {
+                return OffsetDateTime.ofInstant(Instant.ofEpochMilli(millis), com.alibaba.fastjson3.util.DateUtils.DEFAULT_ZONE_ID);
+            }
         }
 
         // Boolean → AtomicBoolean conversion
@@ -333,28 +355,28 @@ public final class FieldReader implements Comparable<FieldReader> {
             return new AtomicReference<>(value);
         }
 
-        // String → temporal type conversion
+        // String → temporal type conversion (high-performance manual parsing)
         if (value instanceof String str && !str.isEmpty()) {
             if (fieldClass == LocalDateTime.class) {
-                return LocalDateTime.parse(str);
+                return com.alibaba.fastjson3.util.DateUtils.parseLocalDateTime(str);
             }
             if (fieldClass == LocalDate.class) {
-                return LocalDate.parse(str);
+                return com.alibaba.fastjson3.util.DateUtils.parseLocalDate(str);
             }
             if (fieldClass == LocalTime.class) {
-                return LocalTime.parse(str);
+                return com.alibaba.fastjson3.util.DateUtils.parseLocalTime(str);
             }
             if (fieldClass == Instant.class) {
-                return Instant.parse(str);
+                return com.alibaba.fastjson3.util.DateUtils.parseInstant(str);
             }
             if (fieldClass == ZonedDateTime.class) {
-                return ZonedDateTime.parse(str);
+                return com.alibaba.fastjson3.util.DateUtils.parseZonedDateTime(str);
             }
             if (fieldClass == OffsetDateTime.class) {
-                return OffsetDateTime.parse(str);
+                return com.alibaba.fastjson3.util.DateUtils.parseOffsetDateTime(str);
             }
             if (fieldClass == Date.class) {
-                return Date.from(Instant.parse(str));
+                return com.alibaba.fastjson3.util.DateUtils.parseDate(str);
             }
         }
 

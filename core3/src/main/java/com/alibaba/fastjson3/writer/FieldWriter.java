@@ -54,8 +54,9 @@ public final class FieldWriter implements Comparable<FieldWriter> {
     final long[] nameByteLongs;
     final int nameBytesLen; // actual byte count (not padded)
 
-    // For TYPE_OBJECT / TYPE_LIST_OBJECT: cached ObjectWriter
+    // For TYPE_OBJECT / TYPE_LIST_OBJECT: cached ObjectWriter + class guard
     private volatile ObjectWriter<Object> cachedWriter;
+    private volatile Class<?> cachedWriterClass;
 
     // For TYPE_LIST_STRING / TYPE_LIST_OBJECT: element class
     final Class<?> elementClass;
@@ -358,11 +359,13 @@ public final class FieldWriter implements Comparable<FieldWriter> {
         }
         generator.writePreEncodedNameLongs(nameByteLongs, nameBytesLen, nameChars, nameBytes);
 
+        Class<?> valueClass = value.getClass();
         ObjectWriter<Object> writer = cachedWriter;
-        if (writer == null) {
-            writer = (ObjectWriter<Object>) ObjectMapper.shared().getObjectWriter(value.getClass());
+        if (writer == null || cachedWriterClass != valueClass) {
+            writer = (ObjectWriter<Object>) ObjectMapper.shared().getObjectWriter(valueClass);
             if (writer != null) {
                 cachedWriter = writer;
+                cachedWriterClass = valueClass;
             }
         }
         if (writer != null) {

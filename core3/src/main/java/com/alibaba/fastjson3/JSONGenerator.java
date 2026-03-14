@@ -89,8 +89,11 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
         ESCAPE_CHARS['\t'] = 't';
     }
 
+    static final int MAX_WRITE_DEPTH = 512;
+
     protected final long features;
     protected int count;
+    protected int writeDepth;
 
     // Filters — null when no filters configured (zero overhead)
     public PropertyFilter[] propertyFilters;
@@ -217,6 +220,35 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
     public abstract void writeString(String val);
     public abstract void writeRaw(String raw);
 
+    /**
+     * Write a LocalDate value as a JSON string in yyyy-MM-dd format.
+     * Subclasses may override for zero-alloc direct writing.
+     */
+    public void writeLocalDate(LocalDate val) {
+        writeString(val.toString());
+    }
+
+    /**
+     * Write a LocalDateTime value as a JSON string in yyyy-MM-ddTHH:mm:ss format.
+     */
+    public void writeLocalDateTime(LocalDateTime val) {
+        writeString(val.toString());
+    }
+
+    /**
+     * Write a LocalTime value as a JSON string in HH:mm:ss format.
+     */
+    public void writeLocalTime(LocalTime val) {
+        writeString(val.toString());
+    }
+
+    /**
+     * Write an Instant value as a JSON string in yyyy-MM-ddTHH:mm:ssZ format.
+     */
+    public void writeInstant(Instant val) {
+        writeString(val.toString());
+    }
+
     // ---- Name-Value convenience ----
 
     /**
@@ -275,9 +307,8 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
             writeFloat((Float) value);
         } else if (value instanceof BigDecimal) {
             writeDecimal((BigDecimal) value);
-        } else if (value instanceof BigInteger) {
-            writeRaw(value.toString());
-            writeRaw(",");
+        } else if (value instanceof BigInteger bi) {
+            writeDecimal(new BigDecimal(bi));
         } else if (value instanceof Short) {
             writeInt32((Short) value);
         } else if (value instanceof Byte) {
@@ -307,40 +338,52 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
         } else if (value instanceof JSONArray) {
             writeJSONArray((JSONArray) value);
         } else if (value instanceof Map<?, ?> map) {
+            if (++writeDepth > MAX_WRITE_DEPTH) {
+                throw new JSONException("serialization depth " + writeDepth + " exceeds maximum " + MAX_WRITE_DEPTH);
+            }
             startObject();
             for (Map.Entry<?, ?> entry : map.entrySet()) {
                 writeName(String.valueOf(entry.getKey()));
                 writeAny(entry.getValue());
             }
             endObject();
+            writeDepth--;
         } else if (value instanceof Collection<?> coll) {
+            if (++writeDepth > MAX_WRITE_DEPTH) {
+                throw new JSONException("serialization depth " + writeDepth + " exceeds maximum " + MAX_WRITE_DEPTH);
+            }
             startArray();
             for (Object item : coll) {
                 writeAny(item);
             }
             endArray();
+            writeDepth--;
         } else if (value instanceof Object[] arr) {
+            if (++writeDepth > MAX_WRITE_DEPTH) {
+                throw new JSONException("serialization depth " + writeDepth + " exceeds maximum " + MAX_WRITE_DEPTH);
+            }
             startArray();
             for (Object item : arr) {
                 writeAny(item);
             }
             endArray();
+            writeDepth--;
         } else if (value instanceof Enum<?> e) {
             writeString(e.name());
         } else if (value instanceof LocalDateTime ldt) {
-            writeString(ldt.toString());
+            writeLocalDateTime(ldt);
         } else if (value instanceof LocalDate ld) {
-            writeString(ld.toString());
+            writeLocalDate(ld);
         } else if (value instanceof LocalTime lt) {
-            writeString(lt.toString());
+            writeLocalTime(lt);
         } else if (value instanceof Instant inst) {
-            writeString(inst.toString());
+            writeInstant(inst);
         } else if (value instanceof ZonedDateTime zdt) {
             writeString(zdt.toString());
         } else if (value instanceof OffsetDateTime odt) {
             writeString(odt.toString());
         } else if (value instanceof Date date) {
-            writeString(date.toInstant().toString());
+            writeInstant(date.toInstant());
         } else {
             // Try ObjectWriter-based serialization
             @SuppressWarnings("unchecked")
@@ -354,20 +397,28 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
     }
 
     private void writeJSONObject(JSONObject obj) {
+        if (++writeDepth > MAX_WRITE_DEPTH) {
+            throw new JSONException("serialization depth " + writeDepth + " exceeds maximum " + MAX_WRITE_DEPTH);
+        }
         startObject();
         for (Map.Entry<String, Object> entry : obj.entrySet()) {
             writeName(entry.getKey());
             writeAny(entry.getValue());
         }
         endObject();
+        writeDepth--;
     }
 
     private void writeJSONArray(JSONArray arr) {
+        if (++writeDepth > MAX_WRITE_DEPTH) {
+            throw new JSONException("serialization depth " + writeDepth + " exceeds maximum " + MAX_WRITE_DEPTH);
+        }
         startArray();
         for (int i = 0, size = arr.size(); i < size; i++) {
             writeAny(arr.get(i));
         }
         endArray();
+        writeDepth--;
     }
 
     // ---- Output ----
@@ -523,6 +574,10 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
 
         @Override
         public void writeFloat(float val) {
+            if (Float.isNaN(val) || Float.isInfinite(val)) {
+                writeNull();
+                return;
+            }
             String s = Float.toString(val);
             int len = s.length();
             ensureCapacity(count + len + 1);
@@ -533,6 +588,10 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
 
         @Override
         public void writeDouble(double val) {
+            if (Double.isNaN(val) || Double.isInfinite(val)) {
+                writeNull();
+                return;
+            }
             String s = Double.toString(val);
             int len = s.length();
             ensureCapacity(count + len + 1);
@@ -758,7 +817,7 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
         @Override
         public void writeName(String name) {
             int len = name.length();
-            ensureCapacity(len * 3 + 3);
+            ensureCapacity(len * 4 + 3);
             buf[count++] = '"';
             for (int i = 0; i < len; i++) {
                 char ch = name.charAt(i);
@@ -767,6 +826,18 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
                 } else if (ch < 0x800) {
                     buf[count++] = (byte) (0xC0 | (ch >> 6));
                     buf[count++] = (byte) (0x80 | (ch & 0x3F));
+                } else if (Character.isHighSurrogate(ch)) {
+                    if (i + 1 < len && Character.isLowSurrogate(name.charAt(i + 1))) {
+                        int cp = Character.toCodePoint(ch, name.charAt(++i));
+                        buf[count++] = (byte) (0xF0 | (cp >> 18));
+                        buf[count++] = (byte) (0x80 | ((cp >> 12) & 0x3F));
+                        buf[count++] = (byte) (0x80 | ((cp >> 6) & 0x3F));
+                        buf[count++] = (byte) (0x80 | (cp & 0x3F));
+                    } else {
+                        buf[count++] = (byte) 0xEF;
+                        buf[count++] = (byte) 0xBF;
+                        buf[count++] = (byte) 0xBD;
+                    }
                 } else {
                     buf[count++] = (byte) (0xE0 | (ch >> 12));
                     buf[count++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
@@ -911,6 +982,10 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
 
         @Override
         public void writeFloat(float val) {
+            if (Float.isNaN(val) || Float.isInfinite(val)) {
+                writeNull();
+                return;
+            }
             String s = Float.toString(val);
             writeNumericString(s);
         }
@@ -1127,12 +1202,80 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
                 } else if (ch < 0x800) {
                     buf[pos++] = (byte) (0xC0 | (ch >> 6));
                     buf[pos++] = (byte) (0x80 | (ch & 0x3F));
+                } else if (Character.isHighSurrogate(ch)) {
+                    // UTF-16 surrogate pair → 4-byte UTF-8
+                    if (i + 1 < len && Character.isLowSurrogate(val.charAt(i + 1))) {
+                        int cp = Character.toCodePoint(ch, val.charAt(++i));
+                        buf[pos++] = (byte) (0xF0 | (cp >> 18));
+                        buf[pos++] = (byte) (0x80 | ((cp >> 12) & 0x3F));
+                        buf[pos++] = (byte) (0x80 | ((cp >> 6) & 0x3F));
+                        buf[pos++] = (byte) (0x80 | (cp & 0x3F));
+                    } else {
+                        // Lone high surrogate — write replacement char U+FFFD
+                        buf[pos++] = (byte) 0xEF;
+                        buf[pos++] = (byte) 0xBF;
+                        buf[pos++] = (byte) 0xBD;
+                    }
                 } else {
                     buf[pos++] = (byte) (0xE0 | (ch >> 12));
                     buf[pos++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
                     buf[pos++] = (byte) (0x80 | (ch & 0x3F));
                 }
             }
+            buf[pos++] = '"';
+            buf[pos++] = ',';
+            count = pos;
+        }
+
+        @Override
+        public void writeLocalDate(LocalDate val) {
+            // "yyyy-MM-dd", = 12 + 1 bytes
+            ensureCapacity(13);
+            int pos = count;
+            buf[pos++] = '"';
+            pos += com.alibaba.fastjson3.util.DateUtils.writeLocalDate(buf, pos, val);
+            buf[pos++] = '"';
+            buf[pos++] = ',';
+            count = pos;
+        }
+
+        @Override
+        public void writeLocalDateTime(LocalDateTime val) {
+            // "yyyy-MM-ddTHH:mm:ss.SSSSSSSSS", = max 32 bytes
+            ensureCapacity(34);
+            int pos = count;
+            buf[pos++] = '"';
+            pos += com.alibaba.fastjson3.util.DateUtils.writeLocalDateTime(buf, pos, val);
+            buf[pos++] = '"';
+            buf[pos++] = ',';
+            count = pos;
+        }
+
+        @Override
+        public void writeLocalTime(LocalTime val) {
+            // "HH:mm:ss.SSSSSSSSS", = max 21 bytes
+            ensureCapacity(22);
+            int pos = count;
+            buf[pos++] = '"';
+            pos += com.alibaba.fastjson3.util.DateUtils.writeLocalTime(buf, pos, val);
+            int nanos = val.getNano();
+            if (nanos != 0) {
+                pos += com.alibaba.fastjson3.util.DateUtils.writeFractionNanos(buf, pos, nanos);
+            }
+            buf[pos++] = '"';
+            buf[pos++] = ',';
+            count = pos;
+        }
+
+        @Override
+        public void writeInstant(Instant val) {
+            // "yyyy-MM-ddTHH:mm:ss.SSSSSSSSSZ", = max 34 bytes
+            ensureCapacity(36);
+            int pos = count;
+            buf[pos++] = '"';
+            LocalDateTime ldt = LocalDateTime.ofInstant(val, java.time.ZoneOffset.UTC);
+            pos += com.alibaba.fastjson3.util.DateUtils.writeLocalDateTime(buf, pos, ldt);
+            buf[pos++] = 'Z';
             buf[pos++] = '"';
             buf[pos++] = ',';
             count = pos;
