@@ -1,51 +1,216 @@
+# Contributing to FASTJSON 2
 
-# Contributing
+Thank you for your interest in contributing to FASTJSON 2! This guide will help you get started.
 
-## Create pull request
-PR are always welcome, even if they only contain small fixes like typos, or a few lines of code. If there will be a significant effort, please document it as an issue and get a discussion going before starting to work on it.
+## Table of Contents
 
-Please submit a PR broken down into small changes bit by bit. A PR consisting of a lot of features and code changes may be hard to review. It is recommended to submit PRs in an incremental fashion.
+- [Ways to Contribute](#ways-to-contribute)
+- [Development Environment](#development-environment)
+- [Building the Project](#building-the-project)
+- [Running Tests](#running-tests)
+- [Code Style](#code-style)
+- [Creating a Pull Request](#creating-a-pull-request)
+- [Reporting Issues](#reporting-issues)
+- [Project Structure](#project-structure)
 
-Before submitting your PR, please ensure that your code adheres to the project's coding standards and that all tests pass.
+## Ways to Contribute
 
-### Required Pre-submission Checks
+- **Bug Reports** - Found a bug? [Open an issue](https://github.com/alibaba/fastjson2/issues) with steps to reproduce.
+- **Bug Fixes** - Submit a PR with a fix and a test that validates it.
+- **Feature Requests** - Propose new features via issues for discussion before implementation.
+- **Documentation** - Improve or translate documentation. Both English and Chinese docs are maintained.
+- **Performance** - Identify bottlenecks and submit benchmarks or optimizations.
+- **Code Review** - Review open PRs and provide constructive feedback.
 
-The CI pipeline runs tests on multiple JDK versions (8, 11, 17, 21, 25) and operating systems (Ubuntu, Windows, macOS). Please run the following Maven commands locally to verify your changes:
+## Development Environment
 
-**1. Standard Build Test:**
+### Prerequisites
+
+- **JDK 8+** (JDK 17+ recommended for full test coverage)
+- **Maven 3.6+** (or use the included Maven wrapper `./mvnw`)
+- **Git**
+
+### Setup
+
+1. Fork the repository on GitHub.
+2. Clone your fork:
+   ```bash
+   git clone https://github.com/<your-username>/fastjson2.git
+   cd fastjson2
+   ```
+3. Add the upstream remote:
+   ```bash
+   git remote add upstream https://github.com/alibaba/fastjson2.git
+   ```
+4. Create a feature branch:
+   ```bash
+   git checkout -b feature/my-improvement
+   ```
+
+## Building the Project
+
+**Standard build:**
+
+```bash
+./mvnw clean package
+```
+
+**Build with Javadoc and Dokka generation:**
+
 ```bash
 ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
 ```
 
-**2. Reflect Mode Test:**
+**Build a specific module (faster iteration):**
+
 ```bash
-./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package
+./mvnw -pl core clean package
 ```
 
-Or use the shortcut (if available):
+## Running Tests
+
+The CI pipeline runs tests on multiple JDK versions (8, 11, 17, 21, 25) and operating systems (Ubuntu, Windows, macOS). Before submitting a PR, please run:
+
+**1. Standard test:**
+
 ```bash
-mvn validate
-mvn test
+./mvnw clean test
 ```
 
-**Note:** Your PR should not break any existing tests. If your changes affect multiple modules, please ensure all related tests pass in both standard and reflect modes.
+**2. Reflect mode test (validates non-ASM code paths):**
 
-This [Wiki](https://github.com/alibaba/fastjson2/wiki) contains information about scenarios structure, design and api documents, how to use, how to run it, and more.
+```bash
+./mvnw -Dfastjson2.creator=reflect clean test
+```
 
-Note: If you split your pull request to small changes, please make sure any of the changes goes to master will not break anything. Otherwise, it can not be merged until this feature complete.
+**3. Checkstyle validation:**
 
-## Report issues
-It is a great way to contribute by reporting an issue. Well-written and complete bug reports are always welcome! Please open an issue and follow the template to fill in required information.
+```bash
+./mvnw validate
+```
 
-Before opening any issue, please look up the existing issues to avoid submitting a duplication.
-If you find a match, you can "subscribe" to it to get notified on updates. If you have additional helpful information about the issue, please leave a comment.
+**Run tests in a specific module:**
 
-When reporting issues, always include:
+```bash
+./mvnw -pl core test
+```
 
-* Which version you are using.
-* Steps to reproduce the issue.
-* Snapshots or log files if needed
+**Run a specific test class:**
 
-Because the issues are open to the public, when submitting files, be sure to remove any sensitive information, e.g. username, password, IP address, and company name. You can
-replace those parts with "REDACTED" or other strings like "****".
+```bash
+./mvnw -pl core -Dtest=JSONTest test
+```
 
+## Code Style
+
+FASTJSON 2 uses Checkstyle to enforce coding standards. The configuration is in `src/checkstyle/fastjson2-checks.xml`.
+
+Key conventions:
+
+- **Indentation**: 4 spaces (no tabs).
+- **Line length**: Follow the existing patterns in the file you're modifying.
+- **Naming**: Standard Java naming conventions (camelCase for methods/fields, PascalCase for classes).
+- **Imports**: No wildcard imports. Organize imports alphabetically.
+- **Tests**: Use JUnit 5. Place tests in the corresponding `src/test/java` directory.
+- **Kotlin**: Follow standard Kotlin conventions for the `kotlin` module.
+
+Run `./mvnw validate` to check for style violations before committing.
+
+## Creating a Pull Request
+
+### Before You Start
+
+- For significant changes, open an issue first to discuss the approach.
+- Check existing issues and PRs to avoid duplication.
+
+### PR Guidelines
+
+1. **Keep it small and focused.** A PR with one clear purpose is easier to review and merge. If you have multiple independent improvements, submit separate PRs.
+
+2. **Include tests.** Every bug fix should include a regression test. New features should include unit tests covering key scenarios.
+
+3. **Don't break existing tests.** Run both standard and reflect mode tests locally.
+
+4. **Follow commit message conventions:**
+   - Use descriptive commit messages that explain _why_, not just _what_.
+   - Examples:
+     - `fix: JSONPath nested array filter returning incorrect results`
+     - `feat: add support for JDK 25 records`
+     - `docs: improve Spring integration guide`
+
+5. **Update documentation** if your change affects the public API or user-facing behavior.
+
+### PR Checklist
+
+- [ ] Code compiles without errors: `./mvnw clean package`
+- [ ] All tests pass: `./mvnw clean test`
+- [ ] Reflect mode tests pass: `./mvnw -Dfastjson2.creator=reflect clean test`
+- [ ] Checkstyle passes: `./mvnw validate`
+- [ ] New/changed functionality has test coverage
+- [ ] Documentation updated if applicable
+
+### Review Process
+
+- A maintainer will review your PR and may request changes.
+- Address review feedback by pushing additional commits (not force-pushing).
+- Once approved, a maintainer will merge the PR.
+
+## Reporting Issues
+
+Well-written bug reports help us fix issues faster. When reporting, please include:
+
+1. **FASTJSON 2 version** you are using.
+2. **JDK version** and operating system.
+3. **Minimal reproduction code** - a self-contained test case that demonstrates the issue.
+4. **Expected behavior** vs. **actual behavior**.
+5. **Stack traces or log output** if applicable.
+
+### Security Issues
+
+For security vulnerabilities, do **not** open a public issue. Instead, report via [https://security.alibaba.com](https://security.alibaba.com). See [SECURITY.md](SECURITY.md) for details.
+
+### Tips
+
+- Search [existing issues](https://github.com/alibaba/fastjson2/issues) before creating a new one.
+- If you find an existing issue that matches yours, add a comment or reaction instead of opening a duplicate.
+- Remove any sensitive information (usernames, passwords, IPs) from your examples. Use `"REDACTED"` as a placeholder.
+
+## Project Structure
+
+```
+fastjson2/
+├── core/                        # Core JSON library (JDK 8+)
+├── kotlin/                      # Kotlin extension functions
+├── extension/                   # Base extensions (Arrow, ClickHouse, etc.)
+├── extension-spring5/           # Spring 5.x integration
+├── extension-spring6/           # Spring 6.x integration
+├── extension-solon/             # Solon framework integration
+├── extension-jaxrs/             # JAX-RS integration
+├── fastjson1-compatible/        # Fastjson 1.x API compatibility layer
+├── codegen/                     # Compile-time code generation (APT)
+├── benchmark/                   # JMH performance benchmarks
+├── example-spring-test/         # Spring 5 example project
+├── example-spring6-test/        # Spring 6 example project
+├── example-solon-test/          # Solon example project
+├── safemode-test/               # SafeMode test suite
+├── android-test/                # Android compatibility tests
+├── test-jdk17/                  # JDK 17 feature tests (Records, etc.)
+├── test-jdk25/                  # JDK 25 feature tests
+├── docs/                        # Documentation
+└── src/checkstyle/              # Checkstyle configuration
+```
+
+### Key Source Directories in `core/`
+
+| Package | Purpose |
+|---------|---------|
+| `com.alibaba.fastjson2` | Top-level API: `JSON`, `JSONB`, `JSONObject`, `JSONArray`, `JSONReader`, `JSONWriter`, `JSONPath` |
+| `com.alibaba.fastjson2.reader` | Object deserialization: `ObjectReader`, `FieldReader`, creator implementations |
+| `com.alibaba.fastjson2.writer` | Object serialization: `ObjectWriter`, `FieldWriter`, creator implementations |
+| `com.alibaba.fastjson2.annotation` | Annotations: `@JSONField`, `@JSONType`, `@JSONCreator`, `@JSONCompiler` |
+| `com.alibaba.fastjson2.filter` | Serialization filters: `ValueFilter`, `NameFilter`, `PropertyFilter`, etc. |
+| `com.alibaba.fastjson2.schema` | JSON Schema validation |
+| `com.alibaba.fastjson2.support.csv` | CSV reader/writer support |
+| `com.alibaba.fastjson2.util` | Internal utilities |
+
+Thank you for contributing to FASTJSON 2!
