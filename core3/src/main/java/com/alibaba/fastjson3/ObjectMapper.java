@@ -74,7 +74,8 @@ public final class ObjectMapper {
             Collections.<ObjectWriterModule>emptyList(),
             null, null,
             NO_PROPERTY_FILTERS, NO_VALUE_FILTERS, NO_NAME_FILTERS,
-            Collections.<Class<?>, Class<?>>emptyMap());
+            Collections.<Class<?>, Class<?>>emptyMap(),
+            false);
 
     private final long readFeatures;
     private final long writeFeatures;
@@ -94,6 +95,9 @@ public final class ObjectMapper {
     // Mixin mappings: target class → mixin source class
     private final Map<Class<?>, Class<?>> mixInCache;
 
+    // Optional Jackson annotation support (off by default)
+    private final boolean useJacksonAnnotation;
+
     // Thread-safe caches for ObjectReader/ObjectWriter instances
     private final ConcurrentHashMap<Type, ObjectReader<?>> readerCache;
     private final ConcurrentHashMap<Type, ObjectWriter<?>> writerCache;
@@ -108,7 +112,8 @@ public final class ObjectMapper {
             PropertyFilter[] propertyFilters,
             ValueFilter[] valueFilters,
             NameFilter[] nameFilters,
-            Map<Class<?>, Class<?>> mixInCache
+            Map<Class<?>, Class<?>> mixInCache,
+            boolean useJacksonAnnotation
     ) {
         this.readFeatures = readFeatures;
         this.writeFeatures = writeFeatures;
@@ -120,6 +125,7 @@ public final class ObjectMapper {
         this.valueFilters = valueFilters;
         this.nameFilters = nameFilters;
         this.mixInCache = mixInCache;
+        this.useJacksonAnnotation = useJacksonAnnotation;
         this.readerCache = new ConcurrentHashMap<Type, ObjectReader<?>>();
         this.writerCache = new ConcurrentHashMap<Type, ObjectWriter<?>>();
     }
@@ -157,6 +163,7 @@ public final class ObjectMapper {
         Collections.addAll(b.valueFilters, this.valueFilters);
         Collections.addAll(b.nameFilters, this.nameFilters);
         b.mixIns.putAll(this.mixInCache);
+        b.useJacksonAnnotation = this.useJacksonAnnotation;
         return b;
     }
 
@@ -602,7 +609,7 @@ public final class ObjectMapper {
                 reader = readerCreator.apply(clazz);
             } else {
                 Class<?> mixIn = mixInCache.get(clazz);
-                reader = ObjectReaderCreator.createObjectReader(clazz, mixIn);
+                reader = ObjectReaderCreator.createObjectReader(clazz, mixIn, useJacksonAnnotation);
             }
         } catch (Exception e) {
             return null;
@@ -660,7 +667,7 @@ public final class ObjectMapper {
                     writer = writerCreator.apply(rawType);
                 } else {
                     Class<?> mixIn = mixInCache.get(rawType);
-                    writer = ObjectWriterCreator.createObjectWriter(rawType, mixIn);
+                    writer = ObjectWriterCreator.createObjectWriter(rawType, mixIn, useJacksonAnnotation);
                 }
             } catch (Exception e) {
                 return null;
@@ -962,6 +969,7 @@ public final class ObjectMapper {
         final List<ValueFilter> valueFilters = new ArrayList<ValueFilter>();
         final List<NameFilter> nameFilters = new ArrayList<NameFilter>();
         final Map<Class<?>, Class<?>> mixIns = new LinkedHashMap<Class<?>, Class<?>>();
+        boolean useJacksonAnnotation;
 
         Builder() {
         }
@@ -1060,6 +1068,21 @@ public final class ObjectMapper {
             return this;
         }
 
+        // ---- Jackson annotation support ----
+
+        /**
+         * Enable or disable optional Jackson annotation recognition.
+         * When enabled, Jackson annotations (@JsonProperty, @JsonIgnore, etc.) are
+         * detected via reflection with zero compile-time dependency on Jackson.
+         * Native @JSONField/@JSONType annotations always take precedence.
+         *
+         * <p>Disabled by default. Requires Jackson annotations on the classpath at runtime.</p>
+         */
+        public Builder useJacksonAnnotation(boolean enable) {
+            this.useJacksonAnnotation = enable;
+            return this;
+        }
+
         // ---- Mixins ----
 
         /**
@@ -1108,7 +1131,8 @@ public final class ObjectMapper {
                     propertyFilters.toArray(NO_PROPERTY_FILTERS),
                     valueFilters.toArray(NO_VALUE_FILTERS),
                     nameFilters.toArray(NO_NAME_FILTERS),
-                    Collections.unmodifiableMap(new LinkedHashMap<Class<?>, Class<?>>(mixIns))
+                    Collections.unmodifiableMap(new LinkedHashMap<Class<?>, Class<?>>(mixIns)),
+                    useJacksonAnnotation
             );
             // Initialize modules
             for (ObjectReaderModule module : mapper.readerModules) {

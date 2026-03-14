@@ -1,10 +1,7 @@
 package com.alibaba.fastjson3.writer;
 
 import com.alibaba.fastjson3.ObjectWriter;
-import com.alibaba.fastjson3.annotation.Inclusion;
-import com.alibaba.fastjson3.annotation.JSONField;
-import com.alibaba.fastjson3.annotation.JSONType;
-import com.alibaba.fastjson3.annotation.NamingStrategy;
+import com.alibaba.fastjson3.annotation.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -29,24 +26,47 @@ public final class ObjectWriterCreator {
      * @return a new ObjectWriter that serializes instances of the given type
      */
     public static <T> ObjectWriter<T> createObjectWriter(Class<T> type) {
-        return createObjectWriter(type, null);
+        return createObjectWriter(type, null, false);
     }
 
     public static <T> ObjectWriter<T> createObjectWriter(Class<T> type, Class<?> mixIn) {
-        if (com.alibaba.fastjson3.util.JDKUtils.isRecord(type)) {
-            return createRecordWriter(type, mixIn);
-        }
-
-        return createPojoWriter(type, mixIn);
+        return createObjectWriter(type, mixIn, false);
     }
 
-    private static <T> ObjectWriter<T> createRecordWriter(Class<T> type, Class<?> mixIn) {
+    public static <T> ObjectWriter<T> createObjectWriter(Class<T> type, Class<?> mixIn, boolean useJacksonAnnotation) {
+        if (com.alibaba.fastjson3.util.JDKUtils.isRecord(type)) {
+            return createRecordWriter(type, mixIn, useJacksonAnnotation);
+        }
+
+        return createPojoWriter(type, mixIn, useJacksonAnnotation);
+    }
+
+    private static <T> ObjectWriter<T> createRecordWriter(Class<T> type, Class<?> mixIn, boolean useJacksonAnnotation) {
         JSONType jsonType = type.getAnnotation(JSONType.class);
         NamingStrategy naming = jsonType != null ? jsonType.naming() : NamingStrategy.NoneStrategy;
-        Set<String> includes = jsonType != null ? Set.of(jsonType.includes()) : Set.of();
-        Set<String> ignores = jsonType != null ? Set.of(jsonType.ignores()) : Set.of();
+        Set<String> includes = jsonType != null && jsonType.includes().length > 0 ? Set.of(jsonType.includes()) : Set.of();
+        Set<String> ignores = jsonType != null && jsonType.ignores().length > 0 ? Set.of(jsonType.ignores()) : Set.of();
         boolean alphabetic = jsonType == null || jsonType.alphabetic();
         Inclusion typeInclusion = jsonType != null ? jsonType.inclusion() : Inclusion.DEFAULT;
+
+        // Jackson class-level annotations as fallback
+        if (useJacksonAnnotation) {
+            JacksonAnnotationSupport.BeanInfo jackson = JacksonAnnotationSupport.getBeanInfo(type);
+            if (jackson != null) {
+                if (naming == NamingStrategy.NoneStrategy && jackson.naming() != null) {
+                    naming = jackson.naming();
+                }
+                if (ignores.isEmpty() && jackson.ignoreProperties() != null) {
+                    ignores = Set.of(jackson.ignoreProperties());
+                }
+                if (jsonType == null && jackson.alphabetic() != null) {
+                    alphabetic = jackson.alphabetic();
+                }
+                if (typeInclusion == Inclusion.DEFAULT && jackson.inclusion() != null) {
+                    typeInclusion = jackson.inclusion();
+                }
+            }
+        }
 
         String[] componentNames = com.alibaba.fastjson3.util.JDKUtils.getRecordComponentNames(type);
         java.lang.reflect.Method[] accessors = com.alibaba.fastjson3.util.JDKUtils.getRecordComponentAccessors(type);
@@ -84,20 +104,46 @@ public final class ObjectWriterCreator {
                 continue;
             }
 
+            // Jackson field annotations as fallback
+            JacksonAnnotationSupport.FieldInfo jacksonField = null;
+            if (jsonField == null && useJacksonAnnotation) {
+                jacksonField = JacksonAnnotationSupport.getFieldInfo(accessor.getAnnotations());
+                if (jacksonField == null) {
+                    try {
+                        java.lang.reflect.Field f = type.getDeclaredField(propertyName);
+                        jacksonField = JacksonAnnotationSupport.getFieldInfo(f.getAnnotations());
+                    } catch (NoSuchFieldException ignored) {
+                    }
+                }
+                if (jacksonField != null && jacksonField.noSerialize()) {
+                    continue;
+                }
+            }
+
             String jsonName;
             int ordinal = 0;
             if (jsonField != null && !jsonField.name().isEmpty()) {
                 jsonName = jsonField.name();
+            } else if (jacksonField != null && !jacksonField.name().isEmpty()) {
+                jsonName = jacksonField.name();
             } else {
                 jsonName = applyNamingStrategy(propertyName, naming);
             }
             if (jsonField != null) {
                 ordinal = jsonField.ordinal();
+            } else if (jacksonField != null) {
+                ordinal = jacksonField.ordinal();
             }
 
             // Resolve inclusion: field-level overrides type-level
-            Inclusion fieldInclusion = (jsonField != null && jsonField.inclusion() != Inclusion.DEFAULT)
-                    ? jsonField.inclusion() : typeInclusion;
+            Inclusion fieldInclusion;
+            if (jsonField != null && jsonField.inclusion() != Inclusion.DEFAULT) {
+                fieldInclusion = jsonField.inclusion();
+            } else if (jacksonField != null && jacksonField.inclusion() != null) {
+                fieldInclusion = jacksonField.inclusion();
+            } else {
+                fieldInclusion = typeInclusion;
+            }
 
             // Prefer backing field for Unsafe direct access
             java.lang.reflect.Field backingField = null;
@@ -128,14 +174,36 @@ public final class ObjectWriterCreator {
         return buildObjectWriter(writers);
     }
 
-    private static <T> ObjectWriter<T> createPojoWriter(Class<T> type, Class<?> mixIn) {
+    private static <T> ObjectWriter<T> createPojoWriter(Class<T> type, Class<?> mixIn, boolean useJacksonAnnotation) {
         JSONType jsonType = type.getAnnotation(JSONType.class);
         NamingStrategy naming = jsonType != null ? jsonType.naming() : NamingStrategy.NoneStrategy;
-        Set<String> includes = jsonType != null ? Set.of(jsonType.includes()) : Set.of();
-        Set<String> ignores = jsonType != null ? Set.of(jsonType.ignores()) : Set.of();
+        Set<String> includes = jsonType != null && jsonType.includes().length > 0 ? Set.of(jsonType.includes()) : Set.of();
+        Set<String> ignores = jsonType != null && jsonType.ignores().length > 0 ? Set.of(jsonType.ignores()) : Set.of();
         String[] orders = jsonType != null ? jsonType.orders() : new String[0];
         boolean alphabetic = jsonType == null || jsonType.alphabetic();
         Inclusion typeInclusion = jsonType != null ? jsonType.inclusion() : Inclusion.DEFAULT;
+
+        // Jackson class-level annotations as fallback (only when @JSONType not present or doesn't specify)
+        if (useJacksonAnnotation) {
+            JacksonAnnotationSupport.BeanInfo jackson = JacksonAnnotationSupport.getBeanInfo(type);
+            if (jackson != null) {
+                if (naming == NamingStrategy.NoneStrategy && jackson.naming() != null) {
+                    naming = jackson.naming();
+                }
+                if (ignores.isEmpty() && jackson.ignoreProperties() != null) {
+                    ignores = Set.of(jackson.ignoreProperties());
+                }
+                if (orders.length == 0 && jackson.propertyOrder() != null) {
+                    orders = jackson.propertyOrder();
+                }
+                if (jsonType == null && jackson.alphabetic() != null) {
+                    alphabetic = jackson.alphabetic();
+                }
+                if (typeInclusion == Inclusion.DEFAULT && jackson.inclusion() != null) {
+                    typeInclusion = jackson.inclusion();
+                }
+            }
+        }
 
         // Collect field writers keyed by property name to deduplicate getter vs field
         Map<String, FieldWriter> writerMap = new LinkedHashMap<>();
@@ -167,21 +235,34 @@ public final class ObjectWriterCreator {
                 continue;
             }
 
+            // Jackson field annotations as fallback (only when @JSONField not found)
+            JacksonAnnotationSupport.FieldInfo jacksonField = null;
+            if (jsonField == null && useJacksonAnnotation) {
+                jacksonField = JacksonAnnotationSupport.getFieldInfo(method.getAnnotations());
+                if (jacksonField != null && jacksonField.noSerialize()) {
+                    continue;
+                }
+            }
+
             String jsonName;
             int ordinal = 0;
 
             if (jsonField != null && !jsonField.name().isEmpty()) {
                 jsonName = jsonField.name();
+            } else if (jacksonField != null && !jacksonField.name().isEmpty()) {
+                jsonName = jacksonField.name();
             } else {
                 jsonName = applyNamingStrategy(propertyName, naming);
             }
 
             if (jsonField != null) {
                 ordinal = jsonField.ordinal();
+            } else if (jacksonField != null) {
+                ordinal = jacksonField.ordinal();
             }
 
             // Check field-level annotation as well (for the corresponding field)
-            if (jsonField == null) {
+            if (jsonField == null && jacksonField == null) {
                 try {
                     Field f = findDeclaredField(type, propertyName);
                     if (f != null) {
@@ -198,6 +279,18 @@ public final class ObjectWriterCreator {
                                 jsonName = fieldAnnotation.name();
                             }
                             ordinal = fieldAnnotation.ordinal();
+                        } else if (useJacksonAnnotation) {
+                            // Check Jackson annotations on backing field
+                            jacksonField = JacksonAnnotationSupport.getFieldInfo(f.getAnnotations());
+                            if (jacksonField != null) {
+                                if (jacksonField.noSerialize()) {
+                                    continue;
+                                }
+                                if (!jacksonField.name().isEmpty()) {
+                                    jsonName = jacksonField.name();
+                                }
+                                ordinal = jacksonField.ordinal();
+                            }
                         }
                     }
                 } catch (Exception ignored) {
@@ -212,6 +305,8 @@ public final class ObjectWriterCreator {
             Inclusion fieldInclusion = typeInclusion;
             if (jsonField != null && jsonField.inclusion() != Inclusion.DEFAULT) {
                 fieldInclusion = jsonField.inclusion();
+            } else if (jacksonField != null && jacksonField.inclusion() != null) {
+                fieldInclusion = jacksonField.inclusion();
             }
             if (backingField != null) {
                 JSONField fAnn = backingField.getAnnotation(JSONField.class);
@@ -260,22 +355,41 @@ public final class ObjectWriterCreator {
                 continue;
             }
 
+            // Jackson field annotations as fallback
+            JacksonAnnotationSupport.FieldInfo jacksonField = null;
+            if (jsonField == null && useJacksonAnnotation) {
+                jacksonField = JacksonAnnotationSupport.getFieldInfo(field.getAnnotations());
+                if (jacksonField != null && jacksonField.noSerialize()) {
+                    continue;
+                }
+            }
+
             String jsonName;
             int ordinal = 0;
 
             if (jsonField != null && !jsonField.name().isEmpty()) {
                 jsonName = jsonField.name();
+            } else if (jacksonField != null && !jacksonField.name().isEmpty()) {
+                jsonName = jacksonField.name();
             } else {
                 jsonName = applyNamingStrategy(propertyName, naming);
             }
 
             if (jsonField != null) {
                 ordinal = jsonField.ordinal();
+            } else if (jacksonField != null) {
+                ordinal = jacksonField.ordinal();
             }
 
             // Resolve inclusion: field-level overrides type-level
-            Inclusion fieldInclusion = (jsonField != null && jsonField.inclusion() != Inclusion.DEFAULT)
-                    ? jsonField.inclusion() : typeInclusion;
+            Inclusion fieldInclusion;
+            if (jsonField != null && jsonField.inclusion() != Inclusion.DEFAULT) {
+                fieldInclusion = jsonField.inclusion();
+            } else if (jacksonField != null && jacksonField.inclusion() != null) {
+                fieldInclusion = jacksonField.inclusion();
+            } else {
+                fieldInclusion = typeInclusion;
+            }
 
             field.setAccessible(true);
             writerMap.put(propertyName, createFieldWriterForField(

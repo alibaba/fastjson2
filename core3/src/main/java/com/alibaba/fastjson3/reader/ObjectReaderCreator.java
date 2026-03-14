@@ -5,10 +5,7 @@ import com.alibaba.fastjson3.JSONParser;
 import com.alibaba.fastjson3.ObjectMapper;
 import com.alibaba.fastjson3.ObjectReader;
 import com.alibaba.fastjson3.ReadFeature;
-import com.alibaba.fastjson3.annotation.JSONCreator;
-import com.alibaba.fastjson3.annotation.JSONField;
-import com.alibaba.fastjson3.annotation.JSONType;
-import com.alibaba.fastjson3.annotation.NamingStrategy;
+import com.alibaba.fastjson3.annotation.*;
 import com.alibaba.fastjson3.util.JDKUtils;
 
 import java.lang.reflect.*;
@@ -22,12 +19,16 @@ public final class ObjectReaderCreator {
     }
 
     public static <T> ObjectReader<T> createObjectReader(Class<T> type) {
-        return createObjectReader(type, null);
+        return createObjectReader(type, null, false);
     }
 
     public static <T> ObjectReader<T> createObjectReader(Class<T> type, Class<?> mixIn) {
+        return createObjectReader(type, mixIn, false);
+    }
+
+    public static <T> ObjectReader<T> createObjectReader(Class<T> type, Class<?> mixIn, boolean useJacksonAnnotation) {
         if (JDKUtils.isRecord(type)) {
-            return createRecordReader(type, mixIn);
+            return createRecordReader(type, mixIn, useJacksonAnnotation);
         }
 
         // Sealed class/interface: auto-discover subtypes for polymorphic deserialization
@@ -35,18 +36,18 @@ public final class ObjectReaderCreator {
             return createSealedReader(type, mixIn);
         }
 
-        Constructor<T> constructor = resolveConstructor(type, mixIn);
+        Constructor<T> constructor = resolveConstructor(type, mixIn, useJacksonAnnotation);
         constructor.setAccessible(true);
         boolean useUnsafeAlloc = JDKUtils.UNSAFE_AVAILABLE;
 
-        FieldReaderCollection collection = collectFieldReaders(type, mixIn);
+        FieldReaderCollection collection = collectFieldReaders(type, mixIn, useJacksonAnnotation);
 
         return new ReflectionObjectReader<>(type, constructor, collection.fieldReaders,
                 collection.fieldReaderMap, collection.matcher, useUnsafeAlloc);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> ObjectReader<T> createRecordReader(Class<T> type, Class<?> mixIn) {
+    private static <T> ObjectReader<T> createRecordReader(Class<T> type, Class<?> mixIn, boolean useJacksonAnnotation) {
         String[] componentNames = JDKUtils.getRecordComponentNames(type);
         Class<?>[] componentTypes = JDKUtils.getRecordComponentTypes(type);
         java.lang.reflect.Type[] genericTypes = JDKUtils.getRecordComponentGenericTypes(type);
@@ -67,6 +68,16 @@ public final class ObjectReaderCreator {
         }
         NamingStrategy naming = jsonType != null ? jsonType.naming() : com.alibaba.fastjson3.annotation.NamingStrategy.NoneStrategy;
 
+        // Jackson class-level fallback
+        if (useJacksonAnnotation) {
+            JacksonAnnotationSupport.BeanInfo jackson = JacksonAnnotationSupport.getBeanInfo(type);
+            if (jackson != null) {
+                if (naming == NamingStrategy.NoneStrategy && jackson.naming() != null) {
+                    naming = jackson.naming();
+                }
+            }
+        }
+
         List<FieldReader> fieldReaderList = new ArrayList<>();
         for (int i = 0; i < componentNames.length; i++) {
             String rawName = componentNames[i];
@@ -86,11 +97,34 @@ public final class ObjectReaderCreator {
                 } catch (NoSuchFieldException ignored) {
                 }
             }
+
+            // Jackson field annotations as fallback
+            JacksonAnnotationSupport.FieldInfo jacksonField = null;
+            if (annotation == null && useJacksonAnnotation && field != null) {
+                jacksonField = JacksonAnnotationSupport.getFieldInfo(field.getAnnotations());
+            }
+
             String jsonName = resolveFieldName(rawName, annotation, naming);
             String[] alternateNames = annotation != null ? annotation.alternateNames() : new String[0];
             int ordinal = annotation != null ? annotation.ordinal() : 0;
             String defaultValue = annotation != null ? annotation.defaultValue() : "";
             boolean required = annotation != null && annotation.required();
+
+            // Apply Jackson fallbacks
+            if (jacksonField != null) {
+                if (jsonName.equals(applyNamingStrategy(rawName, naming)) && !jacksonField.name().isEmpty()) {
+                    jsonName = jacksonField.name();
+                }
+                if (alternateNames.length == 0 && jacksonField.alternateNames().length > 0) {
+                    alternateNames = jacksonField.alternateNames();
+                }
+                if (ordinal == 0) {
+                    ordinal = jacksonField.ordinal();
+                }
+                if (!required) {
+                    required = jacksonField.required();
+                }
+            }
 
             fieldReaderList.add(new FieldReader(
                     jsonName, alternateNames,
@@ -159,16 +193,33 @@ public final class ObjectReaderCreator {
      * Package-private so ObjectReaderCreatorASM can reuse this logic.
      */
     static FieldReaderCollection collectFieldReaders(Class<?> type) {
-        return collectFieldReaders(type, null);
+        return collectFieldReaders(type, null, false);
     }
 
     static FieldReaderCollection collectFieldReaders(Class<?> type, Class<?> mixIn) {
+        return collectFieldReaders(type, mixIn, false);
+    }
+
+    static FieldReaderCollection collectFieldReaders(Class<?> type, Class<?> mixIn, boolean useJacksonAnnotation) {
         JSONType jsonType = type.getAnnotation(JSONType.class);
         NamingStrategy naming = jsonType != null ? jsonType.naming() : NamingStrategy.NoneStrategy;
         Set<String> includes = jsonType != null && jsonType.includes().length > 0
                 ? Set.of(jsonType.includes()) : Set.of();
         Set<String> ignores = jsonType != null && jsonType.ignores().length > 0
                 ? Set.of(jsonType.ignores()) : Set.of();
+
+        // Jackson class-level annotations as fallback
+        if (useJacksonAnnotation) {
+            JacksonAnnotationSupport.BeanInfo jackson = JacksonAnnotationSupport.getBeanInfo(type);
+            if (jackson != null) {
+                if (naming == NamingStrategy.NoneStrategy && jackson.naming() != null) {
+                    naming = jackson.naming();
+                }
+                if (ignores.isEmpty() && jackson.ignoreProperties() != null) {
+                    ignores = Set.of(jackson.ignoreProperties());
+                }
+            }
+        }
 
         List<FieldReader> fieldReaderList = new ArrayList<>();
         Set<String> processedNames = new HashSet<>();
@@ -184,6 +235,15 @@ public final class ObjectReaderCreator {
                 continue;
             }
 
+            // Jackson field annotations as fallback
+            JacksonAnnotationSupport.FieldInfo jacksonField = null;
+            if (annotation == null && useJacksonAnnotation) {
+                jacksonField = JacksonAnnotationSupport.getFieldInfo(field.getAnnotations());
+                if (jacksonField != null && jacksonField.noDeserialize()) {
+                    continue;
+                }
+            }
+
             String rawName = field.getName();
             if (ignores.contains(rawName)) {
                 continue;
@@ -193,7 +253,7 @@ public final class ObjectReaderCreator {
             }
 
             boolean isPublic = Modifier.isPublic(field.getModifiers());
-            boolean hasAnnotation = annotation != null;
+            boolean hasAnnotation = annotation != null || jacksonField != null;
             if (!isPublic && !hasAnnotation) {
                 continue;
             }
@@ -206,6 +266,22 @@ public final class ObjectReaderCreator {
             int ordinal = annotation != null ? annotation.ordinal() : 0;
             String defaultValue = annotation != null ? annotation.defaultValue() : "";
             boolean required = annotation != null && annotation.required();
+
+            // Apply Jackson fallbacks
+            if (jacksonField != null) {
+                if (jsonName.equals(applyNamingStrategy(rawName, naming)) && !jacksonField.name().isEmpty()) {
+                    jsonName = jacksonField.name();
+                }
+                if (alternateNames.length == 0 && jacksonField.alternateNames().length > 0) {
+                    alternateNames = jacksonField.alternateNames();
+                }
+                if (ordinal == 0) {
+                    ordinal = jacksonField.ordinal();
+                }
+                if (!required) {
+                    required = jacksonField.required();
+                }
+            }
 
             fieldReaderList.add(new FieldReader(
                     jsonName, alternateNames,
@@ -235,12 +311,25 @@ public final class ObjectReaderCreator {
                 continue;
             }
 
-            if (rawName == null && annotation == null) {
+            // Jackson setter annotations as fallback
+            JacksonAnnotationSupport.FieldInfo jacksonField = null;
+            if (annotation == null && useJacksonAnnotation) {
+                jacksonField = JacksonAnnotationSupport.getFieldInfo(method.getAnnotations());
+                if (jacksonField != null && jacksonField.noDeserialize()) {
+                    continue;
+                }
+            }
+
+            if (rawName == null && annotation == null && jacksonField == null) {
                 continue;
             }
             if (rawName == null) {
-                rawName = annotation.name();
-                if (rawName.isEmpty()) {
+                if (annotation != null) {
+                    rawName = annotation.name();
+                } else if (jacksonField != null && !jacksonField.name().isEmpty()) {
+                    rawName = jacksonField.name();
+                }
+                if (rawName == null || rawName.isEmpty()) {
                     continue;
                 }
             }
@@ -260,6 +349,22 @@ public final class ObjectReaderCreator {
             int ordinal = annotation != null ? annotation.ordinal() : 0;
             String defaultValue = annotation != null ? annotation.defaultValue() : "";
             boolean required = annotation != null && annotation.required();
+
+            // Apply Jackson fallbacks
+            if (jacksonField != null) {
+                if (jsonName.equals(applyNamingStrategy(rawName, naming)) && !jacksonField.name().isEmpty()) {
+                    jsonName = jacksonField.name();
+                }
+                if (alternateNames.length == 0 && jacksonField.alternateNames().length > 0) {
+                    alternateNames = jacksonField.alternateNames();
+                }
+                if (ordinal == 0) {
+                    ordinal = jacksonField.ordinal();
+                }
+                if (!required) {
+                    required = jacksonField.required();
+                }
+            }
 
             Parameter param = method.getParameters()[0];
             fieldReaderList.add(new FieldReader(
@@ -1352,8 +1457,8 @@ public final class ObjectReaderCreator {
     // ==================== Helper methods ====================
 
     @SuppressWarnings("unchecked")
-    private static <T> Constructor<T> resolveConstructor(Class<T> type, Class<?> mixIn) {
-        // Check target class constructors
+    private static <T> Constructor<T> resolveConstructor(Class<T> type, Class<?> mixIn, boolean useJacksonAnnotation) {
+        // Check target class constructors for @JSONCreator
         for (Constructor<?> ctor : type.getDeclaredConstructors()) {
             if (ctor.isAnnotationPresent(JSONCreator.class)) {
                 if (ctor.getParameterCount() == 0) {
@@ -1362,6 +1467,18 @@ public final class ObjectReaderCreator {
                 throw new JSONException(
                         "@JSONCreator with parameters is not yet supported: " + type.getName()
                 );
+            }
+        }
+        // Check Jackson @JsonCreator on constructors
+        if (useJacksonAnnotation) {
+            for (Constructor<?> ctor : type.getDeclaredConstructors()) {
+                if (JacksonAnnotationSupport.hasJsonCreator(ctor)) {
+                    if (ctor.getParameterCount() == 0) {
+                        return (Constructor<T>) ctor;
+                    }
+                    // Jackson @JsonCreator with parameters not yet supported either
+                    break;
+                }
             }
         }
         // Check mixin constructors for @JSONCreator (match by parameter types)
