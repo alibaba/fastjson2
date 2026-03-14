@@ -150,7 +150,7 @@ class SerializationEdgeTest {
     // ==================== TypeReference ====================
 
     @Test
-    void typeReferenceCapuresGenericType() {
+    void typeReferenceCapturesGenericType() {
         TypeReference<List<String>> ref = new TypeReference<List<String>>() {
         };
         Type type = ref.getType();
@@ -539,5 +539,154 @@ class SerializationEdgeTest {
     public static class CustomPoint {
         public int x;
         public int y;
+    }
+
+    // ==================== NaN / Infinity ====================
+
+    @Test
+    void nanSerializesToNull() {
+        String json = JSON.toJSONString(Double.NaN);
+        assertEquals("null", json);
+    }
+
+    @Test
+    void positiveInfinitySerializesToNull() {
+        String json = JSON.toJSONString(Double.POSITIVE_INFINITY);
+        assertEquals("null", json);
+    }
+
+    @Test
+    void floatNanSerializesToNull() {
+        String json = JSON.toJSONString(Float.NaN);
+        assertEquals("null", json);
+    }
+
+    @Test
+    void nanInBeanSerializesToNull() {
+        NumericBean bean = new NumericBean();
+        bean.floatVal = Float.NaN;
+        String json = JSON.toJSONString(bean);
+        assertTrue(json.contains("null"), json);
+    }
+
+    // ==================== Nesting Depth ====================
+
+    @Test
+    void deepNestingParseThrows() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 600; i++) {
+            sb.append("{\"a\":");
+        }
+        sb.append("1");
+        for (int i = 0; i < 600; i++) {
+            sb.append('}');
+        }
+        assertThrows(JSONException.class, () -> JSON.parse(sb.toString()));
+    }
+
+    @Test
+    void deepArrayNestingParseThrows() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 600; i++) {
+            sb.append('[');
+        }
+        sb.append("1");
+        for (int i = 0; i < 600; i++) {
+            sb.append(']');
+        }
+        assertThrows(JSONException.class, () -> JSON.parse(sb.toString()));
+    }
+
+    @Test
+    void moderateNestingParseSucceeds() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 100; i++) {
+            sb.append("{\"a\":");
+        }
+        sb.append("1");
+        for (int i = 0; i < 100; i++) {
+            sb.append('}');
+        }
+        Object result = JSON.parse(sb.toString());
+        assertNotNull(result);
+    }
+
+    // ==================== Int Overflow ====================
+
+    @Test
+    void largeNumberParsedAsLong() {
+        String json = "3000000000"; // > Integer.MAX_VALUE
+        Object val = JSON.parse(json);
+        assertInstanceOf(Long.class, val);
+        assertEquals(3000000000L, val);
+    }
+
+    @Test
+    void veryLargeNumberParsedAsBigInteger() {
+        String json = "99999999999999999999"; // > Long.MAX_VALUE
+        Object val = JSON.parse(json);
+        assertInstanceOf(java.math.BigInteger.class, val);
+    }
+
+    // ==================== Surrogate Pairs ====================
+
+    @Test
+    void emojiRoundTrip() {
+        String emoji = "Hello \uD83D\uDE00 World"; // 😀
+        String json = JSON.toJSONString(emoji);
+        String parsed = (String) JSON.parse(json);
+        assertEquals(emoji, parsed);
+    }
+
+    @Test
+    void emojiInBeanRoundTrip() {
+        SimpleBean bean = new SimpleBean();
+        bean.name = "test \uD83C\uDF89"; // 🎉
+        String json = JSON.toJSONString(bean);
+        SimpleBean back = JSON.parseObject(json, SimpleBean.class);
+        assertEquals(bean.name, back.name);
+    }
+
+    @Test
+    void emojiInBytesRoundTrip() {
+        String emoji = "\uD83D\uDE80\uD83C\uDF1F"; // 🚀🌟
+        byte[] bytes = JSON.toJSONBytes(emoji);
+        Object parsed = JSON.parseObject(bytes, String.class);
+        assertEquals(emoji, parsed);
+    }
+
+    // ==================== Non-ASCII Field Names ====================
+
+    public static class ChineseFieldBean {
+        @com.alibaba.fastjson3.annotation.JSONField(name = "名字")
+        public String name;
+
+        @com.alibaba.fastjson3.annotation.JSONField(name = "年龄")
+        public int age;
+
+        public ChineseFieldBean() {
+        }
+    }
+
+    @Test
+    void nonAsciiFieldNameRoundTrip() {
+        ChineseFieldBean bean = new ChineseFieldBean();
+        bean.name = "张三";
+        bean.age = 30;
+        String json = JSON.toJSONString(bean);
+        assertTrue(json.contains("名字"), json);
+        assertTrue(json.contains("张三"), json);
+
+        ChineseFieldBean back = JSON.parseObject(json, ChineseFieldBean.class);
+        assertEquals("张三", back.name);
+        assertEquals(30, back.age);
+    }
+
+    @Test
+    void nonAsciiFieldNameFromBytes() {
+        byte[] json = "{\"名字\":\"李四\",\"年龄\":25}".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        ChineseFieldBean back = JSON.parseObject(json, ChineseFieldBean.class);
+        assertEquals("李四", back.name);
+        assertEquals(25, back.age);
     }
 }

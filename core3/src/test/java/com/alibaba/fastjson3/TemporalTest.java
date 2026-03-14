@@ -12,8 +12,10 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for java.time.* and java.util.Date serialization/deserialization.
@@ -47,7 +49,7 @@ class TemporalTest {
         event.date = LocalDate.of(2024, 6, 15);
         String json = JSON.toJSONString(event);
         assertNotNull(json);
-        assert json.contains("\"2024-06-15\"") : json;
+        assertTrue(json.contains("\"2024-06-15\""), json);
     }
 
     @Test
@@ -57,7 +59,7 @@ class TemporalTest {
         event.dateTime = LocalDateTime.of(2024, 6, 15, 10, 30, 0);
         String json = JSON.toJSONString(event);
         assertNotNull(json);
-        assert json.contains("\"2024-06-15T10:30\"") : json;
+        assertTrue(json.contains("\"2024-06-15T10:30\""), json);
     }
 
     @Test
@@ -67,7 +69,7 @@ class TemporalTest {
         event.instant = Instant.parse("2024-06-15T10:30:00Z");
         String json = JSON.toJSONString(event);
         assertNotNull(json);
-        assert json.contains("\"2024-06-15T10:30:00Z\"") : json;
+        assertTrue(json.contains("\"2024-06-15T10:30:00Z\""), json);
     }
 
     @Test
@@ -77,7 +79,7 @@ class TemporalTest {
         event.time = LocalTime.of(14, 30, 0);
         String json = JSON.toJSONString(event);
         assertNotNull(json);
-        assert json.contains("\"14:30\"") : json;
+        assertTrue(json.contains("\"14:30\""), json);
     }
 
     @Test
@@ -87,7 +89,7 @@ class TemporalTest {
         event.legacyDate = Date.from(Instant.parse("2024-06-15T10:30:00Z"));
         String json = JSON.toJSONString(event);
         assertNotNull(json);
-        assert json.contains("\"2024-06-15T10:30:00Z\"") : json;
+        assertTrue(json.contains("\"2024-06-15T10:30:00Z\""), json);
     }
 
     @Test
@@ -97,7 +99,7 @@ class TemporalTest {
         event.zoned = ZonedDateTime.of(2024, 6, 15, 10, 30, 0, 0, ZoneOffset.UTC);
         String json = JSON.toJSONString(event);
         assertNotNull(json);
-        assert json.contains("2024-06-15T10:30") : json;
+        assertTrue(json.contains("2024-06-15T10:30"), json);
     }
 
     @Test
@@ -170,8 +172,8 @@ class TemporalTest {
         event.name = "empty";
         String json = JSON.toJSONString(event);
         // Null temporal fields should be omitted by default
-        assert !json.contains("date") : json;
-        assert !json.contains("dateTime") : json;
+        assertFalse(json.contains("date"), json);
+        assertFalse(json.contains("dateTime"), json);
 
         Event deserialized = ObjectMapper.shared().readValue(json, Event.class);
         assertEquals("empty", deserialized.name);
