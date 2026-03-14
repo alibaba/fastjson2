@@ -8,7 +8,10 @@ import com.alibaba.fastjson3.modules.ObjectWriterModule;
 import com.alibaba.fastjson3.reader.ObjectReaderCreator;
 import com.alibaba.fastjson3.writer.ObjectWriterCreator;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -271,6 +274,54 @@ public final class ObjectMapper {
         return readValue(jsonBytes, typeRef.getType());
     }
 
+    // ==================== Read: InputStream input ====================
+
+    /**
+     * Parse JSON from InputStream (UTF-8) to typed Java object.
+     * Reads all bytes then delegates to the byte[] path.
+     */
+    public <T> T readValue(InputStream in, Class<T> type) {
+        return readValue(readAllBytes(in), type);
+    }
+
+    /**
+     * Parse JSON from InputStream (UTF-8) to generic type.
+     */
+    public <T> T readValue(InputStream in, Type type) {
+        return readValue(readAllBytes(in), type);
+    }
+
+    /**
+     * Parse JSON from InputStream (UTF-8) to generic type using TypeReference.
+     */
+    public <T> T readValue(InputStream in, TypeReference<T> typeRef) {
+        return readValue(readAllBytes(in), typeRef.getType());
+    }
+
+    // ==================== Read: Reader input ====================
+
+    /**
+     * Parse JSON from Reader to typed Java object.
+     * Reads all characters then delegates to the String path.
+     */
+    public <T> T readValue(Reader reader, Class<T> type) {
+        return readValue(readAllChars(reader), type);
+    }
+
+    /**
+     * Parse JSON from Reader to generic type.
+     */
+    public <T> T readValue(Reader reader, Type type) {
+        return readValue(readAllChars(reader), type);
+    }
+
+    /**
+     * Parse JSON from Reader to generic type using TypeReference.
+     */
+    public <T> T readValue(Reader reader, TypeReference<T> typeRef) {
+        return readValue(readAllChars(reader), typeRef.getType());
+    }
+
     // ==================== Read: JSONObject / JSONArray ====================
 
     /**
@@ -360,6 +411,67 @@ public final class ObjectMapper {
             }
             return list;
         }
+    }
+
+    // ==================== Convert / Tree ====================
+
+    /**
+     * Convert an object to a different type by serializing and deserializing.
+     * Useful for Map-to-POJO conversion.
+     *
+     * <pre>
+     * Map&lt;String, Object&gt; map = ...;
+     * User user = mapper.convertValue(map, User.class);
+     * </pre>
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T convertValue(Object fromValue, Class<T> toType) {
+        if (fromValue == null) {
+            return null;
+        }
+        if (toType.isInstance(fromValue)) {
+            return toType.cast(fromValue);
+        }
+        byte[] json = writeValueAsBytes(fromValue);
+        return readValue(json, toType);
+    }
+
+    /**
+     * Convert an object to a different generic type.
+     */
+    public <T> T convertValue(Object fromValue, TypeReference<T> typeRef) {
+        if (fromValue == null) {
+            return null;
+        }
+        byte[] json = writeValueAsBytes(fromValue);
+        return readValue(json, typeRef);
+    }
+
+    /**
+     * Parse JSON string to tree (JSONObject or JSONArray).
+     * Alias for {@link #readValue(String)} for Jackson API compatibility.
+     */
+    public Object readTree(String json) {
+        return readValue(json);
+    }
+
+    /**
+     * Parse UTF-8 JSON bytes to tree (JSONObject or JSONArray).
+     */
+    public Object readTree(byte[] jsonBytes) {
+        if (jsonBytes == null || jsonBytes.length == 0) {
+            return null;
+        }
+        try (JSONParser parser = JSONParser.of(jsonBytes)) {
+            return parser.readAny();
+        }
+    }
+
+    /**
+     * Parse JSON from InputStream to tree (JSONObject or JSONArray).
+     */
+    public Object readTree(InputStream in) {
+        return readTree(readAllBytes(in));
     }
 
     // ==================== Write: String output ====================
@@ -467,10 +579,24 @@ public final class ObjectMapper {
             }
         }
 
-        // Auto-create reader (only for POJO types)
-        if (!(type instanceof Class<?> clazz) || isBasicType(clazz)) {
+        // Auto-create reader (only for class types)
+        if (!(type instanceof Class<?> clazz)) {
             return null;
         }
+
+        // Try built-in codecs first (Optional, UUID, Duration, etc.)
+        // Must be before isBasicType() because some builtin types (Year, YearMonth)
+        // are Temporal subtypes that isBasicType() would reject
+        reader = BuiltinCodecs.getReader(clazz);
+        if (reader != null) {
+            readerCache.putIfAbsent(type, reader);
+            return (ObjectReader<T>) reader;
+        }
+
+        if (isBasicType(clazz)) {
+            return null;
+        }
+
         try {
             if (readerCreator != null) {
                 reader = readerCreator.apply(clazz);
@@ -512,6 +638,15 @@ public final class ObjectMapper {
         // Try modules
         for (ObjectWriterModule module : writerModules) {
             writer = module.getObjectWriter(type, rawType);
+            if (writer != null) {
+                writerCache.putIfAbsent(type, writer);
+                return (ObjectWriter<T>) writer;
+            }
+        }
+
+        // Try built-in codecs first (Optional, UUID, Duration, etc.)
+        if (rawType != null) {
+            writer = BuiltinCodecs.getWriter(rawType);
             if (writer != null) {
                 writerCache.putIfAbsent(type, writer);
                 return (ObjectWriter<T>) writer;
@@ -579,6 +714,34 @@ public final class ObjectMapper {
     }
 
     // ==================== Internal ====================
+
+    private static byte[] readAllBytes(InputStream in) {
+        if (in == null) {
+            return null;
+        }
+        try {
+            return in.readAllBytes();
+        } catch (IOException e) {
+            throw new JSONException("read InputStream error", e);
+        }
+    }
+
+    private static String readAllChars(Reader reader) {
+        if (reader == null) {
+            return null;
+        }
+        try {
+            StringBuilder sb = new StringBuilder(1024);
+            char[] buf = new char[4096];
+            int n;
+            while ((n = reader.read(buf)) != -1) {
+                sb.append(buf, 0, n);
+            }
+            return sb.toString();
+        } catch (IOException e) {
+            throw new JSONException("read Reader error", e);
+        }
+    }
 
     private static boolean isBasicType(Class<?> type) {
         return type == String.class

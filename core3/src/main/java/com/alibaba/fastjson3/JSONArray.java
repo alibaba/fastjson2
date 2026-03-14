@@ -223,9 +223,9 @@ public class JSONArray extends ArrayList<Object> {
     /**
      * Convert to typed list.
      */
+    @SuppressWarnings("unchecked")
     public <T> List<T> toJavaList(Class<T> clazz) {
-        // TODO: implement via ObjectReader
-        throw new UnsupportedOperationException("Not yet implemented");
+        return ObjectMapper.shared().convertValue(this, new TypeReference<List<T>>() {});
     }
 
     @Override

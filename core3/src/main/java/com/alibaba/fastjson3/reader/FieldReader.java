@@ -7,14 +7,26 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.URI;
+import java.nio.file.Path;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.MonthDay;
 import java.time.OffsetDateTime;
+import java.time.Period;
+import java.time.Year;
+import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -378,6 +390,47 @@ public final class FieldReader implements Comparable<FieldReader> {
             if (fieldClass == Date.class) {
                 return com.alibaba.fastjson3.util.DateUtils.parseDate(str);
             }
+            // String → JDK types (builtin codecs)
+            if (fieldClass == UUID.class) {
+                return UUID.fromString(str);
+            }
+            if (fieldClass == Duration.class) {
+                return Duration.parse(str);
+            }
+            if (fieldClass == Period.class) {
+                return Period.parse(str);
+            }
+            if (fieldClass == YearMonth.class) {
+                return YearMonth.parse(str);
+            }
+            if (fieldClass == MonthDay.class) {
+                return MonthDay.parse(str);
+            }
+            if (fieldClass == URI.class) {
+                return URI.create(str);
+            }
+            if (Path.class.isAssignableFrom(fieldClass)) {
+                return Path.of(str);
+            }
+        }
+
+        // Number → Year conversion
+        if (value instanceof Number number && fieldClass == Year.class) {
+            return Year.of(number.intValue());
+        }
+
+        // Wrap into Optional types
+        if (fieldClass == Optional.class) {
+            return Optional.ofNullable(value);
+        }
+        if (fieldClass == OptionalInt.class && value instanceof Number n) {
+            return OptionalInt.of(n.intValue());
+        }
+        if (fieldClass == OptionalLong.class && value instanceof Number n) {
+            return OptionalLong.of(n.longValue());
+        }
+        if (fieldClass == OptionalDouble.class && value instanceof Number n) {
+            return OptionalDouble.of(n.doubleValue());
         }
 
         // Map → POJO/Record conversion (for nested objects parsed via readAny())

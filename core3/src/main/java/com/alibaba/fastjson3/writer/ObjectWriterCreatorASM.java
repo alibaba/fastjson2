@@ -240,8 +240,17 @@ public final class ObjectWriterCreatorASM {
         } else if (fi.getter != null) {
             mw.invokevirtual(beanInternalName, fi.getter.getName(),
                     "()" + getDescriptor(fi.fieldClass));
+            if (fi.fieldClass == Integer.class) {
+                mw.invokevirtual("java/lang/Integer", "intValue", "()I");
+            }
+        } else if (fi.field != null) {
+            // Boxed type field (e.g., Integer): getfield returns object, need unbox
+            mw.getfield(beanInternalName, fi.field.getName(), getDescriptor(fi.fieldClass));
+            if (fi.fieldClass == Integer.class) {
+                mw.invokevirtual("java/lang/Integer", "intValue", "()I");
+            }
         } else {
-            mw.getfield(beanInternalName, fi.field.getName(), "I");
+            throw new JSONException("no field or getter for int property: " + fi.jsonName);
         }
 
         mw.invokevirtual(TYPE_JSON_GENERATOR, "writeNameInt32",
@@ -262,8 +271,19 @@ public final class ObjectWriterCreatorASM {
         mw.aload(7); // bean
         if (fi.field != null && fi.fieldClass == long.class) {
             mw.getfield(beanInternalName, fi.field.getName(), "J");
+        } else if (fi.getter != null) {
+            mw.invokevirtual(beanInternalName, fi.getter.getName(),
+                    "()" + getDescriptor(fi.fieldClass));
+            if (fi.fieldClass == Long.class) {
+                mw.invokevirtual("java/lang/Long", "longValue", "()J");
+            }
+        } else if (fi.field != null) {
+            mw.getfield(beanInternalName, fi.field.getName(), getDescriptor(fi.fieldClass));
+            if (fi.fieldClass == Long.class) {
+                mw.invokevirtual("java/lang/Long", "longValue", "()J");
+            }
         } else {
-            mw.invokevirtual(beanInternalName, fi.getter.getName(), "()J");
+            throw new JSONException("no field or getter for long property: " + fi.jsonName);
         }
         mw.invokevirtual(TYPE_JSON_GENERATOR, "writeInt64", "(J)V");
     }
@@ -278,8 +298,19 @@ public final class ObjectWriterCreatorASM {
 
         if (fi.field != null && fi.fieldClass == double.class) {
             mw.getfield(beanInternalName, fi.field.getName(), "D");
+        } else if (fi.getter != null) {
+            mw.invokevirtual(beanInternalName, fi.getter.getName(),
+                    "()" + getDescriptor(fi.fieldClass));
+            if (fi.fieldClass == Double.class) {
+                mw.invokevirtual("java/lang/Double", "doubleValue", "()D");
+            }
+        } else if (fi.field != null) {
+            mw.getfield(beanInternalName, fi.field.getName(), getDescriptor(fi.fieldClass));
+            if (fi.fieldClass == Double.class) {
+                mw.invokevirtual("java/lang/Double", "doubleValue", "()D");
+            }
         } else {
-            mw.invokevirtual(beanInternalName, fi.getter.getName(), "()D");
+            throw new JSONException("no field or getter for double property: " + fi.jsonName);
         }
 
         mw.invokevirtual(TYPE_JSON_GENERATOR, "writeNameDouble",
@@ -299,8 +330,19 @@ public final class ObjectWriterCreatorASM {
         mw.aload(7);
         if (fi.field != null && fi.fieldClass == float.class) {
             mw.getfield(beanInternalName, fi.field.getName(), "F");
+        } else if (fi.getter != null) {
+            mw.invokevirtual(beanInternalName, fi.getter.getName(),
+                    "()" + getDescriptor(fi.fieldClass));
+            if (fi.fieldClass == Float.class) {
+                mw.invokevirtual("java/lang/Float", "floatValue", "()F");
+            }
+        } else if (fi.field != null) {
+            mw.getfield(beanInternalName, fi.field.getName(), getDescriptor(fi.fieldClass));
+            if (fi.fieldClass == Float.class) {
+                mw.invokevirtual("java/lang/Float", "floatValue", "()F");
+            }
         } else {
-            mw.invokevirtual(beanInternalName, fi.getter.getName(), "()F");
+            throw new JSONException("no field or getter for float property: " + fi.jsonName);
         }
         mw.invokevirtual(TYPE_JSON_GENERATOR, "writeFloat", "(F)V");
     }
@@ -315,8 +357,19 @@ public final class ObjectWriterCreatorASM {
 
         if (fi.field != null && fi.fieldClass == boolean.class) {
             mw.getfield(beanInternalName, fi.field.getName(), "Z");
+        } else if (fi.getter != null) {
+            mw.invokevirtual(beanInternalName, fi.getter.getName(),
+                    "()" + getDescriptor(fi.fieldClass));
+            if (fi.fieldClass == Boolean.class) {
+                mw.invokevirtual("java/lang/Boolean", "booleanValue", "()Z");
+            }
+        } else if (fi.field != null) {
+            mw.getfield(beanInternalName, fi.field.getName(), getDescriptor(fi.fieldClass));
+            if (fi.fieldClass == Boolean.class) {
+                mw.invokevirtual("java/lang/Boolean", "booleanValue", "()Z");
+            }
         } else {
-            mw.invokevirtual(beanInternalName, fi.getter.getName(), "()Z");
+            throw new JSONException("no field or getter for boolean property: " + fi.jsonName);
         }
 
         mw.invokevirtual(TYPE_JSON_GENERATOR, "writeNameBool",

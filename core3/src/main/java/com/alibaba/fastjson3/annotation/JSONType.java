@@ -68,4 +68,10 @@ public @interface JSONType {
      * Builder class for immutable object construction.
      */
     Class<?> builder() default void.class;
+
+    /**
+     * Property inclusion strategy for serialization.
+     * Controls which property values are written (null handling, empty handling).
+     */
+    Inclusion inclusion() default Inclusion.DEFAULT;
 }

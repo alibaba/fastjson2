@@ -689,4 +689,56 @@ class SerializationEdgeTest {
         assertEquals("李四", back.name);
         assertEquals(25, back.age);
     }
+
+    // ==================== Large long values (UTF-8 path) ====================
+
+    @Test
+    void writeLongMaxValueToBytes() {
+        // This exercises writeLongToBytes with hi > Integer.MAX_VALUE
+        byte[] bytes = JSON.toJSONBytes(Long.MAX_VALUE);
+        assertEquals("9223372036854775807", new String(bytes, java.nio.charset.StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void writeLongMinValueToBytes() {
+        byte[] bytes = JSON.toJSONBytes(Long.MIN_VALUE);
+        assertEquals("-9223372036854775808", new String(bytes, java.nio.charset.StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void writeLargeLongToBytes() {
+        // Values above 2.147e18 where hi part overflows int
+        long[] testValues = {
+                2_147_483_648_000_000_000L,  // hi = 2_147_483_648 (just over Integer.MAX_VALUE)
+                3_000_000_000_000_000_000L,  // hi = 3_000_000_000
+                5_000_000_000_000_000_000L,  // hi = 5_000_000_000
+                Long.MAX_VALUE - 1,
+                Long.MAX_VALUE,
+        };
+        for (long val : testValues) {
+            byte[] bytes = JSON.toJSONBytes(val);
+            String result = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
+            assertEquals(Long.toString(val), result, "wrong for " + val);
+        }
+        // Negative counterparts
+        for (long val : testValues) {
+            byte[] bytes = JSON.toJSONBytes(-val);
+            String result = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
+            assertEquals(Long.toString(-val), result, "wrong for " + (-val));
+        }
+    }
+
+    @Test
+    void largeLongInPojoRoundTrip() {
+        // Round-trip through UTF-8 path
+        LongHolder h = new LongHolder();
+        h.value = 5_000_000_000_000_000_000L;
+        byte[] json = ObjectMapper.shared().writeValueAsBytes(h);
+        LongHolder h2 = ObjectMapper.shared().readValue(json, LongHolder.class);
+        assertEquals(h.value, h2.value);
+    }
+
+    public static class LongHolder {
+        public long value;
+    }
 }

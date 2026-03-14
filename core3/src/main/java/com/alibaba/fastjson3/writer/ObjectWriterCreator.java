@@ -1,6 +1,7 @@
 package com.alibaba.fastjson3.writer;
 
 import com.alibaba.fastjson3.ObjectWriter;
+import com.alibaba.fastjson3.annotation.Inclusion;
 import com.alibaba.fastjson3.annotation.JSONField;
 import com.alibaba.fastjson3.annotation.JSONType;
 import com.alibaba.fastjson3.annotation.NamingStrategy;
@@ -45,6 +46,7 @@ public final class ObjectWriterCreator {
         Set<String> includes = jsonType != null ? Set.of(jsonType.includes()) : Set.of();
         Set<String> ignores = jsonType != null ? Set.of(jsonType.ignores()) : Set.of();
         boolean alphabetic = jsonType == null || jsonType.alphabetic();
+        Inclusion typeInclusion = jsonType != null ? jsonType.inclusion() : Inclusion.DEFAULT;
 
         String[] componentNames = com.alibaba.fastjson3.util.JDKUtils.getRecordComponentNames(type);
         java.lang.reflect.Method[] accessors = com.alibaba.fastjson3.util.JDKUtils.getRecordComponentAccessors(type);
@@ -93,6 +95,10 @@ public final class ObjectWriterCreator {
                 ordinal = jsonField.ordinal();
             }
 
+            // Resolve inclusion: field-level overrides type-level
+            Inclusion fieldInclusion = (jsonField != null && jsonField.inclusion() != Inclusion.DEFAULT)
+                    ? jsonField.inclusion() : typeInclusion;
+
             // Prefer backing field for Unsafe direct access
             java.lang.reflect.Field backingField = null;
             try {
@@ -103,12 +109,12 @@ public final class ObjectWriterCreator {
 
             if (backingField != null) {
                 writerMap.put(propertyName, createFieldWriterForField(
-                        jsonName, ordinal, accessor.getGenericReturnType(), accessor.getReturnType(), backingField
+                        jsonName, ordinal, accessor.getGenericReturnType(), accessor.getReturnType(), backingField, fieldInclusion
                 ));
             } else {
                 accessor.setAccessible(true);
                 writerMap.put(propertyName, createFieldWriterForGetter(
-                        jsonName, ordinal, accessor.getGenericReturnType(), accessor.getReturnType(), accessor
+                        jsonName, ordinal, accessor.getGenericReturnType(), accessor.getReturnType(), accessor, fieldInclusion
                 ));
             }
         }
@@ -129,6 +135,7 @@ public final class ObjectWriterCreator {
         Set<String> ignores = jsonType != null ? Set.of(jsonType.ignores()) : Set.of();
         String[] orders = jsonType != null ? jsonType.orders() : new String[0];
         boolean alphabetic = jsonType == null || jsonType.alphabetic();
+        Inclusion typeInclusion = jsonType != null ? jsonType.inclusion() : Inclusion.DEFAULT;
 
         // Collect field writers keyed by property name to deduplicate getter vs field
         Map<String, FieldWriter> writerMap = new LinkedHashMap<>();
@@ -198,17 +205,34 @@ public final class ObjectWriterCreator {
                 }
             }
 
-            // Prefer backing field for Unsafe direct access (avoids Method.invoke overhead)
+            // Lookup backing field once — reused for inclusion resolution and Unsafe offset
             Field backingField = findDeclaredField(type, propertyName);
+
+            // Resolve inclusion: field-level overrides type-level
+            Inclusion fieldInclusion = typeInclusion;
+            if (jsonField != null && jsonField.inclusion() != Inclusion.DEFAULT) {
+                fieldInclusion = jsonField.inclusion();
+            }
+            if (backingField != null) {
+                JSONField fAnn = backingField.getAnnotation(JSONField.class);
+                if (fAnn == null && mixIn != null) {
+                    fAnn = findMixInFieldAnnotation(mixIn, propertyName, JSONField.class);
+                }
+                if (fAnn != null && fAnn.inclusion() != Inclusion.DEFAULT) {
+                    fieldInclusion = fAnn.inclusion();
+                }
+            }
+
+            // Prefer backing field for Unsafe direct access (avoids Method.invoke overhead)
             if (backingField != null) {
                 backingField.setAccessible(true);
                 writerMap.put(propertyName, createFieldWriterForField(
-                        jsonName, ordinal, method.getGenericReturnType(), method.getReturnType(), backingField
+                        jsonName, ordinal, method.getGenericReturnType(), method.getReturnType(), backingField, fieldInclusion
                 ));
             } else {
                 method.setAccessible(true);
                 writerMap.put(propertyName, createFieldWriterForGetter(
-                        jsonName, ordinal, method.getGenericReturnType(), method.getReturnType(), method
+                        jsonName, ordinal, method.getGenericReturnType(), method.getReturnType(), method, fieldInclusion
                 ));
             }
         }
@@ -249,9 +273,13 @@ public final class ObjectWriterCreator {
                 ordinal = jsonField.ordinal();
             }
 
+            // Resolve inclusion: field-level overrides type-level
+            Inclusion fieldInclusion = (jsonField != null && jsonField.inclusion() != Inclusion.DEFAULT)
+                    ? jsonField.inclusion() : typeInclusion;
+
             field.setAccessible(true);
             writerMap.put(propertyName, createFieldWriterForField(
-                    jsonName, ordinal, field.getGenericType(), field.getType(), field
+                    jsonName, ordinal, field.getGenericType(), field.getType(), field, fieldInclusion
             ));
         }
 
@@ -387,25 +415,39 @@ public final class ObjectWriterCreator {
     private static FieldWriter createFieldWriterForGetter(
             String jsonName, int ordinal, Type fieldType, Class<?> fieldClass, Method method
     ) {
+        return createFieldWriterForGetter(jsonName, ordinal, fieldType, fieldClass, method, Inclusion.DEFAULT);
+    }
+
+    private static FieldWriter createFieldWriterForGetter(
+            String jsonName, int ordinal, Type fieldType, Class<?> fieldClass, Method method,
+            Inclusion inclusion
+    ) {
         if (List.class.isAssignableFrom(fieldClass)) {
             Class<?> elemClass = extractListElementClass(fieldType);
             if (elemClass != null) {
-                return FieldWriter.ofList(jsonName, ordinal, fieldType, fieldClass, elemClass, method);
+                return FieldWriter.ofList(jsonName, ordinal, fieldType, fieldClass, elemClass, method, inclusion);
             }
         }
-        return FieldWriter.ofGetter(jsonName, ordinal, fieldType, fieldClass, method);
+        return FieldWriter.ofGetter(jsonName, ordinal, fieldType, fieldClass, method, inclusion);
     }
 
     private static FieldWriter createFieldWriterForField(
             String jsonName, int ordinal, Type fieldType, Class<?> fieldClass, Field field
     ) {
+        return createFieldWriterForField(jsonName, ordinal, fieldType, fieldClass, field, Inclusion.DEFAULT);
+    }
+
+    private static FieldWriter createFieldWriterForField(
+            String jsonName, int ordinal, Type fieldType, Class<?> fieldClass, Field field,
+            Inclusion inclusion
+    ) {
         if (List.class.isAssignableFrom(fieldClass)) {
             Class<?> elemClass = extractListElementClass(fieldType);
             if (elemClass != null) {
-                return FieldWriter.ofList(jsonName, ordinal, fieldType, fieldClass, elemClass, field);
+                return FieldWriter.ofList(jsonName, ordinal, fieldType, fieldClass, elemClass, field, inclusion);
             }
         }
-        return FieldWriter.ofField(jsonName, ordinal, fieldType, fieldClass, field);
+        return FieldWriter.ofField(jsonName, ordinal, fieldType, fieldClass, field, inclusion);
     }
 
     private static Class<?> extractListElementClass(Type fieldType) {

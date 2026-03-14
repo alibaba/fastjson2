@@ -1117,11 +1117,11 @@ public abstract sealed class JSONParser implements Closeable
         public long readFieldNameHashPLHV() {
             final byte[] b = this.bytes;
             int off = this.offset;
-            // Skip whitespace — 无边界检查，前提：合法JSON中此处必有非空白字符
-            while (b[off] <= ' ') {
+            // Skip whitespace
+            while (off < end && b[off] <= ' ') {
                 off++;
             }
-            if (b[off] != '"') {
+            if (off >= end || b[off] != '"') {
                 throw new JSONException("expected '\"' for field name at offset " + off);
             }
             off++;
@@ -1155,11 +1155,11 @@ public abstract sealed class JSONParser implements Closeable
             }
 
             // Skip whitespace, ':', and whitespace after ':'
-            while (b[off] <= ' ') {
+            while (off < end && b[off] <= ' ') {
                 off++;
             }
             off++; // skip ':'
-            while (b[off] <= ' ') {
+            while (off < end && b[off] <= ' ') {
                 off++;
             }
             this.offset = off;
@@ -1667,7 +1667,7 @@ public abstract sealed class JSONParser implements Closeable
             }
 
             // Per-byte tail scan
-            while (b[off] != '"') {
+            while (off < end && b[off] != '"') {
                 if (b[off] == '\\') {
                     this.offset = off;
                     reader.setObjectValue(bean, readStringEscaped(start));
@@ -1679,6 +1679,9 @@ public abstract sealed class JSONParser implements Closeable
                     return this.offset;
                 }
                 off++;
+            }
+            if (off >= end) {
+                throw new JSONException("unterminated string");
             }
 
             int len = off - start;
@@ -1708,7 +1711,7 @@ public abstract sealed class JSONParser implements Closeable
             int start = off;
             long value = c - '0';
             off++;
-            while ((c = b[off] & 0xFF) >= '0' && c <= '9') {
+            while (off < end && (c = b[off] & 0xFF) >= '0' && c <= '9') {
                 value = value * 10 + (c - '0');
                 off++;
             }
@@ -1749,7 +1752,7 @@ public abstract sealed class JSONParser implements Closeable
             int value = c - '0';
             int digitStart = off;
             off++;
-            while ((c = b[off] & 0xFF) >= '0' && c <= '9') {
+            while (off < end && (c = b[off] & 0xFF) >= '0' && c <= '9') {
                 value = value * 10 + (c - '0');
                 off++;
             }
@@ -1770,11 +1773,11 @@ public abstract sealed class JSONParser implements Closeable
             final byte[] b = this.bytes;
             int start = off;
             boolean neg = false;
-            if (b[off] == '-') {
+            if (off < end && b[off] == '-') {
                 neg = true;
                 off++;
             }
-            if (b[off] < '0' || b[off] > '9') {
+            if (off >= end || b[off] < '0' || b[off] > '9') {
                 // Non-numeric (null, string, boolean, etc.) — fallback
                 this.offset = start;
                 Object val = readAny();
@@ -1782,14 +1785,14 @@ public abstract sealed class JSONParser implements Closeable
                 return this.offset;
             }
             long mantissa = 0;
-            while (b[off] >= '0' && b[off] <= '9') {
+            while (off < end && b[off] >= '0' && b[off] <= '9') {
                 mantissa = mantissa * 10 + (b[off] - '0');
                 off++;
             }
             int fracDigits = 0;
-            if (b[off] == '.') {
+            if (off < end && b[off] == '.') {
                 off++;
-                while (b[off] >= '0' && b[off] <= '9') {
+                while (off < end && b[off] >= '0' && b[off] <= '9') {
                     if (fracDigits < 18) {
                         mantissa = mantissa * 10 + (b[off] - '0');
                     }
@@ -1797,7 +1800,7 @@ public abstract sealed class JSONParser implements Closeable
                     off++;
                 }
             }
-            if (b[off] == 'e' || b[off] == 'E') {
+            if (off < end && (b[off] == 'e' || b[off] == 'E')) {
                 this.offset = start;
                 reader.setDoubleValue(bean, readNumber().doubleValue());
                 return this.offset;
@@ -1823,11 +1826,11 @@ public abstract sealed class JSONParser implements Closeable
          */
         public int readBooleanOff(int off, Object bean, com.alibaba.fastjson3.reader.FieldReader reader) {
             final byte[] b = this.bytes;
-            if (b[off] == 't' && b[off + 1] == 'r' && b[off + 2] == 'u' && b[off + 3] == 'e') {
+            if (off + 4 <= end && b[off] == 't' && b[off + 1] == 'r' && b[off + 2] == 'u' && b[off + 3] == 'e') {
                 reader.setBooleanValue(bean, true);
                 return off + 4;
             }
-            if (b[off] == 'f' && b[off + 1] == 'a' && b[off + 2] == 'l' && b[off + 3] == 's' && b[off + 4] == 'e') {
+            if (off + 5 <= end && b[off] == 'f' && b[off + 1] == 'a' && b[off + 2] == 'l' && b[off + 3] == 's' && b[off + 4] == 'e') {
                 reader.setBooleanValue(bean, false);
                 return off + 5;
             }
@@ -1857,7 +1860,7 @@ public abstract sealed class JSONParser implements Closeable
             int value = c - '0';
             int digitStart = off;
             off++;
-            while ((c = b[off] & 0xFF) >= '0' && c <= '9') {
+            while (off < end && (c = b[off] & 0xFF) >= '0' && c <= '9') {
                 value = value * 10 + (c - '0');
                 off++;
             }
@@ -1888,7 +1891,7 @@ public abstract sealed class JSONParser implements Closeable
             int start = off;
             long value = c - '0';
             off++;
-            while ((c = b[off] & 0xFF) >= '0' && c <= '9') {
+            while (off < end && (c = b[off] & 0xFF) >= '0' && c <= '9') {
                 value = value * 10 + (c - '0');
                 off++;
             }
@@ -1909,11 +1912,11 @@ public abstract sealed class JSONParser implements Closeable
             final byte[] b = this.bytes;
             int start = off;
             boolean neg = false;
-            if (b[off] == '-') {
+            if (off < end && b[off] == '-') {
                 neg = true;
                 off++;
             }
-            if (b[off] < '0' || b[off] > '9') {
+            if (off >= end || b[off] < '0' || b[off] > '9') {
                 this.offset = start;
                 Object val = readAny();
                 com.alibaba.fastjson3.util.JDKUtils.putDouble(bean, fieldOffset,
@@ -1921,14 +1924,14 @@ public abstract sealed class JSONParser implements Closeable
                 return this.offset;
             }
             long mantissa = 0;
-            while (b[off] >= '0' && b[off] <= '9') {
+            while (off < end && b[off] >= '0' && b[off] <= '9') {
                 mantissa = mantissa * 10 + (b[off] - '0');
                 off++;
             }
             int fracDigits = 0;
-            if (b[off] == '.') {
+            if (off < end && b[off] == '.') {
                 off++;
-                while (b[off] >= '0' && b[off] <= '9') {
+                while (off < end && b[off] >= '0' && b[off] <= '9') {
                     if (fracDigits < 18) {
                         mantissa = mantissa * 10 + (b[off] - '0');
                     }
@@ -1936,7 +1939,7 @@ public abstract sealed class JSONParser implements Closeable
                     off++;
                 }
             }
-            if (b[off] == 'e' || b[off] == 'E') {
+            if (off < end && (b[off] == 'e' || b[off] == 'E')) {
                 this.offset = start;
                 com.alibaba.fastjson3.util.JDKUtils.putDouble(bean, fieldOffset, readNumber().doubleValue());
                 return this.offset;
@@ -1958,11 +1961,11 @@ public abstract sealed class JSONParser implements Closeable
 
         public int readBooleanOffDirect(int off, Object bean, long fieldOffset) {
             final byte[] b = this.bytes;
-            if (b[off] == 't' && b[off + 1] == 'r' && b[off + 2] == 'u' && b[off + 3] == 'e') {
+            if (off + 4 <= end && b[off] == 't' && b[off + 1] == 'r' && b[off + 2] == 'u' && b[off + 3] == 'e') {
                 com.alibaba.fastjson3.util.JDKUtils.putBoolean(bean, fieldOffset, true);
                 return off + 4;
             }
-            if (b[off] == 'f' && b[off + 1] == 'a' && b[off + 2] == 'l' && b[off + 3] == 's' && b[off + 4] == 'e') {
+            if (off + 5 <= end && b[off] == 'f' && b[off + 1] == 'a' && b[off + 2] == 'l' && b[off + 3] == 's' && b[off + 4] == 'e') {
                 com.alibaba.fastjson3.util.JDKUtils.putBoolean(bean, fieldOffset, false);
                 return off + 5;
             }
@@ -1992,7 +1995,7 @@ public abstract sealed class JSONParser implements Closeable
                 }
             }
 
-            while (b[off] != '"') {
+            while (off < end && b[off] != '"') {
                 if (b[off] == '\\') {
                     this.offset = off;
                     com.alibaba.fastjson3.util.JDKUtils.putObject(bean, fieldOffset, readStringEscaped(start));
@@ -2004,6 +2007,9 @@ public abstract sealed class JSONParser implements Closeable
                     return this.offset;
                 }
                 off++;
+            }
+            if (off >= end) {
+                throw new JSONException("unterminated string");
             }
 
             int len = off - start;
@@ -2026,20 +2032,20 @@ public abstract sealed class JSONParser implements Closeable
             final byte[] b = this.bytes;
             int off = this.offset;
             off++; // skip '['
-            while (b[off] <= ' ') {
+            while (off < end && b[off] <= ' ') {
                 off++;
             }
-            if (b[off] == ']') {
+            if (off < end && b[off] == ']') {
                 this.offset = off + 1;
                 return new java.util.ArrayList<>(0);
             }
 
             java.util.ArrayList<Object> list = new java.util.ArrayList<>(16);
             for (;;) {
-                while (b[off] <= ' ') {
+                while (off < end && b[off] <= ' ') {
                     off++;
                 }
-                if (b[off] == 'n' && b[off + 1] == 'u' && b[off + 2] == 'l' && b[off + 3] == 'l') {
+                if (off + 4 <= end && b[off] == 'n' && b[off + 1] == 'u' && b[off + 2] == 'l' && b[off + 3] == 'l') {
                     list.add(null);
                     off += 4;
                 } else {
@@ -2061,7 +2067,7 @@ public abstract sealed class JSONParser implements Closeable
                     }
                     // Per-byte tail: check for '"', or rare escape/non-ASCII
                     boolean special = false;
-                    while (b[off] != '"') {
+                    while (off < end && b[off] != '"') {
                         if (b[off] == '\\') {
                             this.offset = off;
                             list.add(readStringEscaped(start));
@@ -2078,6 +2084,9 @@ public abstract sealed class JSONParser implements Closeable
                         }
                         off++;
                     }
+                    if (off >= end && !special) {
+                        throw new JSONException("unterminated string");
+                    }
                     if (!special) {
                         int len = off - start;
                         off++; // skip closing '"'
@@ -2085,8 +2094,11 @@ public abstract sealed class JSONParser implements Closeable
                     }
                 }
                 // Inline separator
-                while (b[off] <= ' ') {
+                while (off < end && b[off] <= ' ') {
                     off++;
+                }
+                if (off >= end) {
+                    throw new JSONException("unexpected end of input");
                 }
                 if (b[off] == ',') {
                     off++;
@@ -2111,10 +2123,10 @@ public abstract sealed class JSONParser implements Closeable
             final byte[] b = this.bytes;
             int off = this.offset;
             off++; // skip '['
-            while (b[off] <= ' ') {
+            while (off < end && b[off] <= ' ') {
                 off++;
             }
-            if (b[off] == ']') {
+            if (off < end && b[off] == ']') {
                 this.offset = off + 1;
                 return new String[0];
             }
@@ -2125,10 +2137,10 @@ public abstract sealed class JSONParser implements Closeable
                 if (size == arr.length) {
                     arr = java.util.Arrays.copyOf(arr, size + (size >> 1));
                 }
-                while (b[off] <= ' ') {
+                while (off < end && b[off] <= ' ') {
                     off++;
                 }
-                if (b[off] == 'n' && b[off + 1] == 'u' && b[off + 2] == 'l' && b[off + 3] == 'l') {
+                if (off + 4 <= end && b[off] == 'n' && b[off + 1] == 'u' && b[off + 2] == 'l' && b[off + 3] == 'l') {
                     arr[size++] = null;
                     off += 4;
                 } else {
@@ -2148,7 +2160,7 @@ public abstract sealed class JSONParser implements Closeable
                         off += 8;
                     }
                     boolean special = false;
-                    while (b[off] != '"') {
+                    while (off < end && b[off] != '"') {
                         if (b[off] == '\\') {
                             this.offset = off;
                             arr[size++] = readStringEscaped(start);
@@ -2165,14 +2177,20 @@ public abstract sealed class JSONParser implements Closeable
                         }
                         off++;
                     }
+                    if (off >= end && !special) {
+                        throw new JSONException("unterminated string");
+                    }
                     if (!special) {
                         int len = off - start;
                         off++;
                         arr[size++] = com.alibaba.fastjson3.util.JDKUtils.createLatin1String(b, start, len);
                     }
                 }
-                while (b[off] <= ' ') {
+                while (off < end && b[off] <= ' ') {
                     off++;
+                }
+                if (off >= end) {
+                    throw new JSONException("unexpected end of input");
                 }
                 if (b[off] == ',') {
                     off++;
@@ -2197,10 +2215,10 @@ public abstract sealed class JSONParser implements Closeable
             final byte[] b = this.bytes;
             int off = this.offset;
             off++; // skip '['
-            while (b[off] <= ' ') {
+            while (off < end && b[off] <= ' ') {
                 off++;
             }
-            if (b[off] == ']') {
+            if (off < end && b[off] == ']') {
                 this.offset = off + 1;
                 return new long[0];
             }
@@ -2211,7 +2229,7 @@ public abstract sealed class JSONParser implements Closeable
                 if (size == arr.length) {
                     arr = java.util.Arrays.copyOf(arr, size + (size >> 1));
                 }
-                while (b[off] <= ' ') {
+                while (off < end && b[off] <= ' ') {
                     off++;
                 }
                 // Inline long parsing
@@ -2223,14 +2241,17 @@ public abstract sealed class JSONParser implements Closeable
                 }
                 long value = c - '0';
                 off++;
-                while ((c = b[off] & 0xFF) >= '0' && c <= '9') {
+                while (off < end && (c = b[off] & 0xFF) >= '0' && c <= '9') {
                     value = value * 10 + (c - '0');
                     off++;
                 }
                 arr[size++] = neg ? -value : value;
                 // Separator
-                while (b[off] <= ' ') {
+                while (off < end && b[off] <= ' ') {
                     off++;
+                }
+                if (off >= end) {
+                    throw new JSONException("unexpected end of input");
                 }
                 if (b[off] == ',') {
                     off++;
@@ -2267,12 +2288,16 @@ public abstract sealed class JSONParser implements Closeable
             final byte[] b = this.bytes;
             int off = this.offset;
             // Skip leading whitespace
-            while (b[off] <= ' ') {
+            while (off < end && b[off] <= ' ') {
                 off++;
             }
             int len = header.length;
             // Compare header bytes
-            if (b[off] != '"') {
+            if (off >= end || b[off] != '"') {
+                this.offset = off;
+                return false;
+            }
+            if (off + len > end) {
                 this.offset = off;
                 return false;
             }
@@ -2284,7 +2309,7 @@ public abstract sealed class JSONParser implements Closeable
             }
             // Match! Advance past header and skip trailing whitespace
             off += len;
-            while (b[off] <= ' ') {
+            while (off < end && b[off] <= ' ') {
                 off++;
             }
             this.offset = off;

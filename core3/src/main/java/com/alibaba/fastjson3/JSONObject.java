@@ -255,8 +255,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * Convert to typed Java object.
      */
     public <T> T toJavaObject(Class<T> clazz) {
-        // TODO: implement via ObjectReader
-        throw new UnsupportedOperationException("Not yet implemented");
+        return ObjectMapper.shared().convertValue(this, clazz);
     }
 
     /**

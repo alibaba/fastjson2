@@ -1469,10 +1469,11 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
             if (val <= Integer.MAX_VALUE) {
                 return (pos - start) + writeIntToBytes((int) val, buf, pos);
             }
-            // Split into two int parts for faster digit extraction (int div is cheaper than long div)
-            int hi = (int) (val / 1000000000L);
-            int lo = (int) (val - (long) hi * 1000000000L);
-            int hiDigits = intStringSize(hi);
+            // Split into high and low parts for digit extraction
+            // Note: hi can exceed Integer.MAX_VALUE for val > 2.147e18, so use long
+            long hi = val / 1000000000L;
+            int lo = (int) (val - hi * 1000000000L);
+            int hiDigits = longStringSize(hi);
             int end = pos + hiDigits + 9;
             int p = end;
             // Write low 9 digits (zero-padded) using PACKED_DIGITS (1 putShort = 2 digits)
@@ -1484,17 +1485,17 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
                 JDKUtils.putShortDirect(buf, p, PACKED_DIGITS[r]);
             }
             buf[--p] = (byte) ('0' + lo);
-            // Write high part using int arithmetic + PACKED_DIGITS
+            // Write high part (fits in int after extracting last 2 digits via long)
+            // For val up to Long.MAX_VALUE, hi <= 9_223_372_036 (10 digits)
             while (hi >= 100) {
-                int q = hi / 100;
-                int r = hi - q * 100;
-                hi = q;
+                int r = (int) (hi % 100);
+                hi /= 100;
                 p -= 2;
                 JDKUtils.putShortDirect(buf, p, PACKED_DIGITS[r]);
             }
             if (hi >= 10) {
                 p -= 2;
-                JDKUtils.putShortDirect(buf, p, PACKED_DIGITS[hi]);
+                JDKUtils.putShortDirect(buf, p, PACKED_DIGITS[(int) hi]);
             } else {
                 buf[--p] = (byte) ('0' + hi);
             }
@@ -1518,10 +1519,11 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
         }
 
         private static int longStringSize(long x) {
+            // For values up to 9_223_372_036 (max hi part of Long.MAX_VALUE)
             int d = 1;
-            if (x >= 10000000000L) {
-                d += 10;
-                x /= 10000000000L;
+            if (x >= 1000000000L) {
+                d += 9;
+                x /= 1000000000L;
             }
             if (x >= 100000) {
                 d += 5;

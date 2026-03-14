@@ -30,6 +30,11 @@ public final class ObjectReaderCreator {
             return createRecordReader(type, mixIn);
         }
 
+        // Sealed class/interface: auto-discover subtypes for polymorphic deserialization
+        if (type.isSealed()) {
+            return createSealedReader(type, mixIn);
+        }
+
         Constructor<T> constructor = resolveConstructor(type, mixIn);
         constructor.setAccessible(true);
         boolean useUnsafeAlloc = JDKUtils.UNSAFE_AVAILABLE;
@@ -286,6 +291,73 @@ public final class ObjectReaderCreator {
 
     // ==================== Internal ObjectReader implementation ====================
 
+    /**
+     * Create an ObjectReader for a sealed class/interface that auto-discovers permitted subtypes.
+     * Uses the typeKey from @JSONType (default "@type") and typeName from each subtype's @JSONType.
+     * Built once at creation time — zero hot-path overhead.
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> ObjectReader<T> createSealedReader(Class<T> sealedType, Class<?> mixIn) {
+        JSONType jsonType = sealedType.getAnnotation(JSONType.class);
+        String typeKey = (jsonType != null && !jsonType.typeKey().isEmpty()) ? jsonType.typeKey() : "@type";
+
+        // Auto-discover permitted subtypes (includes seeAlso for manual overrides)
+        Class<?>[] permitted = sealedType.getPermittedSubclasses();
+        Class<?>[] seeAlso = (jsonType != null) ? jsonType.seeAlso() : new Class<?>[0];
+
+        // Build typeName → subtype map, eagerly create ObjectReaders
+        Map<String, ObjectReader<?>> readerMap = new LinkedHashMap<>();
+        for (Class<?> sub : permitted) {
+            registerSubtype(sub, mixIn, readerMap);
+        }
+        for (Class<?> sub : seeAlso) {
+            registerSubtype(sub, mixIn, readerMap);
+        }
+
+        // Single-subtype shortcut: reader used when typeKey is absent
+        ObjectReader<?> singleReader = (permitted.length == 1 && seeAlso.length == 0)
+                ? readerMap.values().iterator().next() : null;
+
+        return (ObjectReader<T>) (JSONParser parser, java.lang.reflect.Type fieldType, Object fieldName, long features) -> {
+            // Handle null literal
+            if (parser.readNull()) {
+                return null;
+            }
+
+            // Parse as JSONObject to inspect the type discriminator
+            com.alibaba.fastjson3.JSONObject jsonObj = parser.readObject();
+
+            String typeName = jsonObj.getString(typeKey);
+            ObjectReader<?> subReader = (typeName != null) ? readerMap.get(typeName) : null;
+
+            if (subReader == null) {
+                subReader = singleReader;
+            }
+
+            if (subReader == null) {
+                throw new com.alibaba.fastjson3.JSONException(
+                        "cannot determine subtype for sealed type " + sealedType.getName()
+                                + ", typeKey='" + typeKey + "', value='" + typeName + "'"
+                                + ", known types=" + readerMap.keySet());
+            }
+
+            // Direct conversion: JSONObject → byte[] → subtype (single parse, no double serialization)
+            byte[] bytes = com.alibaba.fastjson3.JSON.toJSONBytes(jsonObj);
+            try (JSONParser sub = JSONParser.of(bytes)) {
+                return (T) subReader.readObject(sub, sealedType, null, features);
+            }
+        };
+    }
+
+    private static void registerSubtype(Class<?> sub, Class<?> mixIn, Map<String, ObjectReader<?>> readerMap) {
+        JSONType subJsonType = sub.getAnnotation(JSONType.class);
+        String typeName = (subJsonType != null && !subJsonType.typeName().isEmpty())
+                ? subJsonType.typeName() : sub.getSimpleName();
+        if (!readerMap.containsKey(typeName)) {
+            readerMap.put(typeName, createObjectReader(sub, mixIn));
+        }
+    }
+
     private static final class ReflectionObjectReader<T> implements ObjectReader<T> {
         private final Class<T> objectClass;
         private final Constructor<T> constructor;
@@ -323,29 +395,33 @@ public final class ObjectReaderCreator {
             if (fieldReadersResolved) {
                 return;
             }
-            ObjectMapper mapper = ObjectMapper.shared();
-            int len = fieldReaders.length;
-            ObjectReader<?>[] objReaders = new ObjectReader<?>[len];
-            ObjectReader<?>[] elemReaders = new ObjectReader<?>[len];
-            for (int i = 0; i < len; i++) {
-                FieldReader fr = fieldReaders[i];
-                Class<?> fc = fr.fieldClass;
-                // For POJO fields (not basic types), get ObjectReader
-                if (fr.typeTag == FieldReader.TAG_GENERIC) {
-                    ObjectReader<?> r = mapper.getObjectReader(fc);
-                    if (r != null) {
-                        objReaders[i] = r;
-                        fr.typeTag = FieldReader.TAG_POJO;
+            synchronized (this) {
+                if (fieldReadersResolved) {
+                    return;
+                }
+                ObjectMapper mapper = ObjectMapper.shared();
+                int len = fieldReaders.length;
+                ObjectReader<?>[] objReaders = new ObjectReader<?>[len];
+                ObjectReader<?>[] elemReaders = new ObjectReader<?>[len];
+                for (int i = 0; i < len; i++) {
+                    FieldReader fr = fieldReaders[i];
+                    Class<?> fc = fr.fieldClass;
+                    // For POJO fields (not basic types), get ObjectReader
+                    if (fr.typeTag == FieldReader.TAG_GENERIC) {
+                        ObjectReader<?> r = mapper.getObjectReader(fc);
+                        if (r != null) {
+                            objReaders[i] = r;
+                        }
+                    }
+                    // For List fields, get element ObjectReader
+                    if (fr.elementClass != null && fr.elementClass != String.class) {
+                        elemReaders[i] = mapper.getObjectReader(fr.elementClass);
                     }
                 }
-                // For List fields, get element ObjectReader
-                if (fr.elementClass != null && fr.elementClass != String.class) {
-                    elemReaders[i] = mapper.getObjectReader(fr.elementClass);
-                }
+                this.fieldElementReaders = elemReaders;
+                this.fieldObjectReaders = objReaders;
+                this.fieldReadersResolved = true;
             }
-            this.fieldElementReaders = elemReaders;
-            this.fieldObjectReaders = objReaders;
-            this.fieldReadersResolved = true;
         }
 
         @Override
@@ -641,13 +717,6 @@ public final class ObjectReaderCreator {
                     }
                     reader.setObjectValue(instance, readListUTF8Inline(utf8, reader, fieldIndex, features, elemReaders));
                 }
-                case FieldReader.TAG_POJO -> {
-                    if (peek == 'n' && utf8.readNull()) {
-                        return;
-                    }
-                    ObjectReader<?> r = objReaders[fieldIndex];
-                    reader.setObjectValue(instance, r.readObjectUTF8(utf8, features));
-                }
                 case FieldReader.TAG_STRING_ARRAY -> {
                     if (peek == 'n' && utf8.readNull()) {
                         return;
@@ -664,7 +733,14 @@ public final class ObjectReaderCreator {
                     if (peek == 'n' && utf8.readNull()) {
                         return;
                     }
-                    readAndSetFieldGenericValue(utf8, instance, reader, features);
+                    // Check if we have a pre-resolved ObjectReader for this field (POJO type)
+                    ObjectReader<?> objReader = (fieldIndex >= 0 && objReaders != null)
+                            ? objReaders[fieldIndex] : null;
+                    if (objReader != null) {
+                        reader.setObjectValue(instance, objReader.readObjectUTF8(utf8, features));
+                    } else {
+                        readAndSetFieldGenericValue(utf8, instance, reader, features);
+                    }
                 }
             }
         }
