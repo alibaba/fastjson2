@@ -290,7 +290,7 @@ val bytes = user.toJSONByteArray()  // ByteArray
 
 ## 2.5 使用 `JSONObject` 和 `JSONArray`
 
-#### 2.5.1 获取简单属性
+### 2.5.1 获取简单属性
 
 ```java
 String text = "{\"id\": 2, \"name\": \"fastjson2\"}";
@@ -308,7 +308,7 @@ int id = array.getIntValue(0);
 String name = array.getString(1);
 ```
 
-#### 2.5.2 读取 JavaBean
+### 2.5.2 读取 JavaBean
 
 **Java:**
 
@@ -330,7 +330,7 @@ val user = array.to<User>(0)
 val user = obj.to<User>("key")
 ```
 
-#### 2.5.3 转为 JavaBean
+### 2.5.3 转为 JavaBean
 
 **Java:**
 
@@ -395,7 +395,7 @@ val bytes = user.toJSONByteArray()  // ByteArray
 
 JSONB 是一种高性能的二进制 JSON 格式，提供更快的序列化/反序列化速度和更小的数据体积。详见 [JSONB 格式规范](https://alibaba.github.io/fastjson2/JSONB/jsonb_format_cn)。
 
-#### 序列化为 JSONB
+### 序列化为 JSONB
 
 ```java
 User user = ...;
@@ -403,7 +403,7 @@ byte[] bytes = JSONB.toBytes(user);
 byte[] bytes = JSONB.toBytes(user, JSONWriter.Feature.BeanToArray); // 更紧凑
 ```
 
-#### 解析 JSONB
+### 解析 JSONB
 
 ```java
 byte[] bytes = ...;
@@ -415,7 +415,7 @@ User user = JSONB.parseObject(bytes, User.class, JSONReader.Feature.SupportArray
 
 JSONPath 支持不完全反序列化即可从 JSON 文档中提取特定字段，非常适合从大型数据中提取部分数据。FASTJSON 2 实现了 [SQL:2016](https://en.wikipedia.org/wiki/SQL:2016) JSONPath 语法。
 
-#### 从 String 中提取
+### 从 String 中提取
 
 ```java
 String text = ...;
@@ -425,7 +425,7 @@ JSONReader parser = JSONReader.of(text);
 Object result = path.extract(parser);
 ```
 
-#### 从 byte[] 中提取
+### 从 byte[] 中提取
 
 ```java
 byte[] bytes = ...;
@@ -435,7 +435,7 @@ JSONReader parser = JSONReader.of(bytes);
 Object result = path.extract(parser);
 ```
 
-#### 从 JSONB byte[] 中提取
+### 从 JSONB byte[] 中提取
 
 ```java
 byte[] bytes = ...;

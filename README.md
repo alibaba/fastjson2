@@ -289,7 +289,7 @@ val bytes = user.toJSONByteArray()  // ByteArray
 
 ## 2.5 Working with `JSONObject` and `JSONArray`
 
-#### 2.5.1 Get Simple Properties
+### 2.5.1 Get Simple Properties
 
 ```java
 String text = "{\"id\": 2, \"name\": \"fastjson2\"}";
@@ -307,7 +307,7 @@ int id = array.getIntValue(0);
 String name = array.getString(1);
 ```
 
-#### 2.5.2 Get JavaBean from JSON Containers
+### 2.5.2 Get JavaBean from JSON Containers
 
 **Java:**
 
@@ -329,7 +329,7 @@ val user = array.to<User>(0)
 val user = obj.to<User>("key")
 ```
 
-#### 2.5.3 Convert JSONObject/JSONArray to JavaBean
+### 2.5.3 Convert JSONObject/JSONArray to JavaBean
 
 **Java:**
 
@@ -394,7 +394,7 @@ Output:
 
 JSONB is a high-performance binary JSON format that provides significantly faster serialization/deserialization and smaller payload sizes. See the [JSONB Format Specification](https://alibaba.github.io/fastjson2/JSONB/jsonb_format_en).
 
-#### Serialize to JSONB
+### Serialize to JSONB
 
 ```java
 User user = ...;
@@ -402,7 +402,7 @@ byte[] bytes = JSONB.toBytes(user);
 byte[] bytes = JSONB.toBytes(user, JSONWriter.Feature.BeanToArray); // Even more compact
 ```
 
-#### Parse JSONB
+### Parse JSONB
 
 ```java
 byte[] bytes = ...;
@@ -414,7 +414,7 @@ User user = JSONB.parseObject(bytes, User.class, JSONReader.Feature.SupportArray
 
 JSONPath enables partial parsing of JSON documents without full deserialization, which is ideal for extracting specific fields from large payloads. FASTJSON 2 implements [SQL:2016](https://en.wikipedia.org/wiki/SQL:2016) JSONPath syntax.
 
-#### Extract from String
+### Extract from String
 
 ```java
 String text = ...;
@@ -424,7 +424,7 @@ JSONReader parser = JSONReader.of(text);
 Object result = path.extract(parser);
 ```
 
-#### Extract from byte[]
+### Extract from byte[]
 
 ```java
 byte[] bytes = ...;
@@ -434,7 +434,7 @@ JSONReader parser = JSONReader.of(bytes);
 Object result = path.extract(parser);
 ```
 
-#### Extract from JSONB byte[]
+### Extract from JSONB byte[]
 
 ```java
 byte[] bytes = ...;
