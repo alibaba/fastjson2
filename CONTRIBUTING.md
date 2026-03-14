@@ -1,4 +1,3 @@
-
 # Contributing to FASTJSON 2
 
 Thank you for your interest in contributing to FASTJSON 2! This guide will help you get started.

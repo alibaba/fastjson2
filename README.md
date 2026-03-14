@@ -206,7 +206,7 @@ dependencies {
 
 > The package name for FASTJSON 2 is `com.alibaba.fastjson2`. If upgrading from v1, simply update the package imports.
 
-### 2.1 Parse JSON to `JSONObject`
+## 2.1 Parse JSON to `JSONObject`
 
 **Java:**
 
@@ -230,7 +230,7 @@ val bytes: ByteArray = text.toByteArray()
 val data = bytes.parseObject() // JSONObject
 ```
 
-### 2.2 Parse JSON to `JSONArray`
+## 2.2 Parse JSON to `JSONArray`
 
 **Java:**
 
@@ -248,7 +248,7 @@ val text = """[{"id":1},{"id":2}]"""
 val data = text.parseArray() // JSONArray
 ```
 
-### 2.3 Parse JSON to Java Object
+## 2.3 Parse JSON to Java Object
 
 **Java:**
 
@@ -267,7 +267,7 @@ val user = text.to<User>()          // User
 val user = text.parseObject<User>() // User (alternative)
 ```
 
-### 2.4 Serialize Java Object to JSON
+## 2.4 Serialize Java Object to JSON
 
 **Java:**
 
@@ -287,7 +287,7 @@ val text = user.toJSONString()      // String
 val bytes = user.toJSONByteArray()  // ByteArray
 ```
 
-### 2.5 Working with `JSONObject` and `JSONArray`
+## 2.5 Working with `JSONObject` and `JSONArray`
 
 #### 2.5.1 Get Simple Properties
 
@@ -351,7 +351,7 @@ val user = obj.to<User>()           // User
 val users = array.toList<User>()    // List<User>
 ```
 
-### 2.6 Serialize JavaBean to JSON
+## 2.6 Serialize JavaBean to JSON
 
 **Java:**
 
@@ -390,7 +390,7 @@ Output:
 
 # 3. Advanced Usage
 
-### 3.1 JSONB Binary Format
+## 3.1 JSONB Binary Format
 
 JSONB is a high-performance binary JSON format that provides significantly faster serialization/deserialization and smaller payload sizes. See the [JSONB Format Specification](https://alibaba.github.io/fastjson2/JSONB/jsonb_format_en).
 
@@ -410,7 +410,7 @@ User user = JSONB.parseObject(bytes, User.class);
 User user = JSONB.parseObject(bytes, User.class, JSONReader.Feature.SupportArrayToBean);
 ```
 
-### 3.2 JSONPath
+## 3.2 JSONPath
 
 JSONPath enables partial parsing of JSON documents without full deserialization, which is ideal for extracting specific fields from large payloads. FASTJSON 2 implements [SQL:2016](https://en.wikipedia.org/wiki/SQL:2016) JSONPath syntax.
 
@@ -446,7 +446,7 @@ Object result = path.extract(parser);
 
 See the full [JSONPath Documentation](https://alibaba.github.io/fastjson2/JSONPath/jsonpath_en) for filter expressions, aggregate functions, array slicing, and more.
 
-### 3.3 Features Configuration
+## 3.3 Features Configuration
 
 FASTJSON 2 provides fine-grained control over serialization and deserialization behavior through `JSONWriter.Feature` and `JSONReader.Feature`. All features are **OFF by default**.
 
@@ -463,7 +463,7 @@ User user = JSON.parseObject(json, User.class,
 
 See the full [Features Reference](docs/features_en.md) for all available options and migration mapping from fastjson 1.x.
 
-### 3.4 Annotations
+## 3.4 Annotations
 
 Use `@JSONField` and `@JSONType` to customize serialization/deserialization behavior:
 
@@ -482,7 +482,7 @@ public class User {
 
 See the full [Annotations Guide](docs/annotations_en.md).
 
-### 3.5 Custom Serializer/Deserializer
+## 3.5 Custom Serializer/Deserializer
 
 Implement `ObjectWriter<T>` or `ObjectReader<T>` for custom serialization logic:
 
@@ -501,7 +501,7 @@ JSON.register(Money.class, new MoneyWriter());
 
 See the full [Custom Reader/Writer Guide](docs/register_custom_reader_writer_en.md).
 
-### 3.6 Filters
+## 3.6 Filters
 
 FASTJSON 2 provides a comprehensive filter system for serialization:
 
@@ -533,7 +533,7 @@ See the full [Migration Guide](docs/fastjson_1_upgrade_en.md) for step-by-step i
 
 # 5. Documentation
 
-### Core References
+## Core References
 
 | Document | Description |
 |----------|-------------|
@@ -542,7 +542,7 @@ See the full [Migration Guide](docs/fastjson_1_upgrade_en.md) for step-by-step i
 | [Architecture](docs/ARCHITECTURE.md) | Internal architecture, design patterns, and class hierarchy |
 | [FAQ](docs/FAQ_en.md) | Frequently asked questions and troubleshooting |
 
-### Format & Protocol
+## Format & Protocol
 
 | Document | Description |
 |----------|-------------|
@@ -551,7 +551,7 @@ See the full [Migration Guide](docs/fastjson_1_upgrade_en.md) for step-by-step i
 | [JSONB Size Comparison](docs/JSONB/jsonb_size_compare_en.md) | Payload size comparison |
 | [CSV Support](docs/csv_en.md) | CSV reading and writing support |
 
-### JSONPath
+## JSONPath
 
 | Document | Description |
 |----------|-------------|
@@ -560,7 +560,7 @@ See the full [Migration Guide](docs/fastjson_1_upgrade_en.md) for step-by-step i
 | [Typed JSONPath](docs/JSONPath/jsonpath_typed_en.md) | Type-safe JSONPath extraction |
 | [JSONPath Benchmark](docs/JSONPath/jsonpath_benchmark_en.md) | Performance data |
 
-### Integrations
+## Integrations
 
 | Document | Description |
 |----------|-------------|
@@ -568,7 +568,7 @@ See the full [Migration Guide](docs/fastjson_1_upgrade_en.md) for step-by-step i
 | [Kotlin Extensions](docs/Kotlin/kotlin_en.md) | Kotlin API and DSL |
 | [Android Support](docs/Android/android_benchmark_en.md) | Android 8+ integration |
 
-### Customization
+## Customization
 
 | Document | Description |
 |----------|-------------|
@@ -578,7 +578,7 @@ See the full [Migration Guide](docs/fastjson_1_upgrade_en.md) for step-by-step i
 | [JSON Schema](docs/JSONSchema/json_schema_en.md) | Schema validation |
 | [Filter System](docs/Filter/index_en.md) | Serialization filters |
 
-### Migration & Performance
+## Migration & Performance
 
 | Document | Description |
 |----------|-------------|
