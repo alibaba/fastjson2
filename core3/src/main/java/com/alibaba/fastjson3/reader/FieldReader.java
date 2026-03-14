@@ -15,6 +15,10 @@ import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Represents a single field to read during JSON deserialization.
@@ -311,6 +315,22 @@ public final class FieldReader implements Comparable<FieldReader> {
             if (fieldClass == byte.class || fieldClass == Byte.class) {
                 return number.byteValue();
             }
+            if (fieldClass == AtomicInteger.class) {
+                return new AtomicInteger(number.intValue());
+            }
+            if (fieldClass == AtomicLong.class) {
+                return new AtomicLong(number.longValue());
+            }
+        }
+
+        // Boolean → AtomicBoolean conversion
+        if (value instanceof Boolean b && fieldClass == AtomicBoolean.class) {
+            return new AtomicBoolean(b);
+        }
+
+        // Any value → AtomicReference conversion
+        if (fieldClass == AtomicReference.class) {
+            return new AtomicReference<>(value);
         }
 
         // String → temporal type conversion

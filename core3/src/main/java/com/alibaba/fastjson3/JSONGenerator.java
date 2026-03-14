@@ -20,6 +20,12 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerArray;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicLongArray;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * High-performance JSON generator.
@@ -276,6 +282,26 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
             writeInt32((Short) value);
         } else if (value instanceof Byte) {
             writeInt32((Byte) value);
+        } else if (value instanceof AtomicInteger ai) {
+            writeInt32(ai.intValue());
+        } else if (value instanceof AtomicLong al) {
+            writeInt64(al.longValue());
+        } else if (value instanceof AtomicBoolean ab) {
+            writeBool(ab.get());
+        } else if (value instanceof AtomicReference<?> ar) {
+            writeAny(ar.get());
+        } else if (value instanceof AtomicIntegerArray aia) {
+            startArray();
+            for (int i = 0, len = aia.length(); i < len; i++) {
+                writeInt32(aia.get(i));
+            }
+            endArray();
+        } else if (value instanceof AtomicLongArray ala) {
+            startArray();
+            for (int i = 0, len = ala.length(); i < len; i++) {
+                writeInt64(ala.get(i));
+            }
+            endArray();
         } else if (value instanceof JSONObject) {
             writeJSONObject((JSONObject) value);
         } else if (value instanceof JSONArray) {

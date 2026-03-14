@@ -568,6 +568,12 @@ public final class ObjectMapper {
                 || type == Byte.class || type == Character.class
                 || type == java.math.BigDecimal.class || type == java.math.BigInteger.class
                 || type == JSONObject.class || type == JSONArray.class
+                || type == java.util.concurrent.atomic.AtomicInteger.class
+                || type == java.util.concurrent.atomic.AtomicLong.class
+                || type == java.util.concurrent.atomic.AtomicBoolean.class
+                || type == java.util.concurrent.atomic.AtomicIntegerArray.class
+                || type == java.util.concurrent.atomic.AtomicLongArray.class
+                || type == java.util.concurrent.atomic.AtomicReference.class
                 || type.isArray() || type.isEnum()
                 || java.util.Collection.class.isAssignableFrom(type)
                 || java.util.Map.class.isAssignableFrom(type)

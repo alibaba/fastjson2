@@ -7,6 +7,11 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerArray;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
  * High-performance JSON parser.
@@ -585,6 +590,46 @@ public abstract sealed class JSONParser implements Closeable
         }
         if (type == JSONArray.class) {
             return (T) readArray();
+        }
+        if (type == AtomicInteger.class) {
+            if (readNull()) {
+                return null;
+            }
+            return (T) new AtomicInteger(readInt());
+        }
+        if (type == AtomicLong.class) {
+            if (readNull()) {
+                return null;
+            }
+            return (T) new AtomicLong(readLong());
+        }
+        if (type == AtomicBoolean.class) {
+            if (readNull()) {
+                return null;
+            }
+            return (T) new AtomicBoolean(readBoolean());
+        }
+        if (type == AtomicIntegerArray.class) {
+            if (readNull()) {
+                return null;
+            }
+            JSONArray array = readArray();
+            int[] values = new int[array.size()];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = array.getIntValue(i);
+            }
+            return (T) new AtomicIntegerArray(values);
+        }
+        if (type == AtomicLongArray.class) {
+            if (readNull()) {
+                return null;
+            }
+            JSONArray array = readArray();
+            long[] values = new long[array.size()];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = array.getLongValue(i);
+            }
+            return (T) new AtomicLongArray(values);
         }
         // For POJO types, read as JSONObject first and let ObjectMapper handle conversion
         throw new UnsupportedOperationException("reading " + type.getName() + " not yet supported without ObjectReader");
@@ -1738,6 +1783,158 @@ public abstract sealed class JSONParser implements Closeable
                 return off + 5;
             }
             throw new JSONException("expected 'true' or 'false' at offset " + off);
+        }
+
+        // ==================== Direct offset-passing methods (for ASM code gen) ====================
+        // These methods take a field offset (long) directly instead of a FieldReader,
+        // eliminating the FieldReader indirection and virtual dispatch on setXxxValue.
+        // Used by ASM-generated readers where the field offset is a compile-time constant.
+
+        public int readIntOffDirect(int off, Object bean, long fieldOffset) {
+            final byte[] b = this.bytes;
+            boolean neg = false;
+            int c = b[off] & 0xFF;
+            if (c == '-') {
+                neg = true;
+                c = b[++off] & 0xFF;
+            }
+            int value = c - '0';
+            off++;
+            while ((c = b[off] & 0xFF) >= '0' && c <= '9') {
+                value = value * 10 + (c - '0');
+                off++;
+            }
+            com.alibaba.fastjson3.util.JDKUtils.putInt(bean, fieldOffset, neg ? -value : value);
+            return off;
+        }
+
+        public int readLongOffDirect(int off, Object bean, long fieldOffset) {
+            final byte[] b = this.bytes;
+            boolean neg = false;
+            int c = b[off] & 0xFF;
+            if (c == '-') {
+                neg = true;
+                c = b[++off] & 0xFF;
+            }
+            int start = off;
+            long value = c - '0';
+            off++;
+            while ((c = b[off] & 0xFF) >= '0' && c <= '9') {
+                value = value * 10 + (c - '0');
+                off++;
+            }
+            if (off - start >= 19) {
+                if (off - start > 19
+                        || (!neg && value < 0)
+                        || (neg && value < 0 && value != Long.MIN_VALUE)) {
+                    this.offset = start - (neg ? 1 : 0);
+                    com.alibaba.fastjson3.util.JDKUtils.putLongField(bean, fieldOffset, readNumber().longValue());
+                    return this.offset;
+                }
+            }
+            com.alibaba.fastjson3.util.JDKUtils.putLongField(bean, fieldOffset, neg ? -value : value);
+            return off;
+        }
+
+        public int readDoubleOffDirect(int off, Object bean, long fieldOffset) {
+            final byte[] b = this.bytes;
+            int start = off;
+            boolean neg = false;
+            if (b[off] == '-') {
+                neg = true;
+                off++;
+            }
+            long mantissa = 0;
+            while (b[off] >= '0' && b[off] <= '9') {
+                mantissa = mantissa * 10 + (b[off] - '0');
+                off++;
+            }
+            int fracDigits = 0;
+            if (b[off] == '.') {
+                off++;
+                while (b[off] >= '0' && b[off] <= '9') {
+                    if (fracDigits < 18) {
+                        mantissa = mantissa * 10 + (b[off] - '0');
+                    }
+                    fracDigits++;
+                    off++;
+                }
+            }
+            if (b[off] == 'e' || b[off] == 'E') {
+                this.offset = start;
+                com.alibaba.fastjson3.util.JDKUtils.putDouble(bean, fieldOffset, readNumber().doubleValue());
+                return this.offset;
+            }
+            double result;
+            if (fracDigits == 0) {
+                result = neg ? (double) -mantissa : (double) mantissa;
+            } else if (fracDigits <= 18) {
+                result = mantissa * NEG_POW10[fracDigits];
+                if (neg) {
+                    result = -result;
+                }
+            } else {
+                result = Double.parseDouble(new String(b, start, off - start, StandardCharsets.ISO_8859_1));
+            }
+            com.alibaba.fastjson3.util.JDKUtils.putDouble(bean, fieldOffset, result);
+            return off;
+        }
+
+        public int readBooleanOffDirect(int off, Object bean, long fieldOffset) {
+            final byte[] b = this.bytes;
+            if (b[off] == 't' && b[off + 1] == 'r' && b[off + 2] == 'u' && b[off + 3] == 'e') {
+                com.alibaba.fastjson3.util.JDKUtils.putBoolean(bean, fieldOffset, true);
+                return off + 4;
+            }
+            if (b[off] == 'f' && b[off + 1] == 'a' && b[off + 2] == 'l' && b[off + 3] == 's' && b[off + 4] == 'e') {
+                com.alibaba.fastjson3.util.JDKUtils.putBoolean(bean, fieldOffset, false);
+                return off + 5;
+            }
+            throw new JSONException("expected 'true' or 'false' at offset " + off);
+        }
+
+        public int readStringOffDirect(int off, Object bean, long fieldOffset) {
+            final byte[] b = this.bytes;
+            off++; // skip opening '"'
+            int start = off;
+
+            if (com.alibaba.fastjson3.util.JDKUtils.VECTOR_SUPPORT) {
+                off = com.alibaba.fastjson3.util.VectorizedScanner.scanStringSimple(b, off, end);
+            } else {
+                while (off + 8 <= end) {
+                    long word = com.alibaba.fastjson3.util.JDKUtils.getLongDirect(b, off);
+                    long v1 = word ^ SWAR_QUOTE;
+                    long v2 = word ^ SWAR_ESCAPE;
+                    long detect = ((v1 - SWAR_LO) & ~v1)
+                            | ((v2 - SWAR_LO) & ~v2)
+                            | word;
+                    if ((detect & SWAR_HI) != 0) {
+                        off += Long.numberOfTrailingZeros(detect & SWAR_HI) >> 3;
+                        break;
+                    }
+                    off += 8;
+                }
+            }
+
+            while (b[off] != '"') {
+                if (b[off] == '\\') {
+                    this.offset = off;
+                    com.alibaba.fastjson3.util.JDKUtils.putObject(bean, fieldOffset, readStringEscaped(start));
+                    return this.offset;
+                }
+                if (b[off] < 0) {
+                    this.offset = off;
+                    com.alibaba.fastjson3.util.JDKUtils.putObject(bean, fieldOffset, readStringUTF8(start));
+                    return this.offset;
+                }
+                off++;
+            }
+
+            int len = off - start;
+            off++; // skip closing '"'
+            com.alibaba.fastjson3.util.JDKUtils.putObject(bean, fieldOffset,
+                    com.alibaba.fastjson3.util.JDKUtils.createLatin1String(b, start, len));
+            return off;
         }
 
         // ==================== Inline list/array readers ====================

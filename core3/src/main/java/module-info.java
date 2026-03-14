@@ -1,5 +1,5 @@
 /**
- * Fastjson3 — high-performance JSON library for Java 17+.
+ * Fastjson3 — high-performance JSON library for Java 21+.
  *
  * <p>Public API:
  * <ul>

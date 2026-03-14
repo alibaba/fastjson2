@@ -646,6 +646,22 @@ public final class MethodWriter {
         visitJumpInsn(Opcodes.IF_ICMPNE, label);
     }
 
+    public void if_icmpgt(final Label label) {
+        visitJumpInsn(Opcodes.IF_ICMPGT, label);
+    }
+
+    public void iflt(final Label label) {
+        visitJumpInsn(Opcodes.IFLT, label);
+    }
+
+    public void if_icmplt(final Label label) {
+        visitJumpInsn(Opcodes.IF_ICMPLT, label);
+    }
+
+    public void baload() {
+        visitInsn(Opcodes.BALOAD);
+    }
+
     private void visitJumpInsn(final int opcode, final Label label) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
