@@ -66,6 +66,13 @@ final class BuiltinCodecs {
         if (Path.class.isAssignableFrom(type)) {
             return (ObjectReader<T>) PATH_READER;
         }
+
+        // Guava immutable collections (zero-dependency, reflection-based)
+        ObjectReader<?> guavaReader = GuavaSupport.getReader(type);
+        if (guavaReader != null) {
+            return (ObjectReader<T>) guavaReader;
+        }
+
         return null;
     }
 

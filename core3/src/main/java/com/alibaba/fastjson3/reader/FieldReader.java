@@ -172,7 +172,7 @@ public final class FieldReader implements Comparable<FieldReader> {
             return TAG_DOUBLE_OBJ;
         } else if (fc == Boolean.class) {
             return TAG_BOOLEAN_OBJ;
-        } else if (List.class.isAssignableFrom(fc)) {
+        } else if (List.class.isAssignableFrom(fc) && fc.isAssignableFrom(java.util.ArrayList.class)) {
             return TAG_LIST;
         } else if (fc == String[].class) {
             return TAG_STRING_ARRAY;

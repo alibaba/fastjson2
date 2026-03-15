@@ -38,6 +38,13 @@ public final class ObjectReaderCreator {
 
         Constructor<T> constructor = resolveConstructor(type, mixIn, useJacksonAnnotation);
         constructor.setAccessible(true);
+
+        // If constructor has parameters, use constructor-based reader (like Records)
+        // This handles: Kotlin data classes, Java immutable classes, @JSONCreator with params
+        if (constructor.getParameterCount() > 0) {
+            return createConstructorReader(type, constructor, mixIn, useJacksonAnnotation);
+        }
+
         boolean useUnsafeAlloc = JDKUtils.UNSAFE_AVAILABLE;
 
         FieldReaderCollection collection = collectFieldReaders(type, mixIn, useJacksonAnnotation);
@@ -169,6 +176,117 @@ public final class ObjectReaderCreator {
 
         return new RecordObjectReader<>(type, constructor, collection.fieldReaders,
                 collection.fieldReaderMap, collection.matcher, componentTypes.length, paramMapping);
+    }
+
+    /**
+     * Create a constructor-based reader for non-record types with all-args constructors.
+     * Handles Kotlin data classes, Java immutable classes, and @JSONCreator with parameters.
+     * Reuses RecordObjectReader logic: collect values → invoke constructor.
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> ObjectReader<T> createConstructorReader(
+            Class<T> type, Constructor<T> constructor, Class<?> mixIn, boolean useJacksonAnnotation
+    ) {
+        Class<?>[] paramTypes = constructor.getParameterTypes();
+        java.lang.reflect.Type[] genericParamTypes = constructor.getGenericParameterTypes();
+
+        // Match constructor parameters to declared fields by position.
+        // Parent-first order: superclass fields come before subclass fields,
+        // matching typical constructor parameter order (super(...) params first).
+        List<Field> instanceFields = getInstanceFieldsParentFirst(type);
+
+        // Resolve naming strategy
+        JSONType jsonType = type.getAnnotation(JSONType.class);
+        if (jsonType == null && mixIn != null) {
+            jsonType = mixIn.getAnnotation(JSONType.class);
+        }
+        NamingStrategy naming = jsonType != null ? jsonType.naming() : NamingStrategy.NoneStrategy;
+        if (useJacksonAnnotation && naming == NamingStrategy.NoneStrategy) {
+            JacksonAnnotationSupport.BeanInfo jackson = JacksonAnnotationSupport.getBeanInfo(type);
+            if (jackson != null && jackson.naming() != null) {
+                naming = jackson.naming();
+            }
+        }
+
+        // Build FieldReaders from fields (in declaration order = constructor parameter order)
+        List<FieldReader> fieldReaderList = new ArrayList<>();
+        for (int i = 0; i < instanceFields.size() && i < paramTypes.length; i++) {
+            Field field = instanceFields.get(i);
+            field.setAccessible(true);
+            String rawName = field.getName();
+
+            JSONField annotation = field.getAnnotation(JSONField.class);
+            if (annotation == null && mixIn != null) {
+                annotation = findMixInFieldAnnotation(mixIn, rawName, JSONField.class);
+            }
+
+            JacksonAnnotationSupport.FieldInfo jacksonField = null;
+            if (annotation == null && useJacksonAnnotation) {
+                jacksonField = JacksonAnnotationSupport.getFieldInfo(field.getAnnotations());
+            }
+
+            String jsonName = resolveFieldName(rawName, annotation, naming);
+            String[] alternateNames = annotation != null ? annotation.alternateNames() : new String[0];
+            int ordinal = annotation != null ? annotation.ordinal() : 0;
+            String defaultValue = annotation != null ? annotation.defaultValue() : "";
+            boolean required = annotation != null && annotation.required();
+
+            if (jacksonField != null) {
+                if (jsonName.equals(applyNamingStrategy(rawName, naming)) && !jacksonField.name().isEmpty()) {
+                    jsonName = jacksonField.name();
+                }
+                if (alternateNames.length == 0 && jacksonField.alternateNames().length > 0) {
+                    alternateNames = jacksonField.alternateNames();
+                }
+                if (ordinal == 0) {
+                    ordinal = jacksonField.ordinal();
+                }
+                if (!required) {
+                    required = jacksonField.required();
+                }
+            }
+
+            fieldReaderList.add(new FieldReader(
+                    jsonName, alternateNames,
+                    genericParamTypes[i], paramTypes[i],
+                    ordinal, defaultValue, required,
+                    field, null
+            ));
+        }
+
+        Collections.sort(fieldReaderList);
+
+        FieldReader[] fieldReaders = fieldReaderList.toArray(new FieldReader[0]);
+        FieldNameMatcher matcher = FieldNameMatcher.build(fieldReaders);
+
+        Map<String, FieldReader> fieldReaderMap = HashMap.newHashMap(fieldReaders.length * 2);
+        for (int i = 0; i < fieldReaders.length; i++) {
+            FieldReader fr = fieldReaders[i];
+            fr.index = i;
+            fieldReaderMap.put(fr.fieldName, fr);
+            for (String alt : fr.alternateNames) {
+                fieldReaderMap.putIfAbsent(alt, fr);
+            }
+        }
+
+        FieldReaderCollection collection = new FieldReaderCollection(fieldReaders, matcher, fieldReaderMap);
+
+        // Build parameter mapping: fieldReader index → constructor parameter index
+        int[] paramMapping = new int[fieldReaders.length];
+        for (int i = 0; i < fieldReaders.length; i++) {
+            String name = fieldReaders[i].fieldName;
+            for (int j = 0; j < instanceFields.size(); j++) {
+                String resolvedName = applyNamingStrategy(instanceFields.get(j).getName(), naming);
+                String rawFieldName = instanceFields.get(j).getName();
+                if (resolvedName.equals(name) || rawFieldName.equals(name)) {
+                    paramMapping[i] = j;
+                    break;
+                }
+            }
+        }
+
+        return new RecordObjectReader<>(type, constructor, collection.fieldReaders,
+                collection.fieldReaderMap, collection.matcher, paramTypes.length, paramMapping);
     }
 
     /**
@@ -839,10 +957,13 @@ public final class ObjectReaderCreator {
                         return;
                     }
                     // Check if we have a pre-resolved ObjectReader for this field (POJO type)
+                    // Use readObject (not readObjectUTF8) to pass fieldType for generic-aware readers
+                    // (e.g., Guava ImmutableList<User>, Optional<User>). For POJO readers, readObject
+                    // internally dispatches to the UTF-8 fast path via instanceof check.
                     ObjectReader<?> objReader = (fieldIndex >= 0 && objReaders != null)
                             ? objReaders[fieldIndex] : null;
                     if (objReader != null) {
-                        reader.setObjectValue(instance, objReader.readObjectUTF8(utf8, features));
+                        reader.setObjectValue(instance, objReader.readObject(utf8, reader.fieldType, null, features));
                     } else {
                         readAndSetFieldGenericValue(utf8, instance, reader, features);
                     }
@@ -879,8 +1000,16 @@ public final class ObjectReaderCreator {
                 case FieldReader.TAG_DOUBLE_OBJ -> reader.setFieldValue(instance, parser.readDouble());
                 case FieldReader.TAG_BOOLEAN_OBJ -> reader.setFieldValue(instance, parser.readBoolean());
                 default -> {
-                    Object value = parser.readAny();
-                    reader.setFieldValue(instance, reader.convertValue(value));
+                    // Check for registered ObjectReader (e.g., Guava ImmutableList, custom POJO)
+                    int fi = reader.index;
+                    ObjectReader<?> objReader = (fi >= 0 && fieldObjectReaders != null)
+                            ? fieldObjectReaders[fi] : null;
+                    if (objReader != null) {
+                        reader.setObjectValue(instance, objReader.readObject(parser, reader.fieldType, null, features));
+                    } else {
+                        Object value = parser.readAny();
+                        reader.setFieldValue(instance, reader.convertValue(value));
+                    }
                 }
             }
         }
@@ -1458,35 +1587,25 @@ public final class ObjectReaderCreator {
 
     @SuppressWarnings("unchecked")
     private static <T> Constructor<T> resolveConstructor(Class<T> type, Class<?> mixIn, boolean useJacksonAnnotation) {
-        // Check target class constructors for @JSONCreator
+        // 1. Check for @JSONCreator annotated constructor
         for (Constructor<?> ctor : type.getDeclaredConstructors()) {
             if (ctor.isAnnotationPresent(JSONCreator.class)) {
-                if (ctor.getParameterCount() == 0) {
-                    return (Constructor<T>) ctor;
-                }
-                throw new JSONException(
-                        "@JSONCreator with parameters is not yet supported: " + type.getName()
-                );
+                return (Constructor<T>) ctor; // supports both no-arg and with-params
             }
         }
-        // Check Jackson @JsonCreator on constructors
+        // 2. Check Jackson @JsonCreator
         if (useJacksonAnnotation) {
             for (Constructor<?> ctor : type.getDeclaredConstructors()) {
                 if (JacksonAnnotationSupport.hasJsonCreator(ctor)) {
-                    if (ctor.getParameterCount() == 0) {
-                        return (Constructor<T>) ctor;
-                    }
-                    // Jackson @JsonCreator with parameters not yet supported either
-                    break;
+                    return (Constructor<T>) ctor;
                 }
             }
         }
-        // Check mixin constructors for @JSONCreator (match by parameter types)
+        // 3. Check mixin constructors for @JSONCreator
         if (mixIn != null) {
             for (Constructor<?> mixCtor : mixIn.getDeclaredConstructors()) {
                 if (mixCtor.isAnnotationPresent(JSONCreator.class)) {
                     if (mixCtor.getParameterCount() == 0) {
-                        // Find matching no-arg constructor on target
                         try {
                             return type.getDeclaredConstructor();
                         } catch (NoSuchMethodException ignored) {
@@ -1495,11 +1614,59 @@ public final class ObjectReaderCreator {
                 }
             }
         }
+        // 4. Prefer no-arg constructor
         try {
             return type.getDeclaredConstructor();
-        } catch (NoSuchMethodException e) {
-            throw new JSONException("no default constructor found for " + type.getName(), e);
+        } catch (NoSuchMethodException ignored) {
         }
+        // 5. Fall back to single all-args constructor (Kotlin data classes, Java immutable classes)
+        Constructor<?> candidate = findAllArgsConstructor(type);
+        if (candidate != null) {
+            return (Constructor<T>) candidate;
+        }
+        throw new JSONException("no suitable constructor found for " + type.getName());
+    }
+
+    /**
+     * Find a single non-synthetic constructor whose parameter count matches the instance field count.
+     * This handles Kotlin data classes and Java immutable classes with all-args constructors.
+     */
+    private static Constructor<?> findAllArgsConstructor(Class<?> type) {
+        // Skip non-static inner classes (have synthetic this$0 field + outer class constructor param)
+        if (type.getEnclosingClass() != null && !Modifier.isStatic(type.getModifiers())) {
+            return null;
+        }
+
+        // Count instance fields (includes superclass, excludes synthetic)
+        int fieldCount = getInstanceFieldsParentFirst(type).size();
+        if (fieldCount == 0) {
+            return null;
+        }
+
+        // Find non-synthetic constructors
+        Constructor<?>[] ctors = type.getDeclaredConstructors();
+        Constructor<?> candidate = null;
+        int candidateCount = 0;
+        for (Constructor<?> ctor : ctors) {
+            if (ctor.isSynthetic()) {
+                continue;
+            }
+            // Skip Kotlin default-value synthetic constructors (have DefaultConstructorMarker param)
+            Class<?>[] paramTypes = ctor.getParameterTypes();
+            if (paramTypes.length > 0) {
+                String lastParam = paramTypes[paramTypes.length - 1].getName();
+                if (lastParam.contains("DefaultConstructorMarker")) {
+                    continue;
+                }
+            }
+            if (ctor.getParameterCount() == fieldCount) {
+                candidate = ctor;
+                candidateCount++;
+            }
+        }
+
+        // Only use if exactly one matching constructor (unambiguous)
+        return candidateCount == 1 ? candidate : null;
     }
 
     private static List<Field> getDeclaredFields(Class<?> type) {
@@ -1508,6 +1675,32 @@ public final class ObjectReaderCreator {
         while (current != null && current != Object.class) {
             Collections.addAll(fields, current.getDeclaredFields());
             current = current.getSuperclass();
+        }
+        return fields;
+    }
+
+    /**
+     * Collect instance fields in parent-first order (superclass fields before subclass fields).
+     * Excludes static, transient, and synthetic fields.
+     * Used by constructor-based readers where parameter order matches parent-first field order.
+     */
+    private static List<Field> getInstanceFieldsParentFirst(Class<?> type) {
+        List<Class<?>> hierarchy = new ArrayList<>();
+        Class<?> current = type;
+        while (current != null && current != Object.class) {
+            hierarchy.add(current);
+            current = current.getSuperclass();
+        }
+        Collections.reverse(hierarchy);
+
+        List<Field> fields = new ArrayList<>();
+        for (Class<?> cls : hierarchy) {
+            for (Field f : cls.getDeclaredFields()) {
+                if (!Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())
+                        && !f.isSynthetic()) {
+                    fields.add(f);
+                }
+            }
         }
         return fields;
     }
