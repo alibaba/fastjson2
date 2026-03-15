@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue3984 {
@@ -24,8 +25,9 @@ public class Issue3984 {
                 new ValueFilter[]{valueFilter},
                 JSONWriter.Feature.WriteClassName);
 
-        assertTrue(json.contains("@type"), "JSON should contain @type when WriteClassName is enabled with ValueFilter: " + json);
-        assertTrue(json.contains("CustomMap"), "JSON should contain class name: " + json);
+        String expectedType = "\"@type\":\"" + CustomMap.class.getName() + "\"";
+        assertTrue(json.contains(expectedType),
+                "JSON should contain " + expectedType + ", actual: " + json);
     }
 
     @Test
@@ -35,8 +37,9 @@ public class Issue3984 {
 
         String json = JSON.toJSONString(map, JSONWriter.Feature.WriteClassName);
 
-        assertTrue(json.contains("@type"), "JSON should contain @type when WriteClassName is enabled: " + json);
-        assertTrue(json.contains("CustomMap"), "JSON should contain class name: " + json);
+        String expectedType = "\"@type\":\"" + CustomMap.class.getName() + "\"";
+        assertTrue(json.contains(expectedType),
+                "JSON should contain " + expectedType + ", actual: " + json);
     }
 
     @Test
@@ -54,10 +57,14 @@ public class Issue3984 {
                 new ValueFilter[]{valueFilter},
                 JSONWriter.Feature.WriteClassName);
 
-        // Both outer and inner maps should have @type
-        int firstIdx = json.indexOf("@type");
-        int lastIdx = json.lastIndexOf("@type");
-        assertTrue(firstIdx >= 0, "Should contain @type: " + json);
-        assertTrue(firstIdx != lastIdx, "Should contain @type for both outer and inner maps: " + json);
+        String typeToken = "\"@type\":\"" + CustomMap.class.getName() + "\"";
+        int count = 0;
+        int idx = 0;
+        while ((idx = json.indexOf(typeToken, idx)) != -1) {
+            count++;
+            idx += typeToken.length();
+        }
+        assertEquals(2, count,
+                "Should contain exactly 2 @type entries for outer and inner maps: " + json);
     }
 }
