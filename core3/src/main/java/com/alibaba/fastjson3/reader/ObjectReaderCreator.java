@@ -1,11 +1,13 @@
 package com.alibaba.fastjson3.reader;
 
 import com.alibaba.fastjson3.JSONException;
+import com.alibaba.fastjson3.JSONObject;
 import com.alibaba.fastjson3.JSONParser;
 import com.alibaba.fastjson3.ObjectMapper;
 import com.alibaba.fastjson3.ObjectReader;
 import com.alibaba.fastjson3.ReadFeature;
 import com.alibaba.fastjson3.annotation.*;
+import com.alibaba.fastjson3.schema.JSONSchema;
 import com.alibaba.fastjson3.util.JDKUtils;
 
 import java.lang.reflect.*;
@@ -52,8 +54,11 @@ public final class ObjectReaderCreator {
         // Scan for @JSONField(anySetter=true) or Jackson @JsonAnySetter
         Method anySetter = findAnySetterMethod(type, mixIn, useJacksonAnnotation);
 
+        // Parse class-level @JSONType(schema=)
+        JSONSchema typeSchema = parseTypeSchema(type);
+
         return new ReflectionObjectReader<>(type, constructor, collection.fieldReaders,
-                collection.fieldReaderMap, collection.matcher, useUnsafeAlloc, anySetter);
+                collection.fieldReaderMap, collection.matcher, useUnsafeAlloc, anySetter, typeSchema);
     }
 
     @SuppressWarnings("unchecked")
@@ -119,6 +124,7 @@ public final class ObjectReaderCreator {
             int ordinal = annotation != null ? annotation.ordinal() : 0;
             String defaultValue = annotation != null ? annotation.defaultValue() : "";
             boolean required = annotation != null && annotation.required();
+            String schema = (annotation != null && !annotation.schema().isEmpty()) ? annotation.schema() : null;
 
             // Apply Jackson fallbacks
             if (jacksonField != null) {
@@ -140,7 +146,7 @@ public final class ObjectReaderCreator {
                     jsonName, alternateNames,
                     genericTypes[i], componentTypes[i],
                     ordinal, defaultValue, required,
-                    field, null
+                    field, null, null, null, schema
             ));
         }
 
@@ -245,6 +251,7 @@ public final class ObjectReaderCreator {
             String format = (annotation != null && !annotation.format().isEmpty()) ? annotation.format() : null;
             Class<?> deserializeUsingClass = (annotation != null && annotation.deserializeUsing() != Void.class)
                     ? annotation.deserializeUsing() : null;
+            String schema = (annotation != null && !annotation.schema().isEmpty()) ? annotation.schema() : null;
 
             if (jacksonField != null) {
                 if (jsonName.equals(applyNamingStrategy(rawName, naming)) && !jacksonField.name().isEmpty()) {
@@ -268,7 +275,7 @@ public final class ObjectReaderCreator {
                     jsonName, alternateNames,
                     genericParamTypes[i], paramTypes[i],
                     ordinal, defaultValue, required,
-                    field, null, format, deserializeUsingClass
+                    field, null, format, deserializeUsingClass, schema
             ));
         }
 
@@ -405,6 +412,7 @@ public final class ObjectReaderCreator {
             String format = (annotation != null && !annotation.format().isEmpty()) ? annotation.format() : null;
             Class<?> deserializeUsingClass = (annotation != null && annotation.deserializeUsing() != Void.class)
                     ? annotation.deserializeUsing() : null;
+            String schema = (annotation != null && !annotation.schema().isEmpty()) ? annotation.schema() : null;
 
             // Apply Jackson fallbacks
             if (jacksonField != null) {
@@ -429,7 +437,7 @@ public final class ObjectReaderCreator {
                     jsonName, alternateNames,
                     field.getGenericType(), field.getType(),
                     ordinal, defaultValue, required,
-                    field, null, format, deserializeUsingClass
+                    field, null, format, deserializeUsingClass, schema
             ));
             processedNames.add(rawName);
         }
@@ -491,6 +499,7 @@ public final class ObjectReaderCreator {
             int ordinal = annotation != null ? annotation.ordinal() : 0;
             String defaultValue = annotation != null ? annotation.defaultValue() : "";
             boolean required = annotation != null && annotation.required();
+            String schema = (annotation != null && !annotation.schema().isEmpty()) ? annotation.schema() : null;
 
             // Apply Jackson fallbacks
             if (jacksonField != null) {
@@ -513,7 +522,7 @@ public final class ObjectReaderCreator {
                     jsonName, alternateNames,
                     param.getParameterizedType(), param.getType(),
                     ordinal, defaultValue, required,
-                    null, method
+                    null, method, null, null, schema
             ));
             processedNames.add(rawName);
         }
@@ -613,6 +622,7 @@ public final class ObjectReaderCreator {
         private final FieldNameMatcher matcher;
         private final boolean useUnsafeAlloc;
         private final Method anySetterMethod; // nullable
+        private final JSONSchema typeSchema; // nullable, from @JSONType(schema=)
 
         // Pre-resolved ObjectReaders for POJO and List element types
         // Lazily initialized on first use
@@ -630,7 +640,8 @@ public final class ObjectReaderCreator {
                 Map<String, FieldReader> fieldReaderMap,
                 FieldNameMatcher matcher,
                 boolean useUnsafeAlloc,
-                Method anySetterMethod
+                Method anySetterMethod,
+                JSONSchema typeSchema
         ) {
             this.objectClass = objectClass;
             this.constructor = constructor;
@@ -639,6 +650,7 @@ public final class ObjectReaderCreator {
             this.matcher = matcher;
             this.useUnsafeAlloc = useUnsafeAlloc;
             this.anySetterMethod = anySetterMethod;
+            this.typeSchema = typeSchema;
         }
 
         private void ensureFieldReaders() {
@@ -718,6 +730,7 @@ public final class ObjectReaderCreator {
             if (peek == '}') {
                 utf8.advance(1);
                 applyDefaults(instance, fieldSetMask);
+                validateTypeSchema(instance);
                 return instance;
             }
 
@@ -732,6 +745,7 @@ public final class ObjectReaderCreator {
                     errorOnUnknown, usePLHV, features, fieldSetMask);
 
             applyDefaults(instance, fieldSetMask);
+            validateTypeSchema(instance);
             return instance;
         }
 
@@ -911,6 +925,7 @@ public final class ObjectReaderCreator {
             if (parser.getOffset() < parser.getEnd() && parser.charAt(parser.getOffset()) == '}') {
                 parser.advance(1);
                 applyDefaults(instance, fieldSetMask);
+                validateTypeSchema(instance);
                 return instance;
             }
 
@@ -960,6 +975,7 @@ public final class ObjectReaderCreator {
             }
 
             applyDefaults(instance, fieldSetMask);
+            validateTypeSchema(instance);
             return instance;
         }
 
@@ -1350,6 +1366,12 @@ public final class ObjectReaderCreator {
                     return list;
                 }
                 throw new JSONException("expected ',' or ']' at offset " + parser.getOffset());
+            }
+        }
+
+        private void validateTypeSchema(T instance) {
+            if (typeSchema != null && instance != null) {
+                typeSchema.assertValidate(instance);
             }
         }
 
@@ -1784,6 +1806,17 @@ public final class ObjectReaderCreator {
      * Scan for @JSONField(anySetter = true) or Jackson @JsonAnySetter on 2-param methods.
      * Method signature must be void xxx(String key, Object value).
      */
+    private static JSONSchema parseTypeSchema(Class<?> type) {
+        JSONType jsonType = type.getAnnotation(JSONType.class);
+        if (jsonType != null && !jsonType.schema().isEmpty()) {
+            JSONObject schemaObj = com.alibaba.fastjson3.JSON.parseObject(jsonType.schema());
+            if (schemaObj != null && !schemaObj.isEmpty()) {
+                return JSONSchema.of(schemaObj);
+            }
+        }
+        return null;
+    }
+
     private static Method findAnySetterMethod(Class<?> type, Class<?> mixIn, boolean useJacksonAnnotation) {
         for (Method method : type.getMethods()) {
             if (Modifier.isStatic(method.getModifiers()) || method.getParameterCount() != 2) {

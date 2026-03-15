@@ -80,6 +80,12 @@ public final class ObjectReaderCreatorASM {
         if (fields.length == 0) {
             return false;
         }
+        // @JSONType(schema=) requires reflection path for post-construction validation
+        com.alibaba.fastjson3.annotation.JSONType jsonType = type.getAnnotation(
+                com.alibaba.fastjson3.annotation.JSONType.class);
+        if (jsonType != null && !jsonType.schema().isEmpty()) {
+            return false;
+        }
 
         for (FieldReader fr : fields) {
             if (fr.fieldOffset < 0) {
@@ -89,6 +95,9 @@ public final class ObjectReaderCreatorASM {
                 return false;
             }
             if (fr.defaultValue != null && !fr.defaultValue.isEmpty()) {
+                return false;
+            }
+            if (fr.jsonSchema != null) {
                 return false;
             }
         }

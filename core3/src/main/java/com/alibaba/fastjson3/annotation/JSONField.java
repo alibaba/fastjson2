@@ -125,4 +125,15 @@ public @interface JSONField {
      * Only one anySetter per class is allowed.
      */
     boolean anySetter() default false;
+
+    /**
+     * JSON Schema for validating this field's value during deserialization.
+     * The schema string is parsed as a JSON object conforming to JSON Schema specification.
+     *
+     * <pre>
+     * &#64;JSONField(schema = "{\"minimum\": 0, \"maximum\": 100}")
+     * private int score;
+     * </pre>
+     */
+    String schema() default "";
 }

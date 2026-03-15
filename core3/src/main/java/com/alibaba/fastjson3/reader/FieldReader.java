@@ -1,6 +1,9 @@
 package com.alibaba.fastjson3.reader;
 
+import com.alibaba.fastjson3.JSON;
 import com.alibaba.fastjson3.JSONException;
+import com.alibaba.fastjson3.JSONObject;
+import com.alibaba.fastjson3.schema.JSONSchema;
 import com.alibaba.fastjson3.util.JDKUtils;
 
 import java.lang.reflect.Field;
@@ -72,6 +75,9 @@ public final class FieldReader implements Comparable<FieldReader> {
     // Optional: custom ObjectReader class (from @JSONField(deserializeUsing=))
     public final Class<?> deserializeUsingClass;
 
+    // Optional: JSON Schema for validation during deserialization (from @JSONField(schema=))
+    public final JSONSchema jsonSchema;
+
     // Index in the fieldReaders array (set after construction)
     public int index = -1;
 
@@ -106,7 +112,7 @@ public final class FieldReader implements Comparable<FieldReader> {
             Method setter
     ) {
         this(fieldName, alternateNames, fieldType, fieldClass, ordinal, defaultValue,
-                required, field, setter, null, null);
+                required, field, setter, null, null, null);
     }
 
     public FieldReader(
@@ -122,6 +128,24 @@ public final class FieldReader implements Comparable<FieldReader> {
             String format,
             Class<?> deserializeUsingClass
     ) {
+        this(fieldName, alternateNames, fieldType, fieldClass, ordinal, defaultValue,
+                required, field, setter, format, deserializeUsingClass, null);
+    }
+
+    public FieldReader(
+            String fieldName,
+            String[] alternateNames,
+            Type fieldType,
+            Class<?> fieldClass,
+            int ordinal,
+            String defaultValue,
+            boolean required,
+            Field field,
+            Method setter,
+            String format,
+            Class<?> deserializeUsingClass,
+            String schema
+    ) {
         this.fieldName = fieldName;
         this.alternateNames = alternateNames != null ? alternateNames : new String[0];
         this.fieldType = fieldType;
@@ -135,6 +159,15 @@ public final class FieldReader implements Comparable<FieldReader> {
         this.formatter = (format != null && !format.isEmpty())
                 ? java.time.format.DateTimeFormatter.ofPattern(format) : null;
         this.deserializeUsingClass = deserializeUsingClass;
+
+        // Parse JSON Schema for validation
+        if (schema != null && !schema.isEmpty()) {
+            JSONObject schemaObj = JSON.parseObject(schema);
+            this.jsonSchema = (schemaObj != null && !schemaObj.isEmpty())
+                    ? JSONSchema.of(schemaObj, fieldClass) : null;
+        } else {
+            this.jsonSchema = null;
+        }
 
         if (field != null) {
             field.setAccessible(true);
@@ -248,6 +281,9 @@ public final class FieldReader implements Comparable<FieldReader> {
      * Set the deserialized value onto the target bean instance.
      */
     public void setFieldValue(Object bean, Object value) {
+        if (jsonSchema != null && value != null) {
+            jsonSchema.assertValidate(value);
+        }
         if (fieldOffset >= 0) {
             if (fieldClass == int.class) {
                 JDKUtils.putInt(bean, fieldOffset, ((Number) value).intValue());
@@ -285,6 +321,9 @@ public final class FieldReader implements Comparable<FieldReader> {
      * Set a reference-type value directly via Unsafe, skipping primitive type checks.
      */
     public void setObjectValue(Object bean, Object value) {
+        if (jsonSchema != null && value != null) {
+            jsonSchema.assertValidate(value);
+        }
         if (fieldOffset >= 0) {
             JDKUtils.putObject(bean, fieldOffset, value);
             return;
@@ -293,6 +332,9 @@ public final class FieldReader implements Comparable<FieldReader> {
     }
 
     public void setIntValue(Object bean, int value) {
+        if (jsonSchema != null) {
+            jsonSchema.assertValidate((long) value);
+        }
         if (fieldOffset >= 0) {
             JDKUtils.putInt(bean, fieldOffset, value);
             return;
@@ -301,6 +343,9 @@ public final class FieldReader implements Comparable<FieldReader> {
     }
 
     public void setLongValue(Object bean, long value) {
+        if (jsonSchema != null) {
+            jsonSchema.assertValidate(value);
+        }
         if (fieldOffset >= 0) {
             JDKUtils.putLongField(bean, fieldOffset, value);
             return;
@@ -309,6 +354,9 @@ public final class FieldReader implements Comparable<FieldReader> {
     }
 
     public void setDoubleValue(Object bean, double value) {
+        if (jsonSchema != null) {
+            jsonSchema.assertValidate(value);
+        }
         if (fieldOffset >= 0) {
             JDKUtils.putDouble(bean, fieldOffset, value);
             return;
@@ -317,6 +365,9 @@ public final class FieldReader implements Comparable<FieldReader> {
     }
 
     public void setBooleanValue(Object bean, boolean value) {
+        if (jsonSchema != null) {
+            jsonSchema.assertValidate((Object) value);
+        }
         if (fieldOffset >= 0) {
             JDKUtils.putBoolean(bean, fieldOffset, value);
             return;

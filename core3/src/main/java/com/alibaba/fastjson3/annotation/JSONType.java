@@ -74,4 +74,18 @@ public @interface JSONType {
      * Controls which property values are written (null handling, empty handling).
      */
     Inclusion inclusion() default Inclusion.DEFAULT;
+
+    /**
+     * JSON Schema for validating the entire object after deserialization.
+     * The schema string is parsed as a JSON object conforming to JSON Schema specification.
+     *
+     * <pre>
+     * &#64;JSONType(schema = "{\"required\": [\"name\", \"age\"], \"maxProperties\": 5}")
+     * public class User {
+     *     public String name;
+     *     public int age;
+     * }
+     * </pre>
+     */
+    String schema() default "";
 }
