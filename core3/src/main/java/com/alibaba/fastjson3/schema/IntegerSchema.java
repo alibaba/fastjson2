@@ -11,6 +11,7 @@ public final class IntegerSchema extends JSONSchema {
     final boolean exclusiveMinimum;
     final boolean exclusiveMaximum;
     final long multipleOf;
+    final BigDecimal multipleOfDecimal; // for fractional multipleOf values
     final Long constValue;
     final boolean typed;
     final boolean hasMinimum;
@@ -59,6 +60,13 @@ public final class IntegerSchema extends JSONSchema {
         Object multipleOfObj = input.get("multipleOf");
         this.hasMultipleOf = multipleOfObj instanceof Number;
         this.multipleOf = hasMultipleOf ? ((Number) multipleOfObj).longValue() : 0;
+        if (hasMultipleOf && multipleOfObj instanceof Double || multipleOfObj instanceof Float
+                || multipleOfObj instanceof BigDecimal) {
+            this.multipleOfDecimal = multipleOfObj instanceof BigDecimal bd ? bd
+                    : BigDecimal.valueOf(((Number) multipleOfObj).doubleValue());
+        } else {
+            this.multipleOfDecimal = null;
+        }
 
         Object constObj = input.get("const");
         if (constObj instanceof Number n) {
@@ -167,9 +175,21 @@ public final class IntegerSchema extends JSONSchema {
             }
         }
 
-        if (hasMultipleOf && multipleOf != 0) {
-            if (value % multipleOf != 0) {
-                return new ValidateResult(false, "multipleOf not match, expect multiple of %s, but %s", multipleOf, value);
+        if (hasMultipleOf) {
+            if (multipleOfDecimal != null) {
+                // Fractional multipleOf: use BigDecimal arithmetic
+                try {
+                    BigDecimal[] dr = BigDecimal.valueOf(value).divideAndRemainder(multipleOfDecimal);
+                    if (dr[1].compareTo(BigDecimal.ZERO) != 0) {
+                        return new ValidateResult(false, "multipleOf not match, expect multiple of %s, but %s", multipleOfDecimal, value);
+                    }
+                } catch (ArithmeticException e) {
+                    return new ValidateResult(false, "multipleOf not match, expect multiple of %s, but %s", multipleOfDecimal, value);
+                }
+            } else if (multipleOf != 0) {
+                if (value % multipleOf != 0) {
+                    return new ValidateResult(false, "multipleOf not match, expect multiple of %s, but %s", multipleOf, value);
+                }
             }
         }
 

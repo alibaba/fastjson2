@@ -56,6 +56,28 @@ public final class OneOf extends JSONSchema {
         return successCount == 1 ? SUCCESS : FAIL_ONE_OF;
     }
 
+    @Override
+    protected ValidateResult validateInternal(Object value, EvaluationContext ctx) {
+        int successCount = 0;
+        EvaluationContext successBranch = null;
+        for (JSONSchema item : items) {
+            EvaluationContext branch = ctx.branch();
+            ValidateResult result = item.validate(value, branch);
+            if (result.isSuccess()) {
+                successCount++;
+                successBranch = branch;
+                if (successCount > 1) {
+                    return FAIL_ONE_OF;
+                }
+            }
+        }
+        if (successCount == 1) {
+            ctx.merge(successBranch);
+            return SUCCESS;
+        }
+        return FAIL_ONE_OF;
+    }
+
     public ValidateResult validate(java.util.Map<?, ?> map) {
         int successCount = 0;
         for (JSONSchema item : items) {
@@ -73,5 +95,26 @@ public final class OneOf extends JSONSchema {
             }
         }
         return successCount == 1 ? SUCCESS : FAIL_ONE_OF;
+    }
+
+    public ValidateResult validate(java.util.Map<?, ?> map, EvaluationContext ctx) {
+        int successCount = 0;
+        EvaluationContext successBranch = null;
+        for (JSONSchema item : items) {
+            EvaluationContext branch = ctx.branch();
+            ValidateResult result = item.validate(map, branch);
+            if (result.isSuccess()) {
+                successCount++;
+                successBranch = branch;
+                if (successCount > 1) {
+                    return FAIL_ONE_OF;
+                }
+            }
+        }
+        if (successCount == 1) {
+            ctx.merge(successBranch);
+            return SUCCESS;
+        }
+        return FAIL_ONE_OF;
     }
 }

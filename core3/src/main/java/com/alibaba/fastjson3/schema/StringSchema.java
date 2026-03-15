@@ -32,7 +32,8 @@ public final class StringSchema extends JSONSchema {
         this.maxLength = getInt(input, "maxLength", -1);
         this.format = input.getString("format");
         this.patternFormat = input.getString("pattern");
-        this.pattern = patternFormat != null ? Pattern.compile(patternFormat, Pattern.UNICODE_CHARACTER_CLASS) : null;
+        this.pattern = patternFormat != null
+                ? Pattern.compile(translateUnicodeProperties(patternFormat), Pattern.UNICODE_CHARACTER_CLASS) : null;
 
         Object constObj = input.get("const");
         this.constValue = constObj instanceof String s ? s : null;
@@ -388,6 +389,28 @@ public final class StringSchema extends JSONSchema {
             return false;
         }
         return RELATIVE_JSON_POINTER.matcher(str).matches();
+    }
+
+    /**
+     * Translate ECMA-262 Unicode property names to Java equivalents.
+     * E.g., \p{Letter} → \p{L}, \p{Mark} → \p{M}
+     */
+    static String translateUnicodeProperties(String pattern) {
+        return pattern
+                .replace("\\p{Letter}", "\\p{L}")
+                .replace("\\p{Mark}", "\\p{M}")
+                .replace("\\p{Number}", "\\p{N}")
+                .replace("\\p{Punctuation}", "\\p{P}")
+                .replace("\\p{Separator}", "\\p{Z}")
+                .replace("\\p{Symbol}", "\\p{S}")
+                .replace("\\p{Other}", "\\p{C}")
+                .replace("\\P{Letter}", "\\P{L}")
+                .replace("\\P{Mark}", "\\P{M}")
+                .replace("\\P{Number}", "\\P{N}")
+                .replace("\\P{Punctuation}", "\\P{P}")
+                .replace("\\P{Separator}", "\\P{Z}")
+                .replace("\\P{Symbol}", "\\P{S}")
+                .replace("\\P{Other}", "\\P{C}");
     }
 
     static boolean isRegex(String str) {

@@ -52,6 +52,20 @@ public final class AnyOf extends JSONSchema {
         return FAIL_ANY_OF;
     }
 
+    @Override
+    protected ValidateResult validateInternal(Object value, EvaluationContext ctx) {
+        boolean anyMatch = false;
+        for (JSONSchema item : items) {
+            EvaluationContext branch = ctx.branch();
+            ValidateResult result = item.validate(value, branch);
+            if (result.isSuccess()) {
+                ctx.merge(branch);
+                anyMatch = true;
+            }
+        }
+        return anyMatch ? SUCCESS : FAIL_ANY_OF;
+    }
+
     public ValidateResult validate(java.util.Map<?, ?> map) {
         for (JSONSchema item : items) {
             ValidateResult result;
@@ -65,5 +79,18 @@ public final class AnyOf extends JSONSchema {
             }
         }
         return FAIL_ANY_OF;
+    }
+
+    public ValidateResult validate(java.util.Map<?, ?> map, EvaluationContext ctx) {
+        boolean anyMatch = false;
+        for (JSONSchema item : items) {
+            EvaluationContext branch = ctx.branch();
+            ValidateResult result = item.validate(map, branch);
+            if (result.isSuccess()) {
+                ctx.merge(branch);
+                anyMatch = true;
+            }
+        }
+        return anyMatch ? SUCCESS : FAIL_ANY_OF;
     }
 }

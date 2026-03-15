@@ -36,18 +36,10 @@ public final class EnumSchema extends JSONSchema {
             return SUCCESS;
         }
 
-        // Fallback: BigDecimal comparison for numeric types
-        if (normalized instanceof Number) {
-            BigDecimal bdValue = toBigDecimal(normalized);
-            if (bdValue != null) {
-                for (Object item : items) {
-                    if (item instanceof Number) {
-                        BigDecimal bdItem = toBigDecimal(item);
-                        if (bdItem != null && bdValue.compareTo(bdItem) == 0) {
-                            return SUCCESS;
-                        }
-                    }
-                }
+        // Fallback: deep comparison with type-strict equality (handles numeric coercion in arrays/objects)
+        for (Object item : items) {
+            if (ConstSchema.deepEquals(item, normalized)) {
+                return SUCCESS;
             }
         }
 
@@ -76,21 +68,5 @@ public final class EnumSchema extends JSONSchema {
             return bd.stripTrailingZeros();
         }
         return val;
-    }
-
-    private static BigDecimal toBigDecimal(Object val) {
-        if (val instanceof BigDecimal bd) {
-            return bd;
-        }
-        if (val instanceof Long l) {
-            return BigDecimal.valueOf(l);
-        }
-        if (val instanceof BigInteger bi) {
-            return new BigDecimal(bi);
-        }
-        if (val instanceof Number n) {
-            return BigDecimal.valueOf(n.doubleValue());
-        }
-        return null;
     }
 }

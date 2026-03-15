@@ -167,12 +167,28 @@ public abstract class JSONSchema {
             }
 
             // Handle $ref
-            if (input.size() == 1) {
-                String ref = input.getString("$ref");
-                if (ref != null && !ref.isEmpty()) {
-                    return resolveRef(ref, parent);
+            String ref = input.getString("$ref");
+            if (ref != null && !ref.isEmpty()) {
+                JSONSchema refSchema = resolveRef(ref, parent, input);
+                // Check for sibling keywords (excluding $defs, definitions, $schema, $id, $anchor, $comment)
+                JSONObject siblings = new JSONObject(input);
+                siblings.remove("$ref");
+                siblings.remove("$defs");
+                siblings.remove("definitions");
+                siblings.remove("$schema");
+                siblings.remove("$id");
+                siblings.remove("$anchor");
+                siblings.remove("$comment");
+                siblings.remove("description");
+                siblings.remove("title");
+                if (!siblings.isEmpty()) {
+                    JSONSchema siblingSchema = JSONSchema.of(siblings, parent);
+                    return new AllOf(new JSONSchema[]{refSchema, siblingSchema}, true);
                 }
+                return refSchema;
+            }
 
+            if (input.size() == 1) {
                 Object exclusiveMaximum = input.get("exclusiveMaximum");
                 Object exclusiveMinimum = input.get("exclusiveMinimum");
                 if (exclusiveMaximum instanceof Integer
@@ -199,7 +215,7 @@ public abstract class JSONSchema {
                     || input.containsKey("minProperties")
                     || input.containsKey("maxProperties")
                     || input.containsKey("propertyNames")
-                    || input.containsKey("$ref")
+                    || input.containsKey("unevaluatedProperties")
             ) {
                 return new ObjectSchema(input, parent);
             }
@@ -213,6 +229,7 @@ public abstract class JSONSchema {
                     || input.containsKey("contains")
                     || input.containsKey("maxContains")
                     || input.containsKey("minContains")
+                    || input.containsKey("unevaluatedItems")
             ) {
                 return new ArraySchema(input, parent);
             }
@@ -304,11 +321,50 @@ public abstract class JSONSchema {
         };
     }
 
-    private static JSONSchema resolveRef(String ref, JSONSchema parent) {
+    private static JSONSchema resolveRef(String ref, JSONSchema parent, JSONObject context) {
         if ("#".equals(ref)) {
-            return parent;
+            return parent != null ? parent : Any.INSTANCE;
         }
 
+        // Try $anchor resolution: #anchorName (not starting with /)
+        if (ref.startsWith("#") && ref.length() > 1 && ref.charAt(1) != '/') {
+            String anchorName = ref.substring(1);
+            JSONSchema resolved = SchemaRegistry.getInstance().resolve(anchorName);
+            if (resolved != null) {
+                return resolved;
+            }
+        }
+
+        // JSON Pointer resolution: #/path/to/schema
+        if (ref.startsWith("#/")) {
+            // First try resolving against parsed schema maps (faster)
+            JSONSchema resolved = resolveRefFromParsedSchema(ref, parent);
+            if (resolved != null) {
+                return resolved;
+            }
+
+            // Try resolving against current input context (for $ref + $defs in same schema)
+            if (context != null) {
+                resolved = resolveJsonPointer(ref.substring(1), context, parent);
+                if (resolved != null) {
+                    return resolved;
+                }
+            }
+
+            // Fallback: resolve against raw JSON input of parent
+            JSONObject rawInput = getRawInput(parent);
+            if (rawInput != null && rawInput != context) {
+                resolved = resolveJsonPointer(ref.substring(1), rawInput, parent);
+                if (resolved != null) {
+                    return resolved;
+                }
+            }
+        }
+
+        return Any.INSTANCE;
+    }
+
+    private static JSONSchema resolveRefFromParsedSchema(String ref, JSONSchema parent) {
         Map<String, JSONSchema> definitions = null;
         Map<String, JSONSchema> defs = null;
         Map<String, JSONSchema> properties = null;
@@ -323,29 +379,24 @@ public abstract class JSONSchema {
         }
 
         if (definitions != null && ref.startsWith("#/definitions/")) {
-            String refName = ref.substring("#/definitions/".length());
+            String refName = decodeJsonPointerSegment(ref.substring("#/definitions/".length()));
             JSONSchema resolved = definitions.get(refName);
             if (resolved != null) {
                 return resolved;
             }
-            return new UnresolvedReference(refName);
         }
 
         if (defs != null && ref.startsWith("#/$defs/")) {
-            String refName = ref.substring("#/$defs/".length());
+            String refName = decodeJsonPointerSegment(ref.substring("#/$defs/".length()));
             JSONSchema resolved = defs.get(refName);
             if (resolved != null) {
                 return resolved;
             }
-            return new UnresolvedReference(refName);
         }
 
         if (properties != null && ref.startsWith("#/properties/")) {
-            String refName = ref.substring("#/properties/".length());
-            JSONSchema resolved = properties.get(refName);
-            if (resolved != null) {
-                return resolved;
-            }
+            String refName = decodeJsonPointerSegment(ref.substring("#/properties/".length()));
+            return properties.get(refName);
         }
 
         if (ref.startsWith("#/prefixItems/") && parent instanceof ArraySchema arraySchema) {
@@ -355,20 +406,116 @@ public abstract class JSONSchema {
                     return arraySchema.prefixItems[index];
                 }
             } catch (NumberFormatException ignored) {
-                // malformed ref, fall through
             }
         }
 
-        // Try $anchor resolution via SchemaRegistry
-        if (ref.startsWith("#") && ref.length() > 1 && ref.charAt(1) != '/') {
-            String anchorName = ref.substring(1);
-            JSONSchema resolved = SchemaRegistry.getInstance().resolve(anchorName);
-            if (resolved != null) {
-                return resolved;
+        return null;
+    }
+
+    private static JSONObject getRawInput(JSONSchema parent) {
+        if (parent instanceof ObjectSchema os) {
+            return os.rawInput;
+        }
+        if (parent instanceof ArraySchema as) {
+            return as.rawInput;
+        }
+        return null;
+    }
+
+    /**
+     * Generic JSON Pointer resolution against raw JSON.
+     * Resolves paths like /if, /then, /else, /$defs/name, /properties/name, etc.
+     */
+    private static JSONSchema resolveJsonPointer(String pointer, JSONObject root, JSONSchema parent) {
+        return resolveJsonPointer(pointer, root, parent, 0);
+    }
+
+    private static JSONSchema resolveJsonPointer(String pointer, JSONObject root, JSONSchema parent, int depth) {
+        if (pointer == null || pointer.isEmpty() || "/".equals(pointer) || depth > 10) {
+            return null;
+        }
+
+        String[] segments = pointer.substring(1).split("/", -1); // skip leading /
+        Object current = root;
+        for (String segment : segments) {
+            String decoded = decodeJsonPointerSegment(segment);
+            if (current instanceof JSONObject obj) {
+                if (!obj.containsKey(decoded)) {
+                    return null;
+                }
+                current = obj.get(decoded);
+            } else if (current instanceof JSONArray arr) {
+                try {
+                    int idx = Integer.parseInt(decoded);
+                    if (idx >= 0 && idx < arr.size()) {
+                        current = arr.get(idx);
+                    } else {
+                        return null;
+                    }
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            } else {
+                return null;
             }
         }
 
-        return Any.INSTANCE;
+        // Parse the resolved value as a schema
+        if (current instanceof Boolean b) {
+            return b ? Any.INSTANCE : Any.NOT_ANY;
+        }
+        if (current instanceof JSONObject obj) {
+            // If the resolved object itself contains $ref, resolve it against root
+            String nestedRef = obj.getString("$ref");
+            if (nestedRef != null && nestedRef.startsWith("#/")) {
+                JSONSchema resolved = resolveJsonPointer(nestedRef.substring(1), root, parent, depth + 1);
+                if (resolved != null) {
+                    // Apply sibling keywords if present
+                    JSONObject siblings = new JSONObject(obj);
+                    siblings.remove("$ref");
+                    siblings.remove("$defs");
+                    siblings.remove("definitions");
+                    siblings.remove("$schema");
+                    siblings.remove("$id");
+                    if (!siblings.isEmpty()) {
+                        JSONSchema siblingSchema = JSONSchema.of(siblings, parent);
+                        return new AllOf(new JSONSchema[]{resolved, siblingSchema}, true);
+                    }
+                    return resolved;
+                }
+            }
+            return JSONSchema.of(obj, parent);
+        }
+        return null;
+    }
+
+    /**
+     * Decode JSON Pointer escape sequences: ~0 → ~, ~1 → /, and percent-encoding.
+     */
+    static String decodeJsonPointerSegment(String segment) {
+        // Percent-decode first
+        if (segment.contains("%")) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < segment.length(); i++) {
+                char c = segment.charAt(i);
+                if (c == '%' && i + 2 < segment.length()) {
+                    try {
+                        int code = Integer.parseInt(segment.substring(i + 1, i + 3), 16);
+                        sb.append((char) code);
+                        i += 2;
+                        continue;
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+                sb.append(c);
+            }
+            segment = sb.toString();
+        }
+        // JSON Pointer escape: ~1 → /, ~0 → ~ (order matters!)
+        if (segment.contains("~")) {
+            segment = segment.replace("~1", "/").replace("~0", "~");
+        }
+        return segment;
     }
 
     static Not ofNot(JSONObject input, Class<?> objectClass) {
@@ -413,6 +560,19 @@ public abstract class JSONSchema {
 
     public boolean isValid(Object value) {
         return validate(value).isSuccess();
+    }
+
+    // Context-aware validation for unevaluatedProperties/unevaluatedItems
+    protected ValidateResult validateInternal(Object value, EvaluationContext ctx) {
+        return validateInternal(value);
+    }
+
+    public final ValidateResult validate(Object value, EvaluationContext ctx) {
+        ValidateResult result = validateInternal(value, ctx);
+        if (!result.isSuccess() && this.customErrorMessage != null) {
+            return new ValidateResult(false, this.customErrorMessage);
+        }
+        return result;
     }
 
     public void assertValidate(Object value) {

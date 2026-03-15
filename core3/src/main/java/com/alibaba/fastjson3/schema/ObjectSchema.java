@@ -16,6 +16,7 @@ public final class ObjectSchema extends JSONSchema {
     final Map<String, JSONSchema> properties;
     final Set<String> required;
     final boolean additionalProperties;
+    final boolean hasExplicitAdditionalProperties;
     final JSONSchema additionalPropertySchema;
 
     final PatternProperty[] patternProperties;
@@ -33,6 +34,9 @@ public final class ObjectSchema extends JSONSchema {
     final AnyOf anyOf;
     final OneOf oneOf;
     final boolean encoded;
+    final JSONSchema unevaluatedPropertiesSchema;
+    final boolean hasUnevaluatedProperties;
+    final JSONObject rawInput;
 
     transient List<UnresolvedReference.ResolveTask> resolveTasks;
 
@@ -43,6 +47,7 @@ public final class ObjectSchema extends JSONSchema {
     public ObjectSchema(JSONObject input, JSONSchema root) {
         super(input);
 
+        this.rawInput = input;
         this.typed = "object".equalsIgnoreCase(input.getString("type"));
         this.properties = new LinkedHashMap<>();
         this.definitions = new LinkedHashMap<>();
@@ -125,7 +130,7 @@ public final class ObjectSchema extends JSONSchema {
                     schema = JSONSchema.of((JSONObject) value, root == null ? this : root);
                 }
                 this.patternProperties[index++] = new PatternProperty(
-                        Pattern.compile(key, Pattern.UNICODE_CHARACTER_CLASS), schema);
+                        Pattern.compile(StringSchema.translateUnicodeProperties(key), Pattern.UNICODE_CHARACTER_CLASS), schema);
             }
         } else {
             this.patternProperties = new PatternProperty[0];
@@ -147,12 +152,15 @@ public final class ObjectSchema extends JSONSchema {
         if (additionalProps instanceof Boolean b) {
             this.additionalPropertySchema = null;
             this.additionalProperties = b;
+            this.hasExplicitAdditionalProperties = true;
         } else if (additionalProps instanceof JSONObject addObj) {
             this.additionalPropertySchema = JSONSchema.of(addObj, root);
             this.additionalProperties = false;
+            this.hasExplicitAdditionalProperties = true;
         } else {
             this.additionalPropertySchema = null;
             this.additionalProperties = true;
+            this.hasExplicitAdditionalProperties = false;
         }
 
         // Parse propertyNames
@@ -209,6 +217,19 @@ public final class ObjectSchema extends JSONSchema {
         allOf = JSONSchema.allOf(input, null);
         anyOf = JSONSchema.anyOf(input, null);
         oneOf = JSONSchema.oneOf(input, null);
+
+        // Parse unevaluatedProperties
+        Object unevalProps = input.get("unevaluatedProperties");
+        if (unevalProps instanceof Boolean b) {
+            this.unevaluatedPropertiesSchema = b ? Any.INSTANCE : Any.NOT_ANY;
+            this.hasUnevaluatedProperties = true;
+        } else if (unevalProps instanceof JSONObject obj) {
+            this.unevaluatedPropertiesSchema = JSONSchema.of(obj, root);
+            this.hasUnevaluatedProperties = true;
+        } else {
+            this.unevaluatedPropertiesSchema = null;
+            this.hasUnevaluatedProperties = false;
+        }
     }
 
     @Override
@@ -382,6 +403,52 @@ public final class ObjectSchema extends JSONSchema {
 
     @Override
     protected ValidateResult validateInternal(Object value) {
+        if (hasUnevaluatedProperties) {
+            return validateInternal(value, new EvaluationContext());
+        }
+        return validateInternalNoCtx(value);
+    }
+
+    @Override
+    protected ValidateResult validateInternal(Object value, EvaluationContext ctx) {
+        if (value == null) {
+            return typed ? FAIL_INPUT_NULL : SUCCESS;
+        }
+
+        if (encoded) {
+            if (value instanceof String str) {
+                try {
+                    value = JSON.parseObject(str);
+                } catch (JSONException e) {
+                    return FAIL_INPUT_NOT_ENCODED;
+                }
+            } else {
+                return FAIL_INPUT_NOT_ENCODED;
+            }
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            return validateWithContext(map, ctx);
+        }
+
+        Class<?> valueClass = value.getClass();
+        if (!valueClass.isPrimitive()
+                && !(value instanceof Number)
+                && !(value instanceof CharSequence)
+                && !(value instanceof Boolean)
+                && !(value instanceof java.util.Collection)
+                && !valueClass.isArray()) {
+            Map<String, Object> fieldMap = extractFieldValues(value);
+            return validateWithContext(fieldMap, ctx);
+        }
+
+        if (!typed) {
+            return validateConditionalAndComposition(value, ctx);
+        }
+        return new ValidateResult(false, "expect type %s, but %s", Type.Object, valueClass);
+    }
+
+    private ValidateResult validateInternalNoCtx(Object value) {
         if (value == null) {
             return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
@@ -402,7 +469,6 @@ public final class ObjectSchema extends JSONSchema {
             return validate(map);
         }
 
-        // POJO validation: extract fields via reflection, then validate as Map
         Class<?> valueClass = value.getClass();
         if (!valueClass.isPrimitive()
                 && !(value instanceof Number)
@@ -414,7 +480,6 @@ public final class ObjectSchema extends JSONSchema {
             return validate(fieldMap);
         }
 
-        // For non-object values: still apply if/then/else and composition if present
         if (!typed) {
             return validateConditionalAndComposition(value);
         }
@@ -520,6 +585,242 @@ public final class ObjectSchema extends JSONSchema {
         if (v.test(this)) {
             this.properties.values().forEach(v::test);
         }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private ValidateResult validateWithContext(Map map, EvaluationContext ctx) {
+        // Check required
+        for (String item : required) {
+            if (!map.containsKey(item)) {
+                return new ValidateResult(false, "required %s", item);
+            }
+        }
+
+        // Validate and track properties
+        for (Map.Entry<String, JSONSchema> entry : properties.entrySet()) {
+            String key = entry.getKey();
+            JSONSchema schema = entry.getValue();
+            Object propertyValue = map.get(key);
+            if (propertyValue == null && !map.containsKey(key)) {
+                continue;
+            }
+            ctx.addProperty(key);
+            ValidateResult result = schema.validate(propertyValue, ctx);
+            if (!result.isSuccess()) {
+                return result.atPath(key);
+            }
+        }
+
+        // Validate and track patternProperties
+        for (PatternProperty pp : patternProperties) {
+            for (Object entryObj : map.entrySet()) {
+                Map.Entry entry = (Map.Entry) entryObj;
+                Object entryKey = entry.getKey();
+                if (entryKey instanceof String strKey && pp.pattern.matcher(strKey).find()) {
+                    ctx.addProperty(strKey);
+                    ValidateResult result = pp.schema.validate(entry.getValue(), ctx);
+                    if (!result.isSuccess()) {
+                        return result;
+                    }
+                }
+            }
+        }
+
+        // Check additionalProperties — also marks properties as evaluated
+        if (!additionalProperties) {
+            for (Object entryObj : map.entrySet()) {
+                Map.Entry entry = (Map.Entry) entryObj;
+                Object key = entry.getKey();
+                if (properties.containsKey(key)) {
+                    continue;
+                }
+                boolean matchedPattern = false;
+                for (PatternProperty pp : patternProperties) {
+                    if (key instanceof String strKey && pp.pattern.matcher(strKey).find()) {
+                        matchedPattern = true;
+                        break;
+                    }
+                }
+                if (matchedPattern) {
+                    continue;
+                }
+                if (additionalPropertySchema != null) {
+                    if (key instanceof String strKey) {
+                        ctx.addProperty(strKey);
+                    }
+                    ValidateResult result = additionalPropertySchema.validate(entry.getValue(), ctx);
+                    if (!result.isSuccess()) {
+                        return result;
+                    }
+                    continue;
+                }
+                return new ValidateResult(false, "additional property '%s' not allowed", key);
+            }
+        } else if (hasExplicitAdditionalProperties) {
+            // additionalProperties: true (explicitly set) — marks all remaining properties as evaluated
+            for (Object key : map.keySet()) {
+                if (key instanceof String strKey) {
+                    ctx.addProperty(strKey);
+                }
+            }
+        }
+
+        // Validate propertyNames
+        if (propertyNames != null) {
+            for (Object key : map.keySet()) {
+                ValidateResult result = propertyNames.validate(key);
+                if (!result.isSuccess()) {
+                    return FAIL_PROPERTY_NAME;
+                }
+            }
+        }
+
+        // Check minProperties/maxProperties
+        if (minProperties >= 0 && map.size() < minProperties) {
+            return new ValidateResult(false, "minProperties not match, expect %s, but %s", minProperties, map.size());
+        }
+        if (maxProperties >= 0 && map.size() > maxProperties) {
+            return new ValidateResult(false, "maxProperties not match, expect %s, but %s", maxProperties, map.size());
+        }
+
+        // Check dependentRequired
+        if (dependentRequired != null) {
+            for (Map.Entry<String, String[]> entry : dependentRequired.entrySet()) {
+                String key = entry.getKey();
+                if (map.containsKey(key)) {
+                    for (String depProp : entry.getValue()) {
+                        if (!map.containsKey(depProp)) {
+                            return new ValidateResult(false, "property %s, dependentRequired property %s", key, depProp);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Check dependentSchemas
+        if (dependentSchemas != null) {
+            for (Map.Entry<String, JSONSchema> entry : dependentSchemas.entrySet()) {
+                if (map.containsKey(entry.getKey())) {
+                    ValidateResult result = entry.getValue().validate(map, ctx);
+                    if (!result.isSuccess()) {
+                        return result;
+                    }
+                }
+            }
+        }
+
+        // Check if/then/else with context
+        // Per spec: annotations from failing subschemas are ignored
+        // If "if" succeeds: merge if + then evaluations
+        // If "if" fails: merge only else evaluations (not if's)
+        if (ifSchema != null) {
+            EvaluationContext ifCtx = ctx.branch();
+            ValidateResult ifResult = ifSchema.validate(map, ifCtx);
+            if (ifResult.isSuccess()) {
+                ctx.merge(ifCtx); // if passed: its evaluations count
+                if (thenSchema != null) {
+                    EvaluationContext thenCtx = ctx.branch();
+                    ValidateResult thenResult = thenSchema.validate(map, thenCtx);
+                    if (!thenResult.isSuccess()) {
+                        return thenResult;
+                    }
+                    ctx.merge(thenCtx);
+                }
+            } else {
+                // if failed: do NOT merge ifCtx
+                if (elseSchema != null) {
+                    EvaluationContext elseCtx = ctx.branch();
+                    ValidateResult elseResult = elseSchema.validate(map, elseCtx);
+                    if (!elseResult.isSuccess()) {
+                        return elseResult;
+                    }
+                    ctx.merge(elseCtx);
+                }
+            }
+        }
+
+        // Check composition with context
+        if (allOf != null) {
+            ValidateResult result = allOf.validate(map, ctx);
+            if (!result.isSuccess()) {
+                return result;
+            }
+        }
+        if (anyOf != null) {
+            ValidateResult result = anyOf.validate(map, ctx);
+            if (!result.isSuccess()) {
+                return result;
+            }
+        }
+        if (oneOf != null) {
+            ValidateResult result = oneOf.validate(map, ctx);
+            if (!result.isSuccess()) {
+                return result;
+            }
+        }
+
+        // Apply unevaluatedProperties
+        if (hasUnevaluatedProperties) {
+            for (Object entryObj : map.entrySet()) {
+                Map.Entry entry = (Map.Entry) entryObj;
+                Object key = entry.getKey();
+                if (key instanceof String strKey && !ctx.isPropertyEvaluated(strKey)) {
+                    ValidateResult result = unevaluatedPropertiesSchema.validate(entry.getValue());
+                    if (!result.isSuccess()) {
+                        return new ValidateResult(false, "unevaluated property '%s' not allowed", strKey);
+                    }
+                    ctx.addProperty(strKey);
+                }
+            }
+        }
+
+        return SUCCESS;
+    }
+
+    private ValidateResult validateConditionalAndComposition(Object value, EvaluationContext ctx) {
+        if (ifSchema != null) {
+            EvaluationContext ifCtx = ctx.branch();
+            ValidateResult ifResult = ifSchema.validate(value, ifCtx);
+            if (ifResult.isSuccess()) {
+                ctx.merge(ifCtx);
+                if (thenSchema != null) {
+                    EvaluationContext thenCtx = ctx.branch();
+                    ValidateResult thenResult = thenSchema.validate(value, thenCtx);
+                    if (!thenResult.isSuccess()) {
+                        return thenResult;
+                    }
+                    ctx.merge(thenCtx);
+                }
+            } else {
+                if (elseSchema != null) {
+                    EvaluationContext elseCtx = ctx.branch();
+                    ValidateResult elseResult = elseSchema.validate(value, elseCtx);
+                    if (!elseResult.isSuccess()) {
+                        return elseResult;
+                    }
+                    ctx.merge(elseCtx);
+                }
+            }
+        }
+        if (allOf != null) {
+            ValidateResult result = allOf.validate(value, ctx);
+            if (!result.isSuccess()) {
+                return result;
+            }
+        }
+        if (anyOf != null) {
+            ValidateResult result = anyOf.validate(value, ctx);
+            if (!result.isSuccess()) {
+                return result;
+            }
+        }
+        if (oneOf != null) {
+            ValidateResult result = oneOf.validate(value, ctx);
+            if (!result.isSuccess()) {
+                return result;
+            }
+        }
+        return SUCCESS;
     }
 
     private ValidateResult validateConditionalAndComposition(Object value) {

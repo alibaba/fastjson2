@@ -25,10 +25,14 @@ public final class ArraySchema extends JSONSchema {
     final AnyOf anyOf;
     final OneOf oneOf;
     final boolean encoded;
+    final JSONSchema unevaluatedItemsSchema;
+    final boolean hasUnevaluatedItems;
+    final JSONObject rawInput;
 
     public ArraySchema(JSONObject input, JSONSchema root) {
         super(input);
 
+        this.rawInput = input;
         this.typed = "array".equalsIgnoreCase(input.getString("type"));
         this.minItems = getInt(input, "minItems", -1);
         this.maxItems = getInt(input, "maxItems", -1);
@@ -113,6 +117,19 @@ public final class ArraySchema extends JSONSchema {
         allOf = JSONSchema.allOf(input, null);
         anyOf = JSONSchema.anyOf(input, null);
         oneOf = JSONSchema.oneOf(input, null);
+
+        // Parse unevaluatedItems
+        Object unevalItems = input.get("unevaluatedItems");
+        if (unevalItems instanceof Boolean b) {
+            this.unevaluatedItemsSchema = b ? Any.INSTANCE : Any.NOT_ANY;
+            this.hasUnevaluatedItems = true;
+        } else if (unevalItems instanceof JSONObject obj) {
+            this.unevaluatedItemsSchema = JSONSchema.of(obj, root);
+            this.hasUnevaluatedItems = true;
+        } else {
+            this.unevaluatedItemsSchema = null;
+            this.hasUnevaluatedItems = false;
+        }
     }
 
     @Override
@@ -167,33 +184,54 @@ public final class ArraySchema extends JSONSchema {
 
     @Override
     protected ValidateResult validateInternal(Object value) {
-        if (value == null) {
+        if (hasUnevaluatedItems) {
+            return validateInternal(value, new EvaluationContext());
+        }
+        return validateInternalNoCtx(value);
+    }
+
+    @Override
+    protected ValidateResult validateInternal(Object value, EvaluationContext ctx) {
+        Object resolved = resolveValue(value);
+        if (resolved == null) {
             return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
-
-        if (encoded) {
-            if (value instanceof String str) {
-                try {
-                    value = JSON.parseArray(str);
-                } catch (JSONException e) {
-                    return FAIL_INPUT_NOT_ENCODED;
-                }
-            } else {
-                return FAIL_INPUT_NOT_ENCODED;
-            }
+        if (resolved == FAIL_INPUT_NOT_ENCODED) {
+            return FAIL_INPUT_NOT_ENCODED;
         }
 
         int size;
         java.util.function.IntFunction<Object> getter;
 
-        if (value instanceof List<?> list) {
+        if (resolved instanceof List<?> list) {
             size = list.size();
             getter = list::get;
-        } else if (value instanceof Collection<?> col) {
-            List<?> list = new ArrayList<>(col);
+        } else if (resolved instanceof Object[] arr) {
+            size = arr.length;
+            getter = i -> arr[i];
+        } else {
+            return typed ? FAIL_TYPE_NOT_MATCH : SUCCESS;
+        }
+
+        return validateItemsWithContext(size, getter, ctx);
+    }
+
+    private ValidateResult validateInternalNoCtx(Object value) {
+        Object resolved = resolveValue(value);
+        if (resolved == null) {
+            return typed ? FAIL_INPUT_NULL : SUCCESS;
+        }
+        if (resolved == FAIL_INPUT_NOT_ENCODED) {
+            return FAIL_INPUT_NOT_ENCODED;
+        }
+
+        int size;
+        java.util.function.IntFunction<Object> getter;
+
+        if (resolved instanceof List<?> list) {
             size = list.size();
             getter = list::get;
-        } else if (value instanceof Object[] arr) {
+        } else if (resolved instanceof Object[] arr) {
             size = arr.length;
             getter = i -> arr[i];
         } else {
@@ -201,6 +239,159 @@ public final class ArraySchema extends JSONSchema {
         }
 
         return validateItems(size, getter);
+    }
+
+    private Object resolveValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (encoded) {
+            if (value instanceof String str) {
+                try {
+                    return JSON.parseArray(str);
+                } catch (JSONException e) {
+                    return FAIL_INPUT_NOT_ENCODED;
+                }
+            } else {
+                return FAIL_INPUT_NOT_ENCODED;
+            }
+        }
+        if (value instanceof List<?>) {
+            return value;
+        }
+        if (value instanceof Collection<?> col) {
+            return new ArrayList<>(col);
+        }
+        if (value instanceof Object[]) {
+            return value;
+        }
+        return value; // non-array type
+    }
+
+    private ValidateResult validateItemsWithContext(int size, java.util.function.IntFunction<Object> getter,
+                                                     EvaluationContext ctx) {
+        // Check minItems/maxItems
+        if (minItems >= 0 && size < minItems) {
+            return new ValidateResult(false, "minItems not match, expect >= %s, but %s", minItems, size);
+        }
+        if (maxItems >= 0 && size > maxItems) {
+            return new ValidateResult(false, "maxItems not match, expect <= %s, but %s", maxItems, size);
+        }
+
+        // Validate prefixItems (tuple validation)
+        if (prefixItems != null) {
+            for (int i = 0; i < Math.min(prefixItems.length, size); i++) {
+                ctx.addIndex(i);
+                ValidateResult result = prefixItems[i].validate(getter.apply(i), ctx);
+                if (!result.isSuccess()) {
+                    return result.atPath("[" + i + "]");
+                }
+            }
+
+            if (size > prefixItems.length) {
+                if (itemSchema != null) {
+                    // items applies to all items beyond prefixItems — marks all as evaluated
+                    for (int i = prefixItems.length; i < size; i++) {
+                        ctx.addIndex(i);
+                        ValidateResult result = itemSchema.validate(getter.apply(i), ctx);
+                        if (!result.isSuccess()) {
+                            return result.atPath("[" + i + "]");
+                        }
+                    }
+                } else if (!additionalItems) {
+                    if (additionalItemSchema != null) {
+                        for (int i = prefixItems.length; i < size; i++) {
+                            ctx.addIndex(i);
+                            ValidateResult result = additionalItemSchema.validate(getter.apply(i), ctx);
+                            if (!result.isSuccess()) {
+                                return result.atPath("[" + i + "]");
+                            }
+                        }
+                    } else {
+                        return new ValidateResult(false, "additionalItems not allowed, expect %s items, but %s",
+                                prefixItems.length, size);
+                    }
+                }
+            }
+        } else if (itemSchema != null) {
+            // items with no prefixItems — marks ALL as evaluated
+            for (int i = 0; i < size; i++) {
+                ctx.addIndex(i);
+                ValidateResult result = itemSchema.validate(getter.apply(i), ctx);
+                if (!result.isSuccess()) {
+                    return result.atPath("[" + i + "]");
+                }
+            }
+        }
+
+        // Check uniqueItems
+        if (uniqueItems && size > 1) {
+            Set<Object> seen = new HashSet<>(size);
+            for (int i = 0; i < size; i++) {
+                if (!seen.add(getter.apply(i))) {
+                    return UNIQUE_ITEMS_NOT_MATCH;
+                }
+            }
+        }
+
+        // Check contains — marks matched indices as evaluated
+        if (contains != null) {
+            int matchCount = 0;
+            for (int i = 0; i < size; i++) {
+                if (contains.validate(getter.apply(i)).isSuccess()) {
+                    matchCount++;
+                    ctx.addIndex(i);
+                }
+            }
+            int min = minContains >= 0 ? minContains : 1;
+            if (matchCount < min) {
+                return CONTAINS_NOT_MATCH;
+            }
+            if (maxContains >= 0 && matchCount > maxContains) {
+                return CONTAINS_NOT_MATCH;
+            }
+        }
+
+        // Check composition with context
+        if (allOf != null || anyOf != null || oneOf != null) {
+            List<Object> list = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                list.add(getter.apply(i));
+            }
+            if (allOf != null) {
+                ValidateResult result = allOf.validate(list, ctx);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+            if (anyOf != null) {
+                ValidateResult result = anyOf.validate(list, ctx);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+            if (oneOf != null) {
+                ValidateResult result = oneOf.validate(list, ctx);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+        }
+
+        // Apply unevaluatedItems
+        if (hasUnevaluatedItems) {
+            for (int i = 0; i < size; i++) {
+                if (!ctx.isIndexEvaluated(i)) {
+                    ValidateResult result = unevaluatedItemsSchema.validate(getter.apply(i));
+                    if (!result.isSuccess()) {
+                        return new ValidateResult(false, "unevaluated item at index %s not allowed", i);
+                    }
+                    ctx.addIndex(i);
+                }
+            }
+        }
+
+        return SUCCESS;
     }
 
     private ValidateResult validateItems(int size, java.util.function.IntFunction<Object> getter) {

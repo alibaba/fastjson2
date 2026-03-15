@@ -39,6 +39,12 @@ public final class Not extends JSONSchema {
     }
 
     @Override
+    protected ValidateResult validateInternal(Object value, EvaluationContext ctx) {
+        // Evaluations inside 'not' never propagate — use disposable context
+        return validateInternal(value);
+    }
+
+    @Override
     protected ValidateResult validateInternal(Object value) {
         if (result != null) {
             return result ? FAIL_NOT : SUCCESS;
