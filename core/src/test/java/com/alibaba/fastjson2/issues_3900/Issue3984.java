@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues_3900;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.ValueFilter;
 import org.junit.jupiter.api.Test;
@@ -8,9 +9,10 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue3984 {
+    static final String CUSTOM_MAP_TYPE = CustomMap.class.getName();
+
     public static class CustomMap extends HashMap<String, Object> {
     }
 
@@ -25,9 +27,9 @@ public class Issue3984 {
                 new ValueFilter[]{valueFilter},
                 JSONWriter.Feature.WriteClassName);
 
-        String expectedType = "\"@type\":\"" + CustomMap.class.getName() + "\"";
-        assertTrue(json.contains(expectedType),
-                "JSON should contain " + expectedType + ", actual: " + json);
+        JSONObject parsed = JSON.parseObject(json);
+        assertEquals(CUSTOM_MAP_TYPE, parsed.getString("@type"));
+        assertEquals("value1", parsed.getString("key1"));
     }
 
     @Test
@@ -37,9 +39,9 @@ public class Issue3984 {
 
         String json = JSON.toJSONString(map, JSONWriter.Feature.WriteClassName);
 
-        String expectedType = "\"@type\":\"" + CustomMap.class.getName() + "\"";
-        assertTrue(json.contains(expectedType),
-                "JSON should contain " + expectedType + ", actual: " + json);
+        JSONObject parsed = JSON.parseObject(json);
+        assertEquals(CUSTOM_MAP_TYPE, parsed.getString("@type"));
+        assertEquals("value1", parsed.getString("key1"));
     }
 
     @Test
@@ -57,14 +59,12 @@ public class Issue3984 {
                 new ValueFilter[]{valueFilter},
                 JSONWriter.Feature.WriteClassName);
 
-        String typeToken = "\"@type\":\"" + CustomMap.class.getName() + "\"";
-        int count = 0;
-        int idx = 0;
-        while ((idx = json.indexOf(typeToken, idx)) != -1) {
-            count++;
-            idx += typeToken.length();
-        }
-        assertEquals(2, count,
-                "Should contain exactly 2 @type entries for outer and inner maps: " + json);
+        JSONObject parsed = JSON.parseObject(json);
+        assertEquals(CUSTOM_MAP_TYPE, parsed.getString("@type"));
+        assertEquals("value1", parsed.getString("key1"));
+
+        JSONObject nestedParsed = parsed.getJSONObject("nested");
+        assertEquals(CUSTOM_MAP_TYPE, nestedParsed.getString("@type"));
+        assertEquals(123, nestedParsed.getIntValue("msg"));
     }
 }
