@@ -4877,6 +4877,9 @@ final class JSONReaderJSONB
     public Instant readInstant() {
         int type = bytes[offset++];
         switch (type) {
+            case BC_NULL: {
+                return null;
+            }
             case BC_TIMESTAMP: {
                 return Instant.ofEpochSecond(
                         readInt64Value(),
