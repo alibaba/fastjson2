@@ -308,6 +308,12 @@ public class ObjectReaderCreatorASM
                     match = false;
                     break;
                 }
+
+                if (fieldReader.fieldClass != fieldReader.fieldType
+                        && fieldReader.fieldClass == Number.class) {
+                    match = false;
+                    break;
+                }
             }
         }
 
@@ -423,6 +429,12 @@ public class ObjectReaderCreatorASM
 
                 if (fieldReader instanceof FieldReaderMap
                         && ((FieldReaderMap<?>) fieldReader).arrayToMapKey != null) {
+                    match = false;
+                    break;
+                }
+
+                if (fieldReader.fieldClass != fieldReader.fieldType
+                        && fieldReader.fieldClass == Number.class) {
                     match = false;
                     break;
                 }
