@@ -253,4 +253,17 @@ public final class JSON {
     }
 
     private static final byte[] NULL_BYTES = {'n', 'u', 'l', 'l'};
+
+    // ==================== JSONPath ====================
+
+    /**
+     * Evaluate a JSONPath expression on a JSON string.
+     *
+     * <pre>
+     * String title = JSON.eval(json, "$.store.book[0].title", String.class);
+     * </pre>
+     */
+    public static <T> T eval(String json, String path, Class<T> type) {
+        return JSONPath.eval(json, path, type);
+    }
 }
