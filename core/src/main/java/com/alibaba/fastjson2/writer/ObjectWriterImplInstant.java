@@ -5,14 +5,20 @@ import com.alibaba.fastjson2.codec.DateTimeCodec;
 import com.alibaba.fastjson2.util.DateUtils;
 
 import java.lang.reflect.Type;
-import java.time.*;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.Year;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 final class ObjectWriterImplInstant
         extends DateTimeCodec
         implements ObjectWriter {
-    static final ObjectWriterImplInstant INSTANCE = new ObjectWriterImplInstant(null, null);
+    static final ObjectWriterImplInstant INSTANCE =
+            new ObjectWriterImplInstant(null, null);
+
     public ObjectWriterImplInstant(String format, Locale locale) {
         super(format, locale);
     }
@@ -36,8 +42,15 @@ final class ObjectWriterImplInstant
                 : context.getDateFormat();
 
         Instant instant = (Instant) object;
-        if (dateFormat == null) {
-            jsonWriter.writeInstant(instant);
+
+        if (formatUnixTime || (format == null && context.isDateFormatUnixTime())) {
+            long millis = instant.toEpochMilli();
+            jsonWriter.writeInt64(millis / 1000);
+            return;
+        }
+
+        if (formatMillis || (format == null && context.isDateFormatMillis())) {
+            jsonWriter.writeInt64(instant.toEpochMilli());
             return;
         }
 
@@ -63,7 +76,7 @@ final class ObjectWriterImplInstant
 
                 long zeroDay = localEpochDay + DAYS_0000_TO_1970;
                 // find the march-based year
-                zeroDay -= 60;  // adjust to 0000-03-01 so leap day is at end of four year cycle
+                zeroDay -= 60; // adjust to 0000-03-01 so leap day is at end of four year cycle
                 long adjust = 0;
                 if (zeroDay < 0) {
                     // adjust negative years to positive for calculation
@@ -78,7 +91,7 @@ final class ObjectWriterImplInstant
                     yearEst--;
                     doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
                 }
-                yearEst += adjust;  // reset any negative year
+                yearEst += adjust; // reset any negative year
                 int marchDoy0 = (int) doyEst;
 
                 // convert march-based values back to january-based
@@ -158,19 +171,6 @@ final class ObjectWriterImplInstant
 
         ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, context.getZoneId());
 
-        if (formatUnixTime || (format == null && context.isDateFormatUnixTime())) {
-            long millis = zdt.toInstant().toEpochMilli();
-            jsonWriter.writeInt64(millis / 1000);
-            return;
-        }
-
-        if (formatMillis || (format == null && context.isDateFormatMillis())) {
-            jsonWriter.writeInt64(zdt
-                    .toInstant()
-                    .toEpochMilli());
-            return;
-        }
-
         int year = zdt.getYear();
         if (year >= 0 && year <= 9999) {
             if (formatISO8601 || (format == null && context.isDateFormatISO8601())) {
@@ -195,7 +195,7 @@ final class ObjectWriterImplInstant
         }
 
         if (formatter == null) {
-            jsonWriter.writeZonedDateTime(zdt);
+            jsonWriter.writeInstant(instant);
         } else {
             String str = formatter.format(zdt);
             jsonWriter.writeString(str);
