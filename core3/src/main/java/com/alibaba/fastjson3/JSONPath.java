@@ -3,7 +3,14 @@ package com.alibaba.fastjson3;
 import com.alibaba.fastjson3.jsonpath.JSONPathCompiler;
 import com.alibaba.fastjson3.jsonpath.JSONPathContext;
 import com.alibaba.fastjson3.jsonpath.JSONPathSegment;
+import com.alibaba.fastjson3.reader.FieldNameMatcher;
+import com.alibaba.fastjson3.reader.FieldReader;
 
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -75,6 +82,51 @@ public abstract sealed class JSONPath {
         }
 
         return new CompiledPath(segments, definite, result.streamable());
+    }
+
+    /**
+     * Compile multiple JSONPath expressions with target types for typed multi-path extraction.
+     * Returns a JSONPath that evaluates all paths in a single pass and returns {@code Object[]}.
+     *
+     * <p>The factory analyzes path structures and selects an optimized extraction strategy:
+     * <ul>
+     *   <li>All single names ({@code $.f0, $.f1}): single-pass object field scan</li>
+     *   <li>All single indexes ({@code $[0], $[1]}): single-pass array scan</li>
+     *   <li>Same-prefix names ({@code $.data.f0, $.data.f1}): navigate to prefix, then single-pass scan</li>
+     *   <li>Same-prefix index+names ({@code $[0].f0, $[0].f1}): skip to index, then single-pass scan</li>
+     *   <li>Other patterns: evaluate each path independently</li>
+     * </ul>
+     *
+     * <pre>
+     * JSONPath path = JSONPath.of(
+     *     new String[]{"$.id", "$.name"},
+     *     new Type[]{Long.class, String.class}
+     * );
+     * Object[] result = (Object[]) path.extract("{\"id\":1,\"name\":\"test\"}");
+     * // result = [1L, "test"]
+     * </pre>
+     *
+     * @param paths JSONPath expressions
+     * @param types target types for each path (must be same length as paths)
+     * @return a compiled multi-path JSONPath
+     */
+    public static JSONPath of(String[] paths, Type[] types) {
+        if (paths == null || types == null) {
+            throw new JSONException("paths and types must not be null");
+        }
+        if (paths.length == 0) {
+            throw new JSONException("paths must not be empty");
+        }
+        if (paths.length != types.length) {
+            throw new JSONException("paths.length (" + paths.length + ") != types.length (" + types.length + ")");
+        }
+
+        JSONPath[] compiled = new JSONPath[paths.length];
+        for (int i = 0; i < paths.length; i++) {
+            compiled[i] = of(paths[i]);
+        }
+
+        return TypedMultiPath.create(compiled, types);
     }
 
     // ==================== Evaluation ====================
@@ -443,6 +495,702 @@ public abstract sealed class JSONPath {
                 parentSegments[0].eval(ctx);
             }
             return ctx.getResult();
+        }
+    }
+
+    // ==================== Typed multi-path: extract multiple values ====================
+
+    /**
+     * Extracts multiple typed values from JSON in a single pass.
+     * Immutable and thread-safe after construction.
+     */
+    static final class TypedMultiPath extends JSONPath {
+        enum Strategy {
+            ALL_SINGLE_NAME,
+            ALL_SINGLE_INDEX,
+            PREFIX_NAME_THEN_NAMES,
+            PREFIX_INDEX_THEN_NAMES,
+            PREFIX_NAME2_THEN_NAMES,
+            GENERIC
+        }
+
+        private final JSONPath[] paths;
+        private final Type[] types;
+        private final Strategy strategy;
+
+        // Strategy-specific fields (only populated for matching strategy)
+        private final String[] names;
+        private final Map<String, int[]> nameToIndices; // name -> result indices (handles duplicates, tree mode)
+        private final FieldNameMatcher fieldNameMatcher; // hash-based field matching (zero String alloc)
+        // fieldReaders[ordinal] -> int[] of result indices for that field
+        private final int[][] ordinalToIndices;
+        // Primary type per ordinal for type-specific reads (avoids readAny + convertType)
+        private final Type[] ordinalTypes;
+        private final int[] indexes;
+        private final int[][] indexToPositions; // indexToPositions[elementIndex] = result positions, null if not target
+        private final int maxIndex;
+        private final String prefixName;
+        private final String prefixName2;
+        private final int prefixIndex;
+
+        private TypedMultiPath(
+                JSONPath[] paths,
+                Type[] types,
+                Strategy strategy,
+                String[] names,
+                int[] indexes,
+                int maxIndex,
+                String prefixName,
+                String prefixName2,
+                int prefixIndex
+        ) {
+            super(true); // TypedMultiPath always returns a fixed-size Object[]
+            this.paths = paths;
+            this.types = types;
+            this.strategy = strategy;
+            this.names = names;
+            this.indexes = indexes;
+            this.maxIndex = maxIndex;
+            this.prefixName = prefixName;
+            this.prefixName2 = prefixName2;
+            this.prefixIndex = prefixIndex;
+
+            // Build name->indices lookup for name-based strategies
+            if (names != null) {
+                Map<String, int[]> map = new HashMap<>();
+                for (int i = 0; i < names.length; i++) {
+                    String name = names[i];
+                    int[] existing = map.get(name);
+                    if (existing == null) {
+                        map.put(name, new int[]{i});
+                    } else {
+                        int[] expanded = new int[existing.length + 1];
+                        System.arraycopy(existing, 0, expanded, 0, existing.length);
+                        expanded[existing.length] = i;
+                        map.put(name, expanded);
+                    }
+                }
+                this.nameToIndices = map;
+
+                // Build FieldNameMatcher for zero-alloc hash-based field matching in stream mode
+                int uniqueCount = map.size();
+                FieldReader[] readers = new FieldReader[uniqueCount];
+                int[][] ordToIdx = new int[uniqueCount][];
+                int ri = 0;
+                for (Map.Entry<String, int[]> entry : map.entrySet()) {
+                    readers[ri] = new FieldReader(
+                            entry.getKey(), null, Object.class, Object.class,
+                            ri, null, false, null, null
+                    );
+                    ordToIdx[ri] = entry.getValue();
+                    ri++;
+                }
+                this.fieldNameMatcher = FieldNameMatcher.build(readers);
+                this.ordinalToIndices = ordToIdx;
+                // Precompute primary type per ordinal for type-specific reads
+                Type[] oTypes = new Type[uniqueCount];
+                for (int i = 0; i < uniqueCount; i++) {
+                    // Use the type of the first index for this ordinal
+                    oTypes[i] = types[ordToIdx[i][0]];
+                }
+                this.ordinalTypes = oTypes;
+            } else {
+                this.nameToIndices = null;
+                this.fieldNameMatcher = null;
+                this.ordinalToIndices = null;
+                this.ordinalTypes = null;
+            }
+
+            // Build index->positions lookup for index-based strategies (no autoboxing)
+            if (indexes != null && maxIndex >= 0) {
+                int[][] imap = new int[maxIndex + 1][];
+                for (int i = 0; i < indexes.length; i++) {
+                    int key = indexes[i];
+                    int[] existing = imap[key];
+                    if (existing == null) {
+                        imap[key] = new int[]{i};
+                    } else {
+                        int[] expanded = new int[existing.length + 1];
+                        System.arraycopy(existing, 0, expanded, 0, existing.length);
+                        expanded[existing.length] = i;
+                        imap[key] = expanded;
+                    }
+                }
+                this.indexToPositions = imap;
+            } else {
+                this.indexToPositions = null;
+            }
+        }
+
+        /**
+         * Factory: analyze compiled paths and select optimal strategy.
+         */
+        static TypedMultiPath create(JSONPath[] compiled, Type[] types) {
+            int len = compiled.length;
+
+            // Check if all paths are SingleNamePath
+            boolean allSingleName = true;
+            for (JSONPath p : compiled) {
+                if (!(p instanceof SingleNamePath)) {
+                    allSingleName = false;
+                    break;
+                }
+            }
+            if (allSingleName) {
+                String[] names = new String[len];
+                for (int i = 0; i < len; i++) {
+                    names[i] = ((SingleNamePath) compiled[i]).name;
+                }
+                return new TypedMultiPath(compiled, types, Strategy.ALL_SINGLE_NAME,
+                        names, null, -1, null, null, -1);
+            }
+
+            // Check if all paths are single positive index (CompiledPath with 1 IndexSegment)
+            boolean allSingleIndex = true;
+            int[] idxArr = new int[len];
+            int maxIdx = -1;
+            for (int i = 0; i < len; i++) {
+                int idx = getSinglePositiveIndex(compiled[i]);
+                if (idx < 0) {
+                    allSingleIndex = false;
+                    break;
+                }
+                idxArr[i] = idx;
+                if (idx > maxIdx) {
+                    maxIdx = idx;
+                }
+            }
+            if (allSingleIndex) {
+                return new TypedMultiPath(compiled, types, Strategy.ALL_SINGLE_INDEX,
+                        null, idxArr, maxIdx, null, null, -1);
+            }
+
+            // Check if all paths are TwoNamePath with same first segment
+            boolean allTwoNameSamePrefix = true;
+            String firstPrefix = null;
+            for (int i = 0; i < len; i++) {
+                if (!(compiled[i] instanceof TwoNamePath tnp)) {
+                    allTwoNameSamePrefix = false;
+                    break;
+                }
+                if (i == 0) {
+                    firstPrefix = tnp.name1;
+                } else if (!firstPrefix.equals(tnp.name1)) {
+                    allTwoNameSamePrefix = false;
+                    break;
+                }
+            }
+            if (allTwoNameSamePrefix && firstPrefix != null) {
+                String[] names = new String[len];
+                for (int i = 0; i < len; i++) {
+                    names[i] = ((TwoNamePath) compiled[i]).name2;
+                }
+                return new TypedMultiPath(compiled, types, Strategy.PREFIX_NAME_THEN_NAMES,
+                        names, null, -1, firstPrefix, null, -1);
+            }
+
+            // Check if all paths are CompiledPath with 2 segments: IndexSegment(same) + NameSegment
+            boolean allPrefixIndexThenName = true;
+            int commonIdx = -1;
+            for (int i = 0; i < len; i++) {
+                JSONPathSegment[] segs = getSegments(compiled[i]);
+                if (segs == null || segs.length != 2
+                        || !(segs[0] instanceof JSONPathSegment.IndexSegment is)
+                        || is.index() < 0
+                        || !(segs[1] instanceof JSONPathSegment.NameSegment)) {
+                    allPrefixIndexThenName = false;
+                    break;
+                }
+                if (i == 0) {
+                    commonIdx = is.index();
+                } else if (is.index() != commonIdx) {
+                    allPrefixIndexThenName = false;
+                    break;
+                }
+            }
+            if (allPrefixIndexThenName && commonIdx >= 0) {
+                String[] names = new String[len];
+                for (int i = 0; i < len; i++) {
+                    JSONPathSegment[] segs = getSegments(compiled[i]);
+                    names[i] = ((JSONPathSegment.NameSegment) segs[1]).name();
+                }
+                return new TypedMultiPath(compiled, types, Strategy.PREFIX_INDEX_THEN_NAMES,
+                        names, null, -1, null, null, commonIdx);
+            }
+
+            // Check if all paths are CompiledPath with 3 segments: NameSegment(same) + NameSegment(same) + NameSegment
+            boolean allPrefixName2ThenName = true;
+            String prefix0 = null, prefix1 = null;
+            for (int i = 0; i < len; i++) {
+                JSONPathSegment[] segs = getSegments(compiled[i]);
+                if (segs == null || segs.length != 3
+                        || !(segs[0] instanceof JSONPathSegment.NameSegment ns0)
+                        || !(segs[1] instanceof JSONPathSegment.NameSegment ns1)
+                        || !(segs[2] instanceof JSONPathSegment.NameSegment)) {
+                    allPrefixName2ThenName = false;
+                    break;
+                }
+                if (i == 0) {
+                    prefix0 = ns0.name();
+                    prefix1 = ns1.name();
+                } else if (!prefix0.equals(ns0.name()) || !prefix1.equals(ns1.name())) {
+                    allPrefixName2ThenName = false;
+                    break;
+                }
+            }
+            if (allPrefixName2ThenName && prefix0 != null) {
+                String[] names = new String[len];
+                for (int i = 0; i < len; i++) {
+                    JSONPathSegment[] segs = getSegments(compiled[i]);
+                    names[i] = ((JSONPathSegment.NameSegment) segs[2]).name();
+                }
+                return new TypedMultiPath(compiled, types, Strategy.PREFIX_NAME2_THEN_NAMES,
+                        names, null, -1, prefix0, prefix1, -1);
+            }
+
+            // Fallback: generic strategy
+            return new TypedMultiPath(compiled, types, Strategy.GENERIC,
+                    null, null, -1, null, null, -1);
+        }
+
+        /**
+         * Get the single positive index from a path, or -1 if not applicable.
+         */
+        private static int getSinglePositiveIndex(JSONPath path) {
+            JSONPathSegment[] segs = getSegments(path);
+            if (segs != null && segs.length == 1
+                    && segs[0] instanceof JSONPathSegment.IndexSegment is
+                    && is.index() >= 0) {
+                return is.index();
+            }
+            return -1;
+        }
+
+        /**
+         * Get segments from a CompiledPath, or null if not a CompiledPath.
+         */
+        private static JSONPathSegment[] getSegments(JSONPath path) {
+            if (path instanceof CompiledPath cp) {
+                return cp.segments;
+            }
+            return null;
+        }
+
+        // ==================== Tree Mode ====================
+
+        @Override
+        public Object eval(Object root) {
+            if (root == null) {
+                return new Object[paths.length];
+            }
+            return switch (strategy) {
+                case ALL_SINGLE_NAME -> evalMultiNames(root);
+                case ALL_SINGLE_INDEX -> evalMultiIndexes(root);
+                case PREFIX_NAME_THEN_NAMES -> {
+                    Object child = getProperty(root, prefixName);
+                    yield child != null ? evalMultiNames(child) : new Object[paths.length];
+                }
+                case PREFIX_INDEX_THEN_NAMES -> {
+                    Object child = getListElement(root, prefixIndex);
+                    yield child != null ? evalMultiNames(child) : new Object[paths.length];
+                }
+                case PREFIX_NAME2_THEN_NAMES -> {
+                    Object child = getProperty(root, prefixName);
+                    child = child != null ? getProperty(child, prefixName2) : null;
+                    yield child != null ? evalMultiNames(child) : new Object[paths.length];
+                }
+                case GENERIC -> evalGeneric(root);
+            };
+        }
+
+        private Object[] evalMultiNames(Object obj) {
+            Object[] result = new Object[names.length];
+            if (obj instanceof Map<?, ?> map) {
+                for (Map.Entry<String, int[]> entry : nameToIndices.entrySet()) {
+                    Object value = map.get(entry.getKey());
+                    for (int idx : entry.getValue()) {
+                        result[idx] = convertType(value, types[idx]);
+                    }
+                }
+            }
+            return result;
+        }
+
+        private Object[] evalMultiIndexes(Object obj) {
+            Object[] result = new Object[indexes.length];
+            if (obj instanceof List<?> list) {
+                int size = list.size();
+                for (int i = 0; i < indexes.length; i++) {
+                    int idx = indexes[i];
+                    if (idx < size) {
+                        result[i] = convertType(list.get(idx), types[i]);
+                    }
+                }
+            }
+            return result;
+        }
+
+        private Object[] evalGeneric(Object root) {
+            Object[] result = new Object[paths.length];
+            for (int i = 0; i < paths.length; i++) {
+                Object value = paths[i].eval(root);
+                result[i] = convertType(value, types[i]);
+            }
+            return result;
+        }
+
+        // ==================== Stream Mode ====================
+
+        @Override
+        public Object extract(JSONParser parser) {
+            return switch (strategy) {
+                case ALL_SINGLE_NAME -> extractMultiNames(parser);
+                case ALL_SINGLE_INDEX -> extractMultiIndexes(parser);
+                case PREFIX_NAME_THEN_NAMES -> extractPrefixNameThenNames(parser);
+                case PREFIX_INDEX_THEN_NAMES -> extractPrefixIndexThenNames(parser);
+                case PREFIX_NAME2_THEN_NAMES -> extractPrefixName2ThenNames(parser);
+                case GENERIC -> {
+                    Object root = parser.readAny();
+                    yield evalGeneric(root);
+                }
+            };
+        }
+
+        /**
+         * Stream-mode: scan object fields, match against target names, read typed values.
+         * Uses FieldNameMatcher for zero-allocation hash-based field matching.
+         * Uses type-specific reads (readInt/readLong/readString) to avoid readAny + convertType.
+         * Single-pass with early termination when all names are found.
+         */
+        private Object[] extractMultiNames(JSONParser parser) {
+            Object[] result = new Object[names.length];
+            parser.skipWS();
+            int off = parser.getOffset();
+            if (off >= parser.getEnd() || parser.charAt(off) != '{') {
+                return result;
+            }
+            parser.advance(1);
+
+            int uniqueCount = ordinalToIndices.length;
+            int remaining = uniqueCount;
+            long foundBits = 0;
+            parser.skipWS();
+            while (remaining > 0 && parser.getOffset() < parser.getEnd()
+                    && parser.charAt(parser.getOffset()) != '}') {
+                long hash = parser.readFieldNameHash(fieldNameMatcher);
+                FieldReader fr = fieldNameMatcher.matchFlat(hash);
+                if (fr != null) {
+                    int ordinal = fr.ordinal;
+                    int[] indices = ordinalToIndices[ordinal];
+                    // Type-specific read based on primary target type
+                    Object value = readTyped(parser, ordinalTypes[ordinal]);
+                    if (indices.length == 1) {
+                        // Fast path: single index, no conversion needed (readTyped returns correct type)
+                        result[indices[0]] = value;
+                    } else {
+                        // Duplicate paths with potentially different types
+                        for (int idx : indices) {
+                            result[idx] = convertType(value, types[idx]);
+                        }
+                    }
+                    // Early termination tracking
+                    if (uniqueCount <= 64) {
+                        long bit = 1L << ordinal;
+                        if ((foundBits & bit) == 0) {
+                            foundBits |= bit;
+                            remaining--;
+                        }
+                    }
+                } else {
+                    parser.skipValue();
+                }
+                parser.skipWS();
+                if (parser.getOffset() < parser.getEnd() && parser.charAt(parser.getOffset()) == ',') {
+                    parser.advance(1);
+                    parser.skipWS();
+                }
+            }
+            return result;
+        }
+
+        /**
+         * Read a JSON value with type-specific parsing to avoid readAny + convertType overhead.
+         * Only uses type-specific reads when the JSON token matches the target type.
+         * Falls back to readAny + convertType for mismatched or complex types.
+         */
+        private static Object readTyped(JSONParser parser, Type type) {
+            if (type instanceof Class<?> clazz) {
+                parser.skipWS();
+                int off = parser.getOffset();
+                if (off < parser.getEnd()) {
+                    int c = parser.charAt(off);
+                    // Null check
+                    if (c == 'n') {
+                        if (parser.readNull()) {
+                            return null;
+                        }
+                    }
+                    // Type-specific reads only when JSON token matches expected type
+                    if (c == '"') {
+                        // JSON string value
+                        if (clazz == String.class) {
+                            return parser.readString();
+                        }
+                    } else if (c == '-' || (c >= '0' && c <= '9')) {
+                        // JSON number value
+                        if (clazz == int.class || clazz == Integer.class) {
+                            return parser.readInt();
+                        }
+                        if (clazz == long.class || clazz == Long.class) {
+                            return parser.readLong();
+                        }
+                        if (clazz == double.class || clazz == Double.class) {
+                            return parser.readDouble();
+                        }
+                    } else if (c == 't' || c == 'f') {
+                        // JSON boolean value
+                        if (clazz == boolean.class || clazz == Boolean.class) {
+                            return parser.readBoolean();
+                        }
+                    }
+                }
+            }
+            // Fallback: generic read + type conversion
+            Object value = parser.readAny();
+            return convertType(value, type);
+        }
+
+        /**
+         * Stream-mode: scan array elements, read typed values at target indexes.
+         */
+        private Object[] extractMultiIndexes(JSONParser parser) {
+            Object[] result = new Object[indexes.length];
+            parser.skipWS();
+            int off = parser.getOffset();
+            if (off >= parser.getEnd() || parser.charAt(off) != '[') {
+                return result;
+            }
+            parser.advance(1);
+
+            for (int i = 0; i <= maxIndex; i++) {
+                parser.skipWS();
+                if (parser.getOffset() >= parser.getEnd() || parser.charAt(parser.getOffset()) == ']') {
+                    break;
+                }
+                int[] positions = indexToPositions[i];
+                if (positions != null) {
+                    Object value = parser.readAny();
+                    for (int pos : positions) {
+                        result[pos] = convertType(value, types[pos]);
+                    }
+                } else {
+                    parser.skipValue();
+                }
+                parser.skipWS();
+                if (parser.getOffset() < parser.getEnd() && parser.charAt(parser.getOffset()) == ',') {
+                    parser.advance(1);
+                }
+            }
+            return result;
+        }
+
+        /**
+         * Stream-mode: navigate to prefix name field, then extract multi names.
+         */
+        private Object[] extractPrefixNameThenNames(JSONParser parser) {
+            if (!navigateToField(parser, prefixName)) {
+                return new Object[names.length];
+            }
+            return extractMultiNames(parser);
+        }
+
+        /**
+         * Stream-mode: navigate to array index, then extract multi names.
+         */
+        private Object[] extractPrefixIndexThenNames(JSONParser parser) {
+            if (!navigateToIndex(parser, prefixIndex)) {
+                return new Object[names.length];
+            }
+            return extractMultiNames(parser);
+        }
+
+        /**
+         * Stream-mode: navigate through two prefix name fields, then extract multi names.
+         */
+        private Object[] extractPrefixName2ThenNames(JSONParser parser) {
+            if (!navigateToField(parser, prefixName)) {
+                return new Object[names.length];
+            }
+            if (!navigateToField(parser, prefixName2)) {
+                return new Object[names.length];
+            }
+            return extractMultiNames(parser);
+        }
+
+        /**
+         * Navigate parser to the value of a named field within the current object.
+         * Returns true if the field was found and parser is positioned at its value.
+         */
+        private static boolean navigateToField(JSONParser parser, String targetName) {
+            parser.skipWS();
+            int off = parser.getOffset();
+            if (off >= parser.getEnd() || parser.charAt(off) != '{') {
+                return false;
+            }
+            parser.advance(1);
+            parser.skipWS();
+
+            while (parser.getOffset() < parser.getEnd() && parser.charAt(parser.getOffset()) != '}') {
+                String fieldName = parser.readFieldName();
+                if (targetName.equals(fieldName)) {
+                    return true; // parser is now positioned at the field's value
+                }
+                parser.skipValue();
+                parser.skipWS();
+                if (parser.getOffset() < parser.getEnd() && parser.charAt(parser.getOffset()) == ',') {
+                    parser.advance(1);
+                    parser.skipWS();
+                }
+            }
+            return false; // field not found
+        }
+
+        /**
+         * Navigate parser to the element at a given positive index in the current array.
+         * Returns true if the element was found and parser is positioned at its value.
+         */
+        private static boolean navigateToIndex(JSONParser parser, int targetIndex) {
+            parser.skipWS();
+            int off = parser.getOffset();
+            if (off >= parser.getEnd() || parser.charAt(off) != '[') {
+                return false;
+            }
+            parser.advance(1);
+
+            for (int i = 0; i <= targetIndex; i++) {
+                parser.skipWS();
+                if (parser.getOffset() >= parser.getEnd() || parser.charAt(parser.getOffset()) == ']') {
+                    return false; // array too short
+                }
+                if (i == targetIndex) {
+                    return true; // parser positioned at target element
+                }
+                parser.skipValue();
+                parser.skipWS();
+                if (parser.getOffset() < parser.getEnd() && parser.charAt(parser.getOffset()) == ',') {
+                    parser.advance(1);
+                }
+            }
+            return false;
+        }
+
+        // ==================== Type conversion ====================
+
+        private static Object convertType(Object value, Type type) {
+            if (value == null || type == null || type == Object.class) {
+                return value;
+            }
+            if (type instanceof Class<?> clazz) {
+                if (clazz.isInstance(value)) {
+                    return value;
+                }
+                if (value instanceof Number n) {
+                    if (clazz == int.class || clazz == Integer.class) {
+                        return n.intValue();
+                    }
+                    if (clazz == long.class || clazz == Long.class) {
+                        return n.longValue();
+                    }
+                    if (clazz == double.class || clazz == Double.class) {
+                        return n.doubleValue();
+                    }
+                    if (clazz == float.class || clazz == Float.class) {
+                        return n.floatValue();
+                    }
+                    if (clazz == short.class || clazz == Short.class) {
+                        return n.shortValue();
+                    }
+                    if (clazz == byte.class || clazz == Byte.class) {
+                        return n.byteValue();
+                    }
+                    if (clazz == BigDecimal.class) {
+                        if (n instanceof BigDecimal) {
+                            return n;
+                        }
+                        if (n instanceof BigInteger bi) {
+                            return new BigDecimal(bi);
+                        }
+                        if (n instanceof Long || n instanceof Integer) {
+                            return BigDecimal.valueOf(n.longValue());
+                        }
+                        return new BigDecimal(n.toString());
+                    }
+                    if (clazz == BigInteger.class) {
+                        if (n instanceof BigInteger) {
+                            return n;
+                        }
+                        if (n instanceof BigDecimal bd) {
+                            return bd.toBigInteger();
+                        }
+                        return BigInteger.valueOf(n.longValue());
+                    }
+                    if (clazz == String.class) {
+                        return n.toString();
+                    }
+                }
+                if (clazz == String.class) {
+                    return value.toString();
+                }
+                if (value instanceof String s) {
+                    if (clazz == int.class || clazz == Integer.class) {
+                        return Integer.parseInt(s);
+                    }
+                    if (clazz == long.class || clazz == Long.class) {
+                        return Long.parseLong(s);
+                    }
+                    if (clazz == double.class || clazz == Double.class) {
+                        return Double.parseDouble(s);
+                    }
+                    if (clazz == float.class || clazz == Float.class) {
+                        return Float.parseFloat(s);
+                    }
+                    if (clazz == short.class || clazz == Short.class) {
+                        return Short.parseShort(s);
+                    }
+                    if (clazz == byte.class || clazz == Byte.class) {
+                        return Byte.parseByte(s);
+                    }
+                    if (clazz == BigDecimal.class) {
+                        return new BigDecimal(s);
+                    }
+                    if (clazz == BigInteger.class) {
+                        return new BigInteger(s);
+                    }
+                    if (clazz == boolean.class || clazz == Boolean.class) {
+                        return Boolean.parseBoolean(s);
+                    }
+                }
+            }
+            return value;
+        }
+
+        // ==================== Helpers ====================
+
+        private static Object getProperty(Object obj, String name) {
+            if (obj instanceof JSONObject o) {
+                return o.get(name);
+            }
+            if (obj instanceof Map<?, ?> m) {
+                return m.get(name);
+            }
+            return null;
+        }
+
+        private static Object getListElement(Object obj, int index) {
+            if (obj instanceof List<?> list) {
+                return index < list.size() ? list.get(index) : null;
+            }
+            return null;
         }
     }
 }
