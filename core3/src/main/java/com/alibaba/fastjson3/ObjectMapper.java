@@ -74,6 +74,7 @@ public final class ObjectMapper {
             Collections.<ObjectWriterModule>emptyList(),
             null, null,
             NO_PROPERTY_FILTERS, NO_VALUE_FILTERS, NO_NAME_FILTERS,
+            null,
             Collections.<Class<?>, Class<?>>emptyMap(),
             false);
 
@@ -91,6 +92,7 @@ public final class ObjectMapper {
     private final PropertyFilter[] propertyFilters;
     private final ValueFilter[] valueFilters;
     private final NameFilter[] nameFilters;
+    private final com.alibaba.fastjson3.filter.LabelFilter labelFilter;
 
     // Mixin mappings: target class → mixin source class
     private final Map<Class<?>, Class<?>> mixInCache;
@@ -112,6 +114,7 @@ public final class ObjectMapper {
             PropertyFilter[] propertyFilters,
             ValueFilter[] valueFilters,
             NameFilter[] nameFilters,
+            com.alibaba.fastjson3.filter.LabelFilter labelFilter,
             Map<Class<?>, Class<?>> mixInCache,
             boolean useJacksonAnnotation
     ) {
@@ -124,6 +127,7 @@ public final class ObjectMapper {
         this.propertyFilters = propertyFilters;
         this.valueFilters = valueFilters;
         this.nameFilters = nameFilters;
+        this.labelFilter = labelFilter;
         this.mixInCache = mixInCache;
         this.useJacksonAnnotation = useJacksonAnnotation;
         this.readerCache = new ConcurrentHashMap<Type, ObjectReader<?>>();
@@ -163,6 +167,7 @@ public final class ObjectMapper {
         Collections.addAll(b.valueFilters, this.valueFilters);
         Collections.addAll(b.nameFilters, this.nameFilters);
         b.mixIns.putAll(this.mixInCache);
+        b.labelFilter = this.labelFilter;
         b.useJacksonAnnotation = this.useJacksonAnnotation;
         return b;
     }
@@ -660,6 +665,15 @@ public final class ObjectMapper {
             }
         }
 
+        // Check for @JSONField(value=true) on enum types (bypasses isBasicType)
+        if (rawType != null && rawType.isEnum()) {
+            writer = ObjectWriterCreator.findValueWriter(rawType, null, useJacksonAnnotation);
+            if (writer != null) {
+                writerCache.putIfAbsent(type, writer);
+                return (ObjectWriter<T>) writer;
+            }
+        }
+
         // Auto-create writer (only for POJO types)
         if (rawType != null && !isBasicType(rawType)) {
             try {
@@ -787,6 +801,9 @@ public final class ObjectMapper {
     private void applyFilters(JSONGenerator generator) {
         if (propertyFilters.length > 0 || valueFilters.length > 0 || nameFilters.length > 0) {
             generator.setFilters(propertyFilters, valueFilters, nameFilters);
+        }
+        if (labelFilter != null) {
+            generator.labelFilter = labelFilter;
         }
     }
 
@@ -969,6 +986,7 @@ public final class ObjectMapper {
         final List<ValueFilter> valueFilters = new ArrayList<ValueFilter>();
         final List<NameFilter> nameFilters = new ArrayList<NameFilter>();
         final Map<Class<?>, Class<?>> mixIns = new LinkedHashMap<Class<?>, Class<?>>();
+        com.alibaba.fastjson3.filter.LabelFilter labelFilter;
         boolean useJacksonAnnotation;
 
         Builder() {
@@ -1068,6 +1086,17 @@ public final class ObjectMapper {
             return this;
         }
 
+        // ---- Label filter ----
+
+        /**
+         * Set a label filter for view-based field filtering.
+         * Only fields whose label matches the filter will be serialized.
+         */
+        public Builder addLabelFilter(com.alibaba.fastjson3.filter.LabelFilter filter) {
+            this.labelFilter = filter;
+            return this;
+        }
+
         // ---- Jackson annotation support ----
 
         /**
@@ -1131,6 +1160,7 @@ public final class ObjectMapper {
                     propertyFilters.toArray(NO_PROPERTY_FILTERS),
                     valueFilters.toArray(NO_VALUE_FILTERS),
                     nameFilters.toArray(NO_NAME_FILTERS),
+                    labelFilter,
                     Collections.unmodifiableMap(new LinkedHashMap<Class<?>, Class<?>>(mixIns)),
                     useJacksonAnnotation
             );

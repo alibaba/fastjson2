@@ -47,7 +47,9 @@ public final class JacksonAnnotationSupport {
             boolean required,
             boolean noSerialize,
             boolean noDeserialize,
-            Inclusion inclusion
+            Inclusion inclusion,
+            String format,
+            boolean isValue
     ) {
     }
 
@@ -67,6 +69,8 @@ public final class JacksonAnnotationSupport {
         boolean noSerialize = false;
         boolean noDeserialize = false;
         Inclusion inclusion = null;
+        String format = null;
+        boolean isValue = false;
         boolean found = false;
 
         for (Annotation ann : annotations) {
@@ -115,6 +119,25 @@ public final class JacksonAnnotationSupport {
                         alternateNames = aliases;
                     }
                 }
+                case "com.fasterxml.jackson.annotation.JsonFormat" -> {
+                    Object v = invoke(ann, "pattern");
+                    if (v instanceof String s && !s.isEmpty()) {
+                        found = true;
+                        format = s;
+                    }
+                }
+                case "com.fasterxml.jackson.annotation.JsonValue" -> {
+                    Object v = invoke(ann, "value");
+                    if (!(v instanceof Boolean b) || b) {
+                        found = true;
+                        isValue = true;
+                    }
+                }
+                case "com.fasterxml.jackson.annotation.JsonBackReference" -> {
+                    found = true;
+                    noSerialize = true;
+                    noDeserialize = true;
+                }
                 case "com.fasterxml.jackson.annotation.JsonInclude" -> {
                     Object v = invoke(ann, "value");
                     if (v instanceof Enum<?> e) {
@@ -132,7 +155,7 @@ public final class JacksonAnnotationSupport {
         }
 
         return found ? new FieldInfo(name, alternateNames, ordinal, required,
-                noSerialize, noDeserialize, inclusion) : null;
+                noSerialize, noDeserialize, inclusion, format, isValue) : null;
     }
 
     // ==================== Class-level info ====================

@@ -63,11 +63,22 @@ public final class FieldWriter implements Comparable<FieldWriter> {
     // For TYPE_LIST_STRING / TYPE_LIST_OBJECT: element class
     final Class<?> elementClass;
 
+    // Optional: date/time format pattern + cached formatter
+    final String format;
+    final java.time.format.DateTimeFormatter formatter;
+
+    // Optional: custom ObjectWriter for this field (from @JSONField(serializeUsing=))
+    final ObjectWriter<Object> customWriter;
+
+    // Optional: label for view-based filtering (from @JSONField(label=))
+    final String label;
+
     // Private constructor — use factory methods
+    @SuppressWarnings("unchecked")
     private FieldWriter(
             String fieldName, int ordinal, Type fieldType, Class<?> fieldClass,
             Method getter, Field field, int typeTag, Class<?> elementClass,
-            Inclusion inclusion
+            Inclusion inclusion, String format, ObjectWriter<?> customWriter, String label
     ) {
         this.fieldName = fieldName;
         this.ordinal = ordinal;
@@ -80,6 +91,11 @@ public final class FieldWriter implements Comparable<FieldWriter> {
         this.typeTag = typeTag;
         this.elementClass = elementClass;
         this.inclusion = inclusion;
+        this.format = format;
+        this.formatter = (format != null && !format.isEmpty())
+                ? java.time.format.DateTimeFormatter.ofPattern(format) : null;
+        this.customWriter = (ObjectWriter<Object>) customWriter;
+        this.label = (label != null && !label.isEmpty()) ? label : null;
         this.nameChars = encodeNameChars(fieldName);
         this.nameBytes = encodeNameBytes(fieldName);
         this.nameBytesLen = nameBytes.length;
@@ -99,7 +115,15 @@ public final class FieldWriter implements Comparable<FieldWriter> {
             Inclusion inclusion
     ) {
         return new FieldWriter(fieldName, ordinal, fieldType, fieldClass, getter, null,
-                typeTagFor(fieldClass), null, inclusion);
+                typeTagFor(fieldClass), null, inclusion, null, null, null);
+    }
+
+    public static FieldWriter ofGetter(
+            String fieldName, int ordinal, Type fieldType, Class<?> fieldClass, Method getter,
+            Inclusion inclusion, String format, ObjectWriter<?> customWriter, String label
+    ) {
+        return new FieldWriter(fieldName, ordinal, fieldType, fieldClass, getter, null,
+                typeTagFor(fieldClass), null, inclusion, format, customWriter, label);
     }
 
     public static FieldWriter ofField(
@@ -113,7 +137,15 @@ public final class FieldWriter implements Comparable<FieldWriter> {
             Inclusion inclusion
     ) {
         return new FieldWriter(fieldName, ordinal, fieldType, fieldClass, null, field,
-                typeTagFor(fieldClass), null, inclusion);
+                typeTagFor(fieldClass), null, inclusion, null, null, null);
+    }
+
+    public static FieldWriter ofField(
+            String fieldName, int ordinal, Type fieldType, Class<?> fieldClass, Field field,
+            Inclusion inclusion, String format, ObjectWriter<?> customWriter, String label
+    ) {
+        return new FieldWriter(fieldName, ordinal, fieldType, fieldClass, null, field,
+                typeTagFor(fieldClass), null, inclusion, format, customWriter, label);
     }
 
     public static FieldWriter ofList(
@@ -129,7 +161,7 @@ public final class FieldWriter implements Comparable<FieldWriter> {
     ) {
         int tag = elementClass == String.class ? TYPE_LIST_STRING : TYPE_LIST_OBJECT;
         return new FieldWriter(fieldName, ordinal, fieldType, fieldClass, getter, null,
-                tag, elementClass, inclusion);
+                tag, elementClass, inclusion, null, null, null);
     }
 
     public static FieldWriter ofList(
@@ -145,7 +177,7 @@ public final class FieldWriter implements Comparable<FieldWriter> {
     ) {
         int tag = elementClass == String.class ? TYPE_LIST_STRING : TYPE_LIST_OBJECT;
         return new FieldWriter(fieldName, ordinal, fieldType, fieldClass, null, field,
-                tag, elementClass, inclusion);
+                tag, elementClass, inclusion, null, null, null);
     }
 
     private static int typeTagFor(Class<?> fieldClass) {
@@ -308,6 +340,11 @@ public final class FieldWriter implements Comparable<FieldWriter> {
      * Single monomorphic method with switch dispatch on type tag.
      */
     public void writeField(JSONGenerator generator, Object bean, long features) {
+        // Custom writer takes full control
+        if (customWriter != null) {
+            writeFieldCustom(generator, bean, features);
+            return;
+        }
         switch (typeTag) {
             case TYPE_STRING -> writeString(generator, bean, features);
             case TYPE_INT -> writeInt(generator, bean, features);
@@ -417,6 +454,19 @@ public final class FieldWriter implements Comparable<FieldWriter> {
             return;
         }
         if (inclusion == Inclusion.NON_EMPTY && isEmpty(value)) {
+            return;
+        }
+        // Format temporal types with explicit pattern
+        if (formatter != null) {
+            generator.writePreEncodedNameLongs(nameByteLongs, nameBytesLen, nameChars, nameBytes);
+            if (value instanceof java.time.temporal.TemporalAccessor ta) {
+                generator.writeString(formatter.format(ta));
+            } else if (value instanceof java.util.Date d) {
+                generator.writeString(formatter.format(
+                        d.toInstant().atZone(com.alibaba.fastjson3.util.DateUtils.DEFAULT_ZONE_ID)));
+            } else {
+                generator.writeAny(value);
+            }
             return;
         }
         generator.writePreEncodedNameLongs(nameByteLongs, nameBytesLen, nameChars, nameBytes);
@@ -564,6 +614,21 @@ public final class FieldWriter implements Comparable<FieldWriter> {
         }
         generator.writeName(name);
         generator.writeAny(value);
+    }
+
+    // ==================== Custom writer ====================
+
+    private void writeFieldCustom(JSONGenerator generator, Object bean, long features) {
+        Object value = getObjectValue(bean);
+        if (value == null) {
+            writeNull(generator, features);
+            return;
+        }
+        if (inclusion == Inclusion.NON_EMPTY && isEmpty(value)) {
+            return;
+        }
+        generator.writePreEncodedNameLongs(nameByteLongs, nameBytesLen, nameChars, nameBytes);
+        customWriter.write(generator, value, fieldName, fieldType, features);
     }
 
     // ==================== Comparable ====================

@@ -171,7 +171,7 @@ public final class ObjectWriterCreator {
         }
         FieldWriter[] writers = fieldWriters.toArray(new FieldWriter[0]);
 
-        return buildObjectWriter(writers);
+        return buildObjectWriter(writers, null);
     }
 
     private static <T> ObjectWriter<T> createPojoWriter(Class<T> type, Class<?> mixIn, boolean useJacksonAnnotation) {
@@ -208,6 +208,12 @@ public final class ObjectWriterCreator {
         // Collect field writers keyed by property name to deduplicate getter vs field
         Map<String, FieldWriter> writerMap = new LinkedHashMap<>();
 
+        // 0. Check for @JSONField(value = true) — single-value serialization
+        ObjectWriter<T> valueWriter = findValueWriter(type, mixIn, useJacksonAnnotation);
+        if (valueWriter != null) {
+            return valueWriter;
+        }
+
         // 1. Inspect getter methods
         for (Method method : type.getMethods()) {
             if (method.getDeclaringClass() == Object.class) {
@@ -232,6 +238,10 @@ public final class ObjectWriterCreator {
                 jsonField = findMixInAnnotation(mixIn, method, propertyName, JSONField.class);
             }
             if (jsonField != null && !jsonField.serialize()) {
+                continue;
+            }
+            // Skip anyGetter methods — they're handled separately
+            if (jsonField != null && jsonField.anyGetter()) {
                 continue;
             }
 
@@ -318,16 +328,23 @@ public final class ObjectWriterCreator {
                 }
             }
 
+            // Resolve format, custom writer, and label
+            String format = resolveFormat(jsonField, jacksonField, backingField, mixIn, useJacksonAnnotation);
+            ObjectWriter<?> customWriter = resolveSerializeUsing(jsonField, backingField, mixIn);
+            String label = resolveLabel(jsonField, backingField, mixIn);
+
             // Prefer backing field for Unsafe direct access (avoids Method.invoke overhead)
             if (backingField != null) {
                 backingField.setAccessible(true);
-                writerMap.put(propertyName, createFieldWriterForField(
-                        jsonName, ordinal, method.getGenericReturnType(), method.getReturnType(), backingField, fieldInclusion
+                writerMap.put(propertyName, FieldWriter.ofField(
+                        jsonName, ordinal, method.getGenericReturnType(), method.getReturnType(),
+                        backingField, fieldInclusion, format, customWriter, label
                 ));
             } else {
                 method.setAccessible(true);
-                writerMap.put(propertyName, createFieldWriterForGetter(
-                        jsonName, ordinal, method.getGenericReturnType(), method.getReturnType(), method, fieldInclusion
+                writerMap.put(propertyName, FieldWriter.ofGetter(
+                        jsonName, ordinal, method.getGenericReturnType(), method.getReturnType(),
+                        method, fieldInclusion, format, customWriter, label
                 ));
             }
         }
@@ -391,9 +408,14 @@ public final class ObjectWriterCreator {
                 fieldInclusion = typeInclusion;
             }
 
+            String format = resolveFormat(jsonField, jacksonField, null, mixIn, useJacksonAnnotation);
+            ObjectWriter<?> customWriter = resolveSerializeUsing(jsonField, null, mixIn);
+            String label = resolveLabel(jsonField, null, mixIn);
+
             field.setAccessible(true);
-            writerMap.put(propertyName, createFieldWriterForField(
-                    jsonName, ordinal, field.getGenericType(), field.getType(), field, fieldInclusion
+            writerMap.put(propertyName, FieldWriter.ofField(
+                    jsonName, ordinal, field.getGenericType(), field.getType(), field,
+                    fieldInclusion, format, customWriter, label
             ));
         }
 
@@ -428,21 +450,48 @@ public final class ObjectWriterCreator {
 
         FieldWriter[] writers = fieldWriters.toArray(new FieldWriter[0]);
 
-        return buildObjectWriter(writers);
+        // Scan for @JSONField(anyGetter=true) — separate pass over ALL methods
+        Method anyGetterMethod = findAnyGetterMethod(type, mixIn, useJacksonAnnotation);
+
+        return buildObjectWriter(writers, anyGetterMethod);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> ObjectWriter<T> buildObjectWriter(FieldWriter[] writers) {
+    private static <T> ObjectWriter<T> buildObjectWriter(FieldWriter[] writers, Method anyGetterMethod) {
         return (generator, object, fieldName, fieldType, features) -> {
             generator.startObject();
-            if (generator.hasFilters()) {
+            if (generator.hasFilters() || generator.labelFilter != null) {
+                com.alibaba.fastjson3.filter.LabelFilter lf = generator.labelFilter;
                 for (FieldWriter fw : writers) {
-                    fw.writeFieldFiltered(generator, object, features,
-                            generator.propertyFilters, generator.valueFilters, generator.nameFilters);
+                    if (lf != null && fw.label != null && !lf.apply(fw.label)) {
+                        continue;
+                    }
+                    if (generator.hasFilters()) {
+                        fw.writeFieldFiltered(generator, object, features,
+                                generator.propertyFilters, generator.valueFilters, generator.nameFilters);
+                    } else {
+                        fw.writeField(generator, object, features);
+                    }
                 }
             } else {
                 for (FieldWriter fw : writers) {
                     fw.writeField(generator, object, features);
+                }
+            }
+            // anyGetter: append Map entries after regular fields
+            if (anyGetterMethod != null) {
+                try {
+                    java.util.Map<?, ?> extra = (java.util.Map<?, ?>) anyGetterMethod.invoke(object);
+                    if (extra != null) {
+                        for (java.util.Map.Entry<?, ?> e : extra.entrySet()) {
+                            generator.writeName(String.valueOf(e.getKey()));
+                            generator.writeAny(e.getValue());
+                        }
+                    }
+                } catch (java.lang.reflect.InvocationTargetException e) {
+                    throw new com.alibaba.fastjson3.JSONException("anyGetter error", e.getTargetException());
+                } catch (Exception e) {
+                    throw new com.alibaba.fastjson3.JSONException("anyGetter error", e);
                 }
             }
             generator.endObject();
@@ -584,6 +633,165 @@ public final class ObjectWriterCreator {
                 return current.getDeclaredField(name);
             } catch (NoSuchFieldException e) {
                 current = current.getSuperclass();
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> ObjectWriter<T> createSingleValueWriter(Method valueMethod) {
+        return (ObjectWriter<T>) (com.alibaba.fastjson3.ObjectWriter<Object>)
+                (generator, object, fieldName, fieldType, features) -> {
+                    try {
+                        Object val = valueMethod.invoke(object);
+                        generator.writeAny(val);
+                    } catch (java.lang.reflect.InvocationTargetException e) {
+                        throw new com.alibaba.fastjson3.JSONException(
+                                "error invoking value method: " + valueMethod.getName(), e.getTargetException());
+                    } catch (Exception e) {
+                        throw new com.alibaba.fastjson3.JSONException(
+                                "error invoking value method: " + valueMethod.getName(), e);
+                    }
+                };
+    }
+
+    // ==================== @JSONField(value=true) / format / serializeUsing ====================
+
+    /**
+     * Scan for @JSONField(value = true) on getter methods. If found, return a single-value writer.
+     * Also checks Jackson @JsonValue when useJacksonAnnotation is true.
+     * Returns null if no value method is found.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> ObjectWriter<T> findValueWriter(Class<T> type, Class<?> mixIn, boolean useJacksonAnnotation) {
+        for (Method method : type.getMethods()) {
+            if (method.getDeclaringClass() == Object.class || method.getParameterCount() != 0
+                    || java.lang.reflect.Modifier.isStatic(method.getModifiers())) {
+                continue;
+            }
+            JSONField jsonField = method.getAnnotation(JSONField.class);
+            if (jsonField == null && mixIn != null) {
+                String propName = extractPropertyName(method.getName(), method.getReturnType());
+                if (propName != null) {
+                    jsonField = findMixInAnnotation(mixIn, method, propName, JSONField.class);
+                }
+            }
+            if (jsonField != null && jsonField.value()) {
+                Method valueMethod = method;
+                valueMethod.setAccessible(true);
+                return createSingleValueWriter(valueMethod);
+            }
+            // Also check Jackson @JsonValue via JacksonAnnotationSupport
+            if (useJacksonAnnotation && jsonField == null) {
+                JacksonAnnotationSupport.FieldInfo jacksonInfo = JacksonAnnotationSupport.getFieldInfo(method.getAnnotations());
+                if (jacksonInfo != null && jacksonInfo.isValue()) {
+                    Method valueMethod = method;
+                    valueMethod.setAccessible(true);
+                    return createSingleValueWriter(valueMethod);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Resolve format string from @JSONField or Jackson @JsonFormat, checking method and backing field.
+     */
+    private static String resolveFormat(JSONField jsonField, JacksonAnnotationSupport.FieldInfo jacksonField,
+                                        Field backingField, Class<?> mixIn, boolean useJacksonAnnotation) {
+        if (jsonField != null && !jsonField.format().isEmpty()) {
+            return jsonField.format();
+        }
+        if (jacksonField != null && jacksonField.format() != null && !jacksonField.format().isEmpty()) {
+            return jacksonField.format();
+        }
+        // Check backing field annotation
+        if (backingField != null) {
+            JSONField fAnn = backingField.getAnnotation(JSONField.class);
+            if (fAnn == null && mixIn != null) {
+                fAnn = findMixInFieldAnnotation(mixIn, backingField.getName(), JSONField.class);
+            }
+            if (fAnn != null && !fAnn.format().isEmpty()) {
+                return fAnn.format();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Resolve serializeUsing from @JSONField, instantiating the custom ObjectWriter.
+     */
+    @SuppressWarnings("unchecked")
+    private static ObjectWriter<?> resolveSerializeUsing(JSONField jsonField, Field backingField, Class<?> mixIn) {
+        Class<?> usingClass = null;
+        if (jsonField != null && jsonField.serializeUsing() != Void.class) {
+            usingClass = jsonField.serializeUsing();
+        }
+        if (usingClass == null && backingField != null) {
+            JSONField fAnn = backingField.getAnnotation(JSONField.class);
+            if (fAnn == null && mixIn != null) {
+                fAnn = findMixInFieldAnnotation(mixIn, backingField.getName(), JSONField.class);
+            }
+            if (fAnn != null && fAnn.serializeUsing() != Void.class) {
+                usingClass = fAnn.serializeUsing();
+            }
+        }
+        if (usingClass != null) {
+            if (!com.alibaba.fastjson3.ObjectWriter.class.isAssignableFrom(usingClass)) {
+                throw new com.alibaba.fastjson3.JSONException(
+                        "serializeUsing class must implement ObjectWriter: " + usingClass.getName());
+            }
+            try {
+                return (ObjectWriter<?>) usingClass.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                throw new com.alibaba.fastjson3.JSONException(
+                        "cannot instantiate serializeUsing class: " + usingClass.getName(), e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Scan all methods for @JSONField(anyGetter = true) or Jackson @JsonAnyGetter.
+     * Separate from getter loop because anyGetter methods may not follow getXxx naming.
+     */
+    private static Method findAnyGetterMethod(Class<?> type, Class<?> mixIn, boolean useJacksonAnnotation) {
+        for (Method method : type.getMethods()) {
+            if (method.getDeclaringClass() == Object.class || method.getParameterCount() != 0
+                    || java.lang.reflect.Modifier.isStatic(method.getModifiers())) {
+                continue;
+            }
+            if (!java.util.Map.class.isAssignableFrom(method.getReturnType())) {
+                continue;
+            }
+            JSONField jsonField = method.getAnnotation(JSONField.class);
+            if (jsonField != null && jsonField.anyGetter()) {
+                method.setAccessible(true);
+                return method;
+            }
+            if (useJacksonAnnotation) {
+                for (java.lang.annotation.Annotation ann : method.getAnnotations()) {
+                    if ("com.fasterxml.jackson.annotation.JsonAnyGetter".equals(ann.annotationType().getName())) {
+                        method.setAccessible(true);
+                        return method;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static String resolveLabel(JSONField jsonField, Field backingField, Class<?> mixIn) {
+        if (jsonField != null && !jsonField.label().isEmpty()) {
+            return jsonField.label();
+        }
+        if (backingField != null) {
+            JSONField fAnn = backingField.getAnnotation(JSONField.class);
+            if (fAnn == null && mixIn != null) {
+                fAnn = findMixInFieldAnnotation(mixIn, backingField.getName(), JSONField.class);
+            }
+            if (fAnn != null && !fAnn.label().isEmpty()) {
+                return fAnn.label();
             }
         }
         return null;

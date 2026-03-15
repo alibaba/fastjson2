@@ -99,6 +99,7 @@ public abstract sealed class JSONGenerator implements Closeable, Flushable
     public PropertyFilter[] propertyFilters;
     public ValueFilter[] valueFilters;
     public NameFilter[] nameFilters;
+    public com.alibaba.fastjson3.filter.LabelFilter labelFilter;
 
     protected JSONGenerator(long features) {
         this.features = features;

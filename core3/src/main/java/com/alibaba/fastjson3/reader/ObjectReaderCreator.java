@@ -49,8 +49,11 @@ public final class ObjectReaderCreator {
 
         FieldReaderCollection collection = collectFieldReaders(type, mixIn, useJacksonAnnotation);
 
+        // Scan for @JSONField(anySetter=true) or Jackson @JsonAnySetter
+        Method anySetter = findAnySetterMethod(type, mixIn, useJacksonAnnotation);
+
         return new ReflectionObjectReader<>(type, constructor, collection.fieldReaders,
-                collection.fieldReaderMap, collection.matcher, useUnsafeAlloc);
+                collection.fieldReaderMap, collection.matcher, useUnsafeAlloc, anySetter);
     }
 
     @SuppressWarnings("unchecked")
@@ -208,12 +211,21 @@ public final class ObjectReaderCreator {
             }
         }
 
+        // Check for @JSONCreator(parameterNames=) override
+        JSONCreator creatorAnn = constructor.getAnnotation(JSONCreator.class);
+        String[] paramNames = (creatorAnn != null) ? creatorAnn.parameterNames() : new String[0];
+
         // Build FieldReaders from fields (in declaration order = constructor parameter order)
         List<FieldReader> fieldReaderList = new ArrayList<>();
         for (int i = 0; i < instanceFields.size() && i < paramTypes.length; i++) {
             Field field = instanceFields.get(i);
             field.setAccessible(true);
             String rawName = field.getName();
+
+            // parameterNames override field name
+            if (paramNames.length > i && !paramNames[i].isEmpty()) {
+                rawName = paramNames[i];
+            }
 
             JSONField annotation = field.getAnnotation(JSONField.class);
             if (annotation == null && mixIn != null) {
@@ -230,6 +242,9 @@ public final class ObjectReaderCreator {
             int ordinal = annotation != null ? annotation.ordinal() : 0;
             String defaultValue = annotation != null ? annotation.defaultValue() : "";
             boolean required = annotation != null && annotation.required();
+            String format = (annotation != null && !annotation.format().isEmpty()) ? annotation.format() : null;
+            Class<?> deserializeUsingClass = (annotation != null && annotation.deserializeUsing() != Void.class)
+                    ? annotation.deserializeUsing() : null;
 
             if (jacksonField != null) {
                 if (jsonName.equals(applyNamingStrategy(rawName, naming)) && !jacksonField.name().isEmpty()) {
@@ -244,13 +259,16 @@ public final class ObjectReaderCreator {
                 if (!required) {
                     required = jacksonField.required();
                 }
+                if (format == null && jacksonField.format() != null && !jacksonField.format().isEmpty()) {
+                    format = jacksonField.format();
+                }
             }
 
             fieldReaderList.add(new FieldReader(
                     jsonName, alternateNames,
                     genericParamTypes[i], paramTypes[i],
                     ordinal, defaultValue, required,
-                    field, null
+                    field, null, format, deserializeUsingClass
             ));
         }
 
@@ -384,6 +402,9 @@ public final class ObjectReaderCreator {
             int ordinal = annotation != null ? annotation.ordinal() : 0;
             String defaultValue = annotation != null ? annotation.defaultValue() : "";
             boolean required = annotation != null && annotation.required();
+            String format = (annotation != null && !annotation.format().isEmpty()) ? annotation.format() : null;
+            Class<?> deserializeUsingClass = (annotation != null && annotation.deserializeUsing() != Void.class)
+                    ? annotation.deserializeUsing() : null;
 
             // Apply Jackson fallbacks
             if (jacksonField != null) {
@@ -399,13 +420,16 @@ public final class ObjectReaderCreator {
                 if (!required) {
                     required = jacksonField.required();
                 }
+                if (format == null && jacksonField.format() != null && !jacksonField.format().isEmpty()) {
+                    format = jacksonField.format();
+                }
             }
 
             fieldReaderList.add(new FieldReader(
                     jsonName, alternateNames,
                     field.getGenericType(), field.getType(),
                     ordinal, defaultValue, required,
-                    field, null
+                    field, null, format, deserializeUsingClass
             ));
             processedNames.add(rawName);
         }
@@ -588,6 +612,7 @@ public final class ObjectReaderCreator {
         private final Map<String, FieldReader> fieldReaderMap;
         private final FieldNameMatcher matcher;
         private final boolean useUnsafeAlloc;
+        private final Method anySetterMethod; // nullable
 
         // Pre-resolved ObjectReaders for POJO and List element types
         // Lazily initialized on first use
@@ -604,7 +629,8 @@ public final class ObjectReaderCreator {
                 FieldReader[] fieldReaders,
                 Map<String, FieldReader> fieldReaderMap,
                 FieldNameMatcher matcher,
-                boolean useUnsafeAlloc
+                boolean useUnsafeAlloc,
+                Method anySetterMethod
         ) {
             this.objectClass = objectClass;
             this.constructor = constructor;
@@ -612,6 +638,7 @@ public final class ObjectReaderCreator {
             this.fieldReaderMap = fieldReaderMap;
             this.matcher = matcher;
             this.useUnsafeAlloc = useUnsafeAlloc;
+            this.anySetterMethod = anySetterMethod;
         }
 
         private void ensureFieldReaders() {
@@ -629,8 +656,17 @@ public final class ObjectReaderCreator {
                 for (int i = 0; i < len; i++) {
                     FieldReader fr = fieldReaders[i];
                     Class<?> fc = fr.fieldClass;
-                    // For POJO fields (not basic types), get ObjectReader
-                    if (fr.typeTag == FieldReader.TAG_GENERIC) {
+                    // Custom deserializeUsing takes priority
+                    if (fr.deserializeUsingClass != null) {
+                        try {
+                            objReaders[i] = (ObjectReader<?>) fr.deserializeUsingClass
+                                    .getDeclaredConstructor().newInstance();
+                        } catch (Exception e) {
+                            throw new JSONException("cannot instantiate deserializeUsing: "
+                                    + fr.deserializeUsingClass.getName(), e);
+                        }
+                    } else if (fr.typeTag == FieldReader.TAG_GENERIC) {
+                        // For POJO fields (not basic types), get ObjectReader
                         ObjectReader<?> r = mapper.getObjectReader(fc);
                         if (r != null) {
                             objReaders[i] = r;
@@ -723,6 +759,7 @@ public final class ObjectReaderCreator {
 
             for (;;) {
                 FieldReader reader = null;
+                int fieldStartOff = off; // save for potential anySetter re-read
 
                 // Fast path: ordered field speculation — long-word header matching
                 if (nextExpected < frLen) {
@@ -818,12 +855,24 @@ public final class ObjectReaderCreator {
                         fieldSetMask |= (1L << fi);
                     }
                 } else {
-                    if (errorOnUnknown) {
+                    if (anySetterMethod != null) {
+                        // Re-read field name from saved offset (miss path is inherently slow)
+                        utf8.setOffset(fieldStartOff);
+                        String fname = utf8.readFieldName();
+                        Object fvalue = utf8.readAny();
+                        off = utf8.getOffset();
+                        try {
+                            anySetterMethod.invoke(instance, fname, fvalue);
+                        } catch (Exception e) {
+                            throw new JSONException("anySetter error for '" + fname + "'", e);
+                        }
+                    } else if (errorOnUnknown) {
                         throw new JSONException("unknown property in " + objectClass.getName());
+                    } else {
+                        utf8.setOffset(off);
+                        utf8.skipValue();
+                        off = utf8.getOffset();
                     }
-                    utf8.setOffset(off);
-                    utf8.skipValue();
-                    off = utf8.getOffset();
                 }
 
                 // Inline separator check — avoid readFieldSeparator heap access
@@ -866,6 +915,7 @@ public final class ObjectReaderCreator {
             }
 
             for (;;) {
+                int fieldStart = parser.getOffset();
                 long hash = parser.readFieldNameHash(matcher);
                 FieldReader reader = matcher.match(hash);
 
@@ -876,10 +926,20 @@ public final class ObjectReaderCreator {
                         fieldSetMask |= (1L << fi);
                     }
                 } else {
-                    if (errorOnUnknown) {
+                    if (anySetterMethod != null) {
+                        parser.setOffset(fieldStart);
+                        String fname = parser.readFieldName();
+                        Object fvalue = parser.readAny();
+                        try {
+                            anySetterMethod.invoke(instance, fname, fvalue);
+                        } catch (Exception e) {
+                            throw new JSONException("anySetter error for '" + fname + "'", e);
+                        }
+                    } else if (errorOnUnknown) {
                         throw new JSONException("unknown property in " + objectClass.getName());
+                    } else {
+                        parser.skipValue();
                     }
-                    parser.skipValue();
                 }
 
                 parser.skipWS();
@@ -913,6 +973,14 @@ public final class ObjectReaderCreator {
         private void readAndSetFieldUTF8Inline(JSONParser.UTF8 utf8, Object instance,
                                                 FieldReader reader, int fieldIndex, long features,
                                                 ObjectReader<?>[] objReaders, ObjectReader<?>[] elemReaders) {
+            // Custom deserializeUsing takes priority over type-specific parsing
+            if (reader.deserializeUsingClass != null && fieldIndex >= 0 && objReaders != null
+                    && objReaders[fieldIndex] != null) {
+                reader.setObjectValue(instance,
+                        objReaders[fieldIndex].readObject(utf8, reader.fieldType, null, features));
+                return;
+            }
+
             int peek = utf8.peekByte();
 
             switch (reader.typeTag) {
@@ -989,6 +1057,14 @@ public final class ObjectReaderCreator {
         }
 
         private void readAndSetFieldGenericValue(JSONParser parser, Object instance, FieldReader reader, long features) {
+            // Custom deserializeUsing takes priority over type-specific parsing
+            int fi = reader.index;
+            ObjectReader<?> customReader = (fi >= 0 && fieldObjectReaders != null)
+                    ? fieldObjectReaders[fi] : null;
+            if (customReader != null && reader.deserializeUsingClass != null) {
+                reader.setObjectValue(instance, customReader.readObject(parser, reader.fieldType, null, features));
+                return;
+            }
             switch (reader.typeTag) {
                 case FieldReader.TAG_STRING -> reader.setFieldValue(instance, parser.readString());
                 case FieldReader.TAG_INT -> reader.setIntValue(instance, parser.readInt());
@@ -1001,7 +1077,6 @@ public final class ObjectReaderCreator {
                 case FieldReader.TAG_BOOLEAN_OBJ -> reader.setFieldValue(instance, parser.readBoolean());
                 default -> {
                     // Check for registered ObjectReader (e.g., Guava ImmutableList, custom POJO)
-                    int fi = reader.index;
                     ObjectReader<?> objReader = (fi >= 0 && fieldObjectReaders != null)
                             ? fieldObjectReaders[fi] : null;
                     if (objReader != null) {
@@ -1703,6 +1778,36 @@ public final class ObjectReaderCreator {
             }
         }
         return fields;
+    }
+
+    /**
+     * Scan for @JSONField(anySetter = true) or Jackson @JsonAnySetter on 2-param methods.
+     * Method signature must be void xxx(String key, Object value).
+     */
+    private static Method findAnySetterMethod(Class<?> type, Class<?> mixIn, boolean useJacksonAnnotation) {
+        for (Method method : type.getMethods()) {
+            if (Modifier.isStatic(method.getModifiers()) || method.getParameterCount() != 2) {
+                continue;
+            }
+            Class<?>[] params = method.getParameterTypes();
+            if (params[0] != String.class) {
+                continue;
+            }
+            JSONField jsonField = method.getAnnotation(JSONField.class);
+            if (jsonField != null && jsonField.anySetter()) {
+                method.setAccessible(true);
+                return method;
+            }
+            if (useJacksonAnnotation) {
+                for (java.lang.annotation.Annotation ann : method.getAnnotations()) {
+                    if ("com.fasterxml.jackson.annotation.JsonAnySetter".equals(ann.annotationType().getName())) {
+                        method.setAccessible(true);
+                        return method;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private static String extractPropertyName(Method method) {

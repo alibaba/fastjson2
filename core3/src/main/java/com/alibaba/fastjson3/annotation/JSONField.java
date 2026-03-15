@@ -73,4 +73,56 @@ public @interface JSONField {
      * Property inclusion strategy for this field (overrides class-level).
      */
     Inclusion inclusion() default Inclusion.DEFAULT;
+
+    /**
+     * Mark this method/field as the single value representation of the entire object.
+     * When true, the return value of this method becomes the JSON output for the whole object.
+     *
+     * <pre>
+     * public enum Status {
+     *     ACTIVE("active");
+     *     &#64;JSONField(value = true)
+     *     public String getCode() { return code; }
+     * }
+     * // Serializes as: "active"
+     * </pre>
+     */
+    boolean value() default false;
+
+    /**
+     * Custom ObjectWriter class for serialization of this field.
+     * The class must implement {@code ObjectWriter<T>} and have a no-arg constructor.
+     */
+    Class<?> serializeUsing() default Void.class;
+
+    /**
+     * Custom ObjectReader class for deserialization of this field.
+     * The class must implement {@code ObjectReader<T>} and have a no-arg constructor.
+     */
+    Class<?> deserializeUsing() default Void.class;
+
+    /**
+     * Label for view-based filtering. Fields with a label are only serialized
+     * when a matching {@code LabelFilter} is configured on the ObjectMapper.
+     *
+     * <pre>
+     * &#64;JSONField(label = "admin")
+     * private String internalNote;
+     * </pre>
+     */
+    String label() default "";
+
+    /**
+     * Mark a Map-returning method as the source of dynamic extra properties.
+     * The Map entries are appended after regular fields during serialization.
+     * Only one anyGetter per class is allowed.
+     */
+    boolean anyGetter() default false;
+
+    /**
+     * Mark a two-parameter method as the sink for unknown JSON properties.
+     * Method signature must be {@code void xxx(String key, Object value)}.
+     * Only one anySetter per class is allowed.
+     */
+    boolean anySetter() default false;
 }

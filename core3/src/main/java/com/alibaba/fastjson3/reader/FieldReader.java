@@ -65,6 +65,13 @@ public final class FieldReader implements Comparable<FieldReader> {
     public final long hdrWord1;     // bytes 8-15 as long (for headers > 8 bytes)
     public final long hdrMask1;     // mask for second word comparison
 
+    // Optional: date/time format pattern + cached formatter
+    public final String format;
+    public final java.time.format.DateTimeFormatter formatter;
+
+    // Optional: custom ObjectReader class (from @JSONField(deserializeUsing=))
+    public final Class<?> deserializeUsingClass;
+
     // Index in the fieldReaders array (set after construction)
     public int index = -1;
 
@@ -98,6 +105,23 @@ public final class FieldReader implements Comparable<FieldReader> {
             Field field,
             Method setter
     ) {
+        this(fieldName, alternateNames, fieldType, fieldClass, ordinal, defaultValue,
+                required, field, setter, null, null);
+    }
+
+    public FieldReader(
+            String fieldName,
+            String[] alternateNames,
+            Type fieldType,
+            Class<?> fieldClass,
+            int ordinal,
+            String defaultValue,
+            boolean required,
+            Field field,
+            Method setter,
+            String format,
+            Class<?> deserializeUsingClass
+    ) {
         this.fieldName = fieldName;
         this.alternateNames = alternateNames != null ? alternateNames : new String[0];
         this.fieldType = fieldType;
@@ -107,6 +131,10 @@ public final class FieldReader implements Comparable<FieldReader> {
         this.required = required;
         this.field = field;
         this.setter = setter;
+        this.format = format;
+        this.formatter = (format != null && !format.isEmpty())
+                ? java.time.format.DateTimeFormatter.ofPattern(format) : null;
+        this.deserializeUsingClass = deserializeUsingClass;
 
         if (field != null) {
             field.setAccessible(true);
@@ -367,8 +395,12 @@ public final class FieldReader implements Comparable<FieldReader> {
             return new AtomicReference<>(value);
         }
 
-        // String → temporal type conversion (high-performance manual parsing)
+        // String → temporal type conversion
+        // If format is specified, use DateTimeFormatter; otherwise use high-performance manual parsing
         if (value instanceof String str && !str.isEmpty()) {
+            if (formatter != null) {
+                return parseWithFormatter(str);
+            }
             if (fieldClass == LocalDateTime.class) {
                 return com.alibaba.fastjson3.util.DateUtils.parseLocalDateTime(str);
             }
@@ -444,7 +476,35 @@ public final class FieldReader implements Comparable<FieldReader> {
         return value;
     }
 
-    @Override
+    private Object parseWithFormatter(String str) {
+        if (fieldClass == LocalDateTime.class) {
+            return LocalDateTime.parse(str, formatter);
+        }
+        if (fieldClass == LocalDate.class) {
+            return LocalDate.parse(str, formatter);
+        }
+        if (fieldClass == LocalTime.class) {
+            return LocalTime.parse(str, formatter);
+        }
+        if (fieldClass == ZonedDateTime.class) {
+            return ZonedDateTime.parse(str, formatter);
+        }
+        if (fieldClass == OffsetDateTime.class) {
+            return OffsetDateTime.parse(str, formatter);
+        }
+        if (fieldClass == Date.class) {
+            var zdt = ZonedDateTime.parse(str, formatter.withZone(
+                    com.alibaba.fastjson3.util.DateUtils.DEFAULT_ZONE_ID));
+            return Date.from(zdt.toInstant());
+        }
+        if (fieldClass == Instant.class) {
+            return Instant.from(formatter.withZone(
+                    com.alibaba.fastjson3.util.DateUtils.DEFAULT_ZONE_ID).parse(str));
+        }
+        // Unsupported type with format — fall through to default parsing
+        return str;
+    }
+
     public int compareTo(FieldReader other) {
         int cmp = Integer.compare(this.ordinal, other.ordinal);
         if (cmp != 0) {
