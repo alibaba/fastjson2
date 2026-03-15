@@ -375,6 +375,12 @@ class JSONPathParser {
                     case "sum":
                         segment = JSONPathSegment.SumSegment.INSTANCE;
                         break;
+                    case "avg":
+                        segment = JSONPathSegment.AvgSegment.INSTANCE;
+                        break;
+                    case "stddev":
+                        segment = JSONPathSegment.StddevSegment.INSTANCE;
+                        break;
                     case "type":
                         segment = JSONPathFunction.FUNC_TYPE;
                         break;
@@ -408,6 +414,9 @@ class JSONPathParser {
                         break;
                     case "last":
                         segment = JSONPathFunction.FUNC_LAST;
+                        break;
+                    case "concat":
+                        segment = JSONPathFunction.FUNC_CONCAT;
                         break;
                     case "index":
                         if (jsonReader.isNumber()) {
@@ -942,6 +951,53 @@ class JSONPathParser {
                     }
                 }
 
+                return segment;
+            }
+            case SUBSET_OF:
+            case ANY_OF:
+            case NONE_OF: {
+                JSONArray array = jsonReader.read(JSONArray.class);
+                JSONPathSegment segment = new JSONPathFilter.NameArraySetOpSegment(
+                        fieldName, hashCode, fieldName2, hashCode2, function, operator, array);
+                if (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
+                    filterNests--;
+                    segment = parseFilterRest(segment);
+                }
+                if (parentheses) {
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+                }
+                return segment;
+            }
+            case EMPTY: {
+                boolean expectEmpty;
+                if (jsonReader.ch == 't') {
+                    String ident = jsonReader.readFieldNameUnquote();
+                    if (!"true".equalsIgnoreCase(ident)) {
+                        throw new JSONException("empty expects true or false, got: " + ident);
+                    }
+                    expectEmpty = true;
+                } else if (jsonReader.ch == 'f') {
+                    String ident = jsonReader.readFieldNameUnquote();
+                    if (!"false".equalsIgnoreCase(ident)) {
+                        throw new JSONException("empty expects true or false, got: " + ident);
+                    }
+                    expectEmpty = false;
+                } else {
+                    throw new JSONException(jsonReader.info("empty expects true or false"));
+                }
+                JSONPathSegment segment = new JSONPathFilter.NameEmptySegment(
+                        fieldName, hashCode, fieldName2, hashCode2, expectEmpty);
+                if (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
+                    filterNests--;
+                    segment = parseFilterRest(segment);
+                }
+                if (parentheses) {
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+                }
                 return segment;
             }
             default:

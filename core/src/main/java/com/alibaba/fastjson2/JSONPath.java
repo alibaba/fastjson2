@@ -299,6 +299,137 @@ public abstract class JSONPath {
     }
 
     /**
+     * Adds a value to the array at the specified path
+     *
+     * @param rootObject the root object to modify
+     * @param path the JSONPath expression pointing to an array
+     * @param value the value to add
+     * @return the modified root object
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static Object add(Object rootObject, String path, Object value) {
+        Object target = JSONPath.eval(rootObject, path);
+        if (target == null) {
+            throw new JSONException("path not found: " + path);
+        }
+        if (target instanceof List) {
+            ((List) target).add(value);
+        } else if (target instanceof Collection) {
+            ((Collection) target).add(value);
+        } else {
+            throw new JSONException("can only add to an array, path: " + path);
+        }
+        return rootObject;
+    }
+
+    /**
+     * Adds a value to the array at the specified path in a JSON string
+     *
+     * @param json the JSON string to modify
+     * @param path the JSONPath expression pointing to an array
+     * @param value the value to add
+     * @return the modified JSON string
+     */
+    public static String add(String json, String path, Object value) {
+        Object object = JSON.parse(json);
+        add(object, path, value);
+        return JSON.toJSONString(object);
+    }
+
+    /**
+     * Puts a key-value pair into the object at the specified path
+     *
+     * @param rootObject the root object to modify
+     * @param path the JSONPath expression pointing to an object
+     * @param key the key to set
+     * @param value the value to set
+     * @return the modified root object
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static Object put(Object rootObject, String path, String key, Object value) {
+        Object target = JSONPath.eval(rootObject, path);
+        if (target == null) {
+            throw new JSONException("path not found: " + path);
+        }
+        if (target instanceof Map) {
+            ((Map) target).put(key, value);
+        } else if (target instanceof List) {
+            for (Object item : (List) target) {
+                if (item instanceof Map) {
+                    ((Map) item).put(key, value);
+                }
+            }
+        } else {
+            throw new JSONException("can only put properties to a map, path: " + path);
+        }
+        return rootObject;
+    }
+
+    /**
+     * Puts a key-value pair into the object at the specified path in a JSON string
+     *
+     * @param json the JSON string to modify
+     * @param path the JSONPath expression pointing to an object
+     * @param key the key to set
+     * @param value the value to set
+     * @return the modified JSON string
+     */
+    public static String put(String json, String path, String key, Object value) {
+        Object object = JSON.parse(json);
+        put(object, path, key, value);
+        return JSON.toJSONString(object);
+    }
+
+    /**
+     * Renames a key in the object at the specified path
+     *
+     * @param rootObject the root object to modify
+     * @param path the JSONPath expression pointing to an object
+     * @param oldKey the old key name
+     * @param newKey the new key name
+     * @return the modified root object
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static Object renameKey(Object rootObject, String path, String oldKey, String newKey) {
+        Object target = JSONPath.eval(rootObject, path);
+        if (target == null) {
+            throw new JSONException("path not found: " + path);
+        }
+        renameKeyInTarget(target, oldKey, newKey);
+        return rootObject;
+    }
+
+    /**
+     * Renames a key in the object at the specified path in a JSON string
+     *
+     * @param json the JSON string to modify
+     * @param path the JSONPath expression pointing to an object
+     * @param oldKey the old key name
+     * @param newKey the new key name
+     * @return the modified JSON string
+     */
+    public static String renameKey(String json, String path, String oldKey, String newKey) {
+        Object object = JSON.parse(json);
+        renameKey(object, path, oldKey, newKey);
+        return JSON.toJSONString(object);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void renameKeyInTarget(Object target, String oldKey, String newKey) {
+        if (target instanceof Map) {
+            Map map = (Map) target;
+            if (map.containsKey(oldKey)) {
+                Object val = map.remove(oldKey);
+                map.put(newKey, val);
+            }
+        } else if (target instanceof List) {
+            for (Object item : (List) target) {
+                renameKeyInTarget(item, oldKey, newKey);
+            }
+        }
+    }
+
+    /**
      * Gets all paths in the object
      *
      * @param javaObject the object to get paths from
@@ -1341,6 +1472,11 @@ public abstract class JSONPath {
                     break;
                 }
 
+                if ("noneof".equalsIgnoreCase(fieldName)) {
+                    operator = JSONPathFilter.Operator.NONE_OF;
+                    break;
+                }
+
                 if (!"not".equalsIgnoreCase(fieldName)) {
                     throw new JSONException("not support operator : " + fieldName);
                 }
@@ -1368,6 +1504,17 @@ public abstract class JSONPath {
                     operator = JSONPathFilter.Operator.IN;
                 } else if ("is".equalsIgnoreCase(fieldName)) {
                     operator = JSONPathFilter.Operator.EQ;
+                } else {
+                    throw new JSONException("not support operator : " + fieldName);
+                }
+                break;
+            }
+            case 'a':
+            case 'A': {
+                jsonReader.readFieldNameHashCodeUnquote();
+                String fieldName = jsonReader.getFieldName();
+                if ("anyof".equalsIgnoreCase(fieldName)) {
+                    operator = JSONPathFilter.Operator.ANY_OF;
                 } else {
                     throw new JSONException("not support operator : " + fieldName);
                 }
@@ -1405,11 +1552,14 @@ public abstract class JSONPath {
                     if (!"with".equalsIgnoreCase(fieldName)) {
                         throw new JSONException("not support operator : " + fieldName);
                     }
-                } else if (!"startsWith".equalsIgnoreCase(fieldName)) {
+                    operator = JSONPathFilter.Operator.STARTS_WITH;
+                } else if ("startsWith".equalsIgnoreCase(fieldName)) {
+                    operator = JSONPathFilter.Operator.STARTS_WITH;
+                } else if ("subsetof".equalsIgnoreCase(fieldName)) {
+                    operator = JSONPathFilter.Operator.SUBSET_OF;
+                } else {
                     throw new JSONException("not support operator : " + fieldName);
                 }
-
-                operator = JSONPathFilter.Operator.STARTS_WITH;
                 break;
             }
             case 'e':
@@ -1422,11 +1572,14 @@ public abstract class JSONPath {
                     if (!"with".equalsIgnoreCase(fieldName)) {
                         throw new JSONException("not support operator : " + fieldName);
                     }
-                } else if (!"endsWith".equalsIgnoreCase(fieldName)) {
+                    operator = JSONPathFilter.Operator.ENDS_WITH;
+                } else if ("endsWith".equalsIgnoreCase(fieldName)) {
+                    operator = JSONPathFilter.Operator.ENDS_WITH;
+                } else if ("empty".equalsIgnoreCase(fieldName)) {
+                    operator = JSONPathFilter.Operator.EMPTY;
+                } else {
                     throw new JSONException("not support operator : " + fieldName);
                 }
-
-                operator = JSONPathFilter.Operator.ENDS_WITH;
                 break;
             default: {
                 jsonReader.readFieldNameHashCodeUnquote();

@@ -26,6 +26,7 @@ final class JSONPathFunction
     static final JSONPathFunction FUNC_TRIM = new JSONPathFunction(JSONPathFunction::trim);
     static final JSONPathFunction FUNC_FIRST = new JSONPathFunction(JSONPathFunction::first);
     static final JSONPathFunction FUNC_LAST = new JSONPathFunction(JSONPathFunction::last);
+    static final JSONPathFunction FUNC_CONCAT = new JSONPathFunction(JSONPathFunction::concat);
 
     final Function function;
 
@@ -386,6 +387,38 @@ final class JSONPathFunction
             str = value.toString();
         }
         return str.trim();
+    }
+
+    static Object concat(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        StringBuilder result = new StringBuilder();
+        if (value instanceof Collection) {
+            for (Object item : (Collection) value) {
+                if (item != null) {
+                    result.append(item);
+                }
+            }
+        } else if (value instanceof JSONPath.Sequence) {
+            for (Object item : ((JSONPath.Sequence) value).values) {
+                if (item != null) {
+                    result.append(item);
+                }
+            }
+        } else if (value.getClass().isArray()) {
+            int len = Array.getLength(value);
+            for (int i = 0; i < len; i++) {
+                Object item = Array.get(value, i);
+                if (item != null) {
+                    result.append(item);
+                }
+            }
+        } else {
+            return value.toString();
+        }
+        return result.toString();
     }
 
     @Override

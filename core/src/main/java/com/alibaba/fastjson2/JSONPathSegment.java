@@ -2046,6 +2046,131 @@ abstract class JSONPathSegment {
         }
     }
 
+    static final class AvgSegment
+            extends JSONPathSegment
+            implements EvalSegment {
+        static final AvgSegment INSTANCE = new AvgSegment();
+
+        @Override
+        public void accept(JSONReader jsonReader, JSONPath.Context context) {
+            eval(context);
+        }
+
+        @Override
+        public void eval(JSONPath.Context context) {
+            Object value = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (value == null) {
+                return;
+            }
+
+            double sum = 0;
+            int count = 0;
+            if (value instanceof Collection) {
+                for (Object item : (Collection) value) {
+                    if (item == null) {
+                        continue;
+                    }
+                    sum += ((Number) item).doubleValue();
+                    count++;
+                }
+            } else if (value instanceof Object[]) {
+                Object[] array = (Object[]) value;
+                for (Object item : array) {
+                    if (item == null) {
+                        continue;
+                    }
+                    sum += ((Number) item).doubleValue();
+                    count++;
+                }
+            } else if (value instanceof JSONPath.Sequence) {
+                for (Object item : ((JSONPath.Sequence) value).values) {
+                    if (item == null) {
+                        continue;
+                    }
+                    sum += ((Number) item).doubleValue();
+                    count++;
+                }
+            } else {
+                throw new UnsupportedOperationException();
+            }
+
+            context.value = count > 0 ? sum / count : null;
+            context.eval = true;
+        }
+    }
+
+    static final class StddevSegment
+            extends JSONPathSegment
+            implements EvalSegment {
+        static final StddevSegment INSTANCE = new StddevSegment();
+
+        @Override
+        public void accept(JSONReader jsonReader, JSONPath.Context context) {
+            eval(context);
+        }
+
+        @Override
+        public void eval(JSONPath.Context context) {
+            Object value = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (value == null) {
+                return;
+            }
+
+            double sum = 0;
+            double sumSq = 0;
+            int count = 0;
+            if (value instanceof Collection) {
+                for (Object item : (Collection) value) {
+                    if (item == null) {
+                        continue;
+                    }
+                    double d = ((Number) item).doubleValue();
+                    sum += d;
+                    sumSq += d * d;
+                    count++;
+                }
+            } else if (value instanceof Object[]) {
+                Object[] array = (Object[]) value;
+                for (Object item : array) {
+                    if (item == null) {
+                        continue;
+                    }
+                    double d = ((Number) item).doubleValue();
+                    sum += d;
+                    sumSq += d * d;
+                    count++;
+                }
+            } else if (value instanceof JSONPath.Sequence) {
+                for (Object item : ((JSONPath.Sequence) value).values) {
+                    if (item == null) {
+                        continue;
+                    }
+                    double d = ((Number) item).doubleValue();
+                    sum += d;
+                    sumSq += d * d;
+                    count++;
+                }
+            } else {
+                throw new UnsupportedOperationException();
+            }
+
+            if (count == 0) {
+                context.value = null;
+            } else {
+                double avg = sum / count;
+                double variance = sumSq / count - avg * avg;
+                context.value = Math.sqrt(Math.max(0.0, variance));
+            }
+            context.eval = true;
+        }
+    }
+
     static final class LengthSegment
             extends JSONPathSegment
             implements EvalSegment {

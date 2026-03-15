@@ -53,7 +53,11 @@ abstract class JSONPathFilter
         STARTS_WITH,
         ENDS_WITH,
         CONTAINS,
-        NOT_CONTAINS;
+        NOT_CONTAINS,
+        SUBSET_OF,
+        ANY_OF,
+        NONE_OF,
+        EMPTY;
 
         public String toString() {
             switch (this) {
@@ -93,6 +97,14 @@ abstract class JSONPathFilter
                     return "contains";
                 case NOT_CONTAINS:
                     return "not contains";
+                case SUBSET_OF:
+                    return "subsetof";
+                case ANY_OF:
+                    return "anyof";
+                case NONE_OF:
+                    return "noneof";
+                case EMPTY:
+                    return "empty";
                 default:
                     return name();
             }
@@ -1517,7 +1529,7 @@ abstract class JSONPathFilter
                     }
                     fieldValue = fieldWriter.getFieldValue(object);
 
-                    FieldWriter fieldWriter1 = objectWriter.getFieldWriter(fieldNameNameHash);
+                    FieldWriter fieldWriter1 = objectWriter.getFieldWriter(fieldNameName1Hash);
                     if (fieldWriter1 == null) {
                         return false;
                     }
@@ -1533,6 +1545,154 @@ abstract class JSONPathFilter
         @Override
         boolean apply(Object fieldValue) {
             throw new JSONException("TODO");
+        }
+    }
+
+    static final class NameArraySetOpSegment
+            extends NameFilter {
+        final JSONArray values;
+        final Operator operator;
+
+        public NameArraySetOpSegment(
+                String fieldName,
+                long fieldNameNameHash,
+                String[] fieldName2,
+                long[] fieldNameNameHash2,
+                Function function,
+                Operator operator,
+                JSONArray values
+        ) {
+            super(fieldName, fieldNameNameHash, fieldName2, fieldNameNameHash2, function);
+            this.operator = operator;
+            this.values = values;
+        }
+
+        @Override
+        protected boolean applyNull() {
+            // null/empty is a subset of any set and contains none of any set
+            return operator == Operator.SUBSET_OF || operator == Operator.NONE_OF;
+        }
+
+        @Override
+        boolean apply(Object fieldValue) {
+            if (fieldValue == null) {
+                return applyNull();
+            }
+
+            Collection<?> leftCollection;
+            if (fieldValue instanceof Collection) {
+                leftCollection = (Collection<?>) fieldValue;
+            } else if (fieldValue.getClass().isArray()) {
+                int len = java.lang.reflect.Array.getLength(fieldValue);
+                List<Object> list = new ArrayList<>(len);
+                for (int i = 0; i < len; i++) {
+                    list.add(java.lang.reflect.Array.get(fieldValue, i));
+                }
+                leftCollection = list;
+            } else {
+                leftCollection = Collections.singletonList(fieldValue);
+            }
+
+            switch (operator) {
+                case SUBSET_OF:
+                    for (Object item : leftCollection) {
+                        if (!arrayContainsValue(values, item)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                case ANY_OF:
+                    for (Object item : leftCollection) {
+                        if (arrayContainsValue(values, item)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                case NONE_OF:
+                    for (Object item : leftCollection) {
+                        if (arrayContainsValue(values, item)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        static boolean arrayContainsValue(JSONArray array, Object value) {
+            for (int i = 0; i < array.size(); i++) {
+                Object item = array.get(i);
+                if (Objects.equals(item, value)) {
+                    return true;
+                }
+                if (item instanceof Number && value instanceof Number) {
+                    if (item instanceof BigDecimal || value instanceof BigDecimal) {
+                        BigDecimal a = item instanceof BigDecimal
+                                ? (BigDecimal) item
+                                : new BigDecimal(((Number) item).toString());
+                        BigDecimal b = value instanceof BigDecimal
+                                ? (BigDecimal) value
+                                : new BigDecimal(((Number) value).toString());
+                        if (a.compareTo(b) == 0) {
+                            return true;
+                        }
+                    } else if (item instanceof BigInteger || value instanceof BigInteger) {
+                        BigInteger a = item instanceof BigInteger
+                                ? (BigInteger) item
+                                : BigInteger.valueOf(((Number) item).longValue());
+                        BigInteger b = value instanceof BigInteger
+                                ? (BigInteger) value
+                                : BigInteger.valueOf(((Number) value).longValue());
+                        if (a.equals(b)) {
+                            return true;
+                        }
+                    } else if (((Number) item).doubleValue() == ((Number) value).doubleValue()) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    static final class NameEmptySegment
+            extends NameFilter {
+        final boolean expectEmpty;
+
+        public NameEmptySegment(
+                String fieldName,
+                long fieldNameNameHash,
+                String[] fieldName2,
+                long[] fieldNameNameHash2,
+                boolean expectEmpty
+        ) {
+            super(fieldName, fieldNameNameHash, fieldName2, fieldNameNameHash2, null);
+            this.expectEmpty = expectEmpty;
+        }
+
+        @Override
+        protected boolean applyNull() {
+            return expectEmpty;
+        }
+
+        @Override
+        boolean apply(Object fieldValue) {
+            boolean empty;
+            if (fieldValue == null) {
+                empty = true;
+            } else if (fieldValue instanceof String) {
+                empty = ((String) fieldValue).isEmpty();
+            } else if (fieldValue instanceof Collection) {
+                empty = ((Collection<?>) fieldValue).isEmpty();
+            } else if (fieldValue instanceof Map) {
+                empty = ((Map<?, ?>) fieldValue).isEmpty();
+            } else if (fieldValue.getClass().isArray()) {
+                empty = java.lang.reflect.Array.getLength(fieldValue) == 0;
+            } else {
+                empty = false;
+            }
+            return empty == expectEmpty;
         }
     }
 
