@@ -276,11 +276,10 @@ public class ObjectReaderCreatorASM
                     break;
                 }
 
-                if (fieldReader.fieldClass != fieldReader.fieldType) {
-                    if (fieldReader.fieldClass == Number.class) {
-                        match = false;
-                        break;
-                    }
+                if (fieldReader.fieldClass != fieldReader.fieldType
+                        && fieldReader.fieldClass == Number.class) {
+                    match = false;
+                    break;
                 }
             }
         }
@@ -401,11 +400,10 @@ public class ObjectReaderCreatorASM
                     break;
                 }
 
-                if (fieldReader.fieldClass != fieldReader.fieldType) {
-                    if (fieldReader.fieldClass == Number.class) {
-                        match = false;
-                        break;
-                    }
+                if (fieldReader.fieldClass != fieldReader.fieldType
+                        && fieldReader.fieldClass == Number.class) {
+                    match = false;
+                    break;
                 }
             }
         }

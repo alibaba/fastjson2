@@ -71,41 +71,47 @@ public class Issue3156 {
 
     @Test
     public void test_2() { // 泛型 无默认构造器
-        String json = "{\"temperature\":{\"enabled\":true,\"value\":0.1},\"presencePenalty\":{\"enabled\":false,\"value\":0},\"frequencyPenalty\":{\"enabled\":false,\"value\":0}}";
+        String json = "{\"temperature\":{\"enabled\":true,\"value\":0.1},\"presencePenalty\":{\"enabled\":false,\"value\":0},\"frequencyPenalty\":{\"enabled\":false,\"value\":0},\"maxToken\":{\"enabled\":false,\"value\":1024}}";
         Options options = JSONObject.parseObject(json, new TypeReference<Options>() {});
         Object val = options.getTemperature().value();
         Object val2 = options.getPresencePenalty().value();
+        Object val3 = options.getMaxToken().value();
         assertInstanceOf(Double.class, val);
         assertInstanceOf(Double.class, val2);
+        assertInstanceOf(Integer.class, val3);
     }
 
     @Data
-    public class Options {
+    public static class Options {
         private Parameter<Double> temperature;
         private Parameter<Double> presencePenalty;
         private Parameter<Double> frequencyPenalty;
+        private Parameter<Integer> maxToken;
         public record Parameter<T extends Number>(Boolean enabled, T value) {}
     }
 
     @Test
     public void test_3() { // 泛型 有默认构造器
-        String json = "{\"temperature\":{\"enabled\":true,\"value\":0.1},\"presencePenalty\":{\"enabled\":false,\"value\":0},\"frequencyPenalty\":{\"enabled\":false,\"value\":0}}";
+        String json = "{\"temperature\":{\"enabled\":true,\"value\":0.1},\"presencePenalty\":{\"enabled\":false,\"value\":0},\"frequencyPenalty\":{\"enabled\":false,\"value\":0},\"maxToken\":{\"enabled\":false,\"value\":1024}}";
         Options2 options = JSONObject.parseObject(json, new TypeReference<Options2>() {});
         Object val = options.getTemperature().getValue();
         Object val2 = options.getPresencePenalty().getValue();
+        Object val3 = options.getMaxToken().getValue();
         assertInstanceOf(Double.class, val);
         assertInstanceOf(Double.class, val2);
+        assertInstanceOf(Integer.class, val3);
     }
 
     @Data
-    public class Options2 {
+    public static class Options2 {
         private Parameter<Double> temperature;
         private Parameter<Double> presencePenalty;
         private Parameter<Double> frequencyPenalty;
+        private Parameter<Integer> maxToken;
 
         @NoArgsConstructor
         @Data
-        public class Parameter<T extends Number>{
+        public static class Parameter<T extends Number>{
             private Boolean enabled;
             private T value;
         }
