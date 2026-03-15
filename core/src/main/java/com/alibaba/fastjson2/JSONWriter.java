@@ -1168,7 +1168,7 @@ public abstract class JSONWriter
             return;
         }
 
-        if ((context.features & WriteByteArrayAsBase64.mask) != 0) {
+        if ((context.features & WriteByteArrayAsBase64.mask) != 0 || (context.features & WriteByteArrayAsBase64URLSafe.mask) != 0) {
             writeBase64(bytes);
             return;
         }
@@ -4449,7 +4449,17 @@ public abstract class JSONWriter
          *
          * @since 2.0.61
          */
-        WriteFloatSpecialAsString(1L << 45);
+        WriteFloatSpecialAsString(1L << 45),
+
+        /**
+         * Feature that determines whether to write byte arrays as Base64URL-encoded (URL-safe and unpadded) strings during serialization.
+         * When enabled, byte array values will be serialized as Base64URL-encoded strings without padding rather than arrays of numbers or standard Base64.
+         *
+         * <p>By default, this feature is disabled.</p>
+         *
+         * @since 2.0.62
+         */
+        WriteByteArrayAsBase64URLSafe(1L << 46);
 
         public final long mask;
 

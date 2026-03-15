@@ -451,17 +451,18 @@ public class ObjectWriterCreator {
         }
 
         long writerFieldFeatures = features | beanFeatures;
-        boolean fieldBased = (writerFieldFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
+        boolean fieldBased = ((writerFieldFeatures & JSONWriter.Feature.FieldBased.mask) != 0 && !objectClass.isInterface())
+                || !beanInfo.alphabetic;
 
-        if (fieldBased && (record || objectClass.isInterface())) {
+        if (fieldBased && record) {
             fieldBased = false;
         }
 
         List<FieldWriter> fieldWriters;
+        Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
         final FieldInfo fieldInfo = new FieldInfo();
 
         if (fieldBased) {
-            Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
                 FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
@@ -484,8 +485,6 @@ public class ObjectWriterCreator {
             }
 
             if (!fieldWritersCreated) {
-                Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
-
                 if (!record) {
                     BeanUtils.declaredFields(objectClass, field -> {
                         fieldInfo.init();

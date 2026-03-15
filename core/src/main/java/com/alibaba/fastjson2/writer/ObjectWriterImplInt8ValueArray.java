@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.zip.GZIPOutputStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteByteArrayAsBase64;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteByteArrayAsBase64URLSafe;
 
 final class ObjectWriterImplInt8ValueArray
         extends ObjectWriterPrimitiveImpl {
@@ -96,6 +97,7 @@ final class ObjectWriterImplInt8ValueArray
         if ("base64".equals(format)
                 || "gzip,base64".equals(format)
                 || (jsonWriter.getFeatures(features) & WriteByteArrayAsBase64.mask) != 0
+                || (jsonWriter.getFeatures(features) & WriteByteArrayAsBase64URLSafe.mask) != 0
         ) {
             jsonWriter.writeBase64(bytes);
             return;

@@ -933,6 +933,9 @@ class JSONWriterUTF16
             return;
         }
 
+        boolean urlSafe = (context.features & Feature.WriteByteArrayAsBase64URLSafe.mask) != 0;
+        char[] dict = urlSafe ? CA_URL_SAFE : CA;
+
         int charsLen = ((bytes.length - 1) / 3 + 1) << 2; // base64 character count
 
         int off = this.off;
@@ -948,10 +951,10 @@ class JSONWriterUTF16
             int i = (bytes[s++] & 0xff) << 16 | (bytes[s++] & 0xff) << 8 | (bytes[s++] & 0xff);
 
             // Encode the int into four chars
-            chars[off] = CA[(i >>> 18) & 0x3f];
-            chars[off + 1] = CA[(i >>> 12) & 0x3f];
-            chars[off + 2] = CA[(i >>> 6) & 0x3f];
-            chars[off + 3] = CA[i & 0x3f];
+            chars[off] = dict[(i >>> 18) & 0x3f];
+            chars[off + 1] = dict[(i >>> 12) & 0x3f];
+            chars[off + 2] = dict[(i >>> 6) & 0x3f];
+            chars[off + 3] = dict[i & 0x3f];
             off += 4;
         }
 
@@ -962,11 +965,23 @@ class JSONWriterUTF16
             int i = ((bytes[eLen] & 0xff) << 10) | (left == 2 ? ((bytes[bytes.length - 1] & 0xff) << 2) : 0);
 
             // Set last four chars
-            chars[off] = CA[i >> 12];
-            chars[off + 1] = CA[(i >>> 6) & 0x3f];
-            chars[off + 2] = left == 2 ? CA[i & 0x3f] : '=';
-            chars[off + 3] = '=';
-            off += 4;
+            chars[off] = dict[i >> 12];
+            chars[off + 1] = dict[(i >>> 6) & 0x3f];
+
+            if (urlSafe) {
+                // URL-safe Base64 without padding
+                if (left == 2) {
+                    chars[off + 2] = dict[i & 0x3f];
+                    off += 3;
+                } else {
+                    off += 2;
+                }
+            } else {
+                // Standard Base64 includes padding
+                chars[off + 2] = left == 2 ? dict[i & 0x3f] : '=';
+                chars[off + 3] = '=';
+                off += 4;
+            }
         }
 
         chars[off] = quote;

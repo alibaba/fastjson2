@@ -3885,6 +3885,11 @@ public class ObjectReaderCreator {
                 if (objectReader != ObjectReaderImplDate.INSTANCE) {
                     initReader = objectReader;
                 }
+            } else if (fieldClass == Instant.class) {
+                ObjectReader objectReader = provider.getObjectReader(Instant.class);
+                if (objectReader != ObjectReaderImplInstant.INSTANCE) {
+                    initReader = objectReader;
+                }
             }
         }
         return initReader;

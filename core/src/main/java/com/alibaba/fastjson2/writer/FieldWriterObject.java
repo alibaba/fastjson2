@@ -365,14 +365,15 @@ public class FieldWriterObject<T>
         }
 
         Class<?> valueClass = value.getClass();
-        if (valueClass == byte[].class) {
-            writeBinary(jsonWriter, (byte[]) value);
-            return true;
-        }
-
         ObjectWriter valueWriter = getObjectWriter(jsonWriter, valueClass);
         if (valueWriter == null) {
             throw new JSONException("get objectWriter error : " + valueClass);
+        }
+
+        if (valueClass == byte[].class
+                && (valueWriter == ObjectWriterImplInt8Array.INSTANCE || valueWriter == ObjectWriterImplInt8ValueArray.INSTANCE)) {
+            writeBinary(jsonWriter, (byte[]) value);
+            return true;
         }
 
         if (unwrapped

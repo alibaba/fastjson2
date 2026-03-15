@@ -7673,7 +7673,11 @@ class JSONReaderUTF8
             }
 
             byte[] src = Arrays.copyOfRange(bytes, offset, index);
-            decoded = Base64.getDecoder().decode(src);
+            if ((context.features & Feature.Base64URLSafeStringAsByteArray.mask) != 0) {
+                decoded = Base64.getUrlDecoder().decode(src);
+            } else {
+                decoded = Base64.getDecoder().decode(src);
+            }
         } else {
             decoded = new byte[0];
         }

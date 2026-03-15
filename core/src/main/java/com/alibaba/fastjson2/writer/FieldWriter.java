@@ -600,7 +600,9 @@ public abstract class FieldWriter<T>
         if ((features & WriteNonStringValueAsString.mask) != 0) {
             jsonWriter.writeString(value);
         } else if ("base64".equals(format)
-                || (format == null && (jsonWriter.getFeatures(this.features) & WriteByteArrayAsBase64.mask) != 0)
+                || (format == null &&
+                (jsonWriter.getFeatures(this.features) & WriteByteArrayAsBase64.mask) != 0 ||
+                (jsonWriter.getFeatures(this.features) & WriteByteArrayAsBase64URLSafe.mask) != 0)
         ) {
             jsonWriter.writeBase64(value);
         } else if ("hex".equals(format)) {

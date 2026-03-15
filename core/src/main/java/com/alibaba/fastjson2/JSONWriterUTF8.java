@@ -79,6 +79,14 @@ final class JSONWriterUTF8
 
     @Override
     public final void writeBase64(byte[] value) {
+        if (value == null) {
+            writeArrayNull();
+            return;
+        }
+
+        boolean urlSafe = (context.features & Feature.WriteByteArrayAsBase64URLSafe.mask) != 0;
+        char[] dict = urlSafe ? CA_URL_SAFE : CA;
+
         int charsLen = ((value.length - 1) / 3 + 1) << 2; // base64 character count
 
         int off = this.off;
@@ -96,10 +104,10 @@ final class JSONWriterUTF8
             int i = (value[s++] & 0xff) << 16 | (value[s++] & 0xff) << 8 | (value[s++] & 0xff);
 
             // Encode the int into four chars
-            bytes[off] = (byte) CA[(i >>> 18) & 0x3f];
-            bytes[off + 1] = (byte) CA[(i >>> 12) & 0x3f];
-            bytes[off + 2] = (byte) CA[(i >>> 6) & 0x3f];
-            bytes[off + 3] = (byte) CA[i & 0x3f];
+            bytes[off] = (byte) dict[(i >>> 18) & 0x3f];
+            bytes[off + 1] = (byte) dict[(i >>> 12) & 0x3f];
+            bytes[off + 2] = (byte) dict[(i >>> 6) & 0x3f];
+            bytes[off + 3] = (byte) dict[i & 0x3f];
             off += 4;
         }
 
@@ -110,11 +118,23 @@ final class JSONWriterUTF8
             int i = ((value[eLen] & 0xff) << 10) | (left == 2 ? ((value[value.length - 1] & 0xff) << 2) : 0);
 
             // Set last four chars
-            bytes[off] = (byte) CA[i >> 12];
-            bytes[off + 1] = (byte) CA[(i >>> 6) & 0x3f];
-            bytes[off + 2] = left == 2 ? (byte) CA[i & 0x3f] : (byte) '=';
-            bytes[off + 3] = '=';
-            off += 4;
+            bytes[off] = (byte) dict[i >> 12];
+            bytes[off + 1] = (byte) dict[(i >>> 6) & 0x3f];
+
+            if (urlSafe) {
+                // URL-safe Base64 without padding
+                if (left == 2) {
+                    bytes[off + 2] = (byte) dict[i & 0x3f];
+                    off += 3;
+                } else {
+                    off += 2;
+                }
+            } else {
+                // Standard Base64 includes padding
+                bytes[off + 2] = left == 2 ? (byte) dict[i & 0x3f] : (byte) '=';
+                bytes[off + 3] = '=';
+                off += 4;
+            }
         }
 
         bytes[off] = (byte) quote;
