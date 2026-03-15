@@ -816,8 +816,10 @@ class JSONPathParser {
                     filterNests--;
                     segment = parseFilterRest(segment);
                 }
-                if (!jsonReader.nextIfMatch(')')) {
-                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                if (parentheses) {
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
                 }
                 return segment;
             }
@@ -863,8 +865,10 @@ class JSONPathParser {
                     filterNests--;
                     segment = parseFilterRest(segment);
                 }
-                if (!jsonReader.nextIfMatch(')')) {
-                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                if (parentheses) {
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
                 }
 
                 return segment;
@@ -915,8 +919,14 @@ class JSONPathParser {
                 if (!jsonReader.nextIfMatch(')')) {
                     throw new JSONException(jsonReader.info("jsonpath syntax error"));
                 }
-                if (!jsonReader.nextIfMatch(')')) {
-                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                if (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
+                    filterNests--;
+                    segment = parseFilterRest(segment);
+                }
+                if (parentheses) {
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
                 }
 
                 return segment;
