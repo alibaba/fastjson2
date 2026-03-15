@@ -121,7 +121,7 @@ public class JsonDecodeBenchmark extends BenchmarkBase {
     }
 
     private void stringJackson(String str, Blackhole blackhole) {
-        blackhole.consume(new JsonObject(str));
+//        blackhole.consume(jacksonCodec.fromString(str, JsonObject.class));
     }
 
     private void stringDatabind(String str, Blackhole blackhole) {
@@ -178,11 +178,11 @@ public class JsonDecodeBenchmark extends BenchmarkBase {
     }
 
     private void bufferJackson(Buffer buffer, Blackhole blackhole) {
-        blackhole.consume(new JsonObject(buffer));
+//        blackhole.consume(jacksonCodec.fromBuffer(buffer, JsonObject.class));
     }
 
     private void bufferDatabind(Buffer buffer, Blackhole blackhole) throws Exception {
-        blackhole.consume(jacksonCodec.fromBuffer(buffer, JsonObject.class));
+        blackhole.consume(databindCodec.fromBuffer(buffer, JsonObject.class));
     }
 
     public static void main(String[] args) throws RunnerException {

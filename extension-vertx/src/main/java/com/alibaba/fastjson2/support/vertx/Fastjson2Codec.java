@@ -55,15 +55,15 @@ public class Fastjson2Codec implements JsonCodec {
                 JSONWriter.Feature.WriteMapNullValue,
                 JSONWriter.Feature.WriteEnumsUsingName,
                 JSONWriter.Feature.WriteNonStringKeyAsString,
-                JSONWriter.Feature.WriteByteArrayAsBase64
+                JSONWriter.Feature.WriteByteArrayAsBase64URLSafe
         );
         this.prettyWriterContext = new JSONWriter.Context(
                 writerProvider,
                 JSONWriter.Feature.WriteNulls,
                 JSONWriter.Feature.WriteMapNullValue,
                 JSONWriter.Feature.WriteEnumsUsingName,
-                JSONWriter.Feature.WriteByteArrayAsBase64,
                 JSONWriter.Feature.WriteNonStringKeyAsString,
+                JSONWriter.Feature.WriteByteArrayAsBase64URLSafe,
                 JSONWriter.Feature.PrettyFormat
         );
 
@@ -77,7 +77,7 @@ public class Fastjson2Codec implements JsonCodec {
         this.readerContext = new JSONReader.Context(
                 readerProvider,
                 JSONReader.Feature.UseNativeObject,
-                JSONReader.Feature.Base64StringAsByteArray,
+                JSONReader.Feature.Base64URLSafeStringAsByteArray,
                 JSONReader.Feature.UseDoubleForDecimals
         );
     }

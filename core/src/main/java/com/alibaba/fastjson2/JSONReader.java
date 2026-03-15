@@ -1748,6 +1748,10 @@ public abstract class JSONReader
                 return Base64.getDecoder().decode(str);
             }
 
+            if ((context.features & Feature.Base64URLSafeStringAsByteArray.mask) != 0) {
+                return Base64.getUrlDecoder().decode(str);
+            }
+
             throw new JSONException(info("not support input " + str));
         }
 
@@ -3133,11 +3137,17 @@ public abstract class JSONReader
                     && (p1 = str.indexOf(',', p0 + 1)) != -1 && str.regionMatches(p0 + 1, base64, 0, base64.length())) {
                 str = str.substring(p1 + 1);
             }
+
+            if (str.isEmpty()) {
+                return new byte[0];
+            }
+
+            if ((context.features & Feature.Base64URLSafeStringAsByteArray.mask) != 0) {
+                return Base64.getUrlDecoder().decode(str);
+            }
+            return Base64.getDecoder().decode(str);
         }
-        if (str.isEmpty()) {
-            return new byte[0];
-        }
-        return Base64.getDecoder().decode(str);
+        return null;
     }
 
     /**
@@ -6525,7 +6535,17 @@ public abstract class JSONReader
          * For example, ["value"] would be returned as "value".
          * @since 2.0.60
          */
-        DisableStringArrayUnwrapping(1L << 34L);
+        DisableStringArrayUnwrapping(1L << 34L),
+
+        /**
+         * Feature that determines whether to treat Base64URL-encoded (URL-safe and unpadded) strings as byte arrays during deserialization.
+         * When enabled, strings that contain Base64URL-encoded data will be automatically decoded to byte arrays.
+         *
+         * <p>By default, this feature is disabled.</p>
+         *
+         * @since 2.0.62
+         */
+        Base64URLSafeStringAsByteArray(1L << 35L);
 
         public final long mask;
 

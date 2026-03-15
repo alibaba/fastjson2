@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONReader.Feature.Base64StringAsByteArray;
+import static com.alibaba.fastjson2.JSONReader.Feature.Base64URLSafeStringAsByteArray;
 
 class ObjectReaderImplInt8ValueArray
         extends ObjectReaderPrimitive {
@@ -33,7 +34,13 @@ class ObjectReaderImplInt8ValueArray
     ObjectReaderImplInt8ValueArray(Function<byte[], Object> builder, String format) {
         super(byte[].class);
         this.format = format;
-        this.features = "base64".equals(format) ? Base64StringAsByteArray.mask : 0;
+        if ("base64".equals(format)) {
+            this.features = Base64StringAsByteArray.mask;
+        } else if ("base64url".equals(format)) {
+            this.features = Base64URLSafeStringAsByteArray.mask;
+        } else {
+            this.features = 0;
+        }
         this.builder = builder;
     }
 
@@ -75,7 +82,8 @@ class ObjectReaderImplInt8ValueArray
 
         if (jsonReader.isString()) {
             byte[] bytes;
-            if ((jsonReader.features(this.features | features) & Base64StringAsByteArray.mask) != 0) {
+            if ((jsonReader.features(this.features | features) & Base64StringAsByteArray.mask) != 0
+                    || (jsonReader.features(this.features | features) & Base64URLSafeStringAsByteArray.mask) != 0) {
                 bytes = jsonReader.readBase64();
             } else {
                 String str = jsonReader.readString();
