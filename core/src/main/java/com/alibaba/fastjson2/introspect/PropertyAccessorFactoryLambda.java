@@ -268,46 +268,50 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
         boolean lambda = declaringClass.getName().contains("$$Lambda");
 
         if (!lambda && (setter == null || !isChainableSetter(setter))) {
-            if (propertyClass == boolean.class) {
-                return create(name, getBoolean(getter), setBoolean(setter));
-            }
-            if (JDKUtils.JVM_VERSION == 8) {
-                if (propertyClass == byte.class) {
-                    return create(name, getByte(getter), setByte(setter));
+            try {
+                if (propertyClass == boolean.class) {
+                    return create(name, getBoolean(getter), setBoolean(setter));
                 }
-                if (propertyClass == short.class) {
-                    return create(name, getShort(getter), setShort(setter));
-                }
-                if (propertyClass == char.class) {
-                    return create(name, getChar(getter), setChar(setter));
-                }
-            }
-            if (propertyClass == int.class) {
-                return create(name, getInt(getter), setInt(setter));
-            }
-            if (propertyClass == long.class) {
-                return create(name, getLong(getter), setLong(setter));
-            }
-            if (propertyClass == float.class) {
-                return create(name, getFloat(getter), setFloat(setter));
-            }
-            if (propertyClass == double.class) {
-                return create(name, getDouble(getter), setDouble(setter));
-            }
-            if (!propertyClass.isPrimitive()) {
-                if (propertyType == null) {
-                    if (getter != null) {
-                        propertyType = getter.getGenericReturnType();
-                    } else {
-                        Type[] parameterTypes = setter.getGenericParameterTypes();
-                        if (parameterTypes.length == 1) {
-                            propertyType = parameterTypes[0];
-                        } else if (parameterTypes.length == 2 && String.class.equals(parameterTypes[0])) {
-                            propertyType = parameterTypes[1];
-                        }
+                if (JDKUtils.JVM_VERSION == 8) {
+                    if (propertyClass == byte.class) {
+                        return create(name, getByte(getter), setByte(setter));
+                    }
+                    if (propertyClass == short.class) {
+                        return create(name, getShort(getter), setShort(setter));
+                    }
+                    if (propertyClass == char.class) {
+                        return create(name, getChar(getter), setChar(setter));
                     }
                 }
-                return create(name, propertyClass, propertyType, getObject(getter), setObject(name, setter), exceptionHandler);
+                if (propertyClass == int.class) {
+                    return create(name, getInt(getter), setInt(setter));
+                }
+                if (propertyClass == long.class) {
+                    return create(name, getLong(getter), setLong(setter));
+                }
+                if (propertyClass == float.class) {
+                    return create(name, getFloat(getter), setFloat(setter));
+                }
+                if (propertyClass == double.class) {
+                    return create(name, getDouble(getter), setDouble(setter));
+                }
+                if (!propertyClass.isPrimitive()) {
+                    if (propertyType == null) {
+                        if (getter != null) {
+                            propertyType = getter.getGenericReturnType();
+                        } else {
+                            Type[] parameterTypes = setter.getGenericParameterTypes();
+                            if (parameterTypes.length == 1) {
+                                propertyType = parameterTypes[0];
+                            } else if (parameterTypes.length == 2 && String.class.equals(parameterTypes[0])) {
+                                propertyType = parameterTypes[1];
+                            }
+                        }
+                    }
+                    return create(name, propertyClass, propertyType, getObject(getter), setObject(name, setter), exceptionHandler);
+                }
+            } catch (Throwable ignored) {
+                // Lambda creation failed, fallback to parent's reflection implementation
             }
         }
 
