@@ -259,6 +259,13 @@ public class JSONObject extends LinkedHashMap<String, Object> {
     }
 
     /**
+     * Serialize to JSON string with features.
+     */
+    public String toJSONString(WriteFeature... features) {
+        return JSON.toJSONString(this, features);
+    }
+
+    /**
      * Convert to JSON string.
      */
     @Override

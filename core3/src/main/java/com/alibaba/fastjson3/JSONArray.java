@@ -228,6 +228,13 @@ public class JSONArray extends ArrayList<Object> {
         return ObjectMapper.shared().convertValue(this, new TypeReference<List<T>>() {});
     }
 
+    /**
+     * Serialize to JSON string with features.
+     */
+    public String toJSONString(WriteFeature... features) {
+        return JSON.toJSONString(this, features);
+    }
+
     @Override
     public String toString() {
         return JSON.toJSONString(this);

@@ -23,8 +23,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
- * Immutable, thread-safe JSON object mapper. Central entry point for JSON-to-Object
+ * Thread-safe JSON object mapper. Central entry point for JSON-to-Object
  * and Object-to-JSON conversion with full type support.
+ *
+ * <p>Configuration (features, modules, filters) is immutable after construction via {@link Builder}.
+ * The reader/writer caches are thread-safe and lazily populated.
+ * {@link #registerReader} and {@link #registerWriter} allow runtime registration
+ * of custom codecs on the shared cache.</p>
  *
  * <p>Replaces fastjson2's ObjectReaderProvider + ObjectWriterProvider with a single unified API,
  * inspired by Jackson 3's immutable ObjectMapper design.</p>
@@ -564,9 +569,11 @@ public final class ObjectMapper {
 
     /**
      * Create a per-call writer builder for a specific type.
+     * The given type is used for ObjectWriter lookup instead of the runtime class,
+     * which is useful for serializing an object as a parent type.
      */
     public ValueWriter writerFor(Class<?> type) {
-        return new ValueWriter(this, writeFeatures);
+        return new ValueWriter(this, writeFeatures, type);
     }
 
     // ==================== ObjectReader/ObjectWriter registry ====================
@@ -904,10 +911,16 @@ public final class ObjectMapper {
     public static final class ValueWriter {
         private final ObjectMapper mapper;
         private final long features;
+        private final Class<?> forType;
 
         ValueWriter(ObjectMapper mapper, long features) {
+            this(mapper, features, null);
+        }
+
+        ValueWriter(ObjectMapper mapper, long features, Class<?> forType) {
             this.mapper = mapper;
             this.features = features;
+            this.forType = forType;
         }
 
         /**
@@ -918,7 +931,7 @@ public final class ObjectMapper {
             for (WriteFeature wf : writeFeatures) {
                 f |= wf.mask;
             }
-            return f == this.features ? this : new ValueWriter(mapper, f);
+            return f == this.features ? this : new ValueWriter(mapper, f, forType);
         }
 
         /**
@@ -929,7 +942,7 @@ public final class ObjectMapper {
             for (WriteFeature wf : writeFeatures) {
                 f &= ~wf.mask;
             }
-            return f == this.features ? this : new ValueWriter(mapper, f);
+            return f == this.features ? this : new ValueWriter(mapper, f, forType);
         }
 
         /**
@@ -960,7 +973,8 @@ public final class ObjectMapper {
 
         @SuppressWarnings("unchecked")
         private void writeValue0(JSONGenerator jsonGenerator, Object obj) {
-            ObjectWriter<Object> objectWriter = (ObjectWriter<Object>) mapper.getObjectWriter(obj.getClass());
+            Class<?> type = forType != null ? forType : obj.getClass();
+            ObjectWriter<Object> objectWriter = (ObjectWriter<Object>) mapper.getObjectWriter(type);
             if (objectWriter != null) {
                 objectWriter.write(jsonGenerator, obj, null, null, features);
             } else {

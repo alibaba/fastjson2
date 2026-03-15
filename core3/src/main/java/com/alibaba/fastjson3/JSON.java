@@ -115,10 +115,29 @@ public final class JSON {
     }
 
     /**
+     * Parse JSON bytes (UTF-8) to typed Java object with features.
+     */
+    public static <T> T parseObject(byte[] jsonBytes, Class<T> type, ReadFeature... features) {
+        if (jsonBytes == null || jsonBytes.length == 0) {
+            return null;
+        }
+        try (JSONParser parser = JSONParser.of(jsonBytes, features)) {
+            return parser.read(type);
+        }
+    }
+
+    /**
      * Parse JSON string to JSONArray.
      */
     public static JSONArray parseArray(String json) {
         return ObjectMapper.shared().readArray(json);
+    }
+
+    /**
+     * Parse JSON bytes (UTF-8) to JSONArray.
+     */
+    public static JSONArray parseArray(byte[] jsonBytes) {
+        return ObjectMapper.shared().readArray(jsonBytes);
     }
 
     /**

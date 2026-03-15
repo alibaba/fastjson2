@@ -281,6 +281,28 @@ public abstract sealed class JSONPath {
         return of(path).eval(root, type);
     }
 
+    /**
+     * One-shot: set a value at the specified path on a root object.
+     *
+     * @param root the root object to modify (JSONObject, Map, etc.)
+     * @param path the JSONPath expression (must be definite)
+     * @param value the value to set
+     */
+    public static void set(Object root, String path, Object value) {
+        of(path).set(root, value);
+    }
+
+    /**
+     * One-shot: remove the value at the specified path from a root object.
+     *
+     * @param root the root object to modify (JSONObject, Map, etc.)
+     * @param path the JSONPath expression (must be definite)
+     * @return true if a value was removed
+     */
+    public static boolean remove(Object root, String path) {
+        return of(path).remove(root);
+    }
+
     // ==================== Root path: $ ====================
 
     private static final class RootPath extends JSONPath {
