@@ -816,7 +816,7 @@ class JSONPathParser {
                     filterNests--;
                     segment = parseFilterRest(segment);
                 }
-                if (parentheses) {
+                if (parentheses || filterNests > 0) {
                     if (!jsonReader.nextIfMatch(')')) {
                         throw new JSONException(jsonReader.info("jsonpath syntax error"));
                     }
@@ -865,7 +865,7 @@ class JSONPathParser {
                     filterNests--;
                     segment = parseFilterRest(segment);
                 }
-                if (parentheses) {
+                if (parentheses || filterNests > 0) {
                     if (!jsonReader.nextIfMatch(')')) {
                         throw new JSONException(jsonReader.info("jsonpath syntax error"));
                     }
@@ -923,7 +923,7 @@ class JSONPathParser {
                     filterNests--;
                     segment = parseFilterRest(segment);
                 }
-                if (parentheses) {
+                if (parentheses || filterNests > 0) {
                     if (!jsonReader.nextIfMatch(')')) {
                         throw new JSONException(jsonReader.info("jsonpath syntax error"));
                     }
