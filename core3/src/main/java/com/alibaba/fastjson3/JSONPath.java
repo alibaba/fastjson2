@@ -74,7 +74,7 @@ public abstract sealed class JSONPath {
             return new TwoNamePath(ns1.name(), ns2.name());
         }
 
-        return new CompiledPath(segments, definite);
+        return new CompiledPath(segments, definite, result.streamable());
     }
 
     // ==================== Evaluation ====================
@@ -134,24 +134,83 @@ public abstract sealed class JSONPath {
      * Parse JSON string and evaluate this path.
      */
     public Object extract(String json) {
-        Object root = JSON.parse(json);
-        return eval(root);
+        try (JSONParser parser = JSONParser.of(json)) {
+            return extract(parser);
+        }
     }
 
     /**
      * Parse JSON string and evaluate this path with type conversion.
      */
     public <T> T extract(String json, Class<T> type) {
-        Object root = JSON.parse(json);
-        return eval(root, type);
+        Object result = extract(json);
+        return convertResult(result, type);
     }
 
     /**
      * Parse UTF-8 JSON bytes and evaluate this path with type conversion.
      */
     public <T> T extract(byte[] jsonBytes, Class<T> type) {
-        Object root = JSON.parse(new String(jsonBytes, java.nio.charset.StandardCharsets.UTF_8));
-        return eval(root, type);
+        try (JSONParser parser = JSONParser.of(jsonBytes)) {
+            Object result = extract(parser);
+            return convertResult(result, type);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T convertResult(Object result, Class<T> type) {
+        if (result == null) {
+            return null;
+        }
+        if (type.isInstance(result)) {
+            return type.cast(result);
+        }
+        if (result instanceof Number n) {
+            if (type == int.class || type == Integer.class) {
+                return (T) Integer.valueOf(n.intValue());
+            }
+            if (type == long.class || type == Long.class) {
+                return (T) Long.valueOf(n.longValue());
+            }
+            if (type == double.class || type == Double.class) {
+                return (T) Double.valueOf(n.doubleValue());
+            }
+        }
+        if (type == String.class) {
+            return (T) result.toString();
+        }
+        return (T) result;
+    }
+
+    // ==================== Modification ====================
+
+    /**
+     * Set a value at this path location. Only works for definite paths.
+     */
+    public void set(Object root, Object value) {
+        throw new JSONException("set not supported for this path type");
+    }
+
+    /**
+     * Remove the value at this path location. Only works for definite paths.
+     *
+     * @return true if a value was removed
+     */
+    public boolean remove(Object root) {
+        throw new JSONException("remove not supported for this path type");
+    }
+
+    // ==================== Stream Mode ====================
+
+    /**
+     * Stream Mode: extract directly from a JSONParser without building a full tree.
+     * Only works for simple definite paths (e.g., $.a.b[0].c).
+     * Falls back to Tree Mode for complex/indefinite paths.
+     */
+    public Object extract(JSONParser parser) {
+        // Default: Tree Mode fallback
+        Object root = parser.readAny();
+        return eval(root);
     }
 
     // ==================== Static convenience ====================
@@ -189,10 +248,13 @@ public abstract sealed class JSONPath {
 
     private static final class SingleNamePath extends JSONPath {
         private final String name;
+        private final JSONPathSegment.NameSegment segment;
+        private static final JSONPathSegment[] EMPTY = {};
 
         SingleNamePath(String name) {
             super(true);
             this.name = name;
+            this.segment = new JSONPathSegment.NameSegment(name);
         }
 
         @Override
@@ -205,6 +267,27 @@ public abstract sealed class JSONPath {
             }
             return null;
         }
+
+        @Override
+        public Object extract(JSONParser parser) {
+            return segment.extract(parser, EMPTY, 0);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public void set(Object root, Object value) {
+            if (root instanceof Map map) {
+                map.put(name, value);
+            }
+        }
+
+        @Override
+        public boolean remove(Object root) {
+            if (root instanceof Map<?, ?> map) {
+                return map.remove(name) != null || map.containsKey(name);
+            }
+            return false;
+        }
     }
 
     // ==================== Specialized: $.a.b ====================
@@ -212,28 +295,53 @@ public abstract sealed class JSONPath {
     private static final class TwoNamePath extends JSONPath {
         private final String name1;
         private final String name2;
+        private final JSONPathSegment[] segments;
 
         TwoNamePath(String name1, String name2) {
             super(true);
             this.name1 = name1;
             this.name2 = name2;
+            this.segments = new JSONPathSegment[]{
+                    new JSONPathSegment.NameSegment(name1),
+                    new JSONPathSegment.NameSegment(name2)
+            };
         }
 
         @Override
         public Object eval(Object root) {
-            Object v1;
-            if (root instanceof JSONObject obj) {
-                v1 = obj.get(name1);
-            } else if (root instanceof Map<?, ?> map) {
-                v1 = map.get(name1);
-            } else {
-                return null;
+            Object v1 = getProperty(root, name1);
+            return v1 != null ? getProperty(v1, name2) : null;
+        }
+
+        @Override
+        public Object extract(JSONParser parser) {
+            return segments[0].extract(parser, segments, 1);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public void set(Object root, Object value) {
+            Object parent = getProperty(root, name1);
+            if (parent instanceof Map map) {
+                map.put(name2, value);
             }
-            if (v1 instanceof JSONObject obj2) {
-                return obj2.get(name2);
+        }
+
+        @Override
+        public boolean remove(Object root) {
+            Object parent = getProperty(root, name1);
+            if (parent instanceof Map<?, ?> map) {
+                return map.remove(name2) != null;
             }
-            if (v1 instanceof Map<?, ?> map2) {
-                return map2.get(name2);
+            return false;
+        }
+
+        private static Object getProperty(Object obj, String name) {
+            if (obj instanceof JSONObject o) {
+                return o.get(name);
+            }
+            if (obj instanceof Map<?, ?> m) {
+                return m.get(name);
             }
             return null;
         }
@@ -243,10 +351,12 @@ public abstract sealed class JSONPath {
 
     private static final class CompiledPath extends JSONPath {
         private final JSONPathSegment[] segments;
+        private final boolean streamable;
 
-        CompiledPath(JSONPathSegment[] segments, boolean definite) {
+        CompiledPath(JSONPathSegment[] segments, boolean definite, boolean streamable) {
             super(definite);
             this.segments = segments;
+            this.streamable = streamable;
         }
 
         @Override
@@ -258,6 +368,79 @@ public abstract sealed class JSONPath {
             if (segments.length > 0) {
                 ctx.segmentIndex = 0;
                 segments[0].eval(ctx);
+            }
+            return ctx.getResult();
+        }
+
+        @Override
+        public Object extract(JSONParser parser) {
+            if (streamable) {
+                return segments[0].extract(parser, segments, 1);
+            }
+            // Fall back to Tree Mode
+            Object root = parser.readAny();
+            return eval(root);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public void set(Object root, Object value) {
+            if (!definite || segments.length == 0) {
+                throw new JSONException("set only supported for definite paths");
+            }
+            // Navigate to parent, then set on last segment
+            Object parent = navigateToParent(root);
+            if (parent == null) {
+                return;
+            }
+            JSONPathSegment last = segments[segments.length - 1];
+            if (last instanceof JSONPathSegment.NameSegment ns && parent instanceof Map map) {
+                map.put(ns.name(), value);
+            } else if (last instanceof JSONPathSegment.IndexSegment is && parent instanceof java.util.List list) {
+                int idx = is.index() >= 0 ? is.index() : list.size() + is.index();
+                if (idx >= 0 && idx < list.size()) {
+                    list.set(idx, value);
+                }
+            }
+        }
+
+        @Override
+        public boolean remove(Object root) {
+            if (!definite || segments.length == 0) {
+                throw new JSONException("remove only supported for definite paths");
+            }
+            Object parent = navigateToParent(root);
+            if (parent == null) {
+                return false;
+            }
+            JSONPathSegment last = segments[segments.length - 1];
+            if (last instanceof JSONPathSegment.NameSegment ns && parent instanceof Map<?, ?> map) {
+                return map.remove(ns.name()) != null;
+            }
+            if (last instanceof JSONPathSegment.IndexSegment is && parent instanceof java.util.List<?> list) {
+                int idx = is.index() >= 0 ? is.index() : list.size() + is.index();
+                if (idx >= 0 && idx < list.size()) {
+                    list.remove(idx);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Navigate to the parent of the last segment (for set/remove).
+         * Evaluates segments[0..n-2] and returns the result.
+         */
+        private Object navigateToParent(Object root) {
+            if (segments.length == 1) {
+                return root;
+            }
+            // Create a sub-path with all but last segment
+            JSONPathSegment[] parentSegments = java.util.Arrays.copyOf(segments, segments.length - 1);
+            JSONPathContext ctx = new JSONPathContext(root, parentSegments, true);
+            if (parentSegments.length > 0) {
+                ctx.segmentIndex = 0;
+                parentSegments[0].eval(ctx);
             }
             return ctx.getResult();
         }

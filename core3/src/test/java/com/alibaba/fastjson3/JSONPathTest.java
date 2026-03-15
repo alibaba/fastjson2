@@ -244,4 +244,93 @@ public class JSONPathTest {
         List<Object> values = (List<Object>) path.eval(root);
         assertEquals(2, values.size()); // color + price
     }
+
+    // ==================== Stream Mode ====================
+
+    @Test
+    public void testStreamExtractSingleName() {
+        JSONPath path = JSONPath.of("$.store");
+        try (JSONParser parser = JSONParser.of(STORE_JSON)) {
+            Object result = path.extract(parser);
+            assertNotNull(result);
+            assertInstanceOf(JSONObject.class, result);
+        }
+    }
+
+    @Test
+    public void testStreamExtractNestedName() {
+        JSONPath path = JSONPath.of("$.store.bicycle.color");
+        try (JSONParser parser = JSONParser.of(STORE_JSON)) {
+            Object result = path.extract(parser);
+            assertEquals("red", result);
+        }
+    }
+
+    @Test
+    public void testStreamExtractArrayIndex() {
+        JSONPath path = JSONPath.of("$.store.book[0].author");
+        try (JSONParser parser = JSONParser.of(STORE_JSON)) {
+            Object result = path.extract(parser);
+            assertEquals("Nigel Rees", result);
+        }
+    }
+
+    @Test
+    public void testStreamExtractFromBytes() {
+        JSONPath path = JSONPath.of("$.store.bicycle.price");
+        byte[] bytes = STORE_JSON.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        Double price = path.extract(bytes, Double.class);
+        assertEquals(19.95, price, 0.001);
+    }
+
+    @Test
+    public void testStreamFallbackForComplexPath() {
+        // Wildcard is not streamable — should fall back to Tree Mode
+        JSONPath path = JSONPath.of("$.store.book[*].author");
+        try (JSONParser parser = JSONParser.of(STORE_JSON)) {
+            Object result = path.extract(parser);
+            assertInstanceOf(List.class, result);
+            assertEquals(4, ((List<?>) result).size());
+        }
+    }
+
+    // ==================== set/remove ====================
+
+    @Test
+    public void testSetSingleName() {
+        JSONObject obj = JSON.object("name", "Alice");
+        JSONPath.of("$.name").set(obj, "Bob");
+        assertEquals("Bob", obj.getString("name"));
+    }
+
+    @Test
+    public void testSetNestedPath() {
+        Object root = JSON.parse("{\"store\":{\"bicycle\":{\"color\":\"red\"}}}");
+        JSONPath.of("$.store.bicycle.color").set(root, "blue");
+        assertEquals("blue", JSONPath.eval(root, "$.store.bicycle.color", String.class));
+    }
+
+    @Test
+    public void testSetArrayIndex() {
+        Object root = JSON.parse("{\"items\":[1,2,3]}");
+        JSONPath.of("$.items[0]").set(root, 99);
+        assertEquals(99, JSONPath.eval(root, "$.items[0]", Integer.class));
+    }
+
+    @Test
+    public void testRemoveName() {
+        JSONObject obj = JSON.object("name", "Alice").fluentPut("age", 30);
+        boolean removed = JSONPath.of("$.name").remove(obj);
+        assertTrue(removed);
+        assertNull(obj.get("name"));
+        assertEquals(30, obj.getInteger("age"));
+    }
+
+    @Test
+    public void testRemoveArrayIndex() {
+        Object root = JSON.parse("{\"items\":[1,2,3]}");
+        boolean removed = JSONPath.of("$.items[1]").remove(root);
+        assertTrue(removed);
+        assertEquals(2, ((List<?>) JSONPath.eval(root, "$.items", Object.class)).size());
+    }
 }

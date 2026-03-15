@@ -38,10 +38,28 @@ public final class JSONPathCompiler {
         }
         JSONPathCompiler compiler = new JSONPathCompiler(path);
         JSONPathSegment[] segments = compiler.parsePath();
-        return new CompileResult(segments, compiler.definite);
+        boolean streamable = isStreamable(segments);
+        return new CompileResult(segments, compiler.definite, streamable);
     }
 
-    public record CompileResult(JSONPathSegment[] segments, boolean definite) {
+    /**
+     * Check if all segments support Stream Mode extraction.
+     * Only NameSegment and IndexSegment(positive) are stream-capable.
+     */
+    private static boolean isStreamable(JSONPathSegment[] segments) {
+        for (JSONPathSegment seg : segments) {
+            if (seg instanceof JSONPathSegment.NameSegment) {
+                continue;
+            }
+            if (seg instanceof JSONPathSegment.IndexSegment is && is.index() >= 0) {
+                continue;
+            }
+            return false;
+        }
+        return segments.length > 0;
+    }
+
+    public record CompileResult(JSONPathSegment[] segments, boolean definite, boolean streamable) {
     }
 
     // ==================== Path parsing ====================

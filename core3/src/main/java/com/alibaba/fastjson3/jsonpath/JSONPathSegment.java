@@ -14,10 +14,26 @@ import java.util.Map;
  */
 public sealed interface JSONPathSegment {
     /**
-     * Evaluate this segment on the current context value.
+     * Evaluate this segment on the current context value (Tree Mode).
      * Results are either passed to the next segment or accumulated in ctx.results.
      */
     void eval(JSONPathContext ctx);
+
+    /**
+     * Extract a value from a JSONParser (Stream Mode).
+     * Only supported for definite, forward segments (NameSegment, IndexSegment with positive index).
+     * Returns null if not found. Falls back to Tree Mode for unsupported segments.
+     *
+     * @param parser    the JSON parser positioned at the start of a value
+     * @param segments  the full segment array
+     * @param nextIndex the index of the next segment to process
+     * @return the extracted value, or null
+     */
+    default Object extract(com.alibaba.fastjson3.JSONParser parser,
+                           JSONPathSegment[] segments, int nextIndex) {
+        // Default: fall back to Tree Mode
+        return null;
+    }
 
     // ==================== Property name: $.name or $['name'] ====================
 
@@ -39,6 +55,38 @@ public sealed interface JSONPathSegment {
                 }
             }
         }
+
+        @Override
+        public Object extract(com.alibaba.fastjson3.JSONParser parser,
+                               JSONPathSegment[] segments, int nextIndex) {
+            parser.skipWS();
+            int off = parser.getOffset();
+            if (off >= parser.getEnd() || parser.charAt(off) != '{') {
+                return null;
+            }
+            parser.advance(1);
+
+            // Scan fields until we find the target name
+            parser.skipWS();
+            while (parser.getOffset() < parser.getEnd() && parser.charAt(parser.getOffset()) != '}') {
+                String fieldName = parser.readFieldName();
+                if (name.equals(fieldName)) {
+                    // Found — delegate to next segment or read value
+                    if (nextIndex >= segments.length) {
+                        return parser.readAny();
+                    }
+                    return segments[nextIndex].extract(parser, segments, nextIndex + 1);
+                }
+                // Not matched — skip this value
+                parser.skipValue();
+                parser.skipWS();
+                if (parser.getOffset() < parser.getEnd() && parser.charAt(parser.getOffset()) == ',') {
+                    parser.advance(1);
+                    parser.skipWS();
+                }
+            }
+            return null; // field not found
+        }
     }
 
     // ==================== Array index: $[0], $[-1] ====================
@@ -54,6 +102,42 @@ public sealed interface JSONPathSegment {
                     ctx.evalNext();
                 }
             }
+        }
+
+        @Override
+        public Object extract(com.alibaba.fastjson3.JSONParser parser,
+                               JSONPathSegment[] segments, int nextIndex) {
+            if (index < 0) {
+                return null; // negative index requires knowing array length — fall back
+            }
+            parser.skipWS();
+            int off = parser.getOffset();
+            if (off >= parser.getEnd() || parser.charAt(off) != '[') {
+                return null;
+            }
+            parser.advance(1);
+
+            // Skip elements until we reach the target index
+            for (int i = 0; i <= index; i++) {
+                parser.skipWS();
+                if (parser.getOffset() >= parser.getEnd() || parser.charAt(parser.getOffset()) == ']') {
+                    return null; // array too short
+                }
+                if (i == index) {
+                    // Target element — delegate to next segment or read value
+                    if (nextIndex >= segments.length) {
+                        return parser.readAny();
+                    }
+                    return segments[nextIndex].extract(parser, segments, nextIndex + 1);
+                }
+                // Skip this element
+                parser.skipValue();
+                parser.skipWS();
+                if (parser.getOffset() < parser.getEnd() && parser.charAt(parser.getOffset()) == ',') {
+                    parser.advance(1);
+                }
+            }
+            return null;
         }
     }
 
