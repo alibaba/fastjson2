@@ -7,7 +7,7 @@ import io.vertx.core.json.JsonObject;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-public class JsonObjectReader implements ObjectReader<JsonObject> {
+class JsonObjectReader implements ObjectReader<JsonObject> {
     public static final JsonObjectReader INSTANCE = new JsonObjectReader();
 
     @Override

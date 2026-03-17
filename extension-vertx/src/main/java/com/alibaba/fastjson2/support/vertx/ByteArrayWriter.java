@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.lang.reflect.Type;
 
-public class ByteArrayWriter implements ObjectWriter<byte[]> {
+class ByteArrayWriter implements ObjectWriter<byte[]> {
     public static final ByteArrayWriter INSTANCE = new ByteArrayWriter();
 
     @Override

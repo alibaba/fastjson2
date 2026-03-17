@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import java.lang.reflect.Type;
 import java.time.Instant;
 
-public class InstantWriter implements ObjectWriter<Instant> {
+class InstantWriter implements ObjectWriter<Instant> {
     public static final InstantWriter INSTANCE = new InstantWriter();
 
     @Override

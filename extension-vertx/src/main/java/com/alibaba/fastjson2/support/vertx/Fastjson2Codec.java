@@ -116,6 +116,10 @@ public class Fastjson2Codec implements JsonCodec {
         }
     }
 
+    public Object fromString(String str) throws DecodeException {
+        return fromString(str, Object.class);
+    }
+
     @Override
     public <T> T fromBuffer(Buffer buf, Class<T> clazz) throws DecodeException {
         return parseFromBuffer(buf, clazz);
@@ -123,10 +127,6 @@ public class Fastjson2Codec implements JsonCodec {
 
     public <T> T fromBuffer(Buffer buf, TypeReference<T> type) throws DecodeException {
         return parseFromBuffer(buf, type.getType());
-    }
-
-    public Object fromString(String str) throws DecodeException {
-        return fromString(str, Object.class);
     }
 
     public Object fromBuffer(Buffer buf) throws DecodeException {

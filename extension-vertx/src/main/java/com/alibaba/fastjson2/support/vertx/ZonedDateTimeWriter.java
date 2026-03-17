@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class ZonedDateTimeWriter implements ObjectWriter<ZonedDateTime> {
+class ZonedDateTimeWriter implements ObjectWriter<ZonedDateTime> {
     public static final ZonedDateTimeWriter INSTANCE = new ZonedDateTimeWriter();
 
     @Override

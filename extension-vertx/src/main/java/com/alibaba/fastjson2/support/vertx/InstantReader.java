@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
-public class InstantReader implements ObjectReader<Instant> {
+class InstantReader implements ObjectReader<Instant> {
     public static final InstantReader INSTANCE = new InstantReader();
 
     @Override

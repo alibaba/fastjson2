@@ -6,7 +6,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.lang.reflect.Type;
 
-public class JsonObjectWriter implements ObjectWriter<JsonObject> {
+class JsonObjectWriter implements ObjectWriter<JsonObject> {
     public static final JsonObjectWriter INSTANCE = new JsonObjectWriter();
 
     @Override

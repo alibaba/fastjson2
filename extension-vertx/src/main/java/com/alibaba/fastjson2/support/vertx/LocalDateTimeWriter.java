@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class LocalDateTimeWriter implements ObjectWriter<LocalDateTime> {
+class LocalDateTimeWriter implements ObjectWriter<LocalDateTime> {
     public static final LocalDateTimeWriter INSTANCE = new LocalDateTimeWriter();
 
     @Override

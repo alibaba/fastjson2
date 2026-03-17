@@ -6,7 +6,7 @@ import io.vertx.core.buffer.Buffer;
 
 import java.lang.reflect.Type;
 
-public class BufferReader implements ObjectReader<Buffer> {
+class BufferReader implements ObjectReader<Buffer> {
     public static final BufferReader INSTANCE = new BufferReader();
 
     @Override

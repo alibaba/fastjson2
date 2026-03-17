@@ -17,10 +17,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.jackson.DatabindCodec;
 import io.vertx.core.json.jackson.JacksonCodec;
 import io.vertx.core.spi.json.JsonCodec;
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -77,11 +74,6 @@ public class JsonDecodeBenchmark extends BenchmarkBase {
     }
 
     @Benchmark
-    public void smallStringJackson(Blackhole blackhole) {
-        stringJackson(smallString, blackhole);
-    }
-
-    @Benchmark
     public void smallStringDatabind(Blackhole blackhole) throws Exception {
         stringDatabind(smallString, blackhole);
     }
@@ -89,11 +81,6 @@ public class JsonDecodeBenchmark extends BenchmarkBase {
     @Benchmark
     public void wideStringFastjson2(Blackhole blackhole) {
         stringFastjson2(wideString, blackhole);
-    }
-
-    @Benchmark
-    public void wideStringJackson(Blackhole blackhole) {
-        stringJackson(wideString, blackhole);
     }
 
     @Benchmark
@@ -107,21 +94,12 @@ public class JsonDecodeBenchmark extends BenchmarkBase {
     }
 
     @Benchmark
-    public void deepStringJackson(Blackhole blackhole) {
-        stringJackson(deepString, blackhole);
-    }
-
-    @Benchmark
     public void deepStringDatabind(Blackhole blackhole) throws Exception {
         stringDatabind(deepString, blackhole);
     }
 
     private void stringFastjson2(String str, Blackhole blackhole) {
         blackhole.consume(fastjson2Codec.fromString(str, JsonObject.class));
-    }
-
-    private void stringJackson(String str, Blackhole blackhole) {
-//        blackhole.consume(jacksonCodec.fromString(str, JsonObject.class));
     }
 
     private void stringDatabind(String str, Blackhole blackhole) {
@@ -131,11 +109,6 @@ public class JsonDecodeBenchmark extends BenchmarkBase {
     @Benchmark
     public void smallBufferFastjson2(Blackhole blackhole) {
         bufferFastjson2(small, blackhole);
-    }
-
-    @Benchmark
-    public void smallBufferJackson(Blackhole blackhole) {
-        bufferJackson(small, blackhole);
     }
 
     @Benchmark
@@ -149,11 +122,6 @@ public class JsonDecodeBenchmark extends BenchmarkBase {
     }
 
     @Benchmark
-    public void wideBufferJackson(Blackhole blackhole) {
-        bufferJackson(wide, blackhole);
-    }
-
-    @Benchmark
     public void wideBufferDatabind(Blackhole blackhole) throws Exception {
         bufferDatabind(wide, blackhole);
     }
@@ -164,21 +132,12 @@ public class JsonDecodeBenchmark extends BenchmarkBase {
     }
 
     @Benchmark
-    public void deepBufferJackson(Blackhole blackhole) {
-        bufferJackson(deep, blackhole);
-    }
-
-    @Benchmark
     public void deepBufferDatabind(Blackhole blackhole) throws Exception {
         bufferDatabind(deep, blackhole);
     }
 
     private void bufferFastjson2(Buffer buffer, Blackhole blackhole) {
         blackhole.consume(fastjson2Codec.fromBuffer(buffer, JsonObject.class));
-    }
-
-    private void bufferJackson(Buffer buffer, Blackhole blackhole) {
-//        blackhole.consume(jacksonCodec.fromBuffer(buffer, JsonObject.class));
     }
 
     private void bufferDatabind(Buffer buffer, Blackhole blackhole) throws Exception {

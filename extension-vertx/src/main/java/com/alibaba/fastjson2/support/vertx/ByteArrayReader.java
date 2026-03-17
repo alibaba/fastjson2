@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 
 import java.lang.reflect.Type;
 
-public class ByteArrayReader implements ObjectReader<byte[]> {
+class ByteArrayReader implements ObjectReader<byte[]> {
     public static final ByteArrayReader INSTANCE = new ByteArrayReader();
 
     @Override

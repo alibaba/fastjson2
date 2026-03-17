@@ -6,7 +6,7 @@ import io.vertx.core.buffer.Buffer;
 
 import java.lang.reflect.Type;
 
-public class BufferWriter implements ObjectWriter<Buffer> {
+class BufferWriter implements ObjectWriter<Buffer> {
     public static final BufferWriter INSTANCE = new BufferWriter();
 
     @Override

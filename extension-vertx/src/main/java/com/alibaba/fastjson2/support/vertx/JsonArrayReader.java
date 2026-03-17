@@ -7,7 +7,7 @@ import io.vertx.core.json.JsonArray;
 import java.lang.reflect.Type;
 import java.util.List;
 
-public class JsonArrayReader implements ObjectReader<JsonArray> {
+class JsonArrayReader implements ObjectReader<JsonArray> {
     public static final JsonArrayReader INSTANCE = new JsonArrayReader();
 
     @Override

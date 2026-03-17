@@ -6,7 +6,7 @@ import io.vertx.core.json.JsonArray;
 
 import java.lang.reflect.Type;
 
-public class JsonArrayWriter implements ObjectWriter<JsonArray> {
+class JsonArrayWriter implements ObjectWriter<JsonArray> {
     public static final JsonArrayWriter INSTANCE = new JsonArrayWriter();
 
     @Override
