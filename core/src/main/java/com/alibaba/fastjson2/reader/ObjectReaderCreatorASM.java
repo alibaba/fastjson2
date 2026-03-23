@@ -276,8 +276,8 @@ public class ObjectReaderCreatorASM
                     break;
                 }
 
-                if (fieldReader.fieldClass != fieldReader.fieldType
-                        && fieldReader.fieldClass == Number.class) {
+                if (fieldReader.fieldClass == Number.class
+                        && !Number.class.equals(fieldReader.fieldType)) {
                     match = false;
                     break;
                 }
@@ -400,8 +400,8 @@ public class ObjectReaderCreatorASM
                     break;
                 }
 
-                if (fieldReader.fieldClass != fieldReader.fieldType
-                        && fieldReader.fieldClass == Number.class) {
+                if (fieldReader.fieldClass == Number.class
+                        && !Number.class.equals(fieldReader.fieldType)) {
                     match = false;
                     break;
                 }
