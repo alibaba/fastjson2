@@ -44,4 +44,29 @@ public class Issue4003 {
 
         assertEquals("\"2026-02-24T14:50:00Z\"", json);
     }
+
+    @Test
+    public void testInstantWithNonUTCZone() {
+        Instant instant = Instant.parse("2026-02-24T14:50:00Z");
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        context.setZoneId(ZoneId.of("Asia/Shanghai"));
+        try (JSONWriter writer = JSONWriter.of(context)) {
+            writer.writeAny(instant);
+            assertEquals("\"2026-02-24T14:50:00Z\"", writer.toString());
+        }
+    }
+
+    @Test
+    public void testInstantWithUnixTimeFormat() {
+        Instant instant = Instant.parse("2026-02-24T14:50:00Z");
+        String json = toJSONString(instant, "unixtime");
+        assertEquals("1771944600", json);
+    }
+
+    @Test
+    public void testInstantWithMillisFormat() {
+        Instant instant = Instant.parse("2026-02-24T14:50:00.123Z");
+        String json = toJSONString(instant, "millis");
+        assertEquals("1771944600123", json);
+    }
 }

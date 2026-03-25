@@ -5,11 +5,7 @@ import com.alibaba.fastjson2.codec.DateTimeCodec;
 import com.alibaba.fastjson2.util.DateUtils;
 
 import java.lang.reflect.Type;
-import java.time.DateTimeException;
-import java.time.Instant;
-import java.time.Year;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -51,6 +47,14 @@ final class ObjectWriterImplInstant
 
         if (formatMillis || (format == null && context.isDateFormatMillis())) {
             jsonWriter.writeInt64(instant.toEpochMilli());
+            return;
+        }
+
+        if (dateFormat == null
+                && !formatISO8601 && !context.isDateFormatISO8601()
+                && !yyyyMMddhhmmss14 && !yyyyMMddhhmmss19
+                && !yyyyMMdd8 && !yyyyMMdd10) {
+            jsonWriter.writeInstant(instant);
             return;
         }
 
