@@ -350,6 +350,22 @@ final class ObjectReaderSeeAlso<T>
             }
         }
 
+        if (object == null && seeAlsoDefault != null && seeAlsoDefault != Void.class) {
+            ObjectReader defaultReader = jsonReader.getContext().getObjectReader(seeAlsoDefault);
+            if (defaultReader != null) {
+                object = (T) defaultReader.createInstance(jsonReader.getContext().getFeatures() | features);
+                if (object != null && fieldValues != null) {
+                    for (Map.Entry<Long, Object> entry : fieldValues.entrySet()) {
+                        FieldReader fieldReader = defaultReader.getFieldReader(entry.getKey());
+                        if (fieldReader != null) {
+                            fieldReader.accept(object, entry.getValue());
+                        }
+                    }
+                    fieldValues = null;
+                }
+            }
+        }
+
         if (fieldValues != null) {
             for (Map.Entry<Long, Object> entry : fieldValues.entrySet()) {
                 FieldReader fieldReader = getFieldReader(entry.getKey());
