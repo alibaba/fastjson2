@@ -42,73 +42,125 @@ public class Model {
 }
 ```
 
-# 4. JSONReader.Feature
+# 4. JSONReader.Feature Introduction
 
-| JSONReader.Feature              | Description                                                                                                                                                                                                                                                              |
-|---------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| FieldBased                      | Field-based deserialization. If not configured, it will be serialized based on public field and getter methods by default. After configuration, it will be deserialized based on non-static fields (including private). It will be safer under FieldBased configuration. |
-| IgnoreNoneSerializable          | Deserialization ignores fields of non-Serializable types.                                                                                                                                                                                                                |
-| SupportArrayToBean              | Support mapping arrays to Bean objects.                                                                                                                                                                                                                                  |
-| InitStringFieldAsEmpty          | Initialize the String field to the empty string, e.g: "".                                                                                                                                                                                                                |
-| SupportAutoType                 | Automatic type is supported. To read JSON data with "@type" type information, you need to open SupportAutoType explicitly.                                                                                                                                               |
-| SupportSmartMatch               | The default is camel case exact match, after opening this, it can intelligently identify the case in camel/upper/pascal/snake/Kebab.                                                                                                                                     |
-| UseNativeObject                 | The default is to use JSONObject and JSONArray, and LinkedHashMap and ArrayList will be used after configuration.                                                                                                                                                        |
-| SupportClassForName             | To support fields of type Class, use Class.forName. This is disabled by default for security.                                                                                                                                                                            |
-| IgnoreSetNullValue              | Fields with null input are ignored.                                                                                                                                                                                                                                      |
-| UseDefaultConstructorAsPossible | Use the default constructor as much as possible, and use Unsafe.allocateInstance to implement this option when fieldBase is turned on and this option is not turned on.                                                                                                  |
-| UseBigDecimalForFloats          | The default configuration will use BigDecimal to parse decimals, and will use Float when turned on.                                                                                                                                                                      |
-| UseBigDecimalForDoubles         | The default configuration will use BigDecimal to parse decimals, and Double will be used when turned on.                                                                                                                                                                 |
-| ErrorOnEnumNotMatch             | By default, if the name of the Enum does not match, it will be ignored, and an exception will be thrown if it does not match when turned on.                                                                                                                             |
-| TrimString                      | Trim the string values read.                                                                                                                                                                                                                                             |
-| ErrorOnNotSupportAutoType       | Throw an error when encountering AutoType (default is to ignore).                                                                                                                                                                                                        |
-| DuplicateKeyValueAsArray        | Duplicate Key Values are not replaced but combined into an array.                                                                                                                                                                                                        |
-| AllowUnQuotedFieldNames         | Support field names without double quotes.                                                                                                                                                                                                                               |
-| NonStringKeyAsString            | Treat non-String keys as String.                                                                                                                                                                                                                                         |
-| Base64StringAsByteArray         | Deserialize Base64 formatted strings as byte[].                                                                                                                                                                                                                          |
-| DisableSingleQuote              | Do not allow single quote in key name and values.                                                                                                                                                                                                                        |
+| Core Parsing and Object Mapping Mechanism | |
+|---------------------------------|-----------------------------------------------------------------------------------------------------|
+| FieldBased | Based on field deserialization. If not configured, defaults to public fields and getter methods for deserialization. When configured, it deserializes based on non-static fields (including private). Deserialization is safer under the FieldBased configuration. |
+| UseDefaultConstructorAsPossible | Use the default constructor as much as possible. If this option is not enabled while FieldBased is open, it may use Unsafe.allocateInstance to instantiate objects. |
+| UseNativeObject | Defaults to using JSONObject and JSONArray. When configured, it will use LinkedHashMap and ArrayList. |
+| SupportArrayToBean | Supports mapping arrays to Beans. |
+| DisableReferenceDetect | Disable reference detection. |
+| IgnoreCheckClose | Ignore resource cleanup checks. |
 
-# 5. JSONWriter.Feature
+| Type Safety and Polymorphism | |
+|---------------------------------|-----------------------------------------------------------------------------------------------------|
+| SupportAutoType | Supports automatic typing. To read JSON data with \"@type\" type information, SupportAutoType must be explicitly enabled. |
+| SupportClassForName | Supports fields of Class type, using Class.forName. For security, this is disabled by default. |
+| ErrorOnNotSupportAutoType | Throw an error when encountering AutoType (ignored by default). |
+| IgnoreAutoTypeNotMatch | Ignore AutoType mismatch. |
 
-| JSONWriter.Feature                | Description                                                                                                                                                                                                             |
-|-----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| FieldBased                        | Field-based serialization. If not configured, it will be serialized based on public field and getter methods by default. After configuration, it will be serialized based on non-static fields (including private).        |
-| IgnoreNoneSerializable            | Serialization ignores fields of non-Serializable types.                                                                                                                                                                 |
-| BeanToArray                       | Sequence the objects into an array format like [101,"XX"], which will be smaller.                                                                                                                                       |
-| WriteNulls                        | Serialize and output null value fields.                                                                                                                                                                                 |
-| BrowserCompatible                 | For integers that exceed the range supported by JavaScript, output them in string format.                                                                                                                               |
-| NullAsDefaultValue                | Output null values as default values: Number types as 0, decimal Number types as 0.0, String type as "", Character type as \u0000, array and Collection types as [], and others as {}.                                   |
-| WriteBooleanAsNumber              | Write true as 1 and false as 0.                                                                                                                                                                                         |
-| WriteNonStringValueAsString       | Write values of non-String types as Strings, excluding objects and data types.                                                                                                                                          |
-| WriteClassName                    | Write type information when serializing.                                                                                                                                                                                |
-| NotWriteRootClassName             | When WriteClassName is turned on, the type information of the root object is not output.                                                                                                                                |
-| NotWriteHashMapArrayListClassName | When WriteClassName is opened, the type information of objects of type HashMap/ArrayList is not output, and the deserialization combined with UseNativeObject can save the size of the serialized result.               |
-| NotWriteDefaultValue              | When the value of the field is the default value, it is not output, which can save the size of the serialized result.                                                                                                   |
-| WriteEnumsUsingName               | Serialize enum using name.                                                                                                                                                                                              |
-| WriteEnumUsingToString            | Serialize enum using toString method.                                                                                                                                                                                   |
-| IgnoreErrorGetter                 | Ignore errors in getter methods.                                                                                                                                                                                        |
-| PrettyFormat                      | Format the output.                                                                                                                                                                                                      |
-| ReferenceDetection                | Turn on reference detection, which is turned off by default, which is inconsistent with fastjson 1.x.                                                                                                                   |
-| WriteNameAsSymbol                 | Output field names as symbols, this only works under JSONB.                                                                                                                                                             |
-| WriteBigDecimalAsPlain            | Serialize BigDecimal using toPlainString, avoiding scientific notation.                                                                                                                                                 |
-| UseSingleQuotes                   | Use single quotes.                                                                                                                                                                                                      |
-| MapSortField                      | Sort the KeyValue in Map by Key before output. This Feature is needed in some signature verification scenarios.                                                                                                        |
-| WriteNullListAsEmpty              | Serialize null value fields of List type as empty array "[]".                                                                                                                                                           |
-| WriteNullStringAsEmpty            | Serialize null value fields of String type as empty string "".                                                                                                                                                          |
-| WriteNullNumberAsZero             | Serialize null value fields of Number type as 0.                                                                                                                                                                        |
-| WriteNullBooleanAsFalse           | Serialize null value fields of Boolean type as false.                                                                                                                                                                   |
-| NotWriteEmptyArray                | Do not output array type fields when length is 0.                                                                                                                                                                       |
-| WriteNonStringKeyAsString         | Treat non-String keys in Map as String type for output.                                                                                                                                                                 |
-| ErrorOnNoneSerializable           | Throw an error when serializing non-Serializable objects.                                                                                                                                                               |
-| WritePairAsJavaBean               | Serialize Pair objects from Apache Commons as JavaBean.                                                                                                                                                                 |
-| BrowserSecure                     | Browser security, will escape '<' '>' '(' ')' characters for output.                                                                                                                                                    |
-| WriteLongAsString                 | Serialize Long as String.                                                                                                                                                                                               |
-| WriteEnumUsingOrdinal             | Serialize Enum using Ordinal, the default is name.                                                                                                                                                                      |
-| WriteThrowableClassName           | Include type information when serializing Throwable.                                                                                                                                                                    |
-| LargeObject                       | This is a protection measure to prevent serialization of circular reference objects from consuming excessive resources.                                                                                                 |
-| UnquoteFieldName                  | Output Key without quotes.                                                                                                                                                                                              |
-| NotWriteSetClassName              | When WriteClassName is turned on and you don't want to output the type information of Set, use this Feature.                                                                                                            |
-| NotWriteNumberClassName           | When WriteClassName is turned on and you don't want to output the type information of Number, such as the suffixes L/S/B/F/D, use this Feature.                                                                         |
-| WriteFloatSpecialAsString         | When enabled, NaN/Infinity will be serialized as "NaN", "Infinity", "-Infinity".    |
+| Fault Tolerance and Compatibility Parsing |    |
+|---------------------------------|-------------------------------------------------------------------|
+| SupportSmartMatch | Defaults to exact camel case match. When enabled, it can intelligently recognize five cases: camel, upper, pascal, snake, and Kebab. |
+| AllowUnQuotedFieldNames | Supports field names without double quotes. |
+| DisableSingleQuote | Disallow the use of single quotes in keys and values. |
+| NonStringKeyAsString | Treat non-String keys as Strings. |
+| DuplicateKeyValueAsArray | The value of a duplicate key is combined into an array instead of being replaced. |
+| IgnoreNoneSerializable | Ignore non-Serializable fields during deserialization. |
+| NullOnError | Return null on deserialization error. |
+| NonErrorOnNumberOverflow | Ignore number overflow errors. |
+| DisableStringArrayUnwrapping | Disable unwrapping of single-element string arrays (["value"] is parsed as \"value\" by default; when enabled, it outputs as ["value"]). |
+
+| Data Conversion and Fine-grained Processing |  |
+|---------------------------------|---------------------------------------|
+| InitStringFieldAsEmpty | Initialize String fields as empty strings \"\". |
+| TrimString | Trim the read string values. |
+| Base64StringAsByteArray | Deserialize Base64 format strings into byte[]. |
+| UseBigDecimalForFloats | The default configuration uses BigDecimal to parse decimals. When enabled, it will use Float. |
+| UseBigDecimalForDoubles | The default configuration uses BigDecimal to parse decimals. When enabled, it will use Double. |
+| EmptyStringAsNull | Parse empty strings as null. |
+| NonZeroNumberCastToBooleanAsTrue | Cast non-zero numbers to boolean true. |
+| UseBigIntegerForInts | Parse integers as BigInteger. |
+| UseLongForInts | Parse integers as Long. |
+| UseDoubleForDecimals | Parse decimals as Double. |
+
+| Strict Control and Interception | |
+|---------------------------------|----------------------------------------------------------------------------------------------------|
+| IgnoreSetNullValue | Ignore fields where the input is null. |
+| IgnoreNullPropertyValue | Ignore null property values. |
+| ErrorOnEnumNotMatch | By default, enum name mismatches are ignored. When enabled, mismatches will throw an exception. |
+| ErrorOnNoneSerializable | Throw an error for non-Serializable objects. |
+| ErrorOnNullForPrimitives | Throw an error when primitive types encounter null. |
+| ErrorOnUnknownProperties | Throw an error for unknown properties. |
+
+# 5. JSONWriter.Feature Introduction
+
+| Core Serialization Mechanism |                                                                                                                                                                                                 |
+|-----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| FieldBased | Based on field serialization. If not configured, defaults to public fields and getter methods for serialization. When configured, it serializes based on non-static fields (including private). |
+| BeanToArray | Serialize objects into an array format like [101,"XX"], which results in a smaller size.                                                                                                        |
+| ReferenceDetection | Enable reference detection. This is disabled by default, which is inconsistent with fastjson 1.x.                                                                                               |
+| LargeObject | A protective measure to prevent excessive resource consumption caused by serializing objects with circular references.                                                                          |
+| IgnoreErrorGetter | Ignore errors from getter methods.                                                                                                                                                              |
+| IgnoreNonFieldGetter | Ignore getter methods that do not correspond to fields.                                                                                                                                         |
+| OptimizedForAscii | Optimize for ASCII characters.                                                                                                                                                                  |
+
+| Null and Default Value Control | |
+|-----------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| WriteNulls | Serialize and output null value fields. |
+| WriteMapNullValue | Output null values in Map. |
+| IgnoreEmpty | Ignore empty collections, empty strings, etc., and do not output them to JSON. |
+| NotWriteDefaultValue | Do not output when the field's value is the default value; this saves the size of the serialized result. |
+| NotWriteEmptyArray | Do not output array type fields when the length is 0. (\"@Deprecated\", recommend using IgnoreEmpty) |
+| NullAsDefaultValue | Output null values as default values: Number of integer type outputs as 0, Number of decimal type outputs as 0.0, Boolean type outputs as false, String type outputs as "", Character type outputs as \u0000, array and Collection types output as [], and other types output as {}. |
+| WriteNullListAsEmpty | Serialize null values of List type fields as empty arrays \"[]\". |
+| WriteNullStringAsEmpty | Serialize null values of String type fields as empty strings \"\". |
+| WriteNullNumberAsZero | Serialize null values of Number type fields as 0. |
+| WriteNullBooleanAsFalse | Serialize null values of Boolean type fields as false. |
+
+| Serialization Type Information | |
+|-----------------------------------|------------------------------------------------------------------------------------------------------------------|
+| WriteClassName | Output type information during serialization. |
+| NotWriteRootClassName | When WriteClassName is enabled, do not output the type information of the root object. |
+| NotWriteHashMapArrayListClassName | When WriteClassName is enabled, do not output type information for objects of HashMap/ArrayList type. Combined with UseNativeObject during deserialization, it saves the serialization result size. |
+| NotWriteSetClassName | When WriteClassName is enabled and you do not want to output Set type information, use this Feature. |
+| NotWriteNumberClassName | When WriteClassName is enabled and you do not want to output Number type information, such as L/S/B/F/D suffixes, use this Feature. |
+| WriteThrowableClassName | Include type information when serializing Throwable objects. |
+
+| Type-Specific Conversion Strategies | |
+|-----------------------------------|----------------------------------------------------------|
+| WriteEnumsUsingName | Serialize enums using name. |
+| WriteEnumUsingToString | Serialize enums using the toString method. |
+| WriteEnumUsingOrdinal | Serialize enums using Ordinal; default is name. |
+| WriteByteArrayAsBase64 | Convert byte arrays to Base64. |
+| WriteBooleanAsNumber | Output true as 1, false as 0. |
+| WriteLongAsString | Serialize Long as String. |
+| WriteBigDecimalAsPlain | Serialize BigDecimal using toPlainString to avoid scientific notation. |
+| WriteFloatSpecialAsString | When enabled, NaN/Infinity will be serialized as \"NaN\", \"Infinity\", \"-Infinity\". |
+| WriteNonStringValueAsString | Output non-String type values as Strings, excluding object and array data types. |
+| WritePairAsJavaBean | Serialize Pair objects from the Apache Commons package as JavaBeans. |
+| WriterUtilDateAsMillis | Convert Date to millisecond timestamp. |
+
+| Structure and Formatting Beautification | |
+|-----------------------------------|-------------------------------------------------|
+| PrettyFormat | Format output. |
+| PrettyFormatWith2Space | 2-space formatting indentation. |
+| PrettyFormatWith4Space | 4-space formatting indentation. |
+| MapSortField | Sort Map KeyValues by Key before outputting. Required in some signature verification scenarios. |
+| SortMapEntriesByKeys | Sort Map by Key. |
+| UnquoteFieldName | Output Key without quotes. |
+| UseSingleQuotes | Use single quotes. |
+| WriteNameAsSymbol | Output field names as symbols; this only works under JSONB. |
+| WriteNonStringKeyAsString | Output non-String type Keys in Map as String types. |
+
+| Security and Cross-Platform Compatibility | |
+|-----------------------------------|------------------------------------------------------------------------------------------------------------------|
+| BrowserCompatible | Output integers that greatly exceed JavaScript's supported range in string format. |
+| BrowserSecure | Browser security; will escape '<' '>' '(' ')' characters for output. |
+| EscapeNoneAscii | Escape characters beyond the 7-bit ASCII range (such as Chinese) using specific escaping. |
+| ErrorOnNoneSerializable | Throw an error when serializing non-Serializable objects. |
+| IgnoreNoneSerializable | Ignore non-Serializable type fields during serialization. |
 
 # 6. Usage Examples
 
