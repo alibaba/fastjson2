@@ -2522,6 +2522,32 @@ public abstract class JSONReader
             wasNull = true;
             return null;
         }
+
+        // Handle negative year dates: -yyyy-MM-dd HH:mm:ss or -yyyy-MM-ddTHH:mm:ss
+        if (str.length() == 20 && str.charAt(0) == '-') {
+            char c5 = str.charAt(5);
+            char c8 = str.charAt(8);
+            char c11 = str.charAt(11);
+            char c14 = str.charAt(14);
+            char c17 = str.charAt(17);
+            if ((c5 == '-' || c5 == '/') && (c8 == '-' || c8 == '/')
+                    && (c11 == ' ' || c11 == 'T') && c14 == ':' && c17 == ':') {
+                int year = -(((str.charAt(1) - '0') * 1000)
+                        + ((str.charAt(2) - '0') * 100)
+                        + ((str.charAt(3) - '0') * 10)
+                        + (str.charAt(4) - '0'));
+                int month = ((str.charAt(6) - '0') * 10) + (str.charAt(7) - '0');
+                int dom = ((str.charAt(9) - '0') * 10) + (str.charAt(10) - '0');
+                int hour = ((str.charAt(12) - '0') * 10) + (str.charAt(13) - '0');
+                int minute = ((str.charAt(15) - '0') * 10) + (str.charAt(16) - '0');
+                int second = ((str.charAt(18) - '0') * 10) + (str.charAt(19) - '0');
+                if (month >= 1 && month <= 12 && dom >= 1 && dom <= 31
+                        && hour <= 23 && minute <= 59 && second <= 59) {
+                    return LocalDateTime.of(year, month, dom, hour, minute, second);
+                }
+            }
+        }
+
         throw new JSONException(info("read LocalDateTime error " + str));
     }
 
