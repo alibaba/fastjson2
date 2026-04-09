@@ -102,6 +102,13 @@ public class KotlinUtils {
             } catch (Throwable e) {
                 // Ignore this exception
             }
+        } else if (creatorParams != 0 && beanInfo.createParameterNames == null) {
+            System.err.println("fastjson2 warning: class " + clazz.getName()
+                    + " is a Kotlin class with constructor parameters, "
+                    + "but kotlin-reflect is not on the classpath. "
+                    + "Constructor parameter names cannot be resolved, "
+                    + "which will cause deserialization to silently lose field values. "
+                    + "Add org.jetbrains.kotlin:kotlin-reflect to your dependencies.");
         }
 
         beanInfo.creatorConstructor = creatorConstructor;
