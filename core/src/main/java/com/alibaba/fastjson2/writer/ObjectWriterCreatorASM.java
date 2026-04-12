@@ -869,7 +869,7 @@ public class ObjectWriterCreatorASM
                     mw.astore(symbolTable);
                 }
 
-                int minCapacity = (group.start ? 0 : 1) + (group.end ? 0 : 1);
+                int minCapacity = (group.start ? 1 : 0) + (group.end ? 1 : 0);
                 for (FieldWriterRecord item : group.fieldWriters) {
                     minCapacity += item.fieldWriter.nameJSONB.length;
 
