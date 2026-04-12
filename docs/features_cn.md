@@ -42,18 +42,18 @@ public class Model {
 
 # 4. JSONReader.Feature 介绍
 
-| 核心解析与对象映射机制 | |
-|---------------------------------|-----------------------------------------------------------------------------------------------------|
-| FieldBased | 基于字段反序列化，如果不配置，会默认基于public的field和getter方法序列化。配置后，会基于非static的field（包括private）做反序列化。在fieldbase配置下会更安全 |
-| UseDefaultConstructorAsPossible | 尽可能使用缺省构造函数，在fieldBase打开这个选项没打开的时候，会可能用Unsafe.allocateInstance来实现 |
-| UseNativeObject | 默认是使用JSONObject和JSONArray，配置后会使用LinkedHashMap和ArrayList |
-| SupportArrayToBean | 支持数组映射到Bean的方式 |
-| DisableReferenceDetect | 禁用引用检测 |
-| IgnoreCheckClose | 忽略资源清理检查 |
+| 核心解析与对象映射机制 |                                                                                                      |
+|---------------------------------|------------------------------------------------------------------------------------------------------|
+| FieldBased | 基于字段反序列化，如果不配置，会默认基于public的field和getter方法反序列化。配置后，会基于非static的field（包括private）做反序列化。在fieldbase配置下会更安全 |
+| UseDefaultConstructorAsPossible | 尽可能使用缺省构造函数，在fieldBase打开这个选项没打开的时候，会可能用Unsafe.allocateInstance来实现                                    |
+| UseNativeObject | 默认是使用JSONObject和JSONArray，配置后会使用LinkedHashMap和ArrayList                                              |
+| SupportArrayToBean | 支持数组映射到Bean的方式                                                                                       |
+| DisableReferenceDetect | 禁用引用检测                                                                                               |
+| IgnoreCheckClose | 忽略资源清理检查                                                                                             |
 
 | 类型安全与多态 | |
 |---------------------------------|-----------------------------------------------------------------------------------------------------|
-| SupportAutoType | 支持自动类型，要读取带\"@type\"类型信息的JSON数据，需要显式打开SupportAutoType |
+| SupportAutoType | 支持自动类型，要读取带\"@type\"类型信息的JSON数据（已弃用，不推荐在生产环境使用，建议使用 AutoTypeBeforeHandler）  |
 | SupportClassForName | 支持类型为Class的字段，使用Class.forName。为了安全这个是默认关闭的 |
 | ErrorOnNotSupportAutoType | 遇到AutoType报错（缺省是忽略） |
 | IgnoreAutoTypeNotMatch | 忽略AutoType不匹配 |
@@ -145,8 +145,7 @@ public class Model {
 | PrettyFormat | 格式化输出                                            |
 | PrettyFormatWith2Space | 2空格美化缩进                                          |
 | PrettyFormatWith4Space | 4空格美化缩进                                          |
-| MapSortField | 对Map中的KeyValue按照Key做排序后再输出。在有些验签的场景需要使用这个Feature |
-| SortMapEntriesByKeys | 按 Key 排序 Map                                     |
+| SortMapEntriesByKeys | 对Map中的KeyValue按照Key做排序后再输出。用于需要确定性 Key 顺序的场景（如签名验证） |
 | UnquoteFieldName | 不带引号输出Key                                        |
 | UseSingleQuotes | 使用单引号                                            |
 | WriteNameAsSymbol | 将字段名按照symbol输出，这个仅在JSONB下起作用                     |

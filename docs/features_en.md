@@ -55,7 +55,7 @@ public class Model {
 
 | Type Safety and Polymorphism | |
 |---------------------------------|-----------------------------------------------------------------------------------------------------|
-| SupportAutoType | Supports automatic typing. To read JSON data with \"@type\" type information, SupportAutoType must be explicitly enabled. |
+| SupportAutoType | Supports automatic typing. To read JSON data with \"@type\" type information.(Deprecated, not recommended for production use; use AutoTypeBeforeHandler instead) |
 | SupportClassForName | Supports fields of Class type, using Class.forName. For security, this is disabled by default. |
 | ErrorOnNotSupportAutoType | Throw an error when encountering AutoType (ignored by default). |
 | IgnoreAutoTypeNotMatch | Ignore AutoType mismatch. |
@@ -147,8 +147,7 @@ public class Model {
 | PrettyFormat | Format output. |
 | PrettyFormatWith2Space | 2-space formatting indentation. |
 | PrettyFormatWith4Space | 4-space formatting indentation. |
-| MapSortField | Sort Map KeyValues by Key before outputting. Required in some signature verification scenarios. |
-| SortMapEntriesByKeys | Sort Map by Key. |
+| SortMapEntriesByKeys | Sort Map KeyValues by Key before outputting. Required in scenarios that need deterministic key order (e.g., signature verification). |
 | UnquoteFieldName | Output Key without quotes. |
 | UseSingleQuotes | Use single quotes. |
 | WriteNameAsSymbol | Output field names as symbols; this only works under JSONB. |
