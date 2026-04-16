@@ -319,10 +319,12 @@ public class ObjectWriterBaseModule
                 Constructor kotlinConstructor = KotlinUtils.getKotlinConstructor(getConstructor(objectClass));
                 if (kotlinConstructor != null) {
                     String[] paramNames = KotlinUtils.getKoltinConstructorParameters(objectClass);
-                    for (int i = 0; i < paramNames.length; i++) {
-                        if (paramNames[i].equals(field.getName())) {
-                            annotations = kotlinConstructor.getParameterAnnotations()[i];
-                            break;
+                    if (paramNames != null) {
+                        for (int i = 0; i < paramNames.length; i++) {
+                            if (paramNames[i].equals(field.getName())) {
+                                annotations = kotlinConstructor.getParameterAnnotations()[i];
+                                break;
+                            }
                         }
                     }
                     if (fieldInfo.ignore) {

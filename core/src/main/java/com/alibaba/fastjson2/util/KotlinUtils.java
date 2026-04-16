@@ -210,7 +210,6 @@ public class KotlinUtils {
             }
             return names;
         } catch (Throwable e) {
-            e.printStackTrace();
             kotlin_error = true;
         }
         return null;
