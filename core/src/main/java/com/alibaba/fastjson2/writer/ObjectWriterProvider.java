@@ -708,6 +708,16 @@ public class ObjectWriterProvider
                 break;
         }
 
+        if (objectWriter != null) {
+            ObjectWriter previous = fieldBased
+                    ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
+                    : cache.putIfAbsent(objectType, objectWriter);
+            if (previous != null) {
+                objectWriter = previous;
+            }
+            return objectWriter;
+        }
+
         if (objectWriter == null
                 && (!fieldBased)
                 && Map.class.isAssignableFrom(objectClass)
