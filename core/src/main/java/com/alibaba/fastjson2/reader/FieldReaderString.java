@@ -69,6 +69,10 @@ final class FieldReaderString<T, V>
             }
         }
 
+        if (fieldValue == null && ignoreSetNullValue()) {
+            return;
+        }
+
         if (schema != null) {
             schema.assertValidate(fieldValue);
         }
@@ -98,6 +102,10 @@ final class FieldReaderString<T, V>
             }
         }
 
+        if (fieldValue == null && ignoreSetNullValue(jsonReader)) {
+            return;
+        }
+
         if (schema != null) {
             schema.assertValidate(fieldValue);
         }
@@ -125,6 +133,10 @@ final class FieldReaderString<T, V>
             if (emptyToNull && fieldValue.isEmpty()) {
                 fieldValue = null;
             }
+        }
+
+        if (fieldValue == null && ignoreSetNullValue(jsonReader)) {
+            return;
         }
 
         if (schema != null) {

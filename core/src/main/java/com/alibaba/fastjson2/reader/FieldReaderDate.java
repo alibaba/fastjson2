@@ -69,6 +69,9 @@ final class FieldReaderDate<T>
 
     @Override
     protected void accept(T object, Date value) {
+        if (value == null && ignoreSetNullValue()) {
+            return;
+        }
         propertyAccessor.setObject(object, value);
     }
 

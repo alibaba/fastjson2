@@ -32,6 +32,10 @@ final class FieldReaderInt64<T, V>
 
     @Override
     public void accept(T object, Object value) {
+        if (value == null && ignoreSetNullValue()) {
+            return;
+        }
+
         Long longValue = TypeUtils.toLong(value);
 
         if (schema != null) {
@@ -52,6 +56,10 @@ final class FieldReaderInt64<T, V>
             } else {
                 throw e;
             }
+        }
+
+        if (value == null && ignoreSetNullValue(jsonReader)) {
+            return;
         }
 
         if (schema != null) {

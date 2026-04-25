@@ -3014,7 +3014,7 @@ public class ObjectReaderCreatorASM
 
         MethodWriter mw = mwc.mw;
 
-        if ((fieldFeatures & JSONReader.Feature.NullOnError.mask) != 0) {
+        if ((fieldFeatures & (JSONReader.Feature.NullOnError.mask | JSONReader.Feature.IgnoreSetNullValue.mask)) != 0) {
             mw.aload(THIS);
             mw.getfield(classNameType, fieldReader(fieldReaderIndex), DESC_FIELD_READER);
             mw.aload(JSON_READER);
@@ -3027,6 +3027,31 @@ public class ObjectReaderCreatorASM
         Method method = fieldReader.method;
 
         Label endSet_ = new Label();
+
+        // Honor JSONReader.Feature.IgnoreSetNullValue passed at parse time (context-level).
+        // Annotation-level IgnoreSetNullValue is handled by the fieldFeatures branch above.
+        // NoneDefaultConstructor uses temp locals (no OBJECT slot yet), so skip — that
+        // path needs a different fix.
+        if (!fieldClass.isPrimitive()
+                && !(context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor)) {
+            // if ((FEATURES & IgnoreSetNullValue.mask) != 0) { fieldReader.readFieldValue(jsonReader, object); goto endSet_; }
+            Label noFallback_ = new Label();
+            mw.lload(FEATURES);
+            mw.visitLdcInsn(JSONReader.Feature.IgnoreSetNullValue.mask);
+            mw.land();
+            mw.lconst_0();
+            mw.lcmp();
+            mw.ifeq(noFallback_);
+
+            mw.aload(THIS);
+            mw.getfield(classNameType, fieldReader(fieldReaderIndex), DESC_FIELD_READER);
+            mw.aload(JSON_READER);
+            mw.aload(OBJECT);
+            mw.invokevirtual(TYPE_FIELD_READE, "readFieldValue", METHOD_DESC_READ_FIELD_VALUE);
+            mw.goto_(endSet_);
+
+            mw.visitLabel(noFallback_);
+        }
 
         String TYPE_FIELD_CLASS = ASMUtils.type(fieldClass);
         String DESC_FIELD_CLASS = ASMUtils.desc(fieldClass);
