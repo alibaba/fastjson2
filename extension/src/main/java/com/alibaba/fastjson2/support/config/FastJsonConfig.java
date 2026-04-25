@@ -294,6 +294,26 @@ public class FastJsonConfig {
         return context;
     }
 
+    /**
+     * Gets the JSONReader context.
+     * @deprecated Use {@link #getReaderContext()} instead to comply with JavaBean naming conventions.
+     * @return the JSONReader context
+     */
+    @Deprecated
+    public JSONReader.Context readerContext() {
+        return getReaderContext();
+    }
+
+    /**
+     * Gets the JSONWriter context.
+     * @deprecated Use {@link #getWriterContext()} instead to comply with JavaBean naming conventions.
+     * @return the JSONWriter context
+     */
+    @Deprecated
+    public JSONWriter.Context writerContext() {
+        return getWriterContext();
+    }
+
     public void setReaderContext(JSONReader.Context context) {
         this.readerContext = context;
     }
