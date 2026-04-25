@@ -470,6 +470,15 @@ public class JDKUtils {
     }
 
     public static MethodHandles.Lookup trustedLookup(Class objectClass) {
+        // IMPL_LOOKUP is null on Android (see static init guard) and may also be
+        // null on environments where neither the Unsafe-based access nor
+        // MethodHandles.lookup() were available. All callers wrap usage in a
+        // try/catch and fall back to plain reflection, so signal that here by
+        // returning null instead of NPE'ing on the .in(...) call below.
+        if (IMPL_LOOKUP == null) {
+            return null;
+        }
+
         if (!CONSTRUCTOR_LOOKUP_ERROR) {
             try {
                 int TRUSTED = -1;

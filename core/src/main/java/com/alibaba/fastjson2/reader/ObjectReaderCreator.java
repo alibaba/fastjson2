@@ -2186,6 +2186,9 @@ public class ObjectReaderCreator {
      */
     <T, R> Function<T, R> createBuildFunctionLambda(Method builderMethod) {
         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(builderMethod.getDeclaringClass());
+        if (lookup == null) {
+            return null;
+        }
         try {
             MethodHandle target = lookup.findVirtual(builderMethod.getDeclaringClass(),
                     builderMethod.getName(),
@@ -3994,6 +3997,12 @@ public class ObjectReaderCreator {
 
     protected Object lambdaSetter(Class objectClass, Class fieldClass, Method method) {
         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
+        if (lookup == null) {
+            // Trusted MethodHandles.Lookup not available (e.g. Android, where
+            // IMPL_LOOKUP cannot be obtained via Unsafe). Skip lambda creation
+            // and let the caller fall back to reflection-based access.
+            return null;
+        }
 
         Class<?> returnType = method.getReturnType();
         LambdaSetterInfo lambdaInfo = methodTypeMapping.get(fieldClass);
