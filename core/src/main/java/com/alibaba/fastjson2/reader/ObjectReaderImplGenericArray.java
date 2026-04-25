@@ -10,7 +10,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONReader.Feature.Base64StringAsByteArray;
@@ -87,8 +86,7 @@ class ObjectReaderImplGenericArray
                 byte[] bytes;
                 if ((jsonReader.features(features) & Base64StringAsByteArray.mask) != 0
                         || (jsonReader.features(features) & Base64URLSafeStringAsByteArray.mask) != 0) {
-                    String str = jsonReader.readString();
-                    bytes = Base64.getDecoder().decode(str);
+                    bytes = jsonReader.readBase64();
                 } else {
                     bytes = jsonReader.readBinary();
                 }
