@@ -17,9 +17,7 @@ import io.vertx.core.http.WebSocketVersion;
 import io.vertx.core.json.EncodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -27,16 +25,26 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * vertx 官方内置测试类改写（替换为 Fastjson2Codec）
  */
-@RunWith(Parameterized.class)
 public class JsonCodecTest {
     private static final TypeReference<Integer> INTEGER_TYPE_REF = new TypeReference<Integer>() {
     };
@@ -55,18 +63,7 @@ public class JsonCodecTest {
     private static final TypeReference<Boolean> BOOLEAN_TYPE_REF = new TypeReference<Boolean>() {
     };
 
-    @Parameterized.Parameters
-    public static Collection<Object[]> mappers() {
-        return Arrays.asList(new Object[][]{
-                {new Fastjson2Codec()}
-        });
-    }
-
-    private final Fastjson2Codec codec;
-
-    public JsonCodecTest(Fastjson2Codec codec) {
-        this.codec = codec;
-    }
+    private final Fastjson2Codec codec = new Fastjson2Codec();
 
     @Test
     public void testEncodeJsonObject() {
