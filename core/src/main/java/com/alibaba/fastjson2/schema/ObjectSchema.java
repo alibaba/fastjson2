@@ -345,7 +345,7 @@ public final class ObjectSchema
 
         if (propertyNames != null) {
             for (Object key : map.keySet()) {
-                ValidateResult result = propertyNames.validateInternal(key, handler, path + ".key[" + key + "]");
+                ValidateResult result = propertyNames.validateInternal(key, null, path + ".key[" + key + "]");
                 if (!result.isSuccess()) {
                     ValidateResult r = handleError(handler, key, path + ".key[" + key + "]", FAIL_PROPERTY_NAME);
                     if (handler == null || r.isAbort()) {

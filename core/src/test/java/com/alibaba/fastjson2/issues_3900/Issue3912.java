@@ -266,7 +266,6 @@ public class Issue3912 {
         List<String> errorMessages = new ArrayList<>();
         JSONSchema.ValidationHandler handler = (s, v, msg, path) -> {
             String log = String.format("[%s] %s", path, msg);
-            System.out.println("Captured: " + log);
             errorMessages.add(msg);
             return true;
         };
@@ -286,5 +285,136 @@ public class Issue3912 {
 
         // 4. 验证 Nested Object email 错误 (自定义)
         assertTrue(errorMessages.contains("邮箱太短"));
+    }
+
+    // ---------------------------------------------------------
+    // 补充测试 1：验证 propertyNames 不会发生 Double-Reporting
+    // ---------------------------------------------------------
+    static final String propertyNamesSchemaStr = "{\n" +
+            "  \"type\": \"object\",\n" +
+            "  \"propertyNames\": {\n" +
+            "    \"pattern\": \"^[a-z]+$\"\n" +
+            "  }\n" +
+            "}";
+    static final JSONSchema propertyNamesSchema = JSONSchema.parseSchema(propertyNamesSchemaStr);
+
+    @Test
+    public void testPropertyNames_NoDoubleReporting() {
+        // 场景：传入包含非法 key 的对象
+        // 验证目标：Handler 对于每个非法的 key 只应该被触发一次，而不是内层报一次正则错误，外层再报一次属性名错误。
+        JSONObject data = JSONObject.of(
+                "validkey", 1,
+                "123INVALID", 2
+        );
+
+        List<String> errorPaths = new ArrayList<>();
+        propertyNamesSchema.validate(data, (s, value, msg, path) -> {
+            errorPaths.add(path);
+            return true;
+        });
+
+        // 如果存在 double-reporting bug，这里 size 会是 2
+        assertEquals(1, errorPaths.size(), "Should only report property name error once per invalid key");
+        assertTrue(errorPaths.get(0).contains("123INVALID"));
+    }
+
+    // ---------------------------------------------------------
+    // 补充测试 2：验证 if/then/else 中的 if 探针是静默的
+    // ---------------------------------------------------------
+    static final String ifThenElseSchemaStr = "{\n" +
+            "  \"type\": \"object\",\n" +
+            "  \"if\": {\n" +
+            "    \"properties\": { \"type\": { \"const\": \"A\" } }\n" +
+            "  },\n" +
+            "  \"then\": {\n" +
+            "    \"required\": [\"fieldA\"]\n" +
+            "  },\n" +
+            "  \"else\": {\n" +
+            "    \"required\": [\"fieldB\"]\n" +
+            "  }\n" +
+            "}";
+    static final JSONSchema ifThenElseSchema = JSONSchema.parseSchema(ifThenElseSchemaStr);
+
+    @Test
+    public void testIfThenElse_IfConditionIsSilent() {
+        // 场景 1: 走 else 分支，故意让 else 失败
+        JSONObject dataB = JSONObject.of("type", "B"); // 缺少 fieldB
+
+        List<String> errorsB = new ArrayList<>();
+        ifThenElseSchema.validate(dataB, (s, value, msg, path) -> {
+            errorsB.add(path + " -> " + msg);
+            return true;
+        });
+
+        // 验证目标：if 探针判断 "type" 不是 "A" 时的失败不会触发 handler，只有 else 里的 required 会触发
+        assertEquals(1, errorsB.size());
+        assertTrue(errorsB.get(0).contains("fieldB"), "Should only report missing fieldB");
+
+        // 场景 2: 走 then 分支，故意让 then 失败
+        JSONObject dataA = JSONObject.of("type", "A"); // 缺少 fieldA
+        List<String> errorsA = new ArrayList<>();
+        ifThenElseSchema.validate(dataA, (s, value, msg, path) -> {
+            errorsA.add(path + " -> " + msg);
+            return true;
+        });
+
+        assertEquals(1, errorsA.size());
+        assertTrue(errorsA.get(0).contains("fieldA"), "Should only report missing fieldA");
+    }
+
+    // ---------------------------------------------------------
+    // 补充测试 3：验证 allOf 复合逻辑能收集所有子 Schema 的错误
+    // ---------------------------------------------------------
+    static final String allOfSchemaStr = "{\n" +
+            "  \"allOf\": [\n" +
+            "    { \"type\": \"string\", \"maxLength\": 5 },\n" +
+            "    { \"pattern\": \"^[a-z]+$\" }\n" +
+            "  ]\n" +
+            "}";
+    static final JSONSchema allOfSchema = JSONSchema.parseSchema(allOfSchemaStr);
+
+    @Test
+    public void testAllOf_CollectsErrorsFromAllSubSchemas() {
+        // 场景：传入一个既超过长度限制，又包含大写字母（不符合正则）的字符串
+        String badString = "INVALID_STRING_TOO_LONG";
+
+        List<String> errorMessages = new ArrayList<>();
+        allOfSchema.validate(badString, (s, value, msg, path) -> {
+            errorMessages.add(msg);
+            return true;
+        });
+
+        // 验证目标：Handler 应该同时收到 maxLength 失败和 pattern 失败的错误
+        assertEquals(2, errorMessages.size(), "Should collect errors from all failing allOf sub-schemas");
+        boolean hasMaxLengthError = errorMessages.stream().anyMatch(m -> m.contains("maxLength"));
+        boolean hasPatternError = errorMessages.stream().anyMatch(m -> m.contains("pattern"));
+        assertTrue(hasMaxLengthError);
+        assertTrue(hasPatternError);
+    }
+
+    // ---------------------------------------------------------
+    // 补充测试 4：验证 Array 的 contains / minContains 逻辑
+    // ---------------------------------------------------------
+    static final String containsSchemaStr = "{\n" +
+            "  \"type\": \"array\",\n" +
+            "  \"contains\": { \"type\": \"integer\" },\n" +
+            "  \"minContains\": 2\n" +
+            "}";
+    static final JSONSchema containsSchema = JSONSchema.parseSchema(containsSchemaStr);
+
+    @Test
+    public void testArrayContains_ReportsCorrectMissingCount() {
+        // 场景：数组中只有 1 个 integer，但不满足 minContains: 2
+        JSONArray data = JSONArray.of("str1", 100, "str2");
+
+        List<String> errorMessages = new ArrayList<>();
+        containsSchema.validate(data, (s, value, msg, path) -> {
+            errorMessages.add(msg);
+            return true;
+        });
+
+        // 验证目标：不应该报告元素类型错误（因为 contains 允许非 integer 存在），只应该报告 contains 数量不足
+        assertEquals(1, errorMessages.size());
+        assertTrue(errorMessages.get(0).contains("minContains"), "Should report minContains failure");
     }
 }
