@@ -5023,6 +5023,28 @@ public abstract class JSONWriter
     }
 
     /**
+     * Increments the nesting level and verifies it does not exceed {@code context.maxLevel}.
+     * Used by code paths that emit BC_OBJECT directly to the byte buffer instead of going
+     * through {@link #startObject()}, so that nesting depth is still tracked correctly.
+     *
+     * @throws JSONException if the level exceeds the configured maximum
+     */
+    public final void incrementLevel() {
+        if (++level > context.maxLevel) {
+            overflowLevel();
+        }
+    }
+
+    /**
+     * Decrements the nesting level. Used by code paths that emit BC_OBJECT_END directly
+     * to the byte buffer instead of going through {@link #endObject()}, so that nesting
+     * depth is still tracked correctly.
+     */
+    public final void decrementLevel() {
+        level--;
+    }
+
+    /**
      * Gets the current offset in the internal buffer.
      * The offset represents the position where the next character will be written.
      *
