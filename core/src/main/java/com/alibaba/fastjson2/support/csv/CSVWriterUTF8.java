@@ -109,12 +109,12 @@ final class CSVWriterUTF8
     public void writeDouble(double value) {
         checkCapacity(24);
 
-        off = NumberUtils.writeDouble(this.bytes, off, value, true);
+        off = NumberUtils.writeDouble(this.bytes, off, value, true, false);
     }
 
     public void writeFloat(float value) {
         checkCapacity(15);
-        off = NumberUtils.writeFloat(bytes, off, value, true);
+        off = NumberUtils.writeFloat(bytes, off, value, true, false);
     }
 
     public void flush() {

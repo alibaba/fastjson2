@@ -1,9 +1,11 @@
 package com.alibaba.fastjson2.internal.trove;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
+@Tag("util")
 public class TLongListTest {
     @Test
     public void test_0() {

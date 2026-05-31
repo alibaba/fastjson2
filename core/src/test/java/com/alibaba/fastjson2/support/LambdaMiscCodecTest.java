@@ -2,12 +2,14 @@ package com.alibaba.fastjson2.support;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class LambdaMiscCodecTest {
     @Test
     public void testToLong() throws Throwable {

@@ -2,10 +2,12 @@ package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("util")
 public class OracleClobTest {
     @Test
     public void test() {

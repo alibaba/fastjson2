@@ -12,8 +12,8 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.apache.commons.io.IOUtils;
-import org.apache.fury.Fury;
-import org.apache.fury.config.Language;
+import org.apache.fory.Fory;
+import org.apache.fory.config.Language;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class EishayParseBinaryArrayMapping {
-    static final Fury fury = Fury.builder().withLanguage(Language.JAVA)
+    static final Fory fory = Fory.builder().withLanguage(Language.JAVA)
             .withRefTracking(false)
             .requireClassRegistration(false)
             .withNumberCompressed(true)
@@ -37,7 +37,7 @@ public class EishayParseBinaryArrayMapping {
     static byte[] kryoBytes;
 
     static byte[] protobufBytes;
-    static byte[] furyBytes;
+    static byte[] foryBytes;
 
     private static final ThreadLocal<Kryo> kryos = ThreadLocal.withInitial(() -> {
         Kryo kryo = new Kryo();
@@ -72,16 +72,16 @@ public class EishayParseBinaryArrayMapping {
             kryoBytes = output.toBytes();
 
             protobufBytes = MediaContentTransform.forward(mediaContent).toByteArray();
-            furyBytes = MediaContentTransform.forward(mediaContent).toByteArray();
+            foryBytes = MediaContentTransform.forward(mediaContent).toByteArray();
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
     }
 
 //    @Benchmark
-    public void fury(Blackhole bh) {
+    public void fory(Blackhole bh) {
         bh.consume(
-                fury.deserializeJavaObject(furyBytes, MediaContent.class)
+                fory.deserializeJavaObject(foryBytes, MediaContent.class)
         );
     }
 

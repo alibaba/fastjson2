@@ -5,10 +5,13 @@ import com.alibaba.fastjson.annotation.JSONType;
 import com.alibaba.fastjson2.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue3652 {
     @Test
     public void test_different_Class_Annotation() {

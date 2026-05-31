@@ -40,7 +40,7 @@ public final class EnumSchema
     }
 
     @Override
-    public ValidateResult validate(Object value) {
+    protected ValidateResult validateInternal(Object value) {
         if (value instanceof BigDecimal) {
             BigDecimal decimal = (BigDecimal) value;
             value = decimal.stripTrailingZeros();

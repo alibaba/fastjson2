@@ -65,7 +65,7 @@ public final class IntegerSchema
     }
 
     @Override
-    public ValidateResult validate(Object value) {
+    protected ValidateResult validateInternal(Object value) {
         if (value == null) {
             return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
@@ -168,7 +168,7 @@ public final class IntegerSchema
     }
 
     @Override
-    public ValidateResult validate(long longValue) {
+    protected ValidateResult validateInternal(long longValue) {
         if (minimum != Long.MIN_VALUE) {
             if (exclusiveMinimum ? longValue <= minimum : longValue < minimum) {
                 return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect > %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, longValue);
@@ -197,7 +197,7 @@ public final class IntegerSchema
     }
 
     @Override
-    public ValidateResult validate(Long value) {
+    protected ValidateResult validateInternal(Long value) {
         if (value == null) {
             return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
@@ -230,7 +230,7 @@ public final class IntegerSchema
     }
 
     @Override
-    public ValidateResult validate(Integer value) {
+    protected ValidateResult validateInternal(Integer value) {
         if (value == null) {
             return typed ? FAIL_INPUT_NULL : SUCCESS;
         }

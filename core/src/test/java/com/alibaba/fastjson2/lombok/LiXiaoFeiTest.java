@@ -2,10 +2,12 @@ package com.alibaba.fastjson2.lombok;
 
 import com.alibaba.fastjson2.JSON;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("compat-lombok")
 public class LiXiaoFeiTest {
     @Test
     public void test() {

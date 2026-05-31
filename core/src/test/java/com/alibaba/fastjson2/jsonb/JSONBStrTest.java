@@ -1,10 +1,12 @@
 package com.alibaba.fastjson2.jsonb;
 
 import com.alibaba.fastjson2.JSONB;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("jsonb")
 public class JSONBStrTest {
     @Test
     public void test_0() {

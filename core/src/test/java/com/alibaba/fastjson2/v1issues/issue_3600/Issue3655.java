@@ -5,10 +5,13 @@ import com.alibaba.fastjson2.JSONWriter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue3655 {
     private static final String jsonStr =
             "{\"data\":\"\",\"data2\":\"\",\"data3\":\"\",\"data4\":\"\",\"data5\":\"\",\"data6\":\"\",\"data7\":\"\",\"data8\":\"\",\"data9\":\"\"}";

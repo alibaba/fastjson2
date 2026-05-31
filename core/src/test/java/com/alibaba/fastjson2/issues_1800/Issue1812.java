@@ -2,12 +2,15 @@ package com.alibaba.fastjson2.issues_1800;
 
 import com.alibaba.fastjson2.JSONB;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+@Tag("regression")
+@Tag("jsonb")
 public class Issue1812 {
     @Test
     public void test() throws Exception {

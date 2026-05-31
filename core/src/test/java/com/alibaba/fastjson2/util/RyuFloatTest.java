@@ -1,11 +1,13 @@
 package com.alibaba.fastjson2.util;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class RyuFloatTest {
     @Test
     public void test() {
@@ -39,7 +41,7 @@ public class RyuFloatTest {
 
     static String toString(float value) {
         byte[] bytes = new byte[24];
-        int len = NumberUtils.writeFloat(bytes, 0, value, false);
+        int len = NumberUtils.writeFloat(bytes, 0, value, false, false);
         return new String(bytes, 0, len);
     }
 }

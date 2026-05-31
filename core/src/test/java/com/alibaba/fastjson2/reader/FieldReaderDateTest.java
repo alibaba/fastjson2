@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.DateUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -14,6 +15,7 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("reader")
 public class FieldReaderDateTest {
     @Test
     public void test() throws Exception {
@@ -207,8 +209,7 @@ public class FieldReaderDateTest {
         assertEquals(bean.date, fieldReader.apply(zdt.toLocalDateTime()));
         assertEquals(bean.date, fieldReader.apply(new Date(epochMilli)));
 
-        fieldReader.field.setAccessible(false);
-        assertThrows(Exception.class, () -> fieldReader.accept(bean, epochMilli));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, new Object()));
     }
 
     public static class Bean1 {
@@ -311,8 +312,7 @@ public class FieldReaderDateTest {
         assertEquals(bean.date, fieldReader.apply(zdt.toLocalDateTime()));
         assertEquals(bean.date, fieldReader.apply(new Date(epochMilli)));
 
-        fieldReader.field.setAccessible(false);
-        assertThrows(Exception.class, () -> fieldReader.accept(bean, epochMilli));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, new Object()));
     }
 
     public static class Bean2 {
@@ -418,8 +418,7 @@ public class FieldReaderDateTest {
         assertEquals(bean.date, fieldReader.apply(zdt.toLocalDateTime()));
         assertEquals(bean.date, fieldReader.apply(new Date(epochMilli)));
 
-        fieldReader.field.setAccessible(false);
-        assertThrows(Exception.class, () -> fieldReader.accept(bean, epochMilli));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, new Object()));
     }
 
     public static class Bean3 {

@@ -63,31 +63,13 @@ public class ObjectWriters {
 
     public static <T> ObjectWriter ofToInt(ToIntFunction function) {
         return INSTANCE.createObjectWriter(
-                new FieldWriterInt32ValFunc(
-                        "toInt",
-                        0,
-                        FieldInfo.VALUE_MASK,
-                        null,
-                        null,
-                        null,
-                        null,
-                        function
-                )
+                new FieldWriterInt32Value<>("toInt", 0, FieldInfo.VALUE_MASK, null, null, null, int.class, int.class, null, null, function)
         );
     }
 
     public static <T> ObjectWriter ofToLong(ToLongFunction function) {
         return INSTANCE.createObjectWriter(
-                new FieldWriterInt64ValFunc(
-                        "toLong",
-                        0,
-                        FieldInfo.VALUE_MASK,
-                        null,
-                        null,
-                        null,
-                        null,
-                        function
-                )
+            new FieldWriterInt64Value<>("toLong", 0, FieldInfo.VALUE_MASK, null, null, null, long.class, long.class, null, null, function)
         );
     }
 

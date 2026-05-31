@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.date;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -7,6 +8,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.zone.ZoneRules;
 
+@Tag("date")
 public class ShanghaiOffsetTest {
     @Test
     public void test() {

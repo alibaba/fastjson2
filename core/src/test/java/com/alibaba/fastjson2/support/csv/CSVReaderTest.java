@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.support.csv;
 
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -21,6 +22,7 @@ import java.util.stream.StreamSupport;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("util")
 public class CSVReaderTest {
     String[][] lines = new String[][]{
             new String[]{"1997", "Ford", "E350", "ac, abs, moon", "3000.00"},
@@ -281,7 +283,7 @@ public class CSVReaderTest {
 
     @Test
     public void testFileAsStream() {
-        CSVReader csvReader = CSVReader.of(getClass().getResourceAsStream("/person.csv"), Person.class);
+        CSVReader csvReader = CSVReader.of(getClass().getResourceAsStream("/data/person.csv"), Person.class);
         System.out.println(csvReader.readHeader());
         Stream<Person> stream = readAsStream(csvReader);
         stream.forEach(System.out::println);
@@ -289,7 +291,7 @@ public class CSVReaderTest {
 
     @Test
     public void testFileAsStream1() {
-        CSVReader csvReader = CSVReader.of(new InputStreamReader(getClass().getResourceAsStream("/person.csv")), Person.class);
+        CSVReader csvReader = CSVReader.of(new InputStreamReader(getClass().getResourceAsStream("/data/person.csv")), Person.class);
         System.out.println(csvReader.readHeader());
         Stream<Person> stream = readAsStream(csvReader);
         stream.forEach(System.out::println);

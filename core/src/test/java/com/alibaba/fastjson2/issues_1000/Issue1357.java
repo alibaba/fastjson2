@@ -5,12 +5,14 @@ import com.alibaba.fastjson2.JSONException;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("regression")
 public class Issue1357 {
     @Test
     public void test() {

@@ -679,6 +679,10 @@ public class ObjectWriterProvider
             }
         }
 
+        if (org.w3c.dom.Node.class.isAssignableFrom(objectClass)) {
+            return ObjectWriterImplXmlNode.INSTANCE;
+        }
+
         switch (className) {
             case "com.google.common.collect.HashMultimap":
             case "com.google.common.collect.LinkedListMultimap":

@@ -100,7 +100,7 @@ class Bean {
 File file = ...;
 
 // 构造CSVReader传入对象类型
-SVReader parser = CSVReader.of(file, Bean.clss);
+CSVReader parser = CSVReader.of(file, Bean.class);
 
 // 根据需要，先读取Header第一行，如果没有Header可以忽略
 parser.readHeader();
@@ -120,7 +120,7 @@ while (true) {
 File file = ...;
 
 // 构造CSVReader传入对象类型
-SVReader parser = CSVReader.of(file, Bean.clss);
+CSVReader parser = CSVReader.of(file, Bean.class);
 
 // 根据需要，是否要读取Header第一行
 boolean readHeader = true;

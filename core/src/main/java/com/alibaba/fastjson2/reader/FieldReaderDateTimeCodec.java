@@ -12,6 +12,7 @@ import java.lang.reflect.Type;
 import java.time.*;
 import java.util.Date;
 import java.util.Locale;
+import java.util.function.BiConsumer;
 
 abstract class FieldReaderDateTimeCodec<T>
         extends FieldReader<T> {
@@ -31,9 +32,10 @@ abstract class FieldReaderDateTimeCodec<T>
             JSONSchema schema,
             Method method,
             Field field,
+            BiConsumer function,
             ObjectReader dateReader
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, null, null);
         this.dateReader = dateReader;
 
         boolean formatUnixTime = false, formatMillis = false, hasDay = false, hasHour = false;

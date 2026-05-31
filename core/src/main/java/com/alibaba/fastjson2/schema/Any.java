@@ -15,7 +15,7 @@ final class Any
     }
 
     @Override
-    public ValidateResult validate(Object value) {
+    protected ValidateResult validateInternal(Object value) {
         return SUCCESS;
     }
 }

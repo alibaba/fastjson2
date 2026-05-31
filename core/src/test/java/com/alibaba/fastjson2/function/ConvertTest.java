@@ -2,10 +2,12 @@ package com.alibaba.fastjson2.function;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.function.impl.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("codec")
 public class ConvertTest {
     @Test
     public void to() {

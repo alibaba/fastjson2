@@ -1,0 +1,135 @@
+package com.alibaba.fastjson2.benchmark.eishay;
+
+import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.util.DynamicClassLoader;
+import com.alibaba.fastjson2.util.IOUtils;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.infra.Blackhole;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
+
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipInputStream;
+
+public class EishayForyParseNoneCache {
+    static final int COUNT = 10_000;
+    static final Class[] classes = new Class[COUNT];
+
+    static JSONReader.Feature[] features = {
+            JSONReader.Feature.SupportAutoType,
+            JSONReader.Feature.IgnoreNoneSerializable,
+            JSONReader.Feature.UseDefaultConstructorAsPossible,
+            JSONReader.Feature.UseNativeObject,
+            JSONReader.Feature.FieldBased,
+            JSONReader.Feature.SupportArrayToBean
+    };
+
+    static DynamicClassLoader classLoader = DynamicClassLoader.getInstance();
+
+    static byte[][] fastjson2JSONBBytes = new byte[COUNT][];
+    static byte[][] foryBytes = new byte[COUNT][];
+    static int index;
+
+    static org.apache.fory.ThreadSafeFory fory = org.apache.fory.Fory.builder()
+            .withLanguage(org.apache.fory.config.Language.JAVA)
+            .withRefTracking(true)
+            .withClassLoader(classLoader)
+            .buildThreadSafeFory();
+
+    static {
+        String classZipDataFile = "data/EishayForyParseNoneCache_classes.bin.zip";
+        String jsonbZipDataFile = "data/EishayForyParseNoneCache_data_fastjson.bin.zip";
+        String foryZipDataFile = "data/EishayForyParseNoneCache_data_fory.bin.zip";
+
+        try {
+            {
+                InputStream fis = EishayForyParseNoneCache.class.getClassLoader().getResourceAsStream(classZipDataFile);
+                ZipInputStream zipIn = new ZipInputStream(fis);
+                zipIn.getNextEntry();
+
+                ObjectInputStream is = new ObjectInputStream(zipIn);
+                Map<String, byte[]> codeMap = (Map<String, byte[]>) is.readObject();
+                Map<String, Class> classMap = new HashMap<>(codeMap.size());
+                String prefix = "com.alibaba.fastjson2.benchmark.eishay";
+                codeMap.forEach((name, code) -> {
+                    int index = Integer.parseInt(name.substring(prefix.length(), name.indexOf('.', prefix.length())));
+                    if (index > COUNT) {
+                        return;
+                    }
+                    Class<?> clazz = classLoader.loadClass(name, code, 0, code.length);
+                    classMap.put(name, clazz);
+                });
+
+                for (int i = 0; i < COUNT; i++) {
+                    String packageName = prefix + i;
+                    classLoader.definePackage(packageName);
+                    String className = packageName + ".MediaContent";
+                    Class mediaClass = classMap.get(className);
+                    classes[i] = mediaClass;
+                }
+                IOUtils.close(zipIn);
+                IOUtils.close(is);
+                IOUtils.close(fis);
+            }
+
+            {
+                InputStream fis = EishayForyParseNoneCache.class.getClassLoader().getResourceAsStream(jsonbZipDataFile);
+                ZipInputStream zipIn = new ZipInputStream(fis);
+                zipIn.getNextEntry();
+
+                ObjectInputStream is = new ObjectInputStream(zipIn);
+                fastjson2JSONBBytes = (byte[][]) is.readObject();
+                IOUtils.close(zipIn);
+                IOUtils.close(is);
+                IOUtils.close(fis);
+            }
+            {
+                InputStream fis = EishayForyParseNoneCache.class.getClassLoader().getResourceAsStream(foryZipDataFile);
+                ZipInputStream zipIn = new ZipInputStream(fis);
+                zipIn.getNextEntry();
+
+                ObjectInputStream is = new ObjectInputStream(zipIn);
+                foryBytes = (byte[][]) is.readObject();
+                IOUtils.close(zipIn);
+                IOUtils.close(is);
+                IOUtils.close(fis);
+            }
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Benchmark
+    public void fastjson2JSONB(Blackhole bh) {
+        Thread.currentThread().setContextClassLoader(classLoader);
+        byte[] bytes = fastjson2JSONBBytes[index++];
+        bh.consume(
+                JSONB.parseObject(bytes, Object.class, features)
+        );
+    }
+
+    @Benchmark
+    public void fory(Blackhole bh) {
+        Thread.currentThread().setContextClassLoader(classLoader);
+        byte[] bytes = foryBytes[index++];
+        bh.consume(fory.deserialize(bytes));
+    }
+
+    public static void main(String[] args) throws Exception {
+        Options options = new OptionsBuilder()
+                .include(EishayForyParseNoneCache.class.getName())
+                .mode(Mode.Throughput)
+                .timeUnit(TimeUnit.MILLISECONDS)
+                .warmupIterations(1)
+                .forks(1)
+                .threads(16)
+                .build();
+        new Runner(options).run();
+    }
+}

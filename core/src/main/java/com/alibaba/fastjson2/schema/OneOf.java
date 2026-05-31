@@ -37,7 +37,7 @@ final class OneOf
     }
 
     @Override
-    public ValidateResult validate(Object value) {
+    protected ValidateResult validateInternal(Object value) {
         int count = 0;
         for (JSONSchema item : items) {
             ValidateResult result = item.validate(value);

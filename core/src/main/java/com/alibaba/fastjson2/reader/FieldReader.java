@@ -1,14 +1,11 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONPath;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.PropertyNamingStrategy;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.function.*;
+import com.alibaba.fastjson2.introspect.PropertyAccessor;
+import com.alibaba.fastjson2.introspect.PropertyAccessorFactory;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
@@ -18,10 +15,11 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.*;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.function.*;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
@@ -35,6 +33,7 @@ public abstract class FieldReader<T>
     public final String format;
     public final Method method;
     public final Field field;
+    protected final PropertyAccessor propertyAccessor;
     protected final long fieldOffset;
     public final Object defaultValue;
     public final Locale locale;
@@ -43,6 +42,10 @@ public abstract class FieldReader<T>
     final boolean fieldClassSerializable;
     final long fieldNameHash;
     final long fieldNameHashLCase;
+
+    final Parameter parameter;
+    final String paramName;
+    final long paramNameHash;
 
     volatile ObjectReader reader;
 
@@ -53,6 +56,7 @@ public abstract class FieldReader<T>
     Type itemType;
     Class itemClass;
     volatile ObjectReader itemReader;
+    final BiConsumer function;
 
     public FieldReader(
             String fieldName,
@@ -66,6 +70,25 @@ public abstract class FieldReader<T>
             JSONSchema schema,
             Method method,
             Field field
+    ) {
+        this(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, null, null, null);
+    }
+
+    public FieldReader(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            Field field,
+            Object function,
+            String paramName,
+            Parameter parameter
     ) {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
@@ -84,6 +107,9 @@ public abstract class FieldReader<T>
         this.schema = schema;
         this.method = method;
         this.field = field;
+        this.paramName = paramName;
+        this.paramNameHash = paramName != null ? Fnv.hashCode64(paramName) : 0;
+        this.parameter = parameter;
 
         boolean readOnly = false;
         if (method != null && method.getParameterCount() == 0) {
@@ -92,6 +118,8 @@ public abstract class FieldReader<T>
             readOnly = true;
         }
         this.readOnly = readOnly;
+        this.propertyAccessor = createPropertyAccessor(fieldName, fieldType, fieldClass, method, field, function, schema);
+        this.function = function instanceof BiConsumer ? (BiConsumer) function : null;
 
         long fieldOffset = -1L;
         if (field != null && (features & FieldInfo.DISABLE_UNSAFE) == 0) {
@@ -115,6 +143,93 @@ public abstract class FieldReader<T>
         }
 
         this.noneStaticMemberClass = BeanUtils.isNoneStaticMemberClass(declaringClass, fieldClass);
+    }
+
+    private PropertyAccessor createPropertyAccessor(String fieldName, Type fieldType, Class fieldClass, Method method, Field field, Object function, JSONSchema schema) {
+        PropertyAccessorFactory factory = JSONFactory.PROPERTY_ACCESSOR_FACTORY;
+
+        BiFunction<PropertyAccessor, Throwable, RuntimeException> exceptionHandler
+                = (p, e) -> new JSONException("set PropertyAccessor failed: " + p.name() + ", " + e);
+
+        PropertyAccessor propertyAccessor;
+        if (function instanceof BiConsumer) {
+            propertyAccessor = factory.create(fieldName, fieldClass, fieldType, null, (BiConsumer) function, exceptionHandler);
+        } else if (function instanceof ObjDoubleConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjDoubleConsumer) function);
+        } else if (function instanceof ObjBoolConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjBoolConsumer) function);
+        } else if (function instanceof ObjFloatConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjFloatConsumer) function);
+        } else if (function instanceof ObjByteConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjByteConsumer) function);
+        } else if (function instanceof ObjIntConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjIntConsumer) function);
+        } else if (function instanceof ObjLongConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjLongConsumer) function);
+        } else if (function instanceof ObjCharConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjCharConsumer) function);
+        } else if (function instanceof ObjShortConsumer) {
+            propertyAccessor = factory.create(fieldName, null, (ObjShortConsumer) function);
+        } else if (function instanceof Function) { // readOnly
+            propertyAccessor = factory.create(fieldName, fieldClass, fieldType, (Function) function, null);
+        } else if (method != null) {
+            propertyAccessor = factory.create(method, exceptionHandler);
+        } else {
+            propertyAccessor = field != null ? factory.create(field) : null;
+        }
+
+        if (schema != null) {
+            propertyAccessor = schema(propertyAccessor, schema);
+        }
+
+        return propertyAccessor;
+    }
+
+    private static PropertyAccessor schema(PropertyAccessor propertyAccessor, JSONSchema schema) {
+        PropertyAccessorFactory factory = JSONFactory.PROPERTY_ACCESSOR_FACTORY;
+        Class fieldClass = propertyAccessor.propertyClass();
+        if (fieldClass == boolean.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjBoolConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == Boolean.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == byte.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjByteConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == Byte.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == char.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjCharConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == Character.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == short.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjShortConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == Short.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == int.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjIntConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == Integer.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == long.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjLongConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == Long.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == float.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjFloatConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == Float.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == double.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (ObjDoubleConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == Double.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == String.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == BigInteger.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else if (fieldClass == BigDecimal.class) {
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        } else {
+            propertyAccessor = factory.create(propertyAccessor, null, (BiConsumer) (o, v) -> schema.assertValidate(v));
+        }
+        return propertyAccessor;
     }
 
     public void acceptDefaultValue(T object) {
@@ -626,5 +741,9 @@ public abstract class FieldReader<T>
 
     private boolean needCompareToActualFieldClass(Class clazz) {
         return clazz.isEnum() || clazz.isInterface();
+    }
+
+    public final boolean isParameter() {
+        return paramNameHash != 0;
     }
 }

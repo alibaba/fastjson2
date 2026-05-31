@@ -14,12 +14,12 @@ public class KryoTest {
     Kryo kryo = new Kryo();
     Output output = new Output(1024, -1);
 //
-//    static org.apache.fury.ThreadSafeFury fury = org.apache.fury.Fury.builder()
-//            .withLanguage(org.apache.fury.Language.JAVA)
+//    static org.apache.fory.ThreadSafeFory fory = org.apache.fory.Fory.builder()
+//            .withLanguage(org.apache.fory.config.Language.JAVA)
 //            .withReferenceTracking(true)
 //            .disableSecureMode()
-//            .withCompatibleMode(org.apache.fury.serializers.CompatibleMode.COMPATIBLE)
-//            .buildThreadSafeFury();
+//            .withCompatibleMode(org.apache.fory.config.CompatibleMode.COMPATIBLE)
+//            .buildThreadSafeFory();
 
     @Test
     public void test() throws IOException {
@@ -29,7 +29,7 @@ public class KryoTest {
                     .append(toString(jsonb(i), false)).append(" | ")
                     .append(toString(kryo(i), false)).append(" | ")
                     .append(toString(hessian(i), false)).append(" | ");
-//            buf.append(toString(fury(i), false)).append(" | ");
+//            buf.append(toString(fory(i), false)).append(" | ");
             System.out.println(buf);
         }
     }
@@ -73,8 +73,8 @@ public class KryoTest {
         return bytes;
     }
 //
-//    public byte[] fury(Object o) {
-//        return fury.serialize(o);
+//    public byte[] fory(Object o) {
+//        return fory.serialize(o);
 //    }
 
     public byte[] jsonb(Object o) {

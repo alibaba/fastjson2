@@ -16,8 +16,8 @@ public class GenReport {
         specs.put("aliyun_ecs.c8i.large", "https://help.aliyun.com/zh/ecs/user-guide/compute-optimized-instance-families#c8i");
         specs.put("aws_ecs.c7g.large", "https://aws.amazon.com/ec2/instance-types/c7g/");
 
-        cases.put("EishayFuryCompatibleWrite", "这个场景是JSONB格式和Fury CompatibleMode序列化性能比较。基于KeyValue的映射，对增加和删除字段的序列化结构都能有很好的兼容性。");
-        cases.put("EishayFuryCompatibleParse", "这个场景是JSONB格式和Fury CompatibleMode反序列化性能比较。基于KeyValue的映射，对增加和删除字段的序列化结构都能有很好的兼容性。");
+        cases.put("EishayForyCompatibleWrite", "这个场景是JSONB格式和Fory CompatibleMode序列化性能比较。基于KeyValue的映射，对增加和删除字段的序列化结构都能有很好的兼容性。");
+        cases.put("EishayForyCompatibleParse", "这个场景是JSONB格式和Fory CompatibleMode反序列化性能比较。基于KeyValue的映射，对增加和删除字段的序列化结构都能有很好的兼容性。");
 
         cases.put("EishayWriteBinary", "这个场景是二进制序列化比较，JSONB格式、JSON UTF8编码(fastjson2UTF8Bytes)、hessian、javaSerialize的比较，用于[Apache dubbo](https://github.com/apache/dubbo)的用户选择二进制协议比较");
         cases.put("EishayParseBinary", "这个场景是二进制反序列化比较，JSONB格式、JSON UTF8编码(fastjson2UTF8Bytes)、hessian、javaSerialize的比较，用于[Apache dubbo](https://github.com/apache/dubbo)的用户选择二进制协议比较");
@@ -80,12 +80,12 @@ public class GenReport {
             benchmarkResult.libraryResults.remove("jsonbValid"); // skip jsonbValid
 
             if (benchmarkResult.libraryResults.size() == 2) {
-                LibResult fury = benchmarkResult.libraryResults.get("fury");
+                LibResult fory = benchmarkResult.libraryResults.get("fory");
                 LibResult jsonb = benchmarkResult.libraryResults.get("jsonb");
-                if (fury != null && jsonb != null) {
+                if (fory != null && jsonb != null) {
                     benchmarkResult.libraryResults.clear();
                     benchmarkResult.libraryResults.put("jsonb", jsonb);
-                    benchmarkResult.libraryResults.put("fury", fury);
+                    benchmarkResult.libraryResults.put("fory", fory);
                 }
             } else if (benchmarkResult.libraryResults.size() == 4) {
                 LibResult fastjson2 = benchmarkResult.libraryResults.get("fastjson2");

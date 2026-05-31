@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.google.common.collect.Lists;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * description: setCallback method test
  * fix: bug when index less than 0
  */
+@Tag("jsonpath")
 public class JSONPathSegmentIndexTest1 {
     @Test
     public void test_setCallback_given_array_with_index_eq_minus1() {

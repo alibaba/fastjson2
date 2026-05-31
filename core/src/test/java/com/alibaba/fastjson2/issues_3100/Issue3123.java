@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_3100;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -14,6 +15,7 @@ import java.util.Map;
  * @author 张治保
  * @since 2024/10/22
  */
+@Tag("regression")
 public class Issue3123 {
     @Test
     @SneakyThrows

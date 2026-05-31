@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.v1issues.basicType;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader.Feature;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -10,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 /**
  * Created by wenshao on 10/08/2017.
  */
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class FloatNullTest {
     @Test
     public void test_null() {

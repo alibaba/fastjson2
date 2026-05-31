@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_1600;
 import com.alibaba.fastjson2.JSON;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZoneId;
@@ -10,6 +11,8 @@ import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("date")
 public class Issue1605 {
     @Test
     public void test() {

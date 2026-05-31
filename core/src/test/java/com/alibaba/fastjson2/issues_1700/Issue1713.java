@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.filter.ContextNameFilter;
 import com.alibaba.fastjson2.filter.ContextValueFilter;
 import com.alibaba.fastjson2.filter.Filter;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -13,6 +14,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("regression")
+@Tag("filter")
 public class Issue1713 {
     @Test
     public void test() {

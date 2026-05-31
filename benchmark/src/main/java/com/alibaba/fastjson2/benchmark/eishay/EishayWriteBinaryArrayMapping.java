@@ -10,8 +10,8 @@ import com.alibaba.fastjson2.benchmark.protobuf.MediaContentTransform;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
 import org.apache.commons.io.IOUtils;
-import org.apache.fury.Fury;
-import org.apache.fury.config.Language;
+import org.apache.fory.Fory;
+import org.apache.fory.config.Language;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class EishayWriteBinaryArrayMapping {
-    static final Fury fury = Fury.builder().withLanguage(Language.JAVA)
+    static final Fory fory = Fory.builder().withLanguage(Language.JAVA)
             .withRefTracking(false)
             .requireClassRegistration(false)
             .withNumberCompressed(true)
@@ -64,14 +64,14 @@ public class EishayWriteBinaryArrayMapping {
         }
     }
 
-    public int furySize() {
-        return fury.serialize(mediaContent).length;
+    public int forySize() {
+        return fory.serialize(mediaContent).length;
     }
 
 //    @Benchmark
-    public void fury(Blackhole bh) {
+    public void fory(Blackhole bh) {
         bh.consume(
-                fury.serialize(mediaContent)
+                fory.serialize(mediaContent)
         );
     }
 

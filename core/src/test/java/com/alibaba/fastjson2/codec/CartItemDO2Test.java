@@ -3,12 +3,14 @@ package com.alibaba.fastjson2.codec;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2_vo.CartItemDO2;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+@Tag("codec")
 public class CartItemDO2Test {
     private static List<CartItemDO2> newCartsItem() {
         List<CartItemDO2> list = new ArrayList();

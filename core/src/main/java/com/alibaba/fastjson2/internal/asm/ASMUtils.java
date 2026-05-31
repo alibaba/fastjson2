@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
+import java.util.function.ObjLongConsumer;
 
 public final class ASMUtils {
     public static final String TYPE_UNSAFE_UTILS = JDKUtils.class.getName().replace('.', '/');
@@ -78,6 +79,7 @@ public final class ASMUtils {
     public static final String DESC_JSON_READER = 'L' + TYPE_JSON_READER + ';';
     public static final String DESC_JSON_WRITER = 'L' + TYPE_JSON_WRITER + ';';
     public static final String DESC_OBJECT_READER = 'L' + TYPE_OBJECT_READER + ';';
+    public static final String DESC_OBJECT_READER_ADAPTER = 'L' + TYPE_OBJECT_READER_ADAPTER + ';';
     public static final String DESC_OBJECT_WRITER = 'L' + TYPE_OBJECT_WRITER + ';';
     public static final String DESC_SUPPLIER = "Ljava/util/function/Supplier;";
     public static final String DESC_JSONSCHEMA = 'L' + JSONSchema.class.getName().replace('.', '/') + ';';

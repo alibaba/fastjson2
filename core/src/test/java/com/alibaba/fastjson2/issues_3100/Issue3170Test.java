@@ -6,7 +6,7 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.ToStringSerializer;
 import com.alibaba.fastjson.serializer.ValueFilter;
-import org.junit.Assert;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -14,10 +14,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * Issue3170测试类
  * @author changyi.ccy
  */
+@Tag("regression")
+@Tag("date")
+@Tag("annotation")
 public class Issue3170Test {
     /**
      * 测试: Issue3170
@@ -38,8 +43,8 @@ public class Issue3170Test {
         String jsonText = "[{\"age\":\"10\",\"hairNums\":\"10000000\",\"name\":\"aaa\"},"
                 + "{\"age\":\"40\",\"hairNums\":\"0\",\"name\":\"bbb\",\"son\":"
                 + "{\"age\":\"10\",\"hairNums\":\"10000000\",\"name\":\"aaa\"}}]";
-        Assert.assertEquals("JSON文本不一致", jsonText, JSON.toJSONString(peopleList,
-                stringSerializeConfig, integerToStringFilter));
+        assertEquals(jsonText, JSON.toJSONString(peopleList,
+                stringSerializeConfig, integerToStringFilter), "JSON文本不一致");
     }
 
     /**

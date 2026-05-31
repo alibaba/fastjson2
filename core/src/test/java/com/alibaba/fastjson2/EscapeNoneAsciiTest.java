@@ -1,10 +1,12 @@
 package com.alibaba.fastjson2;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("writer")
 public class EscapeNoneAsciiTest {
     static final String[] STRINGS = new String[] {
             "中国", "中", "01234567中", "0123中", "01中"

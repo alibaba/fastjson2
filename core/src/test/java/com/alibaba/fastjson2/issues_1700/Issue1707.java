@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_1700;
 import com.alibaba.fastjson2.JSON;
 import lombok.Getter;
 import lombok.Setter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author kraity
  */
+@Tag("regression")
 public class Issue1707 {
     @Test
     public void test0() {

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -17,6 +18,8 @@ import java.util.List;
  * @author 张治保
  * @since 2024/3/29
  */
+@Tag("regression")
+@Tag("compat-jackson")
 public class Issue2375 {
     @Test
     void test() throws JSONException {

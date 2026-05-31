@@ -5,11 +5,13 @@ import com.alibaba.fastjson2.TypeReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
+@Tag("regression")
 public class Issue474 {
     @Test
     public void test() {

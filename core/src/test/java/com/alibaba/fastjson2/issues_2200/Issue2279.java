@@ -2,11 +2,16 @@ package com.alibaba.fastjson2.issues_2200;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@Tag("regression")
+@Tag("jsonb")
+@Tag("autotype")
 public class Issue2279 {
     @Test
     public void test01() {
@@ -18,6 +23,6 @@ public class Issue2279 {
         ParameterizedTypeImpl parameterizedType = new ParameterizedTypeImpl(Map.class, Integer.class, new ParameterizedTypeImpl(List.class, Integer.class));
         Map<Integer, List<Integer>> o = JSONB.parseObject(bytes, parameterizedType);
         Integer i = o.get(2).get(0);
-        Assert.assertEquals(-1, (int) i);
+        assertEquals(-1, (int) i);
     }
 }

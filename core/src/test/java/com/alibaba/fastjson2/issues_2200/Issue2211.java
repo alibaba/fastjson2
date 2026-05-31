@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import lombok.Getter;
 import lombok.Setter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -14,12 +15,13 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
 public class Issue2211 {
     @Test
     public void test() {
         UserDo userDo = new UserDo();
         String json = JSON.toJSONString(userDo, JSONWriter.Feature.WriteNullNumberAsZero, JSONWriter.Feature.WriteLongAsString);
-        assertEquals("{\"b1\":true,\"d0\":0,\"d1\":1.0,\"n0\":\"0\",\"n1\":\"1\",\"s1\":\"noear\"}", json);
+        assertEquals("{\"b1\":true,\"d0\":0.0,\"d1\":1.0,\"n0\":\"0\",\"n1\":\"1\",\"s1\":\"noear\"}", json);
     }
 
     @Test
@@ -27,7 +29,7 @@ public class Issue2211 {
         UserDo userDo = new UserDo();
         ObjectWriter objectWriter = new ObjectWriterProvider().getObjectWriter(UserDo.class);
         String json = objectWriter.toJSONString(userDo, JSONWriter.Feature.WriteNullNumberAsZero, JSONWriter.Feature.WriteLongAsString);
-        assertEquals("{\"b1\":true,\"d0\":0,\"d1\":1.0,\"n0\":\"0\",\"n1\":\"1\",\"s1\":\"noear\"}", json);
+        assertEquals("{\"b1\":true,\"d0\":0.0,\"d1\":1.0,\"n0\":\"0\",\"n1\":\"1\",\"s1\":\"noear\"}", json);
     }
 
     @Getter

@@ -9,12 +9,14 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
@@ -33,7 +35,7 @@ public class FieldWriterObject<T>
             "initValueClass"
     );
 
-    protected FieldWriterObject(
+    public FieldWriterObject(
             String name,
             int ordinal,
             long features,
@@ -43,9 +45,10 @@ public class FieldWriterObject<T>
             Type fieldType,
             Class fieldClass,
             Field field,
-            Method method
+            Method method,
+            Function function
     ) {
-        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         this.unwrapped = (features & FieldInfo.UNWRAPPED_MASK) != 0;
 
         if (fieldClass == Currency.class) {
@@ -273,37 +276,50 @@ public class FieldWriterObject<T>
 
         // (features & JSONWriter.Feature.WriteNullNumberAsZero.mask) != 0
         if (value == null) {
-            if (((features & WriteNulls.mask) != 0 || (features & NullAsDefaultValue.mask) != 0 && !number)
-                    && (features & NotWriteDefaultValue.mask) == 0) {
-                writeFieldName(jsonWriter);
-                if (array) {
-                    jsonWriter.writeArrayNull();
-                } else if (number) {
-                    jsonWriter.writeNumberNull();
-                } else if (fieldClass == Appendable.class
-                        || fieldClass == StringBuffer.class
-                        || fieldClass == StringBuilder.class) {
-                    jsonWriter.writeStringNull();
-                } else if (fieldClass == Boolean.class) {
-                    jsonWriter.writeBooleanNull();
-                } else {
-                    jsonWriter.writeObjectNull(fieldClass);
-                }
-                return true;
+            long nullFeatures = JSONWriter.Feature.WriteNulls.mask;
+            if (array) {
+                nullFeatures |= WriteNullListAsEmpty.mask;
+                nullFeatures |= NullAsDefaultValue.mask;
+            } else if (number) {
+                nullFeatures |= WriteNullNumberAsZero.mask;
+                nullFeatures |= NullAsDefaultValue.mask;
+            } else if (fieldClass == Boolean.class) {
+                nullFeatures |= WriteNullBooleanAsFalse.mask;
+                nullFeatures |= NullAsDefaultValue.mask;
+            } else if (fieldClass == String.class) {
+                nullFeatures |= WriteNullStringAsEmpty.mask;
+                nullFeatures |= NullAsDefaultValue.mask;
             } else {
-                if ((features & (WriteNullNumberAsZero.mask | NullAsDefaultValue.mask)) != 0 && number) {
-                    writeFieldName(jsonWriter);
-                    jsonWriter.writeInt32(0);
-                    return true;
-                } else if ((features & (WriteNullBooleanAsFalse.mask | NullAsDefaultValue.mask)) != 0
-                        && (fieldClass == Boolean.class || fieldClass == AtomicBoolean.class)
-                ) {
-                    writeFieldName(jsonWriter);
-                    jsonWriter.writeBool(false);
-                    return true;
-                }
+                nullFeatures |= NullAsDefaultValue.mask;
+            }
+
+            if ((features & nullFeatures) == 0) {
                 return false;
             }
+
+            writeFieldName(jsonWriter);
+            if (array) {
+                jsonWriter.writeArrayNull();
+            } else if (number) {
+                if (fieldClass == Float.class
+                        || fieldClass == Double.class
+                        || fieldClass == BigDecimal.class) {
+                    jsonWriter.writeDecimalNull();
+                } else if (fieldClass == Long.class) {
+                    jsonWriter.writeInt64Null(features);
+                } else {
+                    jsonWriter.writeNumberNull();
+                }
+            } else if (fieldClass == Appendable.class
+                    || fieldClass == StringBuffer.class
+                    || fieldClass == StringBuilder.class) {
+                jsonWriter.writeStringNull();
+            } else if ((fieldClass == Boolean.class || fieldClass == AtomicBoolean.class)) {
+                jsonWriter.writeBooleanNull();
+            } else {
+                jsonWriter.writeObjectNull(fieldClass);
+            }
+            return true;
         }
 
         if (value == object) {
@@ -344,6 +360,8 @@ public class FieldWriterObject<T>
                 jsonWriter.popPath(value);
                 return true;
             }
+        } else if (fieldName.startsWith("this$")) {
+            return false;
         }
 
         Class<?> valueClass = value.getClass();

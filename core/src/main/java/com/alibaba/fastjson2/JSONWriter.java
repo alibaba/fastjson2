@@ -1476,7 +1476,7 @@ public abstract class JSONWriter
         throw new JSONException("UnsupportedOperation");
     }
 
-    protected static boolean isWriteAsString(long value, long features) {
+    public static boolean isWriteAsString(long value, long features) {
         return (features & (MASK_WRITE_NON_STRING_VALUE_AS_STRING | MASK_WRITE_LONG_AS_STRING)) != 0
                 || ((features & MASK_BROWSER_COMPATIBLE) != 0 && !isJavaScriptSupport(value));
     }
@@ -1934,8 +1934,12 @@ public abstract class JSONWriter
             writeFloat(value);
             return;
         }
-        if (Float.isNaN(value) || Float.isInfinite(value)) {
-            writeNull();
+        if (!Float.isFinite(value)) {
+            if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
+                writeFloat(value);
+            } else {
+                writeNull();
+            }
             return;
         }
 
@@ -1968,6 +1972,14 @@ public abstract class JSONWriter
         for (int i = 0; i < value.length; i++) {
             if (i != 0) {
                 writeComma();
+            }
+            if (!Float.isFinite(value[i])) {
+                if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
+                    writeFloat(value[i]);
+                } else {
+                    writeNull();
+                }
+                continue;
             }
             String str = format.format(value[i]);
             writeRaw(str);
@@ -2009,8 +2021,12 @@ public abstract class JSONWriter
             writeDouble(value);
             return;
         }
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
-            writeNull();
+        if (!Double.isFinite(value)) {
+            if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
+                writeDouble(value);
+            } else {
+                writeNull();
+            }
             return;
         }
 
@@ -2056,7 +2072,14 @@ public abstract class JSONWriter
             if (i != 0) {
                 writeComma();
             }
-
+            if (!Double.isFinite(value[i])) {
+                if ((context.features & WriteFloatSpecialAsString.mask) != 0) {
+                    writeDouble(value[i]);
+                } else {
+                    writeNull();
+                }
+                continue;
+            }
             String str = format.format(value[i]);
             writeRaw(str);
         }
@@ -2233,10 +2256,16 @@ public abstract class JSONWriter
      * @param features the features to use for serialization
      */
     public final void writeDecimalNull(long features) {
-        if ((features & MASK_NULL_AS_DEFAULT_VALUE) != 0) {
+        if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
             writeDouble(0.0);
-        } else if ((features & MASK_WRITE_NULL_NUMBER_AS_ZERO) != 0) {
-            writeInt32(0);
+        } else {
+            writeNull();
+        }
+    }
+
+    public final void writeInt64Null(long features) {
+        if ((features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) != 0) {
+            writeInt64(0);
         } else {
             writeNull();
         }
@@ -3406,11 +3435,19 @@ public abstract class JSONWriter
                 }
 
                 if (filter instanceof PropertyFilter) {
-                    this.propertyFilter = (PropertyFilter) filter;
+                    if (this.propertyFilter == null) {
+                        this.propertyFilter = (PropertyFilter) filter;
+                    } else {
+                        this.propertyFilter = PropertyFilter.compose(this.propertyFilter, (PropertyFilter) filter);
+                    }
                 }
 
                 if (filter instanceof PropertyPreFilter) {
-                    this.propertyPreFilter = (PropertyPreFilter) filter;
+                    if (this.propertyPreFilter == null) {
+                        this.propertyPreFilter = (PropertyPreFilter) filter;
+                    } else {
+                        this.propertyPreFilter = PropertyPreFilter.compose(this.propertyPreFilter, (PropertyPreFilter) filter);
+                    }
                 }
 
                 if (filter instanceof BeforeFilter) {
@@ -3422,7 +3459,11 @@ public abstract class JSONWriter
                 }
 
                 if (filter instanceof LabelFilter) {
-                    this.labelFilter = (LabelFilter) filter;
+                    if (this.labelFilter == null) {
+                        this.labelFilter = (LabelFilter) filter;
+                    } else {
+                        this.labelFilter = LabelFilter.compose(this.labelFilter, (LabelFilter) filter);
+                    }
                 }
 
                 if (filter instanceof ContextValueFilter) {
@@ -3839,28 +3880,41 @@ public abstract class JSONWriter
         }
     }
 
-    protected static final long MASK_WRITE_MAP_NULL_VALUE = 1 << 4;
-    protected static final long MASK_BROWSER_COMPATIBLE = 1 << 5;
-    protected static final long MASK_NULL_AS_DEFAULT_VALUE = 1 << 6;
-    protected static final long MASK_WRITE_BOOLEAN_AS_NUMBER = 1 << 7;
-    protected static final long MASK_WRITE_NON_STRING_VALUE_AS_STRING = 1L << 8;
-    protected static final long MASK_WRITE_CLASS_NAME = 1 << 9;
-    protected static final long MASK_NOT_WRITE_DEFAULT_VALUE = 1 << 12;
-    protected static final long MASK_WRITE_ENUMS_USING_NAME = 1 << 13;
-    protected static final long MASK_WRITE_ENUM_USING_TO_STRING = 1 << 14;
-    protected static final long MASK_PRETTY_FORMAT = 1 << 16;
-    protected static final long MASK_REFERENCE_DETECTION = 1 << 17;
-    protected static final long MASK_USE_SINGLE_QUOTES = 1 << 20;
-    protected static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
-    protected static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
-    protected static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
-    protected static final long MASK_WRITE_NULL_BOOLEAN_AS_FALSE = 1 << 25;
-    protected static final long MASK_NOT_WRITE_EMPTY_ARRAY = 1 << 26;
-    protected static final long MASK_ESCAPE_NONE_ASCII = 1L << 30;
-    protected static final long MASK_IGNORE_NON_FIELD_GETTER = 1L << 32;
-    protected static final long MASK_WRITE_LONG_AS_STRING = 1L << 34;
-    protected static final long MASK_BROWSER_SECURE = 1L << 35;
-    protected static final long MASK_NOT_WRITE_NUMBER_CLASS_NAME = 1L << 40;
+    public static final long MASK_FIELD_BASED = 1;
+    public static final long MASK_IGNORE_NONE_SERIALIZABLE = 1 << 1;
+    public static final long MAKS_ERROR_ON_NONE_SERIALIZABLE = 1 << 2;
+    public static final long MASK_BEAN_TO_ARRAY = 1 << 3;
+    public static final long MASK_WRITE_MAP_NULL_VALUE = 1 << 4;
+    public static final long MASK_BROWSER_COMPATIBLE = 1 << 5;
+    public static final long MASK_NULL_AS_DEFAULT_VALUE = 1 << 6;
+    public static final long MASK_WRITE_BOOLEAN_AS_NUMBER = 1 << 7;
+    public static final long MASK_WRITE_NON_STRING_VALUE_AS_STRING = 1L << 8;
+    public static final long MASK_WRITE_CLASS_NAME = 1 << 9;
+    public static final long MASK_NOT_WRITE_ROOT_CLASSNAME = 1 << 10;
+    public static final long MASK_NOT_WRITE_HASHMAP_ARRAY_LIST_CLASS_NAME = 1 << 11;
+    public static final long MASK_NOT_WRITE_DEFAULT_VALUE = 1 << 12;
+    public static final long MASK_WRITE_ENUMS_USING_NAME = 1 << 13;
+    public static final long MASK_WRITE_ENUM_USING_TO_STRING = 1 << 14;
+    public static final long MASK_IGNORE_ERROR_GETTER = 1L << 15;
+    public static final long MASK_PRETTY_FORMAT = 1 << 16;
+    public static final long MASK_REFERENCE_DETECTION = 1 << 17;
+    public static final long MASK_WRITE_BIG_DECIMAL_AS_PLAIN = 1 << 19;
+    public static final long MASK_USE_SINGLE_QUOTES = 1 << 20;
+    public static final long MASK_WRITE_NULL_LIST_AS_EMPTY = 1 << 22;
+    public static final long MASK_WRITE_NULL_STRING_AS_EMPTY = 1 << 23;
+    public static final long MASK_WRITE_NULL_NUMBER_AS_ZERO = 1 << 24;
+    public static final long MASK_WRITE_NULL_BOOLEAN_AS_FALSE = 1 << 25;
+    public static final long MASK_NOT_WRITE_EMPTY_ARRAY = 1 << 26;
+    public static final long MASK_WRITE_NON_STRING_KEY_AS_STRING = 1 << 27;
+    public static final long MASK_WRITE_PAIR_AS_JAVA_BEAN = 1 << 28;
+    public static final long MASK_ESCAPE_NONE_ASCII = 1L << 30;
+    public static final long MASK_IGNORE_NON_FIELD_GETTER = 1L << 32;
+    public static final long MASK_WRITE_LONG_AS_STRING = 1L << 34;
+    public static final long MASK_BROWSER_SECURE = 1L << 35;
+    public static final long MASK_WRITE_ENUM_USING_ORDINAL = 1L << 36;
+    public static final long MASK_UNQUOTE_FIELD_NAME = 1L << 38;
+    public static final long MASK_NOT_WRITE_NUMBER_CLASS_NAME = 1L << 40;
+    public static final long MASK_WRITE_FLOAT_SPECIAL_AS_STRING = 1L << 45;
 
     /**
      * Feature is used to control the behavior of JSON writing and serialization in FASTJSON2.
@@ -4387,7 +4441,15 @@ public abstract class JSONWriter
          *
          * @since 2.0.0
          */
-        WriterUtilDateAsMillis(1L << 44);
+        WriterUtilDateAsMillis(1L << 44),
+
+        /**
+         * Feature that determines whether to write float/double NaN and Infinite values as Strings.
+         * When enabled, NaN/Infinity will be serialized as "NaN", "Infinity", "-Infinity".
+         *
+         * @since 2.0.61
+         */
+        WriteFloatSpecialAsString(1L << 45);
 
         public final long mask;
 

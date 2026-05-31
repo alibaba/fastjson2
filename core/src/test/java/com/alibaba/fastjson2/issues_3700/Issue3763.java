@@ -2,11 +2,13 @@ package com.alibaba.fastjson2.issues_3700;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+@Tag("regression")
 public class Issue3763 {
     @Test
     public void test() throws Throwable {

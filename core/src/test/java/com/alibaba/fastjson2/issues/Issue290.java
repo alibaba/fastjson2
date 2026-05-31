@@ -2,10 +2,13 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@Tag("regression")
+@Tag("compat-jackson")
 public class Issue290 {
     @Test
     public void test() {

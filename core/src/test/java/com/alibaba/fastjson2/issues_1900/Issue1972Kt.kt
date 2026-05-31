@@ -4,8 +4,10 @@ import com.alibaba.fastjson2.JSON
 import com.alibaba.fastjson2.JSONObject
 import com.alibaba.fastjson2.JSONReader
 import com.alibaba.fastjson2.reader.ObjectReader
-import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import java.lang.reflect.Type
 
 class Issue1972Kt {
@@ -25,21 +27,21 @@ class Issue1972Kt {
         JSON.register(InterfaceDemo::class.java, InterfaceDemoReader())
 
         val result = JSON.parseObject(json, InterfaceDemo::class.java)
-        Assert.assertTrue(result is InterfaceImplGroup)
+        assertTrue(result is InterfaceImplGroup)
 
         val group = result as InterfaceImplGroup
-        Assert.assertEquals(group.groupCode, "A12")
-        Assert.assertNotNull(group.items)
-        Assert.assertEquals(group.items?.size, 2)
+        assertEquals("A12", group.groupCode)
+        assertNotNull(group.items)
+        assertEquals(2, group.items?.size)
 
-        Assert.assertTrue(group.items?.get(0) is InterfaceImpl1)
-        Assert.assertTrue(group.items?.get(1) is InterfaceImpl2)
+        assertTrue(group.items?.get(0) is InterfaceImpl1)
+        assertTrue(group.items?.get(1) is InterfaceImpl2)
 
         val impl1 = group.items?.get(0) as InterfaceImpl1
-        Assert.assertEquals(impl1.impl1Code, "code1")
+        assertEquals("code1", impl1.impl1Code)
 
         val impl2 = group.items?.get(1) as InterfaceImpl2
-        Assert.assertEquals(impl2.impl2Code, "code2")
+        assertEquals("code2", impl2.impl2Code)
     }
 }
 

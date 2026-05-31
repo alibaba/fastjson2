@@ -2,10 +2,12 @@ package com.alibaba.fastjson2.dubbo;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("integration")
 public class DubboTest8 {
     @Test
     void test() {

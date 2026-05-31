@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -13,6 +14,8 @@ import java.util.List;
 /**
  * Created by SongLing.Dong on 11/7/2017.
  */
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue1565 {
     @Test
     public void test_testLargeBeanContainsOver256Field() {

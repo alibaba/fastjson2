@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.v1issues;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -9,6 +10,8 @@ import java.lang.reflect.Type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class JSONObjectTest_getObj_2 {
     @Test
     public void test_get_empty() {

@@ -2,12 +2,14 @@ package com.alibaba.fastjson2.autoType;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("autotype")
 public class DateTest {
     @Test
     public void test() {

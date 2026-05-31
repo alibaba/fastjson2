@@ -7,9 +7,9 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 import java.lang.reflect.Field;
 
 final class FieldReaderInt64ValueArrayFinalField<T>
-        extends FieldReaderObjectField<T> {
+        extends FieldReaderObject<T> {
     FieldReaderInt64ValueArrayFinalField(String fieldName, Class fieldType, int ordinal, long features, String format, long[] defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, schema, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, schema, null, field, null);
     }
 
     @Override
@@ -25,7 +25,7 @@ final class FieldReaderInt64ValueArrayFinalField<T>
 
         long[] array;
         try {
-            array = (long[]) field.get(object);
+            array = (long[]) propertyAccessor.getObject(object);
         } catch (Exception e) {
             throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }

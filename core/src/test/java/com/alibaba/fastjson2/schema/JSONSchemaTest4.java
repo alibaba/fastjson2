@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.schema;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.schema.model.Person;
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -12,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("schema")
 public class JSONSchemaTest4 {
     @Test
     public void max() {

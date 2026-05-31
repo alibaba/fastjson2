@@ -2262,7 +2262,7 @@ public class IOUtils {
      * @return the extracted digit value (0-9), or -1 if the character is not a valid digit
      */
     public static int digit1(char[] buf, int off) {
-        int d = UNSAFE.getByte(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1)) - '0';
+        int d = UNSAFE.getChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1)) - '0';
         return d >= 0 && d <= 9 ? d : -1;
     }
 
@@ -2462,7 +2462,7 @@ public class IOUtils {
      */
     public static boolean regionMatches(byte[] bytes, int off, String prefix) {
         int len = prefix.length();
-        if (off + len >= bytes.length) {
+        if (off + len > bytes.length) {
             return false;
         }
         for (int i = 0; i < len; i++) {
@@ -2528,6 +2528,17 @@ public class IOUtils {
         return (((x - 0x0101010101010101L) & ~x) & 0x8080808080808080L) == 0;
     }
 
+    public static int hexDigit4(byte[] buf, int offset, int end) {
+        if (offset + 4 > Math.min(end, buf.length)) {
+            throw outOfBoundsCheckFromToIndex(offset, end);
+        }
+        return hexDigit4(buf, offset);
+    }
+
+    static JSONException outOfBoundsCheckFromToIndex(int offset, int end) {
+        return new JSONException("offset overflow, offset " + offset + ", end " + end);
+    }
+
     /**
      * Extracts a 4-digit hexadecimal number from a byte array at the specified offset.
      * This method performs optimized hexadecimal digit extraction by processing 4 bytes at once
@@ -2541,6 +2552,13 @@ public class IOUtils {
         int v = getIntLE(buf, offset);
         v = (v & 0x0F0F0F0F) + ((((v & 0x40404040) >> 2) | ((v & 0x40404040) << 1)) >>> 4);
         return ((v & 0xF000000) >>> 24) + ((v & 0xF0000) >>> 12) + (v & 0xF00) + ((v & 0xF) << 12);
+    }
+
+    public static int hexDigit4(char[] buf, int offset, int end) {
+        if (offset + 4 > Math.min(end, buf.length)) {
+            throw outOfBoundsCheckFromToIndex(offset, end);
+        }
+        return hexDigit4(buf, offset);
     }
 
     /**
@@ -3060,6 +3078,7 @@ public class IOUtils {
      * @throws NumberFormatException if the byte array segment does not contain a valid integer representation
      */
     public static int parseInt(byte[] buf, int off, int len) {
+        int start = off;
         int fc = buf[off];
         int result = isDigitLatin1(fc)
                 ? '0' - fc
@@ -3086,6 +3105,6 @@ public class IOUtils {
                 & (Integer.MIN_VALUE < result || fc == '-')) {
             return fc == '-' ? result : -result;
         }
-        throw new NumberFormatException(new String(buf, off, len));
+        throw new NumberFormatException(new String(buf, start, len));
     }
 }

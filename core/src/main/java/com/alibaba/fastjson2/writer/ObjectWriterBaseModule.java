@@ -22,6 +22,10 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.*;
+import java.time.chrono.HijrahDate;
+import java.time.chrono.JapaneseDate;
+import java.time.chrono.MinguoDate;
+import java.time.chrono.ThaiBuddhistDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
@@ -397,7 +401,7 @@ public class ObjectWriterBaseModule
                         break;
                     case "com.fasterxml.jackson.annotation.JsonBackReference":
                         if (useJacksonAnnotation) {
-                            fieldInfo.features |= FieldInfo.BACKR_EFERENCE;
+                            fieldInfo.features |= FieldInfo.BACKR_REFERENCE;
                         }
                         break;
                     default:
@@ -1137,9 +1141,23 @@ public class ObjectWriterBaseModule
             case "org.bson.types.Decimal128":
                 return LambdaMiscCodec.getObjectWriter(objectType, objectClass);
             case "java.nio.HeapByteBuffer":
+            case "java.nio.HeapByteBufferR":
             case "java.nio.DirectByteBuffer":
+            case "java.nio.DirectByteBufferR":
+            case "java.nio.MappedByteBuffer":
                 return new ObjectWriterImplInt8ValueArray(
-                        o -> ((ByteBuffer) o).array()
+                        o -> {
+                            ByteBuffer buffer = (ByteBuffer) o;
+                            if (buffer.hasArray()) {
+                                return buffer.array();
+                            }
+                            // For DirectByteBuffer or read-only buffers that don't have a backing array
+                            int position = buffer.position();
+                            byte[] bytes = new byte[buffer.remaining()];
+                            buffer.get(bytes);
+                            buffer.position(position); // restore position
+                            return bytes;
+                        }
                 );
             case "java.awt.Color":
                 try {
@@ -1487,7 +1505,10 @@ public class ObjectWriterBaseModule
                 return ObjectWriterImplInstant.INSTANCE;
             }
 
-            if (Duration.class == clazz || Period.class == clazz) {
+            if (Duration.class == clazz || Period.class == clazz
+                    || Year.class == clazz || YearMonth.class == clazz || MonthDay.class == clazz
+                    || HijrahDate.class == clazz || JapaneseDate.class == clazz
+                    || MinguoDate.class == clazz || ThaiBuddhistDate.class == clazz) {
                 return ObjectWriterImplToString.INSTANCE;
             }
 

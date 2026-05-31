@@ -7,8 +7,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.along.vo.SkillFire_S2C_Msg;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.apache.commons.io.IOUtils;
-import org.apache.fury.Fury;
-import org.apache.fury.config.Language;
+import org.apache.fory.Fory;
+import org.apache.fory.config.Language;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -24,7 +24,7 @@ public class AlongWriteBinaryArrayMapping {
     static final ObjectWriterProvider providerFeatures = new ObjectWriterProvider();
     static final JSONWriter.Context contextFeatures;
     static SkillFire_S2C_Msg object;
-    static Fury fury;
+    static Fory fory;
 
     static {
         try {
@@ -33,7 +33,7 @@ public class AlongWriteBinaryArrayMapping {
             object = JSONReader.of(str)
                     .read(SkillFire_S2C_Msg.class);
 
-            fury = Fury.builder()
+            fory = Fory.builder()
                     .withLanguage(Language.JAVA)
                     .withRefTracking(false)
                     .requireClassRegistration(false)
@@ -63,12 +63,12 @@ public class AlongWriteBinaryArrayMapping {
     }
 
     @Benchmark
-    public void fury(Blackhole bh) {
-        bh.consume(fury.serialize(object));
+    public void fory(Blackhole bh) {
+        bh.consume(fory.serialize(object));
     }
 
-    public int furySize() {
-        return fury.serialize(object).length;
+    public int forySize() {
+        return fory.serialize(object).length;
     }
 
     //    @Benchmark

@@ -41,7 +41,11 @@ final class ObjectWriterImplFloatValueArray
             array = (float[]) object;
         }
 
-        jsonWriter.writeFloat(array);
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(array);
+        } else {
+            jsonWriter.writeFloat(array);
+        }
     }
 
     @Override
@@ -54,7 +58,11 @@ final class ObjectWriterImplFloatValueArray
         }
 
         if (format == null) {
-            jsonWriter.writeFloat(array);
+            if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+                jsonWriter.writeString(array);
+            } else {
+                jsonWriter.writeFloat(array);
+            }
         } else {
             jsonWriter.writeFloat(array, format);
         }

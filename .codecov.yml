@@ -1,0 +1,54 @@
+# Codecov configuration for fastjson2
+# Documentation: https://docs.codecov.com/docs/codecov-yaml
+
+# Configuration for pull request comments
+comment:
+  layout: "header, diff, files, footer"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+# Coverage status checks configuration
+coverage:
+  status:
+    # Project-wide coverage status
+    project:
+      default:
+        # Target coverage percentage
+        target: auto
+        # Threshold for coverage drop (allow 0.5% drop)
+        threshold: 0.5%
+        # Mark as informational if no uploads to avoid blocking PRs
+        if_no_uploads: informational
+        if_ci_failed: error
+    
+    # Patch coverage for new changes
+    patch:
+      default:
+        # Require 80% coverage for new code
+        target: 80%
+        # Allow up to 5% below target
+        threshold: 5%
+        if_no_uploads: success
+        if_ci_failed: error
+
+  # Precision for coverage percentages
+  precision: 2
+  round: down
+  range: "70...90"
+
+# Ignore certain files/directories from coverage
+ignore:
+  - "benchmark/**/*"
+  - "benchmark_25/**/*"
+  - "codegen-test/**/*"
+  - "example-*/**/*"
+  - "test-jdk*/**/*"
+  - "**/src/test/**/*"
+  - "**/*Test.java"
+  - "**/*Tests.java"
+
+# Ensure all CI jobs complete before processing
+github_checks:
+  annotations: true

@@ -2,7 +2,7 @@ package com.alibaba.fastjson2.benchmark.eishay.gen;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.TypeReference;
-import com.alibaba.fastjson2.benchmark.eishay.EishayFuryWriteNoneCache;
+import com.alibaba.fastjson2.benchmark.eishay.EishayForyWriteNoneCache;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.DynamicClassLoader;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -257,7 +257,7 @@ public class EishayClassGen {
     }
 
     public byte[][] genFastjsonJSONBBytes(int count, JSONWriter.Feature[] writerFeatures) throws Exception {
-        try (InputStream is = EishayFuryWriteNoneCache.class.getClassLoader()
+        try (InputStream is = EishayForyWriteNoneCache.class.getClassLoader()
                 .getResourceAsStream("data/eishay.json")
         ) {
             String str = IOUtils.toString(is, "UTF-8");
@@ -288,14 +288,14 @@ public class EishayClassGen {
         return codeMap;
     }
 
-    public byte[][] genFuryBytes(int count) throws Exception {
-//        org.apache.fury.ThreadSafeFury fury = org.apache.fury.Fury.builder()
-//                .withLanguage(org.apache.fury.Language.JAVA)
+    public byte[][] genForyBytes(int count) throws Exception {
+//        org.apache.fory.ThreadSafeFory fory = org.apache.fory.Fory.builder()
+//                .withLanguage(org.apache.fory.Language.JAVA)
 //                .withReferenceTracking(true)
 //                .disableSecureMode()
-//                .buildThreadSafeFury();
+//                .buildThreadSafeFory();
 //
-//        try (InputStream is = EishayFuryWriteNoneCache.class.getClassLoader()
+//        try (InputStream is = EishayForyWriteNoneCache.class.getClassLoader()
 //                .getResourceAsStream("data/eishay.json")
 //        ) {
 //            String str = IOUtils.toString(is, "UTF-8");
@@ -308,7 +308,7 @@ public class EishayClassGen {
 //                Class objectClass = gen.genMedia(classLoader, packageName);
 //                ObjectReaderProvider provider = new ObjectReaderProvider();
 //                Object object = JSONReader.of(str, JSONFactory.createReadContext(provider)).read(objectClass);
-//                bytes[i] = fury.serialize(object);
+//                bytes[i] = fory.serialize(object);
 //                System.out.println(java.time.LocalDateTime.now() + " write " + i + " done");
 //            }
 //            return bytes;

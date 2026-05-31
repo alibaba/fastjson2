@@ -55,24 +55,24 @@ public abstract class JSONReader
         implements Closeable {
     static final int MAX_EXP = 2047;
 
-    static final byte JSON_TYPE_INT = 1;
-    static final byte JSON_TYPE_DEC = 2;
-    static final byte JSON_TYPE_STRING = 3;
-    static final byte JSON_TYPE_BOOL = 4;
-    static final byte JSON_TYPE_NULL = 5;
-    static final byte JSON_TYPE_OBJECT = 6;
-    static final byte JSON_TYPE_ARRAY = 7;
-    static final byte JSON_TYPE_BIG_DEC = 8;
-
-    static final byte JSON_TYPE_INT8 = 9;
-    static final byte JSON_TYPE_INT16 = 10;
-    static final byte JSON_TYPE_INT64 = 11;
-    static final byte JSON_TYPE_FLOAT = 12;
-    static final byte JSON_TYPE_DOUBLE = 13;
-    static final byte JSON_TYPE_NaN = 14;
+    static final byte
+            JSON_TYPE_INT = 1,
+            JSON_TYPE_DEC = 2,
+            JSON_TYPE_STRING = 3,
+            JSON_TYPE_BOOL = 4,
+            JSON_TYPE_NULL = 5,
+            JSON_TYPE_OBJECT = 6,
+            JSON_TYPE_ARRAY = 7,
+            JSON_TYPE_BIG_DEC = 8,
+            JSON_TYPE_INT8 = 9,
+            JSON_TYPE_INT16 = 10,
+            JSON_TYPE_INT64 = 11,
+            JSON_TYPE_FLOAT = 12,
+            JSON_TYPE_DOUBLE = 13,
+            JSON_TYPE_NaN = 14;
 
     static final char EOI = 0x1A;
-    static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
+    static final long SPACE = 1L | (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
 
     static final boolean[] INT_VALUE_END = new boolean[256];
     static {
@@ -81,6 +81,60 @@ public abstract class JSONReader
         for (char ch : chars) {
             INT_VALUE_END[ch] = false;
         }
+    }
+
+    static final byte[] CHAR1_ESCAPED;
+    static {
+        byte[] char1_escaped = new byte[128];
+        Arrays.fill(char1_escaped, (byte) -1);
+        byte[] mapping = new byte[] {
+                '0', '\0',
+                '1', '\1',
+                '2', '\2',
+                '3', '\3',
+                '4', '\4',
+                '5', '\5',
+                '6', '\6',
+                '7', '\7',
+                'b', '\b',
+                't', '\t',
+                'n', '\n',
+                'v', '\u000b',
+                'f', '\f',
+                'F', '\f',
+                'r', '\r',
+                '"', '"',
+                '\'', '\'',
+                '/', '/',
+                '.', '.',
+                '\\', '\\',
+                '#', '#',
+                '&', '&',
+                '[', '[',
+                ']', ']',
+                '@', '@',
+                '(', '(',
+                ')', ')',
+                '_', '_',
+                ',', ',',
+                '~', '~',
+                ' ', ' ',
+        };
+        for (int i = 0; i < mapping.length; i += 2) {
+            char1_escaped[mapping[i]] = mapping[i + 1];
+        }
+        CHAR1_ESCAPED = char1_escaped;
+    }
+
+    protected static int newCapacity(int minCapacity, int oldCapacity) {
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity < 0) {
+            newCapacity = minCapacity;
+        }
+        if (newCapacity < 0) {
+            throw new OutOfMemoryError();
+        }
+        return newCapacity;
     }
 
     protected final Context context;
@@ -92,6 +146,7 @@ public abstract class JSONReader
     protected int offset;
     protected char ch;
     protected boolean comma;
+    protected int nameBegin;
 
     protected boolean nameEscape;
     protected boolean valueEscape;
@@ -1271,56 +1326,15 @@ public abstract class JSONReader
     }
 
     final char char1(int c) {
-        switch (c) {
-            case '0':
-                return '\0';
-            case '1':
-                return '\1';
-            case '2':
-                return '\2';
-            case '3':
-                return '\3';
-            case '4':
-                return '\4';
-            case '5':
-                return '\5';
-            case '6':
-                return '\6';
-            case '7':
-                return '\7';
-            case 'b': // 8
-                return '\b';
-            case 't': // 9
-                return '\t';
-            case 'n': // 10
-                return '\n';
-            case 'v': // 11
-                return '\u000B';
-            case 'f': // 12
-            case 'F':
-                return '\f';
-            case 'r': // 13
-                return '\r';
-            case '"': // 34
-            case '\'': // 39
-            case '/': // 47
-            case '.': // 47
-            case '\\': // 92
-            case '#':
-            case '&':
-            case '[':
-            case ']':
-            case '@':
-            case '(':
-            case ')':
-            case '_':
-            case ',':
-            case '~':
-            case ' ':
-                return (char) c;
-            default:
-                throw new JSONException(info("unclosed.str '\\" + (char) c));
+        byte b = CHAR1_ESCAPED[c & 0x7f];
+        if (b == -1) {
+            throw char1Error(c);
         }
+        return (char) b;
+    }
+
+    protected JSONException char1Error(int c) {
+        return new JSONException(info("unclosed.str '\\" + (char) c));
     }
 
     static char char2(int c1, int c2) {
@@ -1503,6 +1517,15 @@ public abstract class JSONReader
     }
 
     /**
+     * Checks if the current character represents the start of a JSON boolean.
+     *
+     * @return true if the current character is 't' (true) or 'f' (false), false otherwise
+     */
+    public boolean isBool() {
+        return this.ch == 't' || this.ch == 'f';
+    }
+
+    /**
      * Advances the reader to the end of the current JSON array.
      */
     public void endArray() {
@@ -1603,6 +1626,14 @@ public abstract class JSONReader
      * @return The hash code of the current field name
      */
     public abstract long readFieldNameHashCode();
+
+    public long readFieldNameHashCode(int keySie, int min, int max) {
+        return readFieldNameHashCode();
+    }
+
+    public long readFieldNameHashCodeE(int size0, int size1, int size3) {
+        return readFieldNameHashCode();
+    }
 
     /**
      * Reads the hash code of the current field name in lowercase.
@@ -2062,19 +2093,7 @@ public abstract class JSONReader
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 : mag3;
                 }
-                Number number = getNumber();
-                if (number instanceof BigInteger) {
-                    BigInteger bigInt = (BigInteger) number;
-                    if ((context.features & Feature.NonErrorOnNumberOverflow.mask) != 0) {
-                        return bigInt.longValue();
-                    }
-                    try {
-                        return bigInt.longValueExact();
-                    } catch (ArithmeticException e) {
-                        throw numberError();
-                    }
-                }
-                return number.doubleValue();
+                return getNumber().doubleValue();
             case JSON_TYPE_DEC:
             case JSON_TYPE_INT64:
             case JSON_TYPE_FLOAT:
@@ -3355,6 +3374,13 @@ public abstract class JSONReader
                 continue;
             }
 
+            if ((contextFeatures & Feature.SupportAutoType.mask) != 0
+                    && name.equals("@type")
+                    && object.getClass().getName().equals(value)
+            ) {
+                continue;
+            }
+
             Object origin = map.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -3628,6 +3654,13 @@ public abstract class JSONReader
                 continue;
             }
 
+            if ((contextFeatures & Feature.SupportAutoType.mask) != 0
+                    && name.equals("@type")
+                    && object.getClass().getName().equals(value)
+            ) {
+                continue;
+            }
+
             Object origin = object.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -3772,6 +3805,13 @@ public abstract class JSONReader
             }
 
             if (val == null && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
+            if ((context.features & Feature.SupportAutoType.mask) != 0
+                    && name.equals("@type")
+                    && object.getClass().getName().equals(val)
+            ) {
                 continue;
             }
 
@@ -4382,11 +4422,13 @@ public abstract class JSONReader
             }
             case JSON_TYPE_DEC: {
                 BigDecimal decimal = null;
+                boolean needsExponent = false;
 
                 if (mag0 == 0 && mag1 == 0) {
                     if (mag2 == 0 && mag3 >= 0) {
                         int unscaledVal = negative ? -mag3 : mag3;
                         decimal = BigDecimal.valueOf(unscaledVal, scale);
+                        needsExponent = true;
                     } else {
                         long v3 = mag3 & 0XFFFFFFFFL;
                         long v2 = mag2 & 0XFFFFFFFFL;
@@ -4395,6 +4437,7 @@ public abstract class JSONReader
                             long v23 = (v2 << 32) + v3;
                             long unscaledVal = negative ? -v23 : v23;
                             decimal = BigDecimal.valueOf(unscaledVal, scale);
+                            needsExponent = true;
                         }
                     }
                 }
@@ -4421,7 +4464,10 @@ public abstract class JSONReader
                         return Double.parseDouble(
                                 decimalStr + "E" + exponent);
                     }
-                    return decimal.signum() == 0 ? BigDecimal.ZERO : new BigDecimal(decimalStr + "E" + exponent);
+                    if (needsExponent) {
+                        return decimal.signum() == 0 ? BigDecimal.ZERO : new BigDecimal(decimalStr + "E" + exponent);
+                    }
+                    return decimal.signum() == 0 ? BigDecimal.ZERO : decimal;
                 }
 
                 if ((context.features & Feature.UseDoubleForDecimals.mask) != 0) {
@@ -4431,7 +4477,10 @@ public abstract class JSONReader
                 return decimal;
             }
             case JSON_TYPE_BIG_DEC: {
-                if (scale > 0) {
+                boolean hasExponent = stringValue.indexOf('e') != -1 || stringValue.indexOf('E') != -1;
+                if (hasExponent) {
+                    return toBigDecimal(stringValue);
+                } else if (scale > 0) {
                     if (scale > defaultDecimalMaxScale) {
                         throw new JSONException("scale overflow : " + scale);
                     }
@@ -6581,6 +6630,10 @@ public abstract class JSONReader
         return new JSONException(info(message));
     }
 
+    final JSONException error(String message, int ch) {
+        return new JSONException(info(message).concat(Integer.toString(ch)));
+    }
+
     final JSONException error(String message, Exception cause) {
         return new JSONException(info(message), cause);
     }
@@ -6812,5 +6865,23 @@ public abstract class JSONReader
             return null;
         }
         return str;
+    }
+
+    protected final long readFieldNameHashCodeError(int nameBegin, int ch) {
+        if ((context.features & MASK_ALLOW_UN_QUOTED_FIELD_NAMES) != 0 && isFirstIdentifier(ch)) {
+            return readFieldNameHashCodeUnquote();
+        }
+        if (ch == '}' || nextIfNull()) {
+            return -1;
+        }
+
+        String errorMsg, preFieldName;
+        if (ch == '[' && nameBegin > 0 && (preFieldName = getFieldName()) != null) {
+            errorMsg = "illegal fieldName input " + ch + ", previous fieldName " + preFieldName;
+        } else {
+            errorMsg = "illegal fieldName input" + ch;
+        }
+
+        throw new JSONException(info(errorMsg));
     }
 }

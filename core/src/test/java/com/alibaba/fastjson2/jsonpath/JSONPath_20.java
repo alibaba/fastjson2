@@ -1,12 +1,14 @@
 package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.JSONPath;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 
 import static org.junit.jupiter.api.AssertionsKt.assertNotNull;
 
+@Tag("jsonpath")
 public class JSONPath_20 {
     @Test
     public void testMultiPathHasSame() {

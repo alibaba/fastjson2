@@ -8,10 +8,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 
+@Tag("regression")
+@Tag("jsonb")
+@Tag("autotype")
 public class Issue3499 {
     @Test
     public void test() {

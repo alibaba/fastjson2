@@ -25,6 +25,15 @@ final class ObjectWriterBigInteger
     }
 
     @Override
+    public void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        if (object == null) {
+            jsonWriter.writeNumberNull();
+            return;
+        }
+        jsonWriter.writeBigInt((BigInteger) object, features);
+    }
+
+    @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
             jsonWriter.writeNumberNull();

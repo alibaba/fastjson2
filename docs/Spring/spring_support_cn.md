@@ -1,0 +1,425 @@
+# 在 Spring 中集成 Fastjson2
+
+# 0. 依赖配置
+
+Fastjson2采用多module的结构设计，对SpringFramework等框架的支持现独立在`extension`包中。
+
+`Maven`:
+
+```xml
+<dependency>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2-extension-spring5</artifactId>
+    <version>2.0.61</version>
+</dependency>
+
+or
+
+<dependency>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2-extension-spring6</artifactId>
+    <version>2.0.61</version>
+</dependency>
+```
+
+`Gradle`:
+
+```groovy
+dependencies {
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.61'
+}
+
+or
+
+dependencies {
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.61'
+}
+```
+> 2.0.23版本之后为了兼容Spring 5.x / 6.x，将不同版本独立开不同的依赖包。
+> 如使用2.0.23之前的版本，请参考：
+
+`Maven`:
+
+```xml
+<dependency>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2-extension</artifactId>
+    <version>2.0.x</version>
+</dependency>
+```
+
+`Gradle`:
+
+```groovy
+dependencies {
+    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.x'
+}
+```
+
+
+# 1. 参数配置
+
+Fastjson2对于序列化和反序列化的行为进行了重新设计，所以`FastJsonConfig`也会重新适配。
+
+**Package**: `com.alibaba.fastjson2.support.config.FastJsonConfig`
+
+**Attributes**:
+
+参数 | 类型 | 描述
+---- | ---- | ----
+charset | Charset | 指定的字符集，默认UTF-8
+dateFormat | String | 指定的日期格式，默认yyyy-MM-dd HH:mm:ss
+writerFilters | Filter[] | 配置序列化过滤器
+writerFeatures | JSONWriter.Feature[] | 配置序列化的指定行为，更多配置请见：[Features文档](../features_cn.md)
+readerFilters | Filter[] | 配置反序列化过滤器
+readerFeatures | JSONReader.Feature[] | 配置反序列化的指定行为，更多配置请见：[Features文档](../features_cn.md)
+jsonb | boolean | 是否采用JSONB进行序列化和反序列化，默认false
+symbolTable | JSONB.SymbolTable | JSONB序列化和反序列化的符号表，只有使用JSONB时生效
+
+# 2. 在 Spring Web MVC 中集成 Fastjson2
+
+在Fastjson2中，同样可以使用`FastJsonHttpMessageConverter` 和 `FastJsonJsonView` 为 Spring MVC 构建的 Web 应用提供更好的性能体验。
+
+## 2. 配置FastJsonHttpMessageConverter
+
+### 2.1 Spring MVC 7.0 及以上版本
+
+从 Spring MVC 7.0 开始，`configureMessageConverters(List<HttpMessageConverter<?>>)` 方法已被弃用，改为使用新的 `HttpMessageConverters.ServerBuilder` 方式进行配置。
+
+```java
+@Configuration
+public class FastJsonWebMvcConfiguration extends WebMvcConfigurationSupport {
+
+    @Override
+    protected void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+        FastJsonConfig config = new FastJsonConfig();
+        config.setDateFormat("yyyy-MM-dd HH:mm:ss");
+        config.setCharset(StandardCharsets.UTF_8);
+
+        converter.setFastJsonConfig(config);
+        // 从2.0.60版本开始，FastJsonHttpMessageConverter默认charset已经是UTF-8，无需手动设置
+        // converter.setDefaultCharset(StandardCharsets.UTF_8);
+
+        // 使用 withJsonConverter 方法替换默认的 JSON 转换器
+        builder.withJsonConverter(converter);
+    }
+}
+```
+
+**注意**：Spring MVC 7.0 的 `HttpMessageConverters.ServerBuilder` 提供了不同的方法来配置不同类型的消息转换器：
+- `withJsonConverter()` - 用于配置 JSON 转换器
+- `withXmlConverter()` - 用于配置 XML 转换器
+- `withStringConverter()` - 用于配置字符串转换器
+- `addCustomConverter()` - 用于添加自定义转换器（会添加到默认转换器之前）
+- `configureMessageConverters()` - 用于配置所有已选择的消息转换器
+
+### 2.2 Spring MVC 6.x 及以下版本
+
+对于 Spring MVC 6.x 及以下版本，继续使用原有的配置方式：
+
+```java
+@Configuration
+public class FastJsonWebMvcConfiguration extends WebMvcConfigurationSupport {
+
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+        FastJsonConfig config = new FastJsonConfig();
+        config.setDateFormat("yyyy-MM-dd HH:mm:ss");
+        config.setCharset(StandardCharsets.UTF_8);
+
+        converter.setFastJsonConfig(config);
+        // 从2.0.61版本开始，FastJsonHttpMessageConverter默认charset已经是UTF-8，无需手动设置
+        // converter.setDefaultCharset(StandardCharsets.UTF_8);
+        converters.add(0, converter);
+    }
+}
+```
+
+## 2.2  Spring Web MVC View
+
+使用 `FastJsonJsonView` 来设置 Spring MVC 默认的视图模型解析器，以提高 `@Controller` `@ResponseBody` `ModelAndView` JSON序列化速度。
+
+**Package**: `com.alibaba.fastjson2.support.spring.webservlet.view.FastJsonJsonView`
+
+**Before Spring 5 Example**:
+
+```java
+
+@Configuration
+@EnableWebMvc
+public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
+
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        FastJsonJsonView fastJsonJsonView = new FastJsonJsonView();
+        //自定义配置...
+        //FastJsonConfig config = new FastJsonConfig();
+        //config.set...
+        //fastJsonJsonView.setFastJsonConfig(config);
+        registry.enableContentNegotiation(fastJsonJsonView);
+    }
+}
+```
+
+从Spring5.0版本开始，`WebMvcConfigurerAdapter` 已被弃用，您可以直接实现`WebMvcConfigurer`接口，而无需使用此适配器。
+
+**After Spring 5 Example**:
+
+```java
+
+@Configuration
+@EnableWebMvc
+public class CustomWebMvcConfigurer implements WebMvcConfigurer {
+
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        FastJsonJsonView fastJsonJsonView = new FastJsonJsonView();
+        //自定义配置...
+        //FastJsonConfig config = new FastJsonConfig();
+        //config.set...
+        //fastJsonJsonView.setFastJsonConfig(config);
+        registry.enableContentNegotiation(fastJsonJsonView);
+    }
+
+}
+```
+
+> 参考：Spring Framework 官方文档 Spring Web MVC 部分，[查看更多](https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-config) 。
+
+# 3. 在 Spring Webflux 中集成 Fastjson2
+
+Fastjson2提供了针对Spring响应式编解码的支持，可以使用`Fastjson2Decoder`和`Fastjson2Encoder`来替换Spring默认的`Decoder`和`Encoder`。
+
+**Packages**:
+
+- `com.alibaba.fastjson2.support.spring.codec.Fastjson2Decoder`
+- `com.alibaba.fastjson2.support.spring.codec.Fastjson2Encoder`
+
+**Spring6 Packages**:
+
+- `com.alibaba.fastjson2.support.spring6.codec.Fastjson2Decoder`
+- `com.alibaba.fastjson2.support.spring6.codec.Fastjson2Encoder`
+
+**Example1**:
+
+```java
+@Configuration
+public class CustomWebfluxConfigure implements WebFluxConfigurer {
+
+    @Override
+    public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+        //configurer.registerDefaults(false);
+        CodecConfigurer.CustomCodecs customCodecs = configurer.customCodecs();
+        //自定义配置
+        FastJsonConfig config = new FastJsonConfig();
+        config.setCharset(StandardCharsets.UTF_8);
+        config.setDateFormat("yyyy-MM-dd HH:mm:ss");
+        //设置支持的媒体类型
+        MimeType[] supportedMimeTypes = new MimeType[]{MediaType.APPLICATION_JSON};
+        //注册解码器
+        customCodecs.register(new Fastjson2Decoder(config,supportedMimeTypes));
+        //注册编码器
+        customCodecs.register(new Fastjson2Encoder(config,supportedMimeTypes));
+    }
+}
+```
+
+**Example2**:
+
+```java
+@Bean
+public CodecCustomizer codecCustomizer() {
+    return configurer -> {
+        //configurer.registerDefaults(false);
+        CodecConfigurer.CustomCodecs customCodecs = configurer.customCodecs();
+        //自定义配置
+        FastJsonConfig config = new FastJsonConfig();
+        config.setCharset(StandardCharsets.UTF_8);
+        config.setDateFormat("yyyy-MM-dd HH:mm:ss");
+        //设置支持的媒体类型
+        MimeType[] supportedMimeTypes = new MimeType[]{MediaType.APPLICATION_JSON};
+        //注册解码器
+        customCodecs.register(new Fastjson2Decoder(config, supportedMimeTypes));
+        //注册编码器
+        customCodecs.register(new Fastjson2Encoder(config, supportedMimeTypes));
+    };
+}
+```
+
+# 4. 在 Spring Web Socket 中集成 Fastjson2
+
+在Fastjson2中，同样也对 Spring WebSocket 给予支持，可以使用 `FastjsonSockJsMessageCodec` 进行配置。
+
+**Package**: `com.alibaba.fastjson2.support.spring.websocket.sockjs.FastjsonSockJsMessageCodec`
+
+**Example**:
+
+```java
+
+@Component
+@EnableWebSocket
+public class WebSocketConfig extends WebMvcConfigurerAdapter implements WebSocketConfigurer {
+
+    @Resource
+    WebSocketHandler handler;
+
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        //自定义配置...
+        //FastjsonSockJsMessageCodec messageCodec = new FastjsonSockJsMessageCodec();
+        //FastJsonConfig config = new FastJsonConfig();
+        //config.set...
+        //messageCodec.setFastJsonConfig(config);
+        registry.addHandler(handler, "/sockjs").withSockJS().setMessageCodec(new FastjsonSockJsMessageCodec());
+    }
+
+}
+```
+
+> 参考：Spring Framework 官方文档 Spring Web Socket 部分，[查看更多](https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#websocket) 。
+
+# 5. 在 Spring Data Redis 中集成 Fastjson2
+
+在Fastjson2中，同样可以使用 `GenericFastJsonRedisSerializer` 或 `FastJsonRedisSerializer` 为 Spring Data Redis 提供更好的性能体验。
+
+## 5.1 Generic Redis Serializer
+
+使用 `GenericFastJsonRedisSerializer` 作为 `RedisTemplate` 的 `RedisSerializer` 来提升JSON序列化和反序列化速度。
+
+**Package**: `com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonRedisSerializer`
+
+**Example**:
+
+```java
+
+@Configuration
+public class RedisConfiguration {
+
+    @Bean
+    public RedisTemplate redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate redisTemplate = new RedisTemplate();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+
+        GenericFastJsonRedisSerializer fastJsonRedisSerializer = new GenericFastJsonRedisSerializer();
+        redisTemplate.setDefaultSerializer(fastJsonRedisSerializer);//设置默认的Serialize，包含 keySerializer & valueSerializer
+
+        //redisTemplate.setKeySerializer(fastJsonRedisSerializer);//单独设置keySerializer
+        //redisTemplate.setValueSerializer(fastJsonRedisSerializer);//单独设置valueSerializer
+        return redisTemplate;
+    }
+}
+```
+
+## 5.2 Customized Redis Serializer
+
+通常使用 `GenericFastJsonRedisSerializer` 即可满足大部分场景，如果你想定义特定类型专用的 `RedisTemplate` 可以使用 `FastJsonRedisSerializer`
+来代替 `GenericFastJsonRedisSerializer` ，配置是类似的。
+
+**Package**: `com.alibaba.fastjson2.support.spring.data.redis.FastJsonRedisSerializer`
+
+**Example**:
+
+```java
+
+@Configuration
+public class RedisConfiguration {
+
+    @Bean
+    public RedisTemplate redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate redisTemplate = new RedisTemplate();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        FastJsonRedisSerializer fastJsonRedisSerializer = new FastJsonRedisSerializer(User.class);
+        redisTemplate.setDefaultSerializer(fastJsonRedisSerializer);
+        return redisTemplate;
+    }
+}
+
+```
+
+## 5.3 JSONB Redis Serializer
+
+如果你准备使用 JSONB 作为对象序列/反序列化的方式并对序列化速度有较高的要求的话，可以对jsonb参数进行配置，该参数是 fastjson 2.0.6 版本中新增的支持，配置也很简单。
+
+**Example**:
+
+```java
+
+@Configuration
+public class RedisConfiguration {
+
+    @Bean
+    public RedisTemplate redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate redisTemplate = new RedisTemplate();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        // GenericFastJsonRedisSerializer use jsonb
+        // GenericFastJsonRedisSerializer fastJsonRedisSerializer = new GenericFastJsonRedisSerializer(true);
+
+        // FastJsonRedisSerializer use jsonb
+        FastJsonRedisSerializer fastJsonRedisSerializer = new FastJsonRedisSerializer(User.class);
+        // FastJsonConfig fastJsonConfig = new FastJsonConfig();
+        // fastJsonConfig.setJSONB(true);
+        // fastJsonRedisSerializer.setFastJsonConfig(fastJsonConfig);
+        redisTemplate.setDefaultSerializer(fastJsonRedisSerializer);
+
+        return redisTemplate;
+    }
+}
+
+```
+
+> 参考：Spring Data Redis 官方文档，[查看更多](https://docs.spring.io/spring-data/redis/docs/current/reference/html/) 。
+
+# 6. 在 Spring Messaging 中集成 Fastjson2
+
+在Fastjson2中，同样可以使用 `MappingFastJsonMessageConverter` 为 Spring Messaging 提供更好的性能体验。
+
+## 6.1 JSON Message Converter
+
+使用 `MappingFastJsonMessageConverter` 作为 Spring Cloud Stream 或 Spring Messaging 来提升Message的序列化和反序列化速度。
+
+**Package**: `com.alibaba.fastjson2.support.spring.messaging.converter.MappingFastJsonMessageConverter`
+
+**Example**:
+
+```java
+
+@Configuration
+public class StreamConfiguration {
+
+    @Bean
+    @StreamMessageConverter
+    public MappingFastJsonMessageConverter messageConverter() {
+        return new MappingFastJsonMessageConverter();
+    }
+}
+
+```
+
+## 6.2 JSONB Message Converter
+
+如果你准备使用 JSONB 作为对象序列/反序列化的方式并对序列化速度有较高的要求的话，可以对 `FastJsonConfig` 的 `jsonb` 参数进行配置，该参数是 fastjson 2.0.6 版本中新增的支持，配置也很简单。
+
+_注意：JSONB仅支持将Message的payload序列化为byte[]_
+
+**Example**:
+
+```java
+
+@Configuration
+public class StreamConfiguration {
+
+    @Bean
+    @StreamMessageConverter
+    public MappingFastJsonMessageConverter messageConverter() {
+        MappingFastJsonMessageConverter messageConverter = new MappingFastJsonMessageConverter();
+        FastJsonConfig fastJsonConfig = new FastJsonConfig();
+        fastJsonConfig.setJSONB(true); // use jsonb
+        messageConverter.setFastJsonConfig(fastJsonConfig);
+        return messageConverter;
+    }
+}
+
+```
+
+> 参考：Spring Messaging 官方文档，[查看更多](https://docs.spring.io/spring-boot/docs/current/reference/html/messaging.html#messaging) 。

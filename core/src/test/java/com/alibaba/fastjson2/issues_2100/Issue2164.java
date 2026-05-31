@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_2100;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import lombok.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * @author 张治保
  * @since 2024/1/9
  */
+@Tag("regression")
 public class Issue2164 {
     @Setter
     @Getter

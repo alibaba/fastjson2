@@ -2,12 +2,15 @@ package com.alibaba.fastjson2.issues_3300;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("regression")
+@Tag("date")
 public class Issue3337 {
     @Test
     public void localDate() {

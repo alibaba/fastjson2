@@ -3,11 +3,13 @@ package com.alibaba.fastjson2.autoType;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+@Tag("autotype")
 public class AutoTypeTest41_dupRef {
     @Test
     public void test_1() throws Exception {
@@ -38,11 +40,8 @@ public class AutoTypeTest41_dupRef {
                 "\t\t\t\"id#2\":1001\n" +
                 "\t\t},\n" +
                 "\t\t\"item1#3\":{\"$ref\":\"$.item0\"},\n" +
-                "\t\t\"#3\":null,\n" +
                 "\t\t\"item2#4\":{\"$ref\":\"#-1\"},\n" +
-                "\t\t\"#4\":null,\n" +
-                "\t\t\"item3#5\":{\"$ref\":\"#-1\"},\n" +
-                "\t\t\"#5\":null\n" +
+                "\t\t\"item3#5\":{\"$ref\":\"#-1\"}\n" +
                 "\t}\n" +
                 "}", JSONB.toJSONString(bytes, true));
 
@@ -52,11 +51,8 @@ public class AutoTypeTest41_dupRef {
                 "\t\t\"id\":1001\n" +
                 "\t},\n" +
                 "\t\"item1\":{\"$ref\":\"$.item0\"},\n" +
-                "\t\"item1\":null,\n" +
                 "\t\"item2\":{\"$ref\":\"#-1\"},\n" +
-                "\t\"item2\":null,\n" +
-                "\t\"item3\":{\"$ref\":\"#-1\"},\n" +
-                "\t\"item3\":null\n" +
+                "\t\"item3\":{\"$ref\":\"#-1\"}\n" +
                 "}", JSONB.toJSONString(bytes, false));
 
         Bean bean2 = (Bean) JSONB.parseObject(

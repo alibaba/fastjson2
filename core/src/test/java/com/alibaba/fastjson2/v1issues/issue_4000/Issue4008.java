@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.v1issues.issue_4000;
 
 import com.alibaba.fastjson2.JSON;
 import org.json.JSONException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -10,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue4008 {
     @Test
     public void test_for_issue4008() throws JSONException {

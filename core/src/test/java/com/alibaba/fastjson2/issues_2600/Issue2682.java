@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.baomidou.mybatisplus.annotation.IEnum;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -15,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author yanxutao89
  * @author poo00
  */
+@Tag("regression")
+@Tag("annotation")
 public class Issue2682 {
     @Test
     public void test() {

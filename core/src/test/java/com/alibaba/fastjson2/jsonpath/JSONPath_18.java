@@ -3,11 +3,13 @@ package com.alibaba.fastjson2.jsonpath;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+@Tag("jsonpath")
 public class JSONPath_18 {
     String str = "{ \"inputs\": {\n" +
             "        \"sls_log_archive.mytable/project_id=101/category=log_game/import_time=1655031945_0\": [\n" +

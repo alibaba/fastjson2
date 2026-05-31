@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
@@ -228,7 +229,7 @@ public class ObjectWriterCreator {
             FieldInfo fieldInfo,
             Field field
     ) {
-        fieldInfo.features = writerFeatures;
+        fieldInfo.features = writerFeatures & ~BeanToArray.mask;
         provider.getFieldInfo(beanInfo, fieldInfo, objectClass, field);
 
         if (fieldInfo.ignore || isFunction(field.getType())) {
@@ -431,10 +432,13 @@ public class ObjectWriterCreator {
 
         provider.getBeanInfo(beanInfo, objectClass);
 
-        if (beanInfo.serializer != null && ObjectWriter.class.isAssignableFrom(beanInfo.serializer)) {
+        Class serializer = beanInfo.serializer;
+        if (serializer != null && ObjectWriter.class.isAssignableFrom(serializer)) {
             try {
-                return (ObjectWriter) beanInfo.serializer.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+                Constructor constructor = serializer.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                return (ObjectWriter) constructor.newInstance();
+            } catch (Exception e) {
                 throw new JSONException("create serializer error", e);
             }
         }
@@ -485,7 +489,7 @@ public class ObjectWriterCreator {
                 if (!record) {
                     BeanUtils.declaredFields(objectClass, field -> {
                         fieldInfo.init();
-                        fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
+                        fieldInfo.ignore = fieldInfo.isPrivate = (field.getModifiers() & Modifier.PUBLIC) == 0;
                         FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
                             if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
@@ -579,6 +583,7 @@ public class ObjectWriterCreator {
                                     fieldInfo.ordinal,
                                     fieldInfo.features,
                                     fieldInfo.format,
+                                    fieldInfo.locale,
                                     fieldInfo.label,
                                     method,
                                     writeUsingWriter,
@@ -765,7 +770,7 @@ public class ObjectWriterCreator {
                     }
 
                     if ((len == 1 && c0 >= 'a' && c0 <= 'z')
-                            || (len > 2 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
+                            || (len > 1 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
                     ) {
                         char[] chars = fieldName.toCharArray();
                         if (c0 >= 'a') {
@@ -776,8 +781,18 @@ public class ObjectWriterCreator {
                         String fieldName1 = new String(chars);
                         field = BeanUtils.getDeclaredField(objectClass, fieldName1);
 
-                        if (field != null && (len == 1 || Modifier.isPublic(field.getModifiers()))) {
-                            fieldName = field.getName();
+                        if (field != null) {
+                            boolean ucaseAll = true;
+                            for (int i = 2; i < chars.length; i++) {
+                                char c = chars[i];
+                                if (c >= 'a' && c <= 'z') {
+                                    ucaseAll = false;
+                                    break;
+                                }
+                            }
+                            if (ucaseAll || Modifier.isPublic(field.getModifiers())) {
+                                fieldName = field.getName();
+                            }
                         }
                     }
                 }
@@ -1028,7 +1043,7 @@ public class ObjectWriterCreator {
 //                fieldType = fieldClass = Boolean.class;
 //            }
 
-            FieldWriterObject objImp = new FieldWriterObject(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, null);
+            FieldWriterObject objImp = new FieldWriterObject(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, null, null);
             objImp.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objImp.initObjectWriter = initObjectWriter;
@@ -1037,62 +1052,74 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == boolean.class) {
-            return new FieldWriterBoolValField(fieldName, ordinal, features, format, label, field, fieldClass);
+            return new FieldWriterBoolValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == byte.class) {
-            return new FieldWriterInt8ValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterInt8Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == short.class) {
-            return new FieldWriterInt16ValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterInt16Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == int.class) {
-            return new FieldWriterInt32Val(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterInt32Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
-                return new FieldWriterInt64ValField(fieldName, ordinal, features, format, label, field);
+                return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
             }
-            return new FieldWriterMillisField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterMillis<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == float.class) {
-            return new FieldWriterFloatValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterFloatValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == Float.class) {
-            return new FieldWriterFloatField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterFloat<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == double.class) {
-            return new FieldWriterDoubleValField(fieldName, ordinal, format, label, field);
+            return new FieldWriterDoubleValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == Double.class) {
-            return new FieldWriterDoubleField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterDouble<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == char.class) {
-            return new FieldWriterCharValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterCharValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
+        }
+
+        if (fieldClass == Character.class) {
+            return new FieldWriterChar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldWriterBigIntField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterBigInt(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterBigDecimal(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
         if (fieldClass == java.util.Date.class) {
-            return new FieldWriterDateField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterDate<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
+        }
+
+        if (fieldClass == LocalDate.class) {
+            return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
+        }
+
+        if (fieldClass == OffsetDateTime.class) {
+            return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
         }
 
         if (fieldClass == String.class) {
-            return new FieldWriterStringField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterString<>(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
         if (fieldClass.isEnum()) {
@@ -1111,7 +1138,7 @@ public class ObjectWriterCreator {
             if (enumValueField == null && !writeEnumAsJavaBean) {
                 String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
                 if (enumAnnotationNames == null) {
-                    return new FieldWriterEnum(fieldName, ordinal, features, format, label, fieldType, (Class<? extends Enum>) fieldClass, field, null);
+                    return new FieldWriterEnum(fieldName, ordinal, features, format, locale, label, fieldClass, (Class<? extends Enum>) fieldClass, field, null, null);
                 }
             }
         }
@@ -1121,19 +1148,19 @@ public class ObjectWriterCreator {
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
             }
-            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, contentAs);
+            return new FieldWriterList(fieldName, itemType, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null, contentAs);
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterMapField(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, contentAs);
+            return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, null, contentAs);
         }
 
         if (fieldClass.isArray() && !fieldClass.getComponentType().isPrimitive()) {
             Class<?> itemClass = fieldClass.getComponentType();
-            return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, label, itemClass, fieldClass, field);
+            return new FieldWriterObjectArray(fieldName, itemClass, ordinal, features, format, label, itemClass, fieldClass, field, null, null);
         }
 
-        return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null);
+        return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, null);
     }
 
     /**
@@ -1268,12 +1295,12 @@ public class ObjectWriterCreator {
         Class<?> fieldClass = method.getReturnType();
         Type fieldType = method.getGenericReturnType();
 
-        if (initObjectWriter == null && provider != null) {
+        if (initObjectWriter == null && provider != null && (format == null || format.isEmpty() || fieldClass != Date.class)) {
             initObjectWriter = getInitWriter(provider, fieldClass);
         }
 
         if (initObjectWriter != null) {
-            FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
+            FieldWriterObject objMethod = new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method, null);
             objMethod.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objMethod.initObjectWriter = initObjectWriter;
@@ -1289,44 +1316,78 @@ public class ObjectWriterCreator {
                 ? null
                 : BeanUtils.getField(objectType, method);
 
-        if (fieldClass == boolean.class || fieldClass == Boolean.class) {
-            return new FieldWriterBoolMethod(fieldName, ordinal, features, format, label, field, method, fieldClass);
+        if (fieldClass == boolean.class) {
+            return new FieldWriterBoolValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == int.class || fieldClass == Integer.class) {
-            return new FieldWriterInt32Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+        if (fieldClass == Boolean.class) {
+            return new FieldWriterBool<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == float.class || fieldClass == Float.class) {
-            return new FieldWriterFloatMethod<>(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method);
+        if (fieldClass == int.class) {
+            return new FieldWriterInt32Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == double.class || fieldClass == Double.class) {
-            return new FieldWriterDoubleMethod<>(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method);
+        if (fieldClass == Integer.class) {
+            return new FieldWriterInt32<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == float.class) {
+            return new FieldWriterFloatValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == Float.class) {
+            return new FieldWriterFloat<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == double.class) {
+            return new FieldWriterDoubleValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == Double.class) {
+            return new FieldWriterDouble<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == long.class || fieldClass == Long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
-                return new FieldWriterInt64Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+                if (fieldClass == long.class) {
+                    return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+                }
+
+                if (fieldClass == Long.class) {
+                    return new FieldWriterInt64<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+                }
             }
 
-            return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
+            return new FieldWriterMillis<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == short.class || fieldClass == Short.class) {
-            return new FieldWriterInt16Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+        if (fieldClass == short.class) {
+            return new FieldWriterInt16Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == byte.class || fieldClass == Byte.class) {
-            return new FieldWriterInt8Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+        if (fieldClass == Short.class) {
+            return new FieldWriterInt16<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == char.class || fieldClass == Character.class) {
-            return new FieldWriterCharMethod(fieldName, ordinal, features, format, label, field, method, fieldClass);
+        if (fieldClass == byte.class) {
+            return new FieldWriterInt8Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == Byte.class) {
+            return new FieldWriterInt8<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == char.class) {
+            return new FieldWriterCharValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
+        }
+
+        if (fieldClass == Character.class) {
+            return new FieldWriterChar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalMethod<>(fieldName, ordinal, features, format, label, field, method);
+            return new FieldWriterBigDecimal(fieldName, ordinal, features, format, locale, label, field, method, null);
         }
 
         if (fieldClass.isEnum()
@@ -1335,7 +1396,7 @@ public class ObjectWriterCreator {
         ) {
             String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
             if (enumAnnotationNames == null) {
-                return new FieldWriterEnumMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
+                return new FieldWriterEnum(fieldName, ordinal, features, format, locale, label, fieldClass, (Class<? extends Enum>) fieldClass, field, method, null);
             }
         }
 
@@ -1348,11 +1409,23 @@ public class ObjectWriterCreator {
                 }
             }
 
-            return new FieldWriterDateMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
+            return new FieldWriterDate<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == LocalDate.class) {
+            return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == OffsetDateTime.class) {
+            return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
+        }
+
+        if (Calendar.class.isAssignableFrom(fieldClass)) {
+            return new FieldWriterCalendar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == String.class) {
-            return new FieldWriterStringMethod(fieldName, ordinal, format, label, features, field, method);
+            return new FieldWriterString<>(fieldName, ordinal, features, format, locale, label, field, method, null);
         }
 
         if (fieldClass == List.class || fieldClass == ArrayList.class || fieldClass == Iterable.class) {
@@ -1362,18 +1435,18 @@ public class ObjectWriterCreator {
             } else {
                 itemType = Object.class;
             }
-            return new FieldWriterListMethod(fieldName, itemType, ordinal, features, format, label, null, method, fieldType, fieldClass, contentAs);
+            return new FieldWriterList(fieldName, itemType, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null, contentAs);
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterMapMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method, contentAs);
+            return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null, contentAs);
         }
 
         if (fieldClass == Float[].class || fieldClass == Double[].class || fieldClass == BigDecimal[].class) {
-            return new FieldWriterObjectArrayMethod(fieldName, fieldClass.getComponentType(), ordinal, features, format, label, fieldType, fieldClass, field, method);
+            return new FieldWriterObjectArray(fieldName, fieldClass.getComponentType(), ordinal, features, format, label, fieldType, fieldClass, field, method, null);
         }
 
-        return new FieldWriterObjectMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
+        return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
     }
 
     /**
@@ -1385,7 +1458,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToLongFunction<T> function) {
-        return new FieldWriterInt64ValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterInt64Value<>(fieldName, 0, 0, null, null, null, long.class, long.class, null, null, function);
     }
 
     /**
@@ -1397,7 +1470,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToIntFunction<T> function) {
-        return new FieldWriterInt32ValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterInt32Value<>(fieldName, 0, 0, null, null, null, int.class, int.class, null, null, function);
     }
 
     /**
@@ -1411,7 +1484,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, Field field, Method method, ToIntFunction<T> function) {
-        return new FieldWriterInt32ValFunc(fieldName, 0, 0, null, null, field, method, function);
+        return new FieldWriterInt32Value<>(fieldName, 0, 0, null, null, null, int.class, int.class, field, method, function);
     }
 
     /**
@@ -1423,7 +1496,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToShortFunction<T> function) {
-        return new FieldWriterInt16ValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterInt16Value<>(fieldName, 0, 0, null, null, null, short.class, short.class, null, null, function);
     }
 
     /**
@@ -1435,7 +1508,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToByteFunction<T> function) {
-        return new FieldWriterInt8ValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterInt8Value<>(fieldName, 0, 0, null, null, null, byte.class, byte.class, null, null, function);
     }
 
     /**
@@ -1447,7 +1520,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToFloatFunction<T> function) {
-        return new FieldWriterFloatValueFunc(fieldName, 0, 0L, null, null, null, null, function);
+        return new FieldWriterFloatValue<>(fieldName, 0, 0, null, null, null, double.class, double.class, null, null, function);
     }
 
     /**
@@ -1459,7 +1532,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToDoubleFunction<T> function) {
-        return new FieldWriterDoubleValueFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterDoubleValue<>(fieldName, 0, 0, null, null, null, double.class, double.class, null, null, function);
     }
 
     /**
@@ -1471,7 +1544,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToCharFunction<T> function) {
-        return new FieldWriterCharValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterCharValue<>(fieldName, 0, 0, null, null, null, char.class, char.class, null, null, function);
     }
 
     /**
@@ -1483,7 +1556,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, Predicate<T> function) {
-        return new FieldWriterBoolValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterBoolValue<>(fieldName, 0, 0, null, null, null, boolean.class, boolean.class, null, null, function);
     }
 
     /**
@@ -1493,7 +1566,7 @@ public class ObjectWriterCreator {
      * @param <V> the type of field values
      * @param fieldName the name of the field
      * @param fieldClass the class of the field
-     * @param function the Function to create a writer for
+     * @param function the Function to create a writer fork
      * @return a FieldWriter instance
      */
     public <T, V> FieldWriter createFieldWriter(
@@ -1744,51 +1817,51 @@ public class ObjectWriterCreator {
             Class<?> contentAs
     ) {
         if (fieldClass == Byte.class) {
-            return new FieldWriterInt8Func(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterInt8(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == Short.class) {
-            return new FieldWriterInt16Func(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterInt16(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == Integer.class) {
-            return new FieldWriterInt32Func(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterInt32(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == Long.class) {
-            return new FieldWriterInt64Func(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterInt64(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldWriterBigIntFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterBigInt(fieldName, ordinal, features, format, locale, label, field, method, function);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterBigDecimal(fieldName, ordinal, features, format, locale, label, field, method, function);
         }
 
         if (fieldClass == String.class) {
-            return new FieldWriterStringFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterString<>(fieldName, ordinal, features, format, locale, label, field, method, function);
         }
 
         if (fieldClass == Date.class) {
-            return new FieldWriterDateFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterDate<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, function);
         }
 
         if (fieldClass == LocalDate.class) {
-            return new FieldWriterLocalDateFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == OffsetDateTime.class) {
-            return new FieldWriterOffsetDateTimeFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == UUID.class) {
-            return new FieldWriterUUIDFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterUUID(fieldName, ordinal, features, format, locale, label, field, method, function);
         }
 
         if (Calendar.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterCalendarFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterCalendar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, function);
         }
 
         if (fieldClass.isEnum()) {
@@ -1809,7 +1882,7 @@ public class ObjectWriterCreator {
             if (!writeEnumAsJavaBean && BeanUtils.getEnumValueField(fieldClass, provider) == null) {
                 String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
                 if (enumAnnotationNames == null) {
-                    return new FieldWriterEnumFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+                    return new FieldWriterEnum(fieldName, ordinal, features, format, locale, label, fieldClass, (Class<? extends Enum>) fieldClass, field, method, function);
                 }
             }
         }
@@ -1822,23 +1895,20 @@ public class ObjectWriterCreator {
             if (rawType == List.class || rawType == ArrayList.class || rawType == Iterable.class) {
                 if (actualTypeArguments.length == 1) {
                     Type itemType = actualTypeArguments[0];
-                    if (itemType == String.class) {
-                        return new FieldWriterListStrFunc(fieldName, ordinal, features, format, label, field, method, function, fieldType, fieldClass);
-                    }
-                    return new FieldWriterListFunc(fieldName, ordinal, features, format, label, itemType, field, method, function, fieldType, fieldClass, contentAs);
+                    return new FieldWriterList(fieldName, itemType, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function, contentAs);
                 }
             }
 
             if (rawType instanceof Class && Map.class.isAssignableFrom((Class) rawType)) {
-                return new FieldWriterMapFunction(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function, contentAs);
+                return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function, contentAs);
             }
         }
 
         if (Modifier.isFinal(fieldClass.getModifiers())) {
-            return new FieldWriterObjectFuncFinal(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterObjectFinal(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
-        return new FieldWriterObjectFunc(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+        return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
     }
 
     static class LambdaInfo {
@@ -1951,6 +2021,22 @@ public class ObjectWriterCreator {
             ObjectWriter initObjectWriter,
             Class<?> contentAs
     ) {
+        return createFieldWriterLambda(provider, objectClass, fieldName, ordinal, features, format, null, label, method, initObjectWriter, contentAs);
+    }
+
+    <T> FieldWriter<T> createFieldWriterLambda(
+            ObjectWriterProvider provider,
+            Class<T> objectClass,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            String label,
+            Method method,
+            ObjectWriter initObjectWriter,
+            Class<?> contentAs
+    ) {
         Class<?> fieldClass = method.getReturnType();
         Type fieldType = method.getGenericReturnType();
 
@@ -1972,54 +2058,58 @@ public class ObjectWriterCreator {
         Field field = BeanUtils.getField(objectClass, method);
 
         if (fieldClass == int.class) {
-            return new FieldWriterInt32ValFunc(fieldName, ordinal, features, format, label, null, method, (ToIntFunction<T>) lambda);
+            return new FieldWriterInt32Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
-                return new FieldWriterInt64ValFunc(fieldName, ordinal, features, format, label, field, method, (ToLongFunction) lambda);
+                return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
             }
 
-            return new FieldWriterMillisFunc(fieldName, ordinal, features, format, label, field, method, (ToLongFunction) lambda);
+            return new FieldWriterMillis<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == boolean.class) {
-            return new FieldWriterBoolValFunc(fieldName, ordinal, features, format, label, field, method, (Predicate<T>) lambda);
+            return new FieldWriterBoolValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == Boolean.class) {
-            return new FieldWriterBooleanFunc(fieldName, ordinal, features, format, label, field, method, (Function) lambda);
+            return new FieldWriterBool<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == short.class) {
-            return new FieldWriterInt16ValFunc(fieldName, ordinal, features, format, label, field, method, (ToShortFunction) lambda);
+            return new FieldWriterInt16Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == byte.class) {
-            return new FieldWriterInt8ValFunc(fieldName, ordinal, features, format, label, field, method, (ToByteFunction) lambda);
+            return new FieldWriterInt8Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == float.class) {
-            return new FieldWriterFloatValueFunc(fieldName, ordinal, features, format, label, field, method, (ToFloatFunction) lambda);
+            return new FieldWriterFloatValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == Float.class) {
-            return new FieldWriterFloatFunc(fieldName, ordinal, features, format, label, field, method, (Function) lambda);
+            return new FieldWriterFloat<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == double.class) {
-            return new FieldWriterDoubleValueFunc(fieldName, ordinal, features, format, label, field, method, (ToDoubleFunction) lambda);
+            return new FieldWriterDoubleValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == Double.class) {
-            return new FieldWriterDoubleFunc(fieldName, ordinal, features, format, label, field, method, (Function) lambda);
+            return new FieldWriterDouble<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == char.class) {
-            return new FieldWriterCharValFunc(fieldName, ordinal, features, format, label, field, method, (ToCharFunction) lambda);
+            return new FieldWriterCharValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
+        }
+
+        if (fieldClass == Character.class) {
+            return new FieldWriterChar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         Function function = (Function) lambda;
-        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function, contentAs);
+        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function, contentAs);
     }
 }

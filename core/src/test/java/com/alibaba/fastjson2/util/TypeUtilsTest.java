@@ -1,9 +1,16 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2_vo.Double1;
 import com.alibaba.fastjson2_vo.Double2;
 import com.alibaba.fastjson2_vo.Int1;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -19,6 +26,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.BIGINT_JAVASCRIPT_HIGH;
 import static com.alibaba.fastjson2.util.TypeUtils.BIGINT_JAVASCRIPT_LOW;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class TypeUtilsTest {
     @Test
     public void test_0() {

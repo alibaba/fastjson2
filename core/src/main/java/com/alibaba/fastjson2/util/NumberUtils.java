@@ -310,7 +310,11 @@ public final class NumberUtils {
         NEGATIVE_DECIMAL_POWER_CHARS[NEGATIVE_DECIMAL_POWER_CHARS.length - 1] = "4.9E-324".toCharArray();
     }
 
-    public static int writeDouble(byte[] buf, int off, double doubleValue, boolean json) {
+    public static int writeDouble(byte[] buf, int off, double doubleValue, boolean json, boolean writeSpecialAsString) {
+        if (Double.isNaN(doubleValue) || doubleValue == Double.POSITIVE_INFINITY || doubleValue == Double.NEGATIVE_INFINITY) {
+            return writeSpecial(buf, off, (float) doubleValue, json, writeSpecialAsString);
+        }
+
         long bits;
         if (doubleValue == 0) {
             bits = Double.doubleToLongBits(doubleValue);
@@ -323,9 +327,7 @@ public final class NumberUtils {
         }
         boolean sign = doubleValue < 0;
         if (sign) {
-            if (!json || doubleValue != Double.NEGATIVE_INFINITY) {
-                buf[off++] = '-';
-            }
+            buf[off++] = '-';
             doubleValue = -doubleValue;
         }
         if (doubleValue == (long) doubleValue) {
@@ -337,22 +339,6 @@ public final class NumberUtils {
         int e10 = scientific.e10;
         if (!scientific.b) {
             return writeDecimal(scientific.output, scientific.count, scientific.e10, buf, off);
-        }
-        if (scientific == Scientific.SCIENTIFIC_NULL) {
-            if (json) {
-                IOUtils.putIntUnaligned(buf, off, IOUtils.NULL_32);
-                return off + 4;
-            } else {
-                if (doubleValue == Double.POSITIVE_INFINITY) {
-                    IOUtils.putLongUnaligned(buf, off, INFINITY);
-                    return off + 8;
-                } else {
-                    buf[off] = 'N';
-                    buf[off + 1] = 'a';
-                    buf[off + 2] = 'N';
-                    return off + 3;
-                }
-            }
         }
         if (e10 >= 0) {
             char[] chars = POSITIVE_DECIMAL_POWER_CHARS[e10];
@@ -369,7 +355,11 @@ public final class NumberUtils {
         }
     }
 
-    public static int writeDouble(char[] buf, int off, double doubleValue, boolean json) {
+    public static int writeDouble(char[] buf, int off, double doubleValue, boolean json, boolean writeSpecialAsString) {
+        if (Double.isNaN(doubleValue) || doubleValue == Double.POSITIVE_INFINITY || doubleValue == Double.NEGATIVE_INFINITY) {
+            return writeSpecial(buf, off, (float) doubleValue, json, writeSpecialAsString);
+        }
+
         long bits;
         if (doubleValue == 0) {
             bits = Double.doubleToLongBits(doubleValue);
@@ -382,9 +372,7 @@ public final class NumberUtils {
         }
         boolean sign = doubleValue < 0;
         if (sign) {
-            if (!json || doubleValue != Double.NEGATIVE_INFINITY) {
-                buf[off++] = '-';
-            }
+            buf[off++] = '-';
             doubleValue = -doubleValue;
         }
 
@@ -399,23 +387,6 @@ public final class NumberUtils {
         if (!scientific.b) {
             return writeDecimal(scientific.output, scientific.count, e10, buf, off);
         }
-        if (scientific == Scientific.SCIENTIFIC_NULL) {
-            if (json) {
-                IOUtils.putLongUnaligned(buf, off, NULL_64);
-                return off + 4;
-            } else {
-                if (doubleValue == Double.POSITIVE_INFINITY) {
-                    IOUtils.putLongUnaligned(buf, off, INFI);
-                    IOUtils.putLongUnaligned(buf, off + 4, NITY);
-                    return off + 8;
-                } else {
-                    buf[off] = 'N';
-                    buf[off + 1] = 'a';
-                    buf[off + 2] = 'N';
-                    return off + 3;
-                }
-            }
-        }
         if (e10 >= 0) {
             char[] chars = POSITIVE_DECIMAL_POWER_CHARS[e10];
             System.arraycopy(chars, 0, buf, off, chars.length);
@@ -427,9 +398,9 @@ public final class NumberUtils {
         }
     }
 
-    public static int writeFloat(byte[] buf, int off, float floatValue, boolean json) {
+    public static int writeFloat(byte[] buf, int off, float floatValue, boolean json, boolean writeSpecialAsString) {
         if (Float.isNaN(floatValue) || floatValue == Float.POSITIVE_INFINITY || floatValue == Float.NEGATIVE_INFINITY) {
-            return writeSpecial(buf, off, floatValue, json);
+            return writeSpecial(buf, off, floatValue, json, writeSpecialAsString);
         }
         int bits;
         if (floatValue == 0) {
@@ -451,9 +422,9 @@ public final class NumberUtils {
         return writeDecimal(scientific.output, scientific.count, scientific.e10, buf, off);
     }
 
-    public static int writeFloat(char[] buf, int off, float floatValue, boolean json) {
+    public static int writeFloat(char[] buf, int off, float floatValue, boolean json, boolean writeSpecialAsString) {
         if (Float.isNaN(floatValue) || floatValue == Float.POSITIVE_INFINITY || floatValue == Float.NEGATIVE_INFINITY) {
-            return writeSpecial(buf, off, floatValue, json);
+            return writeSpecial(buf, off, floatValue, json, writeSpecialAsString);
         }
         int bits;
         if (floatValue == 0) {
@@ -475,47 +446,62 @@ public final class NumberUtils {
         return writeDecimal(scientific.output, scientific.count, scientific.e10, buf, off);
     }
 
-    private static int writeSpecial(byte[] buf, int off, float floatValue, boolean json) {
-        if (json) {
+    private static int writeSpecial(byte[] buf, int off, float floatValue, boolean json, boolean writeSpecialAsString) {
+        if (json && !writeSpecialAsString) {
             IOUtils.putIntUnaligned(buf, off, NULL_32);
             return off + 4;
+        }
+        if (writeSpecialAsString) {
+            buf[off++] = '"';
         }
 
         if (Float.isNaN(floatValue)) {
             buf[off] = 'N';
             buf[off + 1] = 'a';
             buf[off + 2] = 'N';
-            return off + 3;
+            off += 3;
+        } else {
+            if (floatValue < 0) {
+                buf[off++] = '-';
+            }
+            IOUtils.putLongUnaligned(buf, off, INFINITY);
+            off += 8;
         }
 
-        if (floatValue == Float.NEGATIVE_INFINITY) {
-            buf[off++] = '-';
+        if (writeSpecialAsString) {
+            buf[off++] = '"';
         }
-
-        IOUtils.putLongUnaligned(buf, off, INFINITY);
-        return off + 8;
+        return off;
     }
 
-    private static int writeSpecial(char[] buf, int off, float floatValue, boolean json) {
-        if (json) {
+    private static int writeSpecial(char[] buf, int off, float floatValue, boolean json, boolean writeSpecialAsString) {
+        if (json && !writeSpecialAsString) {
             IOUtils.putLongUnaligned(buf, off, NULL_64);
             return off + 4;
         }
 
+        if (writeSpecialAsString) {
+            buf[off++] = '"';
+        }
+
         if (Float.isNaN(floatValue)) {
             buf[off] = 'N';
             buf[off + 1] = 'a';
             buf[off + 2] = 'N';
-            return off + 3;
+            off += 3;
+        } else {
+            if (floatValue < 0) {
+                buf[off++] = '-';
+            }
+            IOUtils.putLongUnaligned(buf, off, INFI);
+            IOUtils.putLongUnaligned(buf, off + 4, NITY);
+            off += 8;
         }
 
-        if (floatValue == Float.NEGATIVE_INFINITY) {
-            buf[off++] = '-';
+        if (writeSpecialAsString) {
+            buf[off++] = '"';
         }
-
-        IOUtils.putLongUnaligned(buf, off, INFI);
-        IOUtils.putLongUnaligned(buf, off + 4, NITY);
-        return off + 8;
+        return off;
     }
 
     static final int MOD_FLOAT_EXP = (1 << 8) - 1;

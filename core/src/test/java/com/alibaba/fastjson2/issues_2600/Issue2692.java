@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues_2600;
 
 import com.alibaba.fastjson2.JSONValidator;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -8,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("regression")
 public class Issue2692 {
     @Test
     public void testWithUTF16() {

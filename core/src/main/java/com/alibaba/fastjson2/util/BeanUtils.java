@@ -215,6 +215,28 @@ public abstract class BeanUtils {
         return fieldMap.get(fieldName);
     }
 
+    public static Type resolveCollectionItemType(Type fieldTypeResolved, Class<?> fieldClass) {
+        Type contextType = fieldTypeResolved != null ? fieldTypeResolved : fieldClass;
+
+        Type listType = getGenericSupertype(contextType, fieldClass, List.class);
+
+        if (listType == null || listType == List.class) {
+            listType = getGenericSupertype(contextType, fieldClass, Collection.class);
+        }
+
+        listType = BeanUtils.resolve(contextType, fieldClass, listType);
+
+        if (listType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) listType;
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+
+            if (actualTypeArguments.length == 1) {
+                return actualTypeArguments[0];
+            }
+        }
+        return null;
+    }
+
     public static Method getSetter(Class objectClass, String methodName) {
         Method[] methods = new Method[1];
         setters(objectClass, e -> {
@@ -448,6 +470,9 @@ public abstract class BeanUtils {
             return;
         }
 
+        if (isRecord(objectClass)) {
+            return;
+        }
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
             methods = getMethods(objectClass);
@@ -565,7 +590,8 @@ public abstract class BeanUtils {
             }
 
             final int methodNameLength = methodName.length();
-            boolean nameMatch = methodNameLength > 3 && (methodName.startsWith("set") || returnType == objectClass);
+            boolean nameMatch = methodNameLength > 3
+                    && (methodName.startsWith("set") || returnType == objectClass);
             if (!nameMatch) {
                 if (mixin != null) {
                     Method mixinMethod = getMethod(mixin, method);
@@ -1135,7 +1161,7 @@ public abstract class BeanUtils {
         Method[] methods;
         try {
             if (isRecord(objectClass)) {
-                methods = recordComponentsToMethods(objectClass);
+                methods = getRecordMethods(objectClass);
             } else {
                 methods = objectClass.getMethods();
             }
@@ -1145,7 +1171,7 @@ public abstract class BeanUtils {
         return methods;
     }
 
-    private static Method[] recordComponentsToMethods(Class<?> recordClass) {
+    private static Method[] getRecordMethods(Class<?> recordClass) {
         if (JVM_VERSION < 14 && ANDROID_SDK_INT < 33) {
             return new Method[0];
         }
@@ -1161,13 +1187,47 @@ public abstract class BeanUtils {
             }
 
             final Object[] components = (Object[]) RECORD_GET_RECORD_COMPONENTS.invoke(recordClass);
-            final Method[] methods = new Method[components.length];
+            final Method[] allMethods = recordClass.getMethods();
+
+            String[] componentNames = new String[components.length];
             for (int i = 0; i < components.length; i++) {
-                String componentName = (String) RECORD_COMPONENT_GET_NAME.invoke(components[i]);
-                methods[i] = recordClass.getMethod(componentName);
+                componentNames[i] = (String) RECORD_COMPONENT_GET_NAME.invoke(components[i]);
             }
 
-            return methods;
+            Method[] orderedComponents = new Method[components.length];
+            boolean[] isComponentMethod = new boolean[allMethods.length];
+
+            for (int i = 0; i < allMethods.length; i++) {
+                Method method = allMethods[i];
+                if (method.getParameterCount() == 0) {
+                    String methodName = method.getName();
+
+                    for (int j = 0; j < componentNames.length; j++) {
+                        if (componentNames[j].equals(methodName)) {
+                            if (orderedComponents[j] == null) {
+                                orderedComponents[j] = method;
+                                isComponentMethod[i] = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            Method[] results = new Method[allMethods.length];
+            int index = 0;
+            for (Method m : orderedComponents) {
+                if (m != null) {
+                    results[index++] = m;
+                }
+            }
+
+            for (int i = 0; i < allMethods.length; i++) {
+                if (!isComponentMethod[i]) {
+                    results[index++] = allMethods[i];
+                }
+            }
+
+            return results;
         } catch (Exception e) {
             throw new RuntimeException(String.format(
                     "Failed to access Methods needed to support `java.lang.Record`: (%s) %s",

@@ -3946,9 +3946,9 @@ final class JSONReaderJSONB
                     String str = readFixedAsciiString(strlen);
                     offset += strlen;
                     if (str.indexOf('.') == -1) {
-                        return new BigInteger(str).intValue();
+                        return new BigInteger(str).floatValue();
                     } else {
-                        return toBigDecimal(str).intValue();
+                        return toBigDecimal(str).floatValue();
                     }
                 }
                 break;
@@ -4098,9 +4098,9 @@ final class JSONReaderJSONB
                     String str = readFixedAsciiString(strlen);
                     offset += strlen;
                     if (str.indexOf('.') == -1) {
-                        return new BigInteger(str).intValue();
+                        return new BigInteger(str).doubleValue();
                     } else {
-                        return toBigDecimal(str).intValue();
+                        return toBigDecimal(str).doubleValue();
                     }
                 }
                 break;
@@ -4877,6 +4877,9 @@ final class JSONReaderJSONB
     public Instant readInstant() {
         int type = bytes[offset++];
         switch (type) {
+            case BC_NULL: {
+                return null;
+            }
             case BC_TIMESTAMP: {
                 return Instant.ofEpochSecond(
                         readInt64Value(),

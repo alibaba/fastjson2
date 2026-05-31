@@ -2,10 +2,12 @@ package com.alibaba.fastjson2.support.guava;
 
 import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("util")
 public class ImmutableMapTest {
     @Test
     public void test_0() {

@@ -8,12 +8,14 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("reader")
 public class ObjectReaderBaseModuleTest {
     @Test
     public void test() {

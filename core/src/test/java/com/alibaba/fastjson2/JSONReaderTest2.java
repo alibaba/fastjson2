@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -12,6 +13,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("reader")
 public class JSONReaderTest2 {
     @Test
     public void nextIfMatch() {
@@ -1608,5 +1610,17 @@ public class JSONReaderTest2 {
         long features = 123456L;
         context.setFeatures(features);
         assertEquals(features, context.getFeatures());
+    }
+
+    @Test
+    public void test1() {
+        String name = "1234567890123456\\789";
+
+        String json = JSON.toJSONString(JSONObject.of("name", name, "id", 1234567890123456789L));
+        char[] chars = json.toCharArray();
+        JSONReader jsonReader = new JSONReaderUTF16(JSONFactory.createReadContext(), null, chars, 0, chars.length);
+        JSONObject jsonObject = jsonReader.readJSONObject();
+        assertEquals(name,
+                jsonObject.getString("name"));
     }
 }

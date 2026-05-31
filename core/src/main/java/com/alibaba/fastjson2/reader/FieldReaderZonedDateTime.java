@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
@@ -15,12 +14,9 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 public class FieldReaderZonedDateTime<T>
         extends FieldReaderDateTimeCodec<T> {
-    final BiConsumer<T, ZonedDateTime> function;
-
     FieldReaderZonedDateTime(
             String fieldName,
             Type fieldType,
@@ -47,9 +43,9 @@ public class FieldReaderZonedDateTime<T>
                 schema,
                 method,
                 field,
+                function,
                 ObjectReaderImplZonedDateTime.of(format, locale)
         );
-        this.function = function;
     }
 
     @Override
@@ -124,41 +120,9 @@ public class FieldReaderZonedDateTime<T>
 
     @Override
     protected void accept(T object, ZonedDateTime zdt) {
-        if (schema != null) {
-            schema.assertValidate(zdt);
-        }
-
         if (zdt == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
             return;
         }
-
-        if (object == null) {
-            throw new JSONException("set " + fieldName + " error, object is null");
-        }
-
-        if (function != null) {
-            function.accept(object, zdt);
-            return;
-        }
-
-        if (method != null) {
-            try {
-                method.invoke(object, zdt);
-            } catch (Exception e) {
-                throw new JSONException("set " + fieldName + " error", e);
-            }
-            return;
-        }
-
-        if (fieldOffset != -1) {
-            UNSAFE.putObject(object, fieldOffset, zdt);
-            return;
-        }
-
-        try {
-            field.set(object, zdt);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, zdt);
     }
 }

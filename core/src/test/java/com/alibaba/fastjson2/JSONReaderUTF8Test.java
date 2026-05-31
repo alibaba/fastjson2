@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -7,6 +8,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("reader")
 public class JSONReaderUTF8Test {
     @Test
     public void notSupported() {
@@ -40,5 +42,19 @@ public class JSONReaderUTF8Test {
         JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.UTF_8);
         String parsed = jsonReader.readString();
         assertEquals(str, parsed);
+    }
+
+    @Test
+    public void test1() {
+        String name = "1234567890123456789张\"三12345678901234567891234567890123456789";
+        long value = 1234567890123456789L;
+        String json = JSON.toJSONString(JSONObject.of("name", name, "value", value));
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+        JSONReader jsonReader = new JSONReaderUTF8(JSONFactory.createReadContext(), bytes, 0, bytes.length);
+        JSONObject jsonObject = jsonReader.readJSONObject();
+        assertEquals(name,
+                jsonObject.getString("name"));
+        assertEquals(value,
+                jsonObject.getLong("value"));
     }
 }

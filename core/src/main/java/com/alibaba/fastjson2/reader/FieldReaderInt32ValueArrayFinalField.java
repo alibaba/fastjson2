@@ -7,9 +7,9 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 import java.lang.reflect.Field;
 
 final class FieldReaderInt32ValueArrayFinalField<T>
-        extends FieldReaderObjectField<T> {
+        extends FieldReader<T> {
     FieldReaderInt32ValueArrayFinalField(String fieldName, Class fieldType, int ordinal, long features, String format, int[] defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, schema, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, null, defaultValue, schema, null, field, null, null, null);
     }
 
     @Override
@@ -25,7 +25,7 @@ final class FieldReaderInt32ValueArrayFinalField<T>
 
         int[] array;
         try {
-            array = (int[]) field.get(object);
+            array = (int[]) propertyAccessor.getObject(object);
         } catch (Exception e) {
             throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
@@ -42,5 +42,22 @@ final class FieldReaderInt32ValueArrayFinalField<T>
                 }
             }
         }
+    }
+
+    @Override
+    public void accept(T object, Object value) {
+        int[] array;
+        try {
+            array = (int[]) propertyAccessor.getObject(object);
+        } catch (Exception e) {
+            throw new JSONException("set " + fieldName + " error", e);
+        }
+        int[] valueArray = (int[]) value;
+        System.arraycopy(valueArray, 0, array, 0, valueArray.length);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readInt32ValueArray();
     }
 }

@@ -373,7 +373,22 @@ public interface JSON {
 
     /**
      * Parses the json stream as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received {@link String} is {@code null} or empty.
+     * Returns {@code null} if received {@link InputStream} is {@code null} or empty.
+     *
+     * @param in the specified stream to be parsed
+     * @param features the specified features is applied to parsing
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
+     * @throws NullPointerException If received context is null
+     * @since 2.0.61
+     */
+    static Object parse(InputStream in, JSONReader.Feature... features) {
+        return parse(in, JSONFactory.createReadContext(features));
+    }
+
+    /**
+     * Parses the json stream as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received {@link InputStream} is {@code null} or empty.
      *
      * @param in the specified stream to be parsed
      * @param context the specified custom context
@@ -389,6 +404,48 @@ public interface JSON {
 
         ObjectReader<?> objectReader = context.getObjectReader(Object.class);
         try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, in)) {
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json stream as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received {@link InputStream} is {@code null} or empty.
+     *
+     * @param in the specified stream to be parsed
+     * @param charset the specified charset of the stream
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
+     * @throws NullPointerException If received context is null
+     * @since 2.0.61
+     */
+    static Object parse(InputStream in, Charset charset) {
+        return parse(in, charset, JSONFactory.createReadContext());
+    }
+
+    /**
+     * Parses the json stream as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received {@link InputStream} is {@code null} or empty.
+     *
+     * @param in the specified stream to be parsed
+     * @param charset the specified charset of the stream
+     * @param context the specified custom context
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
+     * @throws NullPointerException If received context is null
+     * @since 2.0.61
+     */
+    static Object parse(InputStream in, Charset charset, JSONReader.Context context) {
+        if (in == null) {
+            return null;
+        }
+
+        ObjectReader<?> objectReader = context.getObjectReader(Object.class);
+        try (JSONReader reader = JSONReader.of(in, charset, context)) {
             Object object = objectReader.readObject(reader, null, null, 0);
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));

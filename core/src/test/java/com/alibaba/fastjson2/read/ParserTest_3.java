@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.read;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -10,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("reader")
 public class ParserTest_3 {
     String str = " { \"Object\\u0020Id\" : -123 , \"Full \\\" Name\": \"Steve \\\" Jobs\" } ";
 

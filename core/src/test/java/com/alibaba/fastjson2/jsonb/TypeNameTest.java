@@ -1,11 +1,13 @@
 package com.alibaba.fastjson2.jsonb;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("jsonb")
 public class TypeNameTest {
     @Test
     public void test_typeName() {

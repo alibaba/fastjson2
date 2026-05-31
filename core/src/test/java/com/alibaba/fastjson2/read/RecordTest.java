@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.io.InputStream;
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("reader")
 public class RecordTest {
     static String json = "{\"@type\":\"com.alibaba.mock.demo.api.Demo\"}";
 

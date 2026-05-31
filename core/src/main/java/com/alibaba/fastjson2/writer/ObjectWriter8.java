@@ -6,7 +6,6 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray;
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
 
 public class ObjectWriter8<T>
         extends ObjectWriterAdapter<T> {
@@ -76,7 +75,7 @@ public class ObjectWriter8<T>
 
         jsonWriter.startObject();
 
-        if (((features | this.features) & WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
+        if (jsonWriter.isWriteTypeInfo(object, this.features | features)) {
             writeTypeInfo(jsonWriter);
         }
 

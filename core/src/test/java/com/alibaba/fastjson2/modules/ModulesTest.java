@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.modules;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
@@ -8,6 +9,7 @@ import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@Tag("codec")
 public class ModulesTest {
     @Test
     public void test() {

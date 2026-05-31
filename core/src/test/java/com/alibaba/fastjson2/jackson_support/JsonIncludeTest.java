@@ -2,11 +2,13 @@ package com.alibaba.fastjson2.jackson_support;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("compat-jackson")
 public class JsonIncludeTest {
     @Test
     public void test() throws Exception {

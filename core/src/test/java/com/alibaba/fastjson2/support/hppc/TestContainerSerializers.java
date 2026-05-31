@@ -3,11 +3,13 @@ package com.alibaba.fastjson2.support.hppc;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.carrotsearch.hppc.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteByteArrayAsBase64;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class TestContainerSerializers {
     @Test
     public void testByteArray() {

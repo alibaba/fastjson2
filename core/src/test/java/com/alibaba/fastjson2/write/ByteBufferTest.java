@@ -4,12 +4,15 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("writer")
 public class ByteBufferTest {
     @Test
     public void test() {
@@ -36,6 +39,34 @@ public class ByteBufferTest {
         byte[] jsonbBytes = JSONB.toBytes(buffer, JSONWriter.Feature.WriteClassName);
         System.out.println(JSONB.toJSONString(jsonbBytes));
         ByteBuffer buffer1 = (ByteBuffer) JSONB.parseObject(jsonbBytes, Object.class, JSONReader.Feature.SupportAutoType);
+        assertArrayEquals(bytes, buffer1.array());
+    }
+
+    @Test
+    public void testDirectByteBuffer() {
+        // Test DirectByteBuffer serialization (allocateDirect creates a DirectByteBuffer)
+        byte[] bytes = new byte[]{1, 2, 3};
+        ByteBuffer directBuffer = ByteBuffer.allocateDirect(3);
+        directBuffer.put(bytes);
+        directBuffer.flip();
+
+        String str = JSON.toJSONString(directBuffer);
+        assertEquals("[1,2,3]", str);
+
+        ByteBuffer buffer1 = JSON.parseObject(str, ByteBuffer.class);
+        assertArrayEquals(bytes, buffer1.array());
+    }
+
+    @Test
+    public void testReadOnlyByteBuffer() {
+        // Test read-only ByteBuffer serialization
+        byte[] bytes = new byte[]{1, 2, 3};
+        ByteBuffer buffer = ByteBuffer.wrap(bytes).asReadOnlyBuffer();
+
+        String str = JSON.toJSONString(buffer);
+        assertEquals("[1,2,3]", str);
+
+        ByteBuffer buffer1 = JSON.parseObject(str, ByteBuffer.class);
         assertArrayEquals(bytes, buffer1.array());
     }
 }

@@ -5,12 +5,14 @@ import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.Date1;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZoneId;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("date")
 public class DateTest2 {
     @Test
     public void testDate() throws Exception {

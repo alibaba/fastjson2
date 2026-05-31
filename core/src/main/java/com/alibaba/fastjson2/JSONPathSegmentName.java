@@ -229,27 +229,42 @@ class JSONPathSegmentName
             Collection<?> collection = (Collection<?>) object;
             int size = collection.size();
             Collection values = null; // = new JSONArray(collection.size());
+
+            JSONWriter.Context writerContext = context.path.getWriterContext();
+
             for (Object item : collection) {
+                if (item == null) {
+                    continue;
+                }
+
+                Object val = null;
                 if (item instanceof Map) {
-                    Object val = ((Map<?, ?>) item).get(name);
-                    if (val == null) {
-                        continue;
+                    val = ((Map<?, ?>) item).get(name);
+                } else {
+                    ObjectWriter objectWriter = writerContext.getObjectWriter(item.getClass());
+                    FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
+                    if (fieldWriter != null) {
+                        val = fieldWriter.getFieldValue(item);
                     }
-                    if (val instanceof Collection) {
-                        if (size == 1) {
-                            values = (Collection) val;
-                        } else {
-                            if (values == null) {
-                                values = new JSONArray(size);
-                            }
-                            values.addAll((Collection) val);
-                        }
+                }
+
+                if (val == null) {
+                    continue;
+                }
+                if (val instanceof Collection) {
+                    if (size == 1) {
+                        values = (Collection) val;
                     } else {
                         if (values == null) {
                             values = new JSONArray(size);
                         }
-                        values.add(val);
+                        values.addAll((Collection) val);
                     }
+                } else {
+                    if (values == null) {
+                        values = new JSONArray(size);
+                    }
+                    values.add(val);
                 }
             }
             context.value = values;

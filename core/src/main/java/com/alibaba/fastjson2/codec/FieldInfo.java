@@ -20,7 +20,7 @@ public class FieldInfo {
     public static final long DISABLE_ARRAY_MAPPING = 1L << 58;
     public static final long DISABLE_AUTO_TYPE = 1L << 59;
     public static final long DISABLE_JSONB = 1L << 60;
-    public static final long BACKR_EFERENCE = 1L << 61;
+    public static final long BACKR_REFERENCE = 1L << 61;
     public static final long RECORD = 1L << 62;
     public static final long CONTENT_AS = 1L << 63;
 

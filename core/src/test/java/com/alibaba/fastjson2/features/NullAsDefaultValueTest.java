@@ -3,10 +3,12 @@ package com.alibaba.fastjson2.features;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2_vo.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("features")
 public class NullAsDefaultValueTest {
     @Test
     public void int64() {

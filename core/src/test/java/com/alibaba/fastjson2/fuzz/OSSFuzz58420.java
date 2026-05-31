@@ -2,10 +2,12 @@ package com.alibaba.fastjson2.fuzz;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("fuzz")
 public class OSSFuzz58420 {
     @Test
     public void test() {

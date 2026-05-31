@@ -1,12 +1,15 @@
 package com.alibaba.fastjson2.util;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class TypeUtilsTest2 {
     @Test
     public void parseInt() {
@@ -317,5 +320,37 @@ public class TypeUtilsTest2 {
                     TypeUtils.isNumber(bytes2, prefix.length(), string.length()), string
             );
         }
+    }
+
+    @Test
+    public void parseInt_errorMessage_bytes() {
+        byte[] buf = "12abc".getBytes(StandardCharsets.UTF_8);
+        NumberFormatException ex = assertThrows(NumberFormatException.class,
+                () -> TypeUtils.parseInt(buf, 0, buf.length));
+        assertTrue(ex.getMessage().contains("12abc"));
+    }
+
+    @Test
+    public void parseInt_errorMessage_chars() {
+        char[] buf = "12abc".toCharArray();
+        NumberFormatException ex = assertThrows(NumberFormatException.class,
+                () -> TypeUtils.parseInt(buf, 0, buf.length));
+        assertTrue(ex.getMessage().contains("12abc"));
+    }
+
+    @Test
+    public void parseLong_errorMessage_bytes() {
+        byte[] buf = "12abc".getBytes(StandardCharsets.UTF_8);
+        NumberFormatException ex = assertThrows(NumberFormatException.class,
+                () -> TypeUtils.parseLong(buf, 0, buf.length));
+        assertTrue(ex.getMessage().contains("12abc"));
+    }
+
+    @Test
+    public void parseLong_errorMessage_chars() {
+        char[] buf = "12abc".toCharArray();
+        NumberFormatException ex = assertThrows(NumberFormatException.class,
+                () -> TypeUtils.parseLong(buf, 0, buf.length));
+        assertTrue(ex.getMessage().contains("12abc"));
     }
 }

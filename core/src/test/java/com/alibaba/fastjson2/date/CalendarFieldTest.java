@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.date;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Calendar;
@@ -9,6 +10,7 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("date")
 public class CalendarFieldTest {
     @Test
     public void test_0() {

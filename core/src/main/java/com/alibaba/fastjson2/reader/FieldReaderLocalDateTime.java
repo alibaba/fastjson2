@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.DateUtils;
@@ -15,12 +14,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-
 public final class FieldReaderLocalDateTime<T>
         extends FieldReaderDateTimeCodec<T> {
-    final BiConsumer<T, ZonedDateTime> function;
-
     FieldReaderLocalDateTime(
             String fieldName,
             Type fieldType,
@@ -47,9 +42,9 @@ public final class FieldReaderLocalDateTime<T>
                 schema,
                 method,
                 field,
+                function,
                 format != null ? new ObjectReaderImplLocalDateTime(format, locale) : ObjectReaderImplLocalDateTime.INSTANCE
         );
-        this.function = function;
     }
 
     public boolean supportAcceptType(Class valueClass) {
@@ -134,27 +129,10 @@ public final class FieldReaderLocalDateTime<T>
     }
 
     public void accept(Object object, LocalDateTime value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        if (object == null) {
-            throw new JSONException("set " + fieldName + " error, object is null");
-        }
-
         if (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
             return;
         }
 
-        if (fieldOffset != -1) {
-            UNSAFE.putObject(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.set(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, value);
     }
 }

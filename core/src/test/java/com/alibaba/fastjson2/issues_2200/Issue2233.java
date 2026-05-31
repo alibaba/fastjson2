@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import org.json.JSONException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -19,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @author 张治保
  * @since 2024/2/4
  */
+@Tag("regression")
+@Tag("compat-jackson")
 public class Issue2233 {
     @Test
     void test() throws JSONException {

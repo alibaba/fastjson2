@@ -617,6 +617,12 @@ public final class ObjectWriterImplMap
         jsonWriter.startObject();
         Map map = (Map) object;
 
+        boolean writeTypeInfo = (fieldType == this.objectType && jsonWriter.isWriteMapTypeInfo(object, this.objectClass, features))
+                || jsonWriter.isWriteTypeInfo(object, fieldType, features);
+        if (writeTypeInfo) {
+            writeTypeInfo(jsonWriter);
+        }
+
         features |= jsonWriter.getFeatures();
         if ((features & (MapSortField.mask | SortMapEntriesByKeys.mask)) != 0) {
             if (!(map instanceof SortedMap)

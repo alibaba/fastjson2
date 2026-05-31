@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues_1900;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -11,6 +12,8 @@ import java.util.Map;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("regression")
+@Tag("autotype")
 public class Issue1945 {
     @Test
     public void test_0() throws Exception {

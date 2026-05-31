@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.spring;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationHandler;
@@ -11,6 +12,7 @@ import java.lang.reflect.Proxy;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("integration")
 public class SpringRefreshScopeTest {
     // Mock interface for Spring RefreshScope
     public interface RefreshScope {

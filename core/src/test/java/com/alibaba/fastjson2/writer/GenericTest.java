@@ -2,12 +2,14 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("writer")
 public class GenericTest {
     @Test
     public void test() {

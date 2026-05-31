@@ -785,6 +785,9 @@ class JSONPathParser {
         }
         if (operator == null) {
             if (parentheses && jsonReader.nextIfMatch(')')) {
+                if (function instanceof JSONPathFunction.FilterFunction) {
+                    return new JSONPathFilter.NameSubFilterSegment(fieldName, hashCode, fieldName2, hashCode2, ((JSONPathFunction.FilterFunction) function).filter);
+                }
                 return new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
             }
             operator = JSONPath.parseOperator(jsonReader);
@@ -813,8 +816,10 @@ class JSONPathParser {
                     filterNests--;
                     segment = parseFilterRest(segment);
                 }
-                if (!jsonReader.nextIfMatch(')')) {
-                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                if (parentheses || filterNests > 0) {
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
                 }
                 return segment;
             }
@@ -860,8 +865,10 @@ class JSONPathParser {
                     filterNests--;
                     segment = parseFilterRest(segment);
                 }
-                if (!jsonReader.nextIfMatch(')')) {
-                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                if (parentheses || filterNests > 0) {
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
                 }
 
                 return segment;
@@ -912,8 +919,14 @@ class JSONPathParser {
                 if (!jsonReader.nextIfMatch(')')) {
                     throw new JSONException(jsonReader.info("jsonpath syntax error"));
                 }
-                if (!jsonReader.nextIfMatch(')')) {
-                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                if (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
+                    filterNests--;
+                    segment = parseFilterRest(segment);
+                }
+                if (parentheses || filterNests > 0) {
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
                 }
 
                 return segment;

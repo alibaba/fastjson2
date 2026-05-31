@@ -43,7 +43,11 @@ final class ObjectWriterImplInt8ValueArray
             bytes = (byte[]) object;
         }
 
-        jsonWriter.writeBinary(bytes);
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(bytes);
+        } else {
+            jsonWriter.writeBinary(bytes);
+        }
     }
 
     @Override
@@ -63,6 +67,11 @@ final class ObjectWriterImplInt8ValueArray
         String format = jsonWriter.context.getDateFormat();
         if ("millis".equals(format)) {
             format = null;
+        }
+
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(bytes);
+            return;
         }
 
         if ("gzip".equals(format) || "gzip,base64".equals(format)) {

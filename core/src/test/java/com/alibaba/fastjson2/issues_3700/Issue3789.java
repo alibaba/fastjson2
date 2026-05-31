@@ -3,10 +3,12 @@ package com.alibaba.fastjson2.issues_3700;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("regression")
 public class Issue3789 {
     @Test
     public void test() {
