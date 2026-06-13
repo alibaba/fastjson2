@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -50,6 +51,33 @@ public class JSONTypeNamingSnake {
 
         public void setBeanName(String beanName) {
             this.beanName = beanName;
+        }
+    }
+
+    @JSONType(naming = PropertyNamingStrategy.SnakeCase)
+    public record RecordDto(String currencyCode) {}
+
+    @JSONType(naming = PropertyNamingStrategy.SnakeCase)
+    static class ClassDto {
+        public String currencyCode = "840";
+    }
+
+    @Test
+    public void testRecord() {
+        assertEquals("{\"currency_code\":\"840\"}", JSON.toJSONString(new RecordDto("840")));
+        assertEquals("{\"currency_code\":\"840\"}", JSON.toJSONString(new ClassDto()));
+    }
+
+    @Test
+    public void testRecordGlobalNaming() {
+        var provider = JSONFactory.getDefaultObjectWriterProvider();
+        var prev = provider.getNamingStrategy();
+        try {
+            provider.setNamingStrategy(PropertyNamingStrategy.SnakeCase);
+            record GlobalRecordDto(String currencyCode) {}
+            assertEquals("{\"currency_code\":\"840\"}", JSON.toJSONString(new GlobalRecordDto("840")));
+        } finally {
+            provider.setNamingStrategy(prev);
         }
     }
 }
