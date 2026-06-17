@@ -753,8 +753,10 @@ public class ObjectWriterCreator {
     ) {
         String fieldName;
         if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
-            fieldName = BeanUtils.getterName(method, beanInfo.kotlin, beanInfo.namingStrategy);
-            if (!record) {
+            if (record) {
+                fieldName = BeanUtils.fieldName(method.getName(), beanInfo.namingStrategy);
+            } else {
+                fieldName = BeanUtils.getterName(method, beanInfo.kotlin, beanInfo.namingStrategy);
                 Field field;
                 if ((provider.userDefineMask & NAME_COMPATIBLE_WITH_FILED) != 0
                         && (field = BeanUtils.getField(objectClass, method)) != null) {
