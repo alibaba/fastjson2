@@ -127,19 +127,23 @@ public class Analysis {
                         continue;
                     }
 
-                    FieldInfo fieldInfo = new FieldInfo();
+                    FieldInfo readerFieldInfo = new FieldInfo();
+                    FieldInfo writerFieldInfo = new FieldInfo();
 
                     String name = field.getSimpleName().toString();
                     JSONField[] annotations = field.getAnnotationsByType(JSONField.class);
                     for (JSONField annotation : annotations) {
-                        CodeGenUtils.getFieldInfo(fieldInfo, annotation, false);
+                        CodeGenUtils.getFieldInfo(readerFieldInfo, annotation, false);
+                        CodeGenUtils.getFieldInfo(writerFieldInfo, annotation, true);
                     }
 
-                    if (fieldInfo.fieldName != null) {
-                        name = fieldInfo.fieldName;
+                    if (readerFieldInfo.fieldName != null) {
+                        name = readerFieldInfo.fieldName;
                     }
 
-                    info.getAttributeByField(name, field);
+                    AttributeInfo attr = info.getAttributeByField(name, field);
+                    attr.reader = !readerFieldInfo.ignore;
+                    attr.writer = !writerFieldInfo.ignore;
                 }
 
                 for (ExecutableElement method : ElementFilter.methodsIn(inheritance.getEnclosedElements())) {

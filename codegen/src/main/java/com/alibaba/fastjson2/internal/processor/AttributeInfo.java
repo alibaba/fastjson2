@@ -16,6 +16,8 @@ public class AttributeInfo
     ExecutableElement setMethod;
     VariableElement argument;
     long readerFeatures;
+    boolean reader = true;
+    boolean writer = true;
 
     public AttributeInfo(
             String name,
@@ -35,7 +37,11 @@ public class AttributeInfo
     }
 
     public boolean supportSet() {
-        return field != null || setMethod != null;
+        return reader && (field != null || setMethod != null);
+    }
+
+    public boolean supportGet() {
+        return writer && (field != null || getMethod != null);
     }
 
     @Override

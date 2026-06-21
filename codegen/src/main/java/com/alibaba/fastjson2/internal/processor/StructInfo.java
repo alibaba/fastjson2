@@ -137,4 +137,12 @@ public class StructInfo {
                 .sorted()
                 .collect(Collectors.toList());
     }
+
+    public List<AttributeInfo> getWriterAttributes() {
+        return attributes.values()
+                .stream()
+                .filter(AttributeInfo::supportGet)
+                .sorted()
+                .collect(Collectors.toList());
+    }
 }

@@ -89,11 +89,13 @@ public class JSONCompiledAnnotationProcessor
         Set<ReflectionMetadata> reflects = new HashSet<>(elementsAnnotatedWith.size() * 2);
         elementsAnnotatedWith.forEach(element -> {
             StructInfo structInfo = structs.get(element.toString());
-            java.util.List<AttributeInfo> attributeInfos = structInfo.getReaderAttributes();
-            int fieldsSize = attributeInfos.size();
+            java.util.List<AttributeInfo> readerAttributeInfos = structInfo.getReaderAttributes();
+            java.util.List<AttributeInfo> writerAttributeInfos = structInfo.getWriterAttributes();
+            int readerFieldsSize = readerAttributeInfos.size();
+            int writerFieldsSize = writerAttributeInfos.size();
             boolean record = structInfo.record;
-            Class readSuperClass = getReadSuperClass(fieldsSize);
-            Class writeSuperClass = getWriteSuperClass(fieldsSize);
+            Class readSuperClass = getReadSuperClass(readerFieldsSize);
+            Class writeSuperClass = getWriteSuperClass(writerFieldsSize);
 
             JCTree tree = javacTrees.getTree(element);
             pos(tree.pos);
@@ -129,31 +131,32 @@ public class JSONCompiledAnnotationProcessor
                         JCTree.JCClassDecl innerReadClass = genInnerClass(innerReadClassName, readSuperClass);
 
                         // generate fields if necessary
-                        final boolean generatedFields = fieldsSize < 128;
-                        if (generatedFields) {
-                            innerReadClass.defs = innerReadClass.defs.prependList(genFields(attributeInfos, readSuperClass));
+                        final boolean generatedReadFields = readerFieldsSize < 128;
+                        if (generatedReadFields) {
+                            innerReadClass.defs = innerReadClass.defs.prependList(genFields(readerAttributeInfos, readSuperClass));
                         }
 
                         // generate constructor
-                        innerReadClass.defs = innerReadClass.defs.append(genReadConstructor(beanType, beanNew, attributeInfos, readSuperClass, generatedFields, record));
+                        innerReadClass.defs = innerReadClass.defs.append(genReadConstructor(
+                                beanType, beanNew, readerAttributeInfos, readSuperClass, generatedReadFields, record));
 
                         // generate createInstance
                         innerReadClass.defs = innerReadClass.defs.append(
                                 record
-                                        ? genCreateRecordInstance(objectType, beanType, attributeInfos)
+                                        ? genCreateRecordInstance(objectType, beanType, readerAttributeInfos)
                                         : genCreateInstance(objectType, beanNew));
 
                         // generate readObject
                         innerReadClass.defs = innerReadClass.defs.append(
                                 record
-                                        ? genReadRecordObject(objectType, beanType, attributeInfos, structInfo, false)
-                                        : genReadObject(objectType, beanType, beanNew, attributeInfos, structInfo, false));
+                                        ? genReadRecordObject(objectType, beanType, readerAttributeInfos, structInfo, false)
+                                        : genReadObject(objectType, beanType, beanNew, readerAttributeInfos, structInfo, false));
 
                         // generate readJSONBObject
                         innerReadClass.defs = innerReadClass.defs.append(
                                 record
-                                        ? genReadRecordObject(objectType, beanType, attributeInfos, structInfo, true)
-                                        : genReadObject(objectType, beanType, beanNew, attributeInfos, structInfo, true));
+                                        ? genReadRecordObject(objectType, beanType, readerAttributeInfos, structInfo, true)
+                                        : genReadObject(objectType, beanType, beanNew, readerAttributeInfos, structInfo, true));
 
                         // link with inner class
                         beanClassDecl.defs = beanClassDecl.defs.append(innerReadClass);
@@ -169,15 +172,18 @@ public class JSONCompiledAnnotationProcessor
                         JCTree.JCClassDecl innerWriteClass = genInnerClass(innerWriteClassName, writeSuperClass);
 
                         // generate fields if necessary
-                        if (generatedFields) {
-                            innerWriteClass.defs = innerWriteClass.defs.prependList(genFields(attributeInfos, writeSuperClass));
+                        final boolean generatedWriteFields = writerFieldsSize < 128;
+                        if (generatedWriteFields) {
+                            innerWriteClass.defs = innerWriteClass.defs.prependList(genFields(writerAttributeInfos, writeSuperClass));
                         }
 
                         // generate constructor
-                        innerWriteClass.defs = innerWriteClass.defs.append(genWriteConstructor(beanType, beanNew, attributeInfos, writeSuperClass, generatedFields));
+                        innerWriteClass.defs = innerWriteClass.defs.append(genWriteConstructor(
+                                beanType, beanNew, writerAttributeInfos, writeSuperClass, generatedWriteFields));
 
                         // generate write
-                        innerWriteClass.defs = innerWriteClass.defs.append(genWrite(objectType, beanType, beanNew, attributeInfos, structInfo, false));
+                        innerWriteClass.defs = innerWriteClass.defs.append(
+                                genWrite(objectType, beanType, beanNew, writerAttributeInfos, structInfo, false));
 
                         // link with inner class
                         beanClassDecl.defs = beanClassDecl.defs.append(innerWriteClass);
