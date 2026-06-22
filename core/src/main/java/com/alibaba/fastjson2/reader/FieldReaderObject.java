@@ -92,8 +92,16 @@ public class FieldReaderObject<T>
         }
 
         if (fieldClass != null && Map.class.isAssignableFrom(fieldClass)) {
+            ObjectReader fieldObjectReader = jsonReader.getObjectReader(fieldType);
+            if (isCustomReader(fieldObjectReader)) {
+                return reader = fieldObjectReader;
+            }
             return reader = ObjectReaderImplMap.of(fieldType, fieldClass, features);
         } else if (fieldClass != null && Collection.class.isAssignableFrom(fieldClass)) {
+            ObjectReader fieldObjectReader = jsonReader.getObjectReader(fieldType);
+            if (isCustomReader(fieldObjectReader)) {
+                return reader = fieldObjectReader;
+            }
             return reader = ObjectReaderImplList.of(fieldType, fieldClass, features);
         }
 
@@ -111,12 +119,27 @@ public class FieldReaderObject<T>
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
+            ObjectReader fieldObjectReader = context.getObjectReader(fieldType);
+            if (isCustomReader(fieldObjectReader)) {
+                return reader = fieldObjectReader;
+            }
             return reader = ObjectReaderImplMap.of(fieldType, fieldClass, features);
         } else if (Collection.class.isAssignableFrom(fieldClass)) {
+            ObjectReader fieldObjectReader = context.getObjectReader(fieldType);
+            if (isCustomReader(fieldObjectReader)) {
+                return reader = fieldObjectReader;
+            }
             return reader = ObjectReaderImplList.of(fieldType, fieldClass, features);
         }
 
         return reader = context.getObjectReader(fieldType);
+    }
+
+    private static boolean isCustomReader(ObjectReader objectReader) {
+        return objectReader != null
+                && !(objectReader instanceof ObjectReaderImplMap)
+                && !(objectReader instanceof ObjectReaderImplMapTyped)
+                && !(objectReader instanceof ObjectReaderImplList);
     }
 
     @Override

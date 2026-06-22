@@ -2049,6 +2049,10 @@ public class ObjectReaderBaseModule
                 return null;
             }
 
+            if (hasCustomDeserializer(objectClass)) {
+                return null;
+            }
+
             if (Map.class.isAssignableFrom(objectClass)) {
                 return ObjectReaderImplMap.of(null, objectClass, 0);
             }
@@ -2348,6 +2352,11 @@ public class ObjectReaderBaseModule
         }
 
         return null;
+    }
+
+    private static boolean hasCustomDeserializer(Class objectClass) {
+        JSONType jsonType = (JSONType) objectClass.getAnnotation(JSONType.class);
+        return jsonType != null && ObjectReader.class.isAssignableFrom(jsonType.deserializer());
     }
 
     public static ObjectReader typedMap(Class mapType, Class instanceType, Type keyType, Type valueType) {
