@@ -3,9 +3,11 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.GuavaSupport;
 import com.alibaba.fastjson2.util.MapMultiValueType;
+import com.alibaba.fastjson2.util.ReferenceKey;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
@@ -17,6 +19,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.reader.ObjectReaderImplMap.*;
 
 public class ObjectReaderImplMapMultiValueType
@@ -167,6 +170,95 @@ public class ObjectReaderImplMapMultiValueType
         }
 
         jsonReader.nextIfMatch(',');
+
+        if (builder != null) {
+            return builder.apply(object);
+        }
+
+        return object;
+    }
+
+    @Override
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName1, long features) {
+        if (jsonReader.nextIfNull()) {
+            return null;
+        }
+
+        jsonReader.nextIfMatch(BC_OBJECT);
+
+        JSONReader.Context context = jsonReader.getContext();
+        long contextFeatures = context.getFeatures() | features;
+        Map object, innerMap = null;
+        if (instanceType == HashMap.class) {
+            Supplier<Map> objectSupplier = context.getObjectSupplier();
+            if (mapType == Map.class && objectSupplier != null) {
+                object = objectSupplier.get();
+                innerMap = TypeUtils.getInnerMap(object);
+            } else {
+                object = new HashMap<>();
+            }
+        } else if (instanceType == JSONObject.class) {
+            object = new JSONObject();
+        } else {
+            object = (Map) createInstance(contextFeatures);
+        }
+
+        for (int i = 0; ; i++) {
+            byte type = jsonReader.getType();
+            if (type == BC_OBJECT_END) {
+                jsonReader.next();
+                break;
+            }
+
+            Object name;
+            if (type >= BC_STR_ASCII_FIX_MIN) {
+                name = jsonReader.readFieldName();
+            } else if (jsonReader.nextIfMatch(BC_REFERENCE)) {
+                String reference = jsonReader.readString();
+                name = new ReferenceKey(i);
+                jsonReader.addResolveTask(object, name, JSONPath.of(reference));
+            } else {
+                name = jsonReader.readAny();
+            }
+
+            Type valueType = name instanceof String ? multiValueType.getType((String) name) : null;
+            Object value;
+            if (jsonReader.isReference()) {
+                String reference = jsonReader.readReference();
+                if ("..".equals(reference)) {
+                    value = object;
+                } else {
+                    value = null;
+                    jsonReader.addResolveTask(object, name, JSONPath.of(reference));
+                }
+            } else if (valueType == null) {
+                value = jsonReader.readAny();
+            } else {
+                ObjectReader valueObjectReader = jsonReader.getObjectReader(valueType);
+                value = valueObjectReader.readJSONBObject(jsonReader, valueType, name, 0);
+            }
+
+            if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
+                continue;
+            }
+
+            Object origin;
+            if (innerMap != null) {
+                origin = innerMap.put(name, value);
+            } else {
+                origin = object.put(name, value);
+            }
+
+            if (origin != null && (contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                if (origin instanceof Collection) {
+                    ((Collection) origin).add(value);
+                    object.put(name, origin);
+                } else {
+                    JSONArray array = JSONArray.of(origin, value);
+                    object.put(name, array);
+                }
+            }
+        }
 
         if (builder != null) {
             return builder.apply(object);
