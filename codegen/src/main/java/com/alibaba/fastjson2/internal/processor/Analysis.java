@@ -203,8 +203,6 @@ public class Analysis {
                     }
                     if (readerFieldInfo.fieldName != null) {
                         name = readerFieldInfo.fieldName;
-                    } else if (writerFieldInfo.fieldName != null) {
-                        name = writerFieldInfo.fieldName;
                     }
 
                     AttributeInfo attr = info.getAttributeByMethod(name, type, getter, setter);
