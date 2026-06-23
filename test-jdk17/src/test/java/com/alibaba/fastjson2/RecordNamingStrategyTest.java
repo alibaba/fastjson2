@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.junit.jupiter.api.Test;
 
@@ -29,13 +30,18 @@ public class RecordNamingStrategyTest {
 
     @Test
     public void testRecordGlobalNaming() {
-        ObjectWriterProvider provider = JSONFactory.getDefaultObjectWriterProvider();
-        PropertyNamingStrategy prev = provider.getNamingStrategy();
+        ObjectWriterProvider writerProvider = JSONFactory.getDefaultObjectWriterProvider();
+        ObjectReaderProvider readerProvider = JSONFactory.getDefaultObjectReaderProvider();
+        PropertyNamingStrategy prevWriter = writerProvider.getNamingStrategy();
+        PropertyNamingStrategy prevReader = readerProvider.getNamingStrategy();
         try {
-            provider.setNamingStrategy(PropertyNamingStrategy.SnakeCase);
+            writerProvider.setNamingStrategy(PropertyNamingStrategy.SnakeCase);
+            readerProvider.setNamingStrategy(PropertyNamingStrategy.SnakeCase);
             assertEquals("{\"currency_code\":\"840\"}", JSON.toJSONString(new GlobalRecordDto("840")));
+            assertEquals(new GlobalRecordDto("840"), JSON.parseObject("{\"currency_code\":\"840\"}", GlobalRecordDto.class));
         } finally {
-            provider.setNamingStrategy(prev);
+            writerProvider.setNamingStrategy(prevWriter);
+            readerProvider.setNamingStrategy(prevReader);
         }
     }
 }

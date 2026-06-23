@@ -754,7 +754,9 @@ public class ObjectWriterCreator {
         String fieldName;
         if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
             if (record) {
-                fieldName = BeanUtils.fieldName(method.getName(), beanInfo.namingStrategy);
+                fieldName = beanInfo.namingStrategy != null
+                        ? BeanUtils.fieldName(method.getName(), beanInfo.namingStrategy)
+                        : method.getName();
             } else {
                 fieldName = BeanUtils.getterName(method, beanInfo.kotlin, beanInfo.namingStrategy);
                 Field field;

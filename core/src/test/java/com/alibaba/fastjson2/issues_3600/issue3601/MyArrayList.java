@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.issues_3600.issue3601;
 
+import lombok.var;
+
 import java.util.*;
 
 public class MyArrayList<T>
