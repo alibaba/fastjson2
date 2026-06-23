@@ -682,7 +682,9 @@ public class ObjectWriterAdapter<T>
             }
             if (fieldWriter instanceof FieldWriterObject && fieldValue != null && !(fieldValue instanceof Map)) {
                 ObjectWriter valueWriter = fieldWriter.getInitWriter();
-                if (valueWriter == null) {
+                if (fieldValue.getClass() != fieldWriter.fieldClass) {
+                    valueWriter = JSONFactory.getObjectWriter(fieldValue.getClass(), this.features | features);
+                } else if (valueWriter == null) {
                     valueWriter = JSONFactory.getObjectWriter(fieldWriter.fieldType, this.features | features);
                 }
                 if (valueWriter instanceof ObjectWriterAdapter) {
