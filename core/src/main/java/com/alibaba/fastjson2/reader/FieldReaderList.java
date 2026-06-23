@@ -100,6 +100,12 @@ public class FieldReaderList<T, V>
         JSONReader.Context context = jsonReader.getContext();
         ObjectReader objectReader = getObjectReader(context);
 
+        if (FieldReaderObject.isCustomReader(objectReader)) {
+            Object value = objectReader.readObject(jsonReader, fieldType, fieldName, features);
+            accept(object, value);
+            return;
+        }
+
         Function builder = null;
 
         if (initReader != null) {

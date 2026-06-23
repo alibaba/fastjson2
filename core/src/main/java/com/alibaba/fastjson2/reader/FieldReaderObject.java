@@ -135,11 +135,67 @@ public class FieldReaderObject<T>
         return reader = context.getObjectReader(fieldType);
     }
 
-    private static boolean isCustomReader(ObjectReader objectReader) {
+    static boolean isCustomReader(ObjectReader objectReader) {
         return objectReader != null
                 && !(objectReader instanceof ObjectReaderImplMap)
                 && !(objectReader instanceof ObjectReaderImplMapTyped)
-                && !(objectReader instanceof ObjectReaderImplList);
+                && !(objectReader instanceof ObjectReaderImplList)
+                && !(objectReader instanceof ObjectReaderImplListStr)
+                && !(objectReader instanceof ObjectReaderImplListInt64);
+    }
+
+    static boolean isReadJSONBObjectSupported(ObjectReader objectReader) {
+        try {
+            Method method = objectReader.getClass().getMethod(
+                    "readJSONBObject",
+                    JSONReader.class,
+                    Type.class,
+                    Object.class,
+                    long.class
+            );
+            return method.getDeclaringClass() != ObjectReader.class;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
+    public static Object readJSONBObject(
+            ObjectReader objectReader,
+            JSONReader jsonReader,
+            Type fieldType,
+            Object fieldName,
+            long features
+    ) {
+        return readJSONBObject(
+                objectReader,
+                jsonReader,
+                fieldType,
+                TypeUtils.getClass(fieldType),
+                fieldName,
+                features
+        );
+    }
+
+    public static Object readJSONBObject(
+            ObjectReader objectReader,
+            JSONReader jsonReader,
+            Type fieldType,
+            Class fieldClass,
+            Object fieldName,
+            long features
+    ) {
+        if (isCustomReader(objectReader)
+                && !isReadJSONBObjectSupported(objectReader)
+                && fieldClass != null
+        ) {
+            if (Map.class.isAssignableFrom(fieldClass)) {
+                objectReader = ObjectReaderImplMap.of(fieldType, fieldClass, features);
+            } else if (Collection.class.isAssignableFrom(fieldClass)) {
+                objectReader = ObjectReaderImplList.of(fieldType, fieldClass, features);
+            }
+        }
+
+        return objectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
     }
 
     @Override
@@ -255,7 +311,7 @@ public class FieldReaderObject<T>
         }
 
         if (initReader == null) {
-            initReader = jsonReader.getContext().getObjectReader(fieldType);
+            initReader = getObjectReader(jsonReader.getContext());
         }
 
         if (jsonReader.isReference()) {
@@ -268,7 +324,7 @@ public class FieldReaderObject<T>
             return;
         }
 
-        Object value = initReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+        Object value = readJSONBObject(initReader, jsonReader, fieldType, fieldClass, fieldName, features);
         if (value == null
                 && (jsonReader.features(this.features) & JSONReader.Feature.ErrorOnNullForPrimitives.mask) != 0
                 && fieldClass.isPrimitive()

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.*;
@@ -3207,6 +3208,7 @@ public class ObjectReaderCreatorASM
 
             boolean list = List.class.isAssignableFrom(fieldClass)
                     && fieldReader.getInitReader() == null
+                    && !hasCustomDeserializer(fieldClass)
                     && !fieldClass.getName().startsWith("com.google.common.collect.Immutable");
 
             if (list) {
@@ -3560,10 +3562,24 @@ public class ObjectReaderCreatorASM
         gwGetFieldType(classNameType, mw, i, fieldType);
         mw.visitLdcInsn(fieldReader.fieldName);
         mw.visitLdcInsn(fieldFeatures);
-        mw.invokeinterface(
-                TYPE_OBJECT_READER,
-                jsonb ? "readJSONBObject" : "readObject",
-                METHOD_DESC_READ_OBJECT);
+        if (jsonb && (Map.class.isAssignableFrom(fieldReader.fieldClass)
+                || Collection.class.isAssignableFrom(fieldReader.fieldClass))) {
+            mw.invokestatic(
+                    type(FieldReaderObject.class),
+                    "readJSONBObject",
+                    "(" + DESC_OBJECT_READER + DESC_JSON_READER + "Ljava/lang/reflect/Type;Ljava/lang/Object;J)Ljava/lang/Object;"
+            );
+        } else {
+            mw.invokeinterface(
+                    TYPE_OBJECT_READER,
+                    jsonb ? "readJSONBObject" : "readObject",
+                    METHOD_DESC_READ_OBJECT);
+        }
+    }
+
+    private static boolean hasCustomDeserializer(Class fieldClass) {
+        JSONType jsonType = (JSONType) fieldClass.getAnnotation(JSONType.class);
+        return jsonType != null && ObjectReader.class.isAssignableFrom(jsonType.deserializer());
     }
 
     private void genReadEnumValueRaw(
