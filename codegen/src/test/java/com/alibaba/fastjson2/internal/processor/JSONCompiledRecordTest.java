@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.internal.processor;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class JSONCompiledRecordTest {
@@ -86,6 +88,54 @@ public class JSONCompiledRecordTest {
             assertEquals("Flink", personClass.getMethod("name").invoke(jsonbPerson));
             assertEquals(Arrays.asList("stream", "sql"), personClass.getMethod("tags").invoke(jsonbPerson));
             assertEquals(Integer.valueOf(99), ((java.util.Map<?, ?>) personClass.getMethod("scores").invoke(jsonbPerson)).get("core"));
+        }
+    }
+
+    @Test
+    public void recordJsonbNullListFieldDoesNotCorruptFollowingFields() throws Exception {
+        try (CompiledClass compiled = compile("Person",
+                "import com.alibaba.fastjson2.annotation.JSONCompiled;",
+                "import java.util.List;",
+                "",
+                "@JSONCompiled",
+                "public record Person(int id, List<String> tags, String name) {",
+                "}"
+        )) {
+            Class<?> personClass = compiled.clazz;
+            byte[] jsonbBytes = JSONB.toBytes(
+                    JSON.parseObject("{\"id\":7,\"tags\":null,\"name\":\"Flink\"}"),
+                    JSONWriter.Feature.WriteNulls
+            );
+            Object person = JSONB.parseObject(jsonbBytes, personClass);
+
+            assertEquals(7, personClass.getMethod("id").invoke(person));
+            assertNull(personClass.getMethod("tags").invoke(person));
+            assertEquals("Flink", personClass.getMethod("name").invoke(person));
+        }
+    }
+
+    @Test
+    public void recordListFieldResolvesReferences() throws Exception {
+        try (CompiledClass compiled = compile("Person",
+                "import com.alibaba.fastjson2.annotation.JSONCompiled;",
+                "import java.util.List;",
+                "",
+                "@JSONCompiled",
+                "public record Person(List<Item> first, List<Item> second) {",
+                "    public record Item(String name) {",
+                "    }",
+                "}"
+        )) {
+            Class<?> personClass = compiled.clazz;
+            Object person = JSON.parseObject(
+                    "{\"first\":[{\"name\":\"Flink\"}],\"second\":[{\"$ref\":\"$.first[0]\"}]}",
+                    personClass
+            );
+
+            List<?> first = (List<?>) personClass.getMethod("first").invoke(person);
+            List<?> second = (List<?>) personClass.getMethod("second").invoke(person);
+            assertEquals("Flink", first.get(0).getClass().getMethod("name").invoke(first.get(0)));
+            assertSame(first.get(0), second.get(0));
         }
     }
 

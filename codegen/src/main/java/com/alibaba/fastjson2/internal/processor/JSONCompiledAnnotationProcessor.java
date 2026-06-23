@@ -665,6 +665,7 @@ public class JSONCompiledAnnotationProcessor
         if (genericStart != -1) {
             fieldClass = fieldClass.substring(0, genericStart);
         }
+        JCTree.JCExpression fieldTypeRef = genTypeReference(fieldType);
         JCTree.JCExpression fieldClassRef = field(getFieldValueType(fieldClass), names._class);
         JCTree.JCFieldAccess beanClassRef = field(beanType, names._class);
         return method(
@@ -676,13 +677,48 @@ public class JSONCompiledAnnotationProcessor
                 literal(0),
                 literal(0L),
                 defNull(),
-                fieldClassRef,
+                fieldTypeRef,
                 fieldClassRef,
                 literal(attributeInfo.name),
                 beanClassRef,
                 defNull(),
                 defNull()
         );
+    }
+
+    private JCTree.JCExpression genTypeReference(String type) {
+        int genericStart = type.indexOf('<');
+        if (genericStart == -1) {
+            return field(getFieldValueType(type), names._class);
+        }
+
+        String rawType = type.substring(0, genericStart);
+        String typeArguments = type.substring(genericStart + 1, type.length() - 1);
+        ListBuffer<JCTree.JCExpression> args = new ListBuffer<>();
+        args.append(field(getFieldValueType(rawType), names._class));
+        for (String argument : splitTypeArguments(typeArguments)) {
+            args.append(genTypeReference(argument.trim()));
+        }
+        return method(qualIdent("com.alibaba.fastjson2.TypeReference"), "parametricType", args.toList());
+    }
+
+    private java.util.List<String> splitTypeArguments(String typeArguments) {
+        java.util.List<String> result = new ArrayList<>();
+        int depth = 0;
+        int start = 0;
+        for (int i = 0; i < typeArguments.length(); i++) {
+            char ch = typeArguments.charAt(i);
+            if (ch == '<') {
+                depth++;
+            } else if (ch == '>') {
+                depth--;
+            } else if (ch == ',' && depth == 0) {
+                result.add(typeArguments.substring(start, i));
+                start = i + 1;
+            }
+        }
+        result.add(typeArguments.substring(start));
+        return result;
     }
 
     private JCTree.JCMethodInvocation genFieldReaderList(
@@ -3138,6 +3174,7 @@ public class JSONCompiledAnnotationProcessor
             if (referenceDetect) {
                 referenceDetect = isReference(itemType);
             }
+            JCTree.JCLabeledStatement itemLoopLabel = referenceDetect ? label("_list" + i) : null;
 
             JCTree.JCVariableDecl for_iVar;
             if ("i".equals(attributeInfo.name)) {
@@ -3183,7 +3220,7 @@ public class JSONCompiledAnnotationProcessor
                 );
                 isReferenceStmts.append(exec(addResolveTaskMethod));
                 isReferenceStmts.append(exec(method(fieldValueVar, "add", defNull())));
-                isReferenceStmts.append(defContinue(loopLabel));
+                isReferenceStmts.append(defContinue(itemLoopLabel));
                 whileStmts.append(defIf(method(jsonReaderIdent, "isReference"), block(isReferenceStmts.toList())));
                 whileStmts.append(listItemVar);
                 item = ident(listItemVar);
@@ -3192,25 +3229,32 @@ public class JSONCompiledAnnotationProcessor
             whileStmts.append(exec(method(fieldValueVar, "add", item)));
 
             ListBuffer<JCTree.JCStatement> condStmts = new ListBuffer<>();
+            JCTree.JCStatement itemLoop;
             if (isJsonb) {
                 JCTree.JCVariableDecl itemCntVar = defVar(attributeInfo.name + "_item_cnt", TypeTag.INT, method(jsonReaderIdent, "startArray"));
-                condStmts.append(forLoop(
+                itemLoop = forLoop(
                         List.of(for_iVar, itemCntVar),
                         lt(ident(for_iVar), ident(itemCntVar)),
                         List.of(exec(unary(JCTree.Tag.PREINC, ident(for_iVar)))),
-                        block(whileStmts.toList())));
+                        block(whileStmts.toList()));
             } else if (referenceDetect) {
-                condStmts.append(forLoop(
+                itemLoop = forLoop(
                         List.of(for_iVar),
                         unary(JCTree.Tag.NOT, nextIfArrayEndMethod),
                         List.of(exec(unary(JCTree.Tag.PREINC, ident(for_iVar)))),
-                        block(whileStmts.toList())));
+                        block(whileStmts.toList()));
             } else {
-                condStmts.append(whileLoop(unary(JCTree.Tag.NOT, nextIfArrayEndMethod), block(whileStmts.toList())));
+                itemLoop = whileLoop(unary(JCTree.Tag.NOT, nextIfArrayEndMethod), block(whileStmts.toList()));
+            }
+            if (itemLoopLabel != null) {
+                itemLoopLabel.body = itemLoop;
+                condStmts.append(itemLoopLabel);
+            } else {
+                condStmts.append(itemLoop);
             }
 
             if (isJsonb) {
-                stmts.appendList(condStmts.toList());
+                stmts.append(defIf(ne(fieldValueVar, defNull()), block(condStmts.toList())));
             } else {
                 stmts.append(defIf(nextIfArrayStartMethod, block(condStmts.toList())));
             }
