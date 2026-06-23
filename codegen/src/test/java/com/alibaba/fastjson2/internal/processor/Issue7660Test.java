@@ -101,6 +101,56 @@ public class Issue7660Test {
     }
 
     @Test
+    public void jsonCompiledKeepsChildAccessorDisableWhenParentFieldExists() throws Exception {
+        assertEquals("{\"name\":\"Ada\"}", runSource(
+                "Issue7660InheritedBean",
+                Arrays.asList(
+                    "import com.alibaba.fastjson2.JSON;",
+                    "import com.alibaba.fastjson2.annotation.JSONCompiled;",
+                    "import com.alibaba.fastjson2.annotation.JSONField;",
+                    "",
+                    "public class Issue7660InheritedBean {",
+                    "    public static class BasePerson {",
+                    "        public String internalCode;",
+                    "        public String name;",
+                    "",
+                    "        public BasePerson() {",
+                    "        }",
+                    "",
+                    "        public BasePerson(String internalCode, String name) {",
+                    "            this.internalCode = internalCode;",
+                    "            this.name = name;",
+                    "        }",
+                    "    }",
+                    "",
+                    "    @JSONCompiled",
+                    "    public static class Person extends BasePerson {",
+                    "        public Person() {",
+                    "        }",
+                    "",
+                    "        public Person(String internalCode, String name) {",
+                    "            super(internalCode, name);",
+                    "        }",
+                    "",
+                    "        @JSONField(serialize = false)",
+                    "        public String getInternalCode() {",
+                    "            return internalCode;",
+                    "        }",
+                    "",
+                    "        public String getName() {",
+                    "            return name;",
+                    "        }",
+                    "    }",
+                    "",
+                    "    public static void main(String[] args) {",
+                    "        System.out.println(JSON.toJSONString(new Person(\"secret\", \"Ada\")));",
+                    "    }",
+                    "}"
+                )
+        ));
+    }
+
+    @Test
     public void jsonCompiledHonorsDeserializeFalse() throws Exception {
         assertEquals("null:Ada", runSource(
                 "Issue7660ReaderBean",
@@ -123,6 +173,35 @@ public class Issue7660Test {
                     "    public static void main(String[] args) {",
                     "        Person person = JSON.parseObject(\"{\\\"internalCode\\\":\\\"secret\\\",\\\"name\\\":\\\"Ada\\\"}\", Person.class);",
                     "        System.out.println(person.internalCode + \":\" + person.name);",
+                    "    }",
+                    "}"
+                )
+        ));
+    }
+
+    @Test
+    public void jsonCompiledSerializeFalseStillAllowsDeserialization() throws Exception {
+        assertEquals("secret:{\"name\":\"Ada\"}", runSource(
+                "Issue7660RoundTripBean",
+                Arrays.asList(
+                    "import com.alibaba.fastjson2.JSON;",
+                    "import com.alibaba.fastjson2.annotation.JSONCompiled;",
+                    "import com.alibaba.fastjson2.annotation.JSONField;",
+                    "",
+                    "public class Issue7660RoundTripBean {",
+                    "    @JSONCompiled",
+                    "    public static class Person {",
+                    "        @JSONField(serialize = false)",
+                    "        public String internalCode;",
+                    "        public String name;",
+                    "",
+                    "        public Person() {",
+                    "        }",
+                    "    }",
+                    "",
+                    "    public static void main(String[] args) {",
+                    "        Person person = JSON.parseObject(\"{\\\"internalCode\\\":\\\"secret\\\",\\\"name\\\":\\\"Ada\\\"}\", Person.class);",
+                    "        System.out.println(person.internalCode + \":\" + JSON.toJSONString(person));",
                     "    }",
                     "}"
                 )

@@ -142,8 +142,12 @@ public class Analysis {
                     }
 
                     AttributeInfo attr = info.getAttributeByField(name, field);
-                    attr.reader = !readerFieldInfo.ignore;
-                    attr.writer = !writerFieldInfo.ignore;
+                    if (readerFieldInfo.ignore) {
+                        attr.reader = false;
+                    }
+                    if (writerFieldInfo.ignore) {
+                        attr.writer = false;
+                    }
                 }
 
                 for (ExecutableElement method : ElementFilter.methodsIn(inheritance.getEnclosedElements())) {
