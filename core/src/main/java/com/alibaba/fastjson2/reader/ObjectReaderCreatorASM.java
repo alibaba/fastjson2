@@ -3562,7 +3562,8 @@ public class ObjectReaderCreatorASM
         gwGetFieldType(classNameType, mw, i, fieldType);
         mw.visitLdcInsn(fieldReader.fieldName);
         mw.visitLdcInsn(fieldFeatures);
-        if (jsonb && (Map.class.isAssignableFrom(fieldReader.fieldClass)
+        if (jsonb && hasCustomDeserializer(fieldReader.fieldClass)
+                && (Map.class.isAssignableFrom(fieldReader.fieldClass)
                 || Collection.class.isAssignableFrom(fieldReader.fieldClass))) {
             mw.invokestatic(
                     type(FieldReaderObject.class),
@@ -3578,6 +3579,9 @@ public class ObjectReaderCreatorASM
     }
 
     private static boolean hasCustomDeserializer(Class fieldClass) {
+        if (fieldClass == null) {
+            return false;
+        }
         JSONType jsonType = (JSONType) fieldClass.getAnnotation(JSONType.class);
         return jsonType != null && ObjectReader.class.isAssignableFrom(jsonType.deserializer());
     }

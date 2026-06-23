@@ -9,11 +9,15 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import java.lang.reflect.*;
 import java.time.temporal.Temporal;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class FieldReaderObject<T>
         extends FieldReader<T> {
+    static final ConcurrentMap<Class<?>, Boolean> JSONB_SUPPORTED_CACHE = new ConcurrentHashMap<>();
+
     protected ObjectReader initReader;
 
     public FieldReaderObject(
@@ -139,24 +143,27 @@ public class FieldReaderObject<T>
         return objectReader != null
                 && !(objectReader instanceof ObjectReaderImplMap)
                 && !(objectReader instanceof ObjectReaderImplMapTyped)
+                && !(objectReader instanceof ObjectReaderImplMapMultiValueType)
                 && !(objectReader instanceof ObjectReaderImplList)
                 && !(objectReader instanceof ObjectReaderImplListStr)
                 && !(objectReader instanceof ObjectReaderImplListInt64);
     }
 
     static boolean isReadJSONBObjectSupported(ObjectReader objectReader) {
-        try {
-            Method method = objectReader.getClass().getMethod(
-                    "readJSONBObject",
-                    JSONReader.class,
-                    Type.class,
-                    Object.class,
-                    long.class
-            );
-            return method.getDeclaringClass() != ObjectReader.class;
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
+        return JSONB_SUPPORTED_CACHE.computeIfAbsent(objectReader.getClass(), objectReaderClass -> {
+            try {
+                Method method = objectReaderClass.getMethod(
+                        "readJSONBObject",
+                        JSONReader.class,
+                        Type.class,
+                        Object.class,
+                        long.class
+                );
+                return method.getDeclaringClass() != ObjectReader.class;
+            } catch (NoSuchMethodException e) {
+                return false;
+            }
+        });
     }
 
     public static Object readJSONBObject(
@@ -268,7 +275,7 @@ public class FieldReaderObject<T>
                         value = jsonReader.readAny();
                     }
                 } else {
-                    value = objectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+                    value = readJSONBObject(objectReader, jsonReader, fieldType, fieldClass, fieldName, features);
                 }
             } else {
                 value = objectReader.readObject(jsonReader, fieldType, fieldName, features);
@@ -394,7 +401,7 @@ public class FieldReaderObject<T>
         }
 
         Object object = jsonReader.jsonb
-                ? initReader.readJSONBObject(jsonReader, fieldType, fieldName, features)
+                ? readJSONBObject(initReader, jsonReader, fieldType, fieldClass, fieldName, features)
                 : initReader.readObject(jsonReader, fieldType, fieldName, features);
 
         Function builder = initReader.getBuildFunction();

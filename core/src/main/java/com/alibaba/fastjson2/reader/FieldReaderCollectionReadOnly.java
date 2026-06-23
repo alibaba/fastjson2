@@ -108,7 +108,7 @@ class FieldReaderCollectionReadOnly<T>
                     .getObjectReader(fieldType);
         }
         Object value = jsonReader.jsonb
-                ? initReader.readJSONBObject(jsonReader, fieldType, fieldName, 0)
+                ? FieldReaderObject.readJSONBObject(initReader, jsonReader, fieldType, fieldClass, fieldName, 0)
                 : initReader.readObject(jsonReader, fieldType, fieldName, 0);
         accept(object, value);
     }

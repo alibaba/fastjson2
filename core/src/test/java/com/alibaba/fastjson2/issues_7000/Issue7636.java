@@ -56,6 +56,35 @@ public class Issue7636 {
     }
 
     @Test
+    public void testCustomReaderForListSubtypeFieldJSONB() {
+        byte[] bytes = JSONB.toBytes(JSON.parseObject("{\"items\":[\"a\",\"b\"]}"));
+        ListBean bean = JSONB.parseObject(bytes, ListBean.class);
+
+        assertEquals(2, bean.items.size());
+        assertEquals("a", bean.items.get(0));
+        assertEquals("b", bean.items.get(1));
+    }
+
+    @Test
+    public void testReadOnlyCustomReaderForMapSubtypeFieldJSONB() {
+        byte[] bytes = JSONB.toBytes(JSON.parseObject("{\"entity\":{\"id\":123}}"));
+        ReadOnlyBean bean = JSONB.parseObject(bytes, ReadOnlyBean.class);
+
+        assertEquals(0, bean.getEntity().id);
+        assertEquals(123, bean.getEntity().get("id"));
+    }
+
+    @Test
+    public void testReadOnlyCustomReaderForListSubtypeFieldJSONB() {
+        byte[] bytes = JSONB.toBytes(JSON.parseObject("{\"items\":[\"a\",\"b\"]}"));
+        ReadOnlyListBean bean = JSONB.parseObject(bytes, ReadOnlyListBean.class);
+
+        assertEquals(2, bean.getItems().size());
+        assertEquals("a", bean.getItems().get(0));
+        assertEquals("b", bean.getItems().get(1));
+    }
+
+    @Test
     public void testCustomReaderForListSubtype() {
         EntityList list = JSON.parseObject("[\"a\",\"b\"]", EntityList.class);
 
@@ -85,6 +114,22 @@ public class Issue7636 {
 
     public static class RawListBean {
         public RawEntityList items;
+    }
+
+    public static class ReadOnlyBean {
+        private final Entity entity = new Entity();
+
+        public Entity getEntity() {
+            return entity;
+        }
+    }
+
+    public static class ReadOnlyListBean {
+        private final EntityList items = new EntityList();
+
+        public EntityList getItems() {
+            return items;
+        }
     }
 
     @JSONType(deserializer = EntityReader.class)

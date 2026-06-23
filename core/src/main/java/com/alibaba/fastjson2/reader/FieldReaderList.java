@@ -164,7 +164,7 @@ public class FieldReaderList<T, V>
         }
 
         Object value = jsonReader.jsonb
-                ? objectReader.readJSONBObject(jsonReader, null, null, features)
+                ? FieldReaderObject.readJSONBObject(objectReader, jsonReader, fieldType, fieldClass, fieldName, features)
                 : objectReader.readObject(jsonReader, null, null, features);
         accept(object, value);
     }
