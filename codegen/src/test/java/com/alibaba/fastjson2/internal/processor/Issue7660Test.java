@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.internal.processor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -19,40 +20,142 @@ public class Issue7660Test {
 
     @Test
     public void jsonCompiledHonorsSerializeFalse() throws Exception {
-        Path classes = tempDir.resolve("classes");
+        assertEquals("{\"name\":\"Ada\"}", runSource(
+                "Issue7660Bean",
+                Arrays.asList(
+                    "import com.alibaba.fastjson2.JSON;",
+                    "import com.alibaba.fastjson2.annotation.JSONCompiled;",
+                    "import com.alibaba.fastjson2.annotation.JSONField;",
+                    "",
+                    "public class Issue7660Bean {",
+                    "    @JSONCompiled",
+                    "    public static class Person {",
+                    "        @JSONField(serialize = false)",
+                    "        public String internalCode;",
+                    "        public String name;",
+                    "",
+                    "        public Person() {",
+                    "        }",
+                    "",
+                    "        public Person(String internalCode, String name) {",
+                    "            this.internalCode = internalCode;",
+                    "            this.name = name;",
+                    "        }",
+                    "    }",
+                    "",
+                    "    public static void main(String[] args) {",
+                    "        System.out.println(JSON.toJSONString(new Person(\"secret\", \"Ada\")));",
+                    "    }",
+                    "}"
+                )
+        ));
+    }
+
+    @Test
+    public void jsonCompiledHonorsSerializeFalseOnGetter() throws Exception {
+        assertEquals("{\"name\":\"Ada\"}", runSource(
+                "Issue7660GetterBean",
+                Arrays.asList(
+                    "import com.alibaba.fastjson2.JSON;",
+                    "import com.alibaba.fastjson2.annotation.JSONCompiled;",
+                    "import com.alibaba.fastjson2.annotation.JSONField;",
+                    "",
+                    "public class Issue7660GetterBean {",
+                    "    @JSONCompiled",
+                    "    public static class Person {",
+                    "        private String internalCode;",
+                    "        private String name;",
+                    "",
+                    "        public Person() {",
+                    "        }",
+                    "",
+                    "        public Person(String internalCode, String name) {",
+                    "            this.internalCode = internalCode;",
+                    "            this.name = name;",
+                    "        }",
+                    "",
+                    "        @JSONField(serialize = false)",
+                    "        public String getInternalCode() {",
+                    "            return internalCode;",
+                    "        }",
+                    "",
+                    "        public void setInternalCode(String internalCode) {",
+                    "            this.internalCode = internalCode;",
+                    "        }",
+                    "",
+                    "        public String getName() {",
+                    "            return name;",
+                    "        }",
+                    "",
+                    "        public void setName(String name) {",
+                    "            this.name = name;",
+                    "        }",
+                    "    }",
+                    "",
+                    "    public static void main(String[] args) {",
+                    "        System.out.println(JSON.toJSONString(new Person(\"secret\", \"Ada\")));",
+                    "    }",
+                    "}"
+                )
+        ));
+    }
+
+    @Test
+    public void jsonCompiledHonorsDeserializeFalse() throws Exception {
+        assertEquals("null:Ada", runSource(
+                "Issue7660ReaderBean",
+                Arrays.asList(
+                    "import com.alibaba.fastjson2.JSON;",
+                    "import com.alibaba.fastjson2.annotation.JSONCompiled;",
+                    "import com.alibaba.fastjson2.annotation.JSONField;",
+                    "",
+                    "public class Issue7660ReaderBean {",
+                    "    @JSONCompiled",
+                    "    public static class Person {",
+                    "        @JSONField(deserialize = false)",
+                    "        public String internalCode;",
+                    "        public String name;",
+                    "",
+                    "        public Person() {",
+                    "        }",
+                    "    }",
+                    "",
+                    "    public static void main(String[] args) {",
+                    "        Person person = JSON.parseObject(\"{\\\"internalCode\\\":\\\"secret\\\",\\\"name\\\":\\\"Ada\\\"}\", Person.class);",
+                    "        System.out.println(person.internalCode + \":\" + person.name);",
+                    "    }",
+                    "}"
+                )
+        ));
+    }
+
+    private static List<String> command(String first, String... rest) {
+        List<String> command = new ArrayList<>();
+        command.add(first);
+        command.addAll(Arrays.asList(rest));
+        return command;
+    }
+
+    private static ProcessResult run(List<String> command) throws Exception {
+        Process process = new ProcessBuilder(command)
+                .redirectErrorStream(true)
+                .start();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[4096];
+        int len;
+        while ((len = process.getInputStream().read(buffer)) != -1) {
+            baos.write(buffer, 0, len);
+        }
+        byte[] output = baos.toByteArray();
+        return new ProcessResult(process.waitFor(), new String(output, StandardCharsets.UTF_8));
+    }
+
+    private String runSource(String className, List<String> sourceLines) throws Exception {
+        Path classes = tempDir.resolve(className + "-classes");
         Files.createDirectories(classes);
 
-        Path source = tempDir.resolve("Issue7660Bean.java");
-        Files.write(
-                source,
-                Arrays.asList(
-                        "import com.alibaba.fastjson2.JSON;",
-                        "import com.alibaba.fastjson2.annotation.JSONCompiled;",
-                        "import com.alibaba.fastjson2.annotation.JSONField;",
-                        "",
-                        "public class Issue7660Bean {",
-                        "    @JSONCompiled",
-                        "    public static class Person {",
-                        "        @JSONField(serialize = false)",
-                        "        public String internalCode;",
-                        "        public String name;",
-                        "",
-                        "        public Person() {",
-                        "        }",
-                        "",
-                        "        public Person(String internalCode, String name) {",
-                        "            this.internalCode = internalCode;",
-                        "            this.name = name;",
-                        "        }",
-                        "    }",
-                        "",
-                        "    public static void main(String[] args) {",
-                        "        System.out.println(JSON.toJSONString(new Person(\"secret\", \"Ada\")));",
-                        "    }",
-                        "}"
-                ),
-                StandardCharsets.UTF_8
-        );
+        Path source = tempDir.resolve(className + ".java");
+        Files.write(source, sourceLines, StandardCharsets.UTF_8);
 
         String javaClassPath = System.getProperty("java.class.path");
         ProcessResult javac = run(command(
@@ -83,25 +186,10 @@ public class Issue7660Test {
                 java(),
                 "-cp",
                 classes + File.pathSeparator + javaClassPath,
-                "Issue7660Bean"
+                className
         ));
         assertEquals(0, java.exitCode, java.output);
-        assertEquals("{\"name\":\"Ada\"}", lastLine(java.output));
-    }
-
-    private static List<String> command(String first, String... rest) {
-        List<String> command = new ArrayList<>();
-        command.add(first);
-        command.addAll(Arrays.asList(rest));
-        return command;
-    }
-
-    private static ProcessResult run(List<String> command) throws Exception {
-        Process process = new ProcessBuilder(command)
-                .redirectErrorStream(true)
-                .start();
-        byte[] output = process.getInputStream().readAllBytes();
-        return new ProcessResult(process.waitFor(), new String(output, StandardCharsets.UTF_8));
+        return lastLine(java.output);
     }
 
     private static String javac() {

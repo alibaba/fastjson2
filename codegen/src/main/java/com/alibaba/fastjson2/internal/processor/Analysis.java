@@ -189,7 +189,29 @@ public class Analysis {
                     } else {
                         continue;
                     }
+
+                    FieldInfo readerFieldInfo = new FieldInfo();
+                    FieldInfo writerFieldInfo = new FieldInfo();
+                    JSONField[] annotations = method.getAnnotationsByType(JSONField.class);
+                    for (JSONField annotation : annotations) {
+                        CodeGenUtils.getFieldInfo(readerFieldInfo, annotation, false);
+                        CodeGenUtils.getFieldInfo(writerFieldInfo, annotation, true);
+                    }
+                    if (readerFieldInfo.fieldName != null) {
+                        name = readerFieldInfo.fieldName;
+                    } else if (writerFieldInfo.fieldName != null) {
+                        name = writerFieldInfo.fieldName;
+                    }
+
                     AttributeInfo attr = info.getAttributeByMethod(name, type, getter, setter);
+                    if (annotations.length != 0) {
+                        if (readerFieldInfo.ignore) {
+                            attr.reader = false;
+                        }
+                        if (writerFieldInfo.ignore) {
+                            attr.writer = false;
+                        }
+                    }
                 }
             }
         }
