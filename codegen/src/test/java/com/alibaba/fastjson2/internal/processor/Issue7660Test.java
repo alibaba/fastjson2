@@ -180,6 +180,51 @@ public class Issue7660Test {
     }
 
     @Test
+    public void jsonCompiledHonorsDeserializeFalseOnSetter() throws Exception {
+        assertEquals("null:Ada", runSource(
+                "Issue7660SetterReaderBean",
+                Arrays.asList(
+                    "import com.alibaba.fastjson2.JSON;",
+                    "import com.alibaba.fastjson2.annotation.JSONCompiled;",
+                    "import com.alibaba.fastjson2.annotation.JSONField;",
+                    "",
+                    "public class Issue7660SetterReaderBean {",
+                    "    @JSONCompiled",
+                    "    public static class Person {",
+                    "        private String internalCode;",
+                    "        private String name;",
+                    "",
+                    "        public Person() {",
+                    "        }",
+                    "",
+                    "        public String getInternalCode() {",
+                    "            return internalCode;",
+                    "        }",
+                    "",
+                    "        @JSONField(deserialize = false)",
+                    "        public void setInternalCode(String internalCode) {",
+                    "            this.internalCode = internalCode;",
+                    "        }",
+                    "",
+                    "        public String getName() {",
+                    "            return name;",
+                    "        }",
+                    "",
+                    "        public void setName(String name) {",
+                    "            this.name = name;",
+                    "        }",
+                    "    }",
+                    "",
+                    "    public static void main(String[] args) {",
+                    "        Person person = JSON.parseObject(\"{\\\"internalCode\\\":\\\"secret\\\",\\\"name\\\":\\\"Ada\\\"}\", Person.class);",
+                    "        System.out.println(person.getInternalCode() + \":\" + person.getName());",
+                    "    }",
+                    "}"
+                )
+        ));
+    }
+
+    @Test
     public void jsonCompiledSerializeFalseStillAllowsDeserialization() throws Exception {
         assertEquals("secret:{\"name\":\"Ada\"}", runSource(
                 "Issue7660RoundTripBean",
