@@ -174,6 +174,10 @@ public class Analysis {
                         name = BeanUtils.getterName(methodName, null);
                         getter = method;
                         type = method.getReturnType();
+                    } else if (info.record && parameters.isEmpty() && info.attributes.containsKey(methodName)) {
+                        name = methodName;
+                        getter = method;
+                        type = method.getReturnType();
                     } else if (methodName.startsWith("set") && method.getParameters().size() == 1) {
                         name = BeanUtils.setterName(methodName, null);
                         setter = method;
