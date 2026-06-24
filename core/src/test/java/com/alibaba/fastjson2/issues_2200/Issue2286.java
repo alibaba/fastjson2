@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues_2200;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 @Tag("regression")
 @Tag("annotation")
@@ -19,6 +21,18 @@ public class Issue2286 {
         Bean bean = new Bean();
         bean.animal = new Cat();
         assertEquals("{\"animal\":{\"type\":\"Cat\"}}", JSON.toJSONString(bean));
+    }
+
+    @Test
+    public void toJSONShouldNotBypassSerializeUsingForSubtype() {
+        Bean bean = new Bean();
+        Cat cat = new Cat();
+        cat.color = "black";
+        bean.animal = cat;
+
+        JSONObject jsonObject = (JSONObject) JSON.toJSON(bean);
+
+        assertSame(cat, jsonObject.get("animal"));
     }
 
     public static class Bean {

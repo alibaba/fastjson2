@@ -611,7 +611,17 @@ public class ObjectWriterAdapter<T>
     }
 
     public JSONObject toJSONObject(T object, long features) {
+        return toJSONObject(object, features, new IdentityHashMap<Object, JSONObject>());
+    }
+
+    private JSONObject toJSONObject(T object, long features, IdentityHashMap refs) {
+        JSONObject existing = (JSONObject) refs.get(object);
+        if (existing != null) {
+            return existing;
+        }
+
         JSONObject jsonObject = new JSONObject();
+        refs.put(object, jsonObject);
 
         for (int i = 0, size = fieldWriters.size(); i < size; i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
@@ -681,16 +691,19 @@ public class ObjectWriterAdapter<T>
                 }
             }
             if (fieldWriter instanceof FieldWriterObject && fieldValue != null && !(fieldValue instanceof Map)) {
-                ObjectWriter valueWriter = fieldWriter.getInitWriter();
-                if (fieldValue.getClass() != fieldWriter.fieldClass) {
-                    valueWriter = JSONFactory.getObjectWriter(fieldValue.getClass(), this.features | features);
+                FieldWriterObject fieldWriterObject = (FieldWriterObject) fieldWriter;
+                Class<?> fieldValueClass = fieldValue.getClass();
+                ObjectWriter valueWriter = fieldWriterObject.getInitWriter();
+                if (fieldValueClass != fieldWriter.fieldClass
+                        && !fieldWriterObjectWriteUsing(fieldWriterObject, valueWriter, fieldValueClass)) {
+                    valueWriter = JSONFactory.getObjectWriter(fieldValueClass, this.features | features);
                 } else if (valueWriter == null) {
                     valueWriter = JSONFactory.getObjectWriter(fieldWriter.fieldType, this.features | features);
                 }
                 if (valueWriter instanceof ObjectWriterAdapter) {
                     ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) valueWriter;
                     if (!objectWriterAdapter.getFieldWriters().isEmpty()) {
-                        fieldValue = objectWriterAdapter.toJSONObject(fieldValue);
+                        fieldValue = objectWriterAdapter.toJSONObject(fieldValue, features, refs);
                     } else {
                         fieldValue = JSON.toJSON(fieldValue);
                     }
@@ -698,8 +711,20 @@ public class ObjectWriterAdapter<T>
             }
             jsonObject.put(fieldWriter.fieldName, fieldValue);
         }
-
+        refs.remove(object);
         return jsonObject;
+    }
+
+    private static boolean fieldWriterObjectWriteUsing(
+            FieldWriterObject fieldWriterObject,
+            ObjectWriter valueWriter,
+            Class<?> fieldValueClass
+    ) {
+        Class<?> initValueClass = fieldWriterObject.initValueClass;
+        return valueWriter != null
+                && fieldWriterObject.writeUsing
+                && initValueClass != null
+                && initValueClass.isAssignableFrom(fieldValueClass);
     }
 
     @Override

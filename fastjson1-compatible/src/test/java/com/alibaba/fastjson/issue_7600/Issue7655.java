@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class Issue7655 {
     @Test
@@ -25,6 +26,25 @@ public class Issue7655 {
         assertEquals("value2", fieldClassA.getString("field2"));
         assertEquals("value3", fieldClassA.getString("field3"));
         assertEquals("value4", fieldClassA.getString("field4"));
+    }
+
+    @Test
+    public void toJSONShouldKeepRuntimeSubclassCycleSafe() {
+        ClassB classB = new ClassB();
+        classB.setField1("value1");
+        classB.setField2("value2");
+        classB.setField3("value3");
+        classB.setField4("value4");
+
+        ClassC classC = new ClassC();
+        classC.setFieldClassA(classB);
+        classB.setOwner(classC);
+
+        JSONObject jsonObject = (JSONObject) JSON.toJSON(classC);
+        JSONObject fieldClassA = jsonObject.getJSONObject("fieldClassA");
+
+        assertEquals("value3", fieldClassA.getString("field3"));
+        assertSame(jsonObject, fieldClassA.get("owner"));
     }
 
     public static class ClassA {
@@ -51,6 +71,7 @@ public class Issue7655 {
     public static class ClassB extends ClassA {
         private String field3;
         private String field4;
+        private ClassC owner;
 
         public String getField3() {
             return field3;
@@ -66,6 +87,14 @@ public class Issue7655 {
 
         public void setField4(String field4) {
             this.field4 = field4;
+        }
+
+        public ClassC getOwner() {
+            return owner;
+        }
+
+        public void setOwner(ClassC owner) {
+            this.owner = owner;
         }
     }
 

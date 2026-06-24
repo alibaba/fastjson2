@@ -2315,27 +2315,41 @@ public abstract class JSON
     }
 
     public static Object adaptResult(Object result) {
-        return adaptResult(result, 0);
+        return adaptResult(result, 0, new IdentityHashMap<>());
     }
 
-    private static Object adaptResult(Object result, int level) {
+    private static Object adaptResult(Object result, int level, IdentityHashMap<Object, Object> refs) {
         if (level > MAX_LEVEL) {
             throw new JSONException("level too large : " + level);
         }
         if (result instanceof com.alibaba.fastjson2.JSONObject) {
+            Object existing = refs.get(result);
+            if (existing != null) {
+                return existing;
+            }
+
             JSONObject jsonObject = new JSONObject();
+            refs.put(result, jsonObject);
             com.alibaba.fastjson2.JSONObject object = (com.alibaba.fastjson2.JSONObject) result;
             for (Map.Entry<?, Object> entry : object.entrySet()) {
                 String key = (entry.getKey() == null) ? null : entry.getKey().toString();
-                jsonObject.put(key, adaptResult(entry.getValue(), level + 1));
+                jsonObject.put(key, adaptResult(entry.getValue(), level + 1, refs));
             }
+            refs.remove(result);
             return jsonObject;
         } else if (result instanceof com.alibaba.fastjson2.JSONArray) {
+            Object existing = refs.get(result);
+            if (existing != null) {
+                return existing;
+            }
+
             JSONArray jsonArray = new JSONArray();
+            refs.put(result, jsonArray);
             com.alibaba.fastjson2.JSONArray array = (com.alibaba.fastjson2.JSONArray) result;
             for (int i = 0; i < array.size(); ++i) {
-                jsonArray.set(i, adaptResult(array.get(i), level + 1));
+                jsonArray.set(i, adaptResult(array.get(i), level + 1, refs));
             }
+            refs.remove(result);
             return jsonArray;
         }
         return result;
