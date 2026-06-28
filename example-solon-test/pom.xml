@@ -62,12 +62,12 @@
 
         <dependency>
             <groupId>org.noear</groupId>
-            <artifactId>solon-server-jdkhttp</artifactId>
+            <artifactId>solon-logging-simple</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.noear</groupId>
-            <artifactId>solon-logging-simple</artifactId>
+            <artifactId>solon-server-jdkhttp</artifactId>
         </dependency>
 
         <dependency>
