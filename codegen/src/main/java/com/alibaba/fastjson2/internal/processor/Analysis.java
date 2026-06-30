@@ -206,13 +206,11 @@ public class Analysis {
                     }
 
                     AttributeInfo attr = info.getAttributeByMethod(name, type, getter, setter);
-                    if (annotations.length != 0) {
-                        if (readerFieldInfo.ignore) {
-                            attr.reader = false;
-                        }
-                        if (writerFieldInfo.ignore) {
-                            attr.writer = false;
-                        }
+                    if (readerFieldInfo.ignore) {
+                        attr.reader = false;
+                    }
+                    if (writerFieldInfo.ignore) {
+                        attr.writer = false;
                     }
                 }
             }

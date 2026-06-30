@@ -542,7 +542,7 @@ public class CodeGenUtils {
 
         for (JSONReader.Feature feature : jsonField.deserializeFeatures()) {
             fieldInfo.features |= feature.mask;
-            if (fieldInfo.ignore && feature == JSONReader.Feature.FieldBased) {
+            if (!serialize && fieldInfo.ignore && feature == JSONReader.Feature.FieldBased) {
                 fieldInfo.ignore = false;
             }
         }

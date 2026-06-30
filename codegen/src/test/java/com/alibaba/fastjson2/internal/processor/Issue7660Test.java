@@ -152,7 +152,7 @@ public class Issue7660Test {
 
     @Test
     public void jsonCompiledHonorsDeserializeFalse() throws Exception {
-        assertEquals("null:Ada", runSource(
+        assertEquals("visible:Ada:{\"internalCode\":\"visible\",\"name\":\"Ada\"}", runSource(
                 "Issue7660ReaderBean",
                 Arrays.asList(
                     "import com.alibaba.fastjson2.JSON;",
@@ -172,7 +172,68 @@ public class Issue7660Test {
                     "",
                     "    public static void main(String[] args) {",
                     "        Person person = JSON.parseObject(\"{\\\"internalCode\\\":\\\"secret\\\",\\\"name\\\":\\\"Ada\\\"}\", Person.class);",
-                    "        System.out.println(person.internalCode + \":\" + person.name);",
+                    "        person.internalCode = \"visible\";",
+                    "        System.out.println(person.internalCode + \":\" + person.name + \":\" + JSON.toJSONString(person));",
+                    "    }",
+                    "}"
+                )
+        ));
+    }
+
+    @Test
+    public void jsonCompiledHonorsSerializeFalseWithFieldBasedDeserializeFeature() throws Exception {
+        assertEquals("secret:{\"name\":\"Ada\"}", runSource(
+                "Issue7660FieldBasedBean",
+                Arrays.asList(
+                    "import com.alibaba.fastjson2.JSON;",
+                    "import com.alibaba.fastjson2.JSONReader;",
+                    "import com.alibaba.fastjson2.annotation.JSONCompiled;",
+                    "import com.alibaba.fastjson2.annotation.JSONField;",
+                    "",
+                    "public class Issue7660FieldBasedBean {",
+                    "    @JSONCompiled",
+                    "    public static class Person {",
+                    "        @JSONField(serialize = false, deserializeFeatures = {JSONReader.Feature.FieldBased})",
+                    "        public String internalCode;",
+                    "        public String name;",
+                    "",
+                    "        public Person() {",
+                    "        }",
+                    "    }",
+                    "",
+                    "    public static void main(String[] args) {",
+                    "        Person person = JSON.parseObject(\"{\\\"internalCode\\\":\\\"secret\\\",\\\"name\\\":\\\"Ada\\\"}\", Person.class);",
+                    "        System.out.println(person.internalCode + \":\" + JSON.toJSONString(person));",
+                    "    }",
+                    "}"
+                )
+        ));
+    }
+
+    @Test
+    public void jsonCompiledHonorsSerializeFalseAndDeserializeFalseTogether() throws Exception {
+        assertEquals("visible:{\"name\":\"Ada\"}", runSource(
+                "Issue7660ReadWriteIgnoredBean",
+                Arrays.asList(
+                    "import com.alibaba.fastjson2.JSON;",
+                    "import com.alibaba.fastjson2.annotation.JSONCompiled;",
+                    "import com.alibaba.fastjson2.annotation.JSONField;",
+                    "",
+                    "public class Issue7660ReadWriteIgnoredBean {",
+                    "    @JSONCompiled",
+                    "    public static class Person {",
+                    "        @JSONField(serialize = false, deserialize = false)",
+                    "        public String internalCode;",
+                    "        public String name;",
+                    "",
+                    "        public Person() {",
+                    "        }",
+                    "    }",
+                    "",
+                    "    public static void main(String[] args) {",
+                    "        Person person = JSON.parseObject(\"{\\\"internalCode\\\":\\\"secret\\\",\\\"name\\\":\\\"Ada\\\"}\", Person.class);",
+                    "        person.internalCode = \"visible\";",
+                    "        System.out.println(person.internalCode + \":\" + JSON.toJSONString(person));",
                     "    }",
                     "}"
                 )
