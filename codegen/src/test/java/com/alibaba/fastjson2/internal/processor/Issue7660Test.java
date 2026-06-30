@@ -282,14 +282,18 @@ public class Issue7660Test {
         Files.write(source, sourceLines, StandardCharsets.UTF_8);
 
         String javaClassPath = System.getProperty("java.class.path");
-        ProcessResult javac = run(command(
-                javac(),
-                "-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
-                "-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
-                "-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
-                "-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
-                "-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
-                "-J--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        List<String> javacCommand = command(javac());
+        if (isJdk9OrLater()) {
+            javacCommand.addAll(Arrays.asList(
+                    "-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+                    "-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
+                    "-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
+                    "-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+                    "-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+                    "-J--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED"
+            ));
+        }
+        javacCommand.addAll(Arrays.asList(
                 "-cp",
                 javaClassPath,
                 "-processorpath",
@@ -304,6 +308,7 @@ public class Issue7660Test {
                 classes.toString(),
                 source.toString()
         ));
+        ProcessResult javac = run(javacCommand);
         assertEquals(0, javac.exitCode, javac.output);
 
         ProcessResult java = run(command(
@@ -322,6 +327,10 @@ public class Issue7660Test {
 
     private static String java() {
         return executable("java");
+    }
+
+    private static boolean isJdk9OrLater() {
+        return !System.getProperty("java.specification.version").startsWith("1.");
     }
 
     private static String executable(String name) {
