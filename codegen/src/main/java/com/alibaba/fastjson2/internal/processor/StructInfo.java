@@ -139,6 +139,13 @@ public class StructInfo {
     }
 
     public List<AttributeInfo> getWriterAttributes() {
+        if (record) {
+            return attributes.values()
+                    .stream()
+                    .filter(AttributeInfo::supportGet)
+                    .collect(Collectors.toList());
+        }
+
         return attributes.values()
                 .stream()
                 .filter(AttributeInfo::supportGet)
