@@ -396,20 +396,28 @@ public class Issue7660Test {
 
     private static String executable(String name) {
         File javaHome = new File(System.getProperty("java.home"));
-        File executable = new File(new File(javaHome, "bin"), name);
+        File executable = executable(new File(javaHome, "bin"), name);
         if (executable.isFile()) {
             return executable.getAbsolutePath();
         }
 
         File parent = javaHome.getParentFile();
         if (parent != null) {
-            File parentExecutable = new File(new File(parent, "bin"), name);
+            File parentExecutable = executable(new File(parent, "bin"), name);
             if (parentExecutable.isFile()) {
                 return parentExecutable.getAbsolutePath();
             }
         }
 
         return executable.getAbsolutePath();
+    }
+
+    private static File executable(File directory, String name) {
+        File executable = new File(directory, name);
+        if (executable.isFile()) {
+            return executable;
+        }
+        return new File(directory, name + ".exe");
     }
 
     private static String lastLine(String output) {
