@@ -505,6 +505,33 @@ public abstract class JSONWriter
     }
 
     /**
+     * Captures the currently registered references for later {@link #restoreReferences(Object)}.
+     *
+     * @return an opaque snapshot, or {@code null} if none are registered
+     */
+    public final Object saveReferences() {
+        return refs == null ? null : new IdentityHashMap<>(refs);
+    }
+
+    /**
+     * Restores references to a previous {@link #saveReferences() snapshot},
+     * discarding any registered since.
+     *
+     * @param snapshot a snapshot previously returned by {@link #saveReferences()}
+     */
+    @SuppressWarnings("unchecked")
+    public final void restoreReferences(Object snapshot) {
+        if (refs == null) {
+            return;
+        }
+        if (snapshot == null) {
+            refs.clear();
+        } else {
+            refs.keySet().retainAll(((IdentityHashMap<Object, Path>) snapshot).keySet());
+        }
+    }
+
+    /**
      * Checks if the specified object is contained in the reference map.
      *
      * @param value the object to check

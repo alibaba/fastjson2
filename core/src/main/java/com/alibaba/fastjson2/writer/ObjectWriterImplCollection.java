@@ -81,70 +81,56 @@ final class ObjectWriterImplCollection
 //            }
 //        }
 
-        boolean refDetect = jsonWriter.isRefDetect();
+        boolean contextRefDetect = jsonWriter.isRefDetect();
+        boolean refDetect = contextRefDetect;
         if (collection.size() > 1 && !(collection instanceof SortedSet) && !(collection instanceof LinkedHashSet)) {
             refDetect = false;
         }
 
-        // Fix for shared-reference inside unordered Set elements:
-        // When the outer collection is a non-List (e.g. HashSet), JSON path like "$.foo"
-        // generated for shared references inside element fields cannot be resolved on
-        // read side (the root is a Set, not a Bean / List). Disable ReferenceDetection
-        // for the whole element subtree to force inlining.
-        boolean suppressElementRefDetect = !(collection instanceof List);
-        long originalContextFeatures = 0L;
-        boolean restoreContextFeatures = false;
-        if (suppressElementRefDetect) {
-            JSONWriter.Context ctx = jsonWriter.getContext();
-            originalContextFeatures = ctx.getFeatures();
-            if ((originalContextFeatures & JSONWriter.Feature.ReferenceDetection.mask) != 0) {
-                ctx.setFeatures(originalContextFeatures & ~JSONWriter.Feature.ReferenceDetection.mask);
-                restoreContextFeatures = true;
+        // Non-List Collection: sibling-shared $ref paths are unresolvable on read; restore ancestor refs before each element.
+        boolean inlineSharedElementRefs = contextRefDetect && !(collection instanceof List);
+        Object refsSnapshot = inlineSharedElementRefs ? jsonWriter.saveReferences() : null;
+
+        jsonWriter.startArray(collection.size());
+
+        Class previousClass = null;
+        ObjectWriter previousObjectWriter = null;
+        int i = 0;
+        for (Iterator it = collection.iterator(); it.hasNext(); ++i) {
+            if (inlineSharedElementRefs) {
+                jsonWriter.restoreReferences(refsSnapshot);
             }
-        }
 
-        try {
-            jsonWriter.startArray(collection.size());
+            Object item = it.next();
+            if (item == null) {
+                jsonWriter.writeNull();
+                continue;
+            }
+            Class<?> itemClass = item.getClass();
+            ObjectWriter itemObjectWriter;
+            if (itemClass == previousClass) {
+                itemObjectWriter = previousObjectWriter;
+            } else {
+                itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                previousClass = itemClass;
+                previousObjectWriter = itemObjectWriter;
+            }
 
-            Class previousClass = null;
-            ObjectWriter previousObjectWriter = null;
-            int i = 0;
-            for (Iterator it = collection.iterator(); it.hasNext(); ++i) {
-                Object item = it.next();
-                if (item == null) {
-                    jsonWriter.writeNull();
+            boolean itemRefDetect = refDetect && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
+
+            if (itemRefDetect) {
+                String refPath = jsonWriter.setPath(i, item);
+                if (refPath != null) {
+                    jsonWriter.writeReference(refPath);
+                    jsonWriter.popPath(item);
                     continue;
                 }
-                Class<?> itemClass = item.getClass();
-                ObjectWriter itemObjectWriter;
-                if (itemClass == previousClass) {
-                    itemObjectWriter = previousObjectWriter;
-                } else {
-                    itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
-                    previousClass = itemClass;
-                    previousObjectWriter = itemObjectWriter;
-                }
-
-                boolean itemRefDetect = refDetect && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
-
-                if (itemRefDetect) {
-                    String refPath = jsonWriter.setPath(i, item);
-                    if (refPath != null) {
-                        jsonWriter.writeReference(refPath);
-                        jsonWriter.popPath(item);
-                        continue;
-                    }
-                }
-
-                itemObjectWriter.writeJSONB(jsonWriter, item, i, fieldItemType, features);
-
-                if (itemRefDetect) {
-                    jsonWriter.popPath(item);
-                }
             }
-        } finally {
-            if (restoreContextFeatures) {
-                jsonWriter.getContext().setFeatures(originalContextFeatures);
+
+            itemObjectWriter.writeJSONB(jsonWriter, item, i, fieldItemType, features);
+
+            if (itemRefDetect) {
+                jsonWriter.popPath(item);
             }
         }
     }
@@ -170,13 +156,21 @@ final class ObjectWriterImplCollection
             }
         }
 
-        Iterable iterable = (Iterable) object;
+        Collection collection = (Collection) object;
+
+        // See writeJSONB: inline sibling-shared refs inside a non-List Collection.
+        boolean inlineSharedElementRefs = jsonWriter.isRefDetect() && !(collection instanceof List);
+        Object refsSnapshot = inlineSharedElementRefs ? jsonWriter.saveReferences() : null;
 
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
         jsonWriter.startArray();
         int i = 0;
-        for (Object o : iterable) {
+        for (Object o : collection) {
+            if (inlineSharedElementRefs) {
+                jsonWriter.restoreReferences(refsSnapshot);
+            }
+
             if (i != 0) {
                 jsonWriter.writeComma();
             }
