@@ -2,6 +2,7 @@
 
 open module com.alibaba.fastjson2 {
     requires transitive jdk.unsupported;
+    requires java.xml;
     requires java.management;
 
     exports com.alibaba.fastjson2;
