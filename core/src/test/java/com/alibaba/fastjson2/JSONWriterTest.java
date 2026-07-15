@@ -273,6 +273,41 @@ public class JSONWriterTest {
     }
 
     @Test
+    public void test_saveReferences_restoreReferences() {
+        JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.ReferenceDetection);
+        Object ancestor = new Object();
+        Object sibling = new Object();
+
+        jsonWriter.setPath("ancestor", ancestor);
+        jsonWriter.popPath(ancestor);
+        Object snapshot = jsonWriter.saveReferences();
+        assertTrue(jsonWriter.containsReference(ancestor));
+
+        jsonWriter.setPath("sibling", sibling);
+        jsonWriter.popPath(sibling);
+        assertTrue(jsonWriter.containsReference(sibling));
+
+        jsonWriter.restoreReferences(snapshot);
+        assertTrue(jsonWriter.containsReference(ancestor));
+        assertFalse(jsonWriter.containsReference(sibling));
+    }
+
+    @Test
+    public void test_saveReferences_restoreNull() {
+        JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.ReferenceDetection);
+        Object sibling = new Object();
+
+        assertNull(jsonWriter.saveReferences());
+
+        jsonWriter.setPath("sibling", sibling);
+        jsonWriter.popPath(sibling);
+        assertTrue(jsonWriter.containsReference(sibling));
+
+        jsonWriter.restoreReferences(null);
+        assertFalse(jsonWriter.containsReference(sibling));
+    }
+
+    @Test
     public void test_base64() {
         byte[] bytes = new byte[1024];
         new Random().nextBytes(bytes);

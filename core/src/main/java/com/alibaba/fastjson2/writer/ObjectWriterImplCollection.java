@@ -81,10 +81,15 @@ final class ObjectWriterImplCollection
 //            }
 //        }
 
-        boolean refDetect = jsonWriter.isRefDetect();
+        boolean contextRefDetect = jsonWriter.isRefDetect();
+        boolean refDetect = contextRefDetect;
         if (collection.size() > 1 && !(collection instanceof SortedSet) && !(collection instanceof LinkedHashSet)) {
             refDetect = false;
         }
+
+        // Non-List Collection: sibling-shared $ref paths are unresolvable on read; restore ancestor refs before each element.
+        boolean inlineSharedElementRefs = contextRefDetect && !(collection instanceof List);
+        Object refsSnapshot = inlineSharedElementRefs ? jsonWriter.saveReferences() : null;
 
         jsonWriter.startArray(collection.size());
 
@@ -92,6 +97,10 @@ final class ObjectWriterImplCollection
         ObjectWriter previousObjectWriter = null;
         int i = 0;
         for (Iterator it = collection.iterator(); it.hasNext(); ++i) {
+            if (inlineSharedElementRefs) {
+                jsonWriter.restoreReferences(refsSnapshot);
+            }
+
             Object item = it.next();
             if (item == null) {
                 jsonWriter.writeNull();
@@ -147,13 +156,21 @@ final class ObjectWriterImplCollection
             }
         }
 
-        Iterable iterable = (Iterable) object;
+        Collection collection = (Collection) object;
+
+        // See writeJSONB: inline sibling-shared refs inside a non-List Collection.
+        boolean inlineSharedElementRefs = jsonWriter.isRefDetect() && !(collection instanceof List);
+        Object refsSnapshot = inlineSharedElementRefs ? jsonWriter.saveReferences() : null;
 
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
         jsonWriter.startArray();
         int i = 0;
-        for (Object o : iterable) {
+        for (Object o : collection) {
+            if (inlineSharedElementRefs) {
+                jsonWriter.restoreReferences(refsSnapshot);
+            }
+
             if (i != 0) {
                 jsonWriter.writeComma();
             }
