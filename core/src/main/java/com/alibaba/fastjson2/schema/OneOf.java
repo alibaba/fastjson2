@@ -37,17 +37,21 @@ final class OneOf
     }
 
     @Override
-    protected ValidateResult validateInternal(Object value) {
+    protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         int count = 0;
         for (JSONSchema item : items) {
-            ValidateResult result = item.validate(value);
+            ValidateResult result = item.validateInternal(value, null, path);
             if (result.isSuccess()) {
                 count++;
                 if (count > 1) {
-                    return FAIL_ONE_OF;
+                    return handleError(handler, value, path, FAIL_ONE_OF);
                 }
             }
         }
-        return count != 1 ? FAIL_ONE_OF : SUCCESS;
+
+        if (count != 1) {
+            return handleError(handler, value, path, FAIL_ONE_OF);
+        }
+        return SUCCESS;
     }
 }

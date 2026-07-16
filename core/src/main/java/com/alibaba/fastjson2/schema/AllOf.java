@@ -70,13 +70,23 @@ final class AllOf
     }
 
     @Override
-    protected ValidateResult validateInternal(Object value) {
+    protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
+        boolean totalSuccess = true;
+        ValidateResult firstFail = null;
+
         for (JSONSchema item : items) {
-            ValidateResult result = item.validate(value);
+            ValidateResult result = item.validateInternal(value, handler, path);
             if (!result.isSuccess()) {
-                return result;
+                if (handler == null || result.isAbort()) {
+                    return result;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = result;
+                }
             }
         }
-        return SUCCESS;
+        return totalSuccess ? SUCCESS : firstFail;
     }
 }

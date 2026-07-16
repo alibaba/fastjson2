@@ -7,6 +7,17 @@ public final class ValidateResult {
     final ValidateResult cause;
     String message;
 
+    // Indicates whether the validation process should be aborted based on the ValidationHandler's decision.
+    private boolean abort;
+
+    void setAbort(boolean abort) {
+        this.abort = abort;
+    }
+
+    boolean isAbort() {
+        return abort;
+    }
+
     public ValidateResult(ValidateResult cause, String format, Object... args) {
         this.success = false;
         this.format = format;
