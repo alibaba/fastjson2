@@ -69,6 +69,7 @@ public abstract class JSONWriter
         implements Closeable {
     static final long WRITE_ARRAY_NULL_MASK = NullAsDefaultValue.mask | WriteNullListAsEmpty.mask;
     static final byte PRETTY_NON = 0, PRETTY_TAB = 1, PRETTY_2_SPACE = 2, PRETTY_4_SPACE = 4;
+    static final int PRETTY_INLINE_ARRAY_MAX_LENGTH = 5;
     static final long NONE_DIRECT_FEATURES = ReferenceDetection.mask | NotWriteEmptyArray.mask | NotWriteDefaultValue.mask;
 
     public final Context context;
@@ -84,12 +85,22 @@ public abstract class JSONWriter
 
     protected boolean startObject;
     protected int level;
+    /**
+     * Bitmask tracking which nesting levels are arrays (vs objects).
+     * Bit N is set if level N is an array context.
+     */
+    protected long levelArray;
     protected int off;
     protected Object rootObject;
     protected IdentityHashMap<Object, Path> refs;
     protected Path path;
     protected String lastReference;
     protected byte pretty;
+    /**
+     * When true and pretty formatting is enabled, arrays are written inline
+     * (on a single line) rather than with line breaks between elements.
+     */
+    protected boolean prettyInlineArrays;
     protected Object attachment;
 
     protected JSONWriter(
@@ -119,6 +130,7 @@ public abstract class JSONWriter
         } else {
             pretty = PRETTY_NON;
         }
+        prettyInlineArrays = context.prettyFormatInlineArrays;
     }
 
     /**
@@ -1793,6 +1805,10 @@ public abstract class JSONWriter
             writeArrayNull();
             return;
         }
+        boolean savedInline = prettyInlineArrays;
+        if (pretty != PRETTY_NON && !prettyInlineArrays && value.length < PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            prettyInlineArrays = true;
+        }
         startArray();
         for (int i = 0; i < value.length; i++) {
             if (i != 0) {
@@ -1801,6 +1817,7 @@ public abstract class JSONWriter
             writeInt16(value[i]);
         }
         endArray();
+        prettyInlineArrays = savedInline;
     }
 
     /**
@@ -1968,6 +1985,10 @@ public abstract class JSONWriter
             return;
         }
 
+        boolean savedInline = prettyInlineArrays;
+        if (pretty != PRETTY_NON && !prettyInlineArrays && value.length < PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            prettyInlineArrays = true;
+        }
         startArray();
         for (int i = 0; i < value.length; i++) {
             if (i != 0) {
@@ -1985,6 +2006,7 @@ public abstract class JSONWriter
             writeRaw(str);
         }
         endArray();
+        prettyInlineArrays = savedInline;
     }
 
     /**
@@ -2042,11 +2064,16 @@ public abstract class JSONWriter
      * @param value1 the second double value to write
      */
     public void writeDoubleArray(double value0, double value1) {
+        boolean savedInline = prettyInlineArrays;
+        if (pretty != PRETTY_NON && !prettyInlineArrays) {
+            prettyInlineArrays = true;
+        }
         startArray();
         writeDouble(value0);
         writeComma();
         writeDouble(value1);
         endArray();
+        prettyInlineArrays = savedInline;
     }
 
     /**
@@ -2067,6 +2094,10 @@ public abstract class JSONWriter
             return;
         }
 
+        boolean savedInline = prettyInlineArrays;
+        if (pretty != PRETTY_NON && !prettyInlineArrays && value.length < PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            prettyInlineArrays = true;
+        }
         startArray();
         for (int i = 0; i < value.length; i++) {
             if (i != 0) {
@@ -2084,6 +2115,7 @@ public abstract class JSONWriter
             writeRaw(str);
         }
         endArray();
+        prettyInlineArrays = savedInline;
     }
 
     /**
@@ -2113,6 +2145,10 @@ public abstract class JSONWriter
             return;
         }
 
+        boolean savedInline = prettyInlineArrays;
+        if (pretty != PRETTY_NON && !prettyInlineArrays && value.length < PRETTY_INLINE_ARRAY_MAX_LENGTH) {
+            prettyInlineArrays = true;
+        }
         startArray();
         for (int i = 0; i < value.length; i++) {
             if (i != 0) {
@@ -2121,6 +2157,7 @@ public abstract class JSONWriter
             writeBool(value[i]);
         }
         endArray();
+        prettyInlineArrays = savedInline;
     }
 
     /**
@@ -3251,6 +3288,7 @@ public abstract class JSONWriter
         LabelFilter labelFilter;
         ContextValueFilter contextValueFilter;
         ContextNameFilter contextNameFilter;
+        boolean prettyFormatInlineArrays;
 
         /**
          * Creates a new Context with the specified object writer provider.
@@ -3267,6 +3305,7 @@ public abstract class JSONWriter
             this.provider = provider;
             this.zoneId = defaultWriterZoneId;
             this.maxLevel = defaultMaxLevel;
+            this.prettyFormatInlineArrays = JSONFactory.defaultWriterPrettyFormatInlineArrays;
 
             String format = defaultWriterFormat;
             if (format != null) {
@@ -3284,6 +3323,7 @@ public abstract class JSONWriter
             this.provider = getDefaultObjectWriterProvider();
             this.zoneId = defaultWriterZoneId;
             this.maxLevel = defaultMaxLevel;
+            this.prettyFormatInlineArrays = JSONFactory.defaultWriterPrettyFormatInlineArrays;
 
             String format = defaultWriterFormat;
             if (format != null) {
@@ -3306,6 +3346,7 @@ public abstract class JSONWriter
             this.provider = getDefaultObjectWriterProvider();
             this.zoneId = defaultWriterZoneId;
             this.maxLevel = defaultMaxLevel;
+            this.prettyFormatInlineArrays = JSONFactory.defaultWriterPrettyFormatInlineArrays;
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
@@ -3335,6 +3376,7 @@ public abstract class JSONWriter
             this.provider = provider;
             this.zoneId = defaultWriterZoneId;
             this.maxLevel = defaultMaxLevel;
+            this.prettyFormatInlineArrays = JSONFactory.defaultWriterPrettyFormatInlineArrays;
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
@@ -3877,6 +3919,26 @@ public abstract class JSONWriter
          */
         public void setMaxLevel(int maxLevel) {
             this.maxLevel = maxLevel;
+        }
+
+        /**
+         * Checks if inline arrays is enabled for pretty formatting.
+         *
+         * @return true if inline arrays is enabled, false otherwise
+         * @since 2.0.61
+         */
+        public boolean isPrettyFormatInlineArrays() {
+            return prettyFormatInlineArrays;
+        }
+
+        /**
+         * Sets whether to use inline arrays when pretty formatting.
+         *
+         * @param prettyFormatInlineArrays true to enable inline arrays, false to disable
+         * @since 2.0.61
+         */
+        public void setPrettyFormatInlineArrays(boolean prettyFormatInlineArrays) {
+            this.prettyFormatInlineArrays = prettyFormatInlineArrays;
         }
     }
 
