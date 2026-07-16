@@ -26,6 +26,24 @@ public class JSONArray
         extends ArrayList<Object> {
     private static final long serialVersionUID = 1L;
 
+    protected long contextFeatures;
+
+    public void setContextFeatures(JSONWriter.Feature... features) {
+        long combinedFeatures = this.contextFeatures;
+        for (JSONWriter.Feature feature : features) {
+            combinedFeatures |= feature.mask;
+        }
+        this.contextFeatures = combinedFeatures;
+    }
+
+    public void setContextFeatures(long features) {
+        this.contextFeatures = features;
+    }
+
+    public long getContextFeatures() {
+        return contextFeatures;
+    }
+
     static ObjectWriter<JSONArray> arrayWriter;
 
     /**
@@ -1049,7 +1067,9 @@ public class JSONArray
      */
     @Override
     public String toString() {
-        try (JSONWriter writer = JSONWriter.of()) {
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        context.features |= this.contextFeatures;
+        try (JSONWriter writer = JSONWriter.of(context)) {
             writer.setRootObject(this);
             writer.write(this);
             return writer.toString();
@@ -1064,7 +1084,9 @@ public class JSONArray
      */
     @SuppressWarnings("unchecked")
     public String toString(JSONWriter.Feature... features) {
-        try (JSONWriter writer = JSONWriter.of(features)) {
+        JSONWriter.Context context = features == null ?
+                JSONFactory.createWriteContext() : JSONFactory.createWriteContext(features);
+        try (JSONWriter writer = JSONWriter.of(context)) {
             if ((writer.context.features & NONE_DIRECT_FEATURES) == 0) {
                 writer.write(this);
             } else {

@@ -35,6 +35,24 @@ public class JSONObject
         implements InvocationHandler {
     private static final long serialVersionUID = 1L;
 
+    protected long contextFeatures;
+
+    public void setContextFeatures(JSONWriter.Feature... features) {
+        long combinedFeatures = this.contextFeatures;
+        for (JSONWriter.Feature feature : features) {
+            combinedFeatures |= feature.mask;
+        }
+        this.contextFeatures = combinedFeatures;
+    }
+
+    public void setContextFeatures(long features) {
+        this.contextFeatures = features;
+    }
+
+    public long getContextFeatures() {
+        return contextFeatures;
+    }
+
     static ObjectReader<JSONArray> arrayReader;
     static final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
             | PrettyFormat.mask
@@ -1150,7 +1168,9 @@ public class JSONObject
      */
     @Override
     public String toString() {
-        try (JSONWriter writer = JSONWriter.of()) {
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        context.features |= this.contextFeatures;
+        try (JSONWriter writer = JSONWriter.of(context)) {
             writer.setRootObject(this);
             writer.write(this);
             return writer.toString();
@@ -1164,7 +1184,9 @@ public class JSONObject
      * @return JSON {@link String}
      */
     public String toString(JSONWriter.Feature... features) {
-        try (JSONWriter writer = JSONWriter.of(features)) {
+        JSONWriter.Context context = features == null ?
+                JSONFactory.createWriteContext() : JSONFactory.createWriteContext(features);
+        try (JSONWriter writer = JSONWriter.of(context)) {
             writer.setRootObject(this);
             writer.write(this);
             return writer.toString();
