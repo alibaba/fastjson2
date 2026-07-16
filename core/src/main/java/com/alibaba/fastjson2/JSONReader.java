@@ -6519,10 +6519,10 @@ public abstract class JSONReader
         DisableReferenceDetect(MASK_DISABLE_REFERENCE_DETECT),
 
         /**
-         * Feature that determines whether to unwrap single-element string arrays to scalar values.
-         * When enabled, JSON arrays containing a single string element will be
-         * unwrapped to just that string value rather than returning the array.
-         * For example, ["value"] would be returned as "value".
+         * Feature that disables unwrapping of single-element string arrays to scalar values.
+         * When enabled, JSON arrays containing a single string element will NOT be
+         * unwrapped, and will instead be returned as arrays.
+         * For example, ["value"] would be returned as ["value"] rather than "value".
          * @since 2.0.60
          */
         DisableStringArrayUnwrapping(1L << 34L);
