@@ -611,7 +611,7 @@ abstract class JSONPathFilter
                         array.add(item);
                     }
                 }
-                context.value = array.isEmpty() ? null : array;
+                context.value = array;
                 context.eval = true;
                 return;
             }
@@ -624,7 +624,7 @@ abstract class JSONPathFilter
                         array.add(item);
                     }
                 }
-                context.value = array.isEmpty() ? null : array;
+                context.value = array;
                 context.eval = true;
                 return;
             }
@@ -645,7 +645,7 @@ abstract class JSONPathFilter
                         }
                     }
                 }
-                context.value = array.isEmpty() ? null : array;
+                context.value = array;
                 context.eval = true;
                 return;
             }

@@ -31,7 +31,8 @@ abstract class JSONPathSegment {
 
     public boolean contains(JSONPath.Context context) {
         eval(context);
-        return context.value != null;
+        Object value = context.value;
+        return !(value == null || (value instanceof Collection && ((Collection<?>) value).isEmpty()) || (value instanceof Map && ((Map<?, ?>) value).isEmpty()));
     }
 
     public boolean remove(JSONPath.Context context) {
@@ -1539,7 +1540,7 @@ abstract class JSONPathSegment {
 
             public void accept(Object object) {
                 if (object instanceof Map) {
-                    for (Iterator<Map.Entry> it = ((Map) object).entrySet().iterator(); it.hasNext();) {
+                    for (Iterator<Map.Entry> it = ((Map) object).entrySet().iterator(); it.hasNext(); ) {
                         Map.Entry entry = it.next();
                         if (name.equals(entry.getKey())) {
                             it.remove();
