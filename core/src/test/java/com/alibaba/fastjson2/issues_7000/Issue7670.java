@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue7670 {
-
     @Test
     public void test() {
         String json = "{\"classes\":[{\"className\":\"yuwen\"},{\"className\":\"shuxue\"}]}";
