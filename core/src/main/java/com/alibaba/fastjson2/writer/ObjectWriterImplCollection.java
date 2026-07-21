@@ -81,15 +81,9 @@ final class ObjectWriterImplCollection
 //            }
 //        }
 
-        boolean contextRefDetect = jsonWriter.isRefDetect();
-        boolean refDetect = contextRefDetect;
-        if (collection.size() > 1 && !(collection instanceof SortedSet) && !(collection instanceof LinkedHashSet)) {
-            refDetect = false;
-        }
-
-        // Non-List Collection: sibling-shared $ref paths are unresolvable on read; restore ancestor refs before each element.
-        boolean inlineSharedElementRefs = contextRefDetect && !(collection instanceof List);
-        Object refsSnapshot = inlineSharedElementRefs ? jsonWriter.saveReferences() : null;
+        boolean refDetect = jsonWriter.isRefDetect();
+        // Set element indexes are unstable; non-Set collections keep normal refs
+        boolean unstableIndex = collection instanceof Set;
 
         jsonWriter.startArray(collection.size());
 
@@ -97,10 +91,6 @@ final class ObjectWriterImplCollection
         ObjectWriter previousObjectWriter = null;
         int i = 0;
         for (Iterator it = collection.iterator(); it.hasNext(); ++i) {
-            if (inlineSharedElementRefs) {
-                jsonWriter.restoreReferences(refsSnapshot);
-            }
-
             Object item = it.next();
             if (item == null) {
                 jsonWriter.writeNull();
@@ -119,7 +109,7 @@ final class ObjectWriterImplCollection
             boolean itemRefDetect = refDetect && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
 
             if (itemRefDetect) {
-                String refPath = jsonWriter.setPath(i, item);
+                String refPath = jsonWriter.setPath(i, item, unstableIndex);
                 if (refPath != null) {
                     jsonWriter.writeReference(refPath);
                     jsonWriter.popPath(item);
@@ -156,21 +146,17 @@ final class ObjectWriterImplCollection
             }
         }
 
-        Collection collection = (Collection) object;
+        Iterable iterable = (Iterable) object;
 
-        // See writeJSONB: inline sibling-shared refs inside a non-List Collection.
-        boolean inlineSharedElementRefs = jsonWriter.isRefDetect() && !(collection instanceof List);
-        Object refsSnapshot = inlineSharedElementRefs ? jsonWriter.saveReferences() : null;
+        boolean refDetect = jsonWriter.isRefDetect();
+        // Set element indexes are unstable; non-Set collections keep normal refs
+        boolean unstableIndex = object instanceof Set;
 
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
         jsonWriter.startArray();
         int i = 0;
-        for (Object o : collection) {
-            if (inlineSharedElementRefs) {
-                jsonWriter.restoreReferences(refsSnapshot);
-            }
-
+        for (Object o : iterable) {
             if (i != 0) {
                 jsonWriter.writeComma();
             }
@@ -190,7 +176,23 @@ final class ObjectWriterImplCollection
                 previousObjectWriter = itemObjectWriter;
             }
 
+            boolean itemRefDetect = refDetect && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
+
+            if (itemRefDetect) {
+                String refPath = jsonWriter.setPath(i, o, unstableIndex);
+                if (refPath != null) {
+                    jsonWriter.writeReference(refPath);
+                    jsonWriter.popPath(o);
+                    i++;
+                    continue;
+                }
+            }
+
             itemObjectWriter.write(jsonWriter, o, i, this.itemType, this.features);
+
+            if (itemRefDetect) {
+                jsonWriter.popPath(o);
+            }
 
             ++i;
         }

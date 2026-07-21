@@ -273,38 +273,85 @@ public class JSONWriterTest {
     }
 
     @Test
-    public void test_saveReferences_restoreReferences() {
+    public void test_unstableIndex_sharedReferenceInlined() {
+        Object root = new Object();
+        Object shared = new Object();
         JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.ReferenceDetection);
-        Object ancestor = new Object();
-        Object sibling = new Object();
+        jsonWriter.setRootObject(root);
 
-        jsonWriter.setPath("ancestor", ancestor);
-        jsonWriter.popPath(ancestor);
-        Object snapshot = jsonWriter.saveReferences();
-        assertTrue(jsonWriter.containsReference(ancestor));
+        assertNull(jsonWriter.setPath("first", shared));
+        jsonWriter.popPath(shared);
 
-        jsonWriter.setPath("sibling", sibling);
-        jsonWriter.popPath(sibling);
-        assertTrue(jsonWriter.containsReference(sibling));
+        // non-cyclic ref via unstable index is inlined; stable path kept for later
+        assertNull(jsonWriter.setPath(0, shared, true));
+        jsonWriter.popPath(shared);
 
-        jsonWriter.restoreReferences(snapshot);
-        assertTrue(jsonWriter.containsReference(ancestor));
-        assertFalse(jsonWriter.containsReference(sibling));
+        assertEquals("$.first", jsonWriter.setPath("third", shared));
+        jsonWriter.popPath(shared);
     }
 
     @Test
-    public void test_saveReferences_restoreNull() {
+    public void test_unstableIndex_cyclicReferencePreserved() {
+        Object root = new Object();
+        Object value = new Object();
         JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.ReferenceDetection);
-        Object sibling = new Object();
+        jsonWriter.setRootObject(root);
 
-        assertNull(jsonWriter.saveReferences());
+        assertNull(jsonWriter.setPath(0, value, true));
+        assertEquals("$[0]", jsonWriter.setPath("self", value));
+        jsonWriter.popPath(value);
+        jsonWriter.popPath(value);
+    }
 
-        jsonWriter.setPath("sibling", sibling);
-        jsonWriter.popPath(sibling);
-        assertTrue(jsonWriter.containsReference(sibling));
+    @Test
+    public void test_unstableIndex_stableIndexKeepsReference() {
+        Object root = new Object();
+        Object shared = new Object();
+        JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.ReferenceDetection);
+        jsonWriter.setRootObject(root);
 
-        jsonWriter.restoreReferences(null);
-        assertFalse(jsonWriter.containsReference(sibling));
+        assertNull(jsonWriter.setPath(0, shared, false));
+        jsonWriter.popPath(shared);
+
+        assertEquals("$[0]", jsonWriter.setPath(1, shared, false));
+        jsonWriter.popPath(shared);
+    }
+
+    @Test
+    public void test_unstableIndex_cacheRefreshKeepsCycleDetection() {
+        Object root = new Object();
+        Object first = new Object();
+        Object second = new Object();
+        JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.ReferenceDetection);
+        jsonWriter.setRootObject(root);
+
+        // prime child0 as stable, then refresh as unstable
+        assertNull(jsonWriter.setPath(0, first, false));
+        jsonWriter.popPath(first);
+
+        assertNull(jsonWriter.setPath(0, second, true));
+        // cycle must still be detected after cache refresh
+        assertEquals("$[0]", jsonWriter.setPath("self", second));
+        jsonWriter.popPath(second);
+        jsonWriter.popPath(second);
+
+        // stale stable Path in refs must still match by location
+        assertNull(jsonWriter.setPath(0, first, true));
+        assertEquals("$[0]", jsonWriter.setPath("self", first));
+        jsonWriter.popPath(first);
+        jsonWriter.popPath(first);
+    }
+
+    @Test
+    public void test_pathEquals_considersUnstableIndex() {
+        JSONWriter.Path parent = JSONWriter.Path.ROOT;
+        JSONWriter.Path stable = new JSONWriter.Path(parent, 0, false);
+        JSONWriter.Path unstable = new JSONWriter.Path(parent, 0, true);
+
+        assertEquals(stable, new JSONWriter.Path(parent, 0, false));
+        assertEquals(unstable, new JSONWriter.Path(parent, 0, true));
+        assertNotEquals(stable, unstable);
+        assertTrue(stable.hashCode() != unstable.hashCode());
     }
 
     @Test

@@ -87,6 +87,7 @@ public abstract class JSONWriter
     protected int off;
     protected Object rootObject;
     protected IdentityHashMap<Object, Path> refs;
+    private IdentityHashMap<Object, Path> refRestores;
     protected Path path;
     protected String lastReference;
     protected byte pretty;
@@ -240,21 +241,7 @@ public abstract class JSONWriter
         }
 
         this.path = new Path(this.path, name);
-
-        Path previous;
-        if (object == rootObject) {
-            previous = Path.ROOT;
-        } else {
-            if (refs == null || (previous = refs.get(object)) == null) {
-                if (refs == null) {
-                    refs = new IdentityHashMap(8);
-                }
-                refs.put(object, this.path);
-                return null;
-            }
-        }
-
-        return previous.toString();
+        return setPathInternal(object);
     }
 
     /**
@@ -273,21 +260,7 @@ public abstract class JSONWriter
         this.path = this.path == Path.ROOT
                 ? fieldWriter.getRootParentPath()
                 : fieldWriter.getPath(path);
-
-        Path previous;
-        if (object == rootObject) {
-            previous = Path.ROOT;
-        } else {
-            if (refs == null || (previous = refs.get(object)) == null) {
-                if (refs == null) {
-                    refs = new IdentityHashMap(8);
-                }
-                refs.put(object, this.path);
-                return null;
-            }
-        }
-
-        return previous.toString();
+        return setPathInternal(object);
     }
 
     /**
@@ -302,21 +275,7 @@ public abstract class JSONWriter
         this.path = this.path == Path.ROOT
                 ? fieldWriter.getRootParentPath()
                 : fieldWriter.getPath(path);
-
-        Path previous;
-        if (object == rootObject) {
-            previous = Path.ROOT;
-        } else {
-            if (refs == null || (previous = refs.get(object)) == null) {
-                if (refs == null) {
-                    refs = new IdentityHashMap(8);
-                }
-                refs.put(object, this.path);
-                return null;
-            }
-        }
-
-        return previous.toString();
+        return setPathInternal(object);
     }
 
     /**
@@ -360,11 +319,23 @@ public abstract class JSONWriter
      * @return the previous path as a string, or null if no previous path exists
      */
     public final String setPath(int index, Object object) {
+        return setPath(index, object, false);
+    }
+
+    /**
+     * Sets the path for the specified object at the given index.
+     *
+     * @param index the index to set the path for
+     * @param object the object to set the path for
+     * @param unstableIndex true if this index belongs to a {@link Set}
+     * @return the previous path as a string, or null if no previous path exists
+     */
+    public final String setPath(int index, Object object, boolean unstableIndex) {
         if (!isRefDetect(object)) {
             return null;
         }
 
-        return setPath0(index, object);
+        return setPath0(index, object, unstableIndex);
     }
 
     /**
@@ -376,15 +347,43 @@ public abstract class JSONWriter
      * @return the previous path as a string, or null if no previous path exists
      */
     public final String setPath0(int index, Object object) {
+        return setPath0(index, object, false);
+    }
+
+    /**
+     * Sets the path for the specified object at the given index without reference detection.
+     *
+     * @param index the index to set the path for
+     * @param object the object to set the path for
+     * @param unstableIndex true if this index belongs to a {@link Set}
+     * @return the previous path as a string, or null if no previous path exists
+     */
+    public final String setPath0(int index, Object object, boolean unstableIndex) {
         if (path == null) {
             return null;
         }
-        this.path = index == 0
-                ? (path.child0 != null ? path.child0 : (path.child0 = new Path(path, index)))
-                : index == 1
-                ? (path.child1 != null ? path.child1 : (path.child1 = new Path(path, index)))
-                : new Path(path, index);
+        this.path = nextIndexPath(path, index, unstableIndex);
+        return setPathInternal(object);
+    }
 
+    private static Path nextIndexPath(Path parent, int index, boolean unstableIndex) {
+        if (index == 0) {
+            if (parent.child0 != null && parent.child0.unstableIndex == unstableIndex) {
+                return parent.child0;
+            }
+            // refresh cache when the unstable flag changes to match the requested flag
+            return parent.child0 = new Path(parent, index, unstableIndex);
+        }
+        if (index == 1) {
+            if (parent.child1 != null && parent.child1.unstableIndex == unstableIndex) {
+                return parent.child1;
+            }
+            return parent.child1 = new Path(parent, index, unstableIndex);
+        }
+        return new Path(parent, index, unstableIndex);
+    }
+
+    private String setPathInternal(Object object) {
         Path previous;
         if (object == rootObject) {
             previous = Path.ROOT;
@@ -398,7 +397,57 @@ public abstract class JSONWriter
             }
         }
 
+        // non-cyclic refs involving Set indexes are inlined; restore original path in popPath0
+        if (previous != Path.ROOT
+                && previous != Path.MANGER_REFERNCE
+                && !isActiveReference(previous)
+                && (isUnderUnstable(previous) || isUnderUnstable(this.path))
+        ) {
+            if (refRestores == null) {
+                refRestores = new IdentityHashMap<>(8);
+            }
+            refRestores.putIfAbsent(object, previous);
+            refs.put(object, this.path);
+            return null;
+        }
+
         return previous.toString();
+    }
+
+    private boolean isActiveReference(Path reference) {
+        // walk ancestors; match by identity or location (ignore unstableIndex)
+        for (Path current = path.parent; current != null; current = current.parent) {
+            if (current == reference || sameLocation(current, reference)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether two paths denote the same JSON location, ignoring {@link Path#unstableIndex}.
+     */
+    private static boolean sameLocation(Path left, Path right) {
+        while (left != null && right != null) {
+            if (left == right) {
+                return true;
+            }
+            if (left.index != right.index || !Objects.equals(left.name, right.name)) {
+                return false;
+            }
+            left = left.parent;
+            right = right.parent;
+        }
+        return left == right;
+    }
+
+    private static boolean isUnderUnstable(Path reference) {
+        for (Path current = reference; current != null; current = current.parent) {
+            if (current.unstableIndex) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -428,6 +477,13 @@ public abstract class JSONWriter
                 || object == Collections.EMPTY_SET
         ) {
             return;
+        }
+
+        if (refRestores != null) {
+            Path original = refRestores.remove(object);
+            if (original != null) {
+                refs.put(object, original);
+            }
         }
 
         this.path = this.path.parent;
@@ -502,33 +558,6 @@ public abstract class JSONWriter
                 && (context.features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
                 && object != null
                 && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
-    }
-
-    /**
-     * Captures the currently registered references for later {@link #restoreReferences(Object)}.
-     *
-     * @return an opaque snapshot, or {@code null} if none are registered
-     */
-    public final Object saveReferences() {
-        return refs == null ? null : new IdentityHashMap<>(refs);
-    }
-
-    /**
-     * Restores references to a previous {@link #saveReferences() snapshot},
-     * discarding any registered since.
-     *
-     * @param snapshot a snapshot previously returned by {@link #saveReferences()}
-     */
-    @SuppressWarnings("unchecked")
-    public final void restoreReferences(Object snapshot) {
-        if (refs == null) {
-            return;
-        }
-        if (snapshot == null) {
-            refs.clear();
-        } else {
-            refs.keySet().retainAll(((IdentityHashMap<Object, Path>) snapshot).keySet());
-        }
     }
 
     /**
@@ -4548,6 +4577,11 @@ public abstract class JSONWriter
         final int index;
 
         /**
+         * True if this index belongs to a {@link Set}; non-cyclic refs involving such paths are inlined.
+         */
+        final boolean unstableIndex;
+
+        /**
          * The cached full path string representation, computed lazily.
          */
         String fullPath;
@@ -4572,6 +4606,7 @@ public abstract class JSONWriter
             this.parent = parent;
             this.name = name;
             this.index = -1;
+            this.unstableIndex = false;
         }
 
         /**
@@ -4581,15 +4616,27 @@ public abstract class JSONWriter
          * @param index the array index for this path segment
          */
         public Path(Path parent, int index) {
+            this(parent, index, false);
+        }
+
+        /**
+         * Creates a new Path instance representing an array index.
+         *
+         * @param parent the parent path, or null for the root path
+         * @param index the array index for this path segment
+         * @param unstableIndex true if this index belongs to a {@link Set}
+         */
+        public Path(Path parent, int index, boolean unstableIndex) {
             this.parent = parent;
             this.name = null;
             this.index = index;
+            this.unstableIndex = unstableIndex;
         }
 
         /**
          * Compares this Path with another object for equality.
          * Two Path instances are considered equal if they have the same parent,
-         * name, and index.
+         * name, index, and unstableIndex.
          *
          * @param o the object to compare with
          * @return true if the objects are equal, false otherwise
@@ -4605,7 +4652,10 @@ public abstract class JSONWriter
             }
 
             Path path = (Path) o;
-            return index == path.index && Objects.equals(parent, path.parent) && Objects.equals(name, path.name);
+            return index == path.index
+                    && unstableIndex == path.unstableIndex
+                    && Objects.equals(parent, path.parent)
+                    && Objects.equals(name, path.name);
         }
 
         /**
@@ -4615,7 +4665,7 @@ public abstract class JSONWriter
          */
         @Override
         public int hashCode() {
-            return Objects.hash(parent, name, index);
+            return Objects.hash(parent, name, index, unstableIndex);
         }
 
         /**
