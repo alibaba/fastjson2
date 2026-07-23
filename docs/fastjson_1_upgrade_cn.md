@@ -20,7 +20,7 @@ FASTJSON v2项目目前处于活跃状态，会不定期发布新版本，你可
 * 使用fastjson v2新的API
 
 ### 2.2. 兼容模式升级
-升级可以通过兼容模式升级，兼容模式不需要改代码，但在深度使用的场景，不能做到完全兼容，通过这样的模式升级虽然省事，请认证测试，遇到问题反馈到 [https://github.com/alibaba/fastjson2/issues](https://github.com/alibaba/fastjson2/issues)
+升级可以通过兼容模式升级，兼容模式不需要改代码，但在深度使用的场景，不能做到完全兼容，通过这样的模式升级虽然省事，但请认真测试，遇到问题反馈到 [https://github.com/alibaba/fastjson2/issues](https://github.com/alibaba/fastjson2/issues)
 
 * 兼容模式Maven依赖
 ```xml
