@@ -409,7 +409,8 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
         if (method == null) {
             return null;
         }
-        return o -> (byte) getInt(method).applyAsInt(o);
+        ToIntFunction<Object> fn = getInt(method);
+        return o -> (byte) fn.applyAsInt(o);
     }
 
     /**
@@ -423,7 +424,8 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
         if (method == null) {
             return null;
         }
-        return o -> (short) getInt(method).applyAsInt(o);
+        ToIntFunction<Object> fn = getInt(method);
+        return o -> (short) fn.applyAsInt(o);
     }
 
     /**
@@ -437,7 +439,8 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
         if (method == null) {
             return null;
         }
-        return o -> (char) getInt(method).applyAsInt(o);
+        ToIntFunction<Object> fn = getInt(method);
+        return o -> (char) fn.applyAsInt(o);
     }
 
     /**
@@ -518,21 +521,24 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
         if (method == null) {
             return null;
         }
-        return (o, v) -> setInt(method).accept(o, (int) v);
+        ObjIntConsumer<Object> fn = setInt(method);
+        return (o, v) -> fn.accept(o, (int) v);
     }
 
     public ObjCharConsumer<Object> setChar(Method method) {
         if (method == null) {
             return null;
         }
-        return (o, v) -> setInt(method).accept(o, (int) v);
+        ObjIntConsumer<Object> fn = setInt(method);
+        return (o, v) -> fn.accept(o, (int) v);
     }
 
     public ObjShortConsumer<Object> setShort(Method method) {
         if (method == null) {
             return null;
         }
-        return (o, v) -> setInt(method).accept(o, (int) v);
+        ObjIntConsumer<Object> fn = setInt(method);
+        return (o, v) -> fn.accept(o, (int) v);
     }
 
     public ObjIntConsumer<Object> setInt(Method method) {
