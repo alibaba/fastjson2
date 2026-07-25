@@ -27,6 +27,8 @@ public class JSONArray
     static ObjectReader<JSONArray> arrayReader;
     static ObjectReader<JSONObject> objectReader;
 
+    private static final long serialVersionUID = 1L;
+
     private List list = new com.alibaba.fastjson2.JSONArray();
 
     protected transient Object relatedArray;
