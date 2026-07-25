@@ -592,7 +592,14 @@ public class JSONArray
 
     @Override
     public Object get(int index) {
-        return adaptResult(list.get(index));
+        Object value = list.get(index);
+        if (value instanceof com.alibaba.fastjson2.JSONObject) {
+            return new JSONObject((com.alibaba.fastjson2.JSONObject) value);
+        }
+        if (value instanceof com.alibaba.fastjson2.JSONArray) {
+            return new JSONArray((com.alibaba.fastjson2.JSONArray) value);
+        }
+        return value;
     }
 
     /**

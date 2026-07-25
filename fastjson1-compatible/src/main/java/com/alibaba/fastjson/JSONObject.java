@@ -127,7 +127,13 @@ public class JSONObject
             val = map.get(key.toString());
         }
 
-        return adaptResult(val);
+        if (val instanceof com.alibaba.fastjson2.JSONObject) {
+            return new JSONObject((com.alibaba.fastjson2.JSONObject) val);
+        }
+        if (val instanceof com.alibaba.fastjson2.JSONArray) {
+            return new JSONArray((com.alibaba.fastjson2.JSONArray) val);
+        }
+        return val;
     }
 
     public JSONObject getJSONObject(String key) {
