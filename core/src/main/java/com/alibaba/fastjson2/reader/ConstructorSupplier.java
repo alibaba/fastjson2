@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -28,7 +29,7 @@ final class ConstructorSupplier
                 return objectClass.newInstance();
             } else {
                 if (constructor.getParameterCount() == 1) {
-                    return constructor.newInstance(new Object[1]);
+                    return JDKUtils.UNSAFE.allocateInstance(objectClass);
                 } else {
                     return constructor.newInstance();
                 }

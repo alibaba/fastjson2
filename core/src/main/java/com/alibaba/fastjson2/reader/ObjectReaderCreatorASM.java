@@ -620,7 +620,8 @@ public class ObjectReaderCreatorASM
             String methodName = fieldBased && defaultConstructor == null ? "createInstance0" : "createInstance";
 
             if ((externalClass && defaultConstructor != null)
-                    || fieldBased && (defaultConstructor == null || !Modifier.isPublic(defaultConstructor.getModifiers()) || !Modifier.isPublic(objectClass.getModifiers()))) {
+                    || fieldBased && (defaultConstructor == null || !Modifier.isPublic(defaultConstructor.getModifiers()) || !Modifier.isPublic(objectClass.getModifiers()))
+                    || (defaultConstructor != null && defaultConstructor.getParameterCount() != 0)) {
                 MethodWriter mw = cw.visitMethod(
                         Opcodes.ACC_PUBLIC,
                         methodName,
@@ -2953,7 +2954,8 @@ public class ObjectReaderCreatorASM
         int objectModifiers = objectClass == null ? Modifier.PUBLIC : objectClass.getModifiers();
         boolean publicObject = Modifier.isPublic(objectModifiers) && (objectClass == null || !classLoader.isExternalClass(objectClass));
 
-        if (defaultConstructor == null || !publicObject || !Modifier.isPublic(defaultConstructor.getModifiers())) {
+        if (defaultConstructor == null || !publicObject || !Modifier.isPublic(defaultConstructor.getModifiers())
+                || defaultConstructor.getParameterCount() != 0) {
             if (creator != null) {
                 mw.aload(THIS);
                 mw.getfield(classNameType, "creator", "Ljava/util/function/Supplier;");

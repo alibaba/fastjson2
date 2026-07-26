@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -443,7 +444,12 @@ public class ObjectReaderAdapter<T>
 
         if (constructor != null) {
             try {
-                T object = (T) constructor.newInstance(new Object[parameterCount]);
+                T object;
+                if (parameterCount == 0) {
+                    object = (T) constructor.newInstance();
+                } else {
+                    object = (T) JDKUtils.UNSAFE.allocateInstance(objectClass);
+                }
                 if (hasDefaultValue) {
                     initDefaultValue(object);
                 }
