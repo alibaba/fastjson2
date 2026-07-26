@@ -620,8 +620,7 @@ public class ObjectReaderCreatorASM
             String methodName = fieldBased && defaultConstructor == null ? "createInstance0" : "createInstance";
 
             if ((externalClass && defaultConstructor != null)
-                    || fieldBased && (defaultConstructor == null || !Modifier.isPublic(defaultConstructor.getModifiers()) || !Modifier.isPublic(objectClass.getModifiers()))
-                    || (defaultConstructor != null && defaultConstructor.getParameterCount() != 0)) {
+                    || fieldBased && (defaultConstructor == null || !Modifier.isPublic(defaultConstructor.getModifiers()) || !Modifier.isPublic(objectClass.getModifiers()))) {
                 MethodWriter mw = cw.visitMethod(
                         Opcodes.ACC_PUBLIC,
                         methodName,
@@ -707,7 +706,10 @@ public class ObjectReaderCreatorASM
             mw.invokespecial(TYPE_OBJECT, "<init>", "()V");
         } else {
             Class paramType = defaultConstructor.getParameterTypes()[0];
-            mw.aconst_null();
+            mw.getstatic(TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
+            mw.visitLdcInsn(paramType);
+            mw.invokevirtual("sun/misc/Unsafe", "allocateInstance", "(Ljava/lang/Class;)Ljava/lang/Object;");
+            mw.checkcast(ASMUtils.type(paramType));
             mw.invokespecial(TYPE_OBJECT, "<init>", "(" + ASMUtils.desc(paramType) + ")V");
         }
     }
@@ -2954,8 +2956,7 @@ public class ObjectReaderCreatorASM
         int objectModifiers = objectClass == null ? Modifier.PUBLIC : objectClass.getModifiers();
         boolean publicObject = Modifier.isPublic(objectModifiers) && (objectClass == null || !classLoader.isExternalClass(objectClass));
 
-        if (defaultConstructor == null || !publicObject || !Modifier.isPublic(defaultConstructor.getModifiers())
-                || defaultConstructor.getParameterCount() != 0) {
+        if (defaultConstructor == null || !publicObject || !Modifier.isPublic(defaultConstructor.getModifiers())) {
             if (creator != null) {
                 mw.aload(THIS);
                 mw.getfield(classNameType, "creator", "Ljava/util/function/Supplier;");

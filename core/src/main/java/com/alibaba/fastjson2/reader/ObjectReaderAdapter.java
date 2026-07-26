@@ -448,7 +448,9 @@ public class ObjectReaderAdapter<T>
                 if (parameterCount == 0) {
                     object = (T) constructor.newInstance();
                 } else {
-                    object = (T) JDKUtils.UNSAFE.allocateInstance(objectClass);
+                    Class<?> paramType = constructor.getParameterTypes()[0];
+                    Object dummy = JDKUtils.UNSAFE.allocateInstance(paramType);
+                    object = (T) constructor.newInstance(dummy);
                 }
                 if (hasDefaultValue) {
                     initDefaultValue(object);

@@ -29,7 +29,9 @@ final class ConstructorSupplier
                 return objectClass.newInstance();
             } else {
                 if (constructor.getParameterCount() == 1) {
-                    return JDKUtils.UNSAFE.allocateInstance(objectClass);
+                    Class<?> paramType = constructor.getParameterTypes()[0];
+                    Object dummy = JDKUtils.UNSAFE.allocateInstance(paramType);
+                    return constructor.newInstance(dummy);
                 } else {
                     return constructor.newInstance();
                 }
