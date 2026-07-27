@@ -24,17 +24,20 @@ public class Issue7690 {
         assertEquals(2, JSONPath.eval(root, "$.test[1].title"));
 
         JSONPath.set(root, "$.test[1].value", 220);
+        assertEquals(2, JSONPath.eval(root, "$.test[1].title"));
         assertEquals(220, JSONPath.eval(root, "$.test[1].value"));
     }
 
     @Test
-    public void testSetFieldAfterAutoCreatingObject() {
+    public void testObjectGetReturnsLiveWrapperAfterAutoCreatingObject() {
         JSONObject root = new JSONObject();
 
         JSONPath.set(root, "$.test.title", 2);
-        assertEquals(2, JSONPath.eval(root, "$.test.title"));
 
-        JSONPath.set(root, "$.test.value", 220);
+        JSONObject test = (JSONObject) root.get("test");
+        test.put("value", 220);
+
+        assertEquals(2, JSONPath.eval(root, "$.test.title"));
         assertEquals(220, JSONPath.eval(root, "$.test.value"));
     }
 }
