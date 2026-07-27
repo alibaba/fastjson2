@@ -28,7 +28,9 @@ import java.util.function.Supplier;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
+import static com.alibaba.fastjson2.util.TypeUtils.hasIllegalTypeNameChars;
 import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
+import static com.alibaba.fastjson2.util.TypeUtils.normalizeAcceptName;
 
 /**
  * ObjectReaderProvider is responsible for providing and managing ObjectReader instances
@@ -234,8 +236,9 @@ public class ObjectReaderProvider
         names.add(ANTI_COLLISION_HASH_MAP);
 
         Arrays.sort(hashCodes);
-        acceptHashCodes = hashCodes;
+        // see addAutoTypeAccept, the name set is published before the hash array
         acceptNameSet = Collections.unmodifiableSet(names);
+        acceptHashCodes = hashCodes;
 
         hashCache.put(ObjectArrayReader.TYPE_HASH_CODE, ObjectArrayReader.INSTANCE);
         final long STRING_CLASS_NAME_HASH = -4834614249632438472L; // Fnv.hashCode64(String.class.getName());
@@ -275,6 +278,15 @@ public class ObjectReaderProvider
     public synchronized void addAutoTypeAccept(String name) {
         if (name != null && name.length() != 0) {
             String acceptName = normalizeAcceptName(name);
+
+            // publish the name before the hash, so that a reader seeing the new hash array is
+            // guaranteed to see the name it verifies against rather than transiently rejecting
+            if (!this.acceptNameSet.contains(acceptName)) {
+                Set<String> names = new HashSet<>(this.acceptNameSet);
+                names.add(acceptName);
+                this.acceptNameSet = Collections.unmodifiableSet(names);
+            }
+
             long hash = Fnv.hashCode64(acceptName);
             long[] current = this.acceptHashCodes;
             if (Arrays.binarySearch(current, hash) < 0) {
@@ -284,25 +296,7 @@ public class ObjectReaderProvider
                 Arrays.sort(hashCodes);
                 this.acceptHashCodes = hashCodes;
             }
-            if (!this.acceptNameSet.contains(acceptName)) {
-                Set<String> names = new HashSet<>(this.acceptNameSet);
-                names.add(acceptName);
-                this.acceptNameSet = Collections.unmodifiableSet(names);
-            }
         }
-    }
-
-    /**
-     * Normalizes an accept name the same way {@link #checkAutoType} normalizes the type name it
-     * hashes, so that an accept entry written with the binary name of a nested class
-     * ({@code a.b.Outer$Inner}) matches as well as one written with its canonical name
-     * ({@code a.b.Outer.Inner}).
-     *
-     * @param name the accept name to normalize
-     * @return the normalized accept name
-     */
-    private static String normalizeAcceptName(String name) {
-        return name.indexOf('$') >= 0 ? name.replace('$', '.') : name;
     }
 
     @Deprecated
@@ -847,8 +841,8 @@ public class ObjectReaderProvider
             throw new JSONException("autoType is not support. " + typeName);
         }
 
-        if (typeName.indexOf(':') >= 0 || typeName.indexOf('!') >= 0) {
-            throw new JSONException("autoType is not support. " + typeName);
+        if (hasIllegalTypeNameChars(typeName)) {
+            throw new JSONException("autoType is not support, illegal type name. " + typeName);
         }
 
         if (typeName.charAt(0) == '[') {

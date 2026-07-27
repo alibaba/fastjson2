@@ -10,6 +10,8 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import javax.sql.DataSource;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Set;
@@ -22,6 +24,7 @@ public class AutoTypeValidationTest {
     static final String PACKAGE_PREFIX = "com.alibaba.fastjson2.autoType.";
     static final String TEST_BEAN = "com.alibaba.fastjson2.autoType.AutoTypeValidationTest$TestBean";
     static final String TEST_CLASS_LOADER = "com.alibaba.fastjson2.autoType.AutoTypeValidationTest$TestClassLoader";
+    static final String TEST_DATA_SOURCE = "com.alibaba.fastjson2.autoType.AutoTypeValidationTest$TestDataSource";
 
     // =========================================================================
     // type name format validation
@@ -262,10 +265,26 @@ public class AutoTypeValidationTest {
     }
 
     @Test
+    public void testAcceptPrefixDoesNotAllowDataSource() {
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        provider.addAutoTypeAccept(PACKAGE_PREFIX);
+
+        assertNull(provider.checkAutoType(TEST_DATA_SOURCE, null, 0));
+        assertThrows(JSONException.class, () ->
+                provider.checkAutoType(TEST_DATA_SOURCE, null, JSONReader.Feature.SupportAutoType.mask));
+    }
+
+    @Test
     public void testContextHandlerAcceptPrefixDoesNotAllowClassLoader() {
         ContextAutoTypeBeforeHandler handler = new ContextAutoTypeBeforeHandler(PACKAGE_PREFIX);
         assertNull(handler.apply(TEST_CLASS_LOADER, null, 0));
         assertEquals(TestBean.class, handler.apply(TEST_BEAN, null, 0));
+    }
+
+    @Test
+    public void testContextHandlerAcceptPrefixDoesNotAllowDataSource() {
+        ContextAutoTypeBeforeHandler handler = new ContextAutoTypeBeforeHandler(PACKAGE_PREFIX);
+        assertNull(handler.apply(TEST_DATA_SOURCE, null, 0));
     }
 
     @Test
@@ -311,5 +330,12 @@ public class AutoTypeValidationTest {
 
     public static class TestClassLoader
             extends ClassLoader {
+    }
+
+    /**
+     * Abstract is enough, {@code checkAutoType} resolves the class without instantiating it.
+     */
+    public abstract static class TestDataSource
+            implements DataSource {
     }
 }

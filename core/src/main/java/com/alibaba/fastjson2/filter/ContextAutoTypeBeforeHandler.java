@@ -223,7 +223,7 @@ public class ContextAutoTypeBeforeHandler
             }
 
             array[index++] = hashCode;
-            normalizedNames.add(name.replace('$', '.'));
+            normalizedNames.add(normalizeAcceptName(name));
         }
 
         if (index != array.length) {
@@ -253,7 +253,7 @@ public class ContextAutoTypeBeforeHandler
             typeName = "Object";
         }
 
-        if (typeName.indexOf(':') >= 0 || typeName.indexOf('!') >= 0) {
+        if (hasIllegalTypeNameChars(typeName)) {
             return null;
         }
 
@@ -267,8 +267,7 @@ public class ContextAutoTypeBeforeHandler
             hash *= MAGIC_PRIME;
 
             if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
-                String prefix = typeName.substring(0, i + 1).replace('$', '.');
-                if (!acceptNameSet.contains(prefix)) {
+                if (!acceptNameSet.contains(normalizeAcceptName(typeName.substring(0, i + 1)))) {
                     continue;
                 }
                 long typeNameHash = Fnv.hashCode64(typeName);
