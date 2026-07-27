@@ -197,6 +197,7 @@ public class ObjectReaderProvider
     boolean disableSmartMatch = JSONFactory.isDisableSmartMatch();
 
     private volatile long[] acceptHashCodes;
+    private volatile Set<String> acceptNameSet = Collections.emptySet();
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
     private Consumer<Class> autoTypeHandler = DEFAULT_AUTO_TYPE_HANDLER;
@@ -204,12 +205,15 @@ public class ObjectReaderProvider
 
     {
         long[] hashCodes;
+        Set<String> names = new HashSet<>();
         if (AUTO_TYPE_ACCEPT_LIST == null) {
             hashCodes = new long[1];
         } else {
             hashCodes = new long[AUTO_TYPE_ACCEPT_LIST.length + 1];
             for (int i = 0; i < AUTO_TYPE_ACCEPT_LIST.length; i++) {
+                String name = AUTO_TYPE_ACCEPT_LIST[i].replace('$', '.');
                 hashCodes[i] = Fnv.hashCode64(AUTO_TYPE_ACCEPT_LIST[i]);
+                names.add(name);
             }
         }
 
@@ -217,6 +221,7 @@ public class ObjectReaderProvider
 
         Arrays.sort(hashCodes);
         acceptHashCodes = hashCodes;
+        acceptNameSet = Collections.unmodifiableSet(names);
 
         hashCache.put(ObjectArrayReader.TYPE_HASH_CODE, ObjectArrayReader.INSTANCE);
         final long STRING_CLASS_NAME_HASH = -4834614249632438472L; // Fnv.hashCode64(String.class.getName());
@@ -264,6 +269,9 @@ public class ObjectReaderProvider
                 Arrays.sort(hashCodes);
                 this.acceptHashCodes = hashCodes;
             }
+            Set<String> names = new HashSet<>(this.acceptNameSet);
+            names.add(name.replace('$', '.'));
+            this.acceptNameSet = Collections.unmodifiableSet(names);
         }
     }
 
@@ -809,6 +817,10 @@ public class ObjectReaderProvider
             throw new JSONException("autoType is not support. " + typeName);
         }
 
+        if (typeName.indexOf(':') >= 0 || typeName.indexOf('!') >= 0) {
+            throw new JSONException("autoType is not support. " + typeName);
+        }
+
         if (typeName.charAt(0) == '[') {
             String componentTypeName = typeName.substring(1);
             checkAutoType(componentTypeName, null, features); // blacklist check for componentType
@@ -832,6 +844,10 @@ public class ObjectReaderProvider
                 hash ^= ch;
                 hash *= MAGIC_PRIME;
                 if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
+                    String prefix = typeName.substring(0, i + 1).replace('$', '.');
+                    if (!acceptNameSet.contains(prefix)) {
+                        continue;
+                    }
                     clazz = loadClass(typeName);
                     if (clazz != null) {
                         if (expectClass != null && !expectClass.isAssignableFrom(clazz)) {
@@ -857,7 +873,17 @@ public class ObjectReaderProvider
 
                 // white list
                 if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
+                    String prefix = typeName.substring(0, i + 1).replace('$', '.');
+                    if (!acceptNameSet.contains(prefix)) {
+                        continue;
+                    }
                     clazz = loadClass(typeName);
+
+                    if (clazz != null) {
+                        if (ClassLoader.class.isAssignableFrom(clazz) || JDKUtils.isSQLDataSourceOrRowSet(clazz)) {
+                            throw new JSONException("autoType is not support. " + typeName);
+                        }
+                    }
 
                     if (clazz != null && expectClass != null && !expectClass.isAssignableFrom(clazz)) {
                         throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());

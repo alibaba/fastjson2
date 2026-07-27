@@ -2832,6 +2832,10 @@ public class TypeUtils {
             return null;
         }
 
+        if (className.indexOf(':') >= 0 || className.indexOf('!') >= 0) {
+            return null;
+        }
+
         switch (className) {
             case "O":
             case "Object":
