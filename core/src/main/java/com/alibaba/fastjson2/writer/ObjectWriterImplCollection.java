@@ -82,8 +82,11 @@ final class ObjectWriterImplCollection
 //        }
 
         boolean refDetect = jsonWriter.isRefDetect();
-        // Set element indexes are unstable; non-Set collections keep normal refs
-        boolean unstableIndex = collection instanceof Set;
+        boolean setElement = collection instanceof Set;
+        // LinkedHashSet and SortedSet have deterministic, referenceable element indexes.
+        boolean unstableIndex = setElement
+                && !(collection instanceof LinkedHashSet)
+                && !(collection instanceof SortedSet);
 
         jsonWriter.startArray(collection.size());
 
@@ -109,7 +112,7 @@ final class ObjectWriterImplCollection
             boolean itemRefDetect = refDetect && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
 
             if (itemRefDetect) {
-                String refPath = jsonWriter.setPath(i, item, unstableIndex);
+                String refPath = jsonWriter.setPath(i, item, unstableIndex, setElement);
                 if (refPath != null) {
                     jsonWriter.writeReference(refPath);
                     jsonWriter.popPath(item);
@@ -149,8 +152,11 @@ final class ObjectWriterImplCollection
         Iterable iterable = (Iterable) object;
 
         boolean refDetect = jsonWriter.isRefDetect();
-        // Set element indexes are unstable; non-Set collections keep normal refs
-        boolean unstableIndex = object instanceof Set;
+        boolean setElement = object instanceof Set;
+        // LinkedHashSet and SortedSet have deterministic, referenceable element indexes.
+        boolean unstableIndex = setElement
+                && !(object instanceof LinkedHashSet)
+                && !(object instanceof SortedSet);
 
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
@@ -179,7 +185,7 @@ final class ObjectWriterImplCollection
             boolean itemRefDetect = refDetect && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
 
             if (itemRefDetect) {
-                String refPath = jsonWriter.setPath(i, o, unstableIndex);
+                String refPath = jsonWriter.setPath(i, o, unstableIndex, setElement);
                 if (refPath != null) {
                     jsonWriter.writeReference(refPath);
                     jsonWriter.popPath(o);

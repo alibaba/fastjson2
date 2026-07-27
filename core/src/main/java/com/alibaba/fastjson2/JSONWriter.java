@@ -87,7 +87,8 @@ public abstract class JSONWriter
     protected int off;
     protected Object rootObject;
     protected IdentityHashMap<Object, Path> refs;
-    private IdentityHashMap<Object, Path> refRestores;
+    // Temporarily inlined shared references: [canonical path, inline path].
+    private IdentityHashMap<Object, Path[]> refRestores;
     protected Path path;
     protected String lastReference;
     protected byte pretty;
@@ -331,11 +332,24 @@ public abstract class JSONWriter
      * @return the previous path as a string, or null if no previous path exists
      */
     public final String setPath(int index, Object object, boolean unstableIndex) {
+        return setPath(index, object, unstableIndex, unstableIndex);
+    }
+
+    /**
+     * Sets the path for the specified object at the given collection index.
+     *
+     * @param index the index to set the path for
+     * @param object the object to set the path for
+     * @param unstableIndex true if this index belongs to an unordered {@link Set}
+     * @param setElement true if this index belongs to any {@link Set}
+     * @return the previous path as a string, or null if no previous path exists
+     */
+    public final String setPath(int index, Object object, boolean unstableIndex, boolean setElement) {
         if (!isRefDetect(object)) {
             return null;
         }
 
-        return setPath0(index, object, unstableIndex);
+        return setPath0(index, object, unstableIndex, setElement);
     }
 
     /**
@@ -359,28 +373,47 @@ public abstract class JSONWriter
      * @return the previous path as a string, or null if no previous path exists
      */
     public final String setPath0(int index, Object object, boolean unstableIndex) {
+        return setPath0(index, object, unstableIndex, unstableIndex);
+    }
+
+    public final String setPath0(int index, Object object, boolean unstableIndex, boolean setElement) {
         if (path == null) {
             return null;
         }
-        this.path = nextIndexPath(path, index, unstableIndex);
+        this.path = nextIndexPath(path, index, unstableIndex, setElement);
         return setPathInternal(object);
     }
 
-    private static Path nextIndexPath(Path parent, int index, boolean unstableIndex) {
+    private static Path nextIndexPath(Path parent, int index, boolean unstableIndex, boolean setElement) {
         if (index == 0) {
-            if (parent.child0 != null && parent.child0.unstableIndex == unstableIndex) {
-                return parent.child0;
+            // Keep validation and return consistent if the cache changes concurrently.
+            Path child0 = parent.child0;
+            if (child0 != null
+                    && child0.unstableIndex == unstableIndex
+                    && child0.setElement == setElement) {
+                return child0;
             }
-            // refresh cache when the unstable flag changes to match the requested flag
-            return parent.child0 = new Path(parent, index, unstableIndex);
+            Path child = new Path(parent, index, unstableIndex, setElement);
+            // ROOT is shared across writers; caching collection flags there causes races.
+            if (parent != Path.ROOT) {
+                parent.child0 = child;
+            }
+            return child;
         }
         if (index == 1) {
-            if (parent.child1 != null && parent.child1.unstableIndex == unstableIndex) {
-                return parent.child1;
+            Path child1 = parent.child1;
+            if (child1 != null
+                    && child1.unstableIndex == unstableIndex
+                    && child1.setElement == setElement) {
+                return child1;
             }
-            return parent.child1 = new Path(parent, index, unstableIndex);
+            Path child = new Path(parent, index, unstableIndex, setElement);
+            if (parent != Path.ROOT) {
+                parent.child1 = child;
+            }
+            return child;
         }
-        return new Path(parent, index, unstableIndex);
+        return new Path(parent, index, unstableIndex, setElement);
     }
 
     private String setPathInternal(Object object) {
@@ -397,16 +430,22 @@ public abstract class JSONWriter
             }
         }
 
-        // non-cyclic refs involving Set indexes are inlined; restore original path in popPath0
+        // Inline when delayed resolution could change a Set element's hash/ordering, or when the
+        // target path uses an unordered Set index. Ordered Set element paths remain referenceable.
         if (previous != Path.ROOT
                 && previous != Path.MANGER_REFERNCE
                 && !isActiveReference(previous)
-                && (isUnderUnstable(previous) || isUnderUnstable(this.path))
+                && (isUnderSetElement(this.path) || isUnderUnstable(previous))
         ) {
             if (refRestores == null) {
                 refRestores = new IdentityHashMap<>(8);
             }
-            refRestores.putIfAbsent(object, previous);
+            // Promote a stable current path when the previous path is unstable; the inline path
+            // identifies the exact frame that must restore the canonical path.
+            Path restorePath = isUnderUnstable(previous) && !isUnderUnstable(this.path)
+                    ? this.path
+                    : previous;
+            refRestores.putIfAbsent(object, new Path[]{restorePath, this.path});
             refs.put(object, this.path);
             return null;
         }
@@ -450,6 +489,15 @@ public abstract class JSONWriter
         return false;
     }
 
+    private static boolean isUnderSetElement(Path reference) {
+        for (Path current = reference; current != null; current = current.parent) {
+            if (current.setElement) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Removes the path for the specified object.
      * This method is used to clean up path information during serialization.
@@ -480,9 +528,11 @@ public abstract class JSONWriter
         }
 
         if (refRestores != null) {
-            Path original = refRestores.remove(object);
-            if (original != null) {
-                refs.put(object, original);
+            Path[] restore = refRestores.get(object);
+            // Nested cycles may pop the same object first; restore only at the recorded inline path.
+            if (restore != null && restore[1] == this.path) {
+                refRestores.remove(object);
+                refs.put(object, restore[0]);
             }
         }
 
@@ -4577,9 +4627,15 @@ public abstract class JSONWriter
         final int index;
 
         /**
-         * True if this index belongs to a {@link Set}; non-cyclic refs involving such paths are inlined.
+         * True if this index belongs to an unordered {@link Set} and is unsafe in a $ref path.
          */
         final boolean unstableIndex;
+
+        /**
+         * True if this index belongs to any {@link Set}; delayed resolution could change the
+         * element's hash or ordering after insertion.
+         */
+        final boolean setElement;
 
         /**
          * The cached full path string representation, computed lazily.
@@ -4607,6 +4663,7 @@ public abstract class JSONWriter
             this.name = name;
             this.index = -1;
             this.unstableIndex = false;
+            this.setElement = false;
         }
 
         /**
@@ -4627,16 +4684,29 @@ public abstract class JSONWriter
          * @param unstableIndex true if this index belongs to a {@link Set}
          */
         public Path(Path parent, int index, boolean unstableIndex) {
+            this(parent, index, unstableIndex, unstableIndex);
+        }
+
+        /**
+         * Creates a new Path instance representing an array/collection index.
+         *
+         * @param parent the parent path, or null for the root path
+         * @param index the array index for this path segment
+         * @param unstableIndex true if this index belongs to an unordered {@link Set}
+         * @param setElement true if this index belongs to any {@link Set}
+         */
+        public Path(Path parent, int index, boolean unstableIndex, boolean setElement) {
             this.parent = parent;
             this.name = null;
             this.index = index;
             this.unstableIndex = unstableIndex;
+            this.setElement = setElement;
         }
 
         /**
          * Compares this Path with another object for equality.
          * Two Path instances are considered equal if they have the same parent,
-         * name, index, and unstableIndex.
+         * name, index, unstableIndex and setElement.
          *
          * @param o the object to compare with
          * @return true if the objects are equal, false otherwise
@@ -4654,6 +4724,7 @@ public abstract class JSONWriter
             Path path = (Path) o;
             return index == path.index
                     && unstableIndex == path.unstableIndex
+                    && setElement == path.setElement
                     && Objects.equals(parent, path.parent)
                     && Objects.equals(name, path.name);
         }
@@ -4665,7 +4736,7 @@ public abstract class JSONWriter
          */
         @Override
         public int hashCode() {
-            return Objects.hash(parent, name, index, unstableIndex);
+            return Objects.hash(parent, name, index, unstableIndex, setElement);
         }
 
         /**

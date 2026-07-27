@@ -1505,7 +1505,9 @@ final class JSONWriterJSONB
         int off = this.off;
         grow1(off)[off] = BC_REFERENCE;
         this.off = off + 1;
-        writeString(path == this.lastReference ? "#-1" : path);
+        // "#-1" reuses the previous target, but equal ".." paths may target different parents.
+        boolean samePath = path == this.lastReference && !"..".equals(path);
+        writeString(samePath ? "#-1" : path);
         this.lastReference = path;
     }
 

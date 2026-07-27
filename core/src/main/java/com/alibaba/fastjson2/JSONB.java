@@ -3187,7 +3187,8 @@ public interface JSONB {
          * @return the new offset
          */
         static int writeReference(byte[] bytes, int off, String path, JSONWriter jsonWriter) {
-            if (jsonWriter.lastReference == path) {
+            // "#-1" reuses the previous target, but equal ".." paths may target different parents.
+            if (jsonWriter.lastReference == path && !"..".equals(path)) {
                 path = "#-1";
             } else {
                 jsonWriter.lastReference = path;

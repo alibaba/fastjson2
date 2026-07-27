@@ -25,11 +25,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests shared references in collections using text JSON.
@@ -464,10 +460,7 @@ public class SharedReferenceInCollectionTest {
                 JSONWriter.Feature.ReferenceDetection,
                 JSONWriter.Feature.FieldBased
         );
-        assertTrue(
-                !str.contains("$ref"),
-                "cross-element shared inner in a nested Set must be inlined, was: " + str
-        );
+        assertFalse(str.contains("$ref"), "cross-element shared inner in a nested Set must be inlined, was: " + str);
 
         Wrapper back = JSON.parseObject(str, Wrapper.class, JSONReader.Feature.FieldBased);
         assertEquals(wrapper.data.size(), back.data.size());
@@ -623,6 +616,72 @@ public class SharedReferenceInCollectionTest {
         assertStableAndSetCycles(back);
     }
 
+    // 7.8 Restoring after the first self-reference must not make the second one inline again.
+    // The object is registered at a stable path before being inlined under an unordered Set.
+    @Test
+    public void testSetElementWithTwoSelfReferencingCollectionFields() {
+        DualCyclicBean x = new DualCyclicBean();
+        x.name = "x";
+        x.loop1 = new ArrayList<>();
+        x.loop1.add(x);
+        x.loop2 = new ArrayList<>();
+        x.loop2.add(x);
+
+        DualCyclicHolder holder = new DualCyclicHolder();
+        holder.stable = new ArrayList<>();
+        holder.stable.add(x);
+        holder.set = new HashSet<>();
+        holder.set.add(x);
+
+        String str = assertDoesNotThrow(
+                () -> JSON.toJSONString(
+                        holder,
+                        JSONWriter.Feature.ReferenceDetection,
+                        JSONWriter.Feature.FieldBased
+                )
+        );
+        DualCyclicHolder back = JSON.parseObject(str, DualCyclicHolder.class, JSONReader.Feature.FieldBased);
+
+        DualCyclicBean fromSet = back.set.iterator().next();
+        assertNotNull(fromSet.loop1);
+        assertNotNull(fromSet.loop2);
+        assertSame(fromSet, fromSet.loop1.get(0), "first self-reference must be preserved");
+        assertSame(fromSet, fromSet.loop2.get(0), "second self-reference must not be inlined again");
+    }
+
+    // 7.9 The same restoration case through two indirect back-references.
+    // This exercises FieldWriterObject setPath/popPath instead of the direct self-reference shortcut.
+    @Test
+    public void testSetElementWithTwoIndirectCycles() {
+        DualLinkBean a = new DualLinkBean();
+        a.name = "a";
+        a.link1 = new Link();
+        a.link1.back = a;
+        a.link2 = new Link();
+        a.link2.back = a;
+
+        DualLinkHolder holder = new DualLinkHolder();
+        holder.stable = new ArrayList<>();
+        holder.stable.add(a);
+        holder.set = new HashSet<>();
+        holder.set.add(a);
+
+        String str = assertDoesNotThrow(
+                () -> JSON.toJSONString(
+                        holder,
+                        JSONWriter.Feature.ReferenceDetection,
+                        JSONWriter.Feature.FieldBased
+                )
+        );
+        DualLinkHolder back = JSON.parseObject(str, DualLinkHolder.class, JSONReader.Feature.FieldBased);
+
+        DualLinkBean fromSet = back.set.iterator().next();
+        assertNotNull(fromSet.link1);
+        assertNotNull(fromSet.link2);
+        assertSame(fromSet, fromSet.link1.back, "first indirect back-reference must be preserved");
+        assertSame(fromSet, fromSet.link2.back, "second indirect back-reference must not be inlined again");
+    }
+
     // 8. Enclosing and disabled references
 
     // 8.1 Set element inlines a shared enclosing property
@@ -689,7 +748,7 @@ public class SharedReferenceInCollectionTest {
 
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("value", shared);
-        Set<Map<String, Object>> data = new LinkedHashSet<>();
+        Set<Map<String, Object>> data = new HashSet<>();
         data.add(row);
 
         Map<String, Object> original = new LinkedHashMap<>();
@@ -707,6 +766,61 @@ public class SharedReferenceInCollectionTest {
         }.getType();
         Map<String, Object> back = JSON.parseObject(str, type);
         assertSame(back.get("shared"), back.get("after"));
+    }
+
+    // 8.5 When an object first appears under an unordered Set, its first stable path becomes
+    // canonical so later stable occurrences preserve identity.
+    @Test
+    public void testSetFirstThenStableReferencesUseStablePath() {
+        Map<String, Object> shared = new LinkedHashMap<>();
+        shared.put("id", 1);
+
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("value", shared);
+        Set<Map<String, Object>> data = new HashSet<>();
+        data.add(row);
+
+        Map<String, Object> original = new LinkedHashMap<>();
+        original.put("data", data);
+        original.put("stable", shared);
+        original.put("after", shared);
+
+        String str = JSON.toJSONString(original, JSONWriter.Feature.ReferenceDetection);
+        assertTrue(
+                str.contains("\"$ref\":\"$.stable\""),
+                "a later stable occurrence must reference the promoted stable path, was: " + str
+        );
+
+        Type type = new TypeReference<LinkedHashMap<String, Object>>() {
+        }.getType();
+        Map<String, Object> back = JSON.parseObject(str, type);
+        assertSame(back.get("stable"), back.get("after"));
+    }
+
+    // 8.6 LinkedHashSet element paths are stable and remain referenceable from later fields.
+    @Test
+    public void testOrderedSetElementReferencedByLaterField() {
+        Map<String, Object> shared = new LinkedHashMap<>();
+        shared.put("id", 1);
+
+        Set<Map<String, Object>> ordered = new LinkedHashSet<>();
+        ordered.add(shared);
+
+        Map<String, Object> original = new LinkedHashMap<>();
+        original.put("ordered", ordered);
+        original.put("after", shared);
+
+        String str = JSON.toJSONString(original, JSONWriter.Feature.ReferenceDetection);
+        assertTrue(
+                str.contains("\"$ref\":\"$.ordered[0]\""),
+                "an object first seen in an ordered Set must be referenced by a later field, was: " + str
+        );
+
+        Type type = new TypeReference<LinkedHashMap<String, Object>>() {
+        }.getType();
+        Map<String, Object> back = JSON.parseObject(str, type);
+        List<?> orderedBack = (List<?>) back.get("ordered");
+        assertSame(orderedBack.get(0), back.get("after"));
     }
 
     // 9. Nested Lists in non-List collections
@@ -1094,6 +1208,50 @@ public class SharedReferenceInCollectionTest {
 
         public String name;
         public Set<SetBackRefBean> parentSet;
+    }
+
+    // Two collection fields that both point back to the owning bean
+    public static class DualCyclicBean implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        public String name;
+        public List<DualCyclicBean> loop1;
+        public List<DualCyclicBean> loop2;
+    }
+
+    static class DualCyclicHolder implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        @JSONField(ordinal = 1)
+        public List<DualCyclicBean> stable;
+
+        @JSONField(ordinal = 2)
+        public Set<DualCyclicBean> set;
+    }
+
+    // Reaches the owning bean through two independent intermediate links
+    public static class DualLinkBean implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        public String name;
+        public Link link1;
+        public Link link2;
+    }
+
+    public static class Link implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        public DualLinkBean back;
+    }
+
+    static class DualLinkHolder implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        @JSONField(ordinal = 1)
+        public List<DualLinkBean> stable;
+
+        @JSONField(ordinal = 2)
+        public Set<DualLinkBean> set;
     }
 
     static class EnclosingSharedWrapper implements Serializable {
