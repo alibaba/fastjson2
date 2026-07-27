@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.filter;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.math.BigDecimal;
@@ -276,6 +277,12 @@ public class ContextAutoTypeBeforeHandler
                 if (clazz == null) {
                     clazz = loadClass(typeName);
                     if (clazz != null) {
+                        // matching an accept prefix is not an opt-in for gadget base types, only an
+                        // accept entry naming the type in full is; keep scanning for such an entry
+                        if (i + 1 < typeNameLength && JDKUtils.isAutoTypeDenyClass(clazz)) {
+                            continue;
+                        }
+
                         Class origin = putCacheIfAbsent(typeNameHash, clazz);
                         if (origin != null) {
                             clazz = origin;

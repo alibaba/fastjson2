@@ -196,7 +196,20 @@ public class ObjectReaderProvider
     boolean disableAutoType = JSONFactory.isDisableAutoType();
     boolean disableSmartMatch = JSONFactory.isDisableSmartMatch();
 
+    /**
+     * Always accepted, it is the map implementation fastjson 1.x substitutes for {@code HashMap}
+     * when hash collision protection is enabled.
+     */
+    static final String ANTI_COLLISION_HASH_MAP = "com.alibaba.fastjson.util.AntiCollisionHashMap";
+    static final long ANTI_COLLISION_HASH_MAP_HASH = -6293031534589903644L; // Fnv.hashCode64(ANTI_COLLISION_HASH_MAP)
+
     private volatile long[] acceptHashCodes;
+
+    /**
+     * The accept names behind {@link #acceptHashCodes}, normalized the same way the rolling hash in
+     * {@link #checkAutoType} normalizes a type name. A hash match is only honored when the matched
+     * prefix text is in this set, so a hash collision alone cannot whitelist a type name.
+     */
     private volatile Set<String> acceptNameSet = Collections.emptySet();
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
@@ -211,13 +224,14 @@ public class ObjectReaderProvider
         } else {
             hashCodes = new long[AUTO_TYPE_ACCEPT_LIST.length + 1];
             for (int i = 0; i < AUTO_TYPE_ACCEPT_LIST.length; i++) {
-                String name = AUTO_TYPE_ACCEPT_LIST[i].replace('$', '.');
-                hashCodes[i] = Fnv.hashCode64(AUTO_TYPE_ACCEPT_LIST[i]);
+                String name = normalizeAcceptName(AUTO_TYPE_ACCEPT_LIST[i]);
+                hashCodes[i] = Fnv.hashCode64(name);
                 names.add(name);
             }
         }
 
-        hashCodes[hashCodes.length - 1] = -6293031534589903644L;
+        hashCodes[hashCodes.length - 1] = ANTI_COLLISION_HASH_MAP_HASH;
+        names.add(ANTI_COLLISION_HASH_MAP);
 
         Arrays.sort(hashCodes);
         acceptHashCodes = hashCodes;
@@ -260,7 +274,8 @@ public class ObjectReaderProvider
      */
     public synchronized void addAutoTypeAccept(String name) {
         if (name != null && name.length() != 0) {
-            long hash = Fnv.hashCode64(name);
+            String acceptName = normalizeAcceptName(name);
+            long hash = Fnv.hashCode64(acceptName);
             long[] current = this.acceptHashCodes;
             if (Arrays.binarySearch(current, hash) < 0) {
                 long[] hashCodes = new long[current.length + 1];
@@ -269,10 +284,25 @@ public class ObjectReaderProvider
                 Arrays.sort(hashCodes);
                 this.acceptHashCodes = hashCodes;
             }
-            Set<String> names = new HashSet<>(this.acceptNameSet);
-            names.add(name.replace('$', '.'));
-            this.acceptNameSet = Collections.unmodifiableSet(names);
+            if (!this.acceptNameSet.contains(acceptName)) {
+                Set<String> names = new HashSet<>(this.acceptNameSet);
+                names.add(acceptName);
+                this.acceptNameSet = Collections.unmodifiableSet(names);
+            }
         }
+    }
+
+    /**
+     * Normalizes an accept name the same way {@link #checkAutoType} normalizes the type name it
+     * hashes, so that an accept entry written with the binary name of a nested class
+     * ({@code a.b.Outer$Inner}) matches as well as one written with its canonical name
+     * ({@code a.b.Outer.Inner}).
+     *
+     * @param name the accept name to normalize
+     * @return the normalized accept name
+     */
+    private static String normalizeAcceptName(String name) {
+        return name.indexOf('$') >= 0 ? name.replace('$', '.') : name;
     }
 
     @Deprecated
@@ -844,12 +874,17 @@ public class ObjectReaderProvider
                 hash ^= ch;
                 hash *= MAGIC_PRIME;
                 if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
-                    String prefix = typeName.substring(0, i + 1).replace('$', '.');
-                    if (!acceptNameSet.contains(prefix)) {
+                    if (!acceptNameSet.contains(normalizeAcceptName(typeName.substring(0, i + 1)))) {
                         continue;
                     }
                     clazz = loadClass(typeName);
                     if (clazz != null) {
+                        // matching an accept prefix is not an opt-in for gadget base types, only an
+                        // accept entry naming the type in full is; keep scanning for such an entry
+                        if (i + 1 < typeNameLength && JDKUtils.isAutoTypeDenyClass(clazz)) {
+                            continue;
+                        }
+
                         if (expectClass != null && !expectClass.isAssignableFrom(clazz)) {
                             throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
                         }
@@ -873,16 +908,14 @@ public class ObjectReaderProvider
 
                 // white list
                 if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
-                    String prefix = typeName.substring(0, i + 1).replace('$', '.');
-                    if (!acceptNameSet.contains(prefix)) {
+                    if (!acceptNameSet.contains(normalizeAcceptName(typeName.substring(0, i + 1)))) {
                         continue;
                     }
                     clazz = loadClass(typeName);
 
-                    if (clazz != null) {
-                        if (ClassLoader.class.isAssignableFrom(clazz) || JDKUtils.isSQLDataSourceOrRowSet(clazz)) {
-                            throw new JSONException("autoType is not support. " + typeName);
-                        }
+                    // see the SupportAutoType branch above
+                    if (clazz != null && i + 1 < typeNameLength && JDKUtils.isAutoTypeDenyClass(clazz)) {
+                        continue;
                     }
 
                     if (clazz != null && expectClass != null && !expectClass.isAssignableFrom(clazz)) {
@@ -919,7 +952,7 @@ public class ObjectReaderProvider
         clazz = loadClass(typeName);
 
         if (clazz != null) {
-            if (ClassLoader.class.isAssignableFrom(clazz) || JDKUtils.isSQLDataSourceOrRowSet(clazz)) {
+            if (JDKUtils.isAutoTypeDenyClass(clazz)) {
                 throw new JSONException("autoType is not support. " + typeName);
             }
 
