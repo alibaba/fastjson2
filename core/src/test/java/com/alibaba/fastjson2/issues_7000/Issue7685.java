@@ -1,8 +1,11 @@
 package com.alibaba.fastjson2.issues_7000;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.Test;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -36,6 +39,64 @@ public class Issue7685 {
                     .getJSONObject(1)
                     .getString("message");
             assertEquals(len * 2 + 1, message.length());
+        }
+    }
+
+    /**
+     * Same payloads as {@link #testVariousLengths()}, but parsed from UTF-8 bytes so the
+     * escape handling in JSONReaderUTF8.readString is exercised as well — that reader got
+     * the same strBuf growth fix and is not reached through the String entry point, which
+     * routes multi-byte input to JSONReaderUTF16.
+     */
+    @Test
+    public void testVariousLengthsUTF8() {
+        for (int len = 1; len <= 600; len++) {
+            assertMessageRoundTripUTF8(len);
+        }
+        // strBuf is pooled process-wide, so a preceding test may leave a buffer that already
+        // covers the lengths above; this one is past any capacity another test can have grown it to.
+        assertMessageRoundTripUTF8(100_000);
+    }
+
+    private void assertMessageRoundTripUTF8(int len) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\"Test\":[{\"message\":\"中\\n\"},{\"message\":\"");
+        for (int i = 0; i < len; i++) {
+            sb.append('a');
+        }
+        sb.append("\\n");
+        for (int i = 0; i < len; i++) {
+            sb.append('b');
+        }
+        sb.append("\"}]}");
+
+        byte[] utf8 = sb.toString().getBytes(StandardCharsets.UTF_8);
+        JSONObject result = JSON.parseObject(utf8);
+        assertNotNull(result);
+        String message = result.getJSONArray("Test")
+                .getJSONObject(1)
+                .getString("message");
+        assertEquals(len * 2 + 1, message.length());
+    }
+
+    @Test
+    public void testVariousLengthsJSONB() {
+        for (int len = 1; len <= 600; len++) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("中\n");
+            for (int i = 0; i < len; i++) {
+                sb.append('a');
+            }
+            sb.append('\n');
+            for (int i = 0; i < len; i++) {
+                sb.append('b');
+            }
+            String message = sb.toString();
+
+            JSONObject object = new JSONObject().fluentPut("message", message);
+            JSONObject parsed = (JSONObject) JSONB.parse(JSONB.toBytes(object));
+            assertNotNull(parsed);
+            assertEquals(message, parsed.getString("message"));
         }
     }
 }
