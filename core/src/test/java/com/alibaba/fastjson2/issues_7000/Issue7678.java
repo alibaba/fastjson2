@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_7000;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.TypeReference;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -128,5 +129,42 @@ public class Issue7678 {
 
         String json = JSON.toJSONString(map, JSONWriter.Feature.ReferenceDetection);
         assertTrue(json.contains("$ref"), "Expected $ref in output: " + json);
+    }
+
+    /**
+     * The same instance twice inside a single collection: the $ref can only come from the
+     * per-item setPath/popPath in ObjectWriterImplCollection, not from a parent-level writer.
+     * ArrayDeque is used because it is a Collection (so it routes to ObjectWriterImplCollection
+     * rather than ObjectWriterImplList) and, unlike a Set, it keeps duplicate elements.
+     */
+    @Test
+    public void testDuplicateItemWithinCollection() {
+        Bean bean = new Bean();
+        bean.xxx1 = "shared";
+
+        Collection<Bean> collection = new ArrayDeque<>();
+        collection.add(bean);
+        collection.add(bean);
+
+        String json = JSON.toJSONString(collection, JSONWriter.Feature.ReferenceDetection);
+        assertTrue(json.contains("$ref"), "Expected $ref for duplicate item within collection: " + json);
+    }
+
+    @Test
+    public void testDuplicateItemWithinCollectionJSONB() {
+        Bean bean = new Bean();
+        bean.xxx1 = "shared";
+
+        Collection<Bean> collection = new ArrayDeque<>();
+        collection.add(bean);
+        collection.add(bean);
+
+        byte[] bytes = JSONB.toBytes(collection, JSONWriter.Feature.ReferenceDetection);
+        assertTrue(JSONB.toJSONString(bytes).contains("$ref"), "Expected $ref for duplicate item within collection: " + JSONB.toJSONString(bytes));
+
+        List<Bean> parsed = JSONB.parseObject(bytes, new TypeReference<List<Bean>>() {}.getType());
+        assertEquals(2, parsed.size());
+        assertSame(parsed.get(0), parsed.get(1));
+        assertEquals("shared", parsed.get(0).xxx1);
     }
 }
