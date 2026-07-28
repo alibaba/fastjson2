@@ -4,11 +4,9 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TypeReference;
-import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -21,10 +19,10 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static com.alibaba.fastjson2.testutil.SharedReferenceModels.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -578,7 +576,9 @@ public class SharedReferenceInCollectionTest {
         assertSetBackReferencesPreserved(set);
     }
 
-    // 7.4 Multi-element Set handles self-references
+    // 7.4 Multi-element Set handles self-references.
+    // Each element writes a ".." reference to itself, so consecutive ".." paths target different
+    // objects and must not be collapsed into "#-1".
     @Test
     public void testMultiElementSelfCycleDoesNotOverflow() {
         Set<CyclicBean> set = new HashSet<>();
@@ -705,6 +705,38 @@ public class SharedReferenceInCollectionTest {
         assertNotNull(fromSet.link2);
         assertSame(fromSet, fromSet.link1.back, "first indirect back-reference must be preserved");
         assertSame(fromSet, fromSet.link2.back, "second indirect back-reference must not be inlined again");
+    }
+
+    // 7.10 Nested Set levels each preserve parentSet back-references to their immediate enclosing Set
+    @Test
+    public void testNestedSetParentBackReferencesRoundTrip() {
+        Set<NestedSetBackRefBean> root = new HashSet<>();
+        NestedSetBackRefBean outer = new NestedSetBackRefBean();
+        outer.name = "outer";
+        outer.parentSet = root;
+        outer.nested = new HashSet<>();
+        root.add(outer);
+
+        NestedSetBackRefBean inner = new NestedSetBackRefBean();
+        inner.name = "inner";
+        inner.parentSet = outer.nested;
+        outer.nested.add(inner);
+
+        Type type = new TypeReference<HashSet<NestedSetBackRefBean>>() {
+        }.getType();
+        byte[] bytes = assertDoesNotThrow(() -> JSONB.toBytes(root, WRITER_FEATURES));
+        Set<NestedSetBackRefBean> back = JSONB.parseObject(bytes, type, READER_FEATURES);
+
+        assertEquals(1, back.size());
+        NestedSetBackRefBean outerBack = back.iterator().next();
+        assertEquals("outer", outerBack.name);
+        assertSame(back, outerBack.parentSet, "outer parentSet must resolve to the root Set");
+        assertNotNull(outerBack.nested);
+        assertEquals(1, outerBack.nested.size());
+
+        NestedSetBackRefBean innerBack = outerBack.nested.iterator().next();
+        assertEquals("inner", innerBack.name);
+        assertSame(outerBack.nested, innerBack.parentSet, "inner parentSet must resolve to its enclosing nested Set");
     }
 
     // 8. Enclosing and disabled references
@@ -1079,206 +1111,5 @@ public class SharedReferenceInCollectionTest {
             assertNotNull(row.get("codes"));
             assertSame(row.get("codes"), row.get("codesAlias"), "List should preserve shared identity");
         }
-    }
-
-    private static <S extends Set<Map<String, Object>>> S buildMapRows(S outer) {
-        Set<String> sharedInner = new HashSet<>(Arrays.asList("c1", "c2", "c3"));
-        for (String sn : new String[]{"sn-1", "sn-2", "sn-3"}) {
-            Map<String, Object> row = new LinkedHashMap<>();
-            row.put("sn", sn);
-            row.put("codes", sharedInner);
-            outer.add(row);
-        }
-        return outer;
-    }
-
-    private static <C extends Collection<Map<String, Object>>> C buildAliasedMapRows(C outer, int size) {
-        for (int i = 1; i <= size; i++) {
-            Set<String> sharedInner = new HashSet<>(Arrays.asList("c1", "c2", "c3"));
-            Map<String, Object> row = new LinkedHashMap<>();
-            row.put("sn", "sn-" + i);
-            row.put("codes", sharedInner);
-            row.put("codesAlias", sharedInner);
-            outer.add(row);
-        }
-        return outer;
-    }
-
-    private static <S extends Set<Bean>> S buildBeanRows(S outer) {
-        Set<String> sharedInner = new HashSet<>(Arrays.asList("c1", "c2", "c3"));
-        for (String sn : new String[]{"sn-1", "sn-2", "sn-3"}) {
-            outer.add(new Bean(sn, sharedInner));
-        }
-        return outer;
-    }
-
-    private static <S extends Set<AliasedBean>> S buildAliasedBeanRows(S outer) {
-        for (String sn : new String[]{"sn-1", "sn-2", "sn-3"}) {
-            Set<String> sharedInner = new HashSet<>(Arrays.asList("c1", "c2", "c3"));
-            outer.add(new AliasedBean(sn, sharedInner, sharedInner));
-        }
-        return outer;
-    }
-
-    private static class Bean implements Serializable, Comparable<Bean> {
-        private static final long serialVersionUID = 1L;
-
-        public String sn;
-        public Set<String> codes;
-
-        public Bean() {
-        }
-
-        public Bean(String sn, Set<String> codes) {
-            this.sn = sn;
-            this.codes = codes;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof Bean)) {
-                return false;
-            }
-            Bean bean = (Bean) o;
-            return Objects.equals(sn, bean.sn)
-                    && Objects.equals(codes, bean.codes);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(sn, codes);
-        }
-
-        @Override
-        public int compareTo(Bean o) {
-            return sn.compareTo(o.sn);
-        }
-    }
-
-    private static class AliasedBean implements Serializable, Comparable<AliasedBean> {
-        private static final long serialVersionUID = 1L;
-
-        public String sn;
-        public Set<String> codes;
-        public Set<String> codesAlias;
-
-        public AliasedBean() {
-        }
-
-        public AliasedBean(String sn, Set<String> codes, Set<String> codesAlias) {
-            this.sn = sn;
-            this.codes = codes;
-            this.codesAlias = codesAlias;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof AliasedBean)) {
-                return false;
-            }
-            AliasedBean bean = (AliasedBean) o;
-            return Objects.equals(sn, bean.sn)
-                    && Objects.equals(codes, bean.codes)
-                    && Objects.equals(codesAlias, bean.codesAlias);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(sn, codes, codesAlias);
-        }
-
-        @Override
-        public int compareTo(AliasedBean o) {
-            return sn.compareTo(o.sn);
-        }
-    }
-
-    // Uses identity equality so cycles do not affect Set hashing
-    public static class CyclicBean implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        public String name;
-        public CyclicBean self;
-        public CyclicBean child;
-    }
-
-    // Uses identity equality while referencing the enclosing Set
-    public static class SetBackRefBean implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        public String name;
-        public Set<SetBackRefBean> parentSet;
-    }
-
-    // Two collection fields that both point back to the owning bean
-    public static class DualCyclicBean implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        public String name;
-        public List<DualCyclicBean> loop1;
-        public List<DualCyclicBean> loop2;
-    }
-
-    static class DualCyclicHolder implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        @JSONField(ordinal = 1)
-        public List<DualCyclicBean> stable;
-
-        @JSONField(ordinal = 2)
-        public Set<DualCyclicBean> set;
-    }
-
-    // Reaches the owning bean through two independent intermediate links
-    public static class DualLinkBean implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        public String name;
-        public Link link1;
-        public Link link2;
-    }
-
-    public static class Link implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        public DualLinkBean back;
-    }
-
-    static class DualLinkHolder implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        @JSONField(ordinal = 1)
-        public List<DualLinkBean> stable;
-
-        @JSONField(ordinal = 2)
-        public Set<DualLinkBean> set;
-    }
-
-    static class Wrapper implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        public Set<Bean> data;
-    }
-
-    static class MapWrapper implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        public Set<Map<String, Object>> data;
-    }
-
-    static class EnclosingSharedWrapper implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        @JSONField(ordinal = 1)
-        public Set<String> shared;
-
-        @JSONField(ordinal = 2)
-        public Set<Bean> data;
     }
 }
