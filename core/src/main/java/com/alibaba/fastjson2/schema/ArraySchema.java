@@ -206,7 +206,7 @@ public final class ArraySchema
                     return result;
                 }
                 prefixMatch = true;
-            } else if (isCollection && itemSchema == null && additionalItem != null) { // 只有 Collection 才会执行这部分校验
+            } else if (itemSchema == null && additionalItem != null) {
                 ValidateResult result = additionalItem.validate(item);
                 if (!result.isSuccess()) {
                     return result;
