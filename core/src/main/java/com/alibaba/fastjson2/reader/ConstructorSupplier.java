@@ -12,6 +12,7 @@ final class ConstructorSupplier
     final Constructor constructor;
     final Class objectClass;
     final boolean useClassNewInstance;
+    final Class paramType;
 
     public ConstructorSupplier(Constructor constructor) {
         constructor.setAccessible(true);
@@ -20,6 +21,9 @@ final class ConstructorSupplier
         this.useClassNewInstance = constructor.getParameterCount() == 0
                 && Modifier.isPublic(constructor.getModifiers())
                 && Modifier.isPublic(objectClass.getModifiers());
+        this.paramType = constructor.getParameterCount() == 1
+                ? constructor.getParameterTypes()[0]
+                : null;
     }
 
     @Override
@@ -28,8 +32,7 @@ final class ConstructorSupplier
             if (useClassNewInstance) {
                 return objectClass.newInstance();
             } else {
-                if (constructor.getParameterCount() == 1) {
-                    Class<?> paramType = constructor.getParameterTypes()[0];
+                if (paramType != null) {
                     Object dummy = JDKUtils.UNSAFE.allocateInstance(paramType);
                     return constructor.newInstance(dummy);
                 } else {

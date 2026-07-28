@@ -706,10 +706,17 @@ public class ObjectReaderCreatorASM
             mw.invokespecial(TYPE_OBJECT, "<init>", "()V");
         } else {
             Class paramType = defaultConstructor.getParameterTypes()[0];
-            mw.getstatic(TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
-            mw.visitLdcInsn(paramType);
-            mw.invokevirtual("sun/misc/Unsafe", "allocateInstance", "(Ljava/lang/Class;)Ljava/lang/Object;");
-            mw.checkcast(ASMUtils.type(paramType));
+            // ldc/checkcast on the enclosing type are access-checked against the generated class,
+            // which lives in DynamicClassLoader; a non-public enclosing type fails with
+            // IllegalAccessError there, so keep passing null for it as before.
+            if (Modifier.isPublic(paramType.getModifiers())) {
+                mw.getstatic(TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
+                mw.visitLdcInsn(paramType);
+                mw.invokevirtual("sun/misc/Unsafe", "allocateInstance", "(Ljava/lang/Class;)Ljava/lang/Object;");
+                mw.checkcast(ASMUtils.type(paramType));
+            } else {
+                mw.aconst_null();
+            }
             mw.invokespecial(TYPE_OBJECT, "<init>", "(" + ASMUtils.desc(paramType) + ")V");
         }
     }
