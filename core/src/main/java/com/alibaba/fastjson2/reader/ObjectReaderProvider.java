@@ -841,8 +841,11 @@ public class ObjectReaderProvider
             throw new JSONException("autoType is not support. " + typeName);
         }
 
+        // treat it as unresolvable rather than an error, the same as a type name that fails to
+        // load: JSON-LD uses @type for an IRI, and reporting that as unresolved leaves the
+        // ErrorOnNotSupportAutoType feature in charge of whether the caller sees an exception
         if (hasIllegalTypeNameChars(typeName)) {
-            throw new JSONException("autoType is not support, illegal type name. " + typeName);
+            return null;
         }
 
         if (typeName.charAt(0) == '[') {
@@ -857,6 +860,10 @@ public class ObjectReaderProvider
 
         boolean autoTypeSupport = (features & JSONReader.Feature.SupportAutoType.mask) != 0;
         Class<?> clazz;
+
+        // set when an accept prefix matched a deny class, so that the rejection below can tell a
+        // misconfigured accept list apart from a type name that was never accepted at all
+        boolean denyPrefixOnly = false;
 
         if (autoTypeSupport) {
             long hash = MAGIC_HASH_CODE;
@@ -876,6 +883,7 @@ public class ObjectReaderProvider
                         // matching an accept prefix is not an opt-in for gadget base types, only an
                         // accept entry naming the type in full is; keep scanning for such an entry
                         if (i + 1 < typeNameLength && JDKUtils.isAutoTypeDenyClass(clazz)) {
+                            denyPrefixOnly = true;
                             continue;
                         }
 
@@ -947,7 +955,10 @@ public class ObjectReaderProvider
 
         if (clazz != null) {
             if (JDKUtils.isAutoTypeDenyClass(clazz)) {
-                throw new JSONException("autoType is not support. " + typeName);
+                throw new JSONException(denyPrefixOnly
+                        ? "autoType is not support, an accept prefix does not cover it, "
+                        + "add the type name in full to accept. " + typeName
+                        : "autoType is not support. " + typeName);
             }
 
             if (expectClass != null) {

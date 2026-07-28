@@ -276,12 +276,6 @@ public class ContextAutoTypeBeforeHandler
                 if (clazz == null) {
                     clazz = loadClass(typeName);
                     if (clazz != null) {
-                        // matching an accept prefix is not an opt-in for gadget base types, only an
-                        // accept entry naming the type in full is; keep scanning for such an entry
-                        if (i + 1 < typeNameLength && JDKUtils.isAutoTypeDenyClass(clazz)) {
-                            continue;
-                        }
-
                         Class origin = putCacheIfAbsent(typeNameHash, clazz);
                         if (origin != null) {
                             clazz = origin;
@@ -290,6 +284,13 @@ public class ContextAutoTypeBeforeHandler
                 }
 
                 if (clazz != null) {
+                    // matching an accept prefix is not an opt-in for gadget base types, only an
+                    // accept entry naming the type in full is; keep scanning for such an entry.
+                    // checked after the cache read so that a cached class is checked too
+                    if (i + 1 < typeNameLength && JDKUtils.isAutoTypeDenyClass(clazz)) {
+                        continue;
+                    }
+
                     return clazz;
                 }
             }

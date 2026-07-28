@@ -2835,6 +2835,8 @@ public class TypeUtils {
      * <p>Every autoType entry point shares this predicate; validating in only some of them is the
      * asymmetry that lets a type name reach a class loader through the unchecked path.
      *
+     * <p>Internal, public only because the autoType entry points live in different packages.
+     *
      * @param typeName the type name to test
      * @return true if the type name must be rejected without being resolved
      */
@@ -2845,7 +2847,10 @@ public class TypeUtils {
     /**
      * Normalizes a type name the way the autoType accept-list rolling hash normalizes it, so that a
      * nested class matches whether it is written with its binary name ({@code a.b.Outer$Inner}) or
-     * its canonical name ({@code a.b.Outer.Inner}).
+     * its canonical name ({@code a.b.Outer.Inner}). Following that existing rolling-hash rule means
+     * the two spellings are equivalent as accept entries.
+     *
+     * <p>Internal, public only because the autoType entry points live in different packages.
      *
      * @param typeName the type name to normalize
      * @return the normalized type name

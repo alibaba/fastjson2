@@ -14,6 +14,8 @@ import javax.sql.DataSource;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,26 +32,45 @@ public class AutoTypeValidationTest {
     // type name format validation
     // =========================================================================
 
+    /**
+     * Unresolvable rather than an error, matching a type name that simply fails to load. Whether the
+     * caller sees an exception is left to {@code ErrorOnNotSupportAutoType}.
+     */
     @Test
     public void testRejectColonInTypeName() {
         ObjectReaderProvider provider = new ObjectReaderProvider();
-        assertThrows(JSONException.class, () ->
-                provider.checkAutoType("com.example.Bean:invalid", null, 0));
+        assertNull(provider.checkAutoType("com.example.Bean:invalid", null, 0));
     }
 
     @Test
     public void testRejectExclamationInTypeName() {
         ObjectReaderProvider provider = new ObjectReaderProvider();
-        assertThrows(JSONException.class, () ->
-                provider.checkAutoType("com.example.Bean!invalid", null, 0));
+        assertNull(provider.checkAutoType("com.example.Bean!invalid", null, 0));
     }
 
     @Test
     public void testRejectColonWithSupportAutoType() {
         ObjectReaderProvider provider = new ObjectReaderProvider();
         long features = JSONReader.Feature.SupportAutoType.mask;
-        assertThrows(JSONException.class, () ->
-                provider.checkAutoType("com.example.Bean:invalid", null, features));
+        assertNull(provider.checkAutoType("com.example.Bean:invalid", null, features));
+    }
+
+    /**
+     * {@code @type} is a JSON-LD keyword whose value is an IRI, so it always carries {@code :}.
+     * Rejecting the type name must leave the existing fall-back-to-map behaviour intact.
+     */
+    @Test
+    public void testParseJsonLdFallsBackToMap() {
+        String jsonLd = "{\"@type\":\"http://schema.org/Person\",\"name\":\"x\"}";
+
+        Object object = JSON.parseObject(jsonLd, Object.class);
+        assertInstanceOf(Map.class, object);
+        assertEquals("x", ((Map<?, ?>) object).get("name"));
+
+        assertInstanceOf(Map.class, JSON.parseArray("[" + jsonLd + "]", Object.class).get(0));
+
+        assertThrows(JSONException.class, () -> JSON.parseObject(
+                jsonLd, Object.class, JSONReader.Feature.ErrorOnNotSupportAutoType));
     }
 
     /**
@@ -287,6 +308,23 @@ public class AutoTypeValidationTest {
         assertNull(handler.apply(TEST_DATA_SOURCE, null, 0));
     }
 
+    /**
+     * The blacklist runs after the class cache is consulted, so a cached class is checked too rather
+     * than the check resting on nothing but a deny class never being cached.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testContextHandlerChecksCachedClass() throws Exception {
+        ContextAutoTypeBeforeHandler handler = new ContextAutoTypeBeforeHandler(PACKAGE_PREFIX);
+
+        Field field = ContextAutoTypeBeforeHandler.class.getDeclaredField("classCache");
+        field.setAccessible(true);
+        ((Map<Long, Class>) field.get(handler))
+                .put(Fnv.hashCode64(TEST_CLASS_LOADER), TestClassLoader.class);
+
+        assertNull(handler.apply(TEST_CLASS_LOADER, null, 0));
+    }
+
     @Test
     public void testContextHandlerExactAcceptNameAllowsClassLoader() {
         ContextAutoTypeBeforeHandler handler = new ContextAutoTypeBeforeHandler(
@@ -321,7 +359,25 @@ public class AutoTypeValidationTest {
         String json = "{\"@type\":\"java.util.HashMap\",\"value\":1}";
         Object obj = JSON.parseObject(json, Object.class,
                 JSONReader.autoTypeFilter("java.util.HashMap"));
-        assertNotNull(obj);
+        // not merely non-null, falling back to a JSONObject would satisfy that too
+        assertEquals(HashMap.class, obj.getClass());
+    }
+
+    @Test
+    public void testDenyPrefixOnlyRejectionIsDistinguishable() {
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        long features = JSONReader.Feature.SupportAutoType.mask;
+
+        // no accept entry covers it, the generic rejection
+        JSONException plain = assertThrows(JSONException.class, () ->
+                provider.checkAutoType(TEST_CLASS_LOADER, null, features));
+        assertFalse(plain.getMessage().contains("accept"));
+
+        // an accept prefix covers it but not in full, the actionable rejection
+        provider.addAutoTypeAccept(PACKAGE_PREFIX);
+        JSONException prefixOnly = assertThrows(JSONException.class, () ->
+                provider.checkAutoType(TEST_CLASS_LOADER, null, features));
+        assertTrue(prefixOnly.getMessage().contains("add the type name in full to accept"));
     }
 
     public static class TestBean {
