@@ -5,7 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class Issue7690 {
     @Test
@@ -29,15 +32,29 @@ public class Issue7690 {
     }
 
     @Test
-    public void testObjectGetReturnsLiveWrapperAfterAutoCreatingObject() {
+    public void testGetReturnsLiveWrapperForCoreJSONObject() {
         JSONObject root = new JSONObject();
-
-        JSONPath.set(root, "$.test.title", 2);
+        root.put("test", new com.alibaba.fastjson2.JSONObject());
 
         JSONObject test = (JSONObject) root.get("test");
         test.put("value", 220);
 
-        assertEquals(2, JSONPath.eval(root, "$.test.title"));
         assertEquals(220, JSONPath.eval(root, "$.test.value"));
+    }
+
+    @Test
+    public void testLiveWrapperIterationExposesUnderlyingCoreNestedContainers() {
+        JSONObject root = new JSONObject();
+        JSONPath.set(root, "$.a.b.c", 1);
+
+        JSONObject a = (JSONObject) root.get("a");
+        Object value = a.values().iterator().next();
+        Object entryValue = a.entrySet().iterator().next().getValue();
+        AtomicReference<Object> forEachValue = new AtomicReference<>();
+        a.forEach((key, item) -> forEachValue.set(item));
+
+        assertEquals(com.alibaba.fastjson2.JSONObject.class, value.getClass());
+        assertSame(value, entryValue);
+        assertSame(value, forEachValue.get());
     }
 }
