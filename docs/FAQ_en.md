@@ -272,7 +272,7 @@ Use the compatibility package as a drop-in replacement:
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.61</version>
+    <version>2.0.63</version>
 </dependency>
 ```
 
