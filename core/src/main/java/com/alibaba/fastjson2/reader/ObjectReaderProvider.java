@@ -11,9 +11,6 @@ import com.alibaba.fastjson2.function.impl.*;
 import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.*;
 
-import javax.sql.DataSource;
-import javax.sql.RowSet;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.Serializable;
@@ -32,9 +29,19 @@ import java.util.regex.Pattern;
 import static com.alibaba.fastjson2.util.BeanUtils.*;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
+import static com.alibaba.fastjson2.util.TypeUtils.hasIllegalTypeNameChars;
+import static com.alibaba.fastjson2.util.TypeUtils.isAutoTypeDenyClass;
 import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
+import static com.alibaba.fastjson2.util.TypeUtils.normalizeAcceptName;
 
 public class ObjectReaderProvider {
+    /**
+     * Always accepted, it is the map implementation fastjson 1.x substitutes for {@code HashMap}
+     * when hash collision protection is enabled.
+     */
+    static final String ANTI_COLLISION_HASH_MAP = "com.alibaba.fastjson.util.AntiCollisionHashMap";
+    static final long ANTI_COLLISION_HASH_MAP_HASH = -6293031534589903644L; // Fnv.hashCode64(ANTI_COLLISION_HASH_MAP)
+
     static ObjectReaderCachePair readerCache;
 
     private static final class ObjectReaderCachePair {
@@ -61,6 +68,13 @@ public class ObjectReaderProvider {
 
     private long[] denyHashCodes;
     private long[] acceptHashCodes;
+
+    /**
+     * The accept names behind {@link #acceptHashCodes}, normalized the same way the rolling hash in
+     * {@link #checkAutoType} normalizes a type name. A hash match is only honored when the matched
+     * prefix text is in this set, so a hash collision alone cannot whitelist a type name.
+     */
+    private volatile Set<String> acceptNameSet = Collections.emptySet();
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler;
     private Consumer<Class> autoTypeHandler;
@@ -231,7 +245,8 @@ public class ObjectReaderProvider {
                 9144212112462101475L
         };
 
-        acceptHashCodes = new long[]{-6293031534589903644L};
+        acceptHashCodes = new long[]{ANTI_COLLISION_HASH_MAP_HASH};
+        acceptNameSet = Collections.singleton(ANTI_COLLISION_HASH_MAP);
 
         hashCache.put(ObjectArrayReader.TYPE_HASH_CODE, ObjectArrayReader.INSTANCE);
         final long STRING_CLASS_NAME_HASH = -4834614249632438472L; // Fnv.hashCode64(String.class.getName());
@@ -246,7 +261,17 @@ public class ObjectReaderProvider {
 
     public void addAutoTypeAccept(String name) {
         if (name != null && name.length() != 0) {
-            long hash = Fnv.hashCode64(name);
+            String acceptName = normalizeAcceptName(name);
+
+            // publish the name before the hash, so that a reader seeing the new hash array is
+            // guaranteed to see the name it verifies against rather than transiently rejecting
+            if (!this.acceptNameSet.contains(acceptName)) {
+                Set<String> names = new HashSet<>(this.acceptNameSet);
+                names.add(acceptName);
+                this.acceptNameSet = Collections.unmodifiableSet(names);
+            }
+
+            long hash = Fnv.hashCode64(acceptName);
             if (Arrays.binarySearch(this.acceptHashCodes, hash) < 0) {
                 long[] hashCodes = new long[this.acceptHashCodes.length + 1];
                 hashCodes[hashCodes.length - 1] = hash;
@@ -673,6 +698,13 @@ public class ObjectReaderProvider {
             throw new JSONException("autoType is not support. " + typeName);
         }
 
+        // treat it as unresolvable rather than an error, the same as a type name that fails to
+        // load: JSON-LD uses @type for an IRI, and reporting that as unresolved leaves the
+        // ErrorOnNotSupportAutoType feature in charge of whether the caller sees an exception
+        if (hasIllegalTypeNameChars(typeName)) {
+            return null;
+        }
+
         if (typeName.charAt(0) == '[') {
             String componentTypeName = typeName.substring(1);
             checkAutoType(componentTypeName, null, features); // blacklist check for componentType
@@ -686,6 +718,10 @@ public class ObjectReaderProvider {
         boolean autoTypeSupport = (features & JSONReader.Feature.SupportAutoType.mask) != 0;
         Class<?> clazz;
 
+        // set when an accept prefix matched a deny class, so that the rejection below can tell a
+        // misconfigured accept list apart from a type name that was never accepted at all
+        boolean denyPrefixOnly = false;
+
         if (autoTypeSupport) {
             long hash = MAGIC_HASH_CODE;
             for (int i = 0; i < typeNameLength; ++i) {
@@ -696,8 +732,18 @@ public class ObjectReaderProvider {
                 hash ^= ch;
                 hash *= MAGIC_PRIME;
                 if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
+                    if (!acceptNameSet.contains(normalizeAcceptName(typeName.substring(0, i + 1)))) {
+                        continue;
+                    }
                     clazz = loadClass(typeName);
                     if (clazz != null) {
+                        // matching an accept prefix is not an opt-in for gadget base types, only an
+                        // accept entry naming the type in full is; keep scanning for such an entry
+                        if (i + 1 < typeNameLength && isAutoTypeDenyClass(clazz)) {
+                            denyPrefixOnly = true;
+                            continue;
+                        }
+
                         if (expectClass != null && !expectClass.isAssignableFrom(clazz)) {
                             throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
                         }
@@ -728,7 +774,15 @@ public class ObjectReaderProvider {
 
                 // white list
                 if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
+                    if (!acceptNameSet.contains(normalizeAcceptName(typeName.substring(0, i + 1)))) {
+                        continue;
+                    }
                     clazz = loadClass(typeName);
+
+                    // see the SupportAutoType branch above
+                    if (clazz != null && i + 1 < typeNameLength && isAutoTypeDenyClass(clazz)) {
+                        continue;
+                    }
 
                     if (clazz != null && expectClass != null && !expectClass.isAssignableFrom(clazz)) {
                         throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
@@ -762,8 +816,11 @@ public class ObjectReaderProvider {
         clazz = loadClass(typeName);
 
         if (clazz != null) {
-            if (ClassLoader.class.isAssignableFrom(clazz) || DataSource.class.isAssignableFrom(clazz) || RowSet.class.isAssignableFrom(clazz)) {
-                throw new JSONException("autoType is not support. " + typeName);
+            if (isAutoTypeDenyClass(clazz)) {
+                throw new JSONException(denyPrefixOnly
+                        ? "autoType is not support, an accept prefix does not cover it, "
+                        + "add the type name in full to accept. " + typeName
+                        : "autoType is not support. " + typeName);
             }
 
             if (expectClass != null) {

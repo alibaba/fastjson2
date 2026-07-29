@@ -23,6 +23,7 @@ public class ContextAutoTypeBeforeHandler
     static final Class CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(Collections.emptySet()).getClass();
     static final Class CLASS_UNMODIFIABLE_COLLECTION = Collections.unmodifiableCollection(Collections.emptyList()).getClass();
     final long[] acceptHashCodes;
+    final Set<String> acceptNameSet;
     final ConcurrentMap<Integer, ConcurrentHashMap<Long, Class>> tclHashCaches = new ConcurrentHashMap<>();
     final Map<Long, Class> classCache = new ConcurrentHashMap<>(16, 0.75f, 1);
 
@@ -200,6 +201,7 @@ public class ContextAutoTypeBeforeHandler
         }
 
         long[] array = new long[nameSet.size()];
+        Set<String> normalizedNames = new HashSet<>(nameSet.size());
 
         int index = 0;
         for (String name : nameSet) {
@@ -214,6 +216,7 @@ public class ContextAutoTypeBeforeHandler
             }
 
             array[index++] = hashCode;
+            normalizedNames.add(normalizeAcceptName(name));
         }
 
         if (index != array.length) {
@@ -221,6 +224,7 @@ public class ContextAutoTypeBeforeHandler
         }
         Arrays.sort(array);
         this.acceptHashCodes = array;
+        this.acceptNameSet = Collections.unmodifiableSet(normalizedNames);
     }
 
     public Class<?> apply(long typeNameHash, Class<?> expectClass, long features) {
@@ -242,6 +246,10 @@ public class ContextAutoTypeBeforeHandler
             typeName = "Object";
         }
 
+        if (hasIllegalTypeNameChars(typeName)) {
+            return null;
+        }
+
         long hash = MAGIC_HASH_CODE;
         for (int i = 0, typeNameLength = typeName.length(); i < typeNameLength; ++i) {
             char ch = typeName.charAt(i);
@@ -252,6 +260,9 @@ public class ContextAutoTypeBeforeHandler
             hash *= MAGIC_PRIME;
 
             if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
+                if (!acceptNameSet.contains(normalizeAcceptName(typeName.substring(0, i + 1)))) {
+                    continue;
+                }
                 long typeNameHash = Fnv.hashCode64(typeName);
                 Class clazz = apply(typeNameHash, expectClass, features);
 
@@ -266,6 +277,13 @@ public class ContextAutoTypeBeforeHandler
                 }
 
                 if (clazz != null) {
+                    // matching an accept prefix is not an opt-in for gadget base types, only an
+                    // accept entry naming the type in full is; keep scanning for such an entry.
+                    // checked after the cache read so that a cached class is checked too
+                    if (i + 1 < typeNameLength && isAutoTypeDenyClass(clazz)) {
+                        continue;
+                    }
+
                     return clazz;
                 }
             }
