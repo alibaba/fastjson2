@@ -2233,7 +2233,7 @@ final class JSONWriterUTF16
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
-        int minCapacity = off + values.length * (writeAsString ? 16 : 18) + 1;
+        int minCapacity = off + values.length * 18 + 2;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
