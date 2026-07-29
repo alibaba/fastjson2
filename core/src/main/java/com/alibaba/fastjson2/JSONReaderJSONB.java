@@ -562,9 +562,7 @@ final class JSONReaderJSONB
             }
             case BC_BIGINT: {
                 int len = readInt32Value();
-                if (len < 0 || len > end - offset) {
-                    throw new JSONException("BC_BIGINT length out of range: " + len);
-                }
+                checkBigintLen(len, offset, end);
                 byte[] bytes = new byte[len];
                 System.arraycopy(this.bytes, offset, bytes, 0, len);
                 offset += len;
@@ -659,6 +657,9 @@ final class JSONReaderJSONB
             }
             case BC_BINARY: {
                 int len = readLength();
+                if (len < 0 || len > end - offset) {
+                    throw new JSONException("BC_BINARY length out of range: " + len);
+                }
                 byte[] binary = Arrays.copyOfRange(this.bytes, offset, offset + len);
                 offset += len;
                 return binary;
@@ -3227,9 +3228,7 @@ final class JSONReaderJSONB
                 return Long.toString(int64Value);
             case BC_BIGINT: {
                 int len = readInt32Value();
-                if (len < 0 || len > end - offset) {
-                    throw new JSONException("BC_BIGINT length out of range: " + len);
-                }
+                checkBigintLen(len, offset, end);
                 byte[] bytes = new byte[len];
                 System.arraycopy(this.bytes, offset, bytes, 0, len);
                 offset += len;
@@ -3656,10 +3655,19 @@ final class JSONReaderJSONB
         }
 
         int len = readLength();
+        if (len < 0 || len > end - offset) {
+            throw new JSONException("BC_BINARY length out of range: " + len);
+        }
         byte[] bytes = new byte[len];
         System.arraycopy(this.bytes, offset, bytes, 0, len);
         offset += len;
         return bytes;
+    }
+
+    static void checkBigintLen(int len, int offset, int end) {
+        if (len < 0 || len > end - offset) {
+            throw new JSONException("BC_BIGINT length out of range: " + len + ", available: " + (end - offset));
+        }
     }
 
     @Override
@@ -4114,9 +4122,7 @@ final class JSONReaderJSONB
             }
             case BC_BIGINT: {
                 int len = readInt32Value();
-                if (len < 0 || len > end - offset) {
-                    throw new JSONException("BC_BIGINT length out of range: " + len);
-                }
+                checkBigintLen(len, offset, end);
                 byte[] bytes = new byte[len];
                 System.arraycopy(this.bytes, offset, bytes, 0, len);
                 offset += len;
@@ -4351,9 +4357,7 @@ final class JSONReaderJSONB
             );
         } else if (type == BC_BIGINT) {
             int len = readInt32Value();
-            if (len < 0 || len > end - offset) {
-                throw new JSONException("BC_BIGINT length out of range: " + len);
-            }
+            checkBigintLen(len, offset, end);
             byte[] bytes = new byte[len];
             System.arraycopy(this.bytes, offset, bytes, 0, len);
             offset += len;
@@ -4415,6 +4419,9 @@ final class JSONReaderJSONB
             }
             case BC_BINARY: {
                 int len = readInt32Value();
+                if (len < 0 || len > end - offset) {
+                    throw new JSONException("BC_BINARY length out of range: " + len);
+                }
                 byte[] buf = new byte[len];
                 System.arraycopy(this.bytes, offset, buf, 0, len);
                 offset += len;
