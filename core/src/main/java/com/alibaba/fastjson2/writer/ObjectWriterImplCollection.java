@@ -160,6 +160,7 @@ final class ObjectWriterImplCollection
 
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
+        boolean previousRefDetect = false;
         jsonWriter.startArray();
         int i = 0;
         for (Object o : iterable) {
@@ -174,12 +175,26 @@ final class ObjectWriterImplCollection
             }
             Class<?> itemClass = o.getClass();
             ObjectWriter itemObjectWriter;
+            boolean itemRefDetect;
             if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
+                itemRefDetect = previousRefDetect;
             } else {
                 itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                itemRefDetect = refDetect && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
+                previousRefDetect = itemRefDetect;
+            }
+
+            if (itemRefDetect) {
+                String refPath = jsonWriter.setPath(i, o);
+                if (refPath != null) {
+                    jsonWriter.writeReference(refPath);
+                    jsonWriter.popPath(o);
+                    i++;
+                    continue;
+                }
             }
 
             boolean itemRefDetect = refDetect && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
