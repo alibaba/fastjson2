@@ -4399,59 +4399,10 @@ class JSONReaderUTF8
 
     @Override
     public final void readNumber(ValueConsumer consumer, boolean quoted) {
-        boolean valid = false;
-        this.wasNull = false;
-        this.boolValue = false;
-        this.mag0 = 0;
-        this.mag1 = 0;
-        this.mag2 = 0;
-        this.mag3 = 0;
-        this.negative = false;
-        this.exponent = 0;
-        this.scale = 0;
+        throw new UnsupportedOperationException();
+    }
 
-        final int end = this.end;
-        final byte[] bytes = this.bytes;
-        char quote = '\0';
-        if (ch == '"' || ch == '\'') {
-            quote = ch;
-            ch = (char) bytes[offset++];
-        }
-        final int start = offset;
 
-        if (ch == '-') {
-            negative = true;
-            ch = (char) bytes[offset++];
-        }
-
-        boolean intOverflow = false;
-        valueType = JSON_TYPE_INT;
-        while (ch >= '0' && ch <= '9') {
-            valid = true;
-            if (!intOverflow) {
-                int mag3_10 = mag3 * 10 + (ch - '0');
-                if (mag3_10 < mag3) {
-                    intOverflow = true;
-                } else {
-                    mag3 = mag3_10;
-                }
-            }
-            ch = (char) bytes[offset++];
-        }
-
-        if (ch == '.') {
-            valueType = JSON_TYPE_DEC;
-            ch = (char) bytes[offset++];
-            while (ch >= '0' && ch <= '9') {
-                valid = true;
-                if (!intOverflow) {
-                    int mag3_10 = mag3 * 10 + (ch - '0');
-                    if (mag3_10 < mag3) {
-                        intOverflow = true;
-                    } else {
-                        mag3 = mag3_10;
-                    }
-                }
 
                 this.scale++;
                 ch = (char) bytes[offset++];
