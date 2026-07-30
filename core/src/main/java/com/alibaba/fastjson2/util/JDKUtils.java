@@ -87,15 +87,14 @@ public class JDKUtils {
         }
 
         int jvmVersion = -1, android_sdk_int = -1;
-        boolean openj9 = false, android = false, graal = false;
+        boolean openj9 = false, android = false;
         try {
             String jvmName = System.getProperty("java.vm.name");
             if (jvmName != null) {
                 openj9 = jvmName.contains("OpenJ9");
                 android = "Dalvik".equals(jvmName);
             }
-            graal = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
-            if (openj9 || android || graal) {
+            if (openj9 || android) {
                 FIELD_STRING_VALUE_ERROR = true;
             }
 
@@ -119,7 +118,7 @@ public class JDKUtils {
 
         OPENJ9 = openj9;
         ANDROID = android;
-        GRAAL = graal;
+        GRAAL = false;
         ANDROID_SDK_INT = android_sdk_int;
 
         boolean hasJavaSql = true;

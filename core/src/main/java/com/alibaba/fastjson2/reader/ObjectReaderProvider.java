@@ -4,12 +4,10 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.function.FieldBiConsumer;
 import com.alibaba.fastjson2.function.FieldConsumer;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
-import com.alibaba.fastjson2.support.LambdaMiscCodec;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
@@ -20,7 +18,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -239,11 +236,6 @@ public class ObjectReaderProvider
         // see addAutoTypeAccept, the name set is published before the hash array
         acceptNameSet = Collections.unmodifiableSet(names);
         acceptHashCodes = hashCodes;
-
-        hashCache.put(ObjectArrayReader.TYPE_HASH_CODE, ObjectArrayReader.INSTANCE);
-        final long STRING_CLASS_NAME_HASH = -4834614249632438472L; // Fnv.hashCode64(String.class.getName());
-        hashCache.put(STRING_CLASS_NAME_HASH, ObjectReaderImplString.INSTANCE);
-        hashCache.put(Fnv.hashCode64(TypeUtils.getTypeName(HashMap.class)), ObjectReaderImplMap.INSTANCE);
     }
 
     /**
@@ -578,33 +570,8 @@ public class ObjectReaderProvider
             }
         }
 
-        if (objectReader instanceof ObjectReaderImplMapTyped) {
-            ObjectReaderImplMapTyped mapTyped = (ObjectReaderImplMapTyped) objectReader;
-            Class valueClass = mapTyped.valueClass;
-            if (valueClass != null && valueClass.getClassLoader() == classLoader) {
-                return true;
-            }
-            Class keyClass = TypeUtils.getClass(mapTyped.keyType);
-            return keyClass != null && keyClass.getClassLoader() == classLoader;
-        } else if (objectReader instanceof ObjectReaderImplList) {
-            ObjectReaderImplList list = (ObjectReaderImplList) objectReader;
-            return list.itemClass != null && list.itemClass.getClassLoader() == classLoader;
-        } else if (objectReader instanceof ObjectReaderImplOptional) {
-            Class itemClass = ((ObjectReaderImplOptional) objectReader).itemClass;
-            return itemClass != null && itemClass.getClassLoader() == classLoader;
-        } else if (objectReader instanceof ObjectReaderAdapter) {
-            FieldReader[] fieldReaders = ((ObjectReaderAdapter<?>) objectReader).fieldReaders;
-            for (FieldReader fieldReader : fieldReaders) {
-                if (fieldReader.fieldClass != null && fieldReader.fieldClass.getClassLoader() == classLoader) {
-                    return true;
-                }
-                Type fieldType = fieldReader.fieldType;
-                if (fieldType instanceof ParameterizedType) {
-                    if (match(fieldType, null, classLoader)) {
-                        return true;
-                    }
-                }
-            }
+        if (objectReader instanceof ObjectReaderImplObject) {
+            return false;
         }
 
         return false;
@@ -670,7 +637,7 @@ public class ObjectReaderProvider
             default:
                 try {
                     if (!JDKUtils.ANDROID && !JDKUtils.GRAAL) {
-                        creator = ObjectReaderCreatorASM.INSTANCE;
+                        creator = ObjectReaderCreator.INSTANCE;
                     }
                 } catch (Throwable ignored) {
                     // ignored
@@ -1083,11 +1050,11 @@ public class ObjectReaderProvider
      * @param fieldReaderArray the field readers to use
      * @return a function that creates ByteArrayValueConsumer instances
      */
-    public Function<Consumer, ByteArrayValueConsumer> createValueConsumerCreator(
+    public <T> Function<Consumer, T> createValueConsumerCreator(
             Class objectClass,
-            FieldReader[] fieldReaderArray
+            Object[] fieldReaderArray
     ) {
-        return creator.createByteArrayValueConsumerCreator(objectClass, fieldReaderArray);
+        return null;
     }
 
     /**
@@ -1097,11 +1064,11 @@ public class ObjectReaderProvider
      * @param fieldReaderArray the field readers to use
      * @return a function that creates CharArrayValueConsumer instances
      */
-    public Function<Consumer, CharArrayValueConsumer> createCharArrayValueConsumerCreator(
+    public <T> Function<Consumer, T> createCharArrayValueConsumerCreator(
             Class objectClass,
-            FieldReader[] fieldReaderArray
+            Object[] fieldReaderArray
     ) {
-        return creator.createCharArrayValueConsumerCreator(objectClass, fieldReaderArray);
+        return null;
     }
 
     /**
@@ -1194,11 +1161,11 @@ public class ObjectReaderProvider
                     }
                 }
                 if (typeArguments.length == 1 && ArrayList.class.isAssignableFrom(rawClass)) {
-                    return ObjectReaderImplList.of(objectType, rawClass, 0);
+                    return null;
                 }
 
                 if (typeArguments.length == 2 && Map.class.isAssignableFrom(rawClass)) {
-                    return ObjectReaderImplMap.of(objectType, (Class) rawType, 0);
+                    return null;
                 }
             }
         }
@@ -1208,7 +1175,7 @@ public class ObjectReaderProvider
         String className = objectClass.getName();
         if (!fieldBased) {
             if ("com.google.common.collect.ArrayListMultimap".equals(className)) {
-                objectReader = ObjectReaderImplMap.of(null, objectClass, 0);
+                objectReader = null;
             }
         }
 
@@ -1320,7 +1287,13 @@ public class ObjectReaderProvider
             throw new JSONException("default constructor not found : " + objectClass.getName());
         }
 
-        return LambdaMiscCodec.createSupplier(constructor);
+        return () -> {
+            try {
+                return (T) constructor.newInstance();
+            } catch (Exception e) {
+                throw new JSONException("create instance error", e);
+            }
+        };
     }
 
     /**
@@ -1331,45 +1304,7 @@ public class ObjectReaderProvider
      * @param readerFeatures the reader features to use
      * @return a FieldReader for the specified field, or null if the field is not found
      */
-    public FieldReader createFieldReader(Class objectClass, String fieldName, long readerFeatures) {
-        boolean fieldBased = (readerFeatures & JSONReader.Feature.FieldBased.mask) != 0;
-
-        ObjectReader objectReader = fieldBased
-                ? cacheFieldBased.get(objectClass)
-                : cache.get(objectClass);
-
-        if (objectReader != null) {
-            return objectReader.getFieldReader(fieldName);
-        }
-
-        AtomicReference<Field> fieldRef = new AtomicReference<>();
-        long nameHashLCase = Fnv.hashCode64LCase(fieldName);
-        BeanUtils.fields(objectClass, field -> {
-            if (nameHashLCase == Fnv.hashCode64LCase(field.getName())) {
-                fieldRef.set(field);
-            }
-        });
-
-        Field field = fieldRef.get();
-        if (field != null) {
-            return creator.createFieldReader(fieldName, null, field.getType(), field);
-        }
-
-        AtomicReference<Method> methodRef = new AtomicReference<>();
-        BeanUtils.setters(objectClass, method -> {
-            String setterName = BeanUtils.setterName(method.getName(), PropertyNamingStrategy.CamelCase.name());
-            if (nameHashLCase == Fnv.hashCode64LCase(setterName)) {
-                methodRef.set(method);
-            }
-        });
-
-        Method method = methodRef.get();
-        if (method != null) {
-            Class<?>[] params = method.getParameterTypes();
-            Class fieldClass = params[0];
-            return creator.createFieldReaderMethod(objectClass, fieldName, null, fieldClass, fieldClass, method);
-        }
-
+    public Object createFieldReader(Class objectClass, String fieldName, long readerFeatures) {
         return null;
     }
 
@@ -1410,25 +1345,7 @@ public class ObjectReaderProvider
             Supplier<T> supplier,
             FieldConsumer<T> c
     ) {
-        FieldReader[] fieldReaders = new FieldReader[names.length];
-        for (int i = 0; i < names.length; i++) {
-            Type fieldType = types[i];
-            Class fieldClass = TypeUtils.getClass(fieldType);
-            long feature = features != null && i < features.length ? features[i] : 0;
-            fieldReaders[i] = creator.createFieldReader(
-                    names[i],
-                    fieldType,
-                    fieldClass,
-                    feature,
-                    new FieldBiConsumer(i, c)
-            );
-        }
-
-        return creator.createObjectReader(
-                null,
-                supplier,
-                fieldReaders
-        );
+        return null;
     }
 
     /**

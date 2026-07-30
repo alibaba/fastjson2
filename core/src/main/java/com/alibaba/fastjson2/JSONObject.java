@@ -4,12 +4,8 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.*;
-import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
@@ -115,15 +111,6 @@ public class JSONObject
         }
 
         return super.get(key);
-    }
-
-    public Object getByPath(String jsonPath) {
-        JSONPath path = JSONPath.of(jsonPath);
-        if (path instanceof JSONPathSingleName) {
-            String name = ((JSONPathSingleName) path).name;
-            return get(name);
-        }
-        return path.eval(this);
     }
 
     /**
@@ -331,15 +318,6 @@ public class JSONObject
             JSONObject object = new JSONObject((Map) value);
             put(key, object);
             return object;
-        }
-
-        Class valueClass = value.getClass();
-        ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
-        if (objectWriter instanceof ObjectWriterAdapter) {
-            ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) objectWriter;
-            JSONObject jsonObject = writerAdapter.toJSONObject(value);
-            put(key, jsonObject);
-            return jsonObject;
         }
 
         return null;
@@ -1397,12 +1375,7 @@ public class JSONObject
             }
 
             if (clazz.isEnum()) {
-                objectReader = provider.getObjectReader(clazz, fieldBased);
-                if (objectReader instanceof ObjectReaderImplEnum) {
-                    long hashCode64 = Fnv.hashCode64(str);
-                    ObjectReaderImplEnum enumReader = (ObjectReaderImplEnum) objectReader;
-                    return (T) enumReader.getEnumByHashCode(hashCode64);
-                }
+                return (T) Enum.valueOf((Class<Enum>) clazz, str);
             }
         }
 
@@ -1776,17 +1749,6 @@ public class JSONObject
     }
 
     /**
-     * Checks if this JSONObject is valid according to the specified JSON schema.
-     *
-     * @param schema the JSON schema to validate against
-     * @return true if this JSONObject is valid according to the schema, false otherwise
-     * @since 2.0.4
-     */
-    public boolean isValid(JSONSchema schema) {
-        return schema.isValid(this);
-    }
-
-    /**
      * Applies a name filter to an iterable collection.
      *
      * @param iterable the iterable collection to apply the filter to
@@ -1915,17 +1877,6 @@ public class JSONObject
     @Override
     public JSONObject clone() {
         return new JSONObject(this);
-    }
-
-    /**
-     * Evaluates a JSONPath expression against this JSONObject.
-     *
-     * @param path the JSONPath expression to evaluate
-     * @return the result of evaluating the JSONPath expression
-     * @see JSONPath#paths(Object)
-     */
-    public Object eval(JSONPath path) {
-        return path.eval(this);
     }
 
     /**

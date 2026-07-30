@@ -2608,6 +2608,16 @@ final class JSONWriterUTF8
                 continue;
             }
 
+            if (valueClass == Double.class) {
+                writeDouble((Double) o);
+                continue;
+            }
+
+            if (valueClass == Float.class) {
+                writeFloat((Float) o);
+                continue;
+            }
+
             if (valueClass == JSONArray.class) {
                 write((JSONArray) o);
                 continue;

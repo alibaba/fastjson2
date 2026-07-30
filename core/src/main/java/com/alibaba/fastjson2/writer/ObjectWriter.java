@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.*;
-import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -57,7 +56,7 @@ public interface ObjectWriter<T> {
      *
      * @return the list of FieldWriters, or an empty list if none are available
      */
-    default List<FieldWriter> getFieldWriters() {
+    default List<ObjectWriter> getFieldWriters() {
         return Collections.emptyList();
     }
 
@@ -67,7 +66,7 @@ public interface ObjectWriter<T> {
      * @param hashCode the hash code of the field name
      * @return the FieldWriter for the field, or null if not found
      */
-    default FieldWriter getFieldWriter(long hashCode) {
+    default ObjectWriter getFieldWriter(long hashCode) {
         return null;
     }
 
@@ -79,11 +78,7 @@ public interface ObjectWriter<T> {
      * @return the value of the field, or null if the field is not found
      */
     default Object getFieldValue(Object object, String fieldName) {
-        FieldWriter fieldWriter = getFieldWriter(fieldName);
-        if (fieldWriter == null) {
-            return null;
-        }
-        return fieldWriter.getFieldValue(object);
+        return null;
     }
 
     /**
@@ -92,16 +87,8 @@ public interface ObjectWriter<T> {
      * @param name the name of the field
      * @return the FieldWriter for the field, or null if not found
      */
-    default FieldWriter getFieldWriter(String name) {
-        long nameHash = Fnv.hashCode64(name);
-        FieldWriter fieldWriter = getFieldWriter(nameHash);
-        if (fieldWriter == null) {
-            long nameHashLCase = Fnv.hashCode64LCase(name);
-            if (nameHashLCase != nameHash) {
-                fieldWriter = getFieldWriter(nameHashLCase);
-            }
-        }
-        return fieldWriter;
+    default ObjectWriter getFieldWriter(String name) {
+        return null;
     }
 
     /**
@@ -148,12 +135,12 @@ public interface ObjectWriter<T> {
      * @param features the features to use for writing
      */
     default void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        List<FieldWriter> fieldWriters = getFieldWriters();
+        List<ObjectWriter> fieldWriters = getFieldWriters();
         int size = fieldWriters.size();
         jsonWriter.startArray(size);
         for (int i = 0; i < size; ++i) {
-            FieldWriter fieldWriter = fieldWriters.get(i);
-            fieldWriter.writeValue(jsonWriter, object);
+            ObjectWriter fieldWriter = fieldWriters.get(i);
+            fieldWriter.write(jsonWriter, object);
         }
     }
 
@@ -172,60 +159,15 @@ public interface ObjectWriter<T> {
             return;
         }
 
-        List<FieldWriter> fieldWriters = getFieldWriters();
+        List<ObjectWriter> fieldWriters = getFieldWriters();
         jsonWriter.startArray();
-        boolean hasFilter = hasFilter(jsonWriter);
-        if (!hasFilter) {
-            for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
-                if (i != 0) {
-                    jsonWriter.writeComma();
-                }
-                FieldWriter fieldWriter = fieldWriters.get(i);
-                fieldWriter.writeValue(jsonWriter, object);
+        for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
+            if (i != 0) {
+                jsonWriter.writeComma();
             }
-        } else {
-            JSONWriter.Context ctx = jsonWriter.context;
-            PropertyPreFilter propertyPreFilter = ctx.getPropertyPreFilter();
-            ValueFilter valueFilter = ctx.getValueFilter();
-            PropertyFilter propertyFilter = ctx.getPropertyFilter();
-
-            for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
-                if (i != 0) {
-                    jsonWriter.writeComma();
-                }
-                FieldWriter fieldWriter = fieldWriters.get(i);
-                if (propertyPreFilter != null && !propertyPreFilter.process(jsonWriter, object, fieldWriter.fieldName)) {
-                    jsonWriter.writeNull();
-                    continue;
-                }
-
-                Object fieldValue = fieldWriter.getFieldValue(object);
-                if (propertyFilter != null && !propertyFilter.apply(object, fieldWriter.fieldName, fieldValue)) {
-                    jsonWriter.writeNull();
-                    continue;
-                }
-
-                if (valueFilter != null) {
-                    Object processValue = valueFilter.apply(object, fieldWriter.fieldName, fieldValue);
-                    if (processValue == null) {
-                        jsonWriter.writeNull();
-                        continue;
-                    }
-
-                    ObjectWriter processValueWriter = fieldWriter.getObjectWriter(jsonWriter, processValue.getClass());
-                    processValueWriter.write(jsonWriter, fieldValue);
-                } else {
-                    if (fieldValue == null) {
-                        jsonWriter.writeNull();
-                        continue;
-                    }
-
-                    ObjectWriter fieldValueWriter = fieldWriter.getObjectWriter(jsonWriter, fieldValue.getClass());
-                    fieldValueWriter.write(jsonWriter, fieldValue);
-                }
-            }
+            ObjectWriter fieldWriter = fieldWriters.get(i);
+            fieldWriter.write(jsonWriter, object);
         }
-
         jsonWriter.endArray();
     }
 

@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

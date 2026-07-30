@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
@@ -33,7 +32,7 @@ final class JSONWriterJSONB
 
     private final CacheItem cacheItem;
     byte[] bytes;
-    TLongIntHashMap symbols;
+    HashMap<Long, Integer> symbols;
     int symbolIndex;
 
     private long rootTypeNameHash;
@@ -539,15 +538,17 @@ final class JSONWriterJSONB
         if (symbolTable != null) {
             symbol = symbolTable.getOrdinalByHashCode(hash);
             if (symbol == -1 && symbols != null) {
-                symbol = symbols.get(hash);
+                Integer s = symbols.get(hash);
+                symbol = s != null ? s : -1;
             }
         } else if (symbols != null) {
-            symbol = symbols.get(hash);
+            Integer s = symbols.get(hash);
+            symbol = s != null ? s : -1;
         }
 
         if (symbol == -1) {
             if (symbols == null) {
-                symbols = new TLongIntHashMap();
+                symbols = new HashMap<>();
             }
             symbols.put(hash, symbol = symbolIndex++);
         } else {
@@ -579,11 +580,12 @@ final class JSONWriterJSONB
             symbolExists = true;
             symbol = 0;
         } else if (symbols != null) {
-            symbol = symbols.putIfAbsent(hash, symbolIndex);
-            if (symbol != symbolIndex) {
+            Integer existing = symbols.putIfAbsent(hash, symbolIndex);
+            if (existing != null) {
+                symbol = existing;
                 symbolExists = true;
             } else {
-                symbolIndex++;
+                symbol = symbolIndex++;
             }
         } else {
             symbol = symbolIndex++;
@@ -591,7 +593,8 @@ final class JSONWriterJSONB
                 rootTypeNameHash = hash;
             }
             if (symbol != 0 || (context.features & WriteNameAsSymbol.mask) != 0) {
-                symbols = new TLongIntHashMap(hash, symbol);
+                symbols = new HashMap<>();
+                symbols.put(hash, symbol);
             }
         }
 
@@ -1236,13 +1239,15 @@ final class JSONWriterJSONB
 
             boolean symbolExists = false;
             if (symbols != null) {
-                if ((symbol = symbols.putIfAbsent(nameHash, symbolIndex)) != symbolIndex) {
+                Integer existing = symbols.putIfAbsent(nameHash, symbolIndex);
+                if (existing != null) {
+                    symbol = existing;
                     symbolExists = true;
                 } else {
-                    symbolIndex++;
+                    symbol = symbolIndex++;
                 }
             } else {
-                (symbols = new TLongIntHashMap())
+                (symbols = new HashMap<>())
                         .put(nameHash, symbol = symbolIndex++);
             }
 

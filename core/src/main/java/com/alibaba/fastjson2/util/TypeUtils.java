@@ -2,11 +2,7 @@ package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
-import com.alibaba.fastjson2.reader.ObjectReaderImplInstant;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.writer.ObjectWriterPrimitiveImpl;
 
 import java.lang.invoke.*;
 import java.lang.reflect.*;
@@ -1333,7 +1329,16 @@ public class TypeUtils {
         }
 
         if (obj instanceof Map) {
-            return (Instant) ObjectReaderImplInstant.INSTANCE.createInstance((Map) obj, 0L);
+            Map<String, Object> map = (Map<String, Object>) obj;
+            Object epoch = map.get("epochSecond");
+            Object nano = map.get("nano");
+            if (epoch instanceof Number) {
+                Instant instant = Instant.ofEpochSecond(((Number) epoch).longValue());
+                if (nano instanceof Number) {
+                    instant = instant.withNano(((Number) nano).intValue());
+                }
+                return instant;
+            }
         }
 
         throw new JSONException("can not cast to Date from " + obj.getClass());
@@ -1505,16 +1510,17 @@ public class TypeUtils {
         if (typeConvert != null) {
             return (T) typeConvert.apply(obj);
         }
-
         if (targetClass.isEnum()) {
-            ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(targetClass);
-            if (objectReader instanceof ObjectReaderImplEnum) {
-                if (obj instanceof Integer) {
-                    int intValue = (Integer) obj;
-                    return (T) ((ObjectReaderImplEnum) objectReader).of(intValue);
+            if (obj instanceof Integer) {
+                int intValue = (Integer) obj;
+                Object[] enumConstants = targetClass.getEnumConstants();
+                if (intValue >= 0 && intValue < enumConstants.length) {
+                    return (T) enumConstants[intValue];
                 }
             } else {
-                JSONReader jsonReader = JSONReader.of(JSON.toJSONString(obj));
+                String str = JSON.toJSONString(obj);
+                JSONReader jsonReader = JSONReader.of(str);
+                ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(targetClass);
                 return (T) objectReader.readObject(jsonReader, targetClass, null, 0);
             }
         }
@@ -1572,35 +1578,6 @@ public class TypeUtils {
         }
         // fix org.bson.types.Decimal128 to Double
         String objClassName = obj.getClass().getName();
-        if (objClassName.equals("org.bson.types.Decimal128") && targetClass == Double.class) {
-            ObjectWriter objectWriter = JSONFactory
-                    .getDefaultObjectWriterProvider()
-                    .getObjectWriter(obj.getClass());
-            if (objectWriter instanceof ObjectWriterPrimitiveImpl) {
-                Function function = ((ObjectWriterPrimitiveImpl<?>) objectWriter).getFunction();
-                if (function != null) {
-                    Object apply = function.apply(obj);
-                    Function DecimalTypeConvert = provider.getTypeConvert(apply.getClass(), targetClass);
-                    if (DecimalTypeConvert != null) {
-                        return (T) DecimalTypeConvert.apply(obj);
-                    }
-                }
-            }
-        }
-
-        ObjectWriter objectWriter = JSONFactory
-                .getDefaultObjectWriterProvider()
-                .getObjectWriter(obj.getClass());
-        if (objectWriter instanceof ObjectWriterPrimitiveImpl) {
-            Function function = ((ObjectWriterPrimitiveImpl<?>) objectWriter).getFunction();
-            if (function != null) {
-                Object apply = function.apply(obj);
-                if (targetClass.isInstance(apply)) {
-                    return (T) apply;
-                }
-            }
-        }
-
         throw new JSONException("can not cast to " + className + ", from " + obj.getClass());
     }
 

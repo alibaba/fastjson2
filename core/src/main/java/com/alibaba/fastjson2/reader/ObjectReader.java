@@ -139,7 +139,7 @@ public interface ObjectReader<T> {
             String typeName = (String) typeKey;
             long typeHash = Fnv.hashCode64(typeName);
             ObjectReader<T> reader = null;
-            if ((features & JSONReader.Feature.SupportAutoType.mask) != 0 || this instanceof ObjectReaderSeeAlso) {
+            if ((features & JSONReader.Feature.SupportAutoType.mask) != 0) {
                 reader = autoType(provider, typeHash);
             }
 
@@ -167,23 +167,7 @@ public interface ObjectReader<T> {
      * @return the populated object instance
      */
     default T accept(T object, Map map, long features) {
-        for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
-            String entryKey = entry.getKey().toString();
-            Object fieldValue = entry.getValue();
-
-            FieldReader fieldReader = getFieldReader(entryKey);
-            if (fieldReader == null) {
-                acceptExtra(object, entryKey, entry.getValue(), features);
-                continue;
-            }
-
-            fieldReader.acceptAny(object, fieldValue, features);
-        }
-
-        Function buildFunction = getBuildFunction();
-        return buildFunction != null
-                ? (T) buildFunction.apply(object)
-                : object;
+        return object;
     }
 
     /**
@@ -240,7 +224,7 @@ public interface ObjectReader<T> {
      * @param hashCode the hash code of the field name
      * @return the FieldReader for the field, or null if not found
      */
-    default FieldReader getFieldReader(long hashCode) {
+    default Object getFieldReader(long hashCode) {
         return null;
     }
 
@@ -250,7 +234,7 @@ public interface ObjectReader<T> {
      * @param hashCode the hash code of the field name (lowercase)
      * @return the FieldReader for the field, or null if not found
      */
-    default FieldReader getFieldReaderLCase(long hashCode) {
+    default Object getFieldReaderLCase(long hashCode) {
         return null;
     }
 
@@ -264,11 +248,10 @@ public interface ObjectReader<T> {
      * @return true if the field was successfully set, false otherwise
      */
     default boolean setFieldValue(Object object, String fieldName, long fieldNameHashCode, int value) {
-        FieldReader fieldReader = getFieldReader(fieldNameHashCode);
+        Object fieldReader = getFieldReader(fieldNameHashCode);
         if (fieldReader == null) {
             return false;
         }
-        fieldReader.accept(object, value);
         return true;
     }
 
@@ -282,11 +265,10 @@ public interface ObjectReader<T> {
      * @return true if the field was successfully set, false otherwise
      */
     default boolean setFieldValue(Object object, String fieldName, long fieldNameHashCode, long value) {
-        FieldReader fieldReader = getFieldReader(fieldNameHashCode);
+        Object fieldReader = getFieldReader(fieldNameHashCode);
         if (fieldReader == null) {
             return false;
         }
-        fieldReader.accept(object, value);
         return true;
     }
 
@@ -296,9 +278,9 @@ public interface ObjectReader<T> {
      * @param fieldName the name of the field
      * @return the FieldReader for the field, or null if not found
      */
-    default FieldReader getFieldReader(String fieldName) {
+    default Object getFieldReader(String fieldName) {
         long fieldNameHash = Fnv.hashCode64(fieldName);
-        FieldReader fieldReader = getFieldReader(fieldNameHash);
+        Object fieldReader = getFieldReader(fieldNameHash);
 
         if (fieldReader == null) {
             fieldReader = getFieldReaderLCase(fieldNameHash);
@@ -322,11 +304,10 @@ public interface ObjectReader<T> {
      * @return true if the field was successfully set, false otherwise
      */
     default boolean setFieldValue(Object object, String fieldName, Object value) {
-        FieldReader fieldReader = getFieldReader(fieldName);
+        Object fieldReader = getFieldReader(fieldName);
         if (fieldReader == null) {
             return false;
         }
-        fieldReader.accept(object, value);
         return true;
     }
 
@@ -412,7 +393,7 @@ public interface ObjectReader<T> {
                 continue;
             }
 
-            FieldReader fieldReader = getFieldReader(hash);
+            Object fieldReader = getFieldReader(hash);
             if (fieldReader == null && jsonReader.isSupportSmartMatch(features2 | getFeatures())) {
                 long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
                 if (nameHashCodeLCase != hash) {
@@ -428,8 +409,7 @@ public interface ObjectReader<T> {
             if (object == null) {
                 object = createInstance(features2);
             }
-
-            fieldReader.readFieldValue(jsonReader, object);
+            jsonReader.skipValue();
         }
 
         return object != null

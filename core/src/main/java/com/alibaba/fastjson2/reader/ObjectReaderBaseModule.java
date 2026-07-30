@@ -7,8 +7,6 @@ import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.impl.*;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
-import com.alibaba.fastjson2.support.LambdaMiscCodec;
-import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.*;
@@ -17,21 +15,11 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.*;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.time.*;
-import java.time.chrono.HijrahDate;
-import java.time.chrono.JapaneseDate;
-import java.time.chrono.MinguoDate;
-import java.time.chrono.ThaiBuddhistDate;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 import static com.alibaba.fastjson2.util.BeanUtils.*;
 
@@ -212,7 +200,7 @@ public class ObjectReaderBaseModule
             if (mixInSource == null) {
                 String typeName = objectClass.getName();
                 if ("org.apache.commons.lang3.tuple.Triple".equals(typeName)) {
-                    provider.mixIn(objectClass, mixInSource = ApacheLang3Support.TripleMixIn.class);
+                    // TripleMixIn support removed in slim build
                 }
             }
 
@@ -340,7 +328,7 @@ public class ObjectReaderBaseModule
             if (beanInfo.creatorConstructor == null
                     && (beanInfo.readerFeatures & JSONReader.Feature.FieldBased.mask) == 0
                     && beanInfo.kotlin) {
-                KotlinUtils.getConstructor(objectClass, beanInfo, true);
+                // Kotlin support removed
             }
         }
 
@@ -631,7 +619,7 @@ public class ObjectReaderBaseModule
             if (mixInSource == null) {
                 String typeName = objectClass.getName();
                 if ("org.apache.commons.lang3.tuple.Triple".equals(typeName)) {
-                    provider.mixIn(objectClass, mixInSource = ApacheLang3Support.TripleMixIn.class);
+                    // TripleMixIn support removed in slim build
                 }
             }
 
@@ -1553,182 +1541,13 @@ public class ObjectReaderBaseModule
 
     @Override
     public ObjectReader getObjectReader(ObjectReaderProvider provider, Type type) {
-        if (type == String.class || type == CharSequence.class) {
-            return ObjectReaderImplString.INSTANCE;
-        }
-
-        if (type == char.class || type == Character.class) {
-            return ObjectReaderImplCharacter.INSTANCE;
-        }
-
-        if (type == boolean.class || type == Boolean.class) {
-            return ObjectReaderImplBoolean.INSTANCE;
-        }
-
-        if (type == byte.class || type == Byte.class) {
-            return ObjectReaderImplByte.INSTANCE;
-        }
-
-        if (type == short.class || type == Short.class) {
-            return ObjectReaderImplShort.INSTANCE;
-        }
-
-        if (type == int.class || type == Integer.class) {
-            return ObjectReaderImplInteger.INSTANCE;
-        }
-
-        if (type == long.class || type == Long.class) {
-            return ObjectReaderImplInt64.INSTANCE;
-        }
-
-        if (type == float.class || type == Float.class) {
-            return ObjectReaderImplFloat.INSTANCE;
-        }
-
-        if (type == double.class || type == Double.class) {
-            return ObjectReaderImplDouble.INSTANCE;
-        }
-
-        if (type == BigInteger.class) {
-            return ObjectReaderImplBigInteger.INSTANCE;
-        }
-
-        if (type == BigDecimal.class) {
-            return ObjectReaderImplBigDecimal.INSTANCE;
-        }
-
-        if (type == Number.class) {
-            return ObjectReaderImplNumber.INSTANCE;
-        }
-
-        if (type == BitSet.class) {
-            return ObjectReaderImplBitSet.INSTANCE;
-        }
-
-        if (type == OptionalInt.class) {
-            return ObjectReaderImplOptionalInt.INSTANCE;
-        }
-
-        if (type == OptionalLong.class) {
-            return ObjectReaderImplOptionalLong.INSTANCE;
-        }
-
-        if (type == OptionalDouble.class) {
-            return ObjectReaderImplOptionalDouble.INSTANCE;
-        }
-
-        if (type == Optional.class) {
-            return ObjectReaderImplOptional.INSTANCE;
-        }
-
-        if (type == UUID.class) {
-            return ObjectReaderImplUUID.INSTANCE;
-        }
-
-        if (type == Duration.class) {
-            return new ObjectReaderImplFromString(Duration.class, (Function<String, Duration>) Duration::parse);
-        }
-
-        if (type == Period.class) {
-            return new ObjectReaderImplFromString(Period.class, (Function<String, Period>) Period::parse);
-        }
-
-        if (type == Year.class) {
-            return ObjectReaderImplYear.INSTANCE;
-        }
-
-        if (type == YearMonth.class) {
-            return ObjectReaderImplYearMonth.INSTANCE;
-        }
-
-        if (type == MonthDay.class) {
-            return ObjectReaderImplMonthDay.INSTANCE;
-        }
-
-        if (type == HijrahDate.class) {
-            return ObjectReaderImplHijrahDate.INSTANCE;
-        }
-
-        if (type == JapaneseDate.class) {
-            return ObjectReaderImplJapaneseDate.INSTANCE;
-        }
-
-        if (type == MinguoDate.class) {
-            return ObjectReaderImplMinguoDate.INSTANCE;
-        }
-
-        if (type == ThaiBuddhistDate.class) {
-            return ObjectReaderImplThaiBuddhistDate.INSTANCE;
-        }
-
-        if (type == AtomicBoolean.class) {
-            return new ObjectReaderImplFromBoolean(
-                    AtomicBoolean.class,
-                    (Function<Boolean, AtomicBoolean>) AtomicBoolean::new
-            );
-        }
-
-        if (type == URI.class) {
-            return new ObjectReaderImplFromString<>(
-                    URI.class,
-                    URI::create
-            );
-        }
-
-        if (type == Charset.class) {
-            return new ObjectReaderImplFromString<>(Charset.class, Charset::forName);
-        }
-
-        if (type == File.class) {
-            return new ObjectReaderImplFromString<>(File.class, File::new);
-        }
-
-        if (type == Path.class) {
-            return new ObjectReaderImplFromString<>(
-                    Path.class,
-                    Paths::get
-            );
-        }
-
-        if (type == URL.class) {
-            return new ObjectReaderImplFromString<>(
-                    URL.class,
-                    e -> {
-                        try {
-                            return new URL(e);
-                        } catch (MalformedURLException ex) {
-                            throw new JSONException("read URL error", ex);
-                        }
-                    });
-        }
-
-        if (type == Pattern.class) {
-            return new ObjectReaderImplFromString<>(Pattern.class, Pattern::compile);
-        }
-
-        if (type == Class.class) {
-            return ObjectReaderImplClass.INSTANCE;
-        }
-
-        if (type == Method.class) {
-            return new ObjectReaderImplMethod();
-        }
-
-        if (type == Field.class) {
-            return new ObjectReaderImplField();
-        }
-
-        if (type == Type.class) {
-            return ObjectReaderImplClass.INSTANCE;
-        }
-
         String internalMixin = null;
         String typeName = type.getTypeName();
         switch (typeName) {
             case "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet":
                 return null;
             case "org.springframework.util.LinkedMultiValueMap":
-                return ObjectReaderImplMap.of(type, (Class) type, 0L);
+                return null;
             case "org.springframework.security.core.authority.RememberMeAuthenticationToken":
                 internalMixin = "org.springframework.security.jackson2.AnonymousAuthenticationTokenMixin";
                 break;
@@ -1763,270 +1582,13 @@ public class ObjectReaderBaseModule
             if (mixin == null) {
                 mixin = TypeUtils.loadClass(internalMixin);
                 if (mixin == null) {
-                    if ("org.springframework.security.jackson2.SimpleGrantedAuthorityMixin".equals(internalMixin)) {
-                        mixin = TypeUtils.loadClass("com.alibaba.fastjson2.internal.mixin.spring.SimpleGrantedAuthorityMixin");
-                    }
+                    // mixin not available in slim build
                 }
 
                 if (mixin != null) {
                     provider.mixInCache.putIfAbsent((Class) type, mixin);
                 }
             }
-        }
-
-        if (type == Map.class || type == AbstractMap.class) {
-            return ObjectReaderImplMap.of(null, (Class) type, 0);
-        }
-
-        if (type == ConcurrentMap.class || type == ConcurrentHashMap.class) {
-            return typedMap((Class) type, ConcurrentHashMap.class, null, Object.class);
-        }
-
-        if (type == ConcurrentNavigableMap.class
-                || type == ConcurrentSkipListMap.class
-        ) {
-            return typedMap((Class) type, ConcurrentSkipListMap.class, null, Object.class);
-        }
-
-        if (type == SortedMap.class
-                || type == NavigableMap.class
-                || type == TreeMap.class
-        ) {
-            return typedMap((Class) type, TreeMap.class, null, Object.class);
-        }
-
-        if (type == Calendar.class || "javax.xml.datatype.XMLGregorianCalendar".equals(typeName)) {
-            return ObjectReaderImplCalendar.INSTANCE;
-        }
-
-        if (type == Date.class) {
-            return ObjectReaderImplDate.INSTANCE;
-        }
-
-        if (type == LocalDate.class) {
-            return ObjectReaderImplLocalDate.INSTANCE;
-        }
-
-        if (type == LocalTime.class) {
-            return ObjectReaderImplLocalTime.INSTANCE;
-        }
-
-        if (type == LocalDateTime.class) {
-            return ObjectReaderImplLocalDateTime.INSTANCE;
-        }
-
-        if (type == ZonedDateTime.class) {
-            return ObjectReaderImplZonedDateTime.INSTANCE;
-        }
-
-        if (type == OffsetDateTime.class) {
-            return ObjectReaderImplOffsetDateTime.INSTANCE;
-        }
-
-        if (type == OffsetTime.class) {
-            return ObjectReaderImplOffsetTime.INSTANCE;
-        }
-
-        if (type == ZoneOffset.class) {
-            return new ObjectReaderImplFromString<>(ZoneOffset.class, ZoneOffset::of);
-        }
-
-        if (type == Instant.class) {
-            return ObjectReaderImplInstant.INSTANCE;
-        }
-
-        if (type == Locale.class) {
-            return ObjectReaderImplLocale.INSTANCE;
-        }
-
-        if (type == Currency.class) {
-            return ObjectReaderImplCurrency.INSTANCE;
-        }
-
-        if (type == ZoneId.class) {
-//            return ZoneIdImpl.INSTANCE;
-            // ZoneId.of(strVal)
-            return new ObjectReaderImplFromString<>(ZoneId.class, ZoneId::of);
-        }
-
-        if (type == TimeZone.class) {
-            return new ObjectReaderImplFromString<>(TimeZone.class, TimeZone::getTimeZone);
-        }
-
-        if (type == char[].class) {
-            return ObjectReaderImplCharValueArray.INSTANCE;
-        }
-
-        if (type == float[].class) {
-            return ObjectReaderImplFloatValueArray.INSTANCE;
-        }
-
-        if (type == double[].class) {
-            return ObjectReaderImplDoubleValueArray.INSTANCE;
-        }
-
-        if (type == boolean[].class) {
-            return ObjectReaderImplBoolValueArray.INSTANCE;
-        }
-
-        if (type == byte[].class) {
-            return ObjectReaderImplInt8ValueArray.INSTANCE;
-        }
-
-        if (type == short[].class) {
-            return ObjectReaderImplInt16ValueArray.INSTANCE;
-        }
-
-        if (type == int[].class) {
-            return ObjectReaderImplInt32ValueArray.INSTANCE;
-        }
-
-        if (type == long[].class) {
-            return ObjectReaderImplInt64ValueArray.INSTANCE;
-        }
-
-        if (type == Byte[].class) {
-            return ObjectReaderImplInt8Array.INSTANCE;
-        }
-
-        if (type == Short[].class) {
-            return ObjectReaderImplInt16Array.INSTANCE;
-        }
-
-        if (type == Integer[].class) {
-            return ObjectReaderImplInt32Array.INSTANCE;
-        }
-
-        if (type == Long[].class) {
-            return ObjectReaderImplInt64Array.INSTANCE;
-        }
-
-        if (type == Float[].class) {
-            return ObjectReaderImplFloatArray.INSTANCE;
-        }
-
-        if (type == Double[].class) {
-            return ObjectReaderImplDoubleArray.INSTANCE;
-        }
-
-        if (type == Number[].class) {
-            return ObjectReaderImplNumberArray.INSTANCE;
-        }
-
-        if (type == String[].class) {
-            return ObjectReaderImplStringArray.INSTANCE;
-        }
-
-        if (type == AtomicInteger.class) {
-            return new ObjectReaderImplFromInt(AtomicInteger.class, AtomicInteger::new);
-        }
-
-        if (type == AtomicLong.class) {
-            return new ObjectReaderImplFromLong(AtomicLong.class, AtomicLong::new);
-        }
-
-        if (type == AtomicIntegerArray.class) {
-            return new ObjectReaderImplInt32ValueArray(AtomicIntegerArray.class, AtomicIntegerArray::new);
-            //return ObjectReaderImplAtomicIntegerArray.INSTANCE;
-        }
-
-        if (type == AtomicLongArray.class) {
-            return new ObjectReaderImplInt64ValueArray(AtomicLongArray.class, AtomicLongArray::new);
-//            return ObjectReaderImplAtomicLongArray.INSTANCE;
-        }
-
-        if (type == AtomicReference.class) {
-            return ObjectReaderImplAtomicReference.INSTANCE;
-        }
-
-        if (type instanceof MultiType) {
-            return new ObjectArrayReaderMultiType((MultiType) type);
-        }
-
-        if (type instanceof MapMultiValueType) {
-            return new ObjectReaderImplMapMultiValueType((MapMultiValueType) type);
-        }
-
-        if (type == StringBuffer.class || type == StringBuilder.class) {
-            try {
-                Class objectClass = (Class) type;
-                return new ObjectReaderImplValue(
-                        objectClass,
-                        String.class,
-                        String.class,
-                        0,
-                        null,
-                        null,
-                        null,
-                        objectClass.getConstructor(String.class),
-                        null,
-                        null
-                );
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        if (type == Iterable.class
-                || type == Collection.class
-                || type == List.class
-                || type == AbstractCollection.class
-                || type == AbstractList.class
-                || type == ArrayList.class
-                || type == Stack.class
-        ) {
-            return ObjectReaderImplList.of(type, null, 0);
-            // return new ObjectReaderImplList(type, (Class) type, ArrayList.class, Object.class, null);
-        }
-
-        if (type == Queue.class
-                || type == Deque.class
-                || type == AbstractSequentialList.class
-                || type == LinkedList.class) {
-//            return new ObjectReaderImplList(type, (Class) type, LinkedList.class, Object.class, null);
-            return ObjectReaderImplList.of(type, null, 0);
-        }
-
-        if (type == Set.class || type == AbstractSet.class || type == EnumSet.class) {
-//            return new ObjectReaderImplList(type, (Class) type, HashSet.class, Object.class, null);
-            return ObjectReaderImplList.of(type, null, 0);
-        }
-
-        if (type == NavigableSet.class || type == SortedSet.class) {
-//            return new ObjectReaderImplList(type, (Class) type, TreeSet.class, Object.class, null);
-            return ObjectReaderImplList.of(type, null, 0);
-        }
-
-        if (type == ConcurrentLinkedDeque.class
-                || type == ConcurrentLinkedQueue.class
-                || type == ConcurrentSkipListSet.class
-                || type == LinkedHashSet.class
-                || type == HashSet.class
-                || type == TreeSet.class
-                || type == CopyOnWriteArrayList.class
-        ) {
-//            return new ObjectReaderImplList(type, (Class) type, (Class) type, Object.class, null);
-            return ObjectReaderImplList.of(type, null, 0);
-        }
-
-        if (type == ObjectReaderImplList.CLASS_EMPTY_SET
-                || type == ObjectReaderImplList.CLASS_EMPTY_LIST
-                || type == ObjectReaderImplList.CLASS_SINGLETON
-                || type == ObjectReaderImplList.CLASS_SINGLETON_LIST
-                || type == ObjectReaderImplList.CLASS_ARRAYS_LIST
-                || type == ObjectReaderImplList.CLASS_UNMODIFIABLE_COLLECTION
-                || type == ObjectReaderImplList.CLASS_UNMODIFIABLE_LIST
-                || type == ObjectReaderImplList.CLASS_UNMODIFIABLE_SET
-                || type == ObjectReaderImplList.CLASS_UNMODIFIABLE_SORTED_SET
-                || type == ObjectReaderImplList.CLASS_UNMODIFIABLE_NAVIGABLE_SET
-        ) {
-//            return new ObjectReaderImplList(type, (Class) type, (Class) type, Object.class, null);
-            return ObjectReaderImplList.of(type, null, 0);
-        }
-
-        if (type == TypeUtils.CLASS_SINGLE_SET) {
-//            return SingletonSetImpl.INSTANCE;
-            return ObjectReaderImplList.of(type, null, 0);
         }
 
         if (type == Object.class
@@ -2038,10 +1600,6 @@ public class ObjectReaderBaseModule
             return ObjectReaderImplObject.INSTANCE;
         }
 
-        if (type == Map.Entry.class) {
-            return new ObjectReaderImplMapEntry(null, null);
-        }
-
         if (type instanceof Class) {
             Class objectClass = (Class) type;
 
@@ -2050,28 +1608,16 @@ public class ObjectReaderBaseModule
             }
 
             if (Map.class.isAssignableFrom(objectClass)) {
-                return ObjectReaderImplMap.of(null, objectClass, 0);
+                return null;
             }
 
             if (Collection.class.isAssignableFrom(objectClass)) {
-                return ObjectReaderImplList.of(objectClass, objectClass, 0);
+                return null;
             }
 
             if (objectClass.isArray()) {
-                Class componentType = objectClass.getComponentType();
-                if (componentType == Object.class) {
-                    return ObjectArrayReader.INSTANCE;
-                }
-                return new ObjectArrayTypedReader(objectClass);
+                return null;
             }
-
-            if (JSONPObject.class.isAssignableFrom(objectClass)) {
-                return new ObjectReaderImplJSONP(objectClass);
-            }
-
-            ObjectReaderCreator creator = JSONFactory
-                    .getDefaultObjectReaderProvider()
-                    .getCreator();
 
             if (objectClass == StackTraceElement.class) {
                 try {
@@ -2081,7 +1627,9 @@ public class ObjectReaderBaseModule
                             String.class,
                             int.class);
 
-                    return creator
+                    return JSONFactory
+                            .getDefaultObjectReaderProvider()
+                            .getCreator()
                             .createObjectReaderNoneDefaultConstructor(
                                     constructor,
                                     "className",
@@ -2098,150 +1646,32 @@ public class ObjectReaderBaseModule
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Type rawType = parameterizedType.getRawType();
 
-            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            if (rawType instanceof Class) {
+                Class rawClass = (Class) rawType;
+                Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
-            if (actualTypeArguments.length == 2) {
-                Type actualTypeParam0 = actualTypeArguments[0];
-                Type actualTypeParam1 = actualTypeArguments[1];
-
-                if (rawType == Map.class
-                        || rawType == AbstractMap.class
-                        || rawType == HashMap.class
-                ) {
-                    return typedMap((Class) rawType, HashMap.class, actualTypeParam0, actualTypeParam1);
+                if (actualTypeArguments.length == 2 && Map.class.isAssignableFrom(rawClass)) {
+                    return null;
                 }
 
-                if (rawType == ConcurrentMap.class
-                        || rawType == ConcurrentHashMap.class
-                ) {
-                    return typedMap((Class) rawType, ConcurrentHashMap.class, actualTypeParam0, actualTypeParam1);
+                if (actualTypeArguments.length == 1 && Collection.class.isAssignableFrom(rawClass)) {
+                    return null;
                 }
 
-                if (rawType == ConcurrentNavigableMap.class
-                        || rawType == ConcurrentSkipListMap.class
-                ) {
-                    return typedMap((Class) rawType, ConcurrentSkipListMap.class, actualTypeParam0, actualTypeParam1);
+                if (actualTypeArguments.length == 1 && rawType == Optional.class) {
+                    return null;
                 }
 
-                if (rawType == LinkedHashMap.class
-                        || rawType == TreeMap.class
-                        || rawType == Hashtable.class) {
-                    return typedMap((Class) rawType, (Class) rawType, actualTypeParam0, actualTypeParam1);
+                if (actualTypeArguments.length == 1 && rawType == AtomicReference.class) {
+                    return null;
                 }
 
-                if (rawType == Map.Entry.class) {
-                    return new ObjectReaderImplMapEntry(actualTypeParam0, actualTypeParam1);
-                }
-
-                switch (rawType.getTypeName()) {
-                    case "com.google.common.collect.ImmutableMap":
-                    case "com.google.common.collect.RegularImmutableMap":
-                        return new ObjectReaderImplMapTyped((Class) rawType, HashMap.class, actualTypeParam0, actualTypeParam1, 0, GuavaSupport.immutableMapConverter());
-                    case "com.google.common.collect.SingletonImmutableBiMap":
-                        return new ObjectReaderImplMapTyped((Class) rawType, HashMap.class, actualTypeParam0, actualTypeParam1, 0, GuavaSupport.singletonBiMapConverter());
-                    case "org.springframework.util.LinkedMultiValueMap":
-                        return ObjectReaderImplMap.of(type, (Class) rawType, 0L);
-                    case "org.apache.commons.lang3.tuple.Pair":
-                    case "org.apache.commons.lang3.tuple.ImmutablePair":
-                        return new ApacheLang3Support.PairReader((Class) rawType, actualTypeParam0, actualTypeParam1);
-                }
-            } else if (actualTypeArguments.length == 1) {
-                Type itemType = actualTypeArguments[0];
-                Class itemClass = TypeUtils.getMapping(itemType);
-
-                if (rawType == Iterable.class
-                        || rawType == Collection.class
-                        || rawType == List.class
-                        || rawType == AbstractCollection.class
-                        || rawType == AbstractList.class
-                        || rawType == ArrayList.class
-                        || rawType == Stack.class) {
-                    if (itemClass == String.class) {
-                        return new ObjectReaderImplListStr((Class) rawType, ArrayList.class);
-                    } else if (itemClass == Long.class) {
-                        return new ObjectReaderImplListInt64((Class) rawType, ArrayList.class);
-                    } else {
-                        return ObjectReaderImplList.of(type, null, 0);
-                    }
-                }
-
-                if (rawType == Queue.class
-                        || rawType == Deque.class
-                        || rawType == AbstractSequentialList.class
-                        || rawType == LinkedList.class) {
-                    if (itemClass == String.class) {
-                        return new ObjectReaderImplListStr((Class) rawType, LinkedList.class);
-                    } else if (itemClass == Long.class) {
-                        return new ObjectReaderImplListInt64((Class) rawType, LinkedList.class);
-                    } else {
-                        return ObjectReaderImplList.of(type, null, 0);
-                    }
-                }
-
-                if (rawType == Set.class || rawType == AbstractSet.class || rawType == EnumSet.class) {
-                    if (itemClass == String.class) {
-                        return new ObjectReaderImplListStr((Class) rawType, HashSet.class);
-                    } else if (itemClass == Long.class) {
-                        return new ObjectReaderImplListInt64((Class) rawType, HashSet.class);
-                    } else {
-                        return ObjectReaderImplList.of(type, null, 0);
-                    }
-                }
-
-                if (rawType == NavigableSet.class || rawType == SortedSet.class) {
-                    if (itemType == String.class) {
-                        return new ObjectReaderImplListStr((Class) rawType, TreeSet.class);
-                    } else if (itemClass == Long.class) {
-                        return new ObjectReaderImplListInt64((Class) rawType, TreeSet.class);
-                    } else {
-                        return ObjectReaderImplList.of(type, null, 0);
-                    }
-                }
-
-                if (rawType == ConcurrentLinkedDeque.class
-                        || rawType == ConcurrentLinkedQueue.class
-                        || rawType == ConcurrentSkipListSet.class
-                        || rawType == LinkedHashSet.class
-                        || rawType == HashSet.class
-                        || rawType == TreeSet.class
-                        || rawType == CopyOnWriteArrayList.class
-                ) {
-                    if (itemType == String.class) {
-                        return new ObjectReaderImplListStr((Class) rawType, (Class) rawType);
-                    } else if (itemClass == Long.class) {
-                        return new ObjectReaderImplListInt64((Class) rawType, (Class) rawType);
-                    } else {
-                        return ObjectReaderImplList.of(type, null, 0);
-                    }
-                }
-
-                switch (rawType.getTypeName()) {
-                    case "com.google.common.collect.ImmutableList":
-                    case "com.google.common.collect.ImmutableSet":
-                    case "com.google.common.collect.SingletonImmutableSet":
-                        return ObjectReaderImplList.of(type, null, 0);
-                    case "cn.hutool.core.lang.tree.Tree":
-                        return ObjectReaderImplMap.of(null, (Class<?>) rawType, 0L);
-                }
-
-                if (rawType == Optional.class) {
-                    return ObjectReaderImplOptional.of(type, null, null);
-                }
-
-                if (rawType == AtomicReference.class) {
-                    return new ObjectReaderImplAtomicReference(itemType);
-                }
-
-                if (itemType instanceof WildcardType) {
-                    return getObjectReader(provider, rawType);
+                if (actualTypeArguments.length == 1 && rawType == Map.Entry.class) {
+                    return null;
                 }
             }
 
             return null;
-        }
-
-        if (type instanceof GenericArrayType) {
-            return new ObjectReaderImplGenericArray((GenericArrayType) type);
         }
 
         if (type instanceof WildcardType) {
@@ -2262,38 +1692,6 @@ public class ObjectReaderBaseModule
                 return JdbcSupport.createTimestampReader((Class) type, null, null);
             case "java.sql.Date":
                 return JdbcSupport.createDateReader((Class) type, null, null);
-            case "java.util.RegularEnumSet":
-            case "java.util.JumboEnumSet":
-                return ObjectReaderImplList.of(type, TypeUtils.getClass(type), 0);
-            case "org.joda.time.Chronology":
-                return JodaSupport.createChronologyReader((Class) type);
-            case "org.joda.time.LocalDate":
-                return JodaSupport.createLocalDateReader((Class) type);
-            case "org.joda.time.LocalDateTime":
-                return JodaSupport.createLocalDateTimeReader((Class) type);
-            case "org.joda.time.Instant":
-                return JodaSupport.createInstantReader((Class) type);
-            case "org.joda.time.DateTime":
-                return new ObjectReaderImplZonedDateTime(new JodaSupport.DateTimeFromZDT());
-            case "javax.money.CurrencyUnit":
-                return MoneySupport.createCurrencyUnitReader();
-            case "javax.money.MonetaryAmount":
-            case "javax.money.Money":
-                return MoneySupport.createMonetaryAmountReader();
-            case "javax.money.NumberValue":
-                return MoneySupport.createNumberValueReader();
-            case "java.net.InetSocketAddress":
-                return new ObjectReaderMisc((Class) type);
-            case "java.net.InetAddress":
-                return ObjectReaderImplValue.of((Class<InetAddress>) type, String.class, address -> {
-                    try {
-                        return InetAddress.getByName(address);
-                    } catch (UnknownHostException e) {
-                        throw new JSONException("create address error", e);
-                    }
-                });
-            case "java.text.SimpleDateFormat":
-                return ObjectReaderImplValue.of((Class<SimpleDateFormat>) type, String.class, SimpleDateFormat::new);
             case "java.lang.Throwable":
             case "java.lang.Exception":
             case "java.lang.IllegalStateException":
@@ -2301,18 +1699,6 @@ public class ObjectReaderBaseModule
             case "java.io.IOException":
             case "java.io.UncheckedIOException":
                 return new ObjectReaderException((Class) type);
-            case "java.nio.HeapByteBuffer":
-            case "java.nio.ByteBuffer":
-                return new ObjectReaderImplInt8ValueArray(ByteBuffer::wrap, null);
-            case "org.apache.commons.lang3.tuple.Pair":
-            case "org.apache.commons.lang3.tuple.ImmutablePair":
-                return new ApacheLang3Support.PairReader((Class) type, Object.class, Object.class);
-            case "com.google.common.collect.ImmutableList":
-            case "com.google.common.collect.ImmutableSet":
-            case "com.google.common.collect.SingletonImmutableSet":
-            case "com.google.common.collect.RegularImmutableSet":
-            case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
-                return ObjectReaderImplList.of(type, null, 0);
             case "com.carrotsearch.hppc.ByteArrayList":
             case "com.carrotsearch.hppc.ShortArrayList":
             case "com.carrotsearch.hppc.IntArrayList":
@@ -2327,15 +1713,6 @@ public class ObjectReaderBaseModule
             case "gnu.trove.list.array.TCharArrayList":
             case "gnu.trove.list.array.TShortArrayList":
             case "gnu.trove.list.array.TIntArrayList":
-            case "gnu.trove.list.array.TLongArrayList":
-            case "gnu.trove.list.array.TFloatArrayList":
-            case "gnu.trove.list.array.TDoubleArrayList":
-            case "gnu.trove.set.hash.TByteHashSet":
-            case "gnu.trove.set.hash.TShortHashSet":
-            case "gnu.trove.set.hash.TIntHashSet":
-            case "gnu.trove.set.hash.TLongHashSet":
-            case "org.bson.types.Decimal128":
-                return LambdaMiscCodec.getObjectReader((Class) type);
             case "java.awt.Color":
                 try {
                     Constructor constructor = ((Class) type).getConstructor(int.class, int.class, int.class, int.class);
@@ -2351,9 +1728,6 @@ public class ObjectReaderBaseModule
     }
 
     public static ObjectReader typedMap(Class mapType, Class instanceType, Type keyType, Type valueType) {
-        if ((keyType == null || keyType == String.class) && valueType == String.class) {
-            return new ObjectReaderImplMapString(mapType, instanceType, 0);
-        }
-        return new ObjectReaderImplMapTyped(mapType, instanceType, keyType, valueType, 0, null);
+        return null;
     }
 }

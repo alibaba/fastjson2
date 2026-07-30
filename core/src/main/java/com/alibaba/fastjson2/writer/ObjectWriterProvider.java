@@ -15,7 +15,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.DecimalFormat;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -95,27 +94,7 @@ public class ObjectWriterProvider
     public ObjectWriterProvider(PropertyNamingStrategy namingStrategy) {
         init();
 
-        ObjectWriterCreator creator = null;
-        switch (JSONFactory.CREATOR) {
-            case "reflect":
-            case "lambda":
-                creator = ObjectWriterCreator.INSTANCE;
-                break;
-            case "asm":
-            default:
-                try {
-                    if (!JDKUtils.ANDROID && !JDKUtils.GRAAL) {
-                        creator = ObjectWriterCreatorASM.INSTANCE;
-                    }
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-                if (creator == null) {
-                    creator = ObjectWriterCreator.INSTANCE;
-                }
-                break;
-        }
-        this.creator = creator;
+        this.creator = ObjectWriterCreator.INSTANCE;
         this.namingStrategy = namingStrategy;
     }
 
@@ -222,25 +201,25 @@ public class ObjectWriterProvider
      */
     public ObjectWriter register(Type type, ObjectWriter objectWriter, boolean fieldBased) {
         if (type == Integer.class) {
-            if (objectWriter == null || objectWriter == ObjectWriterImplInt32.INSTANCE) {
+            if (objectWriter == null) {
                 userDefineMask &= ~TYPE_INT32_MASK;
             } else {
                 userDefineMask |= TYPE_INT32_MASK;
             }
         } else if (type == Long.class || type == long.class) {
-            if (objectWriter == null || objectWriter == ObjectWriterImplInt64.INSTANCE) {
+            if (objectWriter == null) {
                 userDefineMask &= ~TYPE_INT64_MASK;
             } else {
                 userDefineMask |= TYPE_INT64_MASK;
             }
         } else if (type == BigDecimal.class) {
-            if (objectWriter == null || objectWriter == ObjectWriterImplBigDecimal.INSTANCE) {
+            if (objectWriter == null) {
                 userDefineMask &= ~TYPE_DECIMAL_MASK;
             } else {
                 userDefineMask |= TYPE_DECIMAL_MASK;
             }
         } else if (type == Date.class) {
-            if (objectWriter == null || objectWriter == ObjectWriterImplDate.INSTANCE) {
+            if (objectWriter == null) {
                 userDefineMask &= ~TYPE_DATE_MASK;
             } else {
                 userDefineMask |= TYPE_DATE_MASK;
@@ -459,42 +438,6 @@ public class ObjectWriterProvider
      * @return the ObjectWriter for the specified type
      */
     public ObjectWriter getObjectWriter(Type objectType, String format, Locale locale) {
-        if (objectType == Double.class) {
-            return new ObjectWriterImplDouble(new DecimalFormat(format));
-        }
-
-        if (objectType == Float.class) {
-            return new ObjectWriterImplFloat(new DecimalFormat(format));
-        }
-
-        if (objectType == BigDecimal.class) {
-            return new ObjectWriterImplBigDecimal(new DecimalFormat(format), null);
-        }
-
-        if (objectType == LocalDate.class) {
-            return ObjectWriterImplLocalDate.of(format, null);
-        }
-
-        if (objectType == LocalDateTime.class) {
-            return new ObjectWriterImplLocalDateTime(format, null);
-        }
-
-        if (objectType == LocalTime.class) {
-            return new ObjectWriterImplLocalTime(format, null);
-        }
-
-        if (objectType == Date.class) {
-            return new ObjectWriterImplDate(format, null);
-        }
-
-        if (objectType == OffsetDateTime.class) {
-            return ObjectWriterImplOffsetDateTime.of(format, null);
-        }
-
-        if (objectType == ZonedDateTime.class) {
-            return new ObjectWriterImplZonedDateTime(format, null);
-        }
-
         return getObjectWriter(objectType);
     }
 
@@ -554,13 +497,7 @@ public class ObjectWriterProvider
      * @return the ObjectWriter for the specified type, class, and format
      */
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, String format, boolean fieldBased) {
-        ObjectWriter objectWriter = getObjectWriter(objectType, objectClass, fieldBased);
-        if (format != null) {
-            if (objectType == LocalDateTime.class && objectWriter == ObjectWriterImplLocalDateTime.INSTANCE) {
-                return ObjectWriterImplLocalDateTime.of(format, null);
-            }
-        }
-        return objectWriter;
+        return getObjectWriter(objectType, objectClass, fieldBased);
     }
 
     /**
@@ -677,52 +614,6 @@ public class ObjectWriterProvider
                     return objectWriter;
                 }
             }
-        }
-
-        if (org.w3c.dom.Node.class.isAssignableFrom(objectClass)) {
-            return ObjectWriterImplXmlNode.INSTANCE;
-        }
-
-        switch (className) {
-            case "com.google.common.collect.HashMultimap":
-            case "com.google.common.collect.LinkedListMultimap":
-            case "com.google.common.collect.LinkedHashMultimap":
-            case "com.google.common.collect.ArrayListMultimap":
-            case "com.google.common.collect.TreeMultimap":
-                objectWriter = GuavaSupport.createAsMapWriter(objectClass);
-                break;
-            case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
-                objectWriter = ObjectWriterImplList.INSTANCE;
-                break;
-            case "com.alibaba.fastjson.JSONObject":
-                objectWriter = ObjectWriterImplMap.of(objectClass);
-                break;
-            case "android.net.Uri$OpaqueUri":
-            case "android.net.Uri$HierarchicalUri":
-            case "android.net.Uri$StringUri":
-                objectWriter = ObjectWriterImplToString.INSTANCE;
-                break;
-            case "com.clickhouse.data.value.UnsignedLong":
-                objectWriter = new ObjectWriterImplToString(true);
-            default:
-                break;
-        }
-
-        if (objectWriter != null) {
-            ObjectWriter previous = fieldBased
-                    ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
-                    : cache.putIfAbsent(objectType, objectWriter);
-            if (previous != null) {
-                objectWriter = previous;
-            }
-            return objectWriter;
-        }
-
-        if (objectWriter == null
-                && (!fieldBased)
-                && Map.class.isAssignableFrom(objectClass)
-                && BeanUtils.isExtendedMap(objectClass)) {
-            return ObjectWriterImplMap.of(objectClass);
         }
 
         if (objectWriter == null) {
@@ -855,38 +746,6 @@ public class ObjectWriterProvider
         Class<?> objectClass = TypeUtils.getClass(objectType);
         if (objectClass != null && objectClass.getClassLoader() == classLoader) {
             return true;
-        }
-
-        if (checkedMap.containsKey(objectWriter)) {
-            return false;
-        }
-
-        if (objectWriter instanceof ObjectWriterImplMap) {
-            ObjectWriterImplMap mapTyped = (ObjectWriterImplMap) objectWriter;
-            Class valueClass = TypeUtils.getClass(mapTyped.valueType);
-            if (valueClass != null && valueClass.getClassLoader() == classLoader) {
-                return true;
-            }
-            Class keyClass = TypeUtils.getClass(mapTyped.keyType);
-            return keyClass != null && keyClass.getClassLoader() == classLoader;
-        } else if (objectWriter instanceof ObjectWriterImplCollection) {
-            Class itemClass = TypeUtils.getClass(((ObjectWriterImplCollection) objectWriter).itemType);
-            return itemClass != null && itemClass.getClassLoader() == classLoader;
-        } else if (objectWriter instanceof ObjectWriterImplOptional) {
-            Class itemClass = TypeUtils.getClass(((ObjectWriterImplOptional) objectWriter).valueType);
-            return itemClass != null && itemClass.getClassLoader() == classLoader;
-        } else if (objectWriter instanceof ObjectWriterAdapter) {
-            checkedMap.put(objectWriter, null);
-            List<FieldWriter> fieldWriters = ((ObjectWriterAdapter<?>) objectWriter).fieldWriters;
-            for (int i = 0; i < fieldWriters.size(); i++) {
-                FieldWriter fieldWriter = fieldWriters.get(i);
-                if (fieldWriter instanceof FieldWriterObject) {
-                    ObjectWriter initObjectWriter = ((FieldWriterObject<?>) fieldWriter).initObjectWriter;
-                    if (match(null, initObjectWriter, classLoader, checkedMap)) {
-                        return true;
-                    }
-                }
-            }
         }
 
         return false;

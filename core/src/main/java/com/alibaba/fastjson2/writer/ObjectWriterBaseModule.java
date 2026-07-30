@@ -7,34 +7,20 @@ import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
-import com.alibaba.fastjson2.support.LambdaMiscCodec;
-import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
-import java.io.File;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.URI;
-import java.net.URL;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.time.*;
-import java.time.chrono.HijrahDate;
-import java.time.chrono.JapaneseDate;
-import java.time.chrono.MinguoDate;
-import java.time.chrono.ThaiBuddhistDate;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
 import static com.alibaba.fastjson2.util.BeanUtils.*;
 
 public class ObjectWriterBaseModule
         implements ObjectWriterModule {
-    static ObjectWriterAdapter STACK_TRACE_ELEMENT_WRITER;
+    static ObjectWriter STACK_TRACE_ELEMENT_WRITER;
 
     final ObjectWriterProvider provider;
     final WriterAnnotationProcessor annotationProcessor;
@@ -156,7 +142,7 @@ public class ObjectWriterBaseModule
                         break;
                     case "kotlin.Metadata":
                         beanInfo.kotlin = true;
-                        KotlinUtils.getConstructor(objectClass, beanInfo);
+                        // Kotlin support removed
                         break;
                     default:
                         break;
@@ -314,22 +300,11 @@ public class ObjectWriterBaseModule
 
             JSONField jsonField = null;
             Annotation[] annotations = getAnnotations(field);
-            if (annotations.length == 0 && KotlinUtils.isKotlin(objectClass)) {
-                annotations = getAnnotations(field.getType());
-                Constructor kotlinConstructor = KotlinUtils.getKotlinConstructor(getConstructor(objectClass));
-                if (kotlinConstructor != null) {
-                    String[] paramNames = KotlinUtils.getKoltinConstructorParameters(objectClass);
-                    for (int i = 0; i < paramNames.length; i++) {
-                        if (paramNames[i].equals(field.getName())) {
-                            annotations = kotlinConstructor.getParameterAnnotations()[i];
-                            break;
-                        }
-                    }
-                    if (fieldInfo.ignore) {
-                        for (Annotation annotation : annotations) {
-                            if (annotation.annotationType() == JSONField.class) {
-                                fieldInfo.ignore = !((JSONField) annotation).serialize();
-                            }
+            if (annotations.length == 0 && false) {
+                if (fieldInfo.ignore) {
+                    for (Annotation annotation : annotations) {
+                        if (annotation.annotationType() == JSONField.class) {
+                            fieldInfo.ignore = !((JSONField) annotation).serialize();
                         }
                     }
                 }
@@ -433,7 +408,7 @@ public class ObjectWriterBaseModule
                     && !String.class.equals(field.getType())
                     && fieldInfo.writeUsing == null
             ) {
-                fieldInfo.writeUsing = ObjectWriterImplToString.class;
+                fieldInfo.writeUsing = null;
             }
         }
 
@@ -499,7 +474,7 @@ public class ObjectWriterBaseModule
             }
 
             if ("com.fasterxml.jackson.databind.ser.std.ToStringSerializer".equals(usingName)) {
-                return ObjectWriterImplToString.class;
+                return null;
             }
             return null;
         }
@@ -1053,16 +1028,6 @@ public class ObjectWriterBaseModule
                 return JdbcSupport.createTimeWriter(null);
             case "java.sql.Timestamp":
                 return JdbcSupport.createTimestampWriter(objectClass, null);
-            case "org.joda.time.chrono.GregorianChronology":
-                return JodaSupport.createGregorianChronologyWriter(objectClass);
-            case "org.joda.time.chrono.ISOChronology":
-                return JodaSupport.createISOChronologyWriter(objectClass);
-            case "org.joda.time.LocalDate":
-                return JodaSupport.createLocalDateWriter(objectClass, null);
-            case "org.joda.time.LocalDateTime":
-                return JodaSupport.createLocalDateTimeWriter(objectClass, null);
-            case "org.joda.time.DateTime":
-                return new ObjectWriterImplZonedDateTime(null, null, new JodaSupport.DateTime2ZDT());
             default:
                 if (JdbcSupport.isClob(objectClass)) {
                     return JdbcSupport.createClobWriter(objectClass);
@@ -1073,571 +1038,11 @@ public class ObjectWriterBaseModule
 
     @Override
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
-        if (objectType == String.class) {
-            return ObjectWriterImplString.INSTANCE;
-        }
-
-        if (objectClass == null) {
-            if (objectType instanceof Class) {
-                objectClass = (Class) objectType;
-            } else {
-                objectClass = TypeUtils.getMapping(objectType);
-            }
-        }
-
-        String className = objectClass.getName();
-        ObjectWriter externalObjectWriter = getExternalObjectWriter(className, objectClass);
-        if (externalObjectWriter != null) {
-            return externalObjectWriter;
-        }
-
-        switch (className) {
-            case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
-            case "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet":
-                return null;
-            case "org.javamoney.moneta.internal.JDKCurrencyAdapter":
-                return ObjectWriterImplToString.INSTANCE;
-            case "com.fasterxml.jackson.databind.node.ObjectNode":
-                return ObjectWriterImplToString.DIRECT;
-            case "org.javamoney.moneta.Money":
-                return MoneySupport.createMonetaryAmountWriter();
-            case "org.javamoney.moneta.spi.DefaultNumberValue":
-                return MoneySupport.createNumberValueWriter();
-            case "net.sf.json.JSONNull":
-            case "java.net.Inet4Address":
-            case "java.net.Inet6Address":
-            case "java.net.InetSocketAddress":
-            case "java.text.SimpleDateFormat":
-            case "java.util.regex.Pattern":
-            case "com.fasterxml.jackson.databind.node.ArrayNode":
-                return ObjectWriterMisc.INSTANCE;
-            case "org.apache.commons.lang3.tuple.Pair":
-            case "org.apache.commons.lang3.tuple.MutablePair":
-            case "org.apache.commons.lang3.tuple.ImmutablePair":
-                return new ApacheLang3Support.PairWriter(objectClass);
-            case "com.carrotsearch.hppc.ByteArrayList":
-            case "com.carrotsearch.hppc.ShortArrayList":
-            case "com.carrotsearch.hppc.IntArrayList":
-            case "com.carrotsearch.hppc.IntHashSet":
-            case "com.carrotsearch.hppc.LongArrayList":
-            case "com.carrotsearch.hppc.LongHashSet":
-            case "com.carrotsearch.hppc.CharArrayList":
-            case "com.carrotsearch.hppc.CharHashSet":
-            case "com.carrotsearch.hppc.FloatArrayList":
-            case "com.carrotsearch.hppc.DoubleArrayList":
-            case "com.carrotsearch.hppc.BitSet":
-            case "gnu.trove.list.array.TByteArrayList":
-            case "gnu.trove.list.array.TCharArrayList":
-            case "gnu.trove.list.array.TShortArrayList":
-            case "gnu.trove.list.array.TIntArrayList":
-            case "gnu.trove.list.array.TLongArrayList":
-            case "gnu.trove.list.array.TFloatArrayList":
-            case "gnu.trove.list.array.TDoubleArrayList":
-            case "gnu.trove.set.hash.TByteHashSet":
-            case "gnu.trove.set.hash.TShortHashSet":
-            case "gnu.trove.set.hash.TIntHashSet":
-            case "gnu.trove.set.hash.TLongHashSet":
-            case "gnu.trove.stack.array.TByteArrayStack":
-            case "org.bson.types.Decimal128":
-                return LambdaMiscCodec.getObjectWriter(objectType, objectClass);
-            case "java.nio.HeapByteBuffer":
-            case "java.nio.HeapByteBufferR":
-            case "java.nio.DirectByteBuffer":
-            case "java.nio.DirectByteBufferR":
-            case "java.nio.MappedByteBuffer":
-                return new ObjectWriterImplInt8ValueArray(
-                        o -> {
-                            ByteBuffer buffer = (ByteBuffer) o;
-                            if (buffer.hasArray()) {
-                                return buffer.array();
-                            }
-                            // For DirectByteBuffer or read-only buffers that don't have a backing array
-                            int position = buffer.position();
-                            byte[] bytes = new byte[buffer.remaining()];
-                            buffer.get(bytes);
-                            buffer.position(position); // restore position
-                            return bytes;
-                        }
-                );
-            case "java.awt.Color":
-                try {
-                    List<FieldWriter> fieldWriters = Arrays.asList(
-                            ObjectWriters.fieldWriter("r", objectClass.getMethod("getRed")),
-                            ObjectWriters.fieldWriter("g", objectClass.getMethod("getGreen")),
-                            ObjectWriters.fieldWriter("b", objectClass.getMethod("getBlue")),
-                            ObjectWriters.fieldWriter("alpha", objectClass.getMethod("getAlpha"))
-                    );
-                    return new ObjectWriter4(objectClass, null, null, 0, fieldWriters);
-                } catch (NoSuchMethodException e) {
-                    // ignored
-                }
-
-            default:
-                break;
-        }
-
-        if (objectType instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) objectType;
-            Type rawType = parameterizedType.getRawType();
-            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-
-            if (rawType == List.class || rawType == ArrayList.class) {
-                if (actualTypeArguments.length == 1
-                        && actualTypeArguments[0] == String.class) {
-                    return ObjectWriterImplListStr.INSTANCE;
-                }
-
-                objectType = rawType;
-            }
-
-            if (Map.class.isAssignableFrom(objectClass)) {
-                return ObjectWriterImplMap.of(objectType, objectClass);
-            }
-
-            if (objectClass == Optional.class) {
-                if (actualTypeArguments.length == 1) {
-                    return new ObjectWriterImplOptional(actualTypeArguments[0], null, null);
-                }
-            }
-        }
-
-        if (objectType == LinkedList.class) {
-            return ObjectWriterImplList.INSTANCE;
-        }
-
-        if (objectType == ArrayList.class
-                || objectType == List.class
-                || List.class.isAssignableFrom(objectClass)) {
-            return ObjectWriterImplList.INSTANCE;
-        }
-
-        if (Collection.class.isAssignableFrom(objectClass)) {
-            return ObjectWriterImplCollection.INSTANCE;
-        }
-
-        if (isExtendedMap(objectClass)) {
-            return null;
-        }
-
-        if (Map.class.isAssignableFrom(objectClass)) {
-            return ObjectWriterImplMap.of(objectClass);
-        }
-
-        if (Map.Entry.class.isAssignableFrom(objectClass)) {
-            return ObjectWriterImplMapEntry.INSTANCE;
-        }
-
-        if (java.nio.file.Path.class.isAssignableFrom(objectClass)) {
-            return ObjectWriterImplToString.INSTANCE;
-        }
-
-        if (objectType == Integer.class) {
-            return ObjectWriterImplInt32.INSTANCE;
-        }
-
-        if (objectType == AtomicInteger.class) {
-            return ObjectWriterImplAtomicInteger.INSTANCE;
-        }
-
-        if (objectType == Byte.class) {
-            return ObjectWriterImplInt8.INSTANCE;
-        }
-
-        if (objectType == Short.class) {
-            return ObjectWriterImplInt16.INSTANCE;
-        }
-
-        if (objectType == Long.class) {
-            return ObjectWriterImplInt64.INSTANCE;
-        }
-
-        if (objectType == AtomicLong.class) {
-            return ObjectWriterImplAtomicLong.INSTANCE;
-        }
-
-        if (objectType == AtomicReference.class) {
-            return ObjectWriterImplAtomicReference.INSTANCE;
-        }
-
-        if (objectType == Float.class) {
-            return ObjectWriterImplFloat.INSTANCE;
-        }
-
-        if (objectType == Double.class) {
-            return ObjectWriterImplDouble.INSTANCE;
-        }
-
-        if (objectType == BigInteger.class) {
-            return ObjectWriterBigInteger.INSTANCE;
-        }
-
-        if (objectType == BigDecimal.class) {
-            return ObjectWriterImplBigDecimal.INSTANCE;
-        }
-
-        if (objectType == BitSet.class) {
-            return ObjectWriterImplBitSet.INSTANCE;
-        }
-
-        if (objectType == OptionalInt.class) {
-            return ObjectWriterImplOptionalInt.INSTANCE;
-        }
-
-        if (objectType == OptionalLong.class) {
-            return ObjectWriterImplOptionalLong.INSTANCE;
-        }
-
-        if (objectType == OptionalDouble.class) {
-            return ObjectWriterImplOptionalDouble.INSTANCE;
-        }
-
-        if (objectType == Optional.class) {
-            return ObjectWriterImplOptional.INSTANCE;
-        }
-
-        if (objectType == Boolean.class) {
-            return ObjectWriterImplBoolean.INSTANCE;
-        }
-
-        if (objectType == AtomicBoolean.class) {
-            return ObjectWriterImplAtomicBoolean.INSTANCE;
-        }
-
-        if (objectType == AtomicIntegerArray.class) {
-            return ObjectWriterImplAtomicIntegerArray.INSTANCE;
-        }
-
-        if (objectType == AtomicLongArray.class) {
-            return ObjectWriterImplAtomicLongArray.INSTANCE;
-        }
-
-        if (objectType == Character.class) {
-            return ObjectWriterImplCharacter.INSTANCE;
-        }
-
-        if (objectType instanceof Class) {
-            Class clazz = (Class) objectType;
-
-            if (TimeUnit.class.isAssignableFrom(clazz)) {
-                return new ObjectWriterImplEnum(null, TimeUnit.class, null, null, 0);
-            }
-
-            if (Enum.class.isAssignableFrom(clazz)) {
-                ObjectWriter enumWriter = createEnumWriter(clazz);
-                if (enumWriter != null) {
-                    return enumWriter;
-                }
-            }
-
-            if (JSONPath.class.isAssignableFrom(clazz)) {
-                return ObjectWriterImplToString.INSTANCE;
-            }
-
-            if (clazz == boolean[].class) {
-                return ObjectWriterImplBoolValueArray.INSTANCE;
-            }
-
-            if (clazz == char[].class) {
-                return ObjectWriterImplCharValueArray.INSTANCE;
-            }
-
-            if (clazz == StringBuffer.class || clazz == StringBuilder.class) {
-                return ObjectWriterImplToString.INSTANCE;
-            }
-
-            if (clazz == byte[].class) {
-                return ObjectWriterImplInt8ValueArray.INSTANCE;
-            }
-
-            if (clazz == short[].class) {
-                return ObjectWriterImplInt16ValueArray.INSTANCE;
-            }
-
-            if (clazz == int[].class) {
-                return ObjectWriterImplInt32ValueArray.INSTANCE;
-            }
-
-            if (clazz == long[].class) {
-                return ObjectWriterImplInt64ValueArray.INSTANCE;
-            }
-
-            if (clazz == float[].class) {
-                return ObjectWriterImplFloatValueArray.INSTANCE;
-            }
-
-            if (clazz == double[].class) {
-                return ObjectWriterImplDoubleValueArray.INSTANCE;
-            }
-
-            if (clazz == Byte[].class) {
-                return ObjectWriterImplInt8Array.INSTANCE;
-            }
-
-            if (clazz == Integer[].class) {
-                return ObjectWriterImplInt32Array.INSTANCE;
-            }
-
-            if (clazz == Long[].class) {
-                return ObjectWriterImplInt64Array.INSTANCE;
-            }
-
-            if (String[].class == clazz) {
-                return ObjectWriterImplStringArray.INSTANCE;
-            }
-
-            if (BigDecimal[].class == clazz) {
-                return ObjectWriterImpDecimalArray.INSTANCE;
-            }
-
-            if (Object[].class.isAssignableFrom(clazz)) {
-                if (clazz == Object[].class) {
-                    return ObjectWriterArray.INSTANCE;
-                } else {
-                    Class componentType = clazz.getComponentType();
-                    if (Modifier.isFinal(componentType.getModifiers())) {
-                        return new ObjectWriterArrayFinal(componentType, null);
-                    } else {
-                        return new ObjectWriterArray(componentType);
-                    }
-                }
-            }
-
-            if (clazz == UUID.class) {
-                return ObjectWriterImplUUID.INSTANCE;
-            }
-
-            if (clazz == Locale.class) {
-                return ObjectWriterImplLocale.INSTANCE;
-            }
-
-            if (clazz == Currency.class) {
-                return ObjectWriterImplCurrency.INSTANCE;
-            }
-
-            if (TimeZone.class.isAssignableFrom(clazz)) {
-                return ObjectWriterImplTimeZone.INSTANCE;
-            }
-
-            if (JSONPObject.class.isAssignableFrom(clazz)) {
-                return new ObjectWriterImplJSONP();
-            }
-
-            if (clazz == URI.class
-                    || clazz == URL.class
-                    || clazz == File.class
-                    || ZoneId.class.isAssignableFrom(clazz)
-                    || Charset.class.isAssignableFrom(clazz)) {
-                return ObjectWriterImplToString.INSTANCE;
-            }
-
-            externalObjectWriter = getExternalObjectWriter(clazz.getName(), clazz);
-            if (externalObjectWriter != null) {
-                return externalObjectWriter;
-            }
-
-            BeanInfo beanInfo = provider.createBeanInfo();
-            Class mixIn = provider.getMixIn(clazz);
-            if (mixIn != null) {
-                annotationProcessor.getBeanInfo(beanInfo, mixIn);
-            }
-
-            if (Date.class.isAssignableFrom(clazz)) {
-                if (beanInfo.format != null || beanInfo.locale != null) {
-                    return new ObjectWriterImplDate(beanInfo.format, beanInfo.locale);
-                }
-
-                return ObjectWriterImplDate.INSTANCE;
-            }
-
-            if (Calendar.class.isAssignableFrom(clazz)) {
-                if (beanInfo.format != null || beanInfo.locale != null) {
-                    return new ObjectWriterImplCalendar(beanInfo.format, beanInfo.locale);
-                }
-
-                return ObjectWriterImplCalendar.INSTANCE;
-            }
-
-            if (ZonedDateTime.class == clazz) {
-                if (beanInfo.format != null || beanInfo.locale != null) {
-                    return new ObjectWriterImplZonedDateTime(beanInfo.format, beanInfo.locale);
-                }
-
-                return ObjectWriterImplZonedDateTime.INSTANCE;
-            }
-
-            if (OffsetDateTime.class == clazz) {
-                return ObjectWriterImplOffsetDateTime.of(beanInfo.format, beanInfo.locale);
-            }
-
-            if (LocalDateTime.class == clazz) {
-                if (beanInfo.format != null || beanInfo.locale != null) {
-                    return new ObjectWriterImplLocalDateTime(beanInfo.format, beanInfo.locale);
-                }
-
-                return ObjectWriterImplLocalDateTime.INSTANCE;
-            }
-
-            if (LocalDate.class == clazz) {
-                return ObjectWriterImplLocalDate.of(beanInfo.format, beanInfo.locale);
-            }
-
-            if (LocalTime.class == clazz) {
-                if (beanInfo.format != null || beanInfo.locale != null) {
-                    return new ObjectWriterImplLocalTime(beanInfo.format, beanInfo.locale);
-                }
-
-                return ObjectWriterImplLocalTime.INSTANCE;
-            }
-
-            if (OffsetTime.class == clazz) {
-                if (beanInfo.format != null || beanInfo.locale != null) {
-                    return new ObjectWriterImplOffsetTime(beanInfo.format, beanInfo.locale);
-                }
-
-                return ObjectWriterImplOffsetTime.INSTANCE;
-            }
-
-            if (Instant.class == clazz) {
-                if (beanInfo.format != null || beanInfo.locale != null) {
-                    return new ObjectWriterImplInstant(beanInfo.format, beanInfo.locale);
-                }
-
-                return ObjectWriterImplInstant.INSTANCE;
-            }
-
-            if (Duration.class == clazz || Period.class == clazz
-                    || Year.class == clazz || YearMonth.class == clazz || MonthDay.class == clazz
-                    || HijrahDate.class == clazz || JapaneseDate.class == clazz
-                    || MinguoDate.class == clazz || ThaiBuddhistDate.class == clazz) {
-                return ObjectWriterImplToString.INSTANCE;
-            }
-
-            if (StackTraceElement.class == clazz) {
-                // return createFieldWriter(null, null, fieldName, 0, 0, null, null, fieldClass, fieldClass, null, function);
-                if (STACK_TRACE_ELEMENT_WRITER == null) {
-                    ObjectWriterCreator creator = provider.getCreator();
-                    STACK_TRACE_ELEMENT_WRITER = new ObjectWriterAdapter(
-                            StackTraceElement.class,
-                            null,
-                            null,
-                            0,
-                            Arrays.asList(
-                                    creator.createFieldWriter(
-                                            "fileName",
-                                            String.class,
-                                            BeanUtils.getDeclaredField(StackTraceElement.class, "fileName"),
-                                            BeanUtils.getMethod(StackTraceElement.class, "getFileName"),
-                                            StackTraceElement::getFileName
-                                    ),
-                                    creator.createFieldWriter(
-                                            "lineNumber",
-                                            BeanUtils.getDeclaredField(StackTraceElement.class, "lineNumber"),
-                                            BeanUtils.getMethod(StackTraceElement.class, "getLineNumber"),
-                                            StackTraceElement::getLineNumber
-                                    ),
-                                    creator.createFieldWriter(
-                                            "className",
-                                            String.class,
-                                            BeanUtils.getDeclaredField(StackTraceElement.class, "declaringClass"),
-                                            BeanUtils.getMethod(StackTraceElement.class, "getClassName"),
-                                            StackTraceElement::getClassName
-                                    ),
-                                    creator.createFieldWriter(
-                                            "methodName",
-                                            String.class,
-                                            BeanUtils.getDeclaredField(StackTraceElement.class, "methodName"),
-                                            BeanUtils.getMethod(StackTraceElement.class, "getMethodName"),
-                                            StackTraceElement::getMethodName
-                                    )
-                            )
-                    );
-                }
-                return STACK_TRACE_ELEMENT_WRITER;
-            }
-
-            if (Class.class == clazz) {
-                return ObjectWriterImplClass.INSTANCE;
-            }
-
-            if (Method.class == clazz) {
-                return new ObjectWriterAdapter<>(
-                        Method.class,
-                        null,
-                        null,
-                        0,
-                        Arrays.asList(
-                                ObjectWriters.fieldWriter("declaringClass", Class.class, Method::getDeclaringClass),
-                                ObjectWriters.fieldWriter("name", String.class, Method::getName),
-                                ObjectWriters.fieldWriter("parameterTypes", Class[].class, Method::getParameterTypes)
-                        )
-                );
-            }
-
-            if (Field.class == clazz) {
-                return new ObjectWriterAdapter<>(
-                        Method.class,
-                        null,
-                        null,
-                        0,
-                        Arrays.asList(
-                                ObjectWriters.fieldWriter("declaringClass", Class.class, Field::getDeclaringClass),
-                                ObjectWriters.fieldWriter("name", String.class, Field::getName)
-                        )
-                );
-            }
-
-            if (ParameterizedType.class.isAssignableFrom(clazz)) {
-                return ObjectWriters.objectWriter(
-                        ParameterizedType.class,
-                        ObjectWriters.fieldWriter("actualTypeArguments", Type[].class, ParameterizedType::getActualTypeArguments),
-                        ObjectWriters.fieldWriter("ownerType", Type.class, ParameterizedType::getOwnerType),
-                        ObjectWriters.fieldWriter("rawType", Type.class, ParameterizedType::getRawType)
-                );
-            }
-        }
-
         return null;
     }
 
     private ObjectWriter createEnumWriter(Class enumClass) {
-        if (!enumClass.isEnum()) {
-            Class superclass = enumClass.getSuperclass();
-            if (superclass.isEnum()) {
-                enumClass = superclass;
-            }
-        }
-
-        Member valueField = BeanUtils.getEnumValueField(enumClass, provider);
-        if (valueField == null) {
-            Class mixInSource = provider.mixInCache.get(enumClass);
-            Member mixedValueField = BeanUtils.getEnumValueField(mixInSource, provider);
-            if (mixedValueField instanceof Field) {
-                try {
-                    valueField = enumClass.getField(mixedValueField.getName());
-                } catch (NoSuchFieldException ignored) {
-                }
-            } else if (mixedValueField instanceof Method) {
-                try {
-                    valueField = enumClass.getMethod(mixedValueField.getName());
-                } catch (NoSuchMethodException ignored) {
-                }
-            }
-        }
-
-        BeanInfo beanInfo = provider.createBeanInfo();
-
-        Class[] interfaces = enumClass.getInterfaces();
-        for (int i = 0; i < interfaces.length; i++) {
-            annotationProcessor.getBeanInfo(beanInfo, interfaces[i]);
-        }
-
-        annotationProcessor.getBeanInfo(beanInfo, enumClass);
-        if (beanInfo.writeEnumAsJavaBean) {
-            return null;
-        }
-
-        String[] annotationNames = BeanUtils.getEnumAnnotationNames(enumClass);
-        return new ObjectWriterImplEnum(null, enumClass, valueField, annotationNames, 0);
+        return null;
     }
 
     static class VoidObjectWriter

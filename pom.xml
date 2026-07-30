@@ -32,29 +32,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <fastjson1x.version>1.2.83</fastjson1x.version>
-        <jackson.version>2.20.0</jackson.version>
-        <jetty.version>11.0.15</jetty.version>
-        <jersey.version>2.44</jersey.version>
-        <solon.version>3.6.0</solon.version>
-        <springframework5.version>5.3.31</springframework5.version>
-        <springframework6.version>6.1.3</springframework6.version>
-        <springsecurity5.version>5.8.8</springsecurity5.version>
-        <springsecurity6.version>6.2.1</springsecurity6.version>
-        <springboot2.version>2.7.18</springboot2.version>
-        <springboot3.version>3.3.11</springboot3.version>
-        <springdata2021.version>2021.2.18</springdata2021.version>
-        <springdata2023.version>2023.1.0</springdata2023.version>
-        <arrow.version>17.0.0</arrow.version>
-
-        <!-- Requires kotlin minor version less than the latest version -->
-        <kotlin.version>2.1.20</kotlin.version>
-        <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
-        <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
-        <!-- https://kotlinlang.org/docs/maven.html#specifying-compiler-options -->
-        <kotlin.compiler.apiVersion>1.9</kotlin.compiler.apiVersion>
-
         <junit5.version>5.13.4</junit5.version>
-        <kotest.version>5.5.5</kotest.version>
         <jmh.version>1.37</jmh.version>
 
         <!-- overridden by submodule that need skip deploy -->
@@ -62,17 +40,7 @@
     </properties>
 
     <modules>
-        <module>benchmark</module>
         <module>core</module>
-        <module>example-solon-test</module>
-        <module>example-spring-test</module>
-        <module>extension</module>
-        <module>extension-jaxrs</module>
-        <module>extension-solon</module>
-        <module>extension-spring5</module>
-        <module>fastjson1-compatible</module>
-        <module>kotlin</module>
-        <module>safemode-test</module>
     </modules>
 
     <organization>
@@ -173,13 +141,7 @@
                 <artifactId>sms-core</artifactId>
                 <version>2.1.13.4</version>
             </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <type>pom</type>
-                <version>${jackson.version}</version>
-                <scope>import</scope>
-            </dependency>
+
             <dependency>
                 <groupId>com.github.erosb</groupId>
                 <artifactId>everit-json-schema</artifactId>
@@ -254,25 +216,6 @@
                 <version>0.41</version>
             </dependency>
 
-            <!-- https://github.com/kotlintest/kotlintest -->
-            <dependency>
-                <groupId>io.kotest</groupId>
-                <artifactId>kotest-assertions-core-jvm</artifactId>
-                <version>${kotest.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.kotest</groupId>
-                <artifactId>kotest-property-jvm</artifactId>
-                <version>${kotest.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.kotest</groupId>
-                <artifactId>kotest-runner-junit5-jvm</artifactId>
-                <version>${kotest.version}</version>
-                <scope>test</scope>
-            </dependency>
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-core</artifactId>
@@ -325,16 +268,7 @@
                 <version>3.0.3</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.apache.arrow</groupId>
-                <artifactId>arrow-memory-netty</artifactId>
-                <version>${arrow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.arrow</groupId>
-                <artifactId>arrow-vector</artifactId>
-                <version>${arrow.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
@@ -345,13 +279,7 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.17.0</version>
             </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-bom</artifactId>
-                <type>pom</type>
-                <version>${jetty.version}</version>
-                <scope>import</scope>
-            </dependency>
+
 
             <dependency>
                 <groupId>org.gitlab4j</groupId>
@@ -359,13 +287,7 @@
                 <version>5.8.0</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.glassfish.jersey</groupId>
-                <artifactId>jersey-bom</artifactId>
-                <type>pom</type>
-                <version>${jersey.version}</version>
-                <scope>import</scope>
-            </dependency>
+
 
             <dependency>
                 <groupId>org.hamcrest</groupId>
@@ -397,13 +319,7 @@
                 <version>3.30.2-GA</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-bom</artifactId>
-                <type>pom</type>
-                <version>${kotlin.version}</version>
-                <scope>import</scope>
-            </dependency>
+
 
             <dependency>
                 <groupId>org.json</groupId>
@@ -454,21 +370,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.kotest</groupId>
-            <artifactId>kotest-assertions-core-jvm</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.kotest</groupId>
-            <artifactId>kotest-property-jvm</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.kotest</groupId>
-            <artifactId>kotest-runner-junit5-jvm</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
             <scope>test</scope>
@@ -494,69 +395,8 @@
 
     <build>
         <plugins>
-            <!--
-                Compiling Kotlin and Java sources - Using Maven - Kotlin Programming Language
-                https://kotlinlang.org/docs/reference/using-maven.html#compiling-kotlin-and-java-sources
-
-                Making sure that the kotlin plugin is above the maven-compiler-plugin in your pom.xml file!
-            -->
-            <plugin>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-maven-plugin</artifactId>
-                <version>${kotlin.version}</version>
-                <executions>
-                    <execution>
-                        <id>compile</id>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDirs>
-                                <sourceDir>${project.basedir}/src/main/java</sourceDir>
-                            </sourceDirs>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>test-compile</id>
-                        <goals>
-                            <goal>test-compile</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDirs>
-                                <sourceDir>${project.basedir}/src/test/java</sourceDir>
-                            </sourceDirs>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <executions>
-                    <!-- Replacing default-compile as it is treated specially by maven -->
-                    <execution>
-                        <id>default-compile</id>
-                        <phase>none</phase>
-                    </execution>
-                    <!-- Replacing default-testCompile as it is treated specially by maven -->
-                    <execution>
-                        <id>default-testCompile</id>
-                        <phase>none</phase>
-                    </execution>
-                    <execution>
-                        <id>java-compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>java-test-compile</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
@@ -789,31 +629,7 @@
                     <artifactId>nexus-staging-maven-plugin</artifactId>
                     <version>1.7.0</version>
                 </plugin>
-                <plugin>
-                    <!-- https://github.com/moditect/moditect -->
-                    <groupId>org.moditect</groupId>
-                    <artifactId>moditect-maven-plugin</artifactId>
-                    <version>1.3.0.Final</version>
-                    <executions>
-                        <execution>
-                            <id>add-module-infos</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>add-module-info</goal>
-                            </goals>
-                            <configuration>
-                                <jvmVersion>9</jvmVersion>
-                                <overwriteExistingFiles>true</overwriteExistingFiles>
-                                <module>
-                                    <!-- using `moduleInfoFile` is more IDE/editor friendly than `moduleInfoSource`/`moduleInfo` -->
-                                    <moduleInfoFile>
-                                        ${project.basedir}/src/main/moditect/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
+
             </plugins>
         </pluginManagement>
     </build>
@@ -988,9 +804,6 @@
                         <version>0.8.13</version>
                         <configuration>
                             <excludes>
-                                <exclude>com/alibaba/fastjson2/benchmark</exclude>
-                                <exclude>com/alibaba/example/springtest</exclude>
-                                <exclude>com/alibaba/example/spring6test</exclude>
                             </excludes>
                         </configuration>
                         <executions>
@@ -1011,61 +824,7 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>enable-incubators-for-jdk25+</id>
-            <activation>
-                <jdk>[25,)</jdk>
-            </activation>
-            <modules>
-                <module>test-jdk25</module>
-            </modules>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <annotationProcessorPaths>
-                                <path>
-                                    <groupId>org.projectlombok</groupId>
-                                    <artifactId>lombok</artifactId>
-                                    <version>1.18.42</version>
-                                </path>
-                            </annotationProcessorPaths>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>enable-for-jdk21+</id>
-            <activation>
-                <jdk>[25,)</jdk>
-            </activation>
-            <modules>
-                <module>benchmark_25</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>enable-for-17+</id>
-            <activation>
-                <jdk>[17,)</jdk>
-            </activation>
-            <modules>
-                <module>extension-spring6</module>
-                <module>example-spring6-test</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>enable-codegen</id>
-            <activation>
-                <jdk>(,22]</jdk>
-            </activation>
-            <modules>
-                <module>codegen</module>
-                <module>codegen-test</module>
-            </modules>
-        </profile>
+<!-- Removed conditional module profiles (benchmark_25, test-jdk25, extension-spring6, example-spring6-test, codegen, codegen-test) -->
         <profile>
             <id>deploy-settings</id>
             <activation>

@@ -4,13 +4,10 @@ import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.reader.*;
-import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.MapMultiValueType;
 import com.alibaba.fastjson2.util.MultiType;
 import com.alibaba.fastjson2.util.TypeUtils;
-import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.IOException;
@@ -22,7 +19,6 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Consumer;
@@ -4077,13 +4073,6 @@ public interface JSON {
                 JSONFactory.createWriteContext() : JSONFactory.createWriteContext(features);
         Class<?> valueClass = object.getClass();
         ObjectWriter<?> objectWriter = writeContext.getObjectWriter(valueClass, valueClass);
-        if (objectWriter instanceof ObjectWriterAdapter
-                && !writeContext.isEnabled(JSONWriter.Feature.ReferenceDetection)
-                && (objectWriter.getFeatures() & JSONWriter.Feature.WriteClassName.mask) == 0) {
-            ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) objectWriter;
-            return objectWriterAdapter.toJSONObject(object, writeContext.features);
-        }
-
         String str;
         try (JSONWriter writer = JSONWriter.of(writeContext)) {
             objectWriter.write(writer, object, null, null, writeContext.features);
@@ -4490,37 +4479,6 @@ public interface JSON {
         ObjectWriter objectWriter = defaultObjectWriterProvider.getObjectWriter(objectClass, objectClass, fieldBased);
         ObjectReader objectReader = defaultObjectReaderProvider.getObjectReader(objectClass, fieldBased);
 
-        if (objectWriter instanceof ObjectWriterAdapter && objectReader instanceof ObjectReaderBean) {
-            List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
-
-            final int size = fieldWriters.size();
-            if (objectReader instanceof ObjectReaderNoneDefaultConstructor) {
-                Map<String, Object> map = new HashMap<>(size, 1F);
-                for (int i = 0; i < size; i++) {
-                    FieldWriter fieldWriter = fieldWriters.get(i);
-                    Object fieldValue = fieldWriter.getFieldValue(object);
-                    map.put(fieldWriter.fieldName, fieldValue);
-                }
-
-                return (T) objectReader.createInstance(map, featuresValue);
-            }
-
-            T instance = (T) objectReader.createInstance(featuresValue);
-            for (int i = 0; i < size; i++) {
-                FieldWriter fieldWriter = fieldWriters.get(i);
-                FieldReader fieldReader = objectReader.getFieldReader(fieldWriter.fieldName);
-                if (fieldReader == null) {
-                    continue;
-                }
-
-                Object fieldValue = fieldWriter.getFieldValue(object);
-                Object fieldValueCopied = copy(fieldValue);
-                fieldReader.accept(instance, fieldValueCopied);
-            }
-
-            return instance;
-        }
-
         byte[] jsonbBytes;
         try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
             writer.config(JSONWriter.Feature.WriteClassName);
@@ -4568,49 +4526,6 @@ public interface JSON {
 
         ObjectWriter objectWriter = defaultObjectWriterProvider.getObjectWriter(objectClass, objectClass, fieldBased);
         ObjectReader objectReader = defaultObjectReaderProvider.getObjectReader(targetClass, fieldBased);
-
-        if (objectWriter instanceof ObjectWriterAdapter && objectReader instanceof ObjectReaderBean) {
-            List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
-
-            if (objectReader instanceof ObjectReaderNoneDefaultConstructor) {
-                Map<String, Object> map = new HashMap<>(fieldWriters.size(), 1F);
-                for (int i = 0; i < fieldWriters.size(); i++) {
-                    FieldWriter fieldWriter = fieldWriters.get(i);
-                    Object fieldValue = fieldWriter.getFieldValue(object);
-                    map.put(fieldWriter.fieldName, fieldValue);
-                }
-
-                return (T) objectReader.createInstance(map, featuresValue);
-            }
-
-            T instance = (T) objectReader.createInstance(featuresValue);
-            for (int i = 0; i < fieldWriters.size(); i++) {
-                FieldWriter fieldWriter = fieldWriters.get(i);
-                FieldReader fieldReader = objectReader.getFieldReader(fieldWriter.fieldName);
-                if (fieldReader == null) {
-                    continue;
-                }
-
-                Object fieldValue = fieldWriter.getFieldValue(object);
-
-                Object fieldValueCopied;
-                if (fieldWriter.fieldClass == Date.class
-                        && fieldReader.fieldClass == String.class) {
-                    fieldValueCopied = DateUtils.format((Date) fieldValue, fieldWriter.format);
-                } else if (fieldWriter.fieldClass == LocalDate.class
-                        && fieldReader.fieldClass == String.class) {
-                    fieldValueCopied = DateUtils.format((LocalDate) fieldValue, fieldWriter.format);
-                } else if (fieldValue == null || fieldReader.supportAcceptType(fieldValue.getClass())) {
-                    fieldValueCopied = fieldValue;
-                } else {
-                    fieldValueCopied = copy(fieldValue);
-                }
-
-                fieldReader.accept(instance, fieldValueCopied);
-            }
-
-            return instance;
-        }
 
         byte[] jsonbBytes;
         try (JSONWriter writer = JSONWriter.ofJSONB(features)) {

@@ -13,11 +13,10 @@ import java.util.function.Supplier;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 public final class ObjectReaderImplObject
-        extends ObjectReaderPrimitive {
+        implements ObjectReader {
     public static final ObjectReaderImplObject INSTANCE = new ObjectReaderImplObject();
 
     public ObjectReaderImplObject() {
-        super(Object.class);
     }
 
     @Override
@@ -39,7 +38,7 @@ public final class ObjectReaderImplObject
             long typeHash = Fnv.hashCode64(typeName);
             ObjectReader reader = null;
             if ((features & JSONReader.Feature.SupportAutoType.mask) != 0) {
-                reader = autoType(provider, typeHash);
+                reader = provider.getObjectReader(typeHash);
             }
 
             if (reader == null) {

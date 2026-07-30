@@ -350,36 +350,13 @@ public final class JSONFactory {
     static final ObjectWriterProvider defaultObjectWriterProvider = new ObjectWriterProvider();
     static final ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
 
-    static final JSONPathCompiler defaultJSONPathCompiler;
-
-    static {
-        JSONPathCompilerReflect compiler = null;
-        switch (JSONFactory.CREATOR) {
-            case "reflect":
-            case "lambda":
-                compiler = JSONPathCompilerReflect.INSTANCE;
-                break;
-            default:
-                try {
-                    if (!JDKUtils.ANDROID && !JDKUtils.GRAAL) {
-                        compiler = JSONPathCompilerReflectASM.INSTANCE;
-                    }
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-                if (compiler == null) {
-                    compiler = JSONPathCompilerReflect.INSTANCE;
-                }
-                break;
-        }
-        defaultJSONPathCompiler = compiler;
-    }
+    static final Object defaultJSONPathCompiler = null;
 
     static final ThreadLocal<ObjectReaderCreator> readerCreatorLocal = new ThreadLocal<>();
     static final ThreadLocal<ObjectReaderProvider> readerProviderLocal = new ThreadLocal<>();
     static final ThreadLocal<ObjectWriterCreator> writerCreatorLocal = new ThreadLocal<>();
 
-    static final ThreadLocal<JSONPathCompiler> jsonPathCompilerLocal = new ThreadLocal<>();
+    static final ThreadLocal<Object> jsonPathCompilerLocal = new ThreadLocal<>();
 
     static final ObjectReader<JSONArray> ARRAY_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONArray.class);
     static final ObjectReader<JSONObject> OBJECT_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONObject.class);
@@ -620,8 +597,8 @@ public final class JSONFactory {
      *
      * @return the default JSONPathCompiler instance
      */
-    public static JSONPathCompiler getDefaultJSONPathCompiler() {
-        JSONPathCompiler compilerLocal = jsonPathCompilerLocal.get();
+    public static Object getDefaultJSONPathCompiler() {
+        Object compilerLocal = jsonPathCompilerLocal.get();
         if (compilerLocal != null) {
             return compilerLocal;
         }
@@ -661,7 +638,7 @@ public final class JSONFactory {
      *
      * @param compiler the JSONPathCompiler to set
      */
-    public static void setContextJSONPathCompiler(JSONPathCompiler compiler) {
+    public static void setContextJSONPathCompiler(Object compiler) {
         jsonPathCompilerLocal.set(compiler);
     }
 
@@ -681,10 +658,6 @@ public final class JSONFactory {
      */
     public static ObjectWriterCreator getContextWriterCreator() {
         return writerCreatorLocal.get();
-    }
-
-    public interface JSONPathCompiler {
-        JSONPath compile(Class objectClass, JSONPath path);
     }
 
     /**

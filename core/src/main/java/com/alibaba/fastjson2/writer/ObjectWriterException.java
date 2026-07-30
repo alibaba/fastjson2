@@ -6,48 +6,17 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 public class ObjectWriterException
-        extends ObjectWriterAdapter<Exception> {
-    public ObjectWriterException(Class objectType, long features, List<FieldWriter> fieldWriters) {
-        super(objectType, null, null, features, fieldWriters);
+        implements ObjectWriter<Exception> {
+    public ObjectWriterException(Class objectType, long features, List<Object> fieldWriters) {
     }
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        writeClassInfo(jsonWriter);
-
-        int size = fieldWriters.size();
-        jsonWriter.startObject();
-        for (int i = 0; i < size; ++i) {
-            FieldWriter fw = fieldWriters.get(i);
-            fw.write(jsonWriter, object);
-        }
-        jsonWriter.endObject();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        if (jsonWriter.jsonb) {
-            writeJSONB(jsonWriter, object, fieldName, fieldType, features);
-            return;
-        }
-
-        if (hasFilter(jsonWriter)) {
-            writeWithFilter(jsonWriter, object);
-            return;
-        }
-
-        jsonWriter.startObject();
-
-        if ((jsonWriter.getFeatures(features)
-                & (JSONWriter.Feature.WriteClassName.mask | JSONWriter.Feature.WriteThrowableClassName.mask)) != 0
-        ) {
-            writeTypeInfo(jsonWriter);
-        }
-
-        for (FieldWriter fieldWriter : fieldWriters) {
-            fieldWriter.write(jsonWriter, object);
-        }
-
-        jsonWriter.endObject();
+        throw new UnsupportedOperationException();
     }
 }

@@ -142,8 +142,6 @@ public abstract class JSONReader
     public final boolean jsonb;
     public final boolean utf8;
 
-    List<ResolveTask> resolveTasks;
-
     protected int offset;
     protected char ch;
     protected boolean comma;
@@ -1100,117 +1098,6 @@ public abstract class JSONReader
     }
 
     /**
-     * Handles resolve tasks for circular references in the JSON data.
-     * This method processes all pending reference resolution tasks after the main
-     * parsing is complete, resolving circular references and updating the object graph.
-     *
-     * @param root The root object of the parsed JSON structure
-     */
-    public final void handleResolveTasks(Object root) {
-        if (resolveTasks == null) {
-            return;
-        }
-
-        Object previous = null;
-        for (ResolveTask resolveTask : resolveTasks) {
-            JSONPath path = resolveTask.reference;
-            FieldReader fieldReader = resolveTask.fieldReader;
-
-            Object fieldValue;
-            if (path.isPrevious()) {
-                fieldValue = previous;
-            } else {
-                if (!path.isRef()) {
-                    throw new JSONException("reference path invalid : " + path);
-                }
-                path.setReaderContext(context);
-                if ((context.features & Feature.FieldBased.mask) != 0) {
-                    JSONWriter.Context writeContext = JSONFactory.createWriteContext();
-                    writeContext.features |= JSONWriter.Feature.FieldBased.mask;
-                    path.setWriterContext(writeContext);
-                }
-
-                fieldValue = path.eval(root);
-                previous = fieldValue;
-            }
-
-            Object resolvedName = resolveTask.name;
-            Object resolvedObject = resolveTask.object;
-
-            if (resolvedName != null) {
-                if (resolvedObject instanceof Map) {
-                    Map map = (Map) resolvedObject;
-                    if (resolvedName instanceof ReferenceKey) {
-                        if (map instanceof LinkedHashMap) {
-                            int size = map.size();
-                            if (size == 0) {
-                                continue;
-                            }
-
-                            Object[] keys = new Object[size];
-                            Object[] values = new Object[size];
-
-                            int index = 0;
-                            for (Object o : map.entrySet()) {
-                                Map.Entry entry = (Map.Entry) o;
-                                Object entryKey = entry.getKey();
-                                if (resolvedName == entryKey) {
-                                    keys[index] = fieldValue;
-                                } else {
-                                    keys[index] = entryKey;
-                                }
-                                values[index++] = entry.getValue();
-                            }
-                            map.clear();
-
-                            for (int j = 0; j < keys.length; j++) {
-                                map.put(keys[j], values[j]);
-                            }
-                        } else {
-                            map.put(fieldValue, map.remove(resolvedName));
-                        }
-                    } else {
-                        map.put(resolvedName, fieldValue);
-                    }
-                    continue;
-                }
-
-                if (resolvedName instanceof Integer) {
-                    if (resolvedObject instanceof List) {
-                        int index = (Integer) resolvedName;
-                        List list = (List) resolvedObject;
-                        if (index == list.size()) {
-                            list.add(fieldValue);
-                        } else {
-                            if (index < list.size() && list.get(index) == null) {
-                                list.set(index, fieldValue);
-                            } else {
-                                list.add(index, fieldValue);
-                            }
-                        }
-                        continue;
-                    }
-
-                    if (resolvedObject instanceof Object[]) {
-                        int index = (Integer) resolvedName;
-                        Object[] array = (Object[]) resolvedObject;
-                        array[index] = fieldValue;
-                        continue;
-                    }
-
-                    if (resolvedObject instanceof Collection) {
-                        Collection collection = (Collection) resolvedObject;
-                        collection.add(fieldValue);
-                        continue;
-                    }
-                }
-            }
-
-            fieldReader.accept(resolvedObject, fieldValue);
-        }
-    }
-
-    /**
      * Gets an ObjectReader for the specified type from the context's provider.
      *
      * @param type The type for which to get an ObjectReader
@@ -1390,75 +1277,6 @@ public abstract class JSONReader
      * @return The reference value as a string
      */
     public abstract String readReference();
-
-    /**
-     * Reads a reference value from JSON data and adds it to the specified list at the given index.
-     *
-     * @param list The list to which the reference should be added
-     * @param i The index at which to add the reference in the list
-     * @return true if a reference was read and added, false otherwise
-     */
-    public final boolean readReference(List list, int i) {
-        if (!isReference()) {
-            return false;
-        }
-        return readReference0(list, i);
-    }
-
-    /**
-     * Reads a reference value from JSON data and adds it to the specified collection at the given index.
-     *
-     * @param list The collection to which the reference should be added
-     * @param i The index at which to add the reference in the collection
-     * @return true if a reference was read and added, false otherwise
-     */
-    public boolean readReference(Collection list, int i) {
-        if (!isReference()) {
-            return false;
-        }
-        return readReference0(list, i);
-    }
-
-    private boolean readReference0(Collection list, int i) {
-        String path = readReference();
-        if ("..".equals(path)) {
-            list.add(list);
-        } else {
-            addResolveTask(list, i, JSONPath.of(path));
-        }
-        return true;
-    }
-
-    public final void addResolveTask(FieldReader fieldReader, Object object, JSONPath path) {
-        if (resolveTasks == null) {
-            resolveTasks = new ArrayList<>();
-        }
-        resolveTasks.add(new ResolveTask(fieldReader, object, fieldReader.fieldName, path));
-    }
-
-    public final void addResolveTask(Map object, Object key, JSONPath reference) {
-        if (resolveTasks == null) {
-            resolveTasks = new ArrayList<>();
-        }
-        if (object instanceof LinkedHashMap) {
-            object.put(key, null);
-        }
-        resolveTasks.add(new ResolveTask(null, object, key, reference));
-    }
-
-    public final void addResolveTask(Collection object, int i, JSONPath reference) {
-        if (resolveTasks == null) {
-            resolveTasks = new ArrayList<>();
-        }
-        resolveTasks.add(new ResolveTask(null, object, i, reference));
-    }
-
-    public final void addResolveTask(Object[] object, int i, JSONPath reference) {
-        if (resolveTasks == null) {
-            resolveTasks = new ArrayList<>();
-        }
-        resolveTasks.add(new ResolveTask(null, object, i, reference));
-    }
 
     /**
      * Checks if the current character represents the start of a JSON array.
@@ -3070,35 +2888,7 @@ public abstract class JSONReader
     protected abstract LocalDate readLocalDate10();
 
     protected abstract LocalDate readLocalDate11();
-
     protected abstract ZonedDateTime readZonedDateTimeX(int len);
-
-    /**
-     * Reads a number value from JSON data and passes it to a consumer.
-     *
-     * @param consumer The consumer to accept the number value
-     * @param quoted Whether the number should be quoted in the output
-     */
-    public void readNumber(ValueConsumer consumer, boolean quoted) {
-        readNumber0();
-        Number number = getNumber();
-        consumer.accept(number);
-    }
-
-    /**
-     * Reads a string value from JSON data and passes it to a consumer.
-     *
-     * @param consumer The consumer to accept the string value
-     * @param quoted Whether the string should be quoted in the output
-     */
-    public void readString(ValueConsumer consumer, boolean quoted) {
-        String str = readString(); //
-        if (quoted) {
-            consumer.accept(JSON.toJSONString(str));
-        } else {
-            consumer.accept(str);
-        }
-    }
 
     /**
      * Reads a string value from JSON data.
@@ -3323,13 +3113,7 @@ public abstract class JSONReader
         if (object == null) {
             throw new JSONException("object is null");
         }
-        Class objectClass = object.getClass();
-        boolean fieldBased = ((context.features | features) & Feature.FieldBased.mask) != 0;
-        ObjectReader objectReader = context.provider.getObjectReader(objectClass, fieldBased);
-        if (objectReader instanceof ObjectReaderBean) {
-            ObjectReaderBean objectReaderBean = (ObjectReaderBean) objectReader;
-            objectReaderBean.readObject(this, object, features);
-        } else if (object instanceof Map) {
+        if (object instanceof Map) {
             read((Map) object, features);
         } else {
             throw new JSONException("read object not support");
@@ -3491,25 +3275,6 @@ public abstract class JSONReader
                 if (ch == ':') {
                     next();
                 }
-            }
-
-            if (isReference()) {
-                String reference = readReference();
-                Object value = null;
-                if ("..".equals(reference)) {
-                    value = map;
-                } else {
-                    JSONPath jsonPath;
-                    try {
-                        jsonPath = JSONPath.of(reference);
-                    } catch (Exception ignored) {
-                        map.put(name, JSONObject.of("$ref", reference));
-                        continue;
-                    }
-                    addResolveTask(map, name, jsonPath);
-                }
-                map.put(name, value);
-                continue;
             }
 
             comma = false;
@@ -3766,12 +3531,7 @@ public abstract class JSONReader
                     val = readArray();
                     break;
                 case '{':
-                    if (isReference()) {
-                        addResolveTask(object, name, JSONPath.of(readReference()));
-                        val = null;
-                    } else {
-                        val = readObject();
-                    }
+                    val = readObject();
                     break;
                 case '"':
                 case '\'':
@@ -3910,17 +3670,7 @@ public abstract class JSONReader
             for (int i = 0; !nextIfArrayEnd(); i++) {
                 int mark = offset;
                 Object item;
-                if (isReference()) {
-                    String reference = readReference();
-                    if ("..".equals(reference)) {
-                        item = list;
-                    } else {
-                        item = null;
-                        addResolveTask(list, i, JSONPath.of(reference));
-                    }
-                } else {
-                    item = objectReader.readObject(this, null, null, 0);
-                }
+                item = objectReader.readObject(this, null, null, 0);
                 list.add(item);
                 if (mark == offset || ch == '}' || ch == EOI) {
                     throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
@@ -4113,8 +3863,6 @@ public abstract class JSONReader
                 case '{':
                     if (context.autoTypeBeforeHandler != null || (context.features & Feature.SupportAutoType.mask) != 0) {
                         val = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, 0);
-                    } else if (isReference()) {
-                        val = JSONPath.of(readReference());
                     } else {
                         val = readObject();
                     }
@@ -4213,12 +3961,7 @@ public abstract class JSONReader
     }
 
     private void add(List<Object> list, int i, Object val) {
-        if (val instanceof JSONPath) {
-            addResolveTask(list, i, (JSONPath) val);
-            list.add(null);
-        } else {
-            list.add(val);
-        }
+        list.add(val);
     }
 
     public final BigInteger getBigInteger() {
@@ -6576,25 +6319,6 @@ public abstract class JSONReader
         }
     }
 
-    static final class ResolveTask {
-        final FieldReader fieldReader;
-        final Object object;
-        final Object name;
-        final JSONPath reference;
-
-        ResolveTask(FieldReader fieldReader, Object object, Object name, JSONPath reference) {
-            this.fieldReader = fieldReader;
-            this.object = object;
-            this.name = name;
-            this.reference = reference;
-        }
-
-        @Override
-        public String toString() {
-            return reference.toString();
-        }
-    }
-
     public SavePoint mark() {
         return new SavePoint(this.offset, this.ch);
     }
@@ -6640,11 +6364,11 @@ public abstract class JSONReader
     }
 
     final JSONException error() {
-        throw new JSONValidException("error, offset " + offset + ", char " + (char) ch);
+        throw new JSONException("error, offset " + offset + ", char " + (char) ch);
     }
 
     final JSONException error(int offset, int ch) {
-        throw new JSONValidException("error, offset " + offset + ", char " + (char) ch);
+        throw new JSONException("error, offset " + offset + ", char " + (char) ch);
     }
 
     static JSONException syntaxError(int ch) {

@@ -1,14 +1,10 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.DateUtils;
-import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
@@ -209,9 +205,7 @@ public class JSONArray
         Class valueClass = value.getClass();
         ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
 
-        JSONObject jsonObject = (objectWriter instanceof ObjectWriterAdapter)
-                ? ((ObjectWriterAdapter) objectWriter).toJSONObject(value)
-                : (JSONObject) JSON.toJSON(value);
+        JSONObject jsonObject = (JSONObject) JSON.toJSON(value);
 
         set(index, jsonObject);
         return jsonObject;
@@ -1426,12 +1420,7 @@ public class JSONArray
             }
 
             if (clazz.isEnum()) {
-                objectReader = provider.getObjectReader(clazz, fieldBased);
-                if (objectReader instanceof ObjectReaderImplEnum) {
-                    long hashCode64 = Fnv.hashCode64(str);
-                    ObjectReaderImplEnum enumReader = (ObjectReaderImplEnum) objectReader;
-                    return (T) enumReader.getEnumByHashCode(hashCode64);
-                }
+                return (T) Enum.valueOf((Class<Enum>) clazz, str);
             }
         }
 
@@ -1573,19 +1562,6 @@ public class JSONArray
     public JSONArray fluentAddAll(Collection<?> c) {
         addAll(c);
         return this;
-    }
-
-    /**
-     * Checks if this {@link JSONArray} is valid against the specified {@link JSONSchema}.
-     *
-     * @param schema the {@link JSONSchema} to validate against
-     * @return true if this {@link JSONArray} is valid against the schema, false otherwise
-     * @since 2.0.3
-     */
-    public boolean isValid(JSONSchema schema) {
-        return schema
-                .validate(this)
-                .isSuccess();
     }
 
     /**

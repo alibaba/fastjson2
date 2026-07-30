@@ -1,4 +1,0 @@
-
-
-solon.serialization.json:
-  dateAsTicks: true #将date转为毫秒数

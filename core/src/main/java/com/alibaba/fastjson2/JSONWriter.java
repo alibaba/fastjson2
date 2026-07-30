@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
-import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
@@ -240,68 +239,6 @@ public abstract class JSONWriter
         }
 
         this.path = new Path(this.path, name);
-
-        Path previous;
-        if (object == rootObject) {
-            previous = Path.ROOT;
-        } else {
-            if (refs == null || (previous = refs.get(object)) == null) {
-                if (refs == null) {
-                    refs = new IdentityHashMap(8);
-                }
-                refs.put(object, this.path);
-                return null;
-            }
-        }
-
-        return previous.toString();
-    }
-
-    /**
-     * Sets the path for the specified object using the provided field writer.
-     * This method is used for reference detection during serialization.
-     *
-     * @param fieldWriter the field writer to use for path generation
-     * @param object the object to set the path for
-     * @return the previous path as a string, or null if no previous path exists
-     */
-    public final String setPath(FieldWriter fieldWriter, Object object) {
-        if (!isRefDetect(object)) {
-            return null;
-        }
-
-        this.path = this.path == Path.ROOT
-                ? fieldWriter.getRootParentPath()
-                : fieldWriter.getPath(path);
-
-        Path previous;
-        if (object == rootObject) {
-            previous = Path.ROOT;
-        } else {
-            if (refs == null || (previous = refs.get(object)) == null) {
-                if (refs == null) {
-                    refs = new IdentityHashMap(8);
-                }
-                refs.put(object, this.path);
-                return null;
-            }
-        }
-
-        return previous.toString();
-    }
-
-    /**
-     * Sets the path for the specified object using the provided field writer without reference detection.
-     * This method is used for reference detection during serialization.
-     *
-     * @param fieldWriter the field writer to use for path generation
-     * @param object the object to set the path for
-     * @return the previous path as a string, or null if no previous path exists
-     */
-    public final String setPath0(FieldWriter fieldWriter, Object object) {
-        this.path = this.path == Path.ROOT
-                ? fieldWriter.getRootParentPath()
-                : fieldWriter.getPath(path);
 
         Path previous;
         if (object == rootObject) {
@@ -3023,6 +2960,16 @@ public abstract class JSONWriter
 
             if (valueClass == BigDecimal.class) {
                 writeDecimal((BigDecimal) value, 0, null);
+                continue;
+            }
+
+            if (valueClass == Double.class) {
+                writeDouble((Double) value);
+                continue;
+            }
+
+            if (valueClass == Float.class) {
+                writeFloat((Float) value);
                 continue;
             }
 

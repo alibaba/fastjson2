@@ -1,9 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
-import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderBean;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -1165,19 +1163,9 @@ public interface JSONB {
             } else {
                 boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
                 ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
-                if ((context.features & JSONReader.Feature.SupportArrayToBean.mask) != 0
-                        && jsonReader.isArray()
-                        && objectReader instanceof ObjectReaderBean
-                ) {
-                    object = objectReader.readArrayMappingJSONBObject(jsonReader, objectClass, null, 0);
-                } else {
-                    object = objectReader.readJSONBObject(jsonReader, objectClass, null, 0);
-                }
+                object = objectReader.readJSONBObject(jsonReader, objectClass, null, 0);
             }
 
-            if (jsonReader.resolveTasks != null) {
-                jsonReader.handleResolveTasks(object);
-            }
             return (T) object;
         }
     }
@@ -1206,18 +1194,7 @@ public interface JSONB {
                         objectClass,
                         (context.features & JSONReader.Feature.FieldBased.mask) != 0
                 );
-                if ((context.features & JSONReader.Feature.SupportArrayToBean.mask) != 0
-                        && jsonReader.isArray()
-                        && objectReader instanceof ObjectReaderBean
-                ) {
-                    object = objectReader.readArrayMappingJSONBObject(jsonReader, objectClass, null, 0);
-                } else {
-                    object = objectReader.readJSONBObject(jsonReader, objectClass, null, 0);
-                }
-            }
-
-            if (jsonReader.resolveTasks != null) {
-                jsonReader.handleResolveTasks(object);
+                object = objectReader.readJSONBObject(jsonReader, objectClass, null, 0);
             }
             return (T) object;
         }
@@ -2543,15 +2520,17 @@ public interface JSONB {
             if (symbolTable != null) {
                 symbol = symbolTable.getOrdinalByHashCode(hash);
                 if (symbol == -1 && jsonWriterJSONB.symbols != null) {
-                    symbol = jsonWriterJSONB.symbols.get(hash);
+                    Integer s = jsonWriterJSONB.symbols.get(hash);
+                    symbol = s != null ? s : -1;
                 }
             } else if (jsonWriterJSONB.symbols != null) {
-                symbol = jsonWriterJSONB.symbols.get(hash);
+                Integer s = jsonWriterJSONB.symbols.get(hash);
+                symbol = s != null ? s : -1;
             }
 
             if (symbol == -1) {
                 if (jsonWriterJSONB.symbols == null) {
-                    jsonWriterJSONB.symbols = new TLongIntHashMap();
+                    jsonWriterJSONB.symbols = new HashMap<>();
                 }
                 jsonWriterJSONB.symbols.put(hash, symbol = jsonWriterJSONB.symbolIndex++);
             } else {
@@ -3220,13 +3199,15 @@ public interface JSONB {
 
                 boolean symbolExists = false;
                 if (jsonWriterJSONB.symbols != null) {
-                    if ((symbol = jsonWriterJSONB.symbols.putIfAbsent(nameHash, jsonWriterJSONB.symbolIndex)) != jsonWriterJSONB.symbolIndex) {
+                    Integer existing = jsonWriterJSONB.symbols.putIfAbsent(nameHash, jsonWriterJSONB.symbolIndex);
+                    if (existing != null) {
+                        symbol = existing;
                         symbolExists = true;
                     } else {
-                        jsonWriterJSONB.symbolIndex++;
+                        symbol = jsonWriterJSONB.symbolIndex++;
                     }
                 } else {
-                    (jsonWriterJSONB.symbols = new TLongIntHashMap())
+                    (jsonWriterJSONB.symbols = new HashMap<>())
                             .put(nameHash, symbol = jsonWriterJSONB.symbolIndex++);
                 }
 
