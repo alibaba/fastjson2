@@ -3328,6 +3328,9 @@ class JSONReaderUTF8
         if (intOverflow) {
             int numStart = negative ? start : start - 1;
             int numDigits = scale > 0 ? offset - 2 - numStart : offset - 1 - numStart;
+            if (numDigits > MAX_NUMBER_DIGITS) {
+                throw new JSONException("Number literal too long: " + numDigits + " digits (max " + MAX_NUMBER_DIGITS + ")");
+            }
             if (numDigits > 38) {
                 valueType = JSON_TYPE_BIG_DEC;
                 if (negative) {
