@@ -29,12 +29,15 @@ public class PropertiesUtils {
 
             int dotIndex = key.lastIndexOf(".");
             if (dotIndex == -1) {
-                FieldReader<T> fieldReader = reader.getFieldReader(key);
+                Object fieldReader = reader.getFieldReader(key);
                 if (fieldReader == null) {
                     continue;
                 }
-                Object fieldValue = TypeUtils.cast(value, fieldReader.fieldType);
-                fieldReader.accept(instance, fieldValue);
+                Object fieldValue = TypeUtils.cast(value, Object.class);
+                try {
+                    instance.getClass().getField(key).set(instance, fieldValue);
+                } catch (Exception ignored) {
+                }
             } else {
                 JSONPath.set(instance, key, value);
             }
@@ -149,22 +152,18 @@ public class PropertiesUtils {
         }
 
         ObjectWriter serializer = provider.getObjectWriter(clazz);
-        if (serializer instanceof ObjectWriterAdapter) {
-            ObjectWriterAdapter javaBeanSerializer = (ObjectWriterAdapter) serializer;
-
-            try {
-                Map<String, Object> fieldValues = javaBeanSerializer.toMap(javaObject);
-                for (Map.Entry<String, Object> entry : fieldValues.entrySet()) {
-                    String key = entry.getKey();
-
-                    if (key != null) {
-                        String path = parent != null ? (parent + "." + key) : key;
-                        paths(provider, values, paths, path, entry.getValue());
-                    }
+        try {
+            String jsonStr = JSON.toJSONString(javaObject);
+            JSONObject obj = JSON.parseObject(jsonStr);
+            for (Map.Entry<String, Object> entry : obj.entrySet()) {
+                String key = entry.getKey();
+                if (key != null) {
+                    String path = parent != null ? (parent + "." + key) : key;
+                    paths(provider, values, paths, path, entry.getValue());
                 }
-            } catch (Exception e) {
-                throw new JSONException("toJSON error", e);
             }
+        } catch (Exception e) {
+            throw new JSONException("toJSON error", e);
         }
     }
 }

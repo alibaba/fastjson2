@@ -172,7 +172,8 @@ public class JdbcSupport {
     }
 
     static class TimeReader
-            extends ObjectReaderImplDate {
+            extends DateTimeCodec
+            implements ObjectReader {
         public TimeReader(String format, Locale locale) {
             super(format, locale);
         }
@@ -439,7 +440,8 @@ public class JdbcSupport {
     }
 
     static class TimestampReader
-            extends ObjectReaderImplDate {
+            extends DateTimeCodec
+            implements ObjectReader {
         public TimestampReader(String format, Locale locale) {
             super(format, locale);
         }
@@ -538,7 +540,8 @@ public class JdbcSupport {
     }
 
     static class DateReader
-            extends ObjectReaderImplDate {
+            extends DateTimeCodec
+            implements ObjectReader {
         public DateReader(String format, Locale locale) {
             super(format, locale);
         }

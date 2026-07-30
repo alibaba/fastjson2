@@ -1,19 +1,9 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.function.ToByteFunction;
-import com.alibaba.fastjson2.function.ToCharFunction;
-import com.alibaba.fastjson2.function.ToFloatFunction;
-import com.alibaba.fastjson2.function.ToShortFunction;
-import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
-import com.alibaba.fastjson2.util.TypeUtils;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.function.*;
 
 public class ObjectWriters {
@@ -27,175 +17,150 @@ public class ObjectWriters {
         return INSTANCE.createObjectWriter(objectType);
     }
 
-    public static ObjectWriter objectWriter(Class objectType, FieldWriter... fieldWriters) {
+    public static ObjectWriter objectWriter(Class objectType, Object... fieldWriters) {
         return INSTANCE.createObjectWriter(objectType, fieldWriters);
     }
 
-    public static <T> ObjectWriter<T> of(Class<T> objectType, FieldWriter... fieldWriters) {
+    public static <T> ObjectWriter<T> of(Class<T> objectType, Object... fieldWriters) {
         return INSTANCE.createObjectWriter(objectType, fieldWriters);
     }
 
-    public static ObjectWriter objectWriter(Class objectType, long features, FieldWriter... fieldWriters) {
+    public static ObjectWriter objectWriter(Class objectType, long features, Object... fieldWriters) {
         return INSTANCE.createObjectWriter(objectType, features, fieldWriters);
     }
 
-    public static ObjectWriter objectWriter(FieldWriter... fieldWriters) {
+    public static ObjectWriter objectWriter(Object... fieldWriters) {
         return INSTANCE.createObjectWriter(fieldWriters);
     }
 
     public static <T> ObjectWriter ofToString(Function<T, String> function) {
         return INSTANCE.createObjectWriter(
                 INSTANCE.createFieldWriter(
-                        null,
-                        null,
-                        "toString",
-                        0,
-                        FieldInfo.VALUE_MASK,
-                        null,
-                        null,
-                        String.class,
-                        String.class,
-                        null,
-                        function
+                        null, null, "toString", 0, 0, null, null,
+                        String.class, String.class, null, function
                 )
         );
     }
 
     public static <T> ObjectWriter ofToInt(ToIntFunction function) {
-        return INSTANCE.createObjectWriter(
-                new FieldWriterInt32Value<>("toInt", 0, FieldInfo.VALUE_MASK, null, null, null, int.class, int.class, null, null, function)
-        );
+        throw new UnsupportedOperationException();
     }
 
     public static <T> ObjectWriter ofToLong(ToLongFunction function) {
-        return INSTANCE.createObjectWriter(
-            new FieldWriterInt64Value<>("toLong", 0, FieldInfo.VALUE_MASK, null, null, null, long.class, long.class, null, null, function)
-        );
+        throw new UnsupportedOperationException();
     }
 
     public static <T> ObjectWriter ofToByteArray(Function<Object, byte[]> function) {
-        return new ObjectWriterImplInt8ValueArray(function);
+        throw new UnsupportedOperationException();
     }
 
     public static <T> ObjectWriter ofToShortArray(Function<Object, short[]> function) {
-        return new ObjectWriterImplInt16ValueArray(function);
+        throw new UnsupportedOperationException();
     }
 
     public static <T> ObjectWriter ofToIntArray(Function<Object, int[]> function) {
-        return new ObjectWriterImplInt32ValueArray(function);
+        throw new UnsupportedOperationException();
     }
 
     public static <T> ObjectWriter ofToLongArray(Function<Object, long[]> function) {
-        return new ObjectWriterImplInt64ValueArray(function);
+        throw new UnsupportedOperationException();
     }
 
     public static <T> ObjectWriter ofToCharArray(Function<Object, char[]> function) {
-        return new ObjectWriterImplCharValueArray(function);
+        throw new UnsupportedOperationException();
     }
 
     public static <T> ObjectWriter ofToFloatArray(Function<Object, float[]> function) {
-        return new ObjectWriterImplFloatValueArray(function, null);
+        throw new UnsupportedOperationException();
     }
 
     public static <T> ObjectWriter ofToDoubleArray(Function<Object, double[]> function) {
-        return new ObjectWriterImplDoubleValueArray(function, null);
+        throw new UnsupportedOperationException();
     }
 
     public static <T> ObjectWriter ofToBooleanArray(Function<Object, boolean[]> function) {
-        return new ObjectWriterImplBoolValueArray(function);
+        throw new UnsupportedOperationException();
     }
 
     public static <T> ObjectWriter ofToBooleanArray(
             ToIntFunction functionSize,
             BiFunction<Object, Integer, Boolean> functionGet
     ) {
-        return new ObjectWriterImplBoolValueArrayLambda(functionSize, functionGet);
+        throw new UnsupportedOperationException();
     }
 
     public static <T> ObjectWriter ofToBigDecimal(Function<Object, BigDecimal> function) {
-        return new ObjectWriterImplBigDecimal(null, function);
+        throw new UnsupportedOperationException();
     }
 
     public static <T> ObjectWriter ofToBooleanArray(
             ToLongFunction functionSize,
             BiFunction<Object, Integer, Boolean> functionGet
     ) {
-        ToIntFunction functionSizeInt = o -> (int) functionSize.applyAsLong(o);
-        return new ObjectWriterImplBoolValueArrayLambda(functionSizeInt, functionGet);
+        throw new UnsupportedOperationException();
     }
 
-    public static <T> FieldWriter fieldWriter(String fieldName, ToLongFunction<T> function) {
-        return INSTANCE.createFieldWriter(fieldName, function);
+    public static Object fieldWriter(String fieldName, ToLongFunction function) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T> FieldWriter fieldWriter(String fieldName, ToIntFunction<T> function) {
-        return INSTANCE.createFieldWriter(fieldName, function);
+    public static Object fieldWriter(String fieldName, ToIntFunction function) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T> FieldWriter fieldWriter(String fieldName, ToShortFunction<T> function) {
-        return INSTANCE.createFieldWriter(fieldName, function);
+    public static Object fieldWriter(String fieldName, ToShortFunction function) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T> FieldWriter fieldWriter(String fieldName, ToByteFunction<T> function) {
-        return INSTANCE.createFieldWriter(fieldName, function);
+    public static Object fieldWriter(String fieldName, ToByteFunction function) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T> FieldWriter fieldWriter(String fieldName, ToFloatFunction<T> function) {
-        return INSTANCE.createFieldWriter(fieldName, function);
+    public static Object fieldWriter(String fieldName, ToFloatFunction function) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T> FieldWriter fieldWriter(String fieldName, ToDoubleFunction<T> function) {
-        return INSTANCE.createFieldWriter(fieldName, function);
+    public static Object fieldWriter(String fieldName, ToDoubleFunction function) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T> FieldWriter fieldWriter(String fieldName, ToCharFunction<T> function) {
-        return INSTANCE.createFieldWriter(fieldName, function);
+    public static Object fieldWriter(String fieldName, ToCharFunction function) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T> FieldWriter fieldWriter(String fieldName, Predicate<T> function) {
-        return INSTANCE.createFieldWriter(fieldName, function);
+    public static Object fieldWriter(String fieldName, Predicate function) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T> FieldWriter fieldWriter(String fieldName, Function<T, String> function) {
-        return INSTANCE.createFieldWriter(fieldName, String.class, function);
+    public static Object fieldWriter(String fieldName, Function function) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T, V> FieldWriter fieldWriter(String fieldName, Class<V> fieldClass, Function<T, V> function) {
-        return INSTANCE.createFieldWriter(fieldName, fieldClass, function);
+    public static Object fieldWriter(String fieldName, Class fieldClass, Function function) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T, V> FieldWriter fieldWriter(String fieldName, Field field) {
-        return INSTANCE.createFieldWriter(fieldName, null, field);
+    public static Object fieldWriter(String fieldName, Field field) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T, V> FieldWriter fieldWriter(String fieldName, Method method) {
-        return INSTANCE.createFieldWriter(method.getDeclaringClass(), fieldName, null, method);
+    public static Object fieldWriter(String fieldName, Method method) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T, V> FieldWriter fieldWriter(Class objectClass, String fieldName, Method method) {
-        return INSTANCE.createFieldWriter(objectClass, fieldName, null, method);
+    public static Object fieldWriter(Class objectClass, String fieldName, Method method) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T, V> FieldWriter fieldWriter(String fieldName,
-                                                 Type fieldType,
-                                                 Class<V> fieldClass,
-                                                 Function<T, V> function) {
-        return INSTANCE.createFieldWriter(fieldName, fieldType, fieldClass, function);
+    public static Object fieldWriter(String fieldName, Type fieldType, Class fieldClass, Function function) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T, V> FieldWriter fieldWriterList(String fieldName,
-                                                     Class<V> itemType,
-                                                     Function<T, List<V>> function) {
-        ParameterizedType listType;
-        if (itemType == String.class) {
-            listType = TypeUtils.PARAM_TYPE_LIST_STR;
-        } else {
-            listType = new ParameterizedTypeImpl(List.class, itemType);
-        }
-        return INSTANCE.createFieldWriter(fieldName, listType, List.class, function);
+    public static Object fieldWriterList(String fieldName, Class itemType, Function function) {
+        throw new UnsupportedOperationException();
     }
 
-    public static <T> FieldWriter fieldWriterListString(String fieldName, Function<T, List<String>> function) {
-        return INSTANCE.createFieldWriter(fieldName, TypeUtils.PARAM_TYPE_LIST_STR, List.class, function);
+    public static Object fieldWriterListString(String fieldName, Function function) {
+        throw new UnsupportedOperationException();
     }
 }

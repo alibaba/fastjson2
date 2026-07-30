@@ -421,9 +421,7 @@ public interface JSONB {
                 jsonbBytes.length)
         ) {
             Object object = reader.readAnyObject();
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -443,9 +441,7 @@ public interface JSONB {
                 jsonbBytes.length)
         ) {
             Object object = reader.readAnyObject();
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -460,9 +456,7 @@ public interface JSONB {
     static Object parse(InputStream in, JSONReader.Context context) {
         try (JSONReaderJSONB reader = new JSONReaderJSONB(context, in)) {
             Object object = reader.readAny();
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -483,9 +477,7 @@ public interface JSONB {
                 jsonbBytes.length)
         ) {
             Object object = reader.readAnyObject();
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -504,9 +496,7 @@ public interface JSONB {
                 jsonbBytes.length)
         ) {
             JSONObject object = (JSONObject) reader.readObject();
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -526,9 +516,7 @@ public interface JSONB {
                 jsonbBytes.length)
         ) {
             JSONObject object = (JSONObject) reader.readObject();
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -543,9 +531,7 @@ public interface JSONB {
     static JSONObject parseObject(InputStream in, JSONReader.Context context) {
         try (JSONReaderJSONB reader = new JSONReaderJSONB(context, in)) {
             JSONObject object = (JSONObject) reader.readObject();
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -797,9 +783,7 @@ public interface JSONB {
                 jsonbBytes.length)
         ) {
             T object = (T) objectReader.readJSONBObject(reader, objectType, null, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -832,9 +816,7 @@ public interface JSONB {
                 jsonbBytes.length)
         ) {
             T object = (T) objectReader.readJSONBObject(reader, objectType, null, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -1224,9 +1206,7 @@ public interface JSONB {
                 0,
                 jsonbBytes.length)) {
             T object = (T) objectReader.readJSONBObject(reader, objectClass, null, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -1254,9 +1234,7 @@ public interface JSONB {
                 len)
         ) {
             T object = (T) objectReader.readJSONBObject(reader, objectClass, null, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -1284,9 +1262,7 @@ public interface JSONB {
                 len)
         ) {
             T object = (T) objectReader.readJSONBObject(reader, type, null, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -1321,9 +1297,7 @@ public interface JSONB {
                 len)
         ) {
             T object = (T) objectReader.readJSONBObject(reader, objectClass, null, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -1351,9 +1325,7 @@ public interface JSONB {
             ObjectReader objectReader = context.provider.getObjectReader(objectType, fieldBased);
 
             T object = (T) objectReader.readJSONBObject(reader, objectType, null, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -1380,9 +1352,7 @@ public interface JSONB {
             ObjectReader objectReader = reader.getObjectReader(objectType);
 
             T object = (T) objectReader.readJSONBObject(reader, objectType, null, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -1408,9 +1378,7 @@ public interface JSONB {
                 len)
         ) {
             T object = (T) objectReader.readJSONBObject(reader, objectClass, null, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -1437,9 +1405,7 @@ public interface JSONB {
                 len)
         ) {
             T object = (T) objectReader.readJSONBObject(reader, objectClass, null, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -1474,9 +1440,7 @@ public interface JSONB {
                 len)
         ) {
             T object = (T) objectReader.readJSONBObject(reader, objectClass, null, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
@@ -1511,9 +1475,7 @@ public interface JSONB {
                 len)
         ) {
             T object = (T) objectReader.readJSONBObject(reader, objectClass, null, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
+
             return object;
         }
     }
