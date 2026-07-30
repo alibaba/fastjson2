@@ -998,7 +998,9 @@ public class DateUtils {
         char c0 = (char) chars[off];
         if (c0 == '"' && chars[len - 1] == '"') {
             try (JSONReader jsonReader = JSONReader.of(chars, off, len, charset)) {
-                millis = jsonReader.readMillisFromString();
+                String dateStr = jsonReader.readString();
+                Date date = java.sql.Date.valueOf(java.time.LocalDate.parse(dateStr));
+                millis = date.getTime();
             }
         } else if (len == 19) {
             millis = DateUtils.parseMillis19(chars, off, zoneId);
@@ -1084,7 +1086,9 @@ public class DateUtils {
         char c0 = chars[off];
         if (c0 == '"' && chars[len - 1] == '"') {
             try (JSONReader jsonReader = JSONReader.of(chars, off, len)) {
-                millis = jsonReader.readMillisFromString();
+                String dateStr = jsonReader.readString();
+                Date date = java.sql.Date.valueOf(java.time.LocalDate.parse(dateStr));
+                millis = date.getTime();
             }
         } else if (len == 19) {
             millis = DateUtils.parseMillis19(chars, off, zoneId);

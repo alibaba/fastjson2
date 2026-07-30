@@ -1177,7 +1177,7 @@ public class JSONObject
      * @return JSONB bytes
      */
     public byte[] toJSONBBytes(JSONWriter.Feature... features) {
-        try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
+        try (JSONWriter writer = JSONWriter.of(features)) {
             writer.setRootObject(this);
             writer.write(this);
             return writer.getBytes();

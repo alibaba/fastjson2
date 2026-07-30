@@ -1306,7 +1306,6 @@ final class JSONReaderASCII
         return readStringNotMatch();
     }
 
-    @Override
     protected final void readString0() {
         final byte[] bytes = this.bytes;
         char quote = this.ch;

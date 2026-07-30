@@ -3068,7 +3068,7 @@ public abstract class JSONReader
                 break;
             }
 
-            Object item = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, 0);
+            Object item = readAny();
             list.add(item);
 
             nextIfComma();
@@ -3300,7 +3300,7 @@ public abstract class JSONReader
                     break;
                 case '{':
                     if (typeRedirect) {
-                        value = ObjectReaderImplObject.INSTANCE.readObject(this, null, name, features);
+                        value = readAny();
                     } else {
                         value = readObject();
                     }
@@ -3862,7 +3862,7 @@ public abstract class JSONReader
                     break;
                 case '{':
                     if (context.autoTypeBeforeHandler != null || (context.features & Feature.SupportAutoType.mask) != 0) {
-                        val = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, 0);
+                        val = readAny();
                     } else {
                         val = readObject();
                     }
@@ -4388,7 +4388,23 @@ public abstract class JSONReader
      * @return A JSONReader instance
      */
     public static JSONReader of(byte[] utf8Bytes) {
-        return of(utf8Bytes, 0, utf8Bytes.length, StandardCharsets.UTF_8, createReadContext());
+        return of(utf8Bytes, 0, utf8Bytes.length, StandardCharsets.UTF_8);
+    }
+
+    public static JSONReader of(byte[] bytes, int offset, int length, Charset charset, Context context) {
+        if (charset == StandardCharsets.UTF_8) {
+            return JSONReaderUTF8.of(bytes, offset, length, context);
+        }
+
+        if (charset == StandardCharsets.UTF_16) {
+            return ofUTF16(bytes, offset, length, context);
+        }
+
+        if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
+            return JSONReaderASCII.of(context, null, bytes, offset, length);
+        }
+
+        throw new JSONException("not support charset " + charset);
     }
 
     @Deprecated
@@ -4423,71 +4439,6 @@ public abstract class JSONReader
         return ofUTF16(null, chars, 0, chars.length, context);
     }
 
-    /**
-     * Creates a JSONReader from a byte array containing JSONB (binary JSON) data.
-     *
-     * @param jsonbBytes The byte array containing JSONB data
-     * @return A JSONReader instance for JSONB data
-     */
-    public static JSONReader ofJSONB(byte[] jsonbBytes) {
-        return new JSONReaderJSONB(
-                JSONFactory.createReadContext(),
-                jsonbBytes,
-                0,
-                jsonbBytes.length);
-    }
-
-    @Deprecated
-    public static JSONReader ofJSONB(Context context, byte[] jsonbBytes) {
-        return new JSONReaderJSONB(
-                context,
-                jsonbBytes,
-                0,
-                jsonbBytes.length);
-    }
-
-    public static JSONReader ofJSONB(byte[] jsonbBytes, Context context) {
-        return new JSONReaderJSONB(
-                context,
-                jsonbBytes,
-                0,
-                jsonbBytes.length);
-    }
-
-    public static JSONReader ofJSONB(InputStream in, Context context) {
-        return new JSONReaderJSONB(context, in);
-    }
-
-    public static JSONReader ofJSONB(byte[] jsonbBytes, Feature... features) {
-        Context context = JSONFactory.createReadContext();
-        context.config(features);
-        return new JSONReaderJSONB(
-                context,
-                jsonbBytes,
-                0,
-                jsonbBytes.length);
-    }
-
-    public static JSONReader ofJSONB(byte[] bytes, int offset, int length) {
-        return new JSONReaderJSONB(
-                JSONFactory.createReadContext(),
-                bytes,
-                offset,
-                length);
-    }
-
-    public static JSONReader ofJSONB(byte[] bytes, int offset, int length, Context context) {
-        return new JSONReaderJSONB(context, bytes, offset, length);
-    }
-
-    public static JSONReader ofJSONB(byte[] bytes, int offset, int length, SymbolTable symbolTable) {
-        return new JSONReaderJSONB(
-                JSONFactory.createReadContext(symbolTable),
-                bytes,
-                offset,
-                length);
-    }
-
     public static JSONReader of(byte[] bytes, int offset, int length, Charset charset) {
         Context context = JSONFactory.createReadContext();
 
@@ -4512,22 +4463,6 @@ public abstract class JSONReader
 
     private static JSONReader ofUTF16(String str, char[] chars, int offset, int length, Context ctx) {
         return new JSONReaderUTF16(ctx, str, chars, offset, length);
-    }
-
-    public static JSONReader of(byte[] bytes, int offset, int length, Charset charset, Context context) {
-        if (charset == StandardCharsets.UTF_8) {
-            return JSONReaderUTF8.of(bytes, offset, length, context);
-        }
-
-        if (charset == StandardCharsets.UTF_16) {
-            return ofUTF16(bytes, offset, length, context);
-        }
-
-        if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
-            return JSONReaderASCII.of(context, null, bytes, offset, length);
-        }
-
-        throw new JSONException("not support charset " + charset);
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length) {

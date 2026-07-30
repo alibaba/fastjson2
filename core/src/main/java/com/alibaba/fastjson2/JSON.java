@@ -138,10 +138,7 @@ public interface JSON {
                     reader.read(array);
                     object = array;
                 }
-                if (reader.resolveTasks != null) {
-                    reader.handleResolveTasks(object);
-                }
-            } else {
+} else {
                 ObjectReader<?> objectReader = provider.getObjectReader(Object.class, false);
                 object = objectReader.readObject(reader, null, null, 0);
             }
@@ -2381,7 +2378,6 @@ public interface JSON {
                         }
 
                         T object = objectReader.readObject(jsonReader, type, null, 0);
-                        
                         if (jsonReader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                             throw new JSONException(jsonReader.info("input not end"));
                         }
@@ -2503,9 +2499,7 @@ public interface JSON {
             }
             JSONArray array = new JSONArray();
             reader.read(array);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(array);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2533,9 +2527,7 @@ public interface JSON {
             }
             JSONArray array = new JSONArray();
             reader.read(array);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(array);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2566,9 +2558,7 @@ public interface JSON {
             }
             JSONArray array = new JSONArray();
             reader.read(array);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(array);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2596,9 +2586,7 @@ public interface JSON {
             }
             JSONArray array = new JSONArray();
             reader.read(array);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(array);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2627,9 +2615,7 @@ public interface JSON {
             }
             JSONArray array = new JSONArray();
             reader.read(array);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(array);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2681,9 +2667,7 @@ public interface JSON {
             }
             JSONArray array = new JSONArray();
             reader.read(array);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(array);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2712,9 +2696,7 @@ public interface JSON {
             }
             JSONArray array = new JSONArray();
             reader.read(array);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(array);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2743,9 +2725,7 @@ public interface JSON {
             }
             JSONArray array = new JSONArray();
             reader.read(array);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(array);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2772,9 +2752,7 @@ public interface JSON {
         final JSONReader.Context context = JSONFactory.createReadContext(features);
         try (JSONReader reader = JSONReader.of(text, context)) {
             List<T> list = reader.readArray(type);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(list);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2800,9 +2778,7 @@ public interface JSON {
         final JSONReader.Context context = JSONFactory.createReadContext();
         try (JSONReader reader = JSONReader.of(text, context)) {
             List<T> list = reader.readArray(type);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(list);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2828,9 +2804,7 @@ public interface JSON {
         final JSONReader.Context context = JSONFactory.createReadContext();
         try (JSONReader reader = JSONReader.of(text, context)) {
             List<T> list = reader.readArray(type);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(list);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2856,9 +2830,7 @@ public interface JSON {
         final JSONReader.Context context = JSONFactory.createReadContext();
         try (JSONReader reader = JSONReader.of(text, context)) {
             List<T> list = reader.readList(types);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(list);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2885,9 +2857,7 @@ public interface JSON {
         final JSONReader.Context context = JSONFactory.createReadContext(features);
         try (JSONReader reader = JSONReader.of(text, context)) {
             List<T> list = reader.readArray(type);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(list);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2914,9 +2884,7 @@ public interface JSON {
         final JSONReader.Context context = JSONFactory.createReadContext(features);
         try (JSONReader reader = JSONReader.of(chars, context)) {
             List<T> list = reader.readArray(type);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(list);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2953,9 +2921,7 @@ public interface JSON {
                 );
             }
             reader.endArray();
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(array);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2982,9 +2948,7 @@ public interface JSON {
         final JSONReader.Context context = JSONFactory.createReadContext(features);
         try (JSONReader reader = JSONReader.of(input, context)) {
             List<T> list = reader.readArray(type);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(list);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -3011,9 +2975,7 @@ public interface JSON {
         final JSONReader.Context context = JSONFactory.createReadContext(features);
         try (JSONReader reader = JSONReader.of(bytes, context)) {
             List<T> list = reader.readArray(type);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(list);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -3040,9 +3002,7 @@ public interface JSON {
         final JSONReader.Context context = JSONFactory.createReadContext(features);
         try (JSONReader reader = JSONReader.of(bytes, context)) {
             List<T> list = reader.readArray(type);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(list);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -3079,9 +3039,7 @@ public interface JSON {
         final JSONReader.Context context = JSONFactory.createReadContext(features);
         try (JSONReader reader = JSONReader.of(bytes, offset, length, charset, context)) {
             List<T> list = reader.readArray(type);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(list);
-            }
+
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -4369,13 +4327,13 @@ public interface JSON {
         ObjectReader objectReader = defaultObjectReaderProvider.getObjectReader(objectClass, fieldBased);
 
         byte[] jsonbBytes;
-        try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
+        try (JSONWriter writer = JSONWriter.of(features)) {
             writer.config(JSONWriter.Feature.WriteClassName);
             objectWriter.writeJSONB(writer, object, null, null, 0);
             jsonbBytes = writer.getBytes();
         }
 
-        try (JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes, JSONReader.Feature.SupportAutoType, JSONReader.Feature.SupportClassForName)) {
+        try (JSONReader jsonReader = JSONReader.of(jsonbBytes)) {
             if (beanToArray) {
                 jsonReader.context.config(JSONReader.Feature.SupportArrayToBean);
             }
@@ -4417,16 +4375,13 @@ public interface JSON {
         ObjectReader objectReader = defaultObjectReaderProvider.getObjectReader(targetClass, fieldBased);
 
         byte[] jsonbBytes;
-        try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
+        try (JSONWriter writer = JSONWriter.of(features)) {
             writer.config(JSONWriter.Feature.WriteClassName);
             objectWriter.writeJSONB(writer, object, null, null, 0);
             jsonbBytes = writer.getBytes();
         }
 
-        try (JSONReader jsonReader = JSONReader.ofJSONB(
-                jsonbBytes,
-                JSONReader.Feature.SupportAutoType,
-                JSONReader.Feature.SupportClassForName)
+        try (JSONReader jsonReader = JSONReader.of(jsonbBytes)
         ) {
             if (beanToArray) {
                 jsonReader.context.config(JSONReader.Feature.SupportArrayToBean);

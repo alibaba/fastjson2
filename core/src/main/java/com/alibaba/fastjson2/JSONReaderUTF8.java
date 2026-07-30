@@ -4122,1942 +4122,289 @@ class JSONReaderUTF8
         return floatValue;
     }
 
-    public final void readString(Object consumer, boolean quoted) {
-    }
     @Override
     public void skipComment() {
-        throw new UnsupportedOperationException();
-    }
-
-    public final void readNumber(Object consumer, boolean quoted) {
-    }
-    @Override
-    public final boolean readIfNull() {
-        final byte[] bytes = this.bytes;
-        int ch = this.ch;
-        int offset = this.offset;
-        if (ch == 'n'
-                && bytes[offset] == 'u'
-                && bytes[offset + 1] == 'l'
-                && bytes[offset + 2] == 'l') {
-            if (offset + 3 == end) {
-                ch = EOI;
-            } else {
-                ch = (char) bytes[offset + 3];
-            }
-            offset += 4;
-        } else {
-            return false;
-        }
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-        if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : (char) bytes[offset++];
-
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-        }
-
-        this.offset = offset;
-        this.ch = (char) ch;
-        return true;
+        // no-op in tree mode
     }
 
     @Override
-    public final boolean isNull() {
-        return ch == 'n' && offset < end && bytes[offset] == 'u';
-    }
-
-    @Override
-    public final Date readNullOrNewDate() {
-        final byte[] bytes = this.bytes;
-        int ch;
-        int offset = this.offset;
-
-        Date date = null;
-        if (offset + 2 < end
-                && bytes[offset] == 'u'
-                && bytes[offset + 1] == 'l'
-                && bytes[offset + 2] == 'l') {
-            if (offset + 3 == end) {
-                ch = EOI;
-            } else {
-                ch = bytes[offset + 3];
-            }
-            offset += 4;
-        } else if (offset + 1 < end
-                && bytes[offset] == 'e'
-                && bytes[offset + 1] == 'w') {
-            if (offset + 3 == end) {
-                ch = EOI;
-            } else {
-                ch = bytes[offset + 2];
-            }
-            offset += 3;
-
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-
-            if (offset + 4 < end
-                    && ch == 'D'
-                    && bytes[offset] == 'a'
-                    && bytes[offset + 1] == 't'
-                    && bytes[offset + 2] == 'e') {
-                if (offset + 3 == end) {
-                    ch = EOI;
+    public String readString() {
+        if (ch == '"' || ch == '\'') {
+            final byte[] bytes = this.bytes;
+            char quote = ch;
+            int start = offset;
+            int i = offset;
+            while (i < bytes.length && bytes[i] != quote) {
+                if (bytes[i] == '\\') {
+                    i += 2;
                 } else {
-                    ch = bytes[offset + 3];
+                    i++;
                 }
-                offset += 4;
-            } else {
-                throw new JSONException("json syntax error, not match new Date" + offset);
             }
-
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-
-            if (ch != '(' || offset >= end) {
-                throw new JSONException("json syntax error, not match new Date" + offset);
-            }
-            ch = bytes[offset++];
-
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-
-            this.ch = (char) ch;
-            this.offset = offset;
-            long millis = readInt64Value();
-
-            ch = this.ch;
-            offset = this.offset;
-
-            if (ch != ')') {
-                throw new JSONException("json syntax error, not match new Date" + offset);
-            }
-            ch = offset >= end ? EOI : bytes[offset++];
-
-            date = new Date(millis);
-        } else {
-            throw new JSONException("json syntax error, not match null or new Date" + offset);
-        }
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-        if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : bytes[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
+            if (i < bytes.length) {
+                String str = new String(bytes, start, i - start, java.nio.charset.StandardCharsets.UTF_8);
+                offset = i + 1;
+                if (offset < bytes.length) {
+                    ch = (char) bytes[offset];
+                }
+                return str;
             }
         }
-
-        this.offset = offset;
-        this.ch = (char) ch;
-        return date;
+        // Fall back to reading field name or simple value
+        return readFieldName();
     }
 
     @Override
-    public final boolean nextIfNull() {
-        int offset = this.offset;
-        if (ch == 'n' && offset + 2 < end && this.bytes[offset] == 'u') {
-            this.readNull();
+    protected ZonedDateTime readZonedDateTimeX(int len) {
+        String str = readString();
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+        return ZonedDateTime.parse(str);
+    }
+
+    @Override
+    protected LocalDate readLocalDate8() { return null; }
+
+    @Override
+    protected LocalDate readLocalDate9() { return null; }
+
+    @Override
+    protected LocalDate readLocalDate10() { return null; }
+
+    @Override
+    protected LocalDate readLocalDate11() { return null; }
+
+    @Override
+    protected LocalTime readLocalTime5() { return null; }
+
+    @Override
+    protected LocalTime readLocalTime6() { return null; }
+
+    @Override
+    protected LocalTime readLocalTime7() { return null; }
+
+    @Override
+    protected LocalTime readLocalTime8() { return null; }
+
+    @Override
+    protected LocalTime readLocalTime9() { return null; }
+
+    @Override
+    protected LocalTime readLocalTime10() { return null; }
+
+    @Override
+    protected LocalTime readLocalTime11() { return null; }
+
+    @Override
+    protected LocalTime readLocalTime12() { return null; }
+
+    @Override
+    protected LocalTime readLocalTime15() { return null; }
+
+    @Override
+    protected LocalTime readLocalTime18() { return null; }
+
+    @Override
+    protected LocalDateTime readLocalDateTime12() { return null; }
+
+    @Override
+    protected LocalDateTime readLocalDateTime14() { return null; }
+
+    @Override
+    protected LocalDateTime readLocalDateTime16() { return null; }
+
+    @Override
+    protected LocalDateTime readLocalDateTime17() { return null; }
+
+    @Override
+    protected LocalDateTime readLocalDateTime18() { return null; }
+
+    @Override
+    protected LocalDateTime readLocalDateTime19() { return null; }
+
+    @Override
+    protected LocalDateTime readLocalDateTime20() { return null; }
+
+    @Override
+    protected LocalDateTime readLocalDateTimeX(int len) { return null; }
+
+    @Override
+    public long readMillis19() { return 0; }
+    @Override
+    protected void readNumber0() {
+        // number reading not supported in tree mode
+        throw new JSONException("readNumber0 not supported");
+    }
+
+    @Override
+    public void readNull() {
+        if (ch == 'n') {
+            final byte[] bytes = this.bytes;
+            int offset = this.offset;
+            if (offset + 2 < bytes.length && bytes[offset] == 'u' && bytes[offset + 1] == 'l' && bytes[offset + 2] == 'l') {
+                offset += 3;
+                this.offset = offset;
+                if (offset < bytes.length) {
+                    this.ch = (char) bytes[offset];
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean readIfNull() {
+        // check if current token is null
+        if (ch == 'n') {
+            readNull();
             return true;
         }
         return false;
     }
 
     @Override
-    public final void readNull() {
-        final byte[] bytes = this.bytes;
-        int offset = this.offset;
-        int ch;
-        if (bytes[offset] == 'u'
-                && bytes[offset + 1] == 'l'
-                && bytes[offset + 2] == 'l') {
-            offset += 3;
-            ch = offset == end ? EOI : bytes[offset++];
-        } else {
-            throw new JSONException("json syntax error, not match null" + offset);
-        }
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset >= end ? EOI : bytes[offset++];
-        }
-        if (comma = (ch == ',')) {
-            ch = offset >= end ? EOI : bytes[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset >= end ? EOI : bytes[offset++];
-            }
-        }
-        this.ch = (char) ch;
-        this.offset = offset;
+    public String getString() {
+        return readString();
     }
 
     @Override
-    public final double readNaN() {
-        final byte[] bytes = this.bytes;
-        int offset = this.offset;
-        int ch;
-        if (bytes[offset] == 'a'
-                && bytes[offset + 1] == 'N') {
-            offset += 2;
-            ch = offset == end ? EOI : bytes[offset++];
-        } else {
-            throw new JSONException("json syntax error, not NaN " + offset);
-        }
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset >= end ? EOI : bytes[offset++];
-        }
-        if (comma = (ch == ',')) {
-            ch = offset >= end ? EOI : bytes[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset >= end ? EOI : bytes[offset++];
-            }
-        }
-        this.ch = (char) ch;
-        this.offset = offset;
-        return Double.NaN;
+    protected int getStringLength() {
+        return -1;
     }
 
     @Override
-    public final int getStringLength() {
-        if (ch != '"' && ch != '\'') {
-            throw new JSONException("string length only support string input " + ch);
-        }
-        final char quote = ch;
-
-        int len = 0;
-        int i = offset;
-        byte[] bytes = this.bytes;
-
-        int i8 = i + 8;
-        if (i8 < end && i8 < bytes.length) {
-            if (bytes[i] != quote
-                    && bytes[i + 1] != quote
-                    && bytes[i + 2] != quote
-                    && bytes[i + 3] != quote
-                    && bytes[i + 4] != quote
-                    && bytes[i + 5] != quote
-                    && bytes[i + 6] != quote
-                    && bytes[i + 7] != quote
-            ) {
-                i += 8;
-                len += 8;
-            }
-        }
-
-        for (; i < end; ++i, ++len) {
-            if (bytes[i] == quote) {
-                break;
-            }
-        }
-        return len;
-    }
-
-    public final LocalDate readLocalDate() {
-        final byte[] bytes = this.bytes;
-        int offset = this.offset, end = this.end;
-        char quote = ch;
-        if (quote == '"' || quote == '\'') {
-            if (!this.context.formatComplex) {
-                LocalDate ldt;
-                int c10 = offset + 10;
-                if (c10 < bytes.length
-                        && c10 < end
-                        && ((ldt = localDateYMD(bytes, offset))) != null
-                        && bytes[offset + 10] == quote
-                ) {
-                    offset = offset + 11;
-                    int ch = offset >= end ? EOI : bytes[offset++];
-                    if (comma = (ch == ',')) {
-                        ch = offset == end ? EOI : (char) bytes[offset++];
-                        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                            ch = offset == end ? EOI : bytes[offset++];
-                        }
-                    } else {
-                        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                            ch = offset == end ? EOI : bytes[offset++];
-                        }
-                    }
-                    if (ch < 0) {
-                        char_utf8(ch, offset);
-                    } else {
-                        this.offset = offset;
-                        this.ch = (char) ch;
-                    }
-                    return ldt;
-                }
-
-                LocalDate localDate = readLocalDate0(offset, bytes, quote);
-                if (localDate != null) {
-                    return localDate;
-                }
-            }
-        }
-        return super.readLocalDate();
-    }
-
-    private LocalDate readLocalDate0(int offset, byte[] bytes, char quote) {
-        int nextQuoteOffset = -1;
-        for (int i = offset, end = Math.min(i + 17, this.end); i < end; ++i) {
-            if (bytes[i] == quote) {
-                nextQuoteOffset = i;
-            }
-        }
-        if (nextQuoteOffset != -1
-                && nextQuoteOffset - offset > 10
-                && bytes[nextQuoteOffset - 6] == '-'
-                && bytes[nextQuoteOffset - 3] == '-'
-        ) {
-            int year = TypeUtils.parseInt(bytes, offset, nextQuoteOffset - offset - 6);
-            int month = IOUtils.digit2(bytes, nextQuoteOffset - 5);
-            int dayOfMonth = IOUtils.digit2(bytes, nextQuoteOffset - 2);
-            LocalDate localDate = year == 0 && month == 0 && dayOfMonth == 0 ? null : LocalDate.of(year, month, dayOfMonth);
-            this.offset = nextQuoteOffset + 1;
-            next();
-            if (comma = (this.ch == ',')) {
-                next();
-            }
-            return localDate;
-        }
-        return null;
-    }
-
-    private static boolean isDateTImeSpace(byte c) {
-        return c == 'T' || c == ' ';
-    }
-
-    public final OffsetDateTime readOffsetDateTime() {
-        final byte[] bytes = this.bytes;
-        int offset = this.offset, end = this.end;
-        char quote = this.ch;
-        if (quote == '"' || quote == '\'') {
-            if (!this.context.formatComplex) {
-                int off21 = offset + 19;
-                LocalDate localDate;
-                long hms;
-                if (off21 < bytes.length
-                        && off21 < end
-                        && (localDate = DateUtils.localDateYMD(bytes, offset)) != null
-                        && (isDateTImeSpace(bytes[offset + 10]))
-                        && ((hms = hms(bytes, offset + 11))) != -1L
-                ) {
-                    int nanos = 0, nanoSize = 0;
-                    offset += 19;
-                    int ch = bytes[offset++];
-                    if (ch == '.') {
-                        ch = bytes[offset++];
-                    }
-                    while (ch >= '0' && ch <= '9') {
-                        nanos = nanos * 10 + (ch - '0');
-                        nanoSize++;
-                        if (offset < end) {
-                            ch = bytes[offset++];
-                        } else {
-                            break;
-                        }
-                    }
-                    if (nanoSize != 0) {
-                        nanos = DateUtils.nanos(nanos, nanoSize);
-                    }
-                    ZoneOffset zoneOffset = ZoneOffset.UTC;
-                    if (ch == 'Z') {
-                        ch = bytes[offset++];
-                    } else if (ch != quote) {
-                        int quoteIndex = IOUtils.indexOfChar(bytes, '"', offset, end);
-                        if (quoteIndex != -1) {
-                            zoneOffset = DateUtils.zoneOffset(bytes, offset - 1, quoteIndex - offset + 1);
-                            offset = quoteIndex + 1;
-                            ch = quote;
-                        }
-                    }
-                    if (ch == quote) {
-                        ch = offset >= end ? EOI : bytes[offset++];
-                        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                            ch = offset == end ? EOI : bytes[offset++];
-                        }
-                        if (comma = (ch == ',')) {
-                            ch = offset == end ? EOI : (char) bytes[offset++];
-                            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                                ch = offset == end ? EOI : bytes[offset++];
-                            }
-                        }
-                        if (ch < 0) {
-                            char_utf8(ch, offset);
-                        } else {
-                            this.offset = offset;
-                            this.ch = (char) ch;
-                        }
-                        return OffsetDateTime.of(
-                                localDate,
-                                LocalTime.of((int) hms & 0xFF,
-                                        (int) (hms >> 24) & 0xFF,
-                                        (int) (hms >> 48) & 0xFF, nanos),
-                                zoneOffset);
-                    }
-                }
-            }
-        }
-        ZonedDateTime zdt = readZonedDateTime();
-        return zdt == null ? null : zdt.toOffsetDateTime();
+    public void close() {
+        // no-op, resources managed by caller
     }
 
     @Override
-    public final OffsetTime readOffsetTime() {
-        final byte[] bytes = this.bytes;
-        final int offset = this.offset;
-        final Context context = this.context;
-        if (this.ch == '"' || this.ch == '\'') {
-            if (context.dateFormat == null) {
-                char quote = this.ch;
-                int off10 = offset + 8;
-                if (off10 < bytes.length
-                        && off10 < end
-                        && bytes[offset + 2] == ':'
-                        && bytes[offset + 5] == ':'
-                ) {
-                    byte h0 = bytes[offset];
-                    byte h1 = bytes[offset + 1];
-                    byte i0 = bytes[offset + 3];
-                    byte i1 = bytes[offset + 4];
-                    byte s0 = bytes[offset + 6];
-                    byte s1 = bytes[offset + 7];
-
-                    int hour;
-                    if (h0 >= '0' && h0 <= '9'
-                            && h1 >= '0' && h1 <= '9'
-                    ) {
-                        hour = (h0 - '0') * 10 + (h1 - '0');
-                    } else {
-                        throw new JSONException(this.info("illegal offsetTime"));
-                    }
-
-                    int minute;
-                    if (i0 >= '0' && i0 <= '9'
-                            && i1 >= '0' && i1 <= '9'
-                    ) {
-                        minute = (i0 - '0') * 10 + (i1 - '0');
-                    } else {
-                        throw new JSONException(this.info("illegal offsetTime"));
-                    }
-
-                    int second;
-                    if (s0 >= '0' && s0 <= '9'
-                            && s1 >= '0' && s1 <= '9'
-                    ) {
-                        second = (s0 - '0') * 10 + (s1 - '0');
-                    } else {
-                        throw new JSONException(this.info("illegal offsetTime"));
-                    }
-
-                    int nanoSize = -1;
-                    int len = 0;
-                    for (int start = offset + 8, i = start, end = offset + 25; i < end && i < this.end && i < bytes.length; ++i) {
-                        byte b = bytes[i];
-                        if (nanoSize == -1 && (b == 'Z' || b == '+' || b == '-')) {
-                            nanoSize = i - start - 1;
-                        }
-                        if (b == quote) {
-                            len = i - offset;
-                            break;
-                        }
-                    }
-
-                    int nano = nanoSize <= 0 ? 0 : DateUtils.readNanos(bytes, nanoSize, offset + 9);
-
-                    ZoneOffset zoneOffset;
-                    int zoneOffsetSize = len - 9 - nanoSize;
-                    if (zoneOffsetSize <= 1) {
-                        zoneOffset = ZoneOffset.UTC;
-                    } else {
-                        String zonedId = new String(bytes, offset + 9 + nanoSize, zoneOffsetSize);
-                        zoneOffset = ZoneOffset.of(zonedId);
-                    }
-                    LocalTime localTime = LocalTime.of(hour, minute, second, nano);
-                    OffsetTime oft = OffsetTime.of(localTime, zoneOffset);
-                    this.offset += len + 1;
-                    next();
-                    if (comma = (this.ch == ',')) {
-                        next();
-                    }
-                    return oft;
-                }
-            }
-        }
-        throw new JSONException(this.info("illegal offsetTime"));
-    }
-
-    @Override
-    protected final ZonedDateTime readZonedDateTimeX(int len) {
-        if (!isString()) {
-            throw new JSONException("date only support string input");
-        }
-
-        if (len < 19) {
-            return null;
-        }
-
-        ZonedDateTime zdt;
-        if (len == 30 && bytes[offset + 29] == 'Z') {
-            LocalDateTime ldt = DateUtils.parseLocalDateTime29(bytes, offset);
-            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
-        } else if (len == 29 && bytes[offset + 28] == 'Z') {
-            LocalDateTime ldt = DateUtils.parseLocalDateTime28(bytes, offset);
-            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
-        } else if (len == 28 && bytes[offset + 27] == 'Z') {
-            LocalDateTime ldt = DateUtils.parseLocalDateTime27(bytes, offset);
-            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
-        } else if (len == 27 && bytes[offset + 26] == 'Z') {
-            LocalDateTime ldt = DateUtils.parseLocalDateTime26(bytes, offset);
-            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
-        } else {
-            zdt = DateUtils.parseZonedDateTime(bytes, offset, len, context.zoneId);
-        }
-
-        if (zdt == null) {
-            return null;
-        }
-
-        offset += (len + 1);
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-        return zdt;
-    }
-
-    @Override
-    public final LocalDate readLocalDate8() {
-        if (!isString()) {
-            throw new JSONException("localDate only support string input");
-        }
-
-        LocalDate ldt;
-        try {
-            ldt = DateUtils.parseLocalDate8(bytes, offset);
-        } catch (DateTimeException ex) {
-            throw new JSONException(info("read date error"), ex);
-        }
-
-        offset += 9;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-        return ldt;
-    }
-
-    @Override
-    public final LocalDate readLocalDate9() {
-        if (!isString()) {
-            throw new JSONException("localDate only support string input");
-        }
-
-        LocalDate ldt;
-        try {
-            ldt = DateUtils.parseLocalDate9(bytes, offset);
-        } catch (DateTimeException ex) {
-            throw new JSONException(info("read date error"), ex);
-        }
-
-        offset += 10;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-        return ldt;
-    }
-
-    @Override
-    public final LocalDate readLocalDate10() {
-        if (!isString()) {
-            throw new JSONException("localDate only support string input");
-        }
-
-        LocalDate ldt;
-        try {
-            ldt = DateUtils.parseLocalDate10(bytes, offset);
-        } catch (DateTimeException ex) {
-            throw new JSONException(info("read date error"), ex);
-        }
-        if (ldt == null) {
-            return null;
-        }
-
-        offset += 11;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-        return ldt;
-    }
-
-    @Override
-    protected final LocalDate readLocalDate11() {
-        if (!isString()) {
-            throw new JSONException("localDate only support string input");
-        }
-
-        LocalDate ldt = DateUtils.parseLocalDate11(bytes, offset);
-        if (ldt == null) {
-            return null;
-        }
-
-        offset += 11;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-        return ldt;
-    }
-
-    @Override
-    protected final LocalDateTime readLocalDateTime17() {
-        if (!isString()) {
-            throw new JSONException("date only support string input");
-        }
-
-        LocalDateTime ldt = DateUtils.parseLocalDateTime17(bytes, offset);
-        if (ldt == null) {
-            return null;
-        }
-
-        offset += 18;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-        return ldt;
-    }
-
-    @Override
-    protected final LocalTime readLocalTime5() {
-        if (ch != '"' && ch != '\'') {
-            throw new JSONException("localTime only support string input");
-        }
-
-        LocalTime time = DateUtils.parseLocalTime5(bytes, offset);
-        if (time == null) {
-            return null;
-        }
-
-        offset += 6;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return time;
-    }
-
-    @Override
-    protected final LocalTime readLocalTime6() {
-        if (ch != '"' && ch != '\'') {
-            throw new JSONException("localTime only support string input");
-        }
-
-        LocalTime time = DateUtils.parseLocalTime6(bytes, offset);
-        if (time == null) {
-            return null;
-        }
-
-        offset += 7;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return time;
-    }
-
-    @Override
-    protected final LocalTime readLocalTime7() {
-        if (ch != '"' && ch != '\'') {
-            throw new JSONException("localTime only support string input");
-        }
-
-        LocalTime time = DateUtils.parseLocalTime7(bytes, offset);
-        if (time == null) {
-            return null;
-        }
-
-        offset += 8;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return time;
-    }
-
-    @Override
-    protected final LocalTime readLocalTime8() {
-        if (ch != '"' && ch != '\'') {
-            throw new JSONException("localTime only support string input");
-        }
-
-        LocalTime time = DateUtils.parseLocalTime8(bytes, offset);
-        if (time == null) {
-            return null;
-        }
-
-        offset += 9;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return time;
-    }
-
-    @Override
-    protected final LocalTime readLocalTime9() {
-        if (ch != '"' && ch != '\'') {
-            throw new JSONException("localTime only support string input");
-        }
-
-        LocalTime time = DateUtils.parseLocalTime8(bytes, offset);
-        if (time == null) {
-            return null;
-        }
-
-        offset += 10;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return time;
-    }
-
-    @Override
-    protected final LocalTime readLocalTime10() {
-        if (!isString()) {
-            throw new JSONException("localTime only support string input");
-        }
-
-        LocalTime time = DateUtils.parseLocalTime10(bytes, offset);
-        if (time == null) {
-            return null;
-        }
-
-        offset += 11;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return time;
-    }
-
-    @Override
-    protected final LocalTime readLocalTime11() {
-        if (!isString()) {
-            throw new JSONException("localTime only support string input");
-        }
-
-        LocalTime time = DateUtils.parseLocalTime11(bytes, offset);
-        if (time == null) {
-            return null;
-        }
-
-        offset += 12;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return time;
-    }
-
-    @Override
-    protected final LocalTime readLocalTime12() {
-        if (!isString()) {
-            throw new JSONException("localTime only support string input");
-        }
-
-        LocalTime time = DateUtils.parseLocalTime12(bytes, offset);
-        if (time == null) {
-            return null;
-        }
-
-        offset += 13;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return time;
-    }
-
-    @Override
-    protected final LocalTime readLocalTime15() {
-        if (!isString()) {
-            throw new JSONException("localTime only support string input");
-        }
-
-        LocalTime time = DateUtils.parseLocalTime15(bytes, offset);
-        if (time == null) {
-            return null;
-        }
-
-        offset += 16;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return time;
-    }
-
-    @Override
-    protected final LocalTime readLocalTime18() {
-        if (!isString()) {
-            throw new JSONException("localTime only support string input");
-        }
-
-        LocalTime time = DateUtils.parseLocalTime18(bytes, offset);
-        if (time == null) {
-            return null;
-        }
-
-        offset += 19;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return time;
-    }
-
-    @Override
-    protected final LocalDateTime readLocalDateTime12() {
-        if (!isString()) {
-            throw new JSONException("date only support string input");
-        }
-
-        LocalDateTime ldt = DateUtils.parseLocalDateTime12(bytes, offset);
-        if (ldt == null) {
-            return null;
-        }
-
-        offset += 13;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-        return ldt;
-    }
-
-    @Override
-    protected final LocalDateTime readLocalDateTime14() {
-        if (!isString()) {
-            throw new JSONException("date only support string input");
-        }
-
-        LocalDateTime ldt = DateUtils.parseLocalDateTime14(bytes, offset);
-        if (ldt == null) {
-            return null;
-        }
-
-        offset += 15;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-        return ldt;
-    }
-
-    @Override
-    protected final LocalDateTime readLocalDateTime16() {
-        if (!isString()) {
-            throw new JSONException("date only support string input");
-        }
-
-        LocalDateTime ldt = DateUtils.parseLocalDateTime16(bytes, offset);
-        if (ldt == null) {
-            return null;
-        }
-
-        offset += 17;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-        return ldt;
-    }
-
-    @Override
-    protected final LocalDateTime readLocalDateTime18() {
-        if (!isString()) {
-            throw new JSONException("date only support string input");
-        }
-
-        LocalDateTime ldt = DateUtils.parseLocalDateTime18(bytes, offset);
-
-        offset += 19;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-        return ldt;
-    }
-
-    @Override
-    protected final LocalDateTime readLocalDateTime19() {
-        if (!isString()) {
-            throw new JSONException("date only support string input");
-        }
-
-        LocalDateTime ldt = DateUtils.parseLocalDateTime19(bytes, offset);
-        if (ldt == null) {
-            return null;
-        }
-
-        offset += 20;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-        return ldt;
-    }
-
-    @Override
-    protected final LocalDateTime readLocalDateTime20() {
-        if (!isString()) {
-            throw new JSONException("date only support string input");
-        }
-
-        LocalDateTime ldt = DateUtils.parseLocalDateTime20(bytes, offset);
-        if (ldt == null) {
-            return null;
-        }
-
-        offset += 21;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-        return ldt;
-    }
-
-    @Override
-    public final long readMillis19() {
-        char quote = ch;
-        if (quote != '"' && quote != '\'') {
-            throw new JSONException("date only support string input");
-        }
-
-        if (offset + 18 >= end) {
-            wasNull = true;
-            return 0;
-        }
-
-        long millis = DateUtils.parseMillis19(bytes, offset, context.zoneId);
-
-        if (bytes[offset + 19] != quote) {
-            throw new JSONException(info("illegal date input"));
-        }
-        offset += 20;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return millis;
-    }
-
-    @Override
-    protected final LocalDateTime readLocalDateTimeX(int len) {
-        if (!isString()) {
-            throw new JSONException("date only support string input");
-        }
-
-        LocalDateTime ldt;
-        if (bytes[offset + len - 1] == 'Z') {
-            ZonedDateTime zdt = DateUtils.parseZonedDateTime(bytes, offset, len);
-            ldt = zdt.toInstant().atZone(context.getZoneId()).toLocalDateTime();
-        } else {
-            ldt = DateUtils.parseLocalDateTimeX(bytes, offset, len);
-        }
-
-        if (ldt == null) {
-            return null;
-        }
-
-        offset += (len + 1);
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-        return ldt;
-    }
-
-    public final BigDecimal readBigDecimal() {
-        boolean valid = false;
-        final byte[] bytes = this.bytes;
-        int ch = this.ch;
-        int offset = this.offset, end = this.end;
-        boolean value = false;
-
-        BigDecimal decimal = null;
-        int quote = '\0';
-        if (ch == '"' || ch == '\'') {
-            quote = ch;
-            ch = bytes[offset++];
-
-            if (ch == quote) {
-                this.ch = offset == end ? EOI : (char) bytes[offset++];
-                this.offset = offset;
-                nextIfComma();
-                return null;
-            }
-        }
-
-        final int start = offset;
-        if (ch == '-') {
-            negative = true;
-            ch = bytes[offset++];
-        } else {
-            negative = false;
-            if (ch == '+') {
-                ch = bytes[offset++];
-            }
-        }
-
-        valueType = JSON_TYPE_INT;
-        boolean overflow = false;
-        long longValue = 0;
-        while (ch >= '0' && ch <= '9') {
-            valid = true;
-            if (!overflow) {
-                long r = longValue * 10;
-                if ((longValue | 10) >>> 31 == 0L || (r / 10 == longValue)) {
-                    longValue = r + (ch - '0');
-                } else {
-                    overflow = true;
-                }
-            }
-
-            if (offset == end) {
-                ch = EOI;
-                offset++;
-                break;
-            }
-            ch = bytes[offset++];
-        }
-
-        if (longValue < 0) {
-            overflow = true;
-        }
-
-        this.scale = 0;
-        if (ch == '.') {
-            valueType = JSON_TYPE_DEC;
-            ch = bytes[offset++];
-            while (ch >= '0' && ch <= '9') {
-                valid = true;
-                this.scale++;
-                if (!overflow) {
-                    long r = longValue * 10;
-                    if ((longValue | 10) >>> 31 == 0L || (r / 10 == longValue)) {
-                        longValue = r + (ch - '0');
-                    } else {
-                        overflow = true;
-                    }
-                }
-
-                if (offset == end) {
-                    ch = EOI;
-                    offset++;
-                    break;
-                }
-                ch = bytes[offset++];
-            }
-        }
-
-        int expValue = 0;
-        if (ch == 'e' || ch == 'E') {
-            boolean negativeExp;
-            ch = bytes[offset++];
-            if ((negativeExp = ch == '-') || ch == '+') {
-                ch = bytes[offset++];
-            }
-
-            while (ch >= '0' && ch <= '9') {
-                valid = true;
-                int byteVal = (ch - '0');
-                expValue = expValue * 10 + byteVal;
-                if (expValue > MAX_EXP) {
-                    throw new JSONException("too large exp value : " + expValue);
-                }
-
-                if (offset == end) {
-                    ch = EOI;
-                    offset++;
-                    break;
-                }
-                ch = bytes[offset++];
-            }
-
-            if (negativeExp) {
-                expValue = -expValue;
-            }
-
-            this.exponent = (short) expValue;
-            valueType = JSON_TYPE_DEC;
-        }
-
-        if (offset == start) {
-            if (ch == 'n' && bytes[offset++] == 'u' && bytes[offset++] == 'l' && bytes[offset++] == 'l') {
-                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
-                    throw new JSONException(info("long value not support input null"));
-                }
-
-                wasNull = true;
-                value = true;
-                ch = offset == end ? EOI : bytes[offset];
-                offset++;
-                valid = true;
-            } else if (ch == 't' && offset + 3 <= end && bytes[offset] == 'r' && bytes[offset + 1] == 'u' && bytes[offset + 2] == 'e') {
-                valid = true;
-                offset += 3;
-                value = true;
-                decimal = BigDecimal.ONE;
-                ch = offset == end ? EOI : bytes[offset];
-                offset++;
-            } else if (ch == 'f' && offset + 4 <= end && IOUtils.isALSE(bytes, offset)) {
-                valid = true;
-                offset += 4;
-                decimal = BigDecimal.ZERO;
-                value = true;
-                ch = offset == end ? EOI : bytes[offset];
-                offset++;
-            } else if (ch == '{' && quote == 0) {
-                JSONObject jsonObject = new JSONObject();
-                readObject(jsonObject, 0);
-                wasNull = false;
-                return decimal(jsonObject);
-            } else if (ch == '[' && quote == 0) {
-                List array = readArray();
-                if (!array.isEmpty()) {
-                    throw new JSONException(info());
-                }
-                wasNull = true;
-                return null;
-            }
-        }
-
-        int len = offset - start;
-
-        if (quote != 0) {
-            if (ch != quote) {
-                String str = readString();
-                try {
-                    return TypeUtils.toBigDecimal(str);
-                } catch (NumberFormatException e) {
-                    throw new JSONException(info(e.getMessage()), e);
-                }
-            } else {
-                ch = offset >= end ? EOI : bytes[offset++];
-            }
-        }
-        if (!value) {
-            if (expValue == 0 && !overflow && longValue != 0) {
-                decimal = BigDecimal.valueOf(negative ? -longValue : longValue, scale);
-                value = true;
-            }
-
-            if (!value) {
-                decimal = TypeUtils.parseBigDecimal(bytes, start - 1, len);
-            }
-
-            if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
-                ch = offset >= end ? EOI : bytes[offset++];
-            }
-        }
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (comma = (ch == ',')) {
-            // next inline
-            ch = offset == end ? EOI : bytes[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-        }
-
-        if (!valid) {
-            throw new JSONException(info("illegal input error"));
-        }
-
-        this.ch = (char) ch;
-        this.offset = offset;
-        return decimal;
-    }
-
-    @Override
-    public final UUID readUUID() {
-        int ch = this.ch, end = this.end;
-        if (ch == 'n') {
-            readNull();
-            return null;
-        }
-
-        if (ch != '"' && ch != '\'') {
-            throw error("syntax error, can not read uuid");
-        }
-        final int quote = ch;
-        final byte[] bytes = this.bytes;
-        int offset = this.offset;
-        UUID uuid;
-        if (offset + 36 < end
-                && bytes[offset + 36] == quote
-                && bytes[offset + 8] == '-'
-                && bytes[offset + 13] == '-'
-                && bytes[offset + 18] == '-'
-                && bytes[offset + 23] == '-'
-        ) {
-            uuid = readUUID36(bytes, offset);
-            offset += 37;
-        } else if (offset + 32 < end && bytes[offset + 32] == quote) {
-            uuid = readUUID32(bytes, offset);
-            offset += 33;
-        } else {
-            String str = readString();
-            if (str.isEmpty()) {
-                return null;
-            }
-            return UUID.fromString(str);
-        }
-
-        ch = offset == end ? EOI : bytes[offset++];
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        this.offset = offset;
-        if (comma = (ch == ',')) {
-            next();
-        } else {
-            this.ch = (char) ch;
-        }
-
-        return uuid;
-    }
-
-    static UUID readUUID32(byte[] bytes, int offset) {
-        long msb1 = parse4Nibbles(bytes, offset);
-        long msb2 = parse4Nibbles(bytes, offset + 4);
-        long msb3 = parse4Nibbles(bytes, offset + 8);
-        long msb4 = parse4Nibbles(bytes, offset + 12);
-        long lsb1 = parse4Nibbles(bytes, offset + 16);
-        long lsb2 = parse4Nibbles(bytes, offset + 20);
-        long lsb3 = parse4Nibbles(bytes, offset + 24);
-        long lsb4 = parse4Nibbles(bytes, offset + 28);
-
-        if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) < 0) {
-            throw new JSONException("Invalid UUID string:  ".concat(new String(bytes, offset, 32, ISO_8859_1)));
-        }
-
-        return new UUID(
-                msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
-                lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
-    }
-
-    static UUID readUUID36(byte[] bytes, int offset) {
-        long msb1 = parse4Nibbles(bytes, offset);
-        long msb2 = parse4Nibbles(bytes, offset + 4);
-        long msb3 = parse4Nibbles(bytes, offset + 9);
-        long msb4 = parse4Nibbles(bytes, offset + 14);
-        long lsb1 = parse4Nibbles(bytes, offset + 19);
-        long lsb2 = parse4Nibbles(bytes, offset + 24);
-        long lsb3 = parse4Nibbles(bytes, offset + 28);
-        long lsb4 = parse4Nibbles(bytes, offset + 32);
-
-        if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) < 0) {
-            throw new JSONException("Invalid UUID string:  ".concat(new String(bytes, offset, 36, ISO_8859_1)));
-        }
-
-        return new UUID(
-                msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
-                lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
-    }
-
-    static long parse4Nibbles(byte[] bytes, int offset) {
-        int x = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-        if (BIG_ENDIAN) {
-            x = Integer.reverseBytes(x);
-        }
-        byte[] ns = NIBBLES;
-        return ns[x & 0xFF] << 12 | ns[(x >> 8) & 0xFF] << 8 | ns[(x >> 16) & 0xFF] << 4 | ns[(x >> 24) & 0xFF];
-    }
-
-    @Override
-    public final String readPattern() {
-        if (ch != '/') {
-            throw new JSONException("illegal pattern");
-        }
-
-        final byte[] bytes = this.bytes;
-        int offset = this.offset;
-        int start = offset;
-        for (; offset < end; ++offset) {
-            if (bytes[offset] == '/') {
-                break;
-            }
-        }
-        String str = new String(bytes, start, offset - start, UTF_8);
-        int ch = ++offset == end ? EOI : bytes[offset++];
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : bytes[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-        }
-
-        this.offset = offset;
-        this.ch = (char) ch;
-
-        return str;
-    }
-
-    @Override
-    public boolean nextIfNullOrEmptyString() {
-        final char first = this.ch;
-        final int end = this.end;
-        int offset = this.offset;
-        byte[] bytes = this.bytes;
-        if (first == 'n'
-                && offset + 2 < end
-                && bytes[offset] == 'u'
-                && bytes[offset + 1] == 'l'
-                && bytes[offset + 2] == 'l'
-        ) {
-            offset += 3;
-        } else if (first == '"' || first == '\'') {
-            if (offset < end && bytes[offset] == first) {
-                offset++;
-            } else if (offset + 4 < end
-                    && IOUtils.isNULL(bytes, offset)
-                    && bytes[offset + 4] == first
-            ) {
-                offset += 5;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-
-        int ch = offset == end ? EOI : bytes[offset++];
-
-        while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (ch < 0) {
-            char_utf8(ch, offset);
-            return true;
-        }
-
-        this.offset = offset;
-        this.ch = (char) ch;
-        return true;
-    }
-
-    @Override
-    public final boolean nextIfMatchIdent(char c0, char c1) {
-        if (ch != c0) {
-            return false;
-        }
-
-        final byte[] bytes = this.bytes;
-        int offset = this.offset;
-        if (offset + 1 > end || bytes[offset] != c1) {
-            return false;
-        }
-
-        offset += 1;
-        int ch = offset == end ? EOI : bytes[offset++];
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-        if (offset == this.offset + 2 && ch != EOI && ch != '(' && ch != '[' && ch != ']' && ch != ')' && ch != ':' && ch != ',') {
-            return false;
-        }
-
-        this.offset = offset;
-        this.ch = (char) ch;
-        return true;
-    }
-
-    @Override
-    public final boolean nextIfMatchIdent(char c0, char c1, char c2) {
-        if (ch != c0) {
-            return false;
-        }
-
-        final byte[] bytes = this.bytes;
-        int offset = this.offset;
-        if (offset + 2 > end || bytes[offset] != c1 || bytes[offset + 1] != c2) {
-            return false;
-        }
-
-        offset += 2;
-        int ch = offset == end ? EOI : bytes[offset++];
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-        if (offset == this.offset + 3 && ch != EOI && ch != '(' && ch != '[' && ch != ']' && ch != ')' && ch != ':' && ch != ',') {
-            return false;
-        }
-
-        this.offset = offset;
-        this.ch = (char) ch;
-        return true;
-    }
-
-    @Override
-    public final boolean nextIfMatchIdent(char c0, char c1, char c2, char c3) {
-        if (ch != c0) {
-            return false;
-        }
-
-        final byte[] bytes = this.bytes;
-        int offset = this.offset;
-        if (offset + 3 > end
-                || bytes[offset] != c1
-                || bytes[offset + 1] != c2
-                || bytes[offset + 2] != c3) {
-            return false;
-        }
-
-        offset += 3;
-        int ch = offset == end ? EOI : bytes[offset++];
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-        if (offset == this.offset + 4 && ch != EOI && ch != '(' && ch != '[' && ch != ']' && ch != ')' && ch != ':' && ch != ',') {
-            return false;
-        }
-
-        this.offset = offset;
-        this.ch = (char) ch;
-        return true;
-    }
-
-    @Override
-    public final boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4) {
-        if (ch != c0) {
-            return false;
-        }
-
-        final byte[] bytes = this.bytes;
-        int offset = this.offset;
-        if (offset + 4 > end
-                || bytes[offset] != c1
-                || bytes[offset + 1] != c2
-                || bytes[offset + 2] != c3
-                || bytes[offset + 3] != c4) {
-            return false;
-        }
-
-        offset += 4;
-        int ch = offset == end ? EOI : bytes[offset++];
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-        if (offset == this.offset + 5 && ch != EOI && ch != '(' && ch != '[' && ch != ']' && ch != ')' && ch != ':' && ch != ',') {
-            return false;
-        }
-
-        this.offset = offset;
-        this.ch = (char) ch;
-        return true;
-    }
-
-    @Override
-    public final boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5) {
-        if (ch != c0) {
-            return false;
-        }
-
-        final byte[] bytes = this.bytes;
-        int offset = this.offset;
-        if (offset + 5 > end
-                || bytes[offset] != c1
-                || bytes[offset + 1] != c2
-                || bytes[offset + 2] != c3
-                || bytes[offset + 3] != c4
-                || bytes[offset + 4] != c5) {
-            return false;
-        }
-
-        offset += 5;
-        int ch = offset == end ? EOI : bytes[offset++];
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-        if (offset == this.offset + 6 && ch != EOI && ch != '(' && ch != '[' && ch != ']' && ch != ')' && ch != ':' && ch != ',') {
-            return false;
-        }
-
-        this.offset = offset;
-        this.ch = (char) ch;
-        return true;
-    }
-
-    @Override
-    public final byte[] readHex() {
-        int offset = this.offset;
-        final byte[] bytes = this.bytes;
-        int ch = this.ch;
-        if (ch == 'x') {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        final int quote = ch;
-        if (quote != '\'' && quote != '"') {
-            throw syntaxError(offset, ch);
-        }
-        int start = offset;
-        ch = offset == end ? EOI : bytes[offset++];
-
-        for (; ; ) {
-            if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F')) {
-                // continue;
-            } else if (ch == quote) {
-                ch = offset == end ? EOI : bytes[offset++];
-                break;
-            } else {
-                throw syntaxError(offset, ch);
-            }
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        int len = offset - start - 2;
-        if (ch == EOI) {
-            len++;
-        }
-
-        if (len % 2 != 0) {
-            throw syntaxError(offset, ch);
-        }
-
-        byte[] hex = new byte[len / 2];
-        for (int i = 0; i < hex.length; ++i) {
-            byte c0 = bytes[start + i * 2];
-            byte c1 = bytes[start + i * 2 + 1];
-
-            int b0 = c0 - (c0 <= 57 ? 48 : 55);
-            int b1 = c1 - (c1 <= 57 ? 48 : 55);
-            hex[i] = (byte) ((b0 << 4) | b1);
-        }
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-
-        if (ch != ',' || offset >= end) {
-            this.offset = offset;
-            this.ch = (char) ch;
-            return hex;
-        }
-
-        comma = true;
-        ch = offset == end ? EOI : bytes[offset++];
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : bytes[offset++];
-        }
-        this.offset = offset;
-        this.ch = (char) ch;
-        if (this.ch == '/') {
-            skipComment();
-        }
-
-        return hex;
-    }
-
-    @Override
-    public final boolean isReference() {
-        // should be codeSize <= FreqInlineSize 325, current : 284
-        if ((context.features & MASK_DISABLE_REFERENCE_DETECT) != 0) {
-            return false;
-        }
-        final byte[] bytes = this.bytes;
-        int ch = this.ch;
-        if (ch != '{') {
-            return false;
-        }
-
-        int offset = this.offset, end = this.end;
-        if (offset == end) {
-            return false;
-        }
-
-        ch = bytes[offset];
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            offset++;
-            if (offset >= end) {
-                return false;
-            }
-            ch = bytes[offset];
-        }
-
-        if (offset + 6 >= end
-                || bytes[offset + 5] != ch
-                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1) != REF
-        ) {
-            return false;
-        }
-
-        return isReference0(bytes, offset, end, ch);
-    }
-
-    private boolean isReference0(byte[] bytes, int offset, int end, int quote) {
-        int ch;
-        offset += 6;
-        ch = bytes[offset];
-        while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            offset++;
-            if (offset >= end) {
-                return false;
-            }
-            ch = bytes[offset];
-        }
-
-        if (ch != ':' || offset + 1 >= end) {
-            return false;
-        }
-
-        ch = bytes[++offset];
-        while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            offset++;
-            if (offset >= end) {
-                return false;
-            }
-            ch = bytes[offset];
-        }
-
-        if (ch != quote
-                || (offset + 1 < end && (ch = bytes[offset + 1]) != '$' && ch != '.' && ch != '@')
-        ) {
-            return false;
-        }
-
-        this.referenceBegin = offset;
-        return true;
-    }
-
-    @Override
-    public final String readReference() {
-        if (referenceBegin == end) {
-            return null;
-        }
-        final byte[] chars = this.bytes;
-        this.offset = referenceBegin;
-        this.ch = (char) chars[offset++];
-
-        String reference = readString();
-
-        int ch = this.ch;
-        int offset = this.offset;
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : chars[offset++];
-        }
-
-        if (ch != '}') {
-            throw new JSONException("illegal reference : ".concat(reference));
-        }
-
-        ch = offset == end ? EOI : chars[offset++];
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset == end ? EOI : chars[offset++];
-        }
-
-        if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : chars[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset == end ? EOI : chars[offset++];
-            }
-        }
-
-        this.ch = (char) ch;
-        this.offset = offset;
-
-        return reference;
-    }
-
-    public final boolean readBoolValue() {
-        boolean val = false;
-        int end = this.end;
-        final byte[] bytes = this.bytes;
-        int offset = this.offset;
-        int ch = this.ch;
-        if (ch == 't'
-                && offset + 2 < bytes.length
-                && bytes[offset] == 'r'
-                && bytes[offset + 1] == 'u'
-                && bytes[offset + 2] == 'e'
-        ) {
-            offset += 3;
-            val = true;
-        } else if (ch == 'f' && offset + 3 < end && isALSE(bytes, offset)) {
-            offset += 4;
-        } else if ((ch == '1' || ch == '0') && offset < end && !IOUtils.isDigit(ch)) {
-            val = ch == '1';
-        } else {
-            return readBoolValue0();
-        }
-
-        ch = offset == end ? EOI : (char) bytes[offset++];
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset >= end ? EOI : bytes[offset++];
-        }
-
-        if (comma = (ch == ',')) {
-            ch = offset >= end ? EOI : bytes[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset >= end ? EOI : bytes[offset++];
-            }
-        }
-        this.offset = offset;
-        this.ch = (char) ch;
-
-        return val;
-    }
-
-    private boolean readBoolValue0() {
+    public boolean readBoolValue() {
         wasNull = false;
         boolean val;
         final byte[] bytes = this.bytes;
         int offset = this.offset;
-        int ch = this.ch;
-        if (ch == 't'
-                && offset + 2 < bytes.length
-                && bytes[offset] == 'r'
-                && bytes[offset + 1] == 'u'
-                && bytes[offset + 2] == 'e'
-        ) {
+        byte ch = (byte) this.ch;
+        if (ch == 't' && offset + 2 < bytes.length && bytes[offset] == 'r' && bytes[offset + 1] == 'u' && bytes[offset + 2] == 'e') {
             offset += 3;
             val = true;
-        } else if (ch == 'f' && offset + 3 < end && isALSE(bytes, offset)) {
+        } else if (ch == 'f' && offset + 3 < bytes.length && bytes[offset] == 'a' && bytes[offset + 1] == 'l' && bytes[offset + 2] == 's' && bytes[offset + 3] == 'e') {
             offset += 4;
             val = false;
-        } else if (ch == '-' || (ch >= '0' && ch <= '9')) {
-            readNumber();
-            if (valueType == JSON_TYPE_INT) {
-                if ((context.features & Feature.NonZeroNumberCastToBooleanAsTrue.mask) != 0) {
-                    return mag0 != 0 || mag1 != 0 || mag2 != 0 || mag3 != 0;
-                } else {
-                    return mag0 == 0
-                            && mag1 == 0
-                            && mag2 == 0
-                            && mag3 == 1;
-                }
-            }
-            return false;
-        } else if (ch == 'n' && offset + 2 < bytes.length
-                && bytes[offset] == 'u'
-                && bytes[offset + 1] == 'l'
-                && bytes[offset + 2] == 'l'
-        ) {
+        } else if (ch == 'n' && offset + 2 < bytes.length && bytes[offset] == 'u' && bytes[offset + 1] == 'l' && bytes[offset + 2] == 'l') {
             if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
                 throw new JSONException(info("boolean value not support input null"));
             }
-
             wasNull = true;
             offset += 3;
             val = false;
-        } else if (ch == '"' || ch == '\'') {
-            if (offset + 1 < bytes.length
-                    && bytes[offset + 1] == ch
-            ) {
-                byte c0 = bytes[offset];
-                offset += 2;
-                if (c0 == '0' || c0 == 'N') {
-                    val = false;
-                } else if (c0 == '1' || c0 == 'Y') {
-                    val = true;
-                } else {
-                    throw new JSONException("can not convert to boolean : " + c0);
-                }
-            } else {
-                String str = readString();
-                if ("true".equalsIgnoreCase(str)) {
-                    return true;
-                }
-
-                if ("false".equalsIgnoreCase(str)) {
-                    return false;
-                }
-
-                if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                    wasNull = true;
-                    return false;
-                }
-                throw new JSONException("can not convert to boolean : " + str);
-            }
-        } else if (ch == '[') {
-            next();
-            val = readBoolValue();
-            if (!nextIfMatch(']')) {
-                throw new JSONException("not closed square brackets, expect ] but found : " + (char) ch);
-            }
-            return val;
         } else {
-            throw new JSONException("syntax error : " + ch);
-        }
-
-        ch = offset == end ? EOI : (char) bytes[offset++];
-
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = offset >= end ? EOI : bytes[offset++];
-        }
-
-        if (comma = (ch == ',')) {
-            ch = offset >= end ? EOI : bytes[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset >= end ? EOI : bytes[offset++];
+            // Fallback: read as string and parse
+            String str = readString();
+            if ("true".equalsIgnoreCase(str) || "1".equals(str)) {
+                val = true;
+            } else if ("false".equalsIgnoreCase(str) || "0".equals(str)) {
+                val = false;
+            } else {
+                throw new JSONException(info("can not convert to boolean : " + str));
             }
         }
         this.offset = offset;
+        ch = bytes[offset];
         this.ch = (char) ch;
-
         return val;
     }
 
-    public final byte[] readBase64() {
-        byte[] bytes = this.bytes;
-        int offset = this.offset, end = this.end;
-        int ch = this.ch;
-        int index = IOUtils.indexOfQuote(bytes, ch, offset, end);
-        if (index == -1) {
-            throw error("invalid escape character EOI");
-        }
-
-        int slashIndex = indexOfSlash(this, bytes, offset, end);
-        if (slashIndex != -1) {
-            throw error("invalid base64 string");
-        }
-
-        byte[] decoded;
-        if (index != offset) {
-            String prefix = "data:image/";
-            int p0, p1;
-            String base64 = "base64";
-            if (regionMatches(bytes, offset, prefix)
-                    && (p0 = IOUtils.indexOfChar(bytes, ';', prefix.length() + 1, index)) != -1
-                    && (p1 = IOUtils.indexOfChar(bytes, ',', p0 + 1, index)) != -1 && IOUtils.regionMatches(bytes, p0 + 1, base64)) {
-                offset = p1 + 1;
-            }
-
-            byte[] src = Arrays.copyOfRange(bytes, offset, index);
-            decoded = Base64.getDecoder().decode(src);
-        } else {
-            decoded = new byte[0];
-        }
-
-        offset = index + 1;
-
-        ch = offset == end ? EOI : (char) bytes[offset++];
-        if (comma = ch == ',') {
-            ch = offset == end ? EOI : bytes[offset++];
-            while (ch <= ' ' && (1L << ch & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-        }
-
-        this.ch = (char) ch;
-        this.offset = offset;
-        return decoded;
-    }
-
-    public final String info(String message, int c) {
-        return info(message).concat(Integer.toString(c));
+    @Override
+    public boolean isNull() {
+        return false;
     }
 
     @Override
-    public final String info(String message) {
-        int line = 1, column = 0;
-        for (int i = 0; i < offset && i < end; i++, column++) {
-            if (bytes[i] == '\n') {
-                column = 0;
-                line++;
-            }
-        }
-
-        StringBuilder buf = new StringBuilder();
-
-        if (message != null && !message.isEmpty()) {
-            buf.append(message).append(", ");
-        }
-
-        return buf.append("offset ").append(offset)
-                .append(", character ").append(ch)
-                .append(", line ").append(line)
-                .append(", column ").append(column)
-                .append(", fastjson-version ").append(JSON.VERSION)
-                .append(line > 1 ? '\n' : ' ')
-                .append(new String(bytes, this.start, Math.min(length, 65535)))
-                .toString();
+    public Date readNullOrNewDate() {
+        return null;
     }
 
     @Override
-    public final void close() {
-        if (cacheItem != null) {
-            if (bytes.length < CACHE_THRESHOLD) {
-                BYTES_UPDATER.lazySet(cacheItem, bytes);
-            }
-        }
-
-        if (in != null) {
-            try {
-                in.close();
-            } catch (IOException ignored) {
-                // ignored
-            }
-        }
+    public boolean nextIfNull() {
+        return false;
     }
 
-    public static JSONReaderUTF8 of(byte[] bytes, int off, int len, JSONReader.Context context) {
-        boolean ascii = false;
-        if (METHOD_HANDLE_HAS_NEGATIVE != null) {
-            try {
-                ascii = !(boolean) METHOD_HANDLE_HAS_NEGATIVE.invoke(bytes, off, len);
-            } catch (Throwable ignored) {
-                // ignored
-            }
-        } else {
-            ascii = IOUtils.isASCII(bytes, off, len);
-        }
-        if (ascii) {
-            return new JSONReaderASCII(context, null, bytes, off, len);
-        }
-        return new JSONReaderUTF8(context, bytes, off, len);
+    @Override
+    public boolean nextIfNullOrEmptyString() {
+        return false;
+    }
+
+    @Override
+    public boolean isReference() {
+        return false;
+    }
+
+    @Override
+    public String readReference() {
+        return null;
+    }
+
+    @Override
+    public String readPattern() {
+        return null;
+    }
+
+    @Override
+    public boolean skipName() {
+        return false;
+    }
+
+    @Override
+    public void skipValue() {
+    }
+
+    @Override
+    public byte[] readHex() {
+        return null;
+    }
+
+    @Override
+    public boolean nextIfMatchIdent(char c0, char c1) {
+        return false;
+    }
+
+    @Override
+    public boolean nextIfMatchIdent(char c0, char c1, char c2) {
+        return false;
+    }
+
+    @Override
+    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3) {
+        return false;
+    }
+
+    @Override
+    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4) {
+        return false;
+    }
+
+    @Override
+    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5) {
+        return false;
+    }
+
+    @Override
+    public BigDecimal readBigDecimal() {
+        return null;
+    }
+
+    @Override
+    public UUID readUUID() {
+        return null;
+    }
+
+    @Override
+    public OffsetDateTime readOffsetDateTime() {
+        return null;
+    }
+
+    @Override
+    public OffsetTime readOffsetTime() {
+        return null;
     }
 }

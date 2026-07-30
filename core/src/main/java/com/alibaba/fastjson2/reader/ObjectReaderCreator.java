@@ -33,7 +33,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
-import java.util.stream.Collectors;
 
 import static com.alibaba.fastjson2.util.BeanUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
@@ -1436,7 +1435,11 @@ public class ObjectReaderCreator {
     private Object[] toFieldReaderArray(Map<String, List> fieldReaders) {
         int size = fieldReaders.values().stream().mapToInt(Collection::size).sum();
         Object[] fieldReaderArray = new Object[size];
-        fieldReaders.values().stream().flatMap(Collection::stream).collect(Collectors.toList()).toArray(fieldReaderArray);
+        List<Object> all = new java.util.ArrayList<>();
+        for (List list : fieldReaders.values()) {
+            all.addAll(list);
+        }
+        all.toArray(fieldReaderArray);
         Arrays.sort(fieldReaderArray);
         return fieldReaderArray;
     }

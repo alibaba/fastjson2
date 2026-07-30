@@ -1597,7 +1597,7 @@ public class ObjectReaderBaseModule
                 || type == Serializable.class
                 || type == Comparable.class
         ) {
-            return ObjectReaderImplObject.INSTANCE;
+            return null;
         }
 
         if (type instanceof Class) {

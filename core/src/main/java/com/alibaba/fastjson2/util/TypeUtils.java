@@ -1333,11 +1333,9 @@ public class TypeUtils {
             Object epoch = map.get("epochSecond");
             Object nano = map.get("nano");
             if (epoch instanceof Number) {
-                Instant instant = Instant.ofEpochSecond(((Number) epoch).longValue());
-                if (nano instanceof Number) {
-                    instant = instant.withNano(((Number) nano).intValue());
-                }
-                return instant;
+                long epochSecond = ((Number) epoch).longValue();
+                int nanoVal = nano instanceof Number ? ((Number) nano).intValue() : 0;
+                return Instant.ofEpochSecond(epochSecond, nanoVal);
             }
         }
 

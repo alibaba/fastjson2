@@ -370,19 +370,6 @@ public class ObjectReaderProvider
         if (superClass == null) {
             throw new JSONException("superclass is null");
         }
-
-        ObjectReader objectReader = getObjectReader(superClass);
-        if (objectReader instanceof ObjectReaderSeeAlso) {
-            ObjectReaderSeeAlso readerSeeAlso = (ObjectReaderSeeAlso) objectReader;
-            ObjectReaderSeeAlso readerSeeAlsoNew = readerSeeAlso.addSubType(subTypeClass, subTypeClassName);
-            if (readerSeeAlsoNew != readerSeeAlso) {
-                if (cache.containsKey(superClass)) {
-                    cache.put(superClass, readerSeeAlsoNew);
-                } else {
-                    cacheFieldBased.put(superClass, readerSeeAlsoNew);
-                }
-            }
-        }
     }
 
     /**
@@ -570,10 +557,7 @@ public class ObjectReaderProvider
             }
         }
 
-        if (objectReader instanceof ObjectReaderImplObject) {
-            return false;
-        }
-
+        // ObjectReaderImplObject removed
         return false;
     }
 

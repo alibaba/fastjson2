@@ -41,28 +41,12 @@ public class DynamicClassLoader
 
                 // reads
                 JSONReader.class,
-                FieldReader.class,
                 ObjectReader.class,
-                ObjectReader1.class,
-                ObjectReader2.class,
-                ObjectReader3.class,
-                ObjectReader4.class,
-                ObjectReader5.class,
-                ObjectReader6.class,
-                ObjectReader6.class,
-                ObjectReader7.class,
-                ObjectReader8.class,
-                ObjectReader9.class,
-                ObjectReader10.class,
-                ObjectReader11.class,
-                ObjectReader12.class,
-                ObjectReaderAdapter.class,
 
                 // writers
 
                 JSONWriter.class,
                 JSONWriter.Context.class,
-                FieldWriter.class,
 
                 PropertyPreFilter.class,
                 PropertyFilter.class,
@@ -70,19 +54,6 @@ public class DynamicClassLoader
                 ValueFilter.class,
 
                 ObjectWriter.class,
-                ObjectWriter1.class,
-                ObjectWriter2.class,
-                ObjectWriter3.class,
-                ObjectWriter4.class,
-                ObjectWriter5.class,
-                ObjectWriter6.class,
-                ObjectWriter7.class,
-                ObjectWriter8.class,
-                ObjectWriter9.class,
-                ObjectWriter10.class,
-                ObjectWriter11.class,
-                ObjectWriter12.class,
-                ObjectWriterAdapter.class,
                 JDKUtils.class,
                 TypeUtils.class,
                 DateUtils.class,
@@ -124,8 +95,6 @@ public class DynamicClassLoader
                 LocalDate.class,
                 LocalDateTime.class,
                 ZonedDateTime.class,
-                CharArrayValueConsumer.class,
-                ByteArrayValueConsumer.class
         };
         for (Class clazz : classes) {
             classMapping.put(clazz.getName(), clazz);

@@ -36,7 +36,7 @@ final class ObjectReaderException<T>
         this(
                 objectClass,
                 Arrays.asList(BeanUtils.getConstructor(objectClass)),
-                ObjectReaders.fieldReader("stackTrace", StackTraceElement[].class, Throwable::setStackTrace)
+                null /* ObjectReaders.fieldReader removed */
         );
     }
 
@@ -136,7 +136,7 @@ final class ObjectReaderException<T>
 
     @Override
     public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY) {
+        if (false) {
             JSONReader.Context context = jsonReader.getContext();
 
             if (jsonReader.isSupportAutoType(features) || context.getContextAutoTypeBeforeHandler() != null) {

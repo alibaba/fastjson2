@@ -1025,9 +1025,9 @@ public class ObjectWriterCreator {
             samMethodType = buildInfo.samMethodType;
         } else {
             methodType = MethodType.methodType(fieldClass);
-            invokedType = METHOD_TYPE_FUNCTION;
+            invokedType = MethodType.methodType(Object.class, Object.class);
             methodName = "apply";
-            samMethodType = METHOD_TYPE_OBJECT_OBJECT;
+            samMethodType = MethodType.methodType(Object.class, Object.class);
         }
 
         try {

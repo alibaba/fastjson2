@@ -983,65 +983,6 @@ public abstract class JSONWriter
      *
      * @return a new JSONWriter instance for JSONB format
      */
-    public static JSONWriter ofJSONB() {
-        return new JSONWriterJSONB(
-                new JSONWriter.Context(defaultObjectWriterProvider),
-                null
-        );
-    }
-
-    /**
-     * Creates a new JSONWriter instance for JSONB (binary JSON) format with the specified context.
-     *
-     * @param context the context to use for the new JSONWriter
-     * @return a new JSONWriter instance for JSONB format
-     */
-    public static JSONWriter ofJSONB(JSONWriter.Context context) {
-        return new JSONWriterJSONB(context, null);
-    }
-
-    /**
-     * Creates a new JSONWriter instance for JSONB (binary JSON) format with the specified context and symbol table.
-     *
-     * @param context the context to use for the new JSONWriter
-     * @param symbolTable the symbol table to use for the new JSONWriter
-     * @return a new JSONWriter instance for JSONB format
-     */
-    public static JSONWriter ofJSONB(JSONWriter.Context context, SymbolTable symbolTable) {
-        return new JSONWriterJSONB(context, symbolTable);
-    }
-
-    /**
-     * Creates a new JSONWriter instance for JSONB (binary JSON) format with the specified features.
-     *
-     * @param features the features to enable for the new JSONWriter
-     * @return a new JSONWriter instance for JSONB format
-     */
-    public static JSONWriter ofJSONB(Feature... features) {
-        return new JSONWriterJSONB(
-                new JSONWriter.Context(defaultObjectWriterProvider, features),
-                null
-        );
-    }
-
-    /**
-     * Creates a new JSONWriter instance for JSONB (binary JSON) format with the specified symbol table.
-     *
-     * @param symbolTable the symbol table to use for the new JSONWriter
-     * @return a new JSONWriter instance for JSONB format
-     */
-    public static JSONWriter ofJSONB(SymbolTable symbolTable) {
-        return new JSONWriterJSONB(
-                new JSONWriter.Context(defaultObjectWriterProvider),
-                symbolTable
-        );
-    }
-
-    /**
-     * Creates a new JSONWriter instance with pretty formatting enabled.
-     *
-     * @return a new JSONWriter instance with pretty formatting
-     */
     public static JSONWriter ofPretty() {
         return of(PrettyFormat);
     }

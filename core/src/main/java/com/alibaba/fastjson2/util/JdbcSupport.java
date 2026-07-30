@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.util;
 
-import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 import com.alibaba.fastjson2.reader.ObjectReader;
@@ -12,7 +10,6 @@ import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.sql.SQLException;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -36,15 +33,15 @@ public class JdbcSupport {
     static volatile boolean CONSTRUCTOR_TIME_ERROR;
 
     public static ObjectReader createTimeReader(Class objectClass, String format, Locale locale) {
-        return new TimeReader(format, locale);
+        return null;
     }
 
     public static ObjectReader createTimestampReader(Class objectClass, String format, Locale locale) {
-        return new TimestampReader(format, locale);
+        return null;
     }
 
     public static ObjectReader createDateReader(Class objectClass, String format, Locale locale) {
-        return new DateReader(format, locale);
+        return null;
     }
 
     public static ObjectWriter createTimeWriter(String format) {
@@ -168,106 +165,6 @@ public class JdbcSupport {
                 throw new JSONException("Clob.getCharacterStream error", e);
             }
             jsonWriter.writeString(reader);
-        }
-    }
-
-    static class TimeReader
-            extends DateTimeCodec
-            implements ObjectReader {
-        public TimeReader(String format, Locale locale) {
-            super(format, locale);
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-            return readObject(jsonReader, fieldType, fieldName, features);
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-            if (jsonReader.isInt()) {
-                long millis = jsonReader.readInt64Value();
-
-                if (formatUnixTime) {
-                    millis *= 1000;
-                }
-                return new Time(millis);
-            }
-
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (formatISO8601 || formatMillis) {
-                long millis = jsonReader.readMillisFromString();
-                return new Time(millis);
-            }
-
-            if (formatUnixTime) {
-                long seconds = jsonReader.readInt64();
-                return new Time(seconds * 1000L);
-            }
-
-            long millis;
-            if (format != null) {
-                DateTimeFormatter formatter = getDateFormatter(jsonReader.getLocale());
-
-                ZonedDateTime zdt;
-                if (formatter != null) {
-                    String str = jsonReader.readString();
-                    if (str.isEmpty()) {
-                        return null;
-                    }
-
-                    LocalDateTime ldt;
-                    if (!formatHasHour) {
-                        ldt = LocalDateTime.of(
-                                LocalDate.parse(str, formatter),
-                                LocalTime.MIN
-                        );
-                    } else if (!formatHasDay) {
-                        ldt = LocalDateTime.of(
-                                LocalDate.of(1970, 1, 1),
-                                LocalTime.parse(str, formatter)
-                        );
-                    } else {
-                        ldt = LocalDateTime.parse(str, formatter);
-                    }
-                    zdt = ldt.atZone(jsonReader.getContext().getZoneId());
-                } else {
-                    zdt = jsonReader.readZonedDateTime();
-                }
-                millis = zdt.toInstant().toEpochMilli();
-            } else {
-                String str = jsonReader.readString();
-                if ("0000-00-00".equals(str) || "0000-00-00 00:00:00".equals(str)) {
-                    millis = 0;
-                } else {
-                    if (str.length() == 9 && str.charAt(8) == 'Z') {
-                        LocalTime localTime = DateUtils.parseLocalTime(
-                                str.charAt(0),
-                                str.charAt(1),
-                                str.charAt(2),
-                                str.charAt(3),
-                                str.charAt(4),
-                                str.charAt(5),
-                                str.charAt(6),
-                                str.charAt(7)
-                        );
-                        millis = LocalDateTime.of(DateUtils.LOCAL_DATE_19700101, localTime)
-                                .atZone(DateUtils.DEFAULT_ZONE_ID)
-                                .toInstant()
-                                .toEpochMilli();
-                    } else {
-                        if (str.isEmpty() || "null".equals(str)) {
-                            return null;
-                        }
-                        return Time.valueOf(str);
-                    }
-                }
-            }
-
-            return new Time(millis);
         }
     }
 
@@ -436,183 +333,6 @@ public class JdbcSupport {
                 String str = dateFormatter.format(zdt);
                 jsonWriter.writeString(str);
             }
-        }
-    }
-
-    static class TimestampReader
-            extends DateTimeCodec
-            implements ObjectReader {
-        public TimestampReader(String format, Locale locale) {
-            super(format, locale);
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-            if (jsonReader.isInt()) {
-                long millis = jsonReader.readInt64Value();
-
-                if (formatUnixTime) {
-                    millis *= 1000;
-                }
-
-                return createTimestamp(millis, 0);
-            }
-
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            byte type = jsonReader.getType();
-            if (type == JSONB.Constants.BC_LOCAL_DATETIME) {
-                LocalDateTime ldt = jsonReader.readLocalDateTime();
-                Instant instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
-                return createTimestamp(
-                        instant.toEpochMilli(),
-                        instant.getNano());
-            }
-
-            return readObject(jsonReader, fieldType, fieldName, features);
-        }
-
-        Object createTimestamp(long millis, int nanos) {
-            Timestamp timestamp = new Timestamp(millis);
-            if (nanos != 0) {
-                timestamp.setNanos(nanos);
-            }
-            return timestamp;
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-            if (jsonReader.isInt()) {
-                long millis = jsonReader.readInt64Value();
-
-                if (formatUnixTime) {
-                    millis *= 1000L;
-                }
-
-                return createTimestamp(millis, 0);
-            }
-
-            if (jsonReader.nextIfNullOrEmptyString()) {
-                return null;
-            }
-
-            if (format == null || formatISO8601 || formatMillis) {
-                LocalDateTime localDateTime = jsonReader.readLocalDateTime();
-                if (localDateTime != null) {
-                    return Timestamp.valueOf(localDateTime);
-                }
-
-                if (jsonReader.wasNull()) {
-                    return null;
-                }
-
-                long millis = jsonReader.readMillisFromString();
-                if (millis == 0 && jsonReader.wasNull()) {
-                    return null;
-                }
-                return new Timestamp(millis);
-            }
-
-            String str = jsonReader.readString();
-            if (str.isEmpty()) {
-                return null;
-            }
-
-            DateTimeFormatter dateFormatter = getDateFormatter();
-
-            Instant instant;
-            if (!formatHasHour) {
-                LocalDate localDate = LocalDate.parse(str, dateFormatter);
-                LocalDateTime ldt = LocalDateTime.of(localDate, LocalTime.MIN);
-                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
-            } else {
-                LocalDateTime ldt = LocalDateTime.parse(str, dateFormatter);
-                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
-            }
-
-            long millis = instant.toEpochMilli();
-            int nanos = instant.getNano();
-
-            return createTimestamp(millis, nanos);
-        }
-    }
-
-    static class DateReader
-            extends DateTimeCodec
-            implements ObjectReader {
-        public DateReader(String format, Locale locale) {
-            super(format, locale);
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-            return readObject(jsonReader, fieldType, fieldName, features);
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-            if (jsonReader.isInt()) {
-                long millis = jsonReader.readInt64Value();
-
-                if (formatUnixTime) {
-                    millis *= 1000L;
-                }
-
-                return new java.sql.Date(millis);
-            }
-
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (formatUnixTime) {
-                if (jsonReader.isString()) {
-                    String str = jsonReader.readString();
-                    long millis = Long.parseLong(str);
-                    millis *= 1000L;
-                    return new java.sql.Date(millis);
-                }
-            }
-
-            if (format == null || formatISO8601 || formatMillis) {
-                LocalDateTime localDateTime = jsonReader.readLocalDateTime();
-                if (localDateTime != null) {
-                    return java.sql.Date.valueOf(localDateTime.toLocalDate());
-                }
-
-                if (jsonReader.wasNull()) {
-                    return null;
-                }
-
-                long millis = jsonReader.readMillisFromString();
-                if (millis == 0 && jsonReader.wasNull()) {
-                    return null;
-                }
-                return new java.sql.Date(millis);
-            }
-
-            String str = jsonReader.readString();
-            if (str.isEmpty()) {
-                return null;
-            }
-
-            DateTimeFormatter dateFormatter = getDateFormatter();
-
-            Instant instant;
-            if (!formatHasHour) {
-                LocalDate localDate = LocalDate.parse(str, dateFormatter);
-                LocalDateTime ldt = LocalDateTime.of(localDate, LocalTime.MIN);
-                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
-            } else {
-                LocalDateTime ldt = LocalDateTime.parse(str, dateFormatter);
-                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
-            }
-
-            return new java.sql.Date(
-                    instant.toEpochMilli()
-            );
         }
     }
 
