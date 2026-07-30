@@ -12,6 +12,8 @@ import com.alibaba.fastjson2.util.*;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
@@ -1038,6 +1040,118 @@ public class ObjectWriterBaseModule
 
     @Override
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
+        if (objectClass == JSONObject.class) {
+            return new ObjectWriter<JSONObject>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.write((JSONObject) object);
+                }
+            };
+        }
+        if (objectClass == JSONArray.class) {
+            return new ObjectWriter<JSONArray>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.write((JSONArray) object);
+                }
+            };
+        }
+        if (objectClass == String.class) {
+            return new ObjectWriter<String>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.writeString((String) object);
+                }
+            };
+        }
+        if (objectClass == Integer.class || objectClass == int.class) {
+            return new ObjectWriter<Integer>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.writeInt32((Integer) object);
+                }
+            };
+        }
+        if (objectClass == Long.class || objectClass == long.class) {
+            return new ObjectWriter<Long>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.writeInt64((Long) object);
+                }
+            };
+        }
+        if (objectClass == Boolean.class || objectClass == boolean.class) {
+            return new ObjectWriter<Boolean>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.writeBool((Boolean) object);
+                }
+            };
+        }
+        if (objectClass == Float.class || objectClass == float.class) {
+            return new ObjectWriter<Float>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.writeFloat((Float) object);
+                }
+            };
+        }
+        if (objectClass == Double.class || objectClass == double.class) {
+            return new ObjectWriter<Double>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.writeDouble((Double) object);
+                }
+            };
+        }
+        if (objectClass == Short.class || objectClass == short.class) {
+            return new ObjectWriter<Short>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.writeInt32(((Short) object).intValue());
+                }
+            };
+        }
+        if (objectClass == Byte.class || objectClass == byte.class) {
+            return new ObjectWriter<Byte>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.writeInt32(((Byte) object).intValue());
+                }
+            };
+        }
+        if (objectClass == BigDecimal.class) {
+            return new ObjectWriter<BigDecimal>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.writeDecimal((BigDecimal) object, features, null);
+                }
+            };
+        }
+        if (objectClass == BigInteger.class) {
+            return new ObjectWriter<BigInteger>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.writeBigInt((BigInteger) object, features);
+                }
+            };
+        }
+        if (objectClass == Character.class || objectClass == char.class) {
+            return new ObjectWriter<Character>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.writeString((Character) object);
+                }
+            };
+        }
+        if (Number.class.isAssignableFrom(objectClass)) {
+            return new ObjectWriter<Number>() {
+                @Override
+                public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+                    jsonWriter.writeString(object.toString());
+                }
+            };
+        }
         return null;
     }
 

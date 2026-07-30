@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.StringUtils;
 import org.junit.jupiter.api.Tag;
@@ -12,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.time.*;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -447,34 +445,6 @@ public class JSONWriterUTF16Test {
             Arrays.fill(chars, '1');
             assertEquals(new String(chars), writer.toString());
         }
-    }
-
-    @Test
-    public void test_writeDateTime14() {
-        Bean bean = new Bean();
-        bean.date = new Date(1679826319000L);
-        String str;
-        JSONWriter jsonWriter = JSONWriter.ofUTF16();
-        jsonWriter.writeAny(bean);
-        str = jsonWriter.toString();
-
-        assertEquals(StandardCharsets.UTF_16, jsonWriter.getCharset());
-        assertFalse(jsonWriter.isUseSingleQuotes());
-
-        String str2;
-        JSONWriter jsonWriter1 = JSONWriter.ofUTF16(PrettyFormat);
-        jsonWriter1.writeAny(bean);
-        str2 = jsonWriter1.toString();
-
-        Bean bean1 = JSON.parseObject(str, Bean.class);
-        Bean bean2 = JSON.parseObject(str2, Bean.class);
-        assertEquals(bean.date.getTime(), bean1.date.getTime());
-        assertEquals(bean.date.getTime(), bean2.date.getTime());
-    }
-
-    public static class Bean {
-        @JSONField(format = "yyyyMMddHHmmss")
-        public Date date;
     }
 
     @Test

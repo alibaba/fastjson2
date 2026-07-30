@@ -3067,6 +3067,8 @@ public interface JSON {
                 Class<?> valueClass = object.getClass();
                 if (valueClass == JSONObject.class && context.features == 0) {
                     writer.write((JSONObject) object);
+                } else if (valueClass == JSONArray.class && context.features == 0) {
+                    writer.write((JSONArray) object);
                 } else {
                     ObjectWriter<?> objectWriter = provider.getObjectWriter(
                             valueClass,
