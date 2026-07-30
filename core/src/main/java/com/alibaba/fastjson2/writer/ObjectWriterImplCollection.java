@@ -82,9 +82,6 @@ final class ObjectWriterImplCollection
 //        }
 
         boolean refDetect = jsonWriter.isRefDetect();
-        if (collection.size() > 1 && !(collection instanceof SortedSet) && !(collection instanceof LinkedHashSet)) {
-            refDetect = false;
-        }
 
         jsonWriter.startArray(collection.size());
 
@@ -144,8 +141,10 @@ final class ObjectWriterImplCollection
 
         Iterable iterable = (Iterable) object;
 
+        boolean refDetect = jsonWriter.isRefDetect();
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
+        boolean previousRefDetect = false;
         jsonWriter.startArray();
         int i = 0;
         for (Iterator it = iterable.iterator(); it.hasNext(); ) {
@@ -161,15 +160,33 @@ final class ObjectWriterImplCollection
             }
             Class<?> itemClass = item.getClass();
             ObjectWriter itemObjectWriter;
+            boolean itemRefDetect;
             if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
+                itemRefDetect = previousRefDetect;
             } else {
                 itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                itemRefDetect = refDetect && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
+                previousRefDetect = itemRefDetect;
+            }
+
+            if (itemRefDetect) {
+                String refPath = jsonWriter.setPath(i, item);
+                if (refPath != null) {
+                    jsonWriter.writeReference(refPath);
+                    jsonWriter.popPath(item);
+                    i++;
+                    continue;
+                }
             }
 
             itemObjectWriter.write(jsonWriter, item, i, this.itemType, this.features);
+
+            if (itemRefDetect) {
+                jsonWriter.popPath(item);
+            }
 
             ++i;
         }
