@@ -4111,7 +4111,8 @@ public abstract class JSONReader
                     val = readArray();
                     break;
                 case '{':
-                    if (context.autoTypeBeforeHandler != null || (context.features & Feature.SupportAutoType.mask) != 0) {
+                    if (context.autoTypeBeforeHandler != null
+                            || (context.features & (Feature.SupportAutoType.mask | Feature.ErrorOnNotSupportAutoType.mask)) != 0) {
                         val = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, 0);
                     } else if (isReference()) {
                         val = JSONPath.of(readReference());
