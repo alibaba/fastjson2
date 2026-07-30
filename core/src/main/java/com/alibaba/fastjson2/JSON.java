@@ -138,7 +138,7 @@ public interface JSON {
                     reader.read(array);
                     object = array;
                 }
-} else {
+            } else {
                 ObjectReader<?> objectReader = provider.getObjectReader(Object.class, false);
                 object = objectReader.readObject(reader, null, null, 0);
             }

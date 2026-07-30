@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.writer;
 
-
 import java.math.BigDecimal;
 import java.util.function.*;
 
