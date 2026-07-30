@@ -34,12 +34,12 @@ public class TestUtils {
         return java.util.Base64.getEncoder().encodeToString(bytes);
     }
 
-    public static JSONReader createJSONReaders(String json) {
-        return JSONReader.of(json);
+    public static JSONReader[] createJSONReaders(String json) {
+        return new JSONReader[]{JSONReader.of(json)};
     }
 
-    public static JSONReader createJSONReaderStr(String json) {
-        return JSONReader.of(json);
+    public static JSONReader[] createJSONReaderStr(String json) {
+        return new JSONReader[]{JSONReader.of(json)};
     }
 
     public static void check(Object o, String jsonStr, String... ignore) {
