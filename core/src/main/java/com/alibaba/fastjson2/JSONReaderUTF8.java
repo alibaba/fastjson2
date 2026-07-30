@@ -4233,8 +4233,271 @@ class JSONReaderUTF8
     public long readMillis19() { return 0; }
     @Override
     protected void readNumber0() {
-        // number reading not supported in tree mode
-        throw new JSONException("readNumber0 not supported");
+        boolean valid = false;
+        this.wasNull = false;
+        this.mag0 = 0;
+        this.mag1 = 0;
+        this.mag2 = 0;
+        this.mag3 = 0;
+        this.negative = false;
+        this.exponent = 0;
+        this.scale = 0;
+        int firstOffset = offset;
+
+        final byte[] bytes = this.bytes;
+        final int end = this.end;
+        int ch = this.ch;
+        int offset = this.offset;
+        int quote = '\0';
+        if (ch == '"' || ch == '\'') {
+            quote = ch;
+            ch = (char) bytes[offset++];
+
+            if (ch == quote) {
+                ch = offset == end ? EOI : bytes[offset++];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    ch = offset == end ? EOI : bytes[offset++];
+                }
+
+                this.ch = (char) ch;
+                this.offset = offset;
+                comma = nextIfComma();
+                wasNull = true;
+                valueType = JSON_TYPE_NULL;
+                return;
+            }
+        }
+
+        final int start = offset;
+
+        if (ch == '-') {
+            if (offset == end) {
+                throw new JSONException(info("illegal input"));
+            }
+            negative = true;
+            ch = bytes[offset++];
+        } else {
+            if (ch == '+') {
+                if (offset == end) {
+                    throw new JSONException(info("illegal input"));
+                }
+                ch = bytes[offset++];
+            }
+        }
+
+        boolean intOverflow = false;
+        valueType = JSON_TYPE_INT;
+        while (ch >= '0' && ch <= '9') {
+            valid = true;
+            if (!intOverflow) {
+                int digit = ch - '0';
+                mag3 *= 10;
+                if (mag3 < Integer.MIN_VALUE / 10) {
+                    intOverflow = true;
+                } else {
+                    mag3 -= digit;
+                    if (mag3 < Integer.MIN_VALUE / 10) {
+                        intOverflow = true;
+                    }
+                }
+            }
+            if (offset == end) {
+                ch = EOI;
+                offset++;
+                break;
+            }
+            ch = bytes[offset++];
+        }
+
+        if (ch == '.') {
+            valueType = JSON_TYPE_DEC;
+            if (offset == end) {
+                throw new JSONException(info("illegal input"));
+            }
+            ch = bytes[offset++];
+            while (ch >= '0' && ch <= '9') {
+                valid = true;
+                if (!intOverflow) {
+                    int digit = ch - '0';
+                    mag3 *= 10;
+                    if (mag3 < Integer.MIN_VALUE / 10) {
+                        intOverflow = true;
+                    } else {
+                        mag3 -= digit;
+                        if (mag3 < Integer.MIN_VALUE / 10) {
+                            intOverflow = true;
+                        }
+                    }
+                }
+
+                this.scale++;
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = bytes[offset++];
+            }
+        }
+
+        if (intOverflow) {
+            int numStart = negative ? start : start - 1;
+            int numDigits = scale > 0 ? offset - 2 - numStart : offset - 1 - numStart;
+            if (numDigits > MAX_NUMBER_DIGITS) {
+                throw new JSONException("Number literal too long: " + numDigits + " digits (max " + MAX_NUMBER_DIGITS + ")");
+            }
+            if (numDigits > 38) {
+                valueType = JSON_TYPE_BIG_DEC;
+            } else {
+                bigInt(bytes, numStart, offset - 1);
+            }
+        } else {
+            mag3 = -mag3;
+        }
+
+        if (ch == 'e' || ch == 'E') {
+            boolean negativeExp = false;
+            int expValue = 0;
+            ch = bytes[offset++];
+
+            if (ch == '-') {
+                negativeExp = true;
+                ch = bytes[offset++];
+            } else if (ch == '+') {
+                ch = (char) bytes[offset++];
+            }
+
+            while (ch >= '0' && ch <= '9') {
+                valid = true;
+                int byteVal = (ch - '0');
+                expValue = expValue * 10 + byteVal;
+                if (expValue > MAX_EXP) {
+                    throw new JSONException("too large exp value : " + expValue);
+                }
+
+                if (offset == end) {
+                    ch = EOI;
+                    break;
+                }
+                ch = bytes[offset++];
+            }
+
+            if (negativeExp) {
+                expValue = -expValue;
+            }
+
+            this.exponent = (short) expValue;
+            if (valueType != JSON_TYPE_BIG_DEC) {
+                valueType = JSON_TYPE_DEC;
+            }
+        }
+
+        if (valueType == JSON_TYPE_BIG_DEC) {
+            stringValue = new String(bytes, start - 1, offset - start);
+        }
+
+        if (offset == start) {
+            if (ch == 'n') {
+                if (bytes[offset] == 'u'
+                        && bytes[offset + 1] == 'l'
+                        && bytes[offset + 2] == 'l'
+                ) {
+                    offset += 3;
+                    valid = true;
+                    wasNull = true;
+                    valueType = JSON_TYPE_NULL;
+                    ch = offset == end ? EOI : bytes[offset++];
+                }
+            } else if (ch == 't' && bytes[offset] == 'r' && bytes[offset + 1] == 'u' && bytes[offset + 2] == 'e') {
+                offset += 3;
+                valid = true;
+                boolValue = true;
+                valueType = JSON_TYPE_BOOL;
+                ch = offset == end ? EOI : bytes[offset++];
+            } else if (ch == 'f' && offset + 3 < end && isALSE(bytes, offset)) {
+                valid = true;
+                offset += 4;
+                boolValue = false;
+                valueType = JSON_TYPE_BOOL;
+                ch = offset == end ? EOI : bytes[offset++];
+            } else if (ch == 'N' && bytes[offset] == 'a' && bytes[offset + 1] == 'N') {
+                offset += 2;
+                valid = true;
+                boolValue = true;
+                valueType = JSON_TYPE_NaN;
+                ch = offset == end ? EOI : bytes[offset++];
+            } else if (ch == '{' && quote == 0) {
+                this.offset = offset;
+                this.ch = (char) ch;
+                this.complex = readObject();
+                valueType = JSON_TYPE_OBJECT;
+                return;
+            } else if (ch == '[' && quote == 0) {
+                this.offset = offset;
+                this.ch = (char) ch;
+                this.complex = readArray();
+                valueType = JSON_TYPE_ARRAY;
+                return;
+            }
+        }
+
+        if (quote != 0) {
+            if (ch != quote) {
+                this.offset = firstOffset;
+                this.ch = (char) quote;
+                readString();
+                valueType = JSON_TYPE_STRING;
+                return;
+            }
+
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+            switch (ch) {
+                case 'B':
+                    if (!intOverflow && valueType != JSON_TYPE_DEC) {
+                        valueType = JSON_TYPE_INT8;
+                    }
+                    break;
+                case 'S':
+                    if (!intOverflow && valueType != JSON_TYPE_DEC) {
+                        valueType = JSON_TYPE_INT16;
+                    }
+                    break;
+                case 'L':
+                    if (offset - start < 19 && valueType != JSON_TYPE_DEC) {
+                        valueType = JSON_TYPE_INT64;
+                    }
+                    break;
+                case 'F':
+                    valueType = JSON_TYPE_FLOAT;
+                    break;
+                case 'D':
+                    valueType = JSON_TYPE_DOUBLE;
+                    break;
+                default:
+                    break;
+            }
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
+        if (comma = (ch == ',')) {
+            ch = offset == end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset == end ? EOI : bytes[offset++];
+            }
+        }
+
+        this.ch = (char) ch;
+        this.offset = offset;
+        if (!valid) {
+            throw new JSONException(info("illegal input"));
+        }
     }
 
     @Override

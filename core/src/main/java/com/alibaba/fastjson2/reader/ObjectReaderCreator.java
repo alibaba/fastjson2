@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.ObjBoolConsumer;
@@ -429,6 +430,46 @@ public class ObjectReaderCreator {
             boolean fieldBased,
             ObjectReaderProvider provider
     ) {
+        if (Map.class.isAssignableFrom(objectClass)) {
+            return new ObjectReader<T>() {
+                @Override
+                public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+                    return (T) jsonReader.readObject();
+                }
+            };
+        }
+        if (Collection.class.isAssignableFrom(objectClass)) {
+            return new ObjectReader<T>() {
+                @Override
+                public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+                    return (T) jsonReader.readArray();
+                }
+            };
+        }
+        if (objectClass == Object.class) {
+            return new ObjectReader<T>() {
+                @Override
+                public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+                    if (jsonReader.isObject()) {
+                        return (T) jsonReader.readObject();
+                    }
+                    if (jsonReader.isArray()) {
+                        return (T) jsonReader.readArray();
+                    }
+                    if (jsonReader.isString()) {
+                        return (T) jsonReader.readString();
+                    }
+                    if (jsonReader.isBool()) {
+                        return (T) (Boolean) jsonReader.readBoolValue();
+                    }
+                    if (jsonReader.isNumber()) {
+                        return (T) jsonReader.readNumber();
+                    }
+                    jsonReader.readNull();
+                    return null;
+                }
+            };
+        }
         throw new UnsupportedOperationException();
     }
 
