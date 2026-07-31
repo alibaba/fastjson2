@@ -4,20 +4,16 @@ import com.alibaba.fastjson2.util.*;
 
 import java.io.*;
 import java.lang.invoke.*;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -47,6 +43,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.*;
  *
  * @since 2.0.0
  */
+@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public abstract class JSONReader
         implements Closeable {
     static final int MAX_EXP = 2047;

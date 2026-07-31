@@ -16,7 +16,6 @@ import java.time.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -24,7 +23,7 @@ import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
-@SuppressWarnings("sunapi")
+@SuppressWarnings({"sunapi", "rawtypes", "unchecked"})
 class JSONWriterUTF16
         extends JSONWriter {
     static final long BYTE_VEC_64_SINGLE_QUOTE = 0x00270027_00270027L;

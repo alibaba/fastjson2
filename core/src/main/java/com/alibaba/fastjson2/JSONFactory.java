@@ -1,10 +1,8 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Supplier;
@@ -13,6 +11,7 @@ import java.util.function.Supplier;
  * JSONFactory is the core factory class for creating JSON readers and writers,
  * as well as managing global configuration for fastjson2.
  */
+@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public final class JSONFactory {
     public static final class Conf {
         static final Properties DEFAULT_PROPERTIES;

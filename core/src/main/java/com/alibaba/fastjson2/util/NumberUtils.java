@@ -10,6 +10,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.ANDROID;
 /**
  * Author: wangy
  */
+@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public final class NumberUtils {
     @FunctionalInterface
     interface LongBiFunction {

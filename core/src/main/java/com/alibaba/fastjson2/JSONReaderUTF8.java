@@ -17,6 +17,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+@SuppressWarnings({"sunapi", "rawtypes", "unchecked"})
 class JSONReaderUTF8
         extends JSONReader {
     static final int REF = BIG_ENDIAN ? 0x24726566 : 0x66657224;

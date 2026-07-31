@@ -4,6 +4,7 @@ package com.alibaba.fastjson2.util;
  * @Date 2024/5/25 13:36
  * @Created by wangyc
  */
+@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 class EF
         extends ED {
     static ED[] E5_F_A = new ED[173];

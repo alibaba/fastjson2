@@ -6,6 +6,7 @@ package com.alibaba.fastjson2;
  * @author wenshao
  * @since 2.0.59
  */
+@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public class JSONSchemaValidException
         extends JSONException {
     /**

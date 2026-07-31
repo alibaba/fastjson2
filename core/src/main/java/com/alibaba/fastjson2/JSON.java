@@ -7,7 +7,6 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -31,6 +30,7 @@ import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
  * String jsonString = JSON.toJSONString(jsonObject, JSONWriter.Feature.PrettyFormat);
  * </pre>
  */
+@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public final class JSON {
     public static final String VERSION = "2.0.63-slim";
 

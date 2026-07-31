@@ -16,6 +16,7 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
+@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 final class JSONReaderUTF16
         extends JSONReader {
     static final long CHAR_MASK = BIG_ENDIAN ? 0x00ff00ff00ff00ffL : 0xff00ff00ff00ff00L;
@@ -3510,28 +3511,6 @@ final class JSONReaderUTF16
         return offset;
     }
 
-    private static int skipStringEscaped(JSONReaderUTF16 jsonReader, char[] bytes, int offset, int quote) {
-        int ch = bytes[offset++];
-        for (; ; ) {
-            if (ch == '\\') {
-                ch = bytes[offset++];
-                if (ch == 'u') {
-                    offset += 4;
-                } else if (ch == 'x') {
-                    offset += 2;
-                } else if (ch != '\\' && ch != '"') {
-                    jsonReader.char1(ch);
-                }
-                ch = bytes[offset++];
-                continue;
-            }
-            if (ch == quote) {
-                return offset;
-            }
-
-            ch = bytes[offset++];
-        }
-    }
 
     private static int skipObject(JSONReaderUTF16 jsonReader, char[] bytes, int offset, int end) {
         offset = next(jsonReader, bytes, offset, end);
@@ -4450,15 +4429,6 @@ final class JSONReaderUTF16
     }
 
 
-    private static long parse4Nibbles(char[] chars, int offset) {
-        byte[] ns = NIBBLES;
-        char ch1 = chars[offset];
-        char ch2 = chars[offset + 1];
-        char ch3 = chars[offset + 2];
-        char ch4 = chars[offset + 3];
-        return (ch1 | ch2 | ch3 | ch4) > 0xff ?
-                -1 : ns[ch1] << 12 | ns[ch2] << 8 | ns[ch3] << 4 | ns[ch4];
-    }
 
     @Override
     public final int getStringLength() {

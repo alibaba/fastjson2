@@ -28,6 +28,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
  *
  * @since 2.0.0
  */
+@SuppressWarnings({"sunapi", "rawtypes", "unchecked"})
 public class IOUtils {
     static final short DOT_ZERO_16 = BIG_ENDIAN ? (short) ('.' << 8 | '0') : (short) ('0' << 8 | '.');
     static final int DOT_ZERO_32 = BIG_ENDIAN ? '.' << 16 | '0' : '0' << 16 | '.';

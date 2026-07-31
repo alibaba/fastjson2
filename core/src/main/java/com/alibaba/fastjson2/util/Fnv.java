@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.util;
 
 // fnv1a 64
+@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public final class Fnv {
     public static final long MAGIC_HASH_CODE = 0xcbf29ce484222325L;
     public static final long MAGIC_PRIME = 0x100000001b3L;

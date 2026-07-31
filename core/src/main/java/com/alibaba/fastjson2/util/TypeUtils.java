@@ -21,6 +21,7 @@ import java.util.function.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.lang.invoke.MethodType.methodType;
 
+@SuppressWarnings({"sunapi", "rawtypes", "unchecked"})
 public class TypeUtils {
     public static final Class CLASS_JSON_OBJECT_1x;
     public static final Field FIELD_JSON_OBJECT_1x_map;

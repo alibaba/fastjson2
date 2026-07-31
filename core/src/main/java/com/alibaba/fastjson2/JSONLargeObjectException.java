@@ -7,6 +7,7 @@ package com.alibaba.fastjson2;
  * @author wenshao
  * @since 2.0.58
  */
+@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public class JSONLargeObjectException
         extends JSONException {
     /**

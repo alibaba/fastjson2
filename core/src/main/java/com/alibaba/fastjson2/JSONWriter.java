@@ -60,6 +60,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.isJavaScriptSupport;
  * @see JSONWriter.Feature
  * @since 2.0.0
  */
+@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public abstract class JSONWriter
         implements Closeable {
     static final long WRITE_ARRAY_NULL_MASK = NullAsDefaultValue.mask | WriteNullListAsEmpty.mask;

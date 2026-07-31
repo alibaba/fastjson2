@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.util.IOUtils;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteBooleanAsNumber;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
+@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 final class JSONWriterUTF16JDK9UF
         extends JSONWriterUTF16 {
     JSONWriterUTF16JDK9UF(Context ctx) {

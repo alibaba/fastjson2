@@ -1,19 +1,17 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.*;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
-import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONObject.NONE_DIRECT_FEATURES;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
+@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public class JSONArray
         extends ArrayList<Object> {
     private static final long serialVersionUID = 1L;
