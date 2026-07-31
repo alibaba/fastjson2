@@ -10,6 +10,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <groupId>${project.parent.groupId}</groupId>
+    <version>${project.parent.version}</version>
     <artifactId>fastjson2</artifactId>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
