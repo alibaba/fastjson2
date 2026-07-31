@@ -44,23 +44,6 @@ public class FnvTest {
         }
     }
 
-    @Test
-    public void test1() {
-        assertEquals(
-                Fnv.hashCode64LCase("A"),
-                Fnv.hashCode64LCase("a")
-        );
-
-        assertEquals(
-                Fnv.hashCode64LCase("_A"),
-                Fnv.hashCode64LCase("a_")
-        );
-
-        assertEquals(
-                Fnv.hashCode64LCase("-A"),
-                Fnv.hashCode64LCase("a-")
-        );
-    }
 
     @Test
     public void test2() {

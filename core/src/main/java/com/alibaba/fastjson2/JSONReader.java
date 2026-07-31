@@ -2221,12 +2221,7 @@ public abstract class JSONReader
             throw new JSONException(info());
         }
 
-        Map map;
-        if (object instanceof Wrapper) {
-            map = ((Wrapper) object).unwrap(Map.class);
-        } else {
-            map = object;
-        }
+        Map map = object;
 
         long contextFeatures = features | context.getFeatures();
 

@@ -34,7 +34,6 @@ public class TypeUtils {
             CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(new HashSet<>()).getClass(),
             CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(new TreeSet<>()).getClass(),
             CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
-    public static final ParameterizedType PARAM_TYPE_LIST_STR = new ParameterizedTypeImpl(List.class, String.class);
 
     public static final MethodType
             METHOD_TYPE_SUPPLIER = MethodType.methodType(Supplier.class),
@@ -98,29 +97,6 @@ public class TypeUtils {
     static volatile boolean METHOD_NEW_PROXY_INSTANCE_ERROR;
     static volatile MethodHandle METHOD_NEW_PROXY_INSTANCE;
 
-    public static <T> T newProxyInstance(Class<T> objectClass, JSONObject object) {
-        MethodHandle newProxyInstance = METHOD_NEW_PROXY_INSTANCE;
-        try {
-            if (newProxyInstance == null) {
-                Class<?> proxyClass = Class.forName("java.lang.reflect.Proxy");
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(proxyClass);
-                newProxyInstance = lookup.findStatic(
-                        proxyClass,
-                        "newProxyInstance",
-                        methodType(Object.class, ClassLoader.class, Class[].class, InvocationHandler.class)
-                );
-                METHOD_NEW_PROXY_INSTANCE = newProxyInstance;
-            }
-        } catch (Throwable ignored) {
-            METHOD_NEW_PROXY_INSTANCE_ERROR = true;
-        }
-
-        try {
-            return (T) newProxyInstance.invokeExact(objectClass.getClassLoader(), new Class[]{objectClass}, (InvocationHandler) object);
-        } catch (Throwable e) {
-            throw new JSONException("create proxy error : " + objectClass, e);
-        }
-    }
 
     static class X1 {
         static final Function<byte[], char[]> TO_CHARS;
@@ -222,21 +198,6 @@ public class TypeUtils {
         return new String(new byte[]{c0, c1}, StandardCharsets.ISO_8859_1);
     }
 
-    public static Type intern(Type type) {
-        if (type instanceof ParameterizedType) {
-            ParameterizedType paramType = (ParameterizedType) type;
-            Type rawType = paramType.getRawType();
-            Type[] actualTypeArguments = paramType.getActualTypeArguments();
-            if (rawType == List.class) {
-                if (actualTypeArguments.length == 1) {
-                    if (actualTypeArguments[0] == String.class) {
-                        return PARAM_TYPE_LIST_STR;
-                    }
-                }
-            }
-        }
-        return type;
-    }
 
     public static double parseDouble(byte[] in, int off, int len) throws NumberFormatException {
         boolean isNegative = false;
@@ -1203,165 +1164,10 @@ public class TypeUtils {
     static final AtomicReferenceFieldUpdater<Cache, char[]> CHARS_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(Cache.class, char[].class, "chars");
 
-    public static Class<?> getMapping(Type type) {
-        if (type == null) {
-            return null;
-        }
 
-        if (type.getClass() == Class.class) {
-            return (Class<?>) type;
-        }
 
-        if (type instanceof ParameterizedType) {
-            return getMapping(((ParameterizedType) type).getRawType());
-        }
 
-        if (type instanceof TypeVariable) {
-            Type boundType = ((TypeVariable<?>) type).getBounds()[0];
-            if (boundType instanceof Class) {
-                return (Class) boundType;
-            }
-            return getMapping(boundType);
-        }
 
-        if (type instanceof WildcardType) {
-            Type[] upperBounds = ((WildcardType) type).getUpperBounds();
-            if (upperBounds.length == 1) {
-                return getMapping(upperBounds[0]);
-            }
-        }
-
-        if (type instanceof GenericArrayType) {
-            Type genericComponentType = ((GenericArrayType) type).getGenericComponentType();
-            Class<?> componentClass = getClass(genericComponentType);
-            return getArrayClass(componentClass);
-        }
-
-        return Object.class;
-    }
-
-    public static Object[] cast(Object obj, Type[] types) {
-        if (obj == null) {
-            return null;
-        }
-
-        Object[] array = new Object[types.length];
-
-        if (obj instanceof Collection) {
-            int i = 0;
-            for (Object item : (Collection) obj) {
-                int index = i++;
-                array[index] = TypeUtils.cast(item, types[index]);
-            }
-        } else {
-            Class<?> objectClass = obj.getClass();
-            if (objectClass.isArray()) {
-                int length = Array.getLength(obj);
-                for (int i = 0; i < array.length && i < length; i++) {
-                    Object item = Array.get(obj, i);
-                    array[i] = TypeUtils.cast(item, types[i]);
-                }
-            } else {
-                throw new JSONException("can not cast to types " + JSON.toJSONString(types) + " from " + objectClass);
-            }
-        }
-
-        return array;
-    }
-
-    public static String[] toStringArray(Object object) {
-        if (object == null || object instanceof String[]) {
-            return (String[]) object;
-        }
-
-        if (object instanceof Collection) {
-            Collection collection = (Collection) object;
-            String[] array = new String[collection.size()];
-            int i = 0;
-            for (Object item : (Collection) object) {
-                int index = i++;
-                array[index] = item == null || (item instanceof String) ? (String) item : item.toString();
-            }
-            return array;
-        }
-
-        Class<?> objectClass = object.getClass();
-        if (objectClass.isArray()) {
-            int length = Array.getLength(object);
-            String[] array = new String[length];
-            for (int i = 0; i < array.length; i++) {
-                Object item = Array.get(object, i);
-                array[i] = item == null || (item instanceof String) ? (String) item : item.toString();
-            }
-            return array;
-        }
-
-        return cast(object, String[].class);
-    }
-
-    public static <T> T cast(Object obj, Type type) {
-        if (type instanceof Class) {
-            return cast(obj, (Class<T>) type);
-        }
-        throw new JSONException("not support cast to type " + type + ", from " + obj.getClass());
-    }
-
-    public static <T> T cast(Object obj, Class<T> targetClass) {
-        if (obj == null) {
-            return null;
-        }
-
-        if (targetClass.isInstance(obj)) {
-            return (T) obj;
-        }
-
-        if (targetClass == String.class) {
-            if (obj instanceof Character || obj instanceof Number || obj instanceof Boolean || obj instanceof Enum) {
-                return (T) obj.toString();
-            }
-            return (T) JSON.toJSONString(obj);
-        }
-
-        if (targetClass == AtomicInteger.class) {
-            return (T) new AtomicInteger(toIntValue(obj));
-        }
-
-        if (targetClass == AtomicLong.class) {
-            return (T) new AtomicLong(toLongValue(obj));
-        }
-
-        if (targetClass == AtomicBoolean.class) {
-            return (T) new AtomicBoolean((Boolean) obj);
-        }
-
-        if (targetClass.isEnum()) {
-            if (obj instanceof Integer) {
-                int intValue = (Integer) obj;
-                Object[] enumConstants = targetClass.getEnumConstants();
-                if (intValue >= 0 && intValue < enumConstants.length) {
-                    return (T) enumConstants[intValue];
-                }
-            } else if (obj instanceof String) {
-                return (T) Enum.valueOf((Class<Enum>) targetClass, (String) obj);
-            }
-        }
-
-        if (obj instanceof String) {
-            String json = (String) obj;
-            if (json.isEmpty() || "null".equals(json)) {
-                return null;
-            }
-
-            if (targetClass == StringBuffer.class) {
-                return (T) new StringBuffer(json);
-            } else if (targetClass == StringBuilder.class) {
-                return (T) new StringBuilder(json);
-            }
-        }
-
-        String className = targetClass.getName();
-        throw new JSONException("can not cast to " + className + ", from " + obj.getClass());
-    }
 
     static final Map<Class, String> NAME_MAPPINGS = new IdentityHashMap<>();
     static final Map<String, Class> TYPE_MAPPINGS = new ConcurrentHashMap<>();
@@ -1647,9 +1453,6 @@ public class TypeUtils {
         return typeName;
     }
 
-    public static Class getMapping(String typeName) {
-        return TYPE_MAPPINGS.get(typeName);
-    }
 
     public static BigDecimal toBigDecimal(Object value) {
         if (value == null || value instanceof BigDecimal) {
@@ -1722,15 +1525,6 @@ public class TypeUtils {
         return parseBigDecimal(strBytes, 0, strBytes.length);
     }
 
-    public static boolean isInt32(BigInteger value) {
-        if (FIELD_BIGINTEGER_MAG_OFFSET != -1) {
-            int[] mag = (int[]) UNSAFE.getObject(value, FIELD_BIGINTEGER_MAG_OFFSET);
-            return mag.length == 0
-                    || (mag.length == 1 && (mag[0] >= 0 || (mag[0] == Integer.MIN_VALUE && value.signum() == -1)));
-        }
-
-        return value.compareTo(BIGINT_INT32_MIN) >= 0 && value.compareTo(BIGINT_INT32_MAX) <= 0;
-    }
 
     public static boolean isInt64(BigInteger value) {
         if (FIELD_BIGINTEGER_MAG_OFFSET != -1) {
@@ -1867,23 +1661,7 @@ public class TypeUtils {
         throw new JSONException("can not cast to long from " + value.getClass());
     }
 
-    public static Boolean parseBoolean(byte[] bytes, int off, int len) {
-        if (len == 0) {
-            return null;
-        }
-        byte b0;
-        return (len == 1 && ((b0 = bytes[off]) == '1' || b0 == 'Y'))
-                || (len == 4 && (IOUtils.getIntUnaligned(bytes, off) | 0x20202020) == IOUtils.TRUE);
-    }
 
-    public static Boolean parseBoolean(char[] chars, int off, int len) {
-        if (len == 0) {
-            return null;
-        }
-        char b0;
-        return (len == 1 && ((b0 = chars[off]) == '1' || b0 == 'Y'))
-                || (len == 4 && (IOUtils.getLongLE(chars, off) | 0x20002000200020L) == 0x65007500720074L);
-    }
 
     public static int parseInt(byte[] bytes, int off, int len) {
         /* Accumulating negatively avoids surprises near MAX_VALUE */
@@ -2122,121 +1900,10 @@ public class TypeUtils {
         return new BigDecimal(chars, 0, chars.length);
     }
 
-    public static Integer toInteger(Object value) {
-        if (value == null || value instanceof Integer) {
-            return (Integer) value;
-        }
 
-        if (value instanceof Number) {
-            return ((Number) value).intValue();
-        }
 
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return null;
-            }
-            return Integer.parseInt(str);
-        }
 
-        if (value instanceof Map && ((Map<?, ?>) value).isEmpty()) {
-            return null;
-        }
 
-        if (value instanceof Boolean) {
-            return (Boolean) value ? 1 : 0;
-        }
-
-        throw new JSONException("can not cast to integer");
-    }
-
-    public static Byte toByte(Object value) {
-        if (value == null || value instanceof Byte) {
-            return (Byte) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).byteValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return null;
-            }
-            return Byte.parseByte(str);
-        }
-
-        throw new JSONException("can not cast to byte");
-    }
-
-    public static byte toByteValue(Object value) {
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Byte) {
-            return (Byte) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).byteValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return 0;
-            }
-            return Byte.parseByte(str);
-        }
-
-        throw new JSONException("can not cast to byte");
-    }
-
-    public static Short toShort(Object value) {
-        if (value == null || value instanceof Short) {
-            return (Short) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).shortValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return null;
-            }
-            return Short.parseShort(str);
-        }
-
-        throw new JSONException("can not cast to byte");
-    }
-
-    public static short toShortValue(Object value) {
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Short) {
-            return (Short) value;
-        }
-
-        if (value instanceof Number) {
-            return (byte) ((Number) value).shortValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return 0;
-            }
-            return Short.parseShort(str);
-        }
-
-        throw new JSONException("can not cast to byte");
-    }
 
     public static int toIntValue(Object value) {
         if (value == null) {
@@ -2279,109 +1946,9 @@ public class TypeUtils {
         throw new JSONException("can not cast to int");
     }
 
-    public static boolean toBooleanValue(Object value) {
-        if (value == null) {
-            return false;
-        }
 
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
 
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return false;
-            }
-            return Boolean.parseBoolean(str);
-        }
 
-        if (value instanceof Number) {
-            int intValue = ((Number) value).intValue();
-            if (intValue == 1) {
-                return true;
-            }
-            if (intValue == 0) {
-                return false;
-            }
-        }
-
-        throw new JSONException("can not cast to boolean");
-    }
-
-    public static Boolean toBoolean(Object value) {
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return null;
-            }
-            return Boolean.parseBoolean(str);
-        }
-
-        if (value instanceof Number) {
-            int intValue = ((Number) value).intValue();
-            if (intValue == 1) {
-                return true;
-            }
-            if (intValue == 0) {
-                return false;
-            }
-        }
-
-        throw new JSONException("can not cast to boolean");
-    }
-
-    public static float toFloatValue(Object value) {
-        if (value == null) {
-            return 0F;
-        }
-
-        if (value instanceof Float) {
-            return (Float) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).floatValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return 0;
-            }
-            return Float.parseFloat(str);
-        }
-
-        throw new JSONException("can not cast to decimal");
-    }
-
-    public static Float toFloat(Object value) {
-        if (value == null || value instanceof Float) {
-            return (Float) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).floatValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return null;
-            }
-            return Float.parseFloat(str);
-        }
-
-        throw new JSONException("can not cast to decimal");
-    }
 
     public static double toDoubleValue(Object value) {
         if (value == null) {
@@ -2421,173 +1988,8 @@ public class TypeUtils {
         throw new JSONException("can not cast to double");
     }
 
-    public static Double toDouble(Object value) {
-        if (value == null || value instanceof Double) {
-            return (Double) value;
-        }
 
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
 
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return null;
-            }
-            return Double.parseDouble(str);
-        }
-
-        throw new JSONException("can not cast to double");
-    }
-
-    public static int compare(Object a, Object b) {
-        final Class typeA = a.getClass(), typeB = b.getClass();
-
-        if (typeA == typeB) {
-            return ((Comparable) a).compareTo(b);
-        }
-
-        if (typeA == BigDecimal.class) {
-            if (typeB == Integer.class || typeB == Long.class) {
-                b = BigDecimal.valueOf(((Number) b).longValue());
-            } else if (typeB == Float.class || typeB == Double.class) {
-                b = BigDecimal.valueOf(((Number) b).doubleValue());
-            } else if (typeB == BigInteger.class) {
-                b = new BigDecimal((BigInteger) b);
-            }
-        } else if (typeA == BigInteger.class) {
-            if (typeB == Integer.class || typeB == Long.class) {
-                b = BigInteger.valueOf(((Number) b).longValue());
-            } else if (typeB == Float.class || typeB == Double.class) {
-                b = BigDecimal.valueOf(((Number) b).doubleValue());
-                a = new BigDecimal((BigInteger) a);
-            } else if (typeB == BigDecimal.class) {
-                a = new BigDecimal((BigInteger) a);
-            }
-        } else if (typeA == Long.class) {
-            if (typeB == Integer.class) {
-                return Long.compare((Long) a, ((Integer) b));
-            } else if (typeB == BigDecimal.class) {
-                a = BigDecimal.valueOf((Long) a);
-            } else if (typeB == Float.class || typeB == Double.class) {
-                return Double.compare((Long) a, ((Number) b).doubleValue());
-            } else if (typeB == BigInteger.class) {
-                a = BigInteger.valueOf((Long) a);
-            } else if (typeB == String.class) {
-                a = BigDecimal.valueOf((Long) a);
-                b = new BigDecimal((String) b);
-            }
-        } else if (typeA == Integer.class) {
-            if (typeB == Long.class) {
-                return Long.compare((Integer) a, ((Long) b));
-            } else if (typeB == BigDecimal.class) {
-                a = BigDecimal.valueOf((Integer) a);
-            } else if (typeB == BigInteger.class) {
-                a = BigInteger.valueOf((Integer) a);
-            } else if (typeB == Float.class || typeB == Double.class) {
-                return Double.compare((Integer) a, ((Number) b).doubleValue());
-            } else if (typeB == String.class) {
-                a = BigDecimal.valueOf((Integer) a);
-                b = new BigDecimal((String) b);
-            }
-        } else if (typeA == Double.class) {
-            if (typeB == Integer.class || typeB == Long.class || typeB == Float.class) {
-                return Double.compare((Double) a, ((Number) b).doubleValue());
-            } else if (typeB == BigDecimal.class) {
-                a = BigDecimal.valueOf((Double) a);
-            } else if (typeB == String.class) {
-                a = BigDecimal.valueOf((Double) a);
-                b = new BigDecimal((String) b);
-            } else if (typeB == BigInteger.class) {
-                a = BigDecimal.valueOf((Double) a);
-                b = new BigDecimal((BigInteger) b);
-            }
-        } else if (typeA == Float.class) {
-            if (typeB == Integer.class || typeB == Long.class || typeB == Double.class) {
-                return Double.compare((Float) a, ((Number) b).doubleValue());
-            } else if (typeB == BigDecimal.class) {
-                a = BigDecimal.valueOf((Float) a);
-            } else if (typeB == String.class) {
-                a = BigDecimal.valueOf((Float) a);
-                b = new BigDecimal((String) b);
-            } else if (typeB == BigInteger.class) {
-                a = BigDecimal.valueOf((Float) a);
-                b = new BigDecimal((BigInteger) b);
-            }
-        } else if (typeA == String.class) {
-            String strA = (String) a;
-            if (typeB == Integer.class || typeB == Long.class) {
-                try {
-                    long aVal = Long.parseLong(strA);
-                    return Long.compare(aVal, ((Number) b).longValue());
-                } catch (NumberFormatException ex) {
-                    a = new BigDecimal(strA);
-                    b = BigDecimal.valueOf(((Number) b).longValue());
-                }
-            } else if (typeB == Float.class || typeB == Double.class) {
-                return Double.compare(Double.parseDouble(strA), ((Number) b).doubleValue());
-            } else if (typeB == BigInteger.class) {
-                a = new BigInteger(strA);
-            } else if (typeB == BigDecimal.class) {
-                a = new BigDecimal(strA);
-            }
-        }
-
-        return ((Comparable) a).compareTo(b);
-    }
-
-    public static Object getDefaultValue(Type paramType) {
-        if (paramType == int.class) {
-            return 0;
-        }
-
-        if (paramType == long.class) {
-            return 0L;
-        }
-
-        if (paramType == float.class) {
-            return 0F;
-        }
-
-        if (paramType == double.class) {
-            return 0D;
-        }
-
-        if (paramType == boolean.class) {
-            return Boolean.FALSE;
-        }
-
-        if (paramType == short.class) {
-            return (short) 0;
-        }
-
-        if (paramType == byte.class) {
-            return (byte) 0;
-        }
-
-        if (paramType == char.class) {
-            return (char) 0;
-        }
-
-        if (paramType == Optional.class) {
-            return Optional.empty();
-        }
-
-        if (paramType == OptionalInt.class) {
-            return OptionalInt.empty();
-        }
-
-        if (paramType == OptionalLong.class) {
-            return OptionalLong.empty();
-        }
-
-        if (paramType == OptionalDouble.class) {
-            return OptionalDouble.empty();
-        }
-
-        return null;
-    }
 
     /**
      * Tests whether a type name carries a character that cannot appear in a Java binary class name
@@ -2827,32 +2229,6 @@ public class TypeUtils {
         return Array.newInstance(componentClass, 1).getClass();
     }
 
-    public static Class nonePrimitive(Class type) {
-        if (type.isPrimitive()) {
-            String name = type.getName();
-            switch (name) {
-                case "byte":
-                    return Byte.class;
-                case "short":
-                    return Short.class;
-                case "int":
-                    return Integer.class;
-                case "long":
-                    return Long.class;
-                case "float":
-                    return Float.class;
-                case "double":
-                    return Double.class;
-                case "char":
-                    return Character.class;
-                case "boolean":
-                    return Boolean.class;
-                default:
-                    break;
-            }
-        }
-        return type;
-    }
 
     public static Class<?> getClass(Type type) {
         if (type == null) {
@@ -2892,52 +2268,6 @@ public class TypeUtils {
         return Object.class;
     }
 
-    public static boolean isProxy(Class<?> clazz) {
-        // Check if the class name contains Spring Cloud RefreshScope indicators
-        String className = clazz.getName();
-        int p = className.indexOf('$');
-        if (p != -1
-                && (className.contains("$EnhancerBySpringCGLIB$")
-                || className.contains("$EnhancerByCGLIB$")
-                || className.contains("$FastClassBySpringCGLIB$")
-                || className.contains("$FastClassByCGLIB$")
-                || className.contains("$EnhancerBySpringCGLIB$")
-                || className.contains("$EnhancerByCGLIB$"))) {
-            return true;
-        }
-
-        // Check interfaces for RefreshScope marker or other proxy indicators
-        for (Class<?> item : clazz.getInterfaces()) {
-            String interfaceName = item.getName();
-            switch (interfaceName) {
-                case "org.springframework.cloud.context.config.annotation.RefreshScope":
-                case "org.springframework.cglib.proxy.Factory":
-                case "javassist.util.proxy.ProxyObject":
-                case "org.apache.ibatis.javassist.util.proxy.ProxyObject":
-                case "org.hibernate.proxy.HibernateProxy":
-                case "org.springframework.context.annotation.ConfigurationClassEnhancer$EnhancedConfiguration":
-                case "org.mockito.cglib.proxy.Factory":
-                case "net.sf.cglib.proxy.Factory":
-                    return true;
-                default:
-                    // Check if interface name contains Spring-related patterns
-                    if (interfaceName.startsWith("org.springframework.cloud.context.config.annotation.") &&
-                            interfaceName.endsWith("RefreshScope")) {
-                        return true;
-                    }
-                    break;
-            }
-        }
-
-        // Check if class name follows Spring proxy patterns
-        if (className.contains("$SpringCGLIB$")
-                || className.contains("$SpringCGLIB$")
-                || className.contains("$EnhancerBySpringCGLIB$")) {
-            return true;
-        }
-
-        return false;
-    }
 
     public static Map getInnerMap(Map object) {
         if (CLASS_JSON_OBJECT_1x == null || !CLASS_JSON_OBJECT_1x.isInstance(object) || FIELD_JSON_OBJECT_1x_map == null) {
@@ -2953,18 +2283,6 @@ public class TypeUtils {
         return object;
     }
 
-    public static boolean isFunction(Class type) {
-        if (type.isInterface()) {
-            String typeName = type.getName();
-            if (typeName.startsWith("java.util.function.")) {
-                return true;
-            }
-
-            return type.isAnnotationPresent(FunctionalInterface.class);
-        }
-
-        return false;
-    }
 
     public static boolean isInteger(String str) {
         if (str == null || str.isEmpty()) {
@@ -3332,46 +2650,7 @@ public class TypeUtils {
         return false;
     }
 
-    public static boolean isUUID(String str) {
-        if (str == null) {
-            return false;
-        }
 
-        if (str.length() == 32) {
-            for (int i = 0; i < 32; i++) {
-                char ch = str.charAt(i);
-                boolean valid = (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f');
-                if (!valid) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        if (str.length() == 36) {
-            for (int i = 0; i < 36; i++) {
-                char ch = str.charAt(i);
-
-                if (i == 8 || i == 13 || i == 18 || i == 23) {
-                    if (ch != '-') {
-                        return false;
-                    }
-                    continue;
-                }
-
-                boolean valid = (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f');
-                if (!valid) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean validateIPv4(String str) {
-        return validateIPv4(str, 0);
-    }
 
     static boolean validateIPv4(String str, int off) {
         if (str == null) {
@@ -3446,99 +2725,6 @@ public class TypeUtils {
         return dotCount == 3;
     }
 
-    public static boolean validateIPv6(String str) {
-        if (str == null) {
-            return false;
-        }
-
-        final int len = str.length();
-        if (len < 2 || len > 39) {
-            return false;
-        }
-
-        int start = 0;
-        int colonCount = 0;
-        for (int i = 0; i < len; i++) {
-            char ch = str.charAt(i);
-            if (ch == '.') {
-                boolean ipV4 = validateIPv4(str, start);
-                if (!ipV4) {
-                    return false;
-                }
-                break;
-            }
-            if (ch == ':' || i == len - 1) {
-                int end = ch == ':' ? i : i + 1;
-                int n = end - start;
-
-                char c0, c1, c2, c3;
-                switch (n) {
-                    case 0:
-                        break;
-                    case 1:
-                        c0 = str.charAt(end - 1);
-                        if (!(c0 >= '0' && c0 <= '9' || (c0 >= 'A' && c0 <= 'F') || (c0 >= 'a' && c0 <= 'f'))) {
-                            return false;
-                        }
-                        break;
-                    case 2:
-                        c0 = str.charAt(end - 2);
-                        c1 = str.charAt(end - 1);
-
-                        if (!(c0 >= '0' && c0 <= '9' || (c0 >= 'A' && c0 <= 'F') || (c0 >= 'a' && c0 <= 'f'))) {
-                            return false;
-                        }
-                        if (!(c1 >= '0' && c1 <= '9' || (c1 >= 'A' && c1 <= 'F') || (c1 >= 'a' && c1 <= 'f'))) {
-                            return false;
-                        }
-                        break;
-                    case 3:
-                        c0 = str.charAt(end - 3);
-                        c1 = str.charAt(end - 2);
-                        c2 = str.charAt(end - 1);
-
-                        if (!(c0 >= '0' && c0 <= '9' || (c0 >= 'A' && c0 <= 'F') || (c0 >= 'a' && c0 <= 'f'))) {
-                            return false;
-                        }
-                        if (!(c1 >= '0' && c1 <= '9' || (c1 >= 'A' && c1 <= 'F') || (c1 >= 'a' && c1 <= 'f'))) {
-                            return false;
-                        }
-                        if (!(c2 >= '0' && c2 <= '9' || (c2 >= 'A' && c2 <= 'F') || (c2 >= 'a' && c2 <= 'f'))) {
-                            return false;
-                        }
-                        break;
-                    case 4:
-                        c0 = str.charAt(end - 4);
-                        c1 = str.charAt(end - 3);
-                        c2 = str.charAt(end - 2);
-                        c3 = str.charAt(end - 1);
-
-                        if (!(c0 >= '0' && c0 <= '9' || (c0 >= 'A' && c0 <= 'F') || (c0 >= 'a' && c0 <= 'f'))) {
-                            return false;
-                        }
-                        if (!(c1 >= '0' && c1 <= '9' || (c1 >= 'A' && c1 <= 'F') || (c1 >= 'a' && c1 <= 'f'))) {
-                            return false;
-                        }
-                        if (!(c2 >= '0' && c2 <= '9' || (c2 >= 'A' && c2 <= 'F') || (c2 >= 'a' && c2 <= 'f'))) {
-                            return false;
-                        }
-                        if (!(c3 >= '0' && c3 <= '9' || (c3 >= 'A' && c3 <= 'F') || (c3 >= 'a' && c3 <= 'f'))) {
-                            return false;
-                        }
-                        break;
-                    default:
-                        return false;
-                }
-
-                if (ch == ':') {
-                    colonCount++;
-                    start = i + 1;
-                }
-            }
-        }
-
-        return colonCount > 0 && colonCount < 8;
-    }
 
     private static final int P_D = 53; // Double.PRECISION
     private static final int Q_MIN_D = -1074; //(Double.MIN_EXPONENT - (P_D - 1));
@@ -3632,16 +2818,6 @@ public class TypeUtils {
         return i.compareTo(BIGINT_JAVASCRIPT_LOW) >= 0 && i.compareTo(BIGINT_JAVASCRIPT_HIGH) <= 0;
     }
 
-    public static Type getMapValueType(Type fieldType) {
-        if (fieldType instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) fieldType;
-            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-            if (actualTypeArguments.length == 2) {
-                return actualTypeArguments[1];
-            }
-        }
-        return Object.class;
-    }
 
     public static List toList(Object object) {
         if (object == null) {

@@ -122,36 +122,6 @@ public class TypeUtilsTest2 {
         }
     }
 
-    @Test
-    public void parseBoolean() {
-        assertNull(TypeUtils.parseBoolean(new byte[0], 0, 0));
-
-        String[] trueStrings = new String[]{
-                "1", "Y", "true", "TRUE", "tRUE", "TrUe"
-        };
-
-        for (String str : trueStrings) {
-            byte[] bytes = str.getBytes();
-            assertTrue(TypeUtils.parseBoolean(bytes, 0, bytes.length));
-        }
-
-        String[] falseStrings = new String[]{
-                "0", "N", "false", "FALSE"
-        };
-
-        for (String str : falseStrings) {
-            byte[] bytes = str.getBytes();
-            assertFalse(TypeUtils.parseBoolean(bytes, 0, bytes.length));
-        }
-
-        String[] errorString = new String[]{
-                "X", "XX", "XXX", "XXXX", "XXXXX", "XXXXXX"
-        };
-        for (String str : errorString) {
-            byte[] bytes = str.getBytes();
-            assertEquals(Boolean.parseBoolean(str), TypeUtils.parseBoolean(bytes, 0, bytes.length));
-        }
-    }
 
     @Test
     public void parseBigDecimal() {
