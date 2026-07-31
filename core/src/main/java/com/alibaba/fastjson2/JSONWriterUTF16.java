@@ -25,6 +25,7 @@ import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
+@SuppressWarnings("sunapi")
 class JSONWriterUTF16
         extends JSONWriter {
     static final long BYTE_VEC_64_SINGLE_QUOTE = 0x00270027_00270027L;

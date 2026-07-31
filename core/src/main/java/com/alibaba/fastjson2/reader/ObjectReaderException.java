@@ -26,16 +26,14 @@ final class ObjectReaderException<T>
     ObjectReaderException(Class<T> objectClass) {
         this(
                 objectClass,
-                Arrays.asList(BeanUtils.getConstructor(objectClass)),
-                null /* ObjectReaders.fieldReader removed */
+                Arrays.asList(BeanUtils.getConstructor(objectClass))
         );
     }
 
     @SuppressWarnings("unchecked")
     ObjectReaderException(
             Class<T> objectClass,
-            List<Constructor> constructors,
-            Object... fieldReaders
+            List<Constructor> constructors
     ) {
         this.objectClass = objectClass;
         this.constructors = constructors;

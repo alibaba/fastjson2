@@ -15,6 +15,7 @@ import java.util.function.*;
 
 import static java.lang.invoke.MethodType.methodType;
 
+@SuppressWarnings("sunapi")
 public class JDKUtils {
     public static final Unsafe UNSAFE;
     public static final long ARRAY_BYTE_BASE_OFFSET;

@@ -20,6 +20,7 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings("removal")
 public class DynamicClassLoader
         extends ClassLoader {
     private static final java.security.ProtectionDomain DOMAIN;
