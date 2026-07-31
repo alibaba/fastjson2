@@ -398,7 +398,7 @@ final class JSONReaderJSONB
                             offset++;
                             len = itemType;
                         } else {
-                            len = readLength();
+                            len = checkItemCnt(readLength());
                         }
                     } else {
                         len = valueType - BC_ARRAY_FIX_MIN;
@@ -924,7 +924,7 @@ final class JSONReaderJSONB
 
                 if (type >= BC_ARRAY_FIX_MIN && type <= BC_ARRAY) {
                     int len = type == BC_ARRAY
-                            ? readLength()
+                            ? checkItemCnt(readLength())
                             : type - BC_ARRAY_FIX_MIN;
 
                     if (len == 0) {
@@ -1095,7 +1095,7 @@ final class JSONReaderJSONB
             } else if (valueType >= BC_ARRAY_FIX_MIN && valueType <= BC_ARRAY) {
                 offset++;
                 int len = valueType == BC_ARRAY
-                        ? readLength()
+                        ? checkItemCnt(readLength())
                         : valueType - BC_ARRAY_FIX_MIN;
 
                 if (len == 0) {
@@ -1435,14 +1435,14 @@ final class JSONReaderJSONB
         }
 
         if (type == BC_BINARY) {
-            return readInt32Value();
+            return checkItemCnt(readInt32Value());
         }
 
         if (type != BC_ARRAY) {
             throw new JSONException("array not support input " + error(type));
         }
 
-        return readInt32Value();
+        return checkItemCnt(readInt32Value());
     }
 
     public String error(byte type) {
@@ -6307,6 +6307,17 @@ final class JSONReaderJSONB
         if (len < 0 || len > end - offset) {
             throw new JSONException("BC_BIGINT length out of range: " + len + ", available: " + (end - offset));
         }
+    }
+
+    /**
+     * Every array item occupies at least one byte, so a declared item count larger than the
+     * bytes left in the input cannot be satisfied and the array must not be sized from it.
+     */
+    private int checkItemCnt(int itemCnt) {
+        if (itemCnt < 0 || itemCnt > end - offset) {
+            throw new JSONException("array item count out of range: " + itemCnt + ", available: " + (end - offset));
+        }
+        return itemCnt;
     }
 
     static JSONException outOfBoundsCheckFromToIndex(int offset, int end) {
