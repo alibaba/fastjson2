@@ -32,7 +32,7 @@ abstract class JSONPathSegment {
     public boolean contains(JSONPath.Context context) {
         eval(context);
         Object value = context.value;
-        return !(value == null || (value instanceof Collection && ((Collection<?>) value).isEmpty()) || (value instanceof Map && ((Map<?, ?>) value).isEmpty()));
+        return !(value == null || (value instanceof Collection && ((Collection<?>) value).isEmpty()));
     }
 
     public boolean remove(JSONPath.Context context) {
