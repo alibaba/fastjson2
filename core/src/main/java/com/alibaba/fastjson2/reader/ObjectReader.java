@@ -130,28 +130,6 @@ public interface ObjectReader<T> {
      * @throws JSONException If a suitable ObjectReader is not found
      */
     default T createInstance(Map map, long features) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        Object typeKey = map.get(getTypeKey());
-
-        if (typeKey instanceof String) {
-            String typeName = (String) typeKey;
-            long typeHash = Fnv.hashCode64(typeName);
-            ObjectReader<T> reader = null;
-            if ((features & JSONReader.Feature.SupportAutoType.mask) != 0) {
-                reader = autoType(provider, typeHash);
-            }
-
-            if (reader == null) {
-                reader = provider.getObjectReader(
-                        typeName, getObjectClass(), features | getFeatures()
-                );
-            }
-
-            if (reader != this && reader != null) {
-                return reader.createInstance(map, features);
-            }
-        }
-
         T object = createInstance(0L);
         return accept(object, map, features);
     }
@@ -186,16 +164,6 @@ public interface ObjectReader<T> {
      */
     default long getFeatures() {
         return 0L;
-    }
-
-    /**
-     * Gets the type key used for auto-type support. This key is used to identify
-     * the type information in JSON objects.
-     *
-     * @return the type key string
-     */
-    default String getTypeKey() {
-        return "@type";
     }
 
     /**
@@ -310,28 +278,6 @@ public interface ObjectReader<T> {
     }
 
     /**
-     * Resolves an ObjectReader for the specified type hash using the JSON reader context.
-     *
-     * @param context the JSON reader context
-     * @param typeHash the hash code of the type name
-     * @return the ObjectReader for the type, or null if not found
-     */
-    default ObjectReader autoType(JSONReader.Context context, long typeHash) {
-        return context.getObjectReaderAutoType(typeHash);
-    }
-
-    /**
-     * Resolves an ObjectReader for the specified type hash using the ObjectReaderProvider.
-     *
-     * @param provider the ObjectReaderProvider
-     * @param typeHash the hash code of the type name
-     * @return the ObjectReader for the type, or null if not found
-     */
-    default ObjectReader autoType(ObjectReaderProvider provider, long typeHash) {
-        return provider.getObjectReader(typeHash);
-    }
-
-    /**
      * Reads an object from JSONB format.
      *
      * @param jsonReader the JSONReader to use for parsing
@@ -357,26 +303,6 @@ public interface ObjectReader<T> {
                 break;
             }
             long hash = jsonReader.readFieldNameHashCode();
-
-            if (hash == Fnv.hashCode64(getTypeKey()) && i == 0) {
-                long typeHash = jsonReader.readTypeHashCode();
-                ObjectReader reader = autoType(context, typeHash);
-
-                if (reader == null) {
-                    String typeName = jsonReader.getString();
-                    reader = context.getObjectReaderAutoType(typeName, null);
-
-                    if (reader == null) {
-                        throw new JSONException(jsonReader.info("No suitable ObjectReader found for " + typeName));
-                    }
-                }
-
-                if (reader == this) {
-                    continue;
-                }
-
-                return (T) reader.readJSONBObject(jsonReader, fieldType, fieldName, features);
-            }
 
             if (hash == 0) {
                 continue;

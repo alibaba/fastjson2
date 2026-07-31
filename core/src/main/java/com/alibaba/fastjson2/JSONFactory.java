@@ -62,9 +62,6 @@ public final class JSONFactory {
     public static final String CREATOR;
 
     public static final String PROPERTY_DENY_PROPERTY = "fastjson2.parser.deny";
-    public static final String PROPERTY_AUTO_TYPE_ACCEPT = "fastjson2.autoTypeAccept";
-    public static final String PROPERTY_AUTO_TYPE_HANDLER = "fastjson2.autoTypeHandler";
-    public static final String PROPERTY_AUTO_TYPE_BEFORE_HANDLER = "fastjson2.autoTypeBeforeHandler";
 
     static boolean useJacksonAnnotation;
     static boolean useGsonAnnotation;
@@ -85,7 +82,6 @@ public final class JSONFactory {
     static final boolean disableReferenceDetect;
     static final boolean disableArrayMapping;
     static final boolean disableJSONB;
-    static final boolean disableAutoType;
     static final boolean disableSmartMatch;
 
     static Supplier<Map> defaultObjectSupplier;
@@ -183,7 +179,6 @@ public final class JSONFactory {
             boolean disableReferenceDetect0 = false,
                     disableArrayMapping0 = false,
                     disableJSONB0 = false,
-                    disableAutoType0 = false,
                     disableSmartMatch0 = false;
             String features = System.getProperty("fastjson2.features");
             if (features == null) {
@@ -201,9 +196,6 @@ public final class JSONFactory {
                         case "disableJSONB":
                             disableJSONB0 = true;
                             break;
-                        case "disableAutoType":
-                            disableAutoType0 = true;
-                            break;
                         case "disableSmartMatch":
                             disableSmartMatch0 = true;
                             break;
@@ -216,7 +208,6 @@ public final class JSONFactory {
             disableReferenceDetect = disableReferenceDetect0;
             disableArrayMapping = disableArrayMapping0;
             disableJSONB = disableJSONB0;
-            disableAutoType = disableAutoType0;
             disableSmartMatch = disableSmartMatch0;
         }
 
@@ -502,10 +493,6 @@ public final class JSONFactory {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context context = new JSONReader.Context(provider);
 
-        if (filter instanceof JSONReader.AutoTypeBeforeHandler) {
-            context.autoTypeBeforeHandler = (JSONReader.AutoTypeBeforeHandler) filter;
-        }
-
         if (filter instanceof ExtraProcessor) {
             context.extraProcessor = (ExtraProcessor) filter;
         }
@@ -743,15 +730,6 @@ public final class JSONFactory {
     }
 
     /**
-     * Checks if auto type support is disabled.
-     *
-     * @return true if auto type is disabled, false otherwise
-     */
-    public static boolean isDisableAutoType() {
-        return disableAutoType;
-    }
-
-    /**
      * Checks if JSONB format is disabled.
      *
      * @return true if JSONB is disabled, false otherwise
@@ -797,16 +775,6 @@ public final class JSONFactory {
     public static void setDisableJSONB(boolean disableJSONB) {
         defaultObjectWriterProvider.setDisableJSONB(disableJSONB);
         defaultObjectReaderProvider.setDisableJSONB(disableJSONB);
-    }
-
-    /**
-     * Sets whether auto type support should be disabled.
-     *
-     * @param disableAutoType true to disable auto type, false to enable
-     */
-    public static void setDisableAutoType(boolean disableAutoType) {
-        defaultObjectWriterProvider.setDisableAutoType(disableAutoType);
-        defaultObjectReaderProvider.setDisableAutoType(disableAutoType);
     }
 
     /**

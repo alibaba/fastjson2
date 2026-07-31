@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
 import com.alibaba.fastjson2.filter.ExtraProcessor;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.*;
@@ -1155,26 +1154,6 @@ public abstract class JSONReader
     }
 
     /**
-     * Checks if the SupportAutoType feature is enabled, considering additional features.
-     *
-     * @param features Additional features to consider
-     * @return true if SupportAutoType is enabled with the given features, false otherwise
-     */
-    public final boolean isSupportAutoType(long features) {
-        return ((context.features | features) & MASK_SUPPORT_AUTO_TYPE) != 0;
-    }
-
-    /**
-     * Checks if the SupportAutoType feature or handler is enabled, considering additional features.
-     *
-     * @param features Additional features to consider
-     * @return true if SupportAutoType or a handler is enabled with the given features, false otherwise
-     */
-    public final boolean isSupportAutoTypeOrHandler(long features) {
-        return ((context.features | features) & MASK_SUPPORT_AUTO_TYPE) != 0 || context.autoTypeBeforeHandler != null;
-    }
-
-    /**
      * Checks if this reader is using JSONB binary format.
      *
      * @return true if using JSONB format, false otherwise
@@ -1190,27 +1169,6 @@ public abstract class JSONReader
      */
     public final boolean isIgnoreNoneSerializable() {
         return (context.features & MASK_IGNORE_NONE_SERIALIZABLE) != 0;
-    }
-
-    /**
-     * Checks if there is an auto-type before handler configured in the context.
-     *
-     * @return true if there is an auto-type before handler, false otherwise
-     */
-    public boolean hasAutoTypeBeforeHandler() {
-        return context.autoTypeBeforeHandler != null;
-    }
-
-    /**
-     * Checks the auto type for the specified class and hash, considering additional features.
-     *
-     * @param expectClass The expected class
-     * @param expectClassHash The expected class hash
-     * @param features Additional features to consider
-     * @return An ObjectReader for the auto-detected type, or null if not found
-     */
-    public ObjectReader checkAutoType(Class expectClass, long expectClassHash, long features) {
-        return null;
     }
 
     final char char1(int c) {
@@ -3159,13 +3117,6 @@ public abstract class JSONReader
                 continue;
             }
 
-            if ((contextFeatures & Feature.SupportAutoType.mask) != 0
-                    && name.equals("@type")
-                    && object.getClass().getName().equals(value)
-            ) {
-                continue;
-            }
-
             Object origin = map.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -3349,13 +3300,6 @@ public abstract class JSONReader
                 continue;
             }
 
-            if ((contextFeatures & Feature.SupportAutoType.mask) != 0
-                    && name.equals("@type")
-                    && object.getClass().getName().equals(value)
-            ) {
-                continue;
-            }
-
             Object origin = map.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -3417,13 +3361,6 @@ public abstract class JSONReader
             Object value = valueReader.readObject(this, null, null, 0L);
 
             if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
-                continue;
-            }
-
-            if ((contextFeatures & Feature.SupportAutoType.mask) != 0
-                    && name.equals("@type")
-                    && object.getClass().getName().equals(value)
-            ) {
                 continue;
             }
 
@@ -3506,10 +3443,6 @@ public abstract class JSONReader
                 nextIfMatch(':');
             }
 
-            if (i == 0 && (context.features & Feature.ErrorOnNotSupportAutoType.mask) != 0 && "@type".equals(name)) {
-                String typeName = readString();
-                throw new JSONException("autoType not support : " + typeName);
-            }
             Object val;
             switch (ch) {
                 case '-':
@@ -3566,13 +3499,6 @@ public abstract class JSONReader
             }
 
             if (val == null && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0) {
-                continue;
-            }
-
-            if ((context.features & Feature.SupportAutoType.mask) != 0
-                    && name.equals("@type")
-                    && object.getClass().getName().equals(val)
-            ) {
                 continue;
             }
 
@@ -3861,11 +3787,7 @@ public abstract class JSONReader
                     val = readArray();
                     break;
                 case '{':
-                    if (context.autoTypeBeforeHandler != null || (context.features & Feature.SupportAutoType.mask) != 0) {
-                        val = readAny();
-                    } else {
-                        val = readObject();
-                    }
+                    val = readObject();
                     break;
                 case '\'':
                 case '"':
@@ -4915,31 +4837,6 @@ public abstract class JSONReader
         }
     }
 
-    public interface AutoTypeBeforeHandler
-            extends Filter {
-        default Class<?> apply(long typeNameHash, Class<?> expectClass, long features) {
-            return null;
-        }
-
-        Class<?> apply(String typeName, Class<?> expectClass, long features);
-    }
-
-    public static AutoTypeBeforeHandler autoTypeFilter(String... names) {
-        return new ContextAutoTypeBeforeHandler(names);
-    }
-
-    public static AutoTypeBeforeHandler autoTypeFilter(boolean includeBasic, String... names) {
-        return new ContextAutoTypeBeforeHandler(includeBasic, names);
-    }
-
-    public static AutoTypeBeforeHandler autoTypeFilter(Class... types) {
-        return new ContextAutoTypeBeforeHandler(types);
-    }
-
-    public static AutoTypeBeforeHandler autoTypeFilter(boolean includeBasic, Class... types) {
-        return new ContextAutoTypeBeforeHandler(includeBasic, types);
-    }
-
     /**
      * Context holds the configuration and state information for JSON reading operations.
      * It controls various aspects of the deserialization process including formatting,
@@ -5026,7 +4923,6 @@ public abstract class JSONReader
         TimeZone timeZone;
         Supplier<Map> objectSupplier;
         Supplier<List> arraySupplier;
-        AutoTypeBeforeHandler autoTypeBeforeHandler;
         ExtraProcessor extraProcessor;
 
         final ObjectReaderProvider provider;
@@ -5318,64 +5214,6 @@ public abstract class JSONReader
          */
         public ObjectReaderProvider getProvider() {
             return provider;
-        }
-
-        /**
-         * Gets an ObjectReader for the specified type hash code.
-         *
-         * @param hashCode The hash code of the type
-         * @return An ObjectReader for the specified type hash code, or null if not found
-         */
-        public ObjectReader getObjectReaderAutoType(long hashCode) {
-            return provider.getObjectReader(hashCode);
-        }
-
-        /**
-         * Gets an ObjectReader for the specified type name and expected class.
-         *
-         * @param typeName The type name
-         * @param expectClass The expected class
-         * @return An ObjectReader for the specified type, or null if not found
-         */
-        public ObjectReader getObjectReaderAutoType(String typeName, Class expectClass) {
-            if (autoTypeBeforeHandler != null) {
-                Class<?> autoTypeClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
-                if (autoTypeClass != null) {
-                    boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
-                    return provider.getObjectReader(autoTypeClass, fieldBased);
-                }
-            }
-
-            return provider.getObjectReader(typeName, expectClass, features);
-        }
-
-        /**
-         * Gets the AutoTypeBeforeHandler configured for this context.
-         *
-         * @return The AutoTypeBeforeHandler, or null if not configured
-         */
-        public AutoTypeBeforeHandler getContextAutoTypeBeforeHandler() {
-            return autoTypeBeforeHandler;
-        }
-
-        /**
-         * Gets an ObjectReader for the specified type name, expected class, and additional features.
-         *
-         * @param typeName The type name
-         * @param expectClass The expected class
-         * @param features Additional features to consider
-         * @return An ObjectReader for the specified type, or null if not found
-         */
-        public ObjectReader getObjectReaderAutoType(String typeName, Class expectClass, long features) {
-            if (autoTypeBeforeHandler != null) {
-                Class<?> autoTypeClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
-                if (autoTypeClass != null) {
-                    boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
-                    return provider.getObjectReader(autoTypeClass, fieldBased);
-                }
-            }
-
-            return provider.getObjectReader(typeName, expectClass, this.features | features);
         }
 
         /**
@@ -5673,10 +5511,6 @@ public abstract class JSONReader
          * @param features The features to enable
          */
         public void config(Filter filter, Feature... features) {
-            if (filter instanceof AutoTypeBeforeHandler) {
-                autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
-            }
-
             if (filter instanceof ExtraProcessor) {
                 extraProcessor = (ExtraProcessor) filter;
             }
@@ -5692,9 +5526,6 @@ public abstract class JSONReader
          * @param filter The filter to configure
          */
         public void config(Filter filter) {
-            if (filter instanceof AutoTypeBeforeHandler) {
-                autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
-            }
 
             if (filter instanceof ExtraProcessor) {
                 extraProcessor = (ExtraProcessor) filter;
@@ -5709,9 +5540,6 @@ public abstract class JSONReader
          */
         public void config(Filter[] filters, Feature... features) {
             for (Filter filter : filters) {
-                if (filter instanceof AutoTypeBeforeHandler) {
-                    autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
-                }
 
                 if (filter instanceof ExtraProcessor) {
                     extraProcessor = (ExtraProcessor) filter;
@@ -5730,9 +5558,6 @@ public abstract class JSONReader
          */
         public void config(Filter[] filters) {
             for (Filter filter : filters) {
-                if (filter instanceof AutoTypeBeforeHandler) {
-                    autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
-                }
 
                 if (filter instanceof ExtraProcessor) {
                     extraProcessor = (ExtraProcessor) filter;
@@ -5770,7 +5595,6 @@ public abstract class JSONReader
     protected static final long MASK_ERROR_ON_NONE_SERIALIZABLE = 1L << 2;
     protected static final long MASK_SUPPORT_ARRAY_TO_BEAN = 1L << 3;
     protected static final long MASK_INIT_STRING_FIELD_AS_EMPTY = 1L << 4;
-    protected static final long MASK_SUPPORT_AUTO_TYPE = 1L << 5;
     protected static final long MASK_SUPPORT_SMART_MATCH = 1L << 6;
     protected static final long MASK_TRIM_STRING = 1L << 14;
     protected static final long MASK_ALLOW_UN_QUOTED_FIELD_NAMES = 1L << 17;
@@ -5878,18 +5702,6 @@ public abstract class JSONReader
         InitStringFieldAsEmpty(MASK_INIT_STRING_FIELD_AS_EMPTY),
 
         /**
-         * Feature that enables automatic type detection during deserialization.
-         * It is not safe to explicitly turn on autoType, it is recommended to use AutoTypeBeforeHandler.
-         *
-         * <p>This feature is deprecated and should not be used in production code.</p>
-         *
-         * @deprecated It is not safe to explicitly turn on autoType, it is recommended to use AutoTypeBeforeHandler
-         * @since 2.0.0
-         */
-        @Deprecated
-        SupportAutoType(MASK_SUPPORT_AUTO_TYPE),
-
-        /**
          * Feature that enables smart matching of field names during deserialization.
          * When enabled, field names in JSON can be matched to Java bean properties in a case-insensitive
          * manner or with other smart matching rules.
@@ -5986,16 +5798,6 @@ public abstract class JSONReader
         TrimString(MASK_TRIM_STRING),
 
         /**
-         * Feature that determines whether to throw an exception when autoType is not supported.
-         * When enabled, an exception will be thrown if autoType functionality is not available.
-         *
-         * <p>By default, this feature is disabled.</p>
-         *
-         * @since 2.0.0
-         */
-        ErrorOnNotSupportAutoType(1 << 15),
-
-        /**
          * Feature that determines how to handle duplicate keys in JSON objects.
          * When enabled, duplicate keys will be stored as arrays rather than overwriting previous values.
          *
@@ -6065,16 +5867,6 @@ public abstract class JSONReader
          * @since 2.0.20
          */
         NullOnError(1 << 22),
-
-        /**
-         * Feature that determines whether to ignore autoType mismatches during deserialization.
-         * When enabled, mismatches between expected and actual types in autoType scenarios will be ignored.
-         *
-         * <p>By default, this feature is disabled.</p>
-         *
-         * @since 2.0.21
-         */
-        IgnoreAutoTypeNotMatch(1 << 23),
 
         /**
          * Feature that determines whether to cast non-zero numbers to boolean true during deserialization.
@@ -6443,33 +6235,6 @@ public abstract class JSONReader
 
             return new BigInteger(bytes);
         }
-    }
-
-    /**
-     * Gets an ObjectReader for the specified type hash, expected class, and features.
-     * This method handles auto-type detection and applies any configured auto-type before handlers.
-     *
-     * @param typeHash The hash code of the type
-     * @param expectClass The expected class
-     * @param features Additional features to consider
-     * @return An ObjectReader for the specified type, or null if not found
-     */
-    public ObjectReader getObjectReaderAutoType(long typeHash, Class expectClass, long features) {
-        ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
-        if (autoTypeObjectReader != null) {
-            return autoTypeObjectReader;
-        }
-
-        String typeName = getString();
-        if (context.autoTypeBeforeHandler != null) {
-            Class<?> autoTypeClass = context.autoTypeBeforeHandler.apply(typeName, expectClass, features);
-            if (autoTypeClass != null) {
-                boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
-                return context.provider.getObjectReader(autoTypeClass, fieldBased);
-            }
-        }
-
-        return context.provider.getObjectReader(typeName, expectClass, context.features | features);
     }
 
     protected final String readStringNotMatch() {

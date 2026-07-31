@@ -449,19 +449,6 @@ public class JDKUtils {
                 || (CLASS_SQL_ROW_SET != null && CLASS_SQL_ROW_SET.isAssignableFrom(type));
     }
 
-    /**
-     * Tests whether a class is a well known deserialization gadget entry point, namely a
-     * {@link ClassLoader} subclass or a JDK SQL {@code DataSource}/{@code RowSet} implementation.
-     * Such types must not be resolved by matching an autoType whitelist prefix; only an accept
-     * entry naming the type in full is treated as an explicit opt-in.
-     *
-     * @param type the class to test
-     * @return true if the class must not be resolved through a whitelist prefix match
-     */
-    public static boolean isAutoTypeDenyClass(Class<?> type) {
-        return ClassLoader.class.isAssignableFrom(type) || isSQLDataSourceOrRowSet(type);
-    }
-
     public static void setReflectErrorLast(Throwable error) {
         reflectErrorCount.incrementAndGet();
         reflectErrorLast = error;

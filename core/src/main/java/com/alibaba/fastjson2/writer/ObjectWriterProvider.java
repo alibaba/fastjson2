@@ -73,7 +73,6 @@ public class ObjectWriterProvider
     boolean disableReferenceDetect = JSONFactory.isDisableReferenceDetect();
     boolean disableArrayMapping = JSONFactory.isDisableArrayMapping();
     boolean disableJSONB = JSONFactory.isDisableJSONB();
-    boolean disableAutoType = JSONFactory.isDisableAutoType();
     boolean skipTransient = JSONFactory.isDefaultSkipTransient();
 
     volatile long userDefineMask;
@@ -786,15 +785,6 @@ public class ObjectWriterProvider
     }
 
     /**
-     * Checks if auto-type support is disabled.
-     *
-     * @return true if auto-type support is disabled, false otherwise
-     */
-    public boolean isDisableAutoType() {
-        return disableAutoType;
-    }
-
-    /**
      * Checks if JSONB support is disabled.
      *
      * @return true if JSONB support is disabled, false otherwise
@@ -837,15 +827,6 @@ public class ObjectWriterProvider
      */
     public void setDisableJSONB(boolean disableJSONB) {
         this.disableJSONB = disableJSONB;
-    }
-
-    /**
-     * Sets whether auto-type support is disabled.
-     *
-     * @param disableAutoType true to disable auto-type support, false to enable it
-     */
-    public void setDisableAutoType(boolean disableAutoType) {
-        this.disableAutoType = disableAutoType;
     }
 
     /**

@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.util;
 
-import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.annotation.JSONType;
 
@@ -9,7 +8,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Objects;
 
-@JSONType(deserializeFeatures = JSONReader.Feature.SupportAutoType, typeName = "java.lang.reflect.ParameterizedType")
+@JSONType(typeName = "java.lang.reflect.ParameterizedType")
 public class ParameterizedTypeImpl
         implements ParameterizedType {
     private final Type[] actualTypeArguments;

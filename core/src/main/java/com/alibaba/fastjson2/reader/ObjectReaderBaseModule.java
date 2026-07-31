@@ -311,7 +311,6 @@ public class ObjectReaderBaseModule
                         }
                         beanInfo.seeAlsoNames[i] = typeName;
                     }
-                    beanInfo.readerFeatures |= JSONReader.Feature.SupportAutoType.mask;
                 } catch (Throwable ignored) {
                     // ignore
                 }
@@ -385,7 +384,6 @@ public class ObjectReaderBaseModule
                         String value = (String) result;
                         if (!value.isEmpty()) {
                             beanInfo.typeKey = value;
-                            beanInfo.readerFeatures |= JSONReader.Feature.SupportAutoType.mask;
                         }
                     }
                 } catch (Throwable ignored) {
@@ -438,7 +436,6 @@ public class ObjectReaderBaseModule
                                     }
                                     beanInfo.seeAlsoNames[i] = typeName;
                                 }
-                                beanInfo.readerFeatures |= JSONReader.Feature.SupportAutoType.mask;
                             }
                             break;
                         }
@@ -507,9 +504,6 @@ public class ObjectReaderBaseModule
                             Enum[] features = (Enum[]) result;
                             for (Enum feature : features) {
                                 switch (feature.name()) {
-                                    case "SupportAutoType":
-                                        beanInfo.readerFeatures |= JSONReader.Feature.SupportAutoType.mask;
-                                        break;
                                     case "SupportArrayToBean":
                                         beanInfo.readerFeatures |= JSONReader.Feature.SupportArrayToBean.mask;
                                         break;
@@ -543,15 +537,6 @@ public class ObjectReaderBaseModule
                             }
                             break;
                         }
-                        case "autoTypeBeforeHandler":
-                        case "autoTypeCheckHandler": {
-                            Class<?> autoTypeCheckHandler = (Class) result;
-                            if (autoTypeCheckHandler != JSONReader.AutoTypeBeforeHandler.class
-                                    && JSONReader.AutoTypeBeforeHandler.class.isAssignableFrom(autoTypeCheckHandler)) {
-                                beanInfo.autoTypeBeforeHandler = (Class<JSONReader.AutoTypeBeforeHandler>) autoTypeCheckHandler;
-                            }
-                            break;
-                        }
                         case "disableReferenceDetect":
                             if (Boolean.TRUE.equals(result)) {
                                 beanInfo.readerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;
@@ -560,11 +545,6 @@ public class ObjectReaderBaseModule
                         case "disableArrayMapping":
                             if (Boolean.TRUE.equals(result)) {
                                 beanInfo.readerFeatures |= FieldInfo.DISABLE_ARRAY_MAPPING;
-                            }
-                            break;
-                        case "disableAutoType":
-                            if (Boolean.TRUE.equals(result)) {
-                                beanInfo.readerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
                             }
                             break;
                         case "disableJSONB":
@@ -1198,9 +1178,6 @@ public class ObjectReaderBaseModule
                             Enum[] features = (Enum[]) result;
                             for (Enum feature : features) {
                                 switch (feature.name()) {
-                                    case "SupportAutoType":
-                                        fieldInfo.features |= JSONReader.Feature.SupportAutoType.mask;
-                                        break;
                                     case "SupportArrayToBean":
                                         fieldInfo.features |= JSONReader.Feature.SupportArrayToBean.mask;
                                         break;

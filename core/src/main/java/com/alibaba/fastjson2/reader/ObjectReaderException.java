@@ -128,26 +128,6 @@ final class ObjectReaderException<T>
 
     @Override
     public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (false) {
-            JSONReader.Context context = jsonReader.getContext();
-
-            if (jsonReader.isSupportAutoType(features) || context.getContextAutoTypeBeforeHandler() != null) {
-                jsonReader.next();
-                long typeHash = jsonReader.readTypeHashCode();
-
-                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
-                if (autoTypeObjectReader == null) {
-                    String typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-
-                    if (autoTypeObjectReader == null) {
-                        throw new JSONException("autoType not support : " + typeName + ", offset " + jsonReader.getOffset());
-                    }
-                }
-                return (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, 0);
-            }
-        }
-
         return readObject(jsonReader, fieldType, fieldName, features);
     }
 

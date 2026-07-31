@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.FieldConsumer;
@@ -23,11 +22,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
-import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
-import static com.alibaba.fastjson2.util.TypeUtils.hasIllegalTypeNameChars;
-import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
-import static com.alibaba.fastjson2.util.TypeUtils.normalizeAcceptName;
 
 /**
  * ObjectReaderProvider is responsible for providing and managing ObjectReader instances
@@ -65,11 +59,6 @@ public class ObjectReaderProvider
     static final ClassLoader FASTJSON2_CLASS_LOADER = JSON.class.getClassLoader();
     public static final boolean SAFE_MODE;
     static final String[] DENYS;
-    static final String[] AUTO_TYPE_ACCEPT_LIST;
-
-    static AutoTypeBeforeHandler DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
-    static Consumer<Class> DEFAULT_AUTO_TYPE_HANDLER;
-    static boolean DEFAULT_AUTO_TYPE_HANDLER_INIT_ERROR;
 
     static ObjectReaderCachePair readerCache;
 
@@ -94,64 +83,6 @@ public class ObjectReaderProvider
                 DENYS = property.split(",");
             } else {
                 DENYS = new String[0];
-            }
-        }
-
-        {
-            String property = System.getProperty(PROPERTY_AUTO_TYPE_ACCEPT);
-            if (property == null) {
-                property = JSONFactory.Conf.getProperty(PROPERTY_AUTO_TYPE_ACCEPT);
-            }
-            if (property != null && property.length() > 0) {
-                AUTO_TYPE_ACCEPT_LIST = property.split(",");
-            } else {
-                AUTO_TYPE_ACCEPT_LIST = new String[0];
-            }
-        }
-
-        {
-            String property = System.getProperty(PROPERTY_AUTO_TYPE_BEFORE_HANDLER);
-            if (property == null || property.isEmpty()) {
-                property = JSONFactory.Conf.getProperty(PROPERTY_AUTO_TYPE_BEFORE_HANDLER);
-            }
-
-            if (property != null) {
-                property = property.trim();
-            }
-
-            if (property != null && !property.isEmpty()) {
-                Class handlerClass = TypeUtils.loadClass(property);
-                if (handlerClass != null) {
-                    try {
-                        DEFAULT_AUTO_TYPE_BEFORE_HANDLER = (AutoTypeBeforeHandler) handlerClass.newInstance();
-                    } catch (Exception ignored) {
-                        DEFAULT_AUTO_TYPE_HANDLER_INIT_ERROR = true;
-                        // skip
-                    }
-                }
-            }
-        }
-
-        {
-            String property = System.getProperty(PROPERTY_AUTO_TYPE_HANDLER);
-            if (property == null || property.isEmpty()) {
-                property = JSONFactory.Conf.getProperty(PROPERTY_AUTO_TYPE_HANDLER);
-            }
-
-            if (property != null) {
-                property = property.trim();
-            }
-
-            if (property != null && !property.isEmpty()) {
-                Class handlerClass = TypeUtils.loadClass(property);
-                if (handlerClass != null) {
-                    try {
-                        DEFAULT_AUTO_TYPE_HANDLER = (Consumer<Class>) handlerClass.newInstance();
-                    } catch (Exception ignored) {
-                        DEFAULT_AUTO_TYPE_HANDLER_INIT_ERROR = true;
-                        // skip
-                    }
-                }
             }
         }
 
@@ -182,8 +113,6 @@ public class ObjectReaderProvider
     final ConcurrentMap<Long, ObjectReader> hashCache = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
 
-    final LRUAutoTypeCache autoTypeList = new LRUAutoTypeCache(1024);
-
     private final ConcurrentMap<Type, Map<Type, Function>> typeConverts = new ConcurrentHashMap<>();
 
     final ObjectReaderCreator creator;
@@ -192,51 +121,9 @@ public class ObjectReaderProvider
     boolean disableReferenceDetect = JSONFactory.isDisableReferenceDetect();
     boolean disableArrayMapping = JSONFactory.isDisableArrayMapping();
     boolean disableJSONB = JSONFactory.isDisableJSONB();
-    boolean disableAutoType = JSONFactory.isDisableAutoType();
     boolean disableSmartMatch = JSONFactory.isDisableSmartMatch();
 
-    /**
-     * Always accepted, it is the map implementation fastjson 1.x substitutes for {@code HashMap}
-     * when hash collision protection is enabled.
-     */
-    static final String ANTI_COLLISION_HASH_MAP = "com.alibaba.fastjson.util.AntiCollisionHashMap";
-    static final long ANTI_COLLISION_HASH_MAP_HASH = -6293031534589903644L; // Fnv.hashCode64(ANTI_COLLISION_HASH_MAP)
-
-    private volatile long[] acceptHashCodes;
-
-    /**
-     * The accept names behind {@link #acceptHashCodes}, normalized the same way the rolling hash in
-     * {@link #checkAutoType} normalizes a type name. A hash match is only honored when the matched
-     * prefix text is in this set, so a hash collision alone cannot whitelist a type name.
-     */
-    private volatile Set<String> acceptNameSet = Collections.emptySet();
-
-    private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
-    private Consumer<Class> autoTypeHandler = DEFAULT_AUTO_TYPE_HANDLER;
     PropertyNamingStrategy namingStrategy;
-
-    {
-        long[] hashCodes;
-        Set<String> names = new HashSet<>();
-        if (AUTO_TYPE_ACCEPT_LIST == null) {
-            hashCodes = new long[1];
-        } else {
-            hashCodes = new long[AUTO_TYPE_ACCEPT_LIST.length + 1];
-            for (int i = 0; i < AUTO_TYPE_ACCEPT_LIST.length; i++) {
-                String name = normalizeAcceptName(AUTO_TYPE_ACCEPT_LIST[i]);
-                hashCodes[i] = Fnv.hashCode64(name);
-                names.add(name);
-            }
-        }
-
-        hashCodes[hashCodes.length - 1] = ANTI_COLLISION_HASH_MAP_HASH;
-        names.add(ANTI_COLLISION_HASH_MAP);
-
-        Arrays.sort(hashCodes);
-        // see addAutoTypeAccept, the name set is published before the hash array
-        acceptNameSet = Collections.unmodifiableSet(names);
-        acceptHashCodes = hashCodes;
-    }
 
     /**
      * Registers an ObjectReader for the specified hash code if it is not already registered.
@@ -259,58 +146,6 @@ public class ObjectReaderProvider
         }
 
         hashCache.putIfAbsent(hashCode, objectReader);
-    }
-
-    /**
-     * Adds a type name to the auto-type accept list. Types in this list are allowed
-     * for auto-type deserialization.
-     *
-     * @param name the type name to add to the accept list
-     */
-    public synchronized void addAutoTypeAccept(String name) {
-        if (name != null && name.length() != 0) {
-            String acceptName = normalizeAcceptName(name);
-
-            // publish the name before the hash, so that a reader seeing the new hash array is
-            // guaranteed to see the name it verifies against rather than transiently rejecting
-            if (!this.acceptNameSet.contains(acceptName)) {
-                Set<String> names = new HashSet<>(this.acceptNameSet);
-                names.add(acceptName);
-                this.acceptNameSet = Collections.unmodifiableSet(names);
-            }
-
-            long hash = Fnv.hashCode64(acceptName);
-            long[] current = this.acceptHashCodes;
-            if (Arrays.binarySearch(current, hash) < 0) {
-                long[] hashCodes = new long[current.length + 1];
-                hashCodes[hashCodes.length - 1] = hash;
-                System.arraycopy(current, 0, hashCodes, 0, current.length);
-                Arrays.sort(hashCodes);
-                this.acceptHashCodes = hashCodes;
-            }
-        }
-    }
-
-    @Deprecated
-    public void addAutoTypeDeny(String name) {
-    }
-
-    /**
-     * Gets the auto-type handler that is invoked when a type is auto-resolved.
-     *
-     * @return the auto-type handler, or null if none is set
-     */
-    public Consumer<Class> getAutoTypeHandler() {
-        return autoTypeHandler;
-    }
-
-    /**
-     * Sets the auto-type handler that will be invoked when a type is auto-resolved.
-     *
-     * @param autoTypeHandler the auto-type handler to set
-     */
-    public void setAutoTypeHandler(Consumer<Class> autoTypeHandler) {
-        this.autoTypeHandler = autoTypeHandler;
     }
 
     /**
@@ -728,211 +563,6 @@ public class ObjectReaderProvider
     }
 
     /**
-     * Gets an ObjectReader for the specified type name, expected class, and features.
-     * This method handles auto-type resolution and ObjectReader caching.
-     *
-     * @param typeName the name of the type
-     * @param expectClass the expected class type
-     * @param features the JSON reader features
-     * @return the ObjectReader for the specified type, or null if the type cannot be resolved
-     */
-    public ObjectReader getObjectReader(String typeName, Class<?> expectClass, long features) {
-        Class<?> autoTypeClass = checkAutoType(typeName, expectClass, features);
-        if (autoTypeClass == null) {
-            return null;
-        }
-        boolean fieldBased = (features & JSONReader.Feature.FieldBased.mask) != 0;
-        ObjectReader objectReader = getObjectReader(autoTypeClass, fieldBased);
-
-        if (autoTypeClass != expectClass) {
-            registerIfAbsent(Fnv.hashCode64(typeName), objectReader);
-        }
-        return objectReader;
-    }
-
-    final void afterAutoType(String typeName, Class type) {
-        if (autoTypeHandler != null) {
-            autoTypeHandler.accept(type);
-        }
-
-        synchronized (autoTypeList) {
-            autoTypeList.putIfAbsent(typeName, new Date());
-        }
-    }
-
-    /**
-     * Checks and resolves the class for auto-type support. This method handles security
-     * validation and class loading for auto-type deserialization.
-     *
-     * @param typeName the name of the type to check
-     * @param expectClass the expected class type
-     * @param features the JSON reader features
-     * @return the resolved Class, or null if the type cannot be resolved or is not allowed
-     * @throws JSONException if the type is not supported or security checks fail
-     */
-    public Class<?> checkAutoType(String typeName, Class<?> expectClass, long features) {
-        if (typeName == null || typeName.isEmpty()) {
-            return null;
-        }
-
-        if (autoTypeBeforeHandler != null) {
-            Class<?> resolvedClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
-            if (resolvedClass != null) {
-                afterAutoType(typeName, resolvedClass);
-                return resolvedClass;
-            }
-        }
-
-        if (SAFE_MODE) {
-            return null;
-        }
-
-        int typeNameLength = typeName.length();
-        if (typeNameLength >= 192) {
-            throw new JSONException("autoType is not support. " + typeName);
-        }
-
-        // treat it as unresolvable rather than an error, the same as a type name that fails to
-        // load: JSON-LD uses @type for an IRI, and reporting that as unresolved leaves the
-        // ErrorOnNotSupportAutoType feature in charge of whether the caller sees an exception
-        if (hasIllegalTypeNameChars(typeName)) {
-            return null;
-        }
-
-        if (typeName.charAt(0) == '[') {
-            String componentTypeName = typeName.substring(1);
-            checkAutoType(componentTypeName, null, features); // blacklist check for componentType
-        }
-
-        if (expectClass != null && expectClass.getName().equals(typeName)) {
-            afterAutoType(typeName, expectClass);
-            return expectClass;
-        }
-
-        boolean autoTypeSupport = (features & JSONReader.Feature.SupportAutoType.mask) != 0;
-        Class<?> clazz;
-
-        // set when an accept prefix matched a deny class, so that the rejection below can tell a
-        // misconfigured accept list apart from a type name that was never accepted at all
-        boolean denyPrefixOnly = false;
-
-        if (autoTypeSupport) {
-            long hash = MAGIC_HASH_CODE;
-            for (int i = 0; i < typeNameLength; ++i) {
-                char ch = typeName.charAt(i);
-                if (ch == '$') {
-                    ch = '.';
-                }
-                hash ^= ch;
-                hash *= MAGIC_PRIME;
-                if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
-                    if (!acceptNameSet.contains(normalizeAcceptName(typeName.substring(0, i + 1)))) {
-                        continue;
-                    }
-                    clazz = loadClass(typeName);
-                    if (clazz != null) {
-                        // matching an accept prefix is not an opt-in for gadget base types, only an
-                        // accept entry naming the type in full is; keep scanning for such an entry
-                        if (i + 1 < typeNameLength && JDKUtils.isAutoTypeDenyClass(clazz)) {
-                            denyPrefixOnly = true;
-                            continue;
-                        }
-
-                        if (expectClass != null && !expectClass.isAssignableFrom(clazz)) {
-                            throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
-                        }
-
-                        afterAutoType(typeName, clazz);
-                        return clazz;
-                    }
-                }
-            }
-        }
-
-        if (!autoTypeSupport) {
-            long hash = MAGIC_HASH_CODE;
-            for (int i = 0; i < typeNameLength; ++i) {
-                char ch = typeName.charAt(i);
-                if (ch == '$') {
-                    ch = '.';
-                }
-                hash ^= ch;
-                hash *= MAGIC_PRIME;
-
-                // white list
-                if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
-                    if (!acceptNameSet.contains(normalizeAcceptName(typeName.substring(0, i + 1)))) {
-                        continue;
-                    }
-                    clazz = loadClass(typeName);
-
-                    // see the SupportAutoType branch above
-                    if (clazz != null && i + 1 < typeNameLength && JDKUtils.isAutoTypeDenyClass(clazz)) {
-                        continue;
-                    }
-
-                    if (clazz != null && expectClass != null && !expectClass.isAssignableFrom(clazz)) {
-                        throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
-                    }
-
-                    if (clazz != null) {
-                        afterAutoType(typeName, clazz);
-                    }
-                    return clazz;
-                }
-            }
-        }
-
-        if (!autoTypeSupport) {
-            return null;
-        }
-
-        clazz = TypeUtils.getMapping(typeName);
-
-        if (clazz != null) {
-            if (expectClass != null
-                    && expectClass != Object.class
-                    && clazz != java.util.HashMap.class
-                    && !expectClass.isAssignableFrom(clazz)
-            ) {
-                throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
-            }
-
-            afterAutoType(typeName, clazz);
-            return clazz;
-        }
-
-        clazz = loadClass(typeName);
-
-        if (clazz != null) {
-            if (JDKUtils.isAutoTypeDenyClass(clazz)) {
-                throw new JSONException(denyPrefixOnly
-                        ? "autoType is not support, an accept prefix does not cover it, "
-                        + "add the type name in full to accept. " + typeName
-                        : "autoType is not support. " + typeName);
-            }
-
-            if (expectClass != null) {
-                if (expectClass.isAssignableFrom(clazz)) {
-                    afterAutoType(typeName, clazz);
-                    return clazz;
-                } else {
-                    if ((features & JSONReader.Feature.IgnoreAutoTypeNotMatch.mask) != 0) {
-                        return expectClass;
-                    }
-
-                    throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
-                }
-            }
-        }
-
-        if (clazz != null) {
-            afterAutoType(typeName, clazz);
-        }
-        return clazz;
-    }
-
-    /**
      * Gets the list of registered ObjectReader modules.
      *
      * @return the list of modules
@@ -1183,43 +813,6 @@ public class ObjectReaderProvider
     }
 
     /**
-     * Gets the auto-type before handler that is invoked before type resolution.
-     *
-     * @return the auto-type before handler, or null if none is set
-     */
-    public AutoTypeBeforeHandler getAutoTypeBeforeHandler() {
-        return autoTypeBeforeHandler;
-    }
-
-    /**
-     * Sets the auto-type before handler that will be invoked before type resolution.
-     *
-     * @param autoTypeBeforeHandler the auto-type before handler to set
-     */
-    public void setAutoTypeBeforeHandler(AutoTypeBeforeHandler autoTypeBeforeHandler) {
-        this.autoTypeBeforeHandler = autoTypeBeforeHandler;
-    }
-
-    public Map<String, Date> getAutoTypeList() {
-        return autoTypeList;
-    }
-
-    private static final class LRUAutoTypeCache
-            extends LinkedHashMap<String, Date> {
-        private final int maxSize;
-
-        public LRUAutoTypeCache(int maxSize) {
-            super(16, 0.75f, false);
-            this.maxSize = maxSize;
-        }
-
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<String, Date> eldest) {
-            return this.size() > this.maxSize;
-        }
-    }
-
-    /**
      * Gets field information for the specified method of a class. This method also
      * handles setter methods by attempting to find corresponding fields.
      *
@@ -1342,15 +935,6 @@ public class ObjectReaderProvider
     }
 
     /**
-     * Checks if auto-type support is disabled.
-     *
-     * @return true if auto-type support is disabled, false otherwise
-     */
-    public boolean isDisableAutoType() {
-        return disableAutoType;
-    }
-
-    /**
      * Checks if JSONB support is disabled.
      *
      * @return true if JSONB support is disabled, false otherwise
@@ -1393,15 +977,6 @@ public class ObjectReaderProvider
      */
     public void setDisableJSONB(boolean disableJSONB) {
         this.disableJSONB = disableJSONB;
-    }
-
-    /**
-     * Sets whether auto-type support is disabled.
-     *
-     * @param disableAutoType true to disable auto-type support, false to enable it
-     */
-    public void setDisableAutoType(boolean disableAutoType) {
-        this.disableAutoType = disableAutoType;
     }
 
     /**

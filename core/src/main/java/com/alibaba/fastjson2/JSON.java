@@ -4163,10 +4163,6 @@ public interface JSON {
     static void config(JSONReader.Feature... features) {
         for (int i = 0; i < features.length; i++) {
             JSONReader.Feature feature = features[i];
-            if (feature == JSONReader.Feature.SupportAutoType) {
-                throw new JSONException("not support config global autotype support");
-            }
-
             JSONFactory.defaultReaderFeatures |= feature.mask;
         }
     }
@@ -4179,10 +4175,6 @@ public interface JSON {
      * @since 2.0.6
      */
     static void config(JSONReader.Feature feature, boolean state) {
-        if (feature == JSONReader.Feature.SupportAutoType && state) {
-            throw new JSONException("not support config global autotype support");
-        }
-
         if (state) {
             JSONFactory.defaultReaderFeatures |= feature.mask;
         } else {

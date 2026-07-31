@@ -2819,21 +2819,6 @@ public class TypeUtils {
         return typeName.indexOf(':') >= 0 || typeName.indexOf('!') >= 0;
     }
 
-    /**
-     * Normalizes a type name the way the autoType accept-list rolling hash normalizes it, so that a
-     * nested class matches whether it is written with its binary name ({@code a.b.Outer$Inner}) or
-     * its canonical name ({@code a.b.Outer.Inner}). Following that existing rolling-hash rule means
-     * the two spellings are equivalent as accept entries.
-     *
-     * <p>Internal, public only because the autoType entry points live in different packages.
-     *
-     * @param typeName the type name to normalize
-     * @return the normalized type name
-     */
-    public static String normalizeAcceptName(String typeName) {
-        return typeName.indexOf('$') >= 0 ? typeName.replace('$', '.') : typeName;
-    }
-
     public static Class loadClass(String className) {
         if (className.length() >= 192) {
             return null;

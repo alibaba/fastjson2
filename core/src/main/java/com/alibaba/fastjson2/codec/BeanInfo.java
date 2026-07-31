@@ -45,15 +45,10 @@ public class BeanInfo {
     public boolean alphabetic = true;
     public String objectWriterFieldName;
     public String objectReaderFieldName;
-    public Class<? extends JSONReader.AutoTypeBeforeHandler> autoTypeBeforeHandler;
     public String rootName;
     public boolean skipTransient = true;
 
     public BeanInfo() {
-        if (JSONFactory.isDisableAutoType()) {
-            writerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
-            readerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
-        }
         if (JSONFactory.isDisableReferenceDetect()) {
             writerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;
             readerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;
@@ -72,9 +67,6 @@ public class BeanInfo {
     }
 
     public BeanInfo(ObjectReaderProvider provider) {
-        if (provider.isDisableAutoType()) {
-            readerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
-        }
         if (provider.isDisableReferenceDetect()) {
             readerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;
         }
@@ -94,9 +86,6 @@ public class BeanInfo {
     }
 
     public BeanInfo(ObjectWriterProvider provider) {
-        if (provider.isDisableAutoType()) {
-            writerFeatures |= FieldInfo.DISABLE_AUTO_TYPE;
-        }
         if (provider.isDisableReferenceDetect()) {
             writerFeatures |= FieldInfo.DISABLE_REFERENCE_DETECT;
         }
