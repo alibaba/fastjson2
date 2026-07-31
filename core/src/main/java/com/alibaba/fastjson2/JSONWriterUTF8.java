@@ -11,7 +11,6 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
-import java.time.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,7 @@ import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.isInt64;
 
-@SuppressWarnings({"sunapi", "rawtypes", "unchecked"})
+@SuppressWarnings("restriction")
 final class JSONWriterUTF8
         extends JSONWriter {
     static final long REF;
@@ -1027,19 +1026,6 @@ final class JSONWriterUTF8
         this.off = off + 1;
     }
 
-
-    /**
-     * A faster alternative that is functionally equivalent to Long.expand(i, 0x0F0F_0F0F_0F0F_0F0FL)
-     */
-    private static long expand(long i) {
-        long t = i << 16;
-        i = (i & ~0xFFFF00000000L) | (t & 0xFFFF00000000L);
-        t = i << 8;
-        i = (i & ~0xFF000000FF0000L) | (t & 0xFF000000FF0000L);
-        t = i << 4;
-        i = (i & ~0xF000F000F000F00L) | (t & 0xF000F000F000F00L);
-        return i & 0x0F0F_0F0F_0F0F_0F0FL;
-    }
 
     @Override
     public final void writeRaw(String str) {

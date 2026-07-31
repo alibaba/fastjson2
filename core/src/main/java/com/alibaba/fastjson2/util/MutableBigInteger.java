@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONException;
 
-@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 final class MutableBigInteger {
     private static final int[][] BIG_TEN_POWERS_MAGIC_TABLE = {
             {1},

@@ -4,14 +4,12 @@ package com.alibaba.fastjson2;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.*;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONObject.NONE_DIRECT_FEATURES;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
-@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public class JSONArray
         extends ArrayList<Object> {
     private static final long serialVersionUID = 1L;
@@ -164,7 +162,6 @@ public class JSONArray
      * @return {@link JSONObject} or null
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public JSONObject getJSONObject(int index) {
         Object value = get(index);
 
@@ -783,7 +780,6 @@ public class JSONArray
      * @param features features to be enabled in serialization
      * @return JSON {@link String}
      */
-    @SuppressWarnings("unchecked")
     public String toString(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
             if ((writer.context.features & NONE_DIRECT_FEATURES) != 0) {
@@ -1069,7 +1065,7 @@ public class JSONArray
      * </pre>
      * @since 2.0.22
      */
-    public static JSONArray copyOf(Collection collection) {
+    public static JSONArray copyOf(Collection<?> collection) {
         return new JSONArray(collection);
     }
 

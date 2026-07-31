@@ -9,7 +9,7 @@ import static com.alibaba.fastjson2.util.IOUtils.hex4U;
 import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
-@SuppressWarnings({"sunapi", "rawtypes", "unchecked"})
+@SuppressWarnings("restriction")
 public class StringUtils {
     protected static final long MASK_ESCAPE_NONE_ASCII = EscapeNoneAscii.mask;
     protected static final long MASK_BROWSER_SECURE = BrowserSecure.mask;

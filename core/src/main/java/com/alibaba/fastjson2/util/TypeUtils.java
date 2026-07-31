@@ -9,7 +9,6 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,7 +20,7 @@ import java.util.function.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.lang.invoke.MethodType.methodType;
 
-@SuppressWarnings({"sunapi", "rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public class TypeUtils {
     public static final Class CLASS_JSON_OBJECT_1x;
     public static final Field FIELD_JSON_OBJECT_1x_map;
@@ -1300,7 +1299,6 @@ public class TypeUtils {
         return cast(object, String[].class);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> T cast(Object obj, Type type) {
         if (type instanceof Class) {
             return cast(obj, (Class<T>) type);
@@ -1308,7 +1306,6 @@ public class TypeUtils {
         throw new JSONException("not support cast to type " + type + ", from " + obj.getClass());
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> T cast(Object obj, Class<T> targetClass) {
         if (obj == null) {
             return null;

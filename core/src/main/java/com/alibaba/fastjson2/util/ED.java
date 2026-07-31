@@ -4,7 +4,6 @@ package com.alibaba.fastjson2.util;
  * @Date 2024/5/24 18:16
  * @Created by wangyc
  */
-@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 class ED {
     public final short e10;
     public final byte adl;

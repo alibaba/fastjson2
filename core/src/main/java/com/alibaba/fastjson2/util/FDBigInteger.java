@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.util;
 
 import java.util.Arrays;
 
-@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public final class FDBigInteger {
     private static final int[] SMALL_5_POW = {
             1, 5, 25, 125, 625, 3125, 15625, 78125, 390625, 1953125, 9765625, 48828125, 244140625, 1220703125

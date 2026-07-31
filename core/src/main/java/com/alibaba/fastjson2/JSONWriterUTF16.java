@@ -12,7 +12,6 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
-import java.time.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,7 @@ import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
-@SuppressWarnings({"sunapi", "rawtypes", "unchecked"})
+@SuppressWarnings({"restriction", "deprecation"})
 class JSONWriterUTF16
         extends JSONWriter {
     static final long BYTE_VEC_64_SINGLE_QUOTE = 0x00270027_00270027L;

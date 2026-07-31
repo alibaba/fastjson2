@@ -17,7 +17,6 @@ import java.util.TreeSet;
  *
  * @since 2.0.58
  */
-@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public final class SymbolTable {
     private final String[] names;
     private final long hashCode64;

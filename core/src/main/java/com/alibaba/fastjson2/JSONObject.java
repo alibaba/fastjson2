@@ -9,7 +9,6 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.*;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.Consumer;
@@ -20,7 +19,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.ANDROID;
 import static com.alibaba.fastjson2.util.JDKUtils.GRAAL;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
-@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
+@SuppressWarnings("deprecation")
 public class JSONObject
         extends LinkedHashMap<String, Object>
         implements InvocationHandler {
@@ -71,8 +70,7 @@ public class JSONObject
      * @param map the map whose mappings are to be placed in this map
      * @throws NullPointerException If the specified map is null
      */
-    @SuppressWarnings("unchecked")
-    public JSONObject(Map map) {
+    public JSONObject(Map<String, ?> map) {
         super(map);
     }
 
@@ -201,7 +199,6 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return {@link JSONArray} or null
      */
-    @SuppressWarnings("unchecked")
     public JSONArray getJSONArray(String key) {
         Object value = super.get(key);
 
@@ -265,7 +262,6 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return {@link JSONObject} or null
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public JSONObject getJSONObject(String key) {
         Object value = super.get(key);
 
@@ -1040,7 +1036,6 @@ public class JSONObject
      * @throws ArrayIndexOutOfBoundsException If the length of args does not match the length of the method parameter
      */
     @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final String methodName = method.getName();
         int parameterCount = method.getParameterCount();
@@ -1051,7 +1046,7 @@ public class JSONObject
                 return this.equals(args[0]);
             }
 
-            Class proxyInterface = null;
+            Class<?> proxyInterface = null;
             Class<?>[] interfaces = proxy.getClass().getInterfaces();
             if (interfaces.length == 1) {
                 proxyInterface = interfaces[0];

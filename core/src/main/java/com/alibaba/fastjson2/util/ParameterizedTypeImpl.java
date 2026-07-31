@@ -6,7 +6,6 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Objects;
 
-@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public class ParameterizedTypeImpl
         implements ParameterizedType {
     private final Type[] actualTypeArguments;

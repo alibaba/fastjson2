@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 
-import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReader.EOI;
 import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
 
@@ -30,7 +29,6 @@ import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
  * String jsonString = JSON.toJSONString(jsonObject, JSONWriter.Feature.PrettyFormat);
  * </pre>
  */
-@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
 public final class JSON {
     public static final String VERSION = "2.0.63-slim";
 
@@ -730,7 +728,6 @@ public final class JSON {
      * @param features the specified features is applied to serialization
      * @return {@link JSONArray} or {@link JSONObject} or {@code null}
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public static Object toJSON(Object object, JSONWriter.Feature... features) {
         if (object == null) {
             return null;
@@ -740,7 +737,7 @@ public final class JSON {
         }
         if (object instanceof Map) {
             JSONObject jsonObject = new JSONObject();
-            for (Map.Entry entry : ((Map<?, ?>) object).entrySet()) {
+            for (Map.Entry<?, ?> entry : ((Map<?, ?>) object).entrySet()) {
                 jsonObject.put(
                         entry.getKey().toString(),
                         toJSON(entry.getValue(), features)
@@ -777,21 +774,19 @@ public final class JSON {
         }
         try {
             JSONReader reader = JSONReader.of(text);
-            Object object;
             char ch = reader.current();
             if (ch == '{') {
-                object = reader.readObject();
+                reader.readObject();
             } else if (ch == '[') {
-                object = reader.readArray();
+                reader.readArray();
             } else if (ch == '"' || ch == '\'') {
-                object = reader.readString();
+                reader.readString();
             } else if (ch == 't' || ch == 'f') {
-                object = reader.readBoolValue();
+                reader.readBoolValue();
             } else if (ch == 'n') {
                 reader.readNull();
-                object = null;
             } else {
-                object = reader.readNumber();
+                reader.readNumber();
             }
             reader.close();
             return reader.ch == EOI;

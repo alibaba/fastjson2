@@ -11,7 +11,7 @@ import java.util.function.Supplier;
  * JSONFactory is the core factory class for creating JSON readers and writers,
  * as well as managing global configuration for fastjson2.
  */
-@SuppressWarnings({"rawtypes", "unchecked", "sunapi"})
+@SuppressWarnings({"rawtypes", "unchecked"})
 public final class JSONFactory {
     public static final class Conf {
         static final Properties DEFAULT_PROPERTIES;
