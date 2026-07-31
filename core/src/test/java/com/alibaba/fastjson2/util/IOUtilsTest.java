@@ -8,11 +8,9 @@ import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Random;
 
-import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("util")
-@SuppressWarnings("restriction")
 public class IOUtilsTest {
     @Test
     public void size() {
@@ -430,7 +428,6 @@ public class IOUtilsTest {
     @Test
     public void test_isASCII() {
         char[] chars = new char[] {'0', '1', '2', '3', '4', '5', '6', 0x80};
-        UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET);
         assertTrue(IOUtils.isLatin1(chars, 0, 4));
         assertTrue(IOUtils.isLatin1(chars, 4, 4));
     }
