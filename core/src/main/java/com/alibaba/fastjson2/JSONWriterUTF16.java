@@ -2331,7 +2331,7 @@ class JSONWriterUTF16
         writeRaw('{');
 
         boolean first = true;
-        for (Map.Entry entry : map.entrySet()) {
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
             Object value = entry.getValue();
             if (value == null && (context.features & WriteMapNullValue.mask) == 0) {
                 continue;
@@ -2424,7 +2424,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    public final void write(List array) {
+    public final void write(List<?> array) {
         if (array == null) {
             this.writeArrayNull();
             return;

@@ -15,7 +15,6 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
-@SuppressWarnings("restriction")
 final class JSONReaderUTF16
         extends JSONReader {
     static final long CHAR_MASK = BIG_ENDIAN ? 0x00ff00ff00ff00ffL : 0xff00ff00ff00ff00L;
@@ -4368,8 +4367,7 @@ final class JSONReaderUTF16
                 wasNull = false;
                 return decimal(jsonObject);
             } else if (ch == '[' && quote == 0) {
-                List array = readArray();
-                if (!array.isEmpty()) {
+                if (!readArray().isEmpty()) {
                     throw new JSONException(info());
                 }
                 wasNull = true;

@@ -2583,7 +2583,7 @@ public abstract class JSONWriter
      *
      * @param array the list to write
      */
-    public abstract void write(List array);
+    public abstract void write(List<?> array);
 
     /**
      * Writes a JSONObject as a JSON object.
@@ -2776,7 +2776,7 @@ public abstract class JSONWriter
         }
 
         if (value instanceof List) {
-            write((List) value);
+            write((List<?>) value);
             return;
         }
 

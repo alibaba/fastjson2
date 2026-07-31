@@ -185,7 +185,7 @@ public class JSONArray
         }
 
         if (value instanceof Map) {
-            JSONObject object = new JSONObject((Map) value);
+            JSONObject object = new JSONObject((Map<String, ?>) value);
             set(index, object);
             return object;
         }

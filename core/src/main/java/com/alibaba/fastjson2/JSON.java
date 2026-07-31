@@ -747,7 +747,7 @@ public final class JSON {
         }
         if (object instanceof Collection) {
             JSONArray array = new JSONArray();
-            for (Object item : (Collection) object) {
+            for (Object item : (Collection<?>) object) {
                 array.add(toJSON(item, features));
             }
             return array;

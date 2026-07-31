@@ -318,7 +318,6 @@ final class MutableBigInteger {
     }
 
     private static boolean equals(int[] magic_a, int[] magic_b) {
-        boolean equals = true;
         // Add Integer.MIN_VALUE to make the comparison act as unsigned integer
         // comparison.
         for (int i = 0, j = 0; i < magic_a.length; i++, j++) {

@@ -1955,7 +1955,9 @@ final class JSONWriterUTF8
         if (writeAsString) {
             bytes[off++] = '"';
         }
-        str.getBytes(0, strlen, bytes, off);
+        for (int i = 0; i < strlen; i++) {
+            bytes[off + i] = (byte) str.charAt(i);
+        }
         off += strlen;
         if (writeAsString) {
             bytes[off++] = '"';
@@ -2003,7 +2005,9 @@ final class JSONWriterUTF8
             off = IOUtils.writeDecimal(bytes, off, unscaleValue, scale);
         } else {
             String str = asPlain ? value.toPlainString() : value.toString();
-            str.getBytes(0, str.length(), bytes, off);
+            for (int i = 0; i < str.length(); i++) {
+                bytes[off + i] = (byte) str.charAt(i);
+            }
             off += str.length();
         }
 
@@ -2046,7 +2050,7 @@ final class JSONWriterUTF8
         bytes[off++] = '{';
 
         boolean first = true;
-        for (Map.Entry entry : map.entrySet()) {
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
             Object value = entry.getValue();
             if (value == null && (features & MASK_WRITE_MAP_NULL_VALUE) == 0) {
                 continue;
@@ -2148,7 +2152,7 @@ final class JSONWriterUTF8
     }
 
     @Override
-    public final void write(List array) {
+    public final void write(List<?> array) {
         if (array == null) {
             this.writeArrayNull();
             return;

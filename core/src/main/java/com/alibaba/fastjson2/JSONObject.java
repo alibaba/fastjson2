@@ -284,7 +284,7 @@ public class JSONObject
         }
 
         if (value instanceof Map) {
-            JSONObject object = new JSONObject((Map) value);
+            JSONObject object = new JSONObject((Map<String, ?>) value);
             put(key, object);
             return object;
         }
