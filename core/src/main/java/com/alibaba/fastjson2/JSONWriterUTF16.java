@@ -3,7 +3,6 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.NumberUtils;
 import com.alibaba.fastjson2.util.StringUtils;
-import com.alibaba.fastjson2.writer.ObjectWriter;
 import sun.misc.Unsafe;
 
 import java.io.IOException;
@@ -1104,40 +1103,6 @@ class JSONWriterUTF16
     }
 
     @Override
-    public final void writeUUID(UUID value) {
-        if (value == null) {
-            writeNull();
-            return;
-        }
-
-        long msb = value.getMostSignificantBits();
-        long lsb = value.getLeastSignificantBits();
-
-        int minCapacity = off + 38;
-        char[] buf = this.chars;
-        if (minCapacity > chars.length) {
-            buf = grow(minCapacity);
-        }
-
-        final int off = this.off;
-        buf[off] = '"';
-        putLong(buf, off + 1, (int) (msb >> 56), (int) (msb >> 48));
-        putLong(buf, off + 5, (int) (msb >> 40), (int) (msb >> 32));
-        buf[off + 9] = '-';
-        putLong(buf, off + 10, ((int) msb) >> 24, ((int) msb) >> 16);
-        buf[off + 14] = '-';
-        putLong(buf, off + 15, ((int) msb) >> 8, (int) msb);
-        buf[off + 19] = '-';
-        putLong(buf, off + 20, (int) (lsb >> 56), (int) (lsb >> 48));
-        buf[off + 24] = '-';
-        putLong(buf, off + 25, ((int) (lsb >> 40)), (int) (lsb >> 32));
-        putLong(buf, off + 29, ((int) lsb) >> 24, ((int) lsb) >> 16);
-        putLong(buf, off + 33, ((int) lsb) >> 8, (int) lsb);
-        buf[off + 37] = '"';
-        this.off += 38;
-    }
-
-    @Override
     public final void writeRaw(String str) {
         int strlen = str.length();
         int off = this.off;
@@ -2234,352 +2199,6 @@ class JSONWriterUTF16
     }
 
     @Override
-    public final void writeDateTime14(
-            int year,
-            int month,
-            int dayOfMonth,
-            int hour,
-            int minute,
-            int second
-    ) {
-        int off = this.off;
-        int minCapacity = off + 16;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-
-        chars[off] = quote;
-        if (year < 0 || year > 9999) {
-            throw illegalYear(year);
-        }
-        int y01 = year / 100;
-        int y23 = year - y01 * 100;
-        writeDigitPair(chars, off + 1, y01);
-        writeDigitPair(chars, off + 3, y23);
-        writeDigitPair(chars, off + 5, month);
-        writeDigitPair(chars, off + 7, dayOfMonth);
-        writeDigitPair(chars, off + 9, hour);
-        writeDigitPair(chars, off + 11, minute);
-        writeDigitPair(chars, off + 13, second);
-        chars[off + 15] = quote;
-        this.off = off + 16;
-    }
-
-    @Override
-    public final void writeDateTime19(
-            int year,
-            int month,
-            int dayOfMonth,
-            int hour,
-            int minute,
-            int second) {
-        char[] chars = this.chars;
-        if (off + 21 > chars.length) {
-            chars = grow(off + 21);
-        }
-
-        int off = this.off;
-        chars[off] = quote;
-        if (year < 0 || year > 9999) {
-            throw illegalYear(year);
-        }
-        off = IOUtils.writeLocalDate(chars, off + 1, year, month, dayOfMonth);
-        chars[off] = ' ';
-        IOUtils.writeLocalTime(chars, off + 1, hour, minute, second);
-        chars[off + 9] = quote;
-        this.off = off + 10;
-    }
-
-    @Override
-    public final void writeLocalDate(LocalDate date) {
-        if (date == null) {
-            writeNull();
-            return;
-        }
-
-        if (context.dateFormat != null
-                && writeLocalDateWithFormat(date)) {
-            return;
-        }
-
-        int off = this.off;
-        int minCapacity = off + 18;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-        chars[off++] = quote;
-        off = IOUtils.writeLocalDate(chars, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
-        chars[off] = quote;
-        this.off = off + 1;
-    }
-
-    @Override
-    public final void writeLocalDateTime(LocalDateTime dateTime) {
-        int off = this.off;
-        int minCapacity = off + 38;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-        chars[off++] = quote;
-        LocalDate localDate = dateTime.toLocalDate();
-        off = IOUtils.writeLocalDate(chars, off, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
-        chars[off++] = ' ';
-        off = IOUtils.writeLocalTime(chars, off, dateTime.toLocalTime());
-        chars[off] = quote;
-        this.off = off + 1;
-    }
-
-    @Override
-    public final void writeDateTimeISO8601(
-            int year,
-            int month,
-            int dayOfMonth,
-            int hour,
-            int minute,
-            int second,
-            int millis,
-            int offsetSeconds,
-            boolean timeZone
-    ) {
-        int zonelen;
-        if (timeZone) {
-            zonelen = offsetSeconds == 0 ? 1 : 6;
-        } else {
-            zonelen = 0;
-        }
-
-        int off = this.off;
-        int minCapacity = off + 25 + zonelen;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-
-        chars[off] = quote;
-        off = IOUtils.writeLocalDate(chars, off + 1, year, month, dayOfMonth);
-        chars[off] = timeZone ? 'T' : ' ';
-        IOUtils.writeLocalTime(chars, off + 1, hour, minute, second);
-        off += 9;
-
-        if (millis > 0) {
-            int div = millis / 10;
-            int div2 = div / 10;
-            final int rem1 = millis - div * 10;
-
-            if (rem1 != 0) {
-                IOUtils.putLongLE(chars, off, (DIGITS_K_64[millis & 0x3ff] & 0xffffffffffff0000L) | DOT_X0);
-                off += 4;
-            } else {
-                chars[off++] = '.';
-                final int rem2 = div - div2 * 10;
-                if (rem2 != 0) {
-                    writeDigitPair(chars, off, div);
-                    off += 2;
-                } else {
-                    chars[off++] = (char) (byte) (div2 + '0');
-                }
-            }
-        }
-
-        if (timeZone) {
-            int offset = offsetSeconds / 3600;
-            if (offsetSeconds == 0) {
-                chars[off++] = 'Z';
-            } else {
-                int offsetAbs = Math.abs(offset);
-                chars[off] = offset >= 0 ? '+' : '-';
-                writeDigitPair(chars, off + 1, offsetAbs);
-                chars[off + 3] = ':';
-                int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
-                if (offsetMinutes < 0) {
-                    offsetMinutes = -offsetMinutes;
-                }
-                writeDigitPair(chars, off + 4, offsetMinutes);
-                off += 6;
-            }
-        }
-        chars[off] = quote;
-        this.off = off + 1;
-    }
-
-    @Override
-    public final void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
-        int off = this.off;
-        int minCapacity = off + 10;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-        chars[off] = quote;
-        if (year < 0 || year > 9999) {
-            throw illegalYear(year);
-        }
-        int y01 = year / 100;
-        int y23 = year - y01 * 100;
-        writeDigitPair(chars, off + 1, y01);
-        writeDigitPair(chars, off + 3, y23);
-        writeDigitPair(chars, off + 5, month);
-        writeDigitPair(chars, off + 7, dayOfMonth);
-        chars[off + 9] = quote;
-        this.off = off + 10;
-    }
-
-    @Override
-    public final void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
-        int off = this.off;
-        int minCapacity = off + 13;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-        chars[off++] = quote;
-        off = IOUtils.writeLocalDate(chars, off, year, month, dayOfMonth);
-        chars[off] = quote;
-        this.off = off + 1;
-    }
-
-    @Override
-    public final void writeTimeHHMMSS8(int hour, int minute, int second) {
-        int off = this.off;
-        int minCapacity = off + 10;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-        chars[off] = (char) (byte) quote;
-        writeDigitPair(chars, off + 1, hour);
-        chars[off + 3] = ':';
-        writeDigitPair(chars, off + 4, minute);
-        chars[off + 6] = ':';
-        writeDigitPair(chars, off + 7, second);
-        chars[off + 9] = (char) (byte) quote;
-        this.off = off + 10;
-    }
-
-    @Override
-    public final void writeLocalTime(LocalTime time) {
-        int off = this.off;
-        int minCapacity = off + 20;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-        chars[off++] = quote;
-        off = IOUtils.writeLocalTime(chars, off, time);
-        chars[off] = quote;
-        this.off = off + 1;
-    }
-
-    @Override
-    public final void writeZonedDateTime(ZonedDateTime dateTime) {
-        if (dateTime == null) {
-            writeNull();
-            return;
-        }
-        ZoneId zone = dateTime.getZone();
-        String zoneId = zone.getId();
-        int zoneIdLength = zoneId.length();
-
-        char firstZoneChar = '\0';
-        int zoneSize;
-        if (ZoneOffset.UTC == zone || (zoneIdLength <= 3 && ("UTC".equals(zoneId) || "Z".equals(zoneId)))) {
-            zoneId = "Z";
-            zoneSize = 1;
-        } else if (zoneIdLength != 0 && ((firstZoneChar = zoneId.charAt(0)) == '+' || firstZoneChar == '-')) {
-            zoneSize = zoneIdLength;
-        } else {
-            zoneSize = 2 + zoneIdLength;
-        }
-
-        int off = this.off;
-        int minCapacity = off + zoneSize + 38;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-        chars[off] = quote;
-        LocalDate localDate = dateTime.toLocalDate();
-        off = IOUtils.writeLocalDate(chars, off + 1, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
-        chars[off] = 'T';
-        off = IOUtils.writeLocalTime(chars, off + 1, dateTime.toLocalTime());
-        if (zoneSize == 1) {
-            chars[off++] = 'Z';
-        } else if (firstZoneChar == '+' || firstZoneChar == '-') {
-            zoneId.getChars(0, zoneIdLength, chars, off);
-            off += zoneIdLength;
-        } else {
-            chars[off++] = '[';
-            zoneId.getChars(0, zoneIdLength, chars, off);
-            off += zoneIdLength;
-            chars[off++] = ']';
-        }
-        chars[off] = quote;
-        this.off = off + 1;
-    }
-
-    @Override
-    public final void writeOffsetDateTime(OffsetDateTime dateTime) {
-        if (dateTime == null) {
-            writeNull();
-            return;
-        }
-
-        int off = this.off;
-        int minCapacity = off + 45;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-        chars[off] = quote;
-        LocalDateTime ldt = dateTime.toLocalDateTime();
-        LocalDate date = ldt.toLocalDate();
-        off = IOUtils.writeLocalDate(chars, off + 1, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
-        chars[off] = 'T';
-        off = IOUtils.writeLocalTime(chars, off + 1, ldt.toLocalTime());
-
-        ZoneOffset offset = dateTime.getOffset();
-        if (offset.getTotalSeconds() == 0) {
-            chars[off++] = 'Z';
-        } else {
-            String zoneId = offset.getId();
-            zoneId.getChars(0, zoneId.length(), chars, off);
-            off += zoneId.length();
-        }
-        chars[off] = quote;
-        this.off = off + 1;
-    }
-
-    @Override
-    public final void writeOffsetTime(OffsetTime time) {
-        if (time == null) {
-            writeNull();
-            return;
-        }
-
-        ZoneOffset offset = time.getOffset();
-        int off = this.off;
-        int minCapacity = off + 28;
-        char[] chars = this.chars;
-        if (minCapacity > chars.length) {
-            chars = grow(minCapacity);
-        }
-        chars[off] = quote;
-        off = IOUtils.writeLocalTime(chars, off + 1, time.toLocalTime());
-        if (offset.getTotalSeconds() == 0) {
-            chars[off++] = 'Z';
-        } else {
-            String zoneId = offset.getId();
-            zoneId.getChars(0, zoneId.length(), chars, off);
-            off += zoneId.length();
-        }
-        chars[off] = quote;
-        this.off = off + 1;
-    }
-
-    @Override
     public final void writeNameRaw(byte[] bytes) {
         throw new JSONException("UnsupportedOperation");
     }
@@ -2708,9 +2327,7 @@ class JSONWriterUTF16
         }
 
         if ((context.features & NONE_DIRECT_FEATURES) != 0) {
-            ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
-            objectWriter.write(this, map, null, null, 0);
-            return;
+            throw new JSONException("not support feature ReferenceDetection / NotWriteEmptyArray / NotWriteDefaultValue");
         }
 
         writeRaw('{');
@@ -2767,6 +2384,16 @@ class JSONWriterUTF16
                 continue;
             }
 
+            if (valueClass == Double.class) {
+                writeDouble((Double) value);
+                continue;
+            }
+
+            if (valueClass == Float.class) {
+                writeFloat((Float) value);
+                continue;
+            }
+
             if (valueClass == JSONArray.class) {
                 write((JSONArray) value);
                 continue;
@@ -2777,8 +2404,22 @@ class JSONWriterUTF16
                 continue;
             }
 
-            ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
-            objectWriter.write(this, value, null, null, 0);
+            if (valueClass == Short.class) {
+                writeInt32(((Short) value).intValue());
+                continue;
+            }
+
+            if (valueClass == Byte.class) {
+                writeInt32(((Byte) value).intValue());
+                continue;
+            }
+
+            if (valueClass == Character.class) {
+                writeString(value.toString());
+                continue;
+            }
+
+            throw new JSONException("not support write value type : " + valueClass.getName());
         }
 
         writeRaw('}');
@@ -2797,9 +2438,7 @@ class JSONWriterUTF16
                 | NotWriteDefaultValue.mask;
 
         if ((context.features & NONE_DIRECT_FEATURES) != 0) {
-            ObjectWriter objectWriter = context.getObjectWriter(array.getClass());
-            objectWriter.write(this, array, null, null, 0);
-            return;
+            throw new JSONException("not support feature ReferenceDetection / NotWriteEmptyArray / NotWriteDefaultValue");
         }
 
         if (off == chars.length) {
@@ -2869,8 +2508,7 @@ class JSONWriterUTF16
                 continue;
             }
 
-            ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
-            objectWriter.write(this, o, null, null, 0);
+            throw new JSONException("not support write value type : " + valueClass.getName());
         }
         if (off == chars.length) {
             grow(off + 1);

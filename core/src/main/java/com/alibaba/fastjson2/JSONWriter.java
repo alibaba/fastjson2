@@ -1,11 +1,7 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
-import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.*;
 import java.lang.reflect.GenericArrayType;
@@ -376,7 +372,7 @@ public abstract class JSONWriter
      * @return true if any filter is configured, false otherwise
      */
     public final boolean hasFilter() {
-        return context.hasFilter;
+        return false;
     }
 
     /**
@@ -386,7 +382,7 @@ public abstract class JSONWriter
      * @return true if any filter is configured or the specified feature is enabled, false otherwise
      */
     public final boolean hasFilter(long feature) {
-        return context.hasFilter || (context.features & feature) != 0;
+        return (context.features & feature) != 0;
     }
 
     /**
@@ -397,7 +393,7 @@ public abstract class JSONWriter
      * @return true if any filter is configured or the IgnoreNonFieldGetter feature should be applied, false otherwise
      */
     public final boolean hasFilter(boolean containsNoneFieldGetter) {
-        return context.hasFilter || containsNoneFieldGetter && (context.features & IgnoreNonFieldGetter.mask) != 0;
+        return false;
     }
 
     /**
@@ -415,8 +411,7 @@ public abstract class JSONWriter
      * @return true if the ReferenceDetection feature is enabled, false otherwise
      */
     public final boolean isRefDetect() {
-        return (context.features & ReferenceDetection.mask) != 0
-                && (context.features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0;
+        return (context.features & ReferenceDetection.mask) != 0;
     }
 
     /**
@@ -436,9 +431,7 @@ public abstract class JSONWriter
      */
     public final boolean isRefDetect(Object object) {
         return (context.features & ReferenceDetection.mask) != 0
-                && (context.features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
-                && object != null
-                && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
+                && object != null;
     }
 
     /**
@@ -806,45 +799,6 @@ public abstract class JSONWriter
     }
 
     /**
-     * Gets the ObjectWriter for the specified object class.
-     * This method retrieves an ObjectWriter instance that can serialize objects of the specified class.
-     *
-     * @param objectClass the class of objects to be serialized
-     * @return the ObjectWriter for the specified class
-     */
-    public final ObjectWriter getObjectWriter(Class objectClass) {
-        boolean fieldBased = (context.features & FieldBased.mask) != 0;
-        return context.provider.getObjectWriter(objectClass, objectClass, fieldBased);
-    }
-
-    /**
-     * Gets the ObjectWriter for the specified object class with a specific format.
-     * This method retrieves an ObjectWriter instance that can serialize objects of the specified class
-     * using the provided format string.
-     *
-     * @param objectClass the class of objects to be serialized
-     * @param format the format string to use for serialization
-     * @return the ObjectWriter for the specified class and format
-     */
-    public final ObjectWriter getObjectWriter(Class objectClass, String format) {
-        boolean fieldBased = (context.features & FieldBased.mask) != 0;
-        return context.provider.getObjectWriter(objectClass, objectClass, format, fieldBased);
-    }
-
-    /**
-     * Gets the ObjectWriter for the specified object type and class.
-     * This method retrieves an ObjectWriter instance that can serialize objects of the specified type and class.
-     *
-     * @param objectType the type of objects to be serialized
-     * @param objectClass the class of objects to be serialized
-     * @return the ObjectWriter for the specified type and class
-     */
-    public final ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
-        boolean fieldBased = (context.features & FieldBased.mask) != 0;
-        return context.provider.getObjectWriter(objectType, objectClass, fieldBased);
-    }
-
-    /**
      * Creates a new JSONWriter with default configuration.
      * The writer will output to an internal buffer and can be converted to a string using toString().
      *
@@ -860,7 +814,7 @@ public abstract class JSONWriter
      * @return a new JSONWriter instance
      */
     public static JSONWriter of() {
-        JSONWriter.Context writeContext = new JSONWriter.Context(defaultObjectWriterProvider);
+        JSONWriter.Context writeContext = new JSONWriter.Context();
         JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
             if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
@@ -883,20 +837,7 @@ public abstract class JSONWriter
     /**
      * Creates a new JSONWriter with the specified object writer provider and features.
      *
-     * @param provider the object writer provider to use
      * @param features the features to enable
-     * @return a new JSONWriter instance
-     */
-    public static JSONWriter of(ObjectWriterProvider provider, Feature... features) {
-        Context context = new Context(provider);
-        context.config(features);
-        return of(context);
-    }
-
-    /**
-     * Creates a new JSONWriter with the specified context.
-     *
-     * @param context the context to use
      * @return a new JSONWriter instance
      */
     public static JSONWriter of(Context context) {
@@ -2250,13 +2191,6 @@ public abstract class JSONWriter
      */
     public abstract void writeBigInt(BigInteger value, long features);
 
-    /**
-     * Writes a UUID value.
-     * The UUID is typically serialized as a string in standard UUID format.
-     *
-     * @param value the UUID to write, can be null
-     */
-    public abstract void writeUUID(UUID value);
 
     /**
      * Checks if type name should be written for the given object and writes it if necessary.
@@ -2644,172 +2578,6 @@ public abstract class JSONWriter
     public abstract void writeString(char[] chars, int off, int len, boolean quote);
 
     /**
-     * Writes a LocalDate value.
-     *
-     * @param date the LocalDate to write
-     */
-    public abstract void writeLocalDate(LocalDate date);
-
-    protected final boolean writeLocalDateWithFormat(LocalDate date) {
-        Context context = this.context;
-        if (context.dateFormatUnixTime || context.dateFormatMillis) {
-            LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
-            long millis = dateTime.atZone(context.getZoneId())
-                    .toInstant()
-                    .toEpochMilli();
-            writeInt64(context.dateFormatMillis ? millis : millis / 1000);
-            return true;
-        }
-
-        DateTimeFormatter formatter = context.getDateFormatter();
-        if (formatter != null) {
-            String str;
-            if (context.isDateFormatHasHour()) {
-                str = formatter.format(LocalDateTime.of(date, LocalTime.MIN));
-            } else {
-                str = formatter.format(date);
-            }
-            writeString(str);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Writes a LocalDateTime value.
-     * @param dateTime the LocalDateTime to write
-     */
-    public abstract void writeLocalDateTime(LocalDateTime dateTime);
-
-    /**
-     * Writes a LocalTime value.
-     * @param time the LocalTime to write
-     */
-    public abstract void writeLocalTime(LocalTime time);
-
-    /**
-     * Writes a ZonedDateTime value.
-     * @param dateTime the ZonedDateTime to write
-     */
-    public abstract void writeZonedDateTime(ZonedDateTime dateTime);
-
-    /**
-     * Writes an OffsetDateTime value.
-     * @param dateTime the OffsetDateTime to write
-     */
-    public abstract void writeOffsetDateTime(OffsetDateTime dateTime);
-
-    /**
-     * Writes an OffsetTime value.
-     * @param dateTime the OffsetTime to write
-     */
-    public abstract void writeOffsetTime(OffsetTime dateTime);
-
-    /**
-     * Writes an Instant value as an ISO-8601 formatted string.
-     * If the instant is null, a null value is written instead.
-     *
-     * @param instant the Instant to write, can be null
-     */
-    public void writeInstant(Instant instant) {
-        if (instant == null) {
-            writeNull();
-            return;
-        }
-
-        String str = DateTimeFormatter.ISO_INSTANT.format(instant);
-        writeString(str);
-    }
-
-    /**
-     * Writes a date-time value in 14-character format (yyyyMMddHHmmss).
-     *
-     * @param year the year
-     * @param month the month (1-12)
-     * @param dayOfMonth the day of month (1-31)
-     * @param hour the hour (0-23)
-     * @param minute the minute (0-59)
-     * @param second the second (0-59)
-     */
-    public abstract void writeDateTime14(
-            int year,
-            int month,
-            int dayOfMonth,
-            int hour,
-            int minute,
-            int second);
-
-    /**
-     * Writes a date-time value in 19-character format (yyyy-MM-dd HH:mm:ss).
-     *
-     * @param year the year
-     * @param month the month (1-12)
-     * @param dayOfMonth the day of month (1-31)
-     * @param hour the hour (0-23)
-     * @param minute the minute (0-59)
-     * @param second the second (0-59)
-     */
-    public abstract void writeDateTime19(
-            int year,
-            int month,
-            int dayOfMonth,
-            int hour,
-            int minute,
-            int second);
-
-    /**
-     * Writes a date-time value in ISO8601 format.
-     *
-     * @param year the year
-     * @param month the month (1-12)
-     * @param dayOfMonth the day of month (1-31)
-     * @param hour the hour (0-23)
-     * @param minute the minute (0-59)
-     * @param second the second (0-59)
-     * @param millis the millisecond (0-999)
-     * @param offsetSeconds the timezone offset in seconds
-     * @param timeZone whether to include timezone information
-     */
-    public abstract void writeDateTimeISO8601(
-            int year,
-            int month,
-            int dayOfMonth,
-            int hour,
-            int minute,
-            int second,
-            int millis,
-            int offsetSeconds,
-            boolean timeZone
-    );
-
-    /**
-     * Writes a date in 8-character format (yyyyMMdd).
-     *
-     * @param year the year
-     * @param month the month (1-12)
-     * @param dayOfMonth the day of month (1-31)
-     */
-    public abstract void writeDateYYYMMDD8(int year, int month, int dayOfMonth);
-
-    /**
-     * Writes a date in 10-character format (yyyy-MM-dd).
-     *
-     * @param year the year
-     * @param month the month (1-12)
-     * @param dayOfMonth the day of month (1-31)
-     */
-    public abstract void writeDateYYYMMDD10(int year, int month, int dayOfMonth);
-
-    /**
-     * Writes a time in 8-character format (HH:mm:ss).
-     *
-     * @param hour the hour (0-23)
-     * @param minute the minute (0-59)
-     * @param second the second (0-59)
-     */
-    public abstract void writeTimeHHMMSS8(int hour, int minute, int second);
-
-    /**
      * Writes a list as a JSON array.
      *
      * @param array the list to write
@@ -2845,9 +2613,7 @@ public abstract class JSONWriter
         }
 
         if ((context.features & NONE_DIRECT_FEATURES) != 0) {
-            ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
-            objectWriter.write(this, map, null, null, 0);
-            return;
+            throw new JSONException("not support feature ReferenceDetection / NotWriteEmptyArray / NotWriteDefaultValue");
         }
 
         startObject();
@@ -2924,8 +2690,7 @@ public abstract class JSONWriter
                 continue;
             }
 
-            ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
-            objectWriter.write(this, value, null, null, 0);
+            throw new JSONException("not support write value type : " + valueClass.getName());
         }
 
         endObject();
@@ -2944,28 +2709,77 @@ public abstract class JSONWriter
             return;
         }
 
-        Class<?> valueClass = value.getClass();
-        ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
-        objectWriter.write(this, value, null, null, 0);
-    }
-
-    /**
-     * Writes an object as if it were of the specified type.
-     * This method is useful for writing objects with a specific type serialization,
-     * even if the actual object is of a different type.
-     *
-     * @param value the object to write
-     * @param type the type to serialize the object as
-     * @since 2.0.43
-     */
-    public final void writeAs(Object value, Class type) {
-        if (value == null) {
-            writeNull();
+        if (value instanceof String) {
+            writeString((String) value);
             return;
         }
 
-        ObjectWriter objectWriter = context.getObjectWriter(type);
-        objectWriter.write(this, value, null, null, 0);
+        if (value instanceof Integer) {
+            writeInt32((Integer) value);
+            return;
+        }
+
+        if (value instanceof Long) {
+            writeInt64((Long) value);
+            return;
+        }
+
+        if (value instanceof Boolean) {
+            writeBool((Boolean) value);
+            return;
+        }
+
+        if (value instanceof BigDecimal) {
+            writeDecimal((BigDecimal) value, 0, null);
+            return;
+        }
+
+        if (value instanceof Double) {
+            writeDouble((Double) value);
+            return;
+        }
+
+        if (value instanceof Float) {
+            writeFloat((Float) value);
+            return;
+        }
+
+        if (value instanceof Short) {
+            writeInt32(((Short) value).intValue());
+            return;
+        }
+
+        if (value instanceof Byte) {
+            writeInt32(((Byte) value).intValue());
+            return;
+        }
+
+        if (value instanceof Character) {
+            writeString(value.toString());
+            return;
+        }
+
+        if (value instanceof JSONObject) {
+            write((JSONObject) value);
+            return;
+        }
+
+        if (value instanceof JSONArray) {
+            write((JSONArray) value);
+            return;
+        }
+
+        if (value instanceof Map) {
+            write((Map) value);
+            return;
+        }
+
+        if (value instanceof List) {
+            write((List) value);
+            return;
+        }
+
+        throw new JSONException("not support write value type : " + value.getClass().getName());
     }
 
     /**
@@ -3116,7 +2930,6 @@ public abstract class JSONWriter
     public static final class Context {
         static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
-        public final ObjectWriterProvider provider;
         DateTimeFormatter dateFormatter;
         String dateFormat;
         Locale locale;
@@ -3129,38 +2942,6 @@ public abstract class JSONWriter
         long features;
         ZoneId zoneId;
         int maxLevel;
-        boolean hasFilter;
-        PropertyPreFilter propertyPreFilter;
-        PropertyFilter propertyFilter;
-        NameFilter nameFilter;
-        ValueFilter valueFilter;
-        BeforeFilter beforeFilter;
-        AfterFilter afterFilter;
-        LabelFilter labelFilter;
-        ContextValueFilter contextValueFilter;
-        ContextNameFilter contextNameFilter;
-
-        /**
-         * Creates a new Context with the specified object writer provider.
-         *
-         * @param provider the object writer provider to use
-         * @throws IllegalArgumentException if provider is null
-         */
-        public Context(ObjectWriterProvider provider) {
-            if (provider == null) {
-                throw new IllegalArgumentException("objectWriterProvider must not null");
-            }
-
-            this.features = defaultWriterFeatures;
-            this.provider = provider;
-            this.zoneId = defaultWriterZoneId;
-            this.maxLevel = defaultMaxLevel;
-
-            String format = defaultWriterFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
-        }
 
         /**
          * Creates a new Context with the specified features.
@@ -3169,7 +2950,6 @@ public abstract class JSONWriter
          */
         public Context(Feature... features) {
             this.features = defaultWriterFeatures;
-            this.provider = getDefaultObjectWriterProvider();
             this.zoneId = defaultWriterZoneId;
             this.maxLevel = defaultMaxLevel;
 
@@ -3191,7 +2971,6 @@ public abstract class JSONWriter
          */
         public Context(String format, Feature... features) {
             this.features = defaultWriterFeatures;
-            this.provider = getDefaultObjectWriterProvider();
             this.zoneId = defaultWriterZoneId;
             this.maxLevel = defaultMaxLevel;
 
@@ -3207,32 +2986,6 @@ public abstract class JSONWriter
             }
         }
 
-        /**
-         * Creates a new Context with the specified object writer provider and features.
-         *
-         * @param provider the object writer provider to use
-         * @param features the features to enable
-         * @throws IllegalArgumentException if provider is null
-         */
-        public Context(ObjectWriterProvider provider, Feature... features) {
-            if (provider == null) {
-                throw new IllegalArgumentException("objectWriterProvider must not null");
-            }
-
-            this.features = defaultWriterFeatures;
-            this.provider = provider;
-            this.zoneId = defaultWriterZoneId;
-            this.maxLevel = defaultMaxLevel;
-
-            for (int i = 0; i < features.length; i++) {
-                this.features |= features[i].mask;
-            }
-
-            String format = defaultWriterFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
-        }
 
         /**
          * Gets the features bitmask for this context.
@@ -3298,117 +3051,9 @@ public abstract class JSONWriter
             }
         }
 
-        /**
-         * Configures filters for this context.
-         *
-         * @param filters the filters to configure
-         */
-        public void configFilter(Filter... filters) {
-            for (int i = 0; i < filters.length; i++) {
-                Filter filter = filters[i];
-                if (filter instanceof NameFilter) {
-                    if (this.nameFilter == null) {
-                        this.nameFilter = (NameFilter) filter;
-                    } else {
-                        this.nameFilter = NameFilter.compose(this.nameFilter, (NameFilter) filter);
-                    }
-                }
 
-                if (filter instanceof ValueFilter) {
-                    if (this.valueFilter == null) {
-                        this.valueFilter = (ValueFilter) filter;
-                    } else {
-                        this.valueFilter = ValueFilter.compose(this.valueFilter, (ValueFilter) filter);
-                    }
-                }
 
-                if (filter instanceof PropertyFilter) {
-                    if (this.propertyFilter == null) {
-                        this.propertyFilter = (PropertyFilter) filter;
-                    } else {
-                        this.propertyFilter = PropertyFilter.compose(this.propertyFilter, (PropertyFilter) filter);
-                    }
-                }
 
-                if (filter instanceof PropertyPreFilter) {
-                    if (this.propertyPreFilter == null) {
-                        this.propertyPreFilter = (PropertyPreFilter) filter;
-                    } else {
-                        this.propertyPreFilter = PropertyPreFilter.compose(this.propertyPreFilter, (PropertyPreFilter) filter);
-                    }
-                }
-
-                if (filter instanceof BeforeFilter) {
-                    this.beforeFilter = (BeforeFilter) filter;
-                }
-
-                if (filter instanceof AfterFilter) {
-                    this.afterFilter = (AfterFilter) filter;
-                }
-
-                if (filter instanceof LabelFilter) {
-                    if (this.labelFilter == null) {
-                        this.labelFilter = (LabelFilter) filter;
-                    } else {
-                        this.labelFilter = LabelFilter.compose(this.labelFilter, (LabelFilter) filter);
-                    }
-                }
-
-                if (filter instanceof ContextValueFilter) {
-                    this.contextValueFilter = (ContextValueFilter) filter;
-                }
-
-                if (filter instanceof ContextNameFilter) {
-                    this.contextNameFilter = (ContextNameFilter) filter;
-                }
-            }
-
-            hasFilter = propertyPreFilter != null
-                    || propertyFilter != null
-                    || nameFilter != null
-                    || valueFilter != null
-                    || beforeFilter != null
-                    || afterFilter != null
-                    || labelFilter != null
-                    || contextValueFilter != null
-                    || contextNameFilter != null;
-        }
-
-        /**
-         * Gets the ObjectWriter for the specified object type.
-         * This method retrieves an ObjectWriter instance that can serialize objects of the specified type.
-         *
-         * @param <T> the type of objects to be serialized
-         * @param objectType the class of objects to be serialized
-         * @return the ObjectWriter for the specified type
-         */
-        public <T> ObjectWriter<T> getObjectWriter(Class<T> objectType) {
-            boolean fieldBased = (features & FieldBased.mask) != 0;
-            return provider.getObjectWriter(objectType, objectType, fieldBased);
-        }
-
-        /**
-         * Gets the ObjectWriter for the specified object type and class.
-         * This method retrieves an ObjectWriter instance that can serialize objects of the specified type and class.
-         *
-         * @param <T> the type of objects to be serialized
-         * @param objectType the type of objects to be serialized
-         * @param objectClass the class of objects to be serialized
-         * @return the ObjectWriter for the specified type and class
-         */
-        public <T> ObjectWriter<T> getObjectWriter(Type objectType, Class<T> objectClass) {
-            boolean fieldBased = (features & FieldBased.mask) != 0;
-            return provider.getObjectWriter(objectType, objectClass, fieldBased);
-        }
-
-        /**
-         * Gets the ObjectWriterProvider used by this context.
-         *
-         * @return the ObjectWriterProvider
-         */
-        public ObjectWriterProvider getProvider() {
-            return provider;
-        }
 
         /**
          * Gets the ZoneId used by this context.
@@ -3560,194 +3205,23 @@ public abstract class JSONWriter
             this.dateFormat = dateFormat;
         }
 
-        /**
-         * Gets the property pre-filter for this context.
-         *
-         * @return the property pre-filter, or null if not set
-         */
-        public PropertyPreFilter getPropertyPreFilter() {
-            return propertyPreFilter;
-        }
 
-        /**
-         * Sets the property pre-filter for this context.
-         *
-         * @param propertyPreFilter the property pre-filter to set
-         */
-        public void setPropertyPreFilter(PropertyPreFilter propertyPreFilter) {
-            this.propertyPreFilter = propertyPreFilter;
-            if (propertyPreFilter != null) {
-                hasFilter = true;
-            }
-        }
 
-        /**
-         * Gets the name filter for this context.
-         *
-         * @return the name filter, or null if not set
-         */
-        public NameFilter getNameFilter() {
-            return nameFilter;
-        }
 
-        /**
-         * Sets the name filter for this context.
-         *
-         * @param nameFilter the name filter to set
-         */
-        public void setNameFilter(NameFilter nameFilter) {
-            this.nameFilter = nameFilter;
-            if (nameFilter != null) {
-                hasFilter = true;
-            }
-        }
 
-        /**
-         * Gets the value filter for this context.
-         *
-         * @return the value filter, or null if not set
-         */
-        public ValueFilter getValueFilter() {
-            return valueFilter;
-        }
 
-        /**
-         * Sets the value filter for this context.
-         *
-         * @param valueFilter the value filter to set
-         */
-        public void setValueFilter(ValueFilter valueFilter) {
-            this.valueFilter = valueFilter;
-            if (valueFilter != null) {
-                hasFilter = true;
-            }
-        }
 
-        /**
-         * Gets the context value filter for this context.
-         *
-         * @return the context value filter, or null if not set
-         */
-        public ContextValueFilter getContextValueFilter() {
-            return contextValueFilter;
-        }
 
-        /**
-         * Sets the context value filter for this context.
-         *
-         * @param contextValueFilter the context value filter to set
-         */
-        public void setContextValueFilter(ContextValueFilter contextValueFilter) {
-            this.contextValueFilter = contextValueFilter;
-            if (contextValueFilter != null) {
-                hasFilter = true;
-            }
-        }
 
-        /**
-         * Gets the context name filter for this context.
-         *
-         * @return the context name filter, or null if not set
-         */
-        public ContextNameFilter getContextNameFilter() {
-            return contextNameFilter;
-        }
 
-        /**
-         * Sets the context name filter for this context.
-         *
-         * @param contextNameFilter the context name filter to set
-         */
-        public void setContextNameFilter(ContextNameFilter contextNameFilter) {
-            this.contextNameFilter = contextNameFilter;
-            if (contextNameFilter != null) {
-                hasFilter = true;
-            }
-        }
 
-        /**
-         * Gets the property filter for this context.
-         *
-         * @return the property filter, or null if not set
-         */
-        public PropertyFilter getPropertyFilter() {
-            return propertyFilter;
-        }
 
-        /**
-         * Sets the property filter for this context.
-         *
-         * @param propertyFilter the property filter to set
-         */
-        public void setPropertyFilter(PropertyFilter propertyFilter) {
-            this.propertyFilter = propertyFilter;
-            if (propertyFilter != null) {
-                hasFilter = true;
-            }
-        }
 
-        /**
-         * Gets the after filter for this context.
-         *
-         * @return the after filter, or null if not set
-         */
-        public AfterFilter getAfterFilter() {
-            return afterFilter;
-        }
 
-        /**
-         * Sets the after filter for this context.
-         *
-         * @param afterFilter the after filter to set
-         */
-        public void setAfterFilter(AfterFilter afterFilter) {
-            this.afterFilter = afterFilter;
-            if (afterFilter != null) {
-                hasFilter = true;
-            }
-        }
 
-        /**
-         * Gets the before filter for this context.
-         *
-         * @return the before filter, or null if not set
-         */
-        public BeforeFilter getBeforeFilter() {
-            return beforeFilter;
-        }
 
-        /**
-         * Sets the before filter for this context.
-         *
-         * @param beforeFilter the before filter to set
-         */
-        public void setBeforeFilter(BeforeFilter beforeFilter) {
-            this.beforeFilter = beforeFilter;
-            if (beforeFilter != null) {
-                hasFilter = true;
-            }
-        }
 
-        /**
-         * Gets the label filter for this context.
-         *
-         * @return the label filter, or null if not set
-         */
-        public LabelFilter getLabelFilter() {
-            return labelFilter;
-        }
 
-        /**
-         * Sets the label filter for this context.
-         *
-         * @param labelFilter the label filter to set
-         */
-        public void setLabelFilter(LabelFilter labelFilter) {
-            this.labelFilter = labelFilter;
-            if (labelFilter != null) {
-                hasFilter = true;
-            }
-        }
 
         /**
          * Gets the maximum nesting level allowed for this context.

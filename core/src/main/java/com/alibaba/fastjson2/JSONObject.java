@@ -1,10 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.filter.NameFilter;
-import com.alibaba.fastjson2.filter.ValueFilter;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.*;
 
 import java.lang.annotation.Annotation;
@@ -21,7 +16,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.util.BeanUtils.getAnnotations;
 import static com.alibaba.fastjson2.util.JDKUtils.ANDROID;
 import static com.alibaba.fastjson2.util.JDKUtils.GRAAL;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
@@ -31,7 +25,6 @@ public class JSONObject
         implements InvocationHandler {
     private static final long serialVersionUID = 1L;
 
-    static ObjectReader<JSONArray> arrayReader;
     static final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
             | PrettyFormat.mask
             | NotWriteEmptyArray.mask
@@ -234,11 +227,7 @@ public class JSONObject
                 return JSONArray.of(str);
             }
 
-            JSONReader reader = JSONReader.of(str);
-            if (arrayReader == null) {
-                arrayReader = reader.getObjectReader(JSONArray.class);
-            }
-            return arrayReader.readObject(reader, null, null, 0);
+            return JSON.parseArray(str);
         }
 
         if (value instanceof Collection) {
@@ -268,22 +257,6 @@ public class JSONObject
         return null;
     }
 
-    /**
-     * Returns a list of objects of the specified type from the associated JSONArray in this {@link JSONObject}.
-     *
-     * @param <T> the type of elements in the list
-     * @param key the key whose associated value is to be returned
-     * @param itemClass the class of the items in the list
-     * @param features features to be enabled in parsing
-     * @return a list of objects or null
-     */
-    public <T> List<T> getList(String key, Class<T> itemClass, JSONReader.Feature... features) {
-        JSONArray jsonArray = getJSONArray(key);
-        if (jsonArray == null) {
-            return null;
-        }
-        return jsonArray.toList(itemClass, features);
-    }
 
     /**
      * Returns the {@link JSONObject} of the associated keys in this {@link JSONObject}.
@@ -310,8 +283,7 @@ public class JSONObject
                 return null;
             }
 
-            JSONReader reader = JSONReader.of(str);
-            return JSONFactory.OBJECT_READER.readObject(reader, null, null, 0);
+            return JSON.parseObject(str);
         }
 
         if (value instanceof Map) {
@@ -351,8 +323,7 @@ public class JSONObject
         }
 
         if (value instanceof Date) {
-            long timeMillis = ((Date) value).getTime();
-            return DateUtils.toString(timeMillis, false, DateUtils.DEFAULT_ZONE_ID);
+            return value.toString();
         }
 
         if (value instanceof Boolean
@@ -915,211 +886,20 @@ public class JSONObject
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");
     }
 
-    /**
-     * Returns the {@link Date} of the associated keys in this {@link JSONObject}.
-     *
-     * @param key the key whose associated value is to be returned
-     * @return {@link Date} or null
-     */
-    public Date getDate(String key) {
-        Object value = super.get(key);
 
-        if (value == null) {
-            return null;
-        }
 
-        if (value instanceof Date) {
-            return (Date) value;
-        }
 
-        if (value instanceof String) {
-            return DateUtils.parseDate((String) value);
-        }
 
-        if (value instanceof Number) {
-            long millis = ((Number) value).longValue();
-            return new Date(millis);
-        }
 
-        return TypeUtils.toDate(value);
-    }
 
-    /**
-     * @since 2.0.27
-     */
-    public Date getDate(String key, Date defaultValue) {
-        Date date = getDate(key);
-        if (date == null) {
-            date = defaultValue;
-        }
-        return date;
-    }
 
-    /**
-     * Returns the {@link BigInteger} of the associated keys in this {@link JSONObject}.
-     *
-     * @param key the key whose associated value is to be returned
-     * @return {@link BigInteger} or null
-     */
-    public Instant getInstant(String key) {
-        Object value = super.get(key);
 
-        if (value == null) {
-            return null;
-        }
 
-        if (value instanceof Instant) {
-            return (Instant) value;
-        }
 
-        if (value instanceof Number) {
-            long millis = ((Number) value).longValue();
-            if (millis == 0) {
-                return null;
-            }
-            return Instant.ofEpochMilli(millis);
-        }
 
-        return TypeUtils.toInstant(value);
-    }
 
-    /**
-     *
-     * @since 2.0.57
-     */
-    public LocalDate getLocalDate(String key) {
-        return getLocalDate(key, null);
-    }
 
-    /**
-     *
-     * @since 2.0.57
-     */
-    public LocalDate getLocalDate(String key, LocalDate defaultValue) {
-        Object value = super.get(key);
-        if (value == null) {
-            return defaultValue;
-        }
-        if (value instanceof LocalDate) {
-            return (LocalDate) value;
-        }
-        return TypeUtils.cast(value, LocalDate.class);
-    }
 
-    /**
-     *
-     * @since 2.0.57
-     */
-    public LocalTime getLocalTime(String key) {
-        return getLocalTime(key, null);
-    }
-
-    /**
-     *
-     * @since 2.0.57
-     */
-    public LocalTime getLocalTime(String key, LocalTime defaultValue) {
-        Object value = super.get(key);
-        if (value == null) {
-            return defaultValue;
-        }
-        if (value instanceof LocalTime) {
-            return (LocalTime) value;
-        }
-        return TypeUtils.cast(value, LocalTime.class);
-    }
-
-    /**
-     *
-     * @since 2.0.57
-     */
-    public OffsetTime getOffsetTime(String key) {
-        return getOffsetTime(key, null);
-    }
-
-    /**
-     *
-     * @since 2.0.57
-     */
-    public OffsetTime getOffsetTime(String key, OffsetTime defaultValue) {
-        Object value = super.get(key);
-        if (value == null) {
-            return defaultValue;
-        }
-        if (value instanceof OffsetTime) {
-            return (OffsetTime) value;
-        }
-        return TypeUtils.cast(value, OffsetTime.class);
-    }
-
-    /**
-     *
-     * @since 2.0.57
-     */
-    public LocalDateTime getLocalDateTime(String key) {
-        return getLocalDateTime(key, null);
-    }
-
-    /**
-     *
-     * @since 2.0.57
-     */
-    public LocalDateTime getLocalDateTime(String key, LocalDateTime defaultValue) {
-        Object value = super.get(key);
-        if (value == null) {
-            return defaultValue;
-        }
-        if (value instanceof LocalDateTime) {
-            return (LocalDateTime) value;
-        }
-        return TypeUtils.cast(value, LocalDateTime.class);
-    }
-
-    /**
-     *
-     * @since 2.0.57
-     */
-    public OffsetDateTime getOffsetDateTime(String key) {
-        return getOffsetDateTime(key, null);
-    }
-
-    /**
-     *
-     * @since 2.0.57
-     */
-    public OffsetDateTime getOffsetDateTime(String key, OffsetDateTime defaultValue) {
-        Object value = super.get(key);
-        if (value == null) {
-            return defaultValue;
-        }
-        if (value instanceof OffsetDateTime) {
-            return (OffsetDateTime) value;
-        }
-        return TypeUtils.cast(value, OffsetDateTime.class);
-    }
-
-    /**
-     *
-     * @since 2.0.57
-     */
-    public ZonedDateTime getZonedDateTime(String key) {
-        return getZonedDateTime(key, null);
-    }
-
-    /**
-     *
-     * @since 2.0.57
-     */
-    public ZonedDateTime getZonedDateTime(String key, ZonedDateTime defaultValue) {
-        Object value = super.get(key);
-        if (value == null) {
-            return defaultValue;
-        }
-        if (value instanceof ZonedDateTime) {
-            return (ZonedDateTime) value;
-        }
-        return TypeUtils.cast(value, ZonedDateTime.class);
-    }
 
     /**
      * Serialize to JSON {@link String}
@@ -1203,41 +983,7 @@ public class JSONObject
      * @param features features to be enabled in parsing
      * @since 2.0.4
      */
-    @SuppressWarnings("unchecked")
-    public <T> T to(Type type, JSONReader.Feature... features) {
-        long featuresValue = JSONFactory.defaultReaderFeatures;
-        boolean fieldBased = false;
-        for (JSONReader.Feature feature : features) {
-            if (feature == JSONReader.Feature.FieldBased) {
-                fieldBased = true;
-            }
-            featuresValue |= feature.mask;
-        }
 
-        if (type == String.class) {
-            return (T) toString();
-        }
-
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-        return objectReader.createInstance(this, featuresValue);
-    }
-
-    /**
-     * Convert this {@link JSONObject} to the specified Object
-     *
-     * <pre>{@code
-     * JSONObject obj = ...
-     * Map<String, User> users = obj.to(new TypeReference<HashMap<String, User>>(){});
-     * }</pre>
-     *
-     * @param typeReference specify the {@link TypeReference} to be converted
-     * @param features features to be enabled in parsing
-     * @since 2.0.7
-     */
-    public <T> T to(TypeReference<T> typeReference, JSONReader.Feature... features) {
-        return to(typeReference.getType(), features);
-    }
 
     /**
      * Convert this {@link JSONObject} to the specified Object
@@ -1251,68 +997,10 @@ public class JSONObject
      * @param features features to be enabled in parsing
      * @since 2.0.4
      */
-    @SuppressWarnings("unchecked")
-    public <T> T to(Class<T> clazz, JSONReader.Feature... features) {
-        long featuresValue = JSONFactory.defaultReaderFeatures | JSONReader.Feature.of(features);
-        boolean fieldBased = JSONReader.Feature.FieldBased.isEnabled(featuresValue);
 
-        if (clazz == String.class) {
-            return (T) toString();
-        }
 
-        if (clazz == JSON.class) {
-            return (T) this;
-        }
 
-        if (clazz == Void.class || clazz == void.class) {
-            return null;
-        }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
-        return objectReader.createInstance(this, featuresValue);
-    }
-
-    public void copyTo(Object object, JSONReader.Feature... features) {
-        long featuresValue = JSONFactory.defaultReaderFeatures | JSONReader.Feature.of(features);
-        boolean fieldBased = JSONReader.Feature.FieldBased.isEnabled(featuresValue);
-        Class clazz = object.getClass();
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
-        objectReader.accept(object, this, featuresValue);
-    }
-
-    /**
-     * Convert this {@link JSONObject} to the specified Object
-     *
-     * @param clazz specify the {@code Class<T>} to be converted
-     * @param features features to be enabled in parsing
-     */
-    public <T> T toJavaObject(Class<T> clazz, JSONReader.Feature... features) {
-        return to(clazz, features);
-    }
-
-    /**
-     * Convert this {@link JSONObject} to the specified Object
-     *
-     * @param type specify the {@link Type} to be converted
-     * @param features features to be enabled in parsing
-     * @deprecated since 2.0.4, please use {@link #to(Type, JSONReader.Feature...)}
-     */
-    public <T> T toJavaObject(Type type, JSONReader.Feature... features) {
-        return to(type, features);
-    }
-
-    /**
-     * Convert this {@link JSONObject} to the specified Object
-     *
-     * @param typeReference specify the {@link TypeReference} to be converted
-     * @param features features to be enabled in parsing
-     * @deprecated since 2.0.4, please use {@link #to(Type, JSONReader.Feature...)}
-     */
-    public <T> T toJavaObject(TypeReference<T> typeReference, JSONReader.Feature... features) {
-        return to(typeReference, features);
-    }
 
     /**
      * Returns the result of the {@link Type} converter conversion of the associated value in this {@link JSONObject}.
@@ -1324,75 +1012,6 @@ public class JSONObject
      * @return {@code <T>} or null
      * @throws JSONException If no suitable conversion method is found
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> T getObject(String key, Class<T> type, JSONReader.Feature... features) {
-        Object value = super.get(key);
-
-        if (value == null) {
-            return null;
-        }
-
-        if (type == Object.class && features.length == 0) {
-            return (T) value;
-        }
-
-        boolean fieldBased = false;
-        for (JSONReader.Feature feature : features) {
-            if (feature == JSONReader.Feature.FieldBased) {
-                fieldBased = true;
-                break;
-            }
-        }
-
-        Class<?> valueClass = value.getClass();
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        Function typeConvert = provider.getTypeConvert(valueClass, type);
-        if (typeConvert != null) {
-            return (T) typeConvert.apply(value);
-        }
-
-        if (value instanceof Map) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Map) value, features);
-        }
-
-        if (value instanceof Collection) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value, features);
-        }
-
-        Class clazz = TypeUtils.getMapping(type);
-        if (clazz.isInstance(value)) {
-            return (T) value;
-        }
-
-        ObjectReader objectReader = null;
-
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return null;
-            }
-
-            if (clazz.isEnum()) {
-                return (T) Enum.valueOf((Class<Enum>) clazz, str);
-            }
-        }
-
-        String json = JSON.toJSONString(value);
-        JSONReader jsonReader = JSONReader.of(json);
-        jsonReader.context.config(features);
-
-        if (objectReader == null) {
-            objectReader = provider.getObjectReader(clazz, fieldBased);
-        }
-
-        T object = (T) objectReader.readObject(jsonReader, null, null, 0L);
-        if (!jsonReader.isEnd()) {
-            throw new JSONException("not support input " + json);
-        }
-        return object;
-    }
 
     /**
      * Returns the result of the {@link Type} converter conversion of the associated value in this {@link JSONObject}.
@@ -1405,93 +1024,8 @@ public class JSONObject
      * @return {@code <T>} or {@code null}
      * @throws JSONException If no suitable conversion method is found
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> T getObject(String key, Type type, JSONReader.Feature... features) {
-        Object value = super.get(key);
 
-        if (value == null) {
-            return null;
-        }
 
-        if (type == Object.class && features.length == 0) {
-            return (T) value;
-        }
-
-        boolean fieldBased = false;
-        for (JSONReader.Feature feature : features) {
-            if (feature == JSONReader.Feature.FieldBased) {
-                fieldBased = true;
-                break;
-            }
-        }
-
-        Class<?> valueClass = value.getClass();
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        Function typeConvert = provider.getTypeConvert(valueClass, type);
-        if (typeConvert != null) {
-            return (T) typeConvert.apply(value);
-        }
-
-        if (value instanceof Map) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Map) value, features);
-        }
-
-        if (value instanceof Collection) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value, features);
-        }
-
-        if (type instanceof Class) {
-            Class clazz = (Class) type;
-            if (clazz.isInstance(value)) {
-                return (T) value;
-            }
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return null;
-            }
-        }
-
-        String json = JSON.toJSONString(value);
-        JSONReader jsonReader = JSONReader.of(json);
-        jsonReader.context.config(features);
-
-        ObjectReader objectReader = provider.getObjectReader(type, fieldBased);
-        return (T) objectReader.readObject(jsonReader, null, null, 0);
-    }
-
-    /**
-     * Returns the result of the {@link Type} converter conversion of the associated value in this {@link JSONObject}.
-     * <p>
-     * {@code User user = jsonObject.getObject("user", User.class);}
-     *
-     * @param key the key whose associated value is to be returned
-     * @param typeReference specify the {@link TypeReference} to be converted
-     * @param features features to be enabled in parsing
-     * @return {@code <T>} or {@code null}
-     * @throws JSONException If no suitable conversion method is found
-     * @since 2.0.3
-     */
-    public <T> T getObject(String key, TypeReference<T> typeReference, JSONReader.Feature... features) {
-        return getObject(key, typeReference.type, features);
-    }
-
-    /**
-     * @since 2.0.4
-     */
-    public <T> T getObject(String key, Function<JSONObject, T> creator) {
-        JSONObject object = getJSONObject(key);
-
-        if (object == null) {
-            return null;
-        }
-
-        return creator.apply(object);
-    }
 
     /**
      * Handles method invocations on a proxy instance.
@@ -1633,15 +1167,7 @@ public class JSONObject
             }
 
             if (!returnType.isInstance(value)) {
-                Function typeConvert = JSONFactory
-                        .getDefaultObjectReaderProvider()
-                        .getTypeConvert(
-                                value.getClass(), method.getGenericReturnType()
-                        );
-
-                if (typeConvert != null) {
-                    value = typeConvert.apply(value);
-                }
+                throw new JSONException("not support convert to " + returnType.getName() + ", from " + value.getClass());
             }
 
             return value;
@@ -1659,21 +1185,18 @@ public class JSONObject
      */
     private String getJSONFieldName(Method method) {
         String name = null;
-        Annotation[] annotations = getAnnotations(method);
+        Annotation[] annotations = method.getAnnotations();
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
-            JSONField jsonField = BeanUtils.findAnnotation(annotation, JSONField.class);
-            if (Objects.nonNull(jsonField)) {
-                name = jsonField.name();
-                if (name.isEmpty()) {
-                    name = null;
+            try {
+                Method nameMethod = annotationType.getMethod("name");
+                Object result = nameMethod.invoke(annotation);
+                if (result instanceof String && !((String) result).isEmpty()) {
+                    name = (String) result;
+                    break;
                 }
-            } else if ("com.alibaba.fastjson.annotation.JSONField".equals(annotationType.getName())) {
-                NameConsumer nameConsumer = new NameConsumer(annotation);
-                BeanUtils.annotationMethods(annotationType, nameConsumer);
-                if (nameConsumer.name != null) {
-                    name = nameConsumer.name;
-                }
+            } catch (Exception ignored) {
+                // ignore
             }
         }
         return name;
@@ -1704,36 +1227,6 @@ public class JSONObject
     }
 
     /**
-     * Consumer for processing method names.
-     *
-     * @since 2.0.3
-     */
-    static class NameConsumer
-            implements Consumer<Method> {
-        final Annotation annotation;
-        String name;
-
-        NameConsumer(Annotation annotation) {
-            this.annotation = annotation;
-        }
-
-        @Override
-        public void accept(Method method) {
-            String methodName = method.getName();
-            if ("name".equals(methodName)) {
-                try {
-                    String result = (String) method.invoke(annotation);
-                    if (!result.isEmpty()) {
-                        name = result;
-                    }
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    // nothing
-                }
-            }
-        }
-    }
-
-    /**
      * Chained addition of elements
      *
      * <pre>
@@ -1746,129 +1239,6 @@ public class JSONObject
     public JSONObject fluentPut(String key, Object value) {
         put(key, value);
         return this;
-    }
-
-    /**
-     * Applies a name filter to an iterable collection.
-     *
-     * @param iterable the iterable collection to apply the filter to
-     * @param nameFilter the name filter to apply
-     * @since 2.0.3
-     */
-    static void nameFilter(Iterable<?> iterable, NameFilter nameFilter) {
-        for (Object item : iterable) {
-            if (item instanceof JSONObject) {
-                ((JSONObject) item).nameFilter(nameFilter);
-            } else if (item instanceof Iterable) {
-                nameFilter((Iterable<?>) item, nameFilter);
-            }
-        }
-    }
-
-    /**
-     * Applies a name filter to a map.
-     *
-     * @param map the map to apply the filter to
-     * @param nameFilter the name filter to apply
-     * @since 2.0.3
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    static void nameFilter(Map map, NameFilter nameFilter) {
-        JSONObject changed = null;
-        for (Iterator<?> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry) it.next();
-            Object entryKey = entry.getKey();
-            Object entryValue = entry.getValue();
-
-            if (entryValue instanceof JSONObject) {
-                ((JSONObject) entryValue).nameFilter(nameFilter);
-            } else if (entryValue instanceof Iterable) {
-                nameFilter((Iterable<?>) entryValue, nameFilter);
-            }
-
-            if (entryKey instanceof String) {
-                String key = (String) entryKey;
-                String processName = nameFilter.process(map, key, entryValue);
-                if (processName != null && !processName.equals(key)) {
-                    if (changed == null) {
-                        changed = new JSONObject();
-                    }
-                    changed.put(processName, entryValue);
-                    it.remove();
-                }
-            }
-        }
-        if (changed != null) {
-            map.putAll(changed);
-        }
-    }
-
-    /**
-     * Applies a value filter to an iterable collection.
-     *
-     * @param iterable the iterable collection to apply the filter to
-     * @param valueFilter the value filter to apply
-     * @since 2.0.3
-     */
-    @SuppressWarnings("rawtypes")
-    static void valueFilter(Iterable<?> iterable, ValueFilter valueFilter) {
-        for (Object item : iterable) {
-            if (item instanceof Map) {
-                valueFilter((Map) item, valueFilter);
-            } else if (item instanceof Iterable) {
-                valueFilter((Iterable<?>) item, valueFilter);
-            }
-        }
-    }
-
-    /**
-     * Applies a value filter to a map.
-     *
-     * @param map the map to apply the filter to
-     * @param valueFilter the value filter to apply
-     * @since 2.0.3
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    static void valueFilter(Map map, ValueFilter valueFilter) {
-        for (Object o : map.entrySet()) {
-            Map.Entry entry = (Map.Entry) o;
-            Object entryKey = entry.getKey();
-            Object entryValue = entry.getValue();
-
-            if (entryValue instanceof Map) {
-                valueFilter((Map) entryValue, valueFilter);
-            } else if (entryValue instanceof Iterable) {
-                valueFilter((Iterable<?>) entryValue, valueFilter);
-            }
-
-            if (entryKey instanceof String) {
-                String key = (String) entryKey;
-                Object applyValue = valueFilter.apply(map, key, entryValue);
-                if (applyValue != entryValue) {
-                    entry.setValue(applyValue);
-                }
-            }
-        }
-    }
-
-    /**
-     * Applies a value filter to this JSONObject.
-     *
-     * @param valueFilter the value filter to apply
-     * @since 2.0.3
-     */
-    public void valueFilter(ValueFilter valueFilter) {
-        valueFilter(this, valueFilter);
-    }
-
-    /**
-     * Applies a name filter to this JSONObject.
-     *
-     * @param nameFilter the name filter to apply
-     * @since 2.0.3
-     */
-    public void nameFilter(NameFilter nameFilter) {
-        nameFilter(this, nameFilter);
     }
 
     /**
@@ -2128,33 +1498,9 @@ public class JSONObject
         return jsonObject;
     }
 
-    /**
-     * See {@link JSON#parseObject} for details
-     */
-    public static <T> T parseObject(String text, Class<T> objectClass) {
-        return JSON.parseObject(text, objectClass);
-    }
 
-    /**
-     * See {@link JSON#parseObject} for details
-     */
-    public static <T> T parseObject(String text, Class<T> objectClass, JSONReader.Feature... features) {
-        return JSON.parseObject(text, objectClass, features);
-    }
 
-    /**
-     * See {@link JSON#parseObject} for details
-     */
-    public static <T> T parseObject(String text, Type objectType, JSONReader.Feature... features) {
-        return JSON.parseObject(text, objectType, features);
-    }
 
-    /**
-     * See {@link JSON#parseObject} for details
-     */
-    public static <T> T parseObject(String text, TypeReference<T> typeReference, JSONReader.Feature... features) {
-        return JSON.parseObject(text, typeReference, features);
-    }
 
     /**
      * See {@link JSON#parseObject} for details

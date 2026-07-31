@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.time.LocalTime;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
-import static com.alibaba.fastjson2.util.NumberUtils.MULTIPLY_HIGH;
 
 /**
  * IOUtils is a utility class that provides various I/O operations and helper methods
@@ -1293,10 +1292,10 @@ public class IOUtils {
 
         int v, v1, v2, v3;
         long numValue = val;
-        val = MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710cb296L) >> 12; // val = numValue / 10000;
+        val = numValue / 10000; // val = numValue / 10000;
         v1 = (int) (numValue - val * 10000);
         numValue = val;
-        val = MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710ccL); // val = numValue / 10000;
+        val = numValue / 10000; // val = numValue / 10000;
         v2 = (int) (numValue - val * 10000);
         if (val < 10000) {
             v = (int) val;
@@ -1309,7 +1308,7 @@ public class IOUtils {
         }
 
         numValue = val;
-        val = MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710ccL); // val = numValue / 10000;
+        val = numValue / 10000; // val = numValue / 10000;
         v3 = (int) (numValue - val * 10000);
         if (val < 10000) {
             v = (int) val;
@@ -1324,7 +1323,7 @@ public class IOUtils {
         }
 
         numValue = val;
-        val = MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710ccL); // val = numValue / 10000;
+        val = numValue / 10000; // val = numValue / 10000;
         int v4 = (int) (numValue - val * 10000);
         off = writeInt3(buf, off, (int) val);
         off = writeInt8(buf, off, v4, v3);
@@ -1358,10 +1357,10 @@ public class IOUtils {
 
         int v, v1, v2, v3;
         long numValue = val;
-        val = MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710cb296L) >> 12; // val = numValue / 10000;
+        val = numValue / 10000; // val = numValue / 10000;
         v1 = (int) (numValue - val * 10000);
         numValue = val;
-        val = MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710ccL); // val = numValue / 10000;
+        val = numValue / 10000; // val = numValue / 10000;
         v2 = (int) (numValue - val * 10000);
         if (val < 10000) {
             v = (int) val;
@@ -1374,7 +1373,7 @@ public class IOUtils {
         }
 
         numValue = val;
-        val = MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710ccL); // val = numValue / 10000;
+        val = numValue / 10000; // val = numValue / 10000;
         v3 = (int) (numValue - val * 10000);
         if (val < 10000) {
             v = (int) val;
@@ -1389,7 +1388,7 @@ public class IOUtils {
         }
 
         numValue = val;
-        val = MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710ccL); // val = numValue / 10000;
+        val = numValue / 10000; // val = numValue / 10000;
         int v4 = (int) (numValue - val * 10000);
         off = writeInt3(buf, off, (int) val);
         off = writeInt8(buf, off, v4, v3);

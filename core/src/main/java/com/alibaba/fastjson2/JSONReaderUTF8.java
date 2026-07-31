@@ -10,7 +10,6 @@ import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.util.DateUtils.*;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
 import static com.alibaba.fastjson2.util.IOUtils.*;
@@ -378,26 +377,6 @@ class JSONReaderUTF8
         return true;
     }
 
-    @Override
-    public final boolean nextIfSet() {
-        final byte[] bytes = this.bytes;
-        int offset = this.offset;
-        int ch = this.ch;
-        if (ch == 'S'
-                && offset + 1 < end
-                && bytes[offset] == 'e'
-                && bytes[offset + 1] == 't') {
-            offset += 2;
-            ch = offset == end ? EOI : bytes[offset++];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                ch = offset == end ? EOI : bytes[offset++];
-            }
-            this.offset = offset;
-            this.ch = (char) ch;
-            return true;
-        }
-        return false;
-    }
 
     @Override
     public final boolean nextIfInfinity() {
@@ -4155,83 +4134,6 @@ class JSONReaderUTF8
     }
 
     @Override
-    protected ZonedDateTime readZonedDateTimeX(int len) {
-        String str = readString();
-        if (str == null || str.isEmpty()) {
-            return null;
-        }
-        return ZonedDateTime.parse(str);
-    }
-
-    @Override
-    protected LocalDate readLocalDate8() { return null; }
-
-    @Override
-    protected LocalDate readLocalDate9() { return null; }
-
-    @Override
-    protected LocalDate readLocalDate10() { return null; }
-
-    @Override
-    protected LocalDate readLocalDate11() { return null; }
-
-    @Override
-    protected LocalTime readLocalTime5() { return null; }
-
-    @Override
-    protected LocalTime readLocalTime6() { return null; }
-
-    @Override
-    protected LocalTime readLocalTime7() { return null; }
-
-    @Override
-    protected LocalTime readLocalTime8() { return null; }
-
-    @Override
-    protected LocalTime readLocalTime9() { return null; }
-
-    @Override
-    protected LocalTime readLocalTime10() { return null; }
-
-    @Override
-    protected LocalTime readLocalTime11() { return null; }
-
-    @Override
-    protected LocalTime readLocalTime12() { return null; }
-
-    @Override
-    protected LocalTime readLocalTime15() { return null; }
-
-    @Override
-    protected LocalTime readLocalTime18() { return null; }
-
-    @Override
-    protected LocalDateTime readLocalDateTime12() { return null; }
-
-    @Override
-    protected LocalDateTime readLocalDateTime14() { return null; }
-
-    @Override
-    protected LocalDateTime readLocalDateTime16() { return null; }
-
-    @Override
-    protected LocalDateTime readLocalDateTime17() { return null; }
-
-    @Override
-    protected LocalDateTime readLocalDateTime18() { return null; }
-
-    @Override
-    protected LocalDateTime readLocalDateTime19() { return null; }
-
-    @Override
-    protected LocalDateTime readLocalDateTime20() { return null; }
-
-    @Override
-    protected LocalDateTime readLocalDateTimeX(int len) { return null; }
-
-    @Override
-    public long readMillis19() { return 0; }
-    @Override
     protected void readNumber0() {
         boolean valid = false;
         this.wasNull = false;
@@ -4607,11 +4509,6 @@ class JSONReaderUTF8
     }
 
     @Override
-    public Date readNullOrNewDate() {
-        return null;
-    }
-
-    @Override
     public boolean nextIfNull() {
         return false;
     }
@@ -4677,21 +4574,6 @@ class JSONReaderUTF8
 
     @Override
     public BigDecimal readBigDecimal() {
-        return null;
-    }
-
-    @Override
-    public UUID readUUID() {
-        return null;
-    }
-
-    @Override
-    public OffsetDateTime readOffsetDateTime() {
-        return null;
-    }
-
-    @Override
-    public OffsetTime readOffsetTime() {
         return null;
     }
 }

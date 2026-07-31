@@ -1,32 +1,17 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.filter.ExtraProcessor;
-import com.alibaba.fastjson2.filter.Filter;
-import com.alibaba.fastjson2.introspect.PropertyAccessorFactory;
-import com.alibaba.fastjson2.introspect.PropertyAccessorFactoryUnsafe;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.TypeUtils;
-import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.writer.ObjectWriterCreator;
-import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Supplier;
 
 /**
  * JSONFactory is the core factory class for creating JSON readers and writers,
  * as well as managing global configuration for fastjson2.
- *
- * @author wenshao
- * @since 2.0.59
  */
 public final class JSONFactory {
     public static final class Conf {
@@ -57,14 +42,8 @@ public final class JSONFactory {
             return DEFAULT_PROPERTIES.getProperty(key);
         }
     }
-    static volatile Throwable initErrorLast;
 
     public static final String CREATOR;
-
-    public static final String PROPERTY_DENY_PROPERTY = "fastjson2.parser.deny";
-
-    static boolean useJacksonAnnotation;
-    static boolean useGsonAnnotation;
 
     public static String getProperty(String key) {
         return Conf.getProperty(key);
@@ -87,20 +66,47 @@ public final class JSONFactory {
     static Supplier<Map> defaultObjectSupplier;
     static Supplier<List> defaultArraySupplier;
 
+    static int defaultDecimalMaxScale = 2048;
+    static int defaultMaxLevel;
+
+    static final char[] CA = new char[]{
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+            'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+            'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+            'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+            'w', 'x', 'y', 'z', '0', '1', '2', '3',
+            '4', '5', '6', '7', '8', '9', '+', '/'
+    };
+
+    static final int[] DIGITS2 = new int[]{
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +1, +2, +3, +4, +5, +6, +7, +8, +9, +0, +0, +0, +0, +0, +0,
+            +0, 10, 11, 12, 13, 14, 15, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, 10, 11, 12, 13, 14, 15
+    };
+
+    static final CacheItem[] CACHE_ITEMS;
+
     static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
 
-    static int defaultDecimalMaxScale = 2048;
-    static int defaultMaxLevel;
-    public static final PropertyAccessorFactory PROPERTY_ACCESSOR_FACTORY;
+    static final float[] FLOAT_10_POW = {
+            1.0e0f, 1.0e1f, 1.0e2f, 1.0e3f, 1.0e4f, 1.0e5f,
+            1.0e6f, 1.0e7f, 1.0e8f, 1.0e9f, 1.0e10f
+    };
 
-    interface JSONReaderUTF8Creator {
-        JSONReader create(JSONReader.Context ctx, String str, byte[] bytes, int offset, int length);
-    }
-
-    interface JSONReaderUTF16Creator {
-        JSONReader create(JSONReader.Context ctx, String str, char[] chars, int offset, int length);
-    }
+    static final double[] DOUBLE_10_POW = {
+            1.0e0, 1.0e1, 1.0e2, 1.0e3, 1.0e4,
+            1.0e5, 1.0e6, 1.0e7, 1.0e8, 1.0e9,
+            1.0e10, 1.0e11, 1.0e12, 1.0e13, 1.0e14,
+            1.0e15, 1.0e16, 1.0e17, 1.0e18, 1.0e19,
+            1.0e20, 1.0e21, 1.0e22
+    };
 
     static final class NameCacheEntry {
         final String name;
@@ -124,39 +130,32 @@ public final class JSONFactory {
         }
     }
 
-    static final char[] CA = new char[]{
-            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-            'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-            'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-            'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-            'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-            'w', 'x', 'y', 'z', '0', '1', '2', '3',
-            '4', '5', '6', '7', '8', '9', '+', '/'
-    };
+    static {
+        final CacheItem[] items = new CacheItem[16];
+        for (int i = 0; i < items.length; i++) {
+            items[i] = new CacheItem();
+        }
+        CACHE_ITEMS = items;
+    }
 
-    static final int[] DIGITS2 = new int[]{
-            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-            +0, +1, +2, +3, +4, +5, +6, +7, +8, +9, +0, +0, +0, +0, +0, +0,
-            +0, 10, 11, 12, 13, 14, 15, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-            +0, 10, 11, 12, 13, 14, 15
-    };
+    static final int CACHE_THRESHOLD = 1024 * 1024 * 8;
+    static final java.util.concurrent.atomic.AtomicReferenceFieldUpdater<CacheItem, char[]> CHARS_UPDATER
+            = java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater(CacheItem.class, char[].class, "chars");
+    static final java.util.concurrent.atomic.AtomicReferenceFieldUpdater<CacheItem, byte[]> BYTES_UPDATER
+            = java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater(CacheItem.class, byte[].class, "bytes");
 
-    static final float[] FLOAT_10_POW = {
-            1.0e0f, 1.0e1f, 1.0e2f, 1.0e3f, 1.0e4f, 1.0e5f,
-            1.0e6f, 1.0e7f, 1.0e8f, 1.0e9f, 1.0e10f
-    };
+    static final class CacheItem {
+        volatile char[] chars;
+        volatile byte[] bytes;
+    }
 
-    static final double[] DOUBLE_10_POW = {
-            1.0e0, 1.0e1, 1.0e2, 1.0e3, 1.0e4,
-            1.0e5, 1.0e6, 1.0e7, 1.0e8, 1.0e9,
-            1.0e10, 1.0e11, 1.0e12, 1.0e13, 1.0e14,
-            1.0e15, 1.0e16, 1.0e17, 1.0e18, 1.0e19,
-            1.0e20, 1.0e21, 1.0e22
-    };
+    interface JSONReaderUTF8Creator {
+        JSONReader create(JSONReader.Context ctx, String str, byte[] bytes, int offset, int length);
+    }
+
+    interface JSONReaderUTF16Creator {
+        JSONReader create(JSONReader.Context ctx, String str, char[] chars, int offset, int length);
+    }
 
     static {
         Properties properties = Conf.DEFAULT_PROPERTIES;
@@ -211,25 +210,9 @@ public final class JSONFactory {
             disableSmartMatch = disableSmartMatch0;
         }
 
-        useJacksonAnnotation = getPropertyBool(properties, "fastjson2.useJacksonAnnotation", true);
-        useGsonAnnotation = getPropertyBool(properties, "fastjson2.useGsonAnnotation", true);
         defaultWriterAlphabetic = getPropertyBool(properties, "fastjson2.writer.alphabetic", true);
         defaultSkipTransient = getPropertyBool(properties, "fastjson2.writer.skipTransient", true);
         defaultMaxLevel = getPropertyInt(properties, "fastjson2.writer.maxLevel", 2048);
-        PropertyAccessorFactory propertyAccessorFactory = null;
-        if (JDKUtils.JVM_VERSION >= 11) {
-            try {
-                String factoryClassNameJDK11 = "com.alibaba.fastjson2.reflect.PropertyAccessorFactoryMethodHandle";
-                Class<?> classV = Conf.class.getClassLoader().loadClass(factoryClassNameJDK11);
-                propertyAccessorFactory = (PropertyAccessorFactory) classV.newInstance();
-            } catch (Exception ignored) {
-                // ignore
-            }
-        }
-        if (propertyAccessorFactory == null) {
-            propertyAccessorFactory = JDKUtils.UNSAFE != null ? new PropertyAccessorFactoryUnsafe() : new PropertyAccessorFactory();
-        }
-        PROPERTY_ACCESSOR_FACTORY = propertyAccessorFactory;
     }
 
     private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {
@@ -280,32 +263,6 @@ public final class JSONFactory {
         return propertyValue;
     }
 
-    public static boolean isUseJacksonAnnotation() {
-        return useJacksonAnnotation;
-    }
-
-    public static boolean isUseGsonAnnotation() {
-        return useGsonAnnotation;
-    }
-
-    public static void setUseJacksonAnnotation(boolean useJacksonAnnotation) {
-        JSONFactory.useJacksonAnnotation = useJacksonAnnotation;
-    }
-
-    public static void setUseGsonAnnotation(boolean useGsonAnnotation) {
-        JSONFactory.useGsonAnnotation = useGsonAnnotation;
-    }
-
-    private static volatile boolean jsonFieldDefaultValueCompatMode;
-
-    public static boolean isJSONFieldDefaultValueCompatMode() {
-        return jsonFieldDefaultValueCompatMode;
-    }
-
-    public static void setJSONFieldDefaultValueCompatMode(boolean compatMode) {
-        jsonFieldDefaultValueCompatMode = compatMode;
-    }
-
     public static int getDefaultMaxLevel() {
         return defaultMaxLevel;
     }
@@ -316,41 +273,6 @@ public final class JSONFactory {
         }
         JSONFactory.defaultMaxLevel = maxLevel;
     }
-
-    static final CacheItem[] CACHE_ITEMS;
-
-    static {
-        final CacheItem[] items = new CacheItem[16];
-        for (int i = 0; i < items.length; i++) {
-            items[i] = new CacheItem();
-        }
-        CACHE_ITEMS = items;
-    }
-
-    static final int CACHE_THRESHOLD = 1024 * 1024 * 8;
-    static final AtomicReferenceFieldUpdater<CacheItem, char[]> CHARS_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(CacheItem.class, char[].class, "chars");
-    static final AtomicReferenceFieldUpdater<CacheItem, byte[]> BYTES_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(CacheItem.class, byte[].class, "bytes");
-
-    static final class CacheItem {
-        volatile char[] chars;
-        volatile byte[] bytes;
-    }
-
-    static final ObjectWriterProvider defaultObjectWriterProvider = new ObjectWriterProvider();
-    static final ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
-
-    static final Object defaultJSONPathCompiler = null;
-
-    static final ThreadLocal<ObjectReaderCreator> readerCreatorLocal = new ThreadLocal<>();
-    static final ThreadLocal<ObjectReaderProvider> readerProviderLocal = new ThreadLocal<>();
-    static final ThreadLocal<ObjectWriterCreator> writerCreatorLocal = new ThreadLocal<>();
-
-    static final ThreadLocal<Object> jsonPathCompilerLocal = new ThreadLocal<>();
-
-    static final ObjectReader<JSONArray> ARRAY_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONArray.class);
-    static final ObjectReader<JSONObject> OBJECT_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONObject.class);
 
     static final byte[] NIBBLES;
 
@@ -386,7 +308,6 @@ public final class JSONFactory {
      * Sets the default object supplier used when creating JSON objects.
      *
      * @param objectSupplier the supplier for creating Map instances
-     * @since 2.0.15
      */
     public static void setDefaultObjectSupplier(Supplier<Map> objectSupplier) {
         defaultObjectSupplier = objectSupplier;
@@ -396,7 +317,6 @@ public final class JSONFactory {
      * Sets the default array supplier used when creating JSON arrays.
      *
      * @param arraySupplier the supplier for creating List instances
-     * @since 2.0.15
      */
     public static void setDefaultArraySupplier(Supplier<List> arraySupplier) {
         defaultArraySupplier = arraySupplier;
@@ -426,20 +346,7 @@ public final class JSONFactory {
      * @return a new JSONWriter.Context instance
      */
     public static JSONWriter.Context createWriteContext() {
-        return new JSONWriter.Context(defaultObjectWriterProvider);
-    }
-
-    /**
-     * Creates a new JSON writer context with the specified provider and features.
-     *
-     * @param provider the object writer provider
-     * @param features the features to enable
-     * @return a new JSONWriter.Context instance
-     */
-    public static JSONWriter.Context createWriteContext(ObjectWriterProvider provider, JSONWriter.Feature... features) {
-        JSONWriter.Context context = new JSONWriter.Context(provider);
-        context.config(features);
-        return context;
+        return new JSONWriter.Context();
     }
 
     /**
@@ -449,7 +356,7 @@ public final class JSONFactory {
      * @return a new JSONWriter.Context instance
      */
     public static JSONWriter.Context createWriteContext(JSONWriter.Feature... features) {
-        return new JSONWriter.Context(defaultObjectWriterProvider, features);
+        return new JSONWriter.Context(features);
     }
 
     /**
@@ -458,8 +365,7 @@ public final class JSONFactory {
      * @return a new JSONReader.Context instance
      */
     public static JSONReader.Context createReadContext() {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        return new JSONReader.Context(provider);
+        return new JSONReader.Context();
     }
 
     /**
@@ -469,8 +375,9 @@ public final class JSONFactory {
      * @return a new JSONReader.Context instance
      */
     public static JSONReader.Context createReadContext(long features) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        return new JSONReader.Context(provider, features);
+        JSONReader.Context context = new JSONReader.Context();
+        context.features = features;
+        return context;
     }
 
     /**
@@ -480,56 +387,12 @@ public final class JSONFactory {
      * @return a new JSONReader.Context instance
      */
     public static JSONReader.Context createReadContext(JSONReader.Feature... features) {
-        JSONReader.Context context = new JSONReader.Context(
-                JSONFactory.getDefaultObjectReaderProvider()
-        );
-        for (int i = 0; i < features.length; i++) {
-            context.features |= features[i].mask;
-        }
-        return context;
-    }
-
-    public static JSONReader.Context createReadContext(Filter filter, JSONReader.Feature... features) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        JSONReader.Context context = new JSONReader.Context(provider);
-
-        if (filter instanceof ExtraProcessor) {
-            context.extraProcessor = (ExtraProcessor) filter;
-        }
-
-        for (int i = 0; i < features.length; i++) {
-            context.features |= features[i].mask;
-        }
-        return context;
-    }
-
-    public static JSONReader.Context createReadContext(ObjectReaderProvider provider, JSONReader.Feature... features) {
-        if (provider == null) {
-            provider = getDefaultObjectReaderProvider();
-        }
-
-        JSONReader.Context context = new JSONReader.Context(provider);
-        context.config(features);
-        return context;
-    }
-
-    public static JSONReader.Context createReadContext(SymbolTable symbolTable) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        return new JSONReader.Context(provider, symbolTable);
-    }
-
-    public static JSONReader.Context createReadContext(SymbolTable symbolTable, JSONReader.Feature... features) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        JSONReader.Context context = new JSONReader.Context(provider, symbolTable);
-        context.config(features);
-        return context;
+        return new JSONReader.Context(features);
     }
 
     public static JSONReader.Context createReadContext(Supplier<Map> objectSupplier, JSONReader.Feature... features) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        JSONReader.Context context = new JSONReader.Context(provider);
+        JSONReader.Context context = new JSONReader.Context(features);
         context.setObjectSupplier(objectSupplier);
-        context.config(features);
         return context;
     }
 
@@ -538,113 +401,10 @@ public final class JSONFactory {
             Supplier<List> arraySupplier,
             JSONReader.Feature... features
     ) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        JSONReader.Context context = new JSONReader.Context(provider);
+        JSONReader.Context context = new JSONReader.Context(features);
         context.setObjectSupplier(objectSupplier);
         context.setArraySupplier(arraySupplier);
-        context.config(features);
         return context;
-    }
-
-    public static ObjectReader getObjectReader(Type type, long features) {
-        return getDefaultObjectReaderProvider()
-                .getObjectReader(type, JSONReader.Feature.FieldBased.isEnabled(features));
-    }
-
-    public static ObjectWriter getObjectWriter(Type type, long features) {
-        return getDefaultObjectWriterProvider()
-                .getObjectWriter(type, TypeUtils.getClass(type), JSONWriter.Feature.FieldBased.isEnabled(features));
-    }
-
-    /**
-     * Gets the default object writer provider.
-     *
-     * @return the default ObjectWriterProvider instance
-     */
-    public static ObjectWriterProvider getDefaultObjectWriterProvider() {
-        return defaultObjectWriterProvider;
-    }
-
-    /**
-     * Gets the default object reader provider.
-     *
-     * @return the default ObjectReaderProvider instance
-     */
-    public static ObjectReaderProvider getDefaultObjectReaderProvider() {
-        ObjectReaderProvider providerLocal = readerProviderLocal.get();
-        if (providerLocal != null) {
-            return providerLocal;
-        }
-
-        return defaultObjectReaderProvider;
-    }
-
-    /**
-     * Gets the default JSONPath compiler.
-     *
-     * @return the default JSONPathCompiler instance
-     */
-    public static Object getDefaultJSONPathCompiler() {
-        Object compilerLocal = jsonPathCompilerLocal.get();
-        if (compilerLocal != null) {
-            return compilerLocal;
-        }
-
-        return defaultJSONPathCompiler;
-    }
-
-    /**
-     * Sets the object reader creator for the current thread context.
-     *
-     * @param creator the ObjectReaderCreator to set
-     */
-    public static void setContextReaderCreator(ObjectReaderCreator creator) {
-        readerCreatorLocal.set(creator);
-    }
-
-    /**
-     * Sets the object reader provider for the current thread context.
-     *
-     * @param creator the ObjectReaderProvider to set
-     */
-    public static void setContextObjectReaderProvider(ObjectReaderProvider creator) {
-        readerProviderLocal.set(creator);
-    }
-
-    /**
-     * Gets the object reader creator for the current thread context.
-     *
-     * @return the ObjectReaderCreator for the current thread, or null if not set
-     */
-    public static ObjectReaderCreator getContextReaderCreator() {
-        return readerCreatorLocal.get();
-    }
-
-    /**
-     * Sets the JSONPath compiler for the current thread context.
-     *
-     * @param compiler the JSONPathCompiler to set
-     */
-    public static void setContextJSONPathCompiler(Object compiler) {
-        jsonPathCompilerLocal.set(compiler);
-    }
-
-    /**
-     * Sets the object writer creator for the current thread context.
-     *
-     * @param creator the ObjectWriterCreator to set
-     */
-    public static void setContextWriterCreator(ObjectWriterCreator creator) {
-        writerCreatorLocal.set(creator);
-    }
-
-    /**
-     * Gets the object writer creator for the current thread context.
-     *
-     * @return the ObjectWriterCreator for the current thread, or null if not set
-     */
-    public static ObjectWriterCreator getContextWriterCreator() {
-        return writerCreatorLocal.get();
     }
 
     /**
@@ -717,7 +477,6 @@ public final class JSONFactory {
      */
     public static void setDefaultWriterAlphabetic(boolean defaultWriterAlphabetic) {
         JSONFactory.defaultWriterAlphabetic = defaultWriterAlphabetic;
-        defaultObjectWriterProvider.setAlphabetic(defaultWriterAlphabetic);
     }
 
     /**
@@ -748,51 +507,12 @@ public final class JSONFactory {
     }
 
     /**
-     * Sets whether reference detection should be disabled.
-     *
-     * @param disableReferenceDetect true to disable reference detection, false to enable
-     */
-    public static void setDisableReferenceDetect(boolean disableReferenceDetect) {
-        defaultObjectWriterProvider.setDisableReferenceDetect(disableReferenceDetect);
-        defaultObjectReaderProvider.setDisableReferenceDetect(disableReferenceDetect);
-    }
-
-    /**
-     * Sets whether array mapping should be disabled.
-     *
-     * @param disableArrayMapping true to disable array mapping, false to enable
-     */
-    public static void setDisableArrayMapping(boolean disableArrayMapping) {
-        defaultObjectWriterProvider.setDisableArrayMapping(disableArrayMapping);
-        defaultObjectReaderProvider.setDisableArrayMapping(disableArrayMapping);
-    }
-
-    /**
-     * Sets whether JSONB format should be disabled.
-     *
-     * @param disableJSONB true to disable JSONB, false to enable
-     */
-    public static void setDisableJSONB(boolean disableJSONB) {
-        defaultObjectWriterProvider.setDisableJSONB(disableJSONB);
-        defaultObjectReaderProvider.setDisableJSONB(disableJSONB);
-    }
-
-    /**
      * Checks if smart matching is disabled.
      *
      * @return true if smart matching is disabled, false otherwise
      */
     public static boolean isDisableSmartMatch() {
         return disableSmartMatch;
-    }
-
-    /**
-     * Sets whether smart matching should be disabled.
-     *
-     * @param disableSmartMatch true to disable smart matching, false to enable
-     */
-    public static void setDisableSmartMatch(boolean disableSmartMatch) {
-        defaultObjectReaderProvider.setDisableSmartMatch(disableSmartMatch);
     }
 
     /**
@@ -811,6 +531,5 @@ public final class JSONFactory {
      */
     public static void setDefaultSkipTransient(boolean skipTransient) {
         JSONFactory.defaultSkipTransient = skipTransient;
-        defaultObjectWriterProvider.setSkipTransient(skipTransient);
     }
 }

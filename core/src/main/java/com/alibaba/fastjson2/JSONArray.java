@@ -1,10 +1,6 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
-import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
@@ -21,8 +17,6 @@ import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 public class JSONArray
         extends ArrayList<Object> {
     private static final long serialVersionUID = 1L;
-
-    static ObjectWriter<JSONArray> arrayWriter;
 
     /**
      * default
@@ -135,8 +129,7 @@ public class JSONArray
                 return JSONArray.of(str);
             }
 
-            JSONReader reader = JSONReader.of(str);
-            return JSONFactory.ARRAY_READER.readObject(reader, null, null, 0);
+            return JSON.parseArray(str);
         }
 
         if (value instanceof Collection) {
@@ -192,8 +185,7 @@ public class JSONArray
                 return null;
             }
 
-            JSONReader reader = JSONReader.of(str);
-            return JSONFactory.OBJECT_READER.readObject(reader, null, null, 0);
+            return JSON.parseObject(str);
         }
 
         if (value instanceof Map) {
@@ -202,13 +194,7 @@ public class JSONArray
             return object;
         }
 
-        Class valueClass = value.getClass();
-        ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
-
-        JSONObject jsonObject = (JSONObject) JSON.toJSON(value);
-
-        set(index, jsonObject);
-        return jsonObject;
+        return null;
     }
 
     /**
@@ -242,8 +228,7 @@ public class JSONArray
         }
 
         if (value instanceof Date) {
-            long timeMillis = ((Date) value).getTime();
-            return DateUtils.toString(timeMillis, false, DateUtils.DEFAULT_ZONE_ID);
+            return value.toString();
         }
 
         if (value instanceof Boolean
@@ -765,276 +750,20 @@ public class JSONArray
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");
     }
 
-    /**
-     * Returns the {@link Date} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @return {@link Date} or null
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     */
-    public Date getDate(int index) {
-        Object value = get(index);
 
-        if (value == null) {
-            return null;
-        }
 
-        if (value instanceof Date) {
-            return (Date) value;
-        }
 
-        if (value instanceof String) {
-            return DateUtils.parseDate((String) value);
-        }
 
-        if (value instanceof Number) {
-            long millis = ((Number) value).longValue();
-            if (millis == 0) {
-                return null;
-            }
-            return new Date(millis);
-        }
 
-        return TypeUtils.toDate(value);
-    }
 
-    /**
-     * Returns the {@link Date} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @param defaultValue default value to return if the element is null
-     * @return {@link Date} or defaultValue
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @since 2.0.27
-     */
-    public Date getDate(int index, Date defaultValue) {
-        Date date = getDate(index);
-        if (date == null) {
-            date = defaultValue;
-        }
-        return date;
-    }
 
-    /**
-     * Returns the {@link Instant} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @return {@link Instant} or null
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     */
-    public Instant getInstant(int index) {
-        Object value = get(index);
 
-        if (value == null) {
-            return null;
-        }
 
-        if (value instanceof Instant) {
-            return (Instant) value;
-        }
 
-        if (value instanceof Number) {
-            long millis = ((Number) value).longValue();
-            if (millis == 0) {
-                return null;
-            }
-            return Instant.ofEpochMilli(millis);
-        }
 
-        return TypeUtils.toInstant(value);
-    }
 
-    /**
-     * Returns the {@link LocalDate} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @return {@link LocalDate} or null
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @since 2.0.57
-     */
-    public LocalDate getLocalDate(int index) {
-        return getLocalDate(index, null);
-    }
 
-    /**
-     * Returns the {@link LocalDate} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @param defaultValue default value to return if the element is null
-     * @return {@link LocalDate} or defaultValue
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @since 2.0.57
-     */
-    public LocalDate getLocalDate(int index, LocalDate defaultValue) {
-        Object value = super.get(index);
-        if (value == null) {
-            return defaultValue;
-        }
-        if (value instanceof LocalDate) {
-            return (LocalDate) value;
-        }
-        return TypeUtils.cast(value, LocalDate.class);
-    }
 
-    /**
-     * Returns the {@link LocalTime} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @return {@link LocalTime} or null
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @since 2.0.57
-     */
-    public LocalTime getLocalTime(int index) {
-        return getLocalTime(index, null);
-    }
-
-    /**
-     * Returns the {@link LocalTime} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @param defaultValue default value to return if the element is null
-     * @return {@link LocalTime} or defaultValue
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @since 2.0.57
-     */
-    public LocalTime getLocalTime(int index, LocalTime defaultValue) {
-        Object value = super.get(index);
-        if (value == null) {
-            return defaultValue;
-        }
-        if (value instanceof LocalTime) {
-            return (LocalTime) value;
-        }
-        return TypeUtils.cast(value, LocalTime.class);
-    }
-
-    /**
-     * Returns the {@link OffsetTime} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @return {@link OffsetTime} or null
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @since 2.0.57
-     */
-    public OffsetTime getOffsetTime(int index) {
-        return getOffsetTime(index, null);
-    }
-
-    /**
-     * Returns the {@link OffsetTime} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @param defaultValue default value to return if the element is null
-     * @return {@link OffsetTime} or defaultValue
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @since 2.0.57
-     */
-    public OffsetTime getOffsetTime(int index, OffsetTime defaultValue) {
-        Object value = super.get(index);
-        if (value == null) {
-            return defaultValue;
-        }
-        if (value instanceof OffsetTime) {
-            return (OffsetTime) value;
-        }
-        return TypeUtils.cast(value, OffsetTime.class);
-    }
-
-    /**
-     * Returns the {@link LocalDateTime} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @return {@link LocalDateTime} or null
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @since 2.0.57
-     */
-    public LocalDateTime getLocalDateTime(int index) {
-        return getLocalDateTime(index, null);
-    }
-
-    /**
-     * Returns the {@link LocalDateTime} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @param defaultValue default value to return if the element is null
-     * @return {@link LocalDateTime} or defaultValue
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @since 2.0.57
-     */
-    public LocalDateTime getLocalDateTime(int index, LocalDateTime defaultValue) {
-        Object value = super.get(index);
-        if (value == null) {
-            return defaultValue;
-        }
-        if (value instanceof LocalDateTime) {
-            return (LocalDateTime) value;
-        }
-        return TypeUtils.cast(value, LocalDateTime.class);
-    }
-
-    /**
-     * Returns the {@link OffsetDateTime} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @return {@link OffsetDateTime} or null
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @since 2.0.57
-     */
-    public OffsetDateTime getOffsetDateTime(int index) {
-        return getOffsetDateTime(index, null);
-    }
-
-    /**
-     * Returns the {@link OffsetDateTime} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @param defaultValue default value to return if the element is null
-     * @return {@link OffsetDateTime} or defaultValue
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @since 2.0.57
-     */
-    public OffsetDateTime getOffsetDateTime(int index, OffsetDateTime defaultValue) {
-        Object value = super.get(index);
-        if (value == null) {
-            return defaultValue;
-        }
-        if (value instanceof OffsetDateTime) {
-            return (OffsetDateTime) value;
-        }
-        return TypeUtils.cast(value, OffsetDateTime.class);
-    }
-
-    /**
-     * Returns the {@link ZonedDateTime} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @return {@link ZonedDateTime} or null
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @since 2.0.57
-     */
-    public ZonedDateTime getZonedDateTime(int index) {
-        return getZonedDateTime(index, null);
-    }
-
-    /**
-     * Returns the {@link ZonedDateTime} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @param defaultValue default value to return if the element is null
-     * @return {@link ZonedDateTime} or defaultValue
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @since 2.0.57
-     */
-    public ZonedDateTime getZonedDateTime(int index, ZonedDateTime defaultValue) {
-        Object value = super.get(index);
-        if (value == null) {
-            return defaultValue;
-        }
-        if (value instanceof ZonedDateTime) {
-            return (ZonedDateTime) value;
-        }
-        return TypeUtils.cast(value, ZonedDateTime.class);
-    }
 
     /**
      * Serialize to JSON {@link String}
@@ -1059,15 +788,10 @@ public class JSONArray
     @SuppressWarnings("unchecked")
     public String toString(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
-            if ((writer.context.features & NONE_DIRECT_FEATURES) == 0) {
-                writer.write(this);
-            } else {
-                writer.setRootObject(this);
-                if (arrayWriter == null) {
-                    arrayWriter = writer.getObjectWriter(JSONArray.class, JSONArray.class);
-                }
-                arrayWriter.write(writer, this, null, null, 0);
+            if ((writer.context.features & NONE_DIRECT_FEATURES) != 0) {
+                throw new JSONException("not support feature ReferenceDetection / NotWriteEmptyArray / NotWriteDefaultValue");
             }
+            writer.write(this);
             return writer.toString();
         }
     }
@@ -1107,20 +831,6 @@ public class JSONArray
         }
     }
 
-    /**
-     * Convert this {@link JSONArray} to the specified Object
-     *
-     * <pre>{@code
-     * JSONArray array = ...
-     * List<User> users = array.to(new TypeReference<ArrayList<User>>(){}.getType());
-     * }</pre>
-     *
-     * @param type specify the {@link Type} to be converted
-     * @since 2.0.4
-     */
-    public <T> T to(Type type) {
-        return to(type, 0L);
-    }
 
     /**
      * Convert this {@link JSONArray} to the specified Object
@@ -1133,34 +843,10 @@ public class JSONArray
      * @param type specify the {@link Type} to be converted
      * @since 2.0.51
      */
-    @SuppressWarnings("unchecked")
-    public <T> T to(Type type, long features) {
-        if (type == String.class) {
-            return (T) toString();
-        }
-
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<T> objectReader = provider.getObjectReader(type);
-        return objectReader.createInstance(this, features);
-    }
 
     /**
      * @since 2.0.9
      */
-    @SuppressWarnings("unchecked")
-    public <T> T to(Class<T> type) {
-        if (type == String.class) {
-            return (T) toString();
-        }
-
-        if (type == JSON.class) {
-            return (T) this;
-        }
-
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<T> objectReader = provider.getObjectReader(type);
-        return objectReader.createInstance(this);
-    }
 
     /**
      * Convert this {@link JSONArray} to the specified Object
@@ -1169,9 +855,6 @@ public class JSONArray
      * @deprecated since 2.0.4, please use {@link #to(Type)}
      */
     @Deprecated
-    public <T> T toJavaObject(Type type) {
-        return to(type);
-    }
 
     /**
      * Convert all the members of this {@link JSONArray} into the specified Object.
@@ -1186,49 +869,6 @@ public class JSONArray
      * @param features features to be enabled in parsing
      * @since 2.0.4
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> List<T> toList(Class<T> itemClass, JSONReader.Feature... features) {
-        boolean fieldBased = false;
-        long featuresValue = JSONFactory.defaultReaderFeatures;
-        for (JSONReader.Feature feature : features) {
-            featuresValue |= feature.mask;
-            if (feature == JSONReader.Feature.FieldBased) {
-                fieldBased = true;
-            }
-        }
-
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<?> objectReader = provider.getObjectReader(itemClass, fieldBased);
-
-        List<T> list = new ArrayList<>(size());
-        for (int i = 0; i < this.size(); i++) {
-            Object item = this.get(i);
-
-            T classItem;
-            if (item instanceof JSONObject) {
-                classItem = (T) objectReader.createInstance((Map) item, featuresValue);
-            } else if (item instanceof Map) {
-                classItem = (T) objectReader.createInstance((Map) item, featuresValue);
-            } else if (item == null || itemClass.isInstance(item)) {
-                classItem = (T) item;
-            } else {
-                Class<?> currentItemClass = item.getClass();
-                Function typeConvert = provider.getTypeConvert(currentItemClass, itemClass);
-                if (typeConvert != null) {
-                    Object converted = typeConvert.apply(item);
-                    list.add((T) converted);
-                    continue;
-                }
-
-                throw new JSONException(
-                        currentItemClass + " cannot be converted to " + itemClass
-                );
-            }
-            list.add(classItem);
-        }
-
-        return list;
-    }
 
     /**
      * Convert all the members of this {@link JSONArray} into the specified Object.
@@ -1243,60 +883,7 @@ public class JSONArray
      * @param features features to be enabled in parsing
      * @since 2.0.4
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> T[] toArray(Class<T> itemClass, JSONReader.Feature... features) {
-        boolean fieldBased = false;
-        long featuresValue = JSONFactory.defaultReaderFeatures;
-        for (JSONReader.Feature feature : features) {
-            featuresValue |= feature.mask;
-            if (feature == JSONReader.Feature.FieldBased) {
-                fieldBased = true;
-            }
-        }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<?> objectReader = provider.getObjectReader(itemClass, fieldBased);
-
-        T[] list = (T[]) Array.newInstance(itemClass, size());
-        for (int i = 0; i < this.size(); i++) {
-            Object item = this.get(i);
-
-            T classItem;
-            if (item instanceof JSONObject) {
-                classItem = (T) objectReader.createInstance((Map) item, featuresValue);
-            } else if (item instanceof Map) {
-                classItem = (T) objectReader.createInstance((Map) item, featuresValue);
-            } else if (item == null || itemClass.isInstance(item)) {
-                classItem = (T) item;
-            } else {
-                Class<?> currentItemClass = item.getClass();
-                Function typeConvert = provider.getTypeConvert(currentItemClass, itemClass);
-                if (typeConvert != null) {
-                    Object converted = typeConvert.apply(item);
-                    list[i] = (T) converted;
-                    continue;
-                }
-
-                throw new JSONException(
-                        currentItemClass + " cannot be converted to " + itemClass
-                );
-            }
-            list[i] = classItem;
-        }
-
-        return list;
-    }
-
-    /**
-     * Convert all the members of this {@link JSONArray} into the specified Object.
-     *
-     * @param clazz specify the {@code Class<T>} to be converted
-     * @param features features to be enabled in parsing
-     * please use {@link #toList(Class, JSONReader.Feature...)}
-     */
-    public <T> List<T> toJavaList(Class<T> clazz, JSONReader.Feature... features) {
-        return toList(clazz, features);
-    }
 
     /**
      * Returns the result of the {@link Type} converter conversion of the element at the specified position in this {@link JSONArray}.
@@ -1312,53 +899,6 @@ public class JSONArray
      * @throws JSONException If no suitable conversion method is found
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> T getObject(int index, Type type, JSONReader.Feature... features) {
-        Object value = get(index);
-
-        if (value == null) {
-            return null;
-        }
-
-        Class<?> valueClass = value.getClass();
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        Function typeConvert = provider.getTypeConvert(valueClass, type);
-
-        if (typeConvert != null) {
-            return (T) typeConvert.apply(value);
-        }
-
-        boolean fieldBased = false;
-        long featuresValue = JSONFactory.defaultReaderFeatures;
-        for (JSONReader.Feature feature : features) {
-            featuresValue |= feature.mask;
-            if (feature == JSONReader.Feature.FieldBased) {
-                fieldBased = true;
-            }
-        }
-
-        if (value instanceof Map) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Map) value, featuresValue);
-        }
-
-        if (value instanceof Collection) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value, featuresValue);
-        }
-
-        Class clazz = TypeUtils.getMapping(type);
-        if (clazz.isInstance(value)) {
-            return (T) value;
-        }
-
-        String json = JSON.toJSONString(value);
-        JSONReader jsonReader = JSONReader.of(json);
-        jsonReader.context.config(features);
-
-        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
-        return (T) objectReader.readObject(jsonReader, null, null, 0);
-    }
 
     /**
      * Returns the result of the {@link Type} converter conversion of the element at the specified position in this {@link JSONArray}.
@@ -1371,86 +911,7 @@ public class JSONArray
      * @throws JSONException If no suitable conversion method is found
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> T getObject(int index, Class<T> type, JSONReader.Feature... features) {
-        Object value = get(index);
 
-        if (value == null) {
-            return null;
-        }
-
-        Class<?> valueClass = value.getClass();
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        Function typeConvert = provider.getTypeConvert(valueClass, type);
-
-        if (typeConvert != null) {
-            return (T) typeConvert.apply(value);
-        }
-
-        boolean fieldBased = false;
-        long featuresValue = JSONFactory.defaultReaderFeatures;
-        for (JSONReader.Feature feature : features) {
-            featuresValue |= feature.mask;
-            if (feature == JSONReader.Feature.FieldBased) {
-                fieldBased = true;
-            }
-        }
-
-        if (value instanceof Map) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Map) value, featuresValue);
-        }
-
-        if (value instanceof Collection) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
-            return objectReader.createInstance((Collection) value, featuresValue);
-        }
-
-        Class clazz = TypeUtils.getMapping(type);
-        if (clazz.isInstance(value)) {
-            return (T) value;
-        }
-
-        ObjectReader objectReader = null;
-
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return null;
-            }
-
-            if (clazz.isEnum()) {
-                return (T) Enum.valueOf((Class<Enum>) clazz, str);
-            }
-        }
-
-        String json = JSON.toJSONString(value);
-        JSONReader jsonReader = JSONReader.of(json);
-        jsonReader.context.config(features);
-
-        if (objectReader == null) {
-            objectReader = provider.getObjectReader(clazz, fieldBased);
-        }
-
-        T object = (T) objectReader.readObject(jsonReader, null, null, 0L);
-        if (!jsonReader.isEnd()) {
-            throw new JSONException("not support input " + json);
-        }
-        return object;
-    }
-
-    /**
-     * @since 2.0.3
-     */
-    public <T> T getObject(int index, Function<JSONObject, T> creator) {
-        JSONObject object = getJSONObject(index);
-
-        if (object == null) {
-            return null;
-        }
-
-        return creator.apply(object);
-    }
 
     /**
      * Adds a new {@link JSONObject} to the end of this {@link JSONArray}.
@@ -1660,16 +1121,6 @@ public class JSONArray
         return JSON.parseArray(text, features);
     }
 
-    /**
-     * Parse JSON {@link String} into {@link List}
-     *
-     * @param text the JSON {@link String} to be parsed
-     * @param type specify the {@link Class} to be converted
-     * @param features features to be enabled in parsing
-     */
-    public static <T> List<T> parseArray(String text, Class<T> type, JSONReader.Feature... features) {
-        return JSON.parseArray(text, type, features);
-    }
 
     /**
      * Parse JSON {@link String} into {@link JSONArray}
@@ -1682,17 +1133,6 @@ public class JSONArray
         return JSON.parseArray(text, features);
     }
 
-    /**
-     *
-     * Parse JSON {@link String} into {@link List}
-     *
-     * @param input the JSON {@link String} to be parsed
-     * @param type specify the {@link Class} to be converted
-     * @since 2.0.24
-     */
-    public static <T> List<T> parseArray(String input, Class<T> type) {
-        return JSON.parseArray(input, type);
-    }
 
     /**
      * See {@link JSON#toJSON} for details

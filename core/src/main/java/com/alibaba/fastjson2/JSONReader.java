@@ -1,8 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.filter.ExtraProcessor;
-import com.alibaba.fastjson2.filter.Filter;
-import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.*;
@@ -141,6 +138,12 @@ public abstract class JSONReader
     public final boolean jsonb;
     public final boolean utf8;
 
+    public JSONReader(Context context, boolean jsonb, boolean utf8) {
+        this.context = context;
+        this.jsonb = jsonb;
+        this.utf8 = utf8;
+    }
+
     protected int offset;
     protected char ch;
     protected boolean comma;
@@ -165,8 +168,6 @@ public abstract class JSONReader
 
     protected String stringValue;
     protected Object complex; // Map | List
-
-    protected boolean typeRedirect; // redirect for {"@type":"xxx"",...
 
     protected byte[] doubleChars;
 
@@ -230,33 +231,6 @@ public abstract class JSONReader
         return comma;
     }
 
-    /**
-     * Reads a Date value from JSON data, returning null if the value is null.
-     *
-     * @return The Date value, or null if the value is null in JSON
-     */
-    public abstract Date readNullOrNewDate();
-
-    /**
-     * Checks if the current JSON value is null and advances the reader if it is.
-     *
-     * @return true if the current value is null, false otherwise
-     */
-    public abstract boolean nextIfNull();
-
-    /**
-     * Constructs a new JSONReader with the specified context and configuration.
-     *
-     * @param context the reading context to use
-     * @param jsonb whether to use JSONB binary format
-     * @param utf8 whether to use UTF-8 encoding
-     * @since 2.0.51
-     */
-    public JSONReader(Context context, boolean jsonb, boolean utf8) {
-        this.context = context;
-        this.jsonb = jsonb;
-        this.utf8 = utf8;
-    }
 
     /**
      * Gets the reading context for this JSONReader.
@@ -1096,15 +1070,6 @@ public abstract class JSONReader
         return false;
     }
 
-    /**
-     * Gets an ObjectReader for the specified type from the context's provider.
-     *
-     * @param type The type for which to get an ObjectReader
-     * @return An ObjectReader for the specified type
-     */
-    public final ObjectReader getObjectReader(Type type) {
-        return context.provider.getObjectReader(type, (context.features & MASK_FIELD_BASED) != 0);
-    }
 
     /**
      * Checks if the SmartMatch feature is enabled in the context.
@@ -1237,6 +1202,13 @@ public abstract class JSONReader
     public abstract String readReference();
 
     /**
+     * Reads a pattern value from JSON data.
+     *
+     * @return The pattern value as a string
+     */
+    public abstract String readPattern();
+
+    /**
      * Checks if the current character represents the start of a JSON array.
      *
      * @return true if the current character is '[', false otherwise
@@ -1338,36 +1310,6 @@ public abstract class JSONReader
      */
     public abstract boolean nextIfArrayEnd();
 
-    /**
-     * Checks if the current value represents a Set and advances the reader if it is.
-     * This method is used to detect Set-type collections during JSON parsing.
-     *
-     * @return true if the current value represents a Set, false otherwise
-     * @since 2.0.51
-     */
-    public abstract boolean nextIfSet();
-
-    /**
-     * Checks if the current value represents infinity and advances the reader if it is.
-     * This method is used to detect infinity values during JSON parsing.
-     *
-     * @return true if the current value represents infinity, false otherwise
-     * @since 2.0.51
-     */
-    public abstract boolean nextIfInfinity();
-
-    /**
-     * Reads a pattern string from the JSON data.
-     * This method is used to read regular expression patterns or other pattern strings.
-     *
-     * @return The pattern string read from the JSON data
-     * @since 2.0.51
-     */
-    public abstract String readPattern();
-
-    public final int getOffset() {
-        return offset;
-    }
 
     /**
      * Advances the reader to the next character in the JSON data.
@@ -1413,6 +1355,13 @@ public abstract class JSONReader
     }
 
     /**
+     * Checks if the current token is the Infinity value.
+     *
+     * @return true if the current value is Infinity, false otherwise
+     */
+    public abstract boolean nextIfInfinity();
+
+    /**
      * Reads the hash code of the current field name in lowercase.
      *
      * @return The hash code of the current field name in lowercase
@@ -1433,23 +1382,7 @@ public abstract class JSONReader
      */
     public abstract String getFieldName();
 
-    /**
-     * Sets the type redirect flag for this reader.
-     *
-     * @param typeRedirect true to enable type redirection, false to disable
-     */
-    public final void setTypeRedirect(boolean typeRedirect) {
-        this.typeRedirect = typeRedirect;
-    }
 
-    /**
-     * Checks if type redirection is enabled for this reader.
-     *
-     * @return true if type redirection is enabled, false otherwise
-     */
-    public final boolean isTypeRedirect() {
-        return typeRedirect;
-    }
 
     /**
      * Reads the hash code of the current field name in a JSON object without requiring quotes.
@@ -1504,51 +1437,6 @@ public abstract class JSONReader
      */
     public abstract byte[] readHex();
 
-    /**
-     * Reads binary data from JSON data.
-     *
-     * @return The byte array representation of the binary data
-     * @throws JSONException if there is an error parsing the binary data
-     */
-    public byte[] readBinary() {
-        if (ch == 'x') {
-            return readHex();
-        }
-
-        if (isString()) {
-            String str = readString();
-            if (str.isEmpty()) {
-                return null;
-            }
-
-            if ((context.features & Feature.Base64StringAsByteArray.mask) != 0) {
-                return Base64.getDecoder().decode(str);
-            }
-
-            throw new JSONException(info("not support input " + str));
-        }
-
-        if (nextIfArrayStart()) {
-            int index = 0;
-            byte[] bytes = new byte[64];
-            while (true) {
-                if (ch == ']') {
-                    next();
-                    break;
-                }
-                if (index == bytes.length) {
-                    int oldCapacity = bytes.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    bytes = Arrays.copyOf(bytes, newCapacity);
-                }
-                bytes[index++] = (byte) readInt32Value();
-            }
-            nextIfComma();
-            return Arrays.copyOf(bytes, index);
-        }
-
-        throw new JSONException(info("not support read binary"));
-    }
 
     /**
      * Reads a 32-bit integer value from JSON data.
@@ -2054,511 +1942,6 @@ public abstract class JSONReader
     public abstract BigDecimal readBigDecimal();
 
     /**
-     * Reads a UUID value from JSON data.
-     *
-     * @return The UUID value
-     */
-    public abstract UUID readUUID();
-
-    /**
-     * Reads a LocalDate value from JSON data.
-     *
-     * @return The LocalDate value, or null if the value is null in JSON
-     * @throws JSONException if there is an error parsing the date
-     */
-    public LocalDate readLocalDate() {
-        if (nextIfNull()) {
-            return null;
-        }
-
-        if (isInt()) {
-            long millis = readInt64Value();
-            if (context.formatUnixTime) {
-                millis *= 1000L;
-            }
-            Instant instant = Instant.ofEpochMilli(millis);
-            ZonedDateTime zdt = instant.atZone(context.getZoneId());
-            return zdt.toLocalDate();
-        }
-
-        if (context.dateFormat == null
-                || context.formatyyyyMMddhhmmss19
-                || context.formatyyyyMMddhhmmssT19
-                || context.formatyyyyMMdd8
-                || context.formatISO8601) {
-            int len = getStringLength();
-            LocalDateTime ldt = null;
-            LocalDate localDate;
-            switch (len) {
-                case 8:
-                    localDate = readLocalDate8();
-                    ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
-                    break;
-                case 9:
-                    localDate = readLocalDate9();
-                    ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
-                    break;
-                case 10:
-                    localDate = readLocalDate10();
-                    ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
-                    break;
-                case 11:
-                    localDate = readLocalDate11();
-                    ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
-                    break;
-                case 19:
-                    ldt = readLocalDateTime19();
-                    break;
-                case 20:
-                    ldt = readLocalDateTime20();
-                    break;
-                default:
-                    if (len > 20) {
-                        ldt = readLocalDateTimeX(len);
-                    }
-                    break;
-            }
-            if (ldt != null) {
-                return ldt.toLocalDate();
-            }
-        }
-
-        String str = readString();
-        if (str.isEmpty() || "null".equals(str)) {
-            return null;
-        }
-
-        DateTimeFormatter formatter = context.getDateFormatter();
-        if (formatter != null) {
-            if (context.formatHasHour) {
-                return LocalDateTime
-                        .parse(str, formatter)
-                        .toLocalDate();
-            }
-            return LocalDate.parse(str, formatter);
-        }
-
-        if (IOUtils.isNumber(str)) {
-            long millis = Long.parseLong(str);
-            Instant instant = Instant.ofEpochMilli(millis);
-            ZonedDateTime zdt = instant.atZone(context.getZoneId());
-            return zdt.toLocalDate();
-        }
-
-        throw new JSONException("not support input : " + str);
-    }
-
-    /**
-     * Reads a LocalDateTime value from JSON data.
-     *
-     * @return The LocalDateTime value, or null if the value is null in JSON
-     * @throws JSONException if there is an error parsing the date/time
-     */
-    public LocalDateTime readLocalDateTime() {
-        if (isInt()) {
-            long millis = readInt64Value();
-            Instant instant = Instant.ofEpochMilli(millis);
-            ZonedDateTime zdt = instant.atZone(context.getZoneId());
-            return zdt.toLocalDateTime();
-        }
-
-        if (isTypeRedirect() && nextIfMatchIdent('"', 'v', 'a', 'l', '"')) {
-            nextIfMatch(':');
-            LocalDateTime dateTime = readLocalDateTime();
-            nextIfObjectEnd();
-            setTypeRedirect(false);
-            return dateTime;
-        }
-
-        if (context.dateFormat == null
-                || context.formatyyyyMMddhhmmss19
-                || context.formatyyyyMMddhhmmssT19
-                || context.formatyyyyMMdd8
-                || context.formatISO8601) {
-            int len = getStringLength();
-            LocalDate localDate;
-            switch (len) {
-                case 8:
-                    localDate = readLocalDate8();
-                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
-                case 9:
-                    localDate = readLocalDate9();
-                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
-                case 10:
-                    localDate = readLocalDate10();
-                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
-                case 11:
-                    localDate = readLocalDate11();
-                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
-                case 16:
-                    return readLocalDateTime16();
-                case 17: {
-                    LocalDateTime ldt = readLocalDateTime17();
-                    if (ldt != null) {
-                        return ldt;
-                    }
-                    break;
-                }
-                case 18: {
-                    LocalDateTime ldt = readLocalDateTime18();
-                    if (ldt != null) {
-                        return ldt;
-                    }
-                    break;
-                }
-                case 19: {
-                    LocalDateTime ldt = readLocalDateTime19();
-                    if (ldt != null) {
-                        return ldt;
-                    }
-                    break;
-                }
-                case 20: {
-                    LocalDateTime ldt = readLocalDateTime20();
-                    if (ldt != null) {
-                        return ldt;
-                    }
-                    ZonedDateTime zdt = readZonedDateTimeX(len);
-                    if (zdt != null) {
-                        return zdt.toLocalDateTime();
-                    }
-                    break;
-                }
-                case 21:
-                case 22:
-                case 23:
-                case 24:
-                case 25:
-                case 26:
-                case 27:
-                case 28:
-                case 29:
-                    LocalDateTime ldt = readLocalDateTimeX(len);
-                    if (ldt != null) {
-                        return ldt;
-                    }
-                    ZonedDateTime zdt = readZonedDateTimeX(len);
-                    if (zdt != null) {
-                        ZoneId contextZoneId = context.getZoneId();
-                        if (!zdt.getZone().equals(contextZoneId)) {
-                            ldt = zdt.toInstant().atZone(contextZoneId).toLocalDateTime();
-                        } else {
-                            ldt = zdt.toLocalDateTime();
-                        }
-                        return ldt;
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        String str = readString();
-        if (str.isEmpty() || "null".equals(str)) {
-            wasNull = true;
-            return null;
-        }
-
-        DateTimeFormatter formatter = context.getDateFormatter();
-        if (formatter != null) {
-            if (!context.formatHasHour) {
-                return LocalDateTime.of(
-                        LocalDate.parse(str, formatter),
-                        LocalTime.MIN
-                );
-            }
-            return LocalDateTime.parse(str, formatter);
-        }
-
-        if (IOUtils.isNumber(str)) {
-            long millis = Long.parseLong(str);
-
-            if (context.formatUnixTime) {
-                millis *= 1000L;
-            }
-
-            Instant instant = Instant.ofEpochMilli(millis);
-            return LocalDateTime.ofInstant(instant, context.getZoneId());
-        }
-
-        if (str.startsWith("/Date(") && str.endsWith(")/")) {
-            String dotnetDateStr = str.substring(6, str.length() - 2);
-            int i = dotnetDateStr.indexOf('+');
-            if (i == -1) {
-                i = dotnetDateStr.indexOf('-');
-            }
-            if (i != -1) {
-                dotnetDateStr = dotnetDateStr.substring(0, i);
-            }
-            long millis = Long.parseLong(dotnetDateStr);
-            Instant instant = Instant.ofEpochMilli(millis);
-            return LocalDateTime.ofInstant(instant, context.getZoneId());
-        }
-
-        if ("0000-00-00 00:00:00".equals(str)) {
-            wasNull = true;
-            return null;
-        }
-        throw new JSONException(info("read LocalDateTime error " + str));
-    }
-
-    public abstract OffsetDateTime readOffsetDateTime();
-
-    /**
-     * Reads a ZonedDateTime value from JSON data.
-     *
-     * @return The ZonedDateTime value, or null if the value is null in JSON
-     * @throws JSONException if there is an error parsing the date/time
-     */
-    public ZonedDateTime readZonedDateTime() {
-        if (isInt()) {
-            long millis = readInt64Value();
-            if (context.formatUnixTime) {
-                millis *= 1000L;
-            }
-            Instant instant = Instant.ofEpochMilli(millis);
-            return instant.atZone(context.getZoneId());
-        }
-
-        if (isString()) {
-            if (context.dateFormat == null
-                    || context.formatyyyyMMddhhmmss19
-                    || context.formatyyyyMMddhhmmssT19
-                    || context.formatyyyyMMdd8
-                    || context.formatISO8601) {
-                int len = getStringLength();
-                LocalDateTime ldt = null;
-                LocalDate localDate;
-                switch (len) {
-                    case 8:
-                        localDate = readLocalDate8();
-                        ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
-                        break;
-                    case 9:
-                        localDate = readLocalDate9();
-                        ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
-                        break;
-                    case 10:
-                        localDate = readLocalDate10();
-                        ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
-                        break;
-                    case 11:
-                        localDate = readLocalDate11();
-                        ldt = LocalDateTime.of(localDate, LocalTime.MIN);
-                        break;
-                    case 16:
-                        ldt = readLocalDateTime16();
-                        break;
-                    case 17:
-                        ldt = readLocalDateTime17();
-                        break;
-                    case 18:
-                        ldt = readLocalDateTime18();
-                        break;
-                    case 19:
-                        ldt = readLocalDateTime19();
-                        break;
-                    case 20: {
-                        ldt = readLocalDateTime20();
-                        break;
-                    }
-                    default:
-                        ZonedDateTime zdt = readZonedDateTimeX(len);
-                        if (zdt != null) {
-                            return zdt;
-                        }
-                        break;
-                }
-                if (ldt != null) {
-                    return ZonedDateTime.ofLocal(
-                            ldt,
-                            context.getZoneId(),
-                            null
-                    );
-                }
-            }
-
-            String str = readString();
-            if (str.isEmpty() || "null".equals(str)) {
-                return null;
-            }
-
-            DateTimeFormatter formatter = context.getDateFormatter();
-            if (formatter != null) {
-                if (!context.formatHasHour) {
-                    LocalDate localDate = LocalDate.parse(str, formatter);
-                    return ZonedDateTime.of(localDate, LocalTime.MIN, context.getZoneId());
-                }
-                LocalDateTime localDateTime = LocalDateTime.parse(str, formatter);
-                return ZonedDateTime.of(localDateTime, context.getZoneId());
-            }
-
-            if (IOUtils.isNumber(str)) {
-                long millis = Long.parseLong(str);
-                if (context.formatUnixTime) {
-                    millis *= 1000L;
-                }
-                Instant instant = Instant.ofEpochMilli(millis);
-                return instant.atZone(context.getZoneId());
-            }
-
-            return ZonedDateTime.parse(str);
-        }
-
-        if (nextIfNull()) {
-            return null;
-        }
-        throw new JSONException("TODO : " + ch);
-    }
-
-    public abstract OffsetTime readOffsetTime();
-
-    /**
-     * Reads a Calendar value from JSON data.
-     *
-     * @return The Calendar value, or null if the value is null in JSON
-     * @throws JSONException if there is an error parsing the date
-     */
-    public Calendar readCalendar() {
-        if (isString()) {
-            long millis = readMillisFromString();
-            if (millis == 0 && wasNull) {
-                return null;
-            }
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(millis);
-            return calendar;
-        }
-
-        if (readIfNull()) {
-            return null;
-        }
-
-        long millis = readInt64Value();
-        if (context.formatUnixTime) {
-            millis *= 1000;
-        }
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(millis);
-        return calendar;
-    }
-
-    /**
-     * Reads a Date value from JSON data.
-     *
-     * @return The Date value, or null if the value is null in JSON
-     * @throws JSONException if there is an error parsing the date
-     */
-    public Date readDate() {
-        if (isInt()) {
-            long millis = readInt64Value();
-            return new Date(millis);
-        }
-
-        if (readIfNull()) {
-            return null;
-        }
-
-        if (nextIfNullOrEmptyString()) {
-            return null;
-        }
-
-        if (current() == 'n') {
-            return readNullOrNewDate();
-        }
-
-        long millis;
-        if (isTypeRedirect() && nextIfMatchIdent('"', 'v', 'a', 'l', '"')) {
-            nextIfMatch(':');
-            millis = readInt64Value();
-            nextIfObjectEnd();
-            setTypeRedirect(false);
-        } else if (isObject()) {
-            JSONObject object = readJSONObject();
-            Object date = object.get("$date");
-            if (date instanceof String) {
-                return DateUtils.parseDate((String) date, context.getZoneId());
-            }
-            return toDate(object);
-        } else {
-            millis = readMillisFromString();
-        }
-
-        if (millis == 0 && wasNull) {
-            return null;
-        }
-
-        return new Date(millis);
-    }
-
-    /**
-     * Reads a LocalTime value from JSON data.
-     *
-     * @return The LocalTime value, or null if the value is null in JSON
-     * @throws JSONException if there is an error parsing the time
-     */
-    public LocalTime readLocalTime() {
-        if (nextIfNull()) {
-            return null;
-        }
-
-        if (isInt()) {
-            long millis = readInt64Value();
-            Instant instant = Instant.ofEpochMilli(millis);
-            ZonedDateTime zdt = instant.atZone(context.getZoneId());
-            return zdt.toLocalTime();
-        }
-
-        int len = getStringLength();
-        switch (len) {
-            case 5:
-                return readLocalTime5();
-            case 6:
-                return readLocalTime6();
-            case 7:
-                return readLocalTime7();
-            case 8:
-                return readLocalTime8();
-            case 9:
-                return readLocalTime9();
-            case 10:
-                return readLocalTime10();
-            case 11:
-                return readLocalTime11();
-            case 12:
-                return readLocalTime12();
-            case 15:
-                return readLocalTime15();
-            case 18:
-                return readLocalTime18();
-            case 19:
-                return readLocalDateTime19()
-                        .toLocalTime();
-            case 20:
-                return readLocalDateTime20()
-                        .toLocalTime();
-            default:
-                break;
-        }
-
-        String str = readString();
-        if (str.isEmpty() || "null".equals(str)) {
-            return null;
-        }
-
-        if (IOUtils.isNumber(str)) {
-            long millis = Long.parseLong(str);
-            Instant instant = Instant.ofEpochMilli(millis);
-            ZonedDateTime zdt = instant.atZone(context.getZoneId());
-            return zdt.toLocalTime();
-        }
-
-        throw new JSONException("not support len : " + str);
-    }
-
-    /**
      * Gets the length of the current string value in the JSON data.
      *
      * @return The length of the current string value
@@ -2573,280 +1956,6 @@ public abstract class JSONReader
     public boolean isDate() {
         return false;
     }
-
-    /**
-     * Reads an Instant value from JSON data.
-     *
-     * @return The Instant value, or null if the value is null in JSON
-     * @throws JSONException if there is an error parsing the instant
-     */
-    public Instant readInstant() {
-        if (nextIfNull()) {
-            return null;
-        }
-
-        if (isNumber()) {
-            long millis = readInt64Value();
-            if (context.formatUnixTime) {
-                millis *= 1000L;
-            }
-            return Instant.ofEpochMilli(millis);
-        }
-
-        if (isObject()) {
-            return (Instant) getObjectReader(Instant.class)
-                    .createInstance(
-                            readObject(),
-                            0L
-                    );
-        }
-
-        ZonedDateTime zdt = readZonedDateTime();
-        if (zdt == null) {
-            return null;
-        }
-
-        return Instant.ofEpochSecond(
-                zdt.toEpochSecond(),
-                zdt.toLocalTime().getNano());
-    }
-
-    /**
-     * Reads milliseconds from a string value in JSON data.
-     *
-     * @return The milliseconds value
-     * @throws JSONException if there is an error parsing the string
-     */
-    public final long readMillisFromString() {
-        wasNull = false;
-        String format = context.dateFormat;
-        if (format == null
-                || context.formatyyyyMMddhhmmss19
-                || context.formatyyyyMMddhhmmssT19
-                || context.formatyyyyMMdd8
-                || context.formatISO8601) {
-            int len = getStringLength();
-            LocalDateTime ldt = null;
-            LocalDate localDate;
-            switch (len) {
-                case 8: {
-                    localDate = readLocalDate8();
-                    if (localDate == null) {
-                        throw new JSONException("TODO : " + readString());
-                    }
-                    ldt = LocalDateTime.of(localDate, LocalTime.MIN);
-                    break;
-                }
-                case 9: {
-                    localDate = readLocalDate9();
-                    if (localDate != null) {
-                        ldt = LocalDateTime.of(localDate, LocalTime.MIN);
-                    }
-                    break;
-                }
-                case 10: {
-                    localDate = readLocalDate10();
-                    if (localDate == null) {
-                        String str = readString();
-                        if ("0000-00-00".equals(str)) {
-                            wasNull = true;
-                            return 0;
-                        }
-                        if (IOUtils.isNumber(str)) {
-                            return Long.parseLong(str);
-                        }
-                        throw new JSONException("TODO : " + str);
-                    } else {
-                        ldt = LocalDateTime.of(localDate, LocalTime.MIN);
-                    }
-                    break;
-                }
-                case 11: {
-                    localDate = readLocalDate11();
-                    if (localDate != null) {
-                        ldt = LocalDateTime.of(localDate, LocalTime.MIN);
-                    }
-                    break;
-                }
-                case 12: {
-                    ldt = readLocalDateTime12();
-                    break;
-                }
-                case 14: {
-                    ldt = readLocalDateTime14();
-                    break;
-                }
-                case 16: {
-                    ldt = readLocalDateTime16();
-                    break;
-                }
-                case 17: {
-                    ldt = readLocalDateTime17();
-                    break;
-                }
-                case 18: {
-                    ldt = readLocalDateTime18();
-                    break;
-                }
-                case 19: {
-                    long millis = readMillis19();
-                    if (millis != 0 || !wasNull) {
-                        return millis;
-                    }
-
-                    ldt = readLocalDateTime19();
-                    break;
-                }
-                case 20: {
-                    ldt = readLocalDateTime20();
-                    break;
-                }
-                default:
-                    break;
-            }
-
-            ZonedDateTime zdt = null;
-            if (ldt != null) {
-                zdt = ZonedDateTime.ofLocal(ldt, context.getZoneId(), null);
-            } else if (len >= 20) {
-                zdt = readZonedDateTimeX(len);
-                if (zdt == null && (len >= 32 && len <= 35)) {
-                    String str = readString();
-                    zdt = DateUtils.parseZonedDateTime(str, null);
-                }
-            }
-
-            if (zdt != null) {
-                long seconds = zdt.toEpochSecond();
-                int nanos = zdt.toLocalTime().getNano();
-                if (seconds < 0 && nanos > 0) {
-                    long millis = (seconds + 1) * 1000;
-                    long adjustment = nanos / 1000_000 - 1000;
-                    return millis + adjustment;
-                } else {
-                    long millis = seconds * 1000L;
-                    return millis + nanos / 1000_000;
-                }
-            }
-        }
-
-        String str = readString();
-
-        if (str.isEmpty() || "null".equals(str)) {
-            wasNull = true;
-            return 0;
-        }
-
-        if (context.formatMillis || context.formatUnixTime) {
-            long millis = Long.parseLong(str);
-            if (context.formatUnixTime) {
-                millis *= 1000L;
-            }
-            return millis;
-        }
-
-        if (format != null && !format.isEmpty()) {
-            if ("yyyy-MM-dd HH:mm:ss".equals(format)) {
-                if ((str.length() < 4 || str.charAt(4) != '-') && IOUtils.isNumber(str)) {
-                    return Long.parseLong(str);
-                }
-
-                return DateUtils.parseMillis19(str, context.getZoneId());
-            }
-
-            if ("yyyy-MM-dd HH:mm:ss.SSS".equals(format)
-                    && str.length() == 19
-                    && str.charAt(4) == '-'
-                    && str.charAt(7) == '-'
-                    && str.charAt(10) == ' '
-                    && str.charAt(13) == ':'
-                    && str.charAt(16) == ':'
-            ) {
-                return DateUtils.parseMillis19(str, context.getZoneId());
-            }
-
-            SimpleDateFormat utilFormat = new SimpleDateFormat(format);
-            try {
-                return utilFormat
-                        .parse(str)
-                        .getTime();
-            } catch (ParseException e) {
-                throw new JSONException("parse date error, " + str + ", expect format " + utilFormat.toPattern());
-            }
-        }
-        if ("0000-00-00T00:00:00".equals(str)
-                || "0001-01-01T00:00:00+08:00".equals(str)) {
-            return 0;
-        }
-
-        if (str.startsWith("/Date(") && str.endsWith(")/")) {
-            String dotnetDateStr = str.substring(6, str.length() - 2);
-            int i = dotnetDateStr.indexOf('+');
-            if (i == -1) {
-                i = dotnetDateStr.indexOf('-');
-            }
-            if (i != -1) {
-                dotnetDateStr = dotnetDateStr.substring(0, i);
-            }
-            return Long.parseLong(dotnetDateStr);
-        } else if (IOUtils.isNumber(str)) {
-            return Long.parseLong(str);
-        }
-
-        throw new JSONException(info("format " + format + " not support, input " + str));
-    }
-
-    protected abstract LocalDateTime readLocalDateTime12();
-
-    protected abstract LocalDateTime readLocalDateTime14();
-
-    protected abstract LocalDateTime readLocalDateTime16();
-
-    protected abstract LocalDateTime readLocalDateTime17();
-
-    protected abstract LocalDateTime readLocalDateTime18();
-
-    protected abstract LocalDateTime readLocalDateTime19();
-
-    protected abstract LocalDateTime readLocalDateTime20();
-
-    /**
-     * Reads milliseconds from a 19-character date string in JSON data.
-     *
-     * @return The milliseconds value
-     */
-    public abstract long readMillis19();
-
-    protected abstract LocalDateTime readLocalDateTimeX(int len);
-
-    protected abstract LocalTime readLocalTime5();
-
-    protected abstract LocalTime readLocalTime6();
-
-    protected abstract LocalTime readLocalTime7();
-
-    protected abstract LocalTime readLocalTime8();
-
-    protected abstract LocalTime readLocalTime9();
-
-    protected abstract LocalTime readLocalTime10();
-
-    protected abstract LocalTime readLocalTime11();
-
-    protected abstract LocalTime readLocalTime12();
-
-    protected abstract LocalTime readLocalTime15();
-
-    protected abstract LocalTime readLocalTime18();
-
-    protected abstract LocalDate readLocalDate8();
-
-    protected abstract LocalDate readLocalDate9();
-
-    protected abstract LocalDate readLocalDate10();
-
-    protected abstract LocalDate readLocalDate11();
-    protected abstract ZonedDateTime readZonedDateTimeX(int len);
 
     /**
      * Reads a string value from JSON data.
@@ -2982,6 +2091,13 @@ public abstract class JSONReader
      */
     public abstract void readNull();
 
+    /**
+     * Checks if the current JSON value is null and advances the reader if it is.
+     *
+     * @return true if the current value is null, false otherwise
+     */
+    public abstract boolean nextIfNull();
+
     protected double readNaN() {
         throw new JSONException("not support");
     }
@@ -3004,11 +2120,6 @@ public abstract class JSONReader
         return wasNull;
     }
 
-    public <T> T read(Type type) {
-        boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
-        ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
-        return (T) objectReader.readObject(this, null, null, 0);
-    }
 
     public final void read(List list) {
         if (!nextIfArrayStart()) {
@@ -3078,61 +2189,6 @@ public abstract class JSONReader
         }
     }
 
-    /**
-     * Reads JSON data into a Map using a specified ObjectReader for the values.
-     *
-     * @param object The Map to populate with data
-     * @param itemReader The ObjectReader to use for reading values
-     * @param features Reader features to apply during reading
-     * @since 2.0.35
-     */
-    public void read(Map object, ObjectReader itemReader, long features) {
-        nextIfObjectStart();
-        Map map;
-        if (object instanceof Wrapper) {
-            map = ((Wrapper) object).unwrap(Map.class);
-        } else {
-            map = object;
-        }
-
-        long contextFeatures = features | context.getFeatures();
-
-        for (int i = 0; ; ++i) {
-            if (ch == '/') {
-                skipComment();
-            }
-
-            if (nextIfObjectEnd()) {
-                break;
-            }
-
-            if (i != 0 && !comma) {
-                throw new JSONException(info());
-            }
-
-            String name = readFieldName();
-            Object value = itemReader.readObject(this, itemReader.getObjectClass(), name, features);
-
-            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
-                continue;
-            }
-
-            Object origin = map.put(name, value);
-            if (origin != null) {
-                if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
-                    if (origin instanceof Collection) {
-                        ((Collection) origin).add(value);
-                        map.put(name, origin);
-                    } else {
-                        JSONArray array = JSONArray.of(origin, value);
-                        map.put(name, array);
-                    }
-                }
-            }
-        }
-
-        nextIfComma();
-    }
 
     /**
      * Reads JSON data into a Map with specified features.
@@ -3144,7 +2200,7 @@ public abstract class JSONReader
         if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
             throw notSupportName();
         }
-        if ((ch == '"' || ch == '\'') && !typeRedirect) {
+        if (ch == '"' || ch == '\'') {
             String str = readString();
             if (str.isEmpty()) {
                 return;
@@ -3158,19 +2214,14 @@ public abstract class JSONReader
         }
 
         boolean match = nextIfObjectStart();
-        boolean typeRedirect = false;
         if (!match) {
-            if (typeRedirect = isTypeRedirect()) {
-                setTypeRedirect(false);
-            } else {
-                if (isString()) {
-                    String str = readString();
-                    if (str.isEmpty()) {
-                        return;
-                    }
+            if (isString()) {
+                String str = readString();
+                if (str.isEmpty()) {
+                    return;
                 }
-                throw new JSONException(info());
             }
+            throw new JSONException(info());
         }
 
         Map map;
@@ -3196,7 +2247,7 @@ public abstract class JSONReader
             }
 
             Object name;
-            if (match || typeRedirect) {
+            if (match) {
                 if ((ch >= '0' && ch <= '9') || ch == '-') {
                     name = null;
                 } else {
@@ -3250,11 +2301,7 @@ public abstract class JSONReader
                     value = readArray();
                     break;
                 case '{':
-                    if (typeRedirect) {
-                        value = readAny();
-                    } else {
-                        value = readObject();
-                    }
+                    value = readObject();
                     break;
                 case '"':
                 case '\'':
@@ -3265,7 +2312,8 @@ public abstract class JSONReader
                     value = readBoolValue();
                     break;
                 case 'n':
-                    value = readNullOrNewDate();
+                    readNull();
+                    value = null;
                     break;
                 case '/':
                     next();
@@ -3275,22 +2323,12 @@ public abstract class JSONReader
                         throw new JSONException("FASTJSON" + JSON.VERSION + "input not support " + ch + ", offset " + offset);
                     }
                     continue;
-                case 'S':
-                    if (nextIfSet()) {
-                        value = read(HashSet.class);
-                    } else {
-                        throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
-                    }
-                    break;
                 case 'I':
                     if (nextIfInfinity()) {
                         value = Double.POSITIVE_INFINITY;
                     } else {
                         throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
                     }
-                    break;
-                case 'x':
-                    value = readBinary();
                     break;
                 default:
                     throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
@@ -3317,75 +2355,7 @@ public abstract class JSONReader
         nextIfComma();
     }
 
-    /**
-     * Reads JSON data into a Map with specified key and value types.
-     *
-     * @param object The Map to populate with data
-     * @param keyType The type of keys in the map
-     * @param valueType The type of values in the map
-     * @param features Reader features to apply during reading
-     */
-    public final void read(Map object, Type keyType, Type valueType, long features) {
-        boolean match = nextIfObjectStart();
-        if (!match) {
-            throw new JSONException("illegal input， offset " + offset + ", char " + ch);
-        }
 
-        ObjectReader keyReader = context.getObjectReader(keyType);
-        ObjectReader valueReader = context.getObjectReader(valueType);
-
-        long contextFeatures = features | context.getFeatures();
-
-        for (int i = 0; ; ++i) {
-            if (ch == '/') {
-                skipComment();
-            }
-
-            if (nextIfObjectEnd()) {
-                break;
-            }
-
-            if (i != 0 && !comma) {
-                throw new JSONException(info());
-            }
-
-            Object name;
-
-            if (keyType == String.class) {
-                name = readFieldName();
-            } else {
-                name = keyReader.readObject(this, null, null, 0L);
-                nextIfMatch(':');
-            }
-
-            Object value = valueReader.readObject(this, null, null, 0L);
-
-            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
-                continue;
-            }
-
-            Object origin = object.put(name, value);
-            if (origin != null) {
-                if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
-                    if (origin instanceof Collection) {
-                        ((Collection) origin).add(value);
-                        object.put(name, origin);
-                    } else {
-                        JSONArray array = JSONArray.of(origin, value);
-                        object.put(name, array);
-                    }
-                }
-            }
-        }
-
-        nextIfComma();
-    }
-
-    public <T> T read(Class<T> type) {
-        boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
-        ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
-        return (T) objectReader.readObject(this, null, null, 0);
-    }
 
     /**
      * Reads JSON data and returns it as a Map.
@@ -3475,7 +2445,8 @@ public abstract class JSONReader
                     val = readBoolValue();
                     break;
                 case 'n':
-                    val = readNullOrNewDate();
+                    readNull();
+                    val = null;
                     break;
                 case '/':
                     skipComment();
@@ -3483,13 +2454,6 @@ public abstract class JSONReader
                 case 'I':
                     if (nextIfInfinity()) {
                         val = Double.POSITIVE_INFINITY;
-                        break;
-                    } else {
-                        throw new JSONException(info("illegal input " + ch));
-                    }
-                case 'S':
-                    if (nextIfSet()) {
-                        val = read(Set.class);
                         break;
                     } else {
                         throw new JSONException(info("illegal input " + ch));
@@ -3573,167 +2537,36 @@ public abstract class JSONReader
      * @return The JSON value as an Object
      */
     public Object readAny() {
-        return read(Object.class);
-    }
-
-    /**
-     * Reads a JSON array with elements of a specified type.
-     *
-     * @param itemType The type of elements in the array
-     * @return A List containing the array elements
-     */
-    public List readArray(Type itemType) {
-        if (nextIfNull()) {
-            return null;
-        }
-
-        List list = new ArrayList();
-        if (ch == '[') {
-            next();
-
-            boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
-            ObjectReader objectReader = context.provider.getObjectReader(itemType, fieldBased);
-            for (int i = 0; !nextIfArrayEnd(); i++) {
-                int mark = offset;
-                Object item;
-                item = objectReader.readObject(this, null, null, 0);
-                list.add(item);
-                if (mark == offset || ch == '}' || ch == EOI) {
-                    throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
-                }
-            }
-        } else if (ch == '"' || ch == '\'' || ch == '{') {
-            String str = readString();
-            if (str != null && !str.isEmpty()) {
-                list.add(str);
-            }
-        } else {
-            throw new JSONException(info("syntax error"));
-        }
-
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return list;
-    }
-
-    /**
-     * Reads a JSON array with elements of specified types.
-     *
-     * @param types The types of elements in the array
-     * @return A List containing the array elements
-     */
-    public List readList(Type[] types) {
-        if (nextIfNull()) {
-            return null;
-        }
-
-        if (!nextIfArrayStart()) {
-            throw new JSONException("syntax error : " + ch);
-        }
-
-        int i = 0, max = types.length;
-        List list = new ArrayList(max);
-
-        for (Object item; !nextIfArrayEnd() && i < max; list.add(item)) {
-            int mark = offset;
-            item = read(types[i++]);
-
-            if (mark == offset || ch == '}' || ch == EOI) {
-                throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
-            }
-        }
-
-        if (i != max) {
-            throw new JSONException(info("element length mismatch"));
-        }
-
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return list;
-    }
-
-    /**
-     * Reads a JSON array with elements of specified types into an Object array.
-     *
-     * @param types The types of elements in the array
-     * @return An Object array containing the array elements
-     */
-    public final Object[] readArray(Type[] types) {
-        if (nextIfNull()) {
-            return null;
-        }
-
-        if (!nextIfArrayStart()) {
-            throw new JSONException(info("syntax error"));
-        }
-
-        int i = 0, max = types.length;
-        Object[] list = new Object[max];
-
-        for (Object item; !nextIfArrayEnd() && i < max; list[i++] = item) {
-            int mark = offset;
-            item = read(types[i]);
-
-            if (mark == offset || ch == '}' || ch == EOI) {
-                throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
-            }
-        }
-
-        if (i != max) {
-            throw new JSONException(info("element length mismatch"));
-        }
-
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return list;
-    }
-
-    public final void readArray(List list, Type itemType) {
-        readArray((Collection) list, itemType);
-    }
-
-    public void readArray(Collection list, Type itemType) {
-        if (nextIfArrayStart()) {
-            while (!nextIfArrayEnd()) {
-                Object item = read(itemType);
-                list.add(item);
-            }
-            return;
-        }
-
-        if (isString()) {
-            String str = readString();
-            if (itemType == String.class) {
-                list.add(str);
-            } else {
-                Function typeConvert = context.getProvider().getTypeConvert(String.class, itemType);
-                if (typeConvert == null) {
-                    throw new JSONException(info("not support input " + str));
-                }
-                if (str.indexOf(',') != -1) {
-                    String[] items = str.split(",");
-                    for (String strItem : items) {
-                        Object item = typeConvert.apply(strItem);
-                        list.add(item);
-                    }
-                } else {
-                    Object item = typeConvert.apply(str);
-                    list.add(item);
-                }
-            }
-        } else {
-            Object item = read(itemType);
-            list.add(item);
-        }
-
-        if (comma = (ch == ',')) {
-            next();
+        switch (ch) {
+            case '{':
+                return readObject();
+            case '[':
+                return readArray();
+            case '"':
+            case '\'':
+                return readString();
+            case 't':
+            case 'f':
+                return readBoolValue();
+            case 'n':
+                readNull();
+                return null;
+            case '-':
+            case '+':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case '.':
+                return readNumber();
+            default:
+                throw new JSONException(info("syntax error, illegal input " + ch));
         }
     }
 
@@ -3819,13 +2652,6 @@ public abstract class JSONReader
                 }
                 case 'N':
                     val = readNaN();
-                    break;
-                case 'S':
-                    if (nextIfSet()) {
-                        val = read(java.util.Set.class);
-                    } else {
-                        throw new JSONException(info());
-                    }
                     break;
                 case '/':
                     skipComment();
@@ -4221,14 +3047,6 @@ public abstract class JSONReader
         if (IOUtils.isNumber(val)
                 || val.lastIndexOf(',') == val.length() - 4) {
             return TypeUtils.toLongValue(val);
-        }
-
-        if (val.length() > 10 && val.length() < 40) {
-            try {
-                return DateUtils.parseMillis(val, context.zoneId);
-            } catch (DateTimeException | JSONException | NullPointerException ignored) {
-                // ignored
-            }
         }
 
         throw error("parseLong error, value : " + val);
@@ -4923,49 +3741,8 @@ public abstract class JSONReader
         TimeZone timeZone;
         Supplier<Map> objectSupplier;
         Supplier<List> arraySupplier;
-        ExtraProcessor extraProcessor;
 
-        final ObjectReaderProvider provider;
         final SymbolTable symbolTable;
-
-        /**
-         * Creates a new Context with the specified object reader provider.
-         *
-         * @param provider the object reader provider to use
-         */
-        public Context(ObjectReaderProvider provider) {
-            this.features = defaultReaderFeatures;
-            this.provider = provider;
-            this.objectSupplier = JSONFactory.defaultObjectSupplier;
-            this.arraySupplier = JSONFactory.defaultArraySupplier;
-            this.symbolTable = null;
-            this.zoneId = defaultReaderZoneId;
-
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
-        }
-
-        /**
-         * Creates a new Context with the specified object reader provider and features.
-         *
-         * @param provider the object reader provider to use
-         * @param features the initial features bitmask
-         */
-        public Context(ObjectReaderProvider provider, long features) {
-            this.features = features;
-            this.provider = provider;
-            this.objectSupplier = JSONFactory.defaultObjectSupplier;
-            this.arraySupplier = JSONFactory.defaultArraySupplier;
-            this.symbolTable = null;
-            this.zoneId = defaultReaderZoneId;
-
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
-        }
 
         /**
          * Creates a new Context with the specified features.
@@ -4974,7 +3751,6 @@ public abstract class JSONReader
          */
         public Context(Feature... features) {
             this.features = defaultReaderFeatures;
-            this.provider = JSONFactory.getDefaultObjectReaderProvider();
             this.objectSupplier = JSONFactory.defaultObjectSupplier;
             this.arraySupplier = JSONFactory.defaultArraySupplier;
             this.symbolTable = null;
@@ -4998,7 +3774,6 @@ public abstract class JSONReader
          */
         public Context(String dateFormat, Feature... features) {
             this.features = defaultReaderFeatures;
-            this.provider = JSONFactory.getDefaultObjectReaderProvider();
             this.objectSupplier = JSONFactory.defaultObjectSupplier;
             this.arraySupplier = JSONFactory.defaultArraySupplier;
             this.symbolTable = null;
@@ -5015,123 +3790,10 @@ public abstract class JSONReader
             setDateFormat(dateFormat);
         }
 
-        /**
-         * Creates a new Context with the specified object reader provider and features.
-         *
-         * @param provider the object reader provider to use
-         * @param features the features to enable
-         */
-        public Context(ObjectReaderProvider provider, Feature... features) {
-            this.features = defaultReaderFeatures;
-            this.provider = provider;
-            this.objectSupplier = JSONFactory.defaultObjectSupplier;
-            this.arraySupplier = JSONFactory.defaultArraySupplier;
-            this.symbolTable = null;
-            this.zoneId = defaultReaderZoneId;
 
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
 
-            for (Feature feature : features) {
-                this.features |= feature.mask;
-            }
-        }
 
-        /**
-         * Creates a new Context with the specified object reader provider, filter, and features.
-         *
-         * @param provider the object reader provider to use
-         * @param filter the filter to configure
-         * @param features the features to enable
-         */
-        public Context(ObjectReaderProvider provider, Filter filter, Feature... features) {
-            this.features = defaultReaderFeatures;
-            this.provider = provider;
-            this.objectSupplier = JSONFactory.defaultObjectSupplier;
-            this.arraySupplier = JSONFactory.defaultArraySupplier;
-            this.symbolTable = null;
-            this.zoneId = defaultReaderZoneId;
 
-            config(filter);
-
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
-
-            for (Feature feature : features) {
-                this.features |= feature.mask;
-            }
-        }
-
-        /**
-         * Creates a new Context with the specified object reader provider and symbol table.
-         *
-         * @param provider the object reader provider to use
-         * @param symbolTable the symbol table to use
-         */
-        public Context(ObjectReaderProvider provider, SymbolTable symbolTable) {
-            this.features = defaultReaderFeatures;
-            this.provider = provider;
-            this.symbolTable = symbolTable;
-            this.zoneId = defaultReaderZoneId;
-
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
-        }
-
-        /**
-         * Creates a new Context with the specified object reader provider, symbol table, and features.
-         *
-         * @param provider the object reader provider to use
-         * @param symbolTable the symbol table to use
-         * @param features the features to enable
-         */
-        public Context(ObjectReaderProvider provider, SymbolTable symbolTable, Feature... features) {
-            this.features = defaultReaderFeatures;
-            this.provider = provider;
-            this.symbolTable = symbolTable;
-            this.zoneId = defaultReaderZoneId;
-
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
-
-            for (Feature feature : features) {
-                this.features |= feature.mask;
-            }
-        }
-
-        /**
-         * Creates a new Context with the specified object reader provider, symbol table, filters, and features.
-         *
-         * @param provider the object reader provider to use
-         * @param symbolTable the symbol table to use
-         * @param filters the filters to configure
-         * @param features the features to enable
-         */
-        public Context(ObjectReaderProvider provider, SymbolTable symbolTable, Filter[] filters, Feature... features) {
-            this.features = defaultReaderFeatures;
-            this.provider = provider;
-            this.symbolTable = symbolTable;
-            this.zoneId = defaultReaderZoneId;
-
-            config(filters);
-
-            String format = defaultReaderFormat;
-            if (format != null) {
-                setDateFormat(format);
-            }
-
-            for (Feature feature : features) {
-                this.features |= feature.mask;
-            }
-        }
 
         /**
          * Checks if the context is configured to format Unix time.
@@ -5196,43 +3858,9 @@ public abstract class JSONReader
             return formatHasHour;
         }
 
-        /**
-         * Gets an ObjectReader for the specified type.
-         *
-         * @param type The type for which to get an ObjectReader
-         * @return An ObjectReader for the specified type
-         */
-        public ObjectReader getObjectReader(Type type) {
-            boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
-            return provider.getObjectReader(type, fieldBased);
-        }
 
-        /**
-         * Gets the ObjectReaderProvider used by this context.
-         *
-         * @return The ObjectReaderProvider
-         */
-        public ObjectReaderProvider getProvider() {
-            return provider;
-        }
 
-        /**
-         * Gets the ExtraProcessor configured for this context.
-         *
-         * @return The ExtraProcessor, or null if not configured
-         */
-        public ExtraProcessor getExtraProcessor() {
-            return extraProcessor;
-        }
 
-        /**
-         * Sets the ExtraProcessor for this context.
-         *
-         * @param extraProcessor The ExtraProcessor to set
-         */
-        public void setExtraProcessor(ExtraProcessor extraProcessor) {
-            this.extraProcessor = extraProcessor;
-        }
 
         /**
          * Gets the object supplier configured for this context.
@@ -5382,7 +4010,7 @@ public abstract class JSONReader
          */
         public ZoneId getZoneId() {
             if (zoneId == null) {
-                zoneId = DateUtils.DEFAULT_ZONE_ID;
+                zoneId = ZoneId.systemDefault();
             }
             return zoneId;
         }
@@ -5501,67 +4129,6 @@ public abstract class JSONReader
         public void config(Feature... features) {
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
-            }
-        }
-
-        /**
-         * Configures a filter and features for this context.
-         *
-         * @param filter The filter to configure
-         * @param features The features to enable
-         */
-        public void config(Filter filter, Feature... features) {
-            if (filter instanceof ExtraProcessor) {
-                extraProcessor = (ExtraProcessor) filter;
-            }
-
-            for (Feature feature : features) {
-                this.features |= feature.mask;
-            }
-        }
-
-        /**
-         * Configures a filter for this context.
-         *
-         * @param filter The filter to configure
-         */
-        public void config(Filter filter) {
-
-            if (filter instanceof ExtraProcessor) {
-                extraProcessor = (ExtraProcessor) filter;
-            }
-        }
-
-        /**
-         * Configures filters and features for this context.
-         *
-         * @param filters The filters to configure
-         * @param features The features to enable
-         */
-        public void config(Filter[] filters, Feature... features) {
-            for (Filter filter : filters) {
-
-                if (filter instanceof ExtraProcessor) {
-                    extraProcessor = (ExtraProcessor) filter;
-                }
-            }
-
-            for (Feature feature : features) {
-                this.features |= feature.mask;
-            }
-        }
-
-        /**
-         * Configures filters for this context.
-         *
-         * @param filters The filters to configure
-         */
-        public void config(Filter[] filters) {
-            for (Filter filter : filters) {
-
-                if (filter instanceof ExtraProcessor) {
-                    extraProcessor = (ExtraProcessor) filter;
-                }
             }
         }
 

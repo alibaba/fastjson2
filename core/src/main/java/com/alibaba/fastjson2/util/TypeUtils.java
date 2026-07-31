@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 
 import java.lang.invoke.*;
 import java.lang.reflect.*;
@@ -1242,106 +1240,6 @@ public class TypeUtils {
         return Object.class;
     }
 
-    public static Date toDate(Object obj) {
-        if (obj == null) {
-            return null;
-        }
-
-        if (obj instanceof Date) {
-            return (Date) obj;
-        }
-
-        if (obj instanceof Instant) {
-            Instant instant = (Instant) obj;
-            return new Date(
-                    instant.toEpochMilli());
-        }
-
-        if (obj instanceof ZonedDateTime) {
-            ZonedDateTime zdt = (ZonedDateTime) obj;
-            return new Date(
-                    zdt.toInstant().toEpochMilli());
-        }
-
-        if (obj instanceof LocalDate) {
-            LocalDate localDate = (LocalDate) obj;
-            ZonedDateTime zdt = localDate.atStartOfDay(ZoneId.systemDefault());
-            return new Date(
-                    zdt.toInstant().toEpochMilli());
-        }
-
-        if (obj instanceof LocalDateTime) {
-            LocalDateTime ldt = (LocalDateTime) obj;
-            ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
-            return new Date(
-                    zdt.toInstant().toEpochMilli());
-        }
-
-        if (obj instanceof String) {
-            return DateUtils.parseDate((String) obj);
-        }
-
-        if (obj instanceof Long || obj instanceof Integer) {
-            return new Date(((Number) obj).longValue());
-        }
-
-        if (obj instanceof Map) {
-            Object date = ((Map) obj).get("$date");
-            if (date instanceof String) {
-                return DateUtils.parseDate((String) date);
-            }
-        }
-
-        throw new JSONException("can not cast to Date from " + obj.getClass());
-    }
-
-    public static Instant toInstant(Object obj) {
-        if (obj == null) {
-            return null;
-        }
-
-        if (obj instanceof Instant) {
-            return (Instant) obj;
-        }
-
-        if (obj instanceof Date) {
-            return ((Date) obj).toInstant();
-        }
-
-        if (obj instanceof ZonedDateTime) {
-            ZonedDateTime zdt = (ZonedDateTime) obj;
-            return zdt.toInstant();
-        }
-
-        if (obj instanceof String) {
-            String str = (String) obj;
-            if (str.isEmpty() || "null".equals(str)) {
-                return null;
-            }
-
-            JSONReader jsonReader;
-            if (str.charAt(0) != '"') {
-                jsonReader = JSONReader.of('"' + str + '"');
-            } else {
-                jsonReader = JSONReader.of(str);
-            }
-            return jsonReader.read(Instant.class);
-        }
-
-        if (obj instanceof Map) {
-            Map<String, Object> map = (Map<String, Object>) obj;
-            Object epoch = map.get("epochSecond");
-            Object nano = map.get("nano");
-            if (epoch instanceof Number) {
-                long epochSecond = ((Number) epoch).longValue();
-                int nanoVal = nano instanceof Number ? ((Number) nano).intValue() : 0;
-                return Instant.ofEpochSecond(epochSecond, nanoVal);
-            }
-        }
-
-        throw new JSONException("can not cast to Date from " + obj.getClass());
-    }
-
     public static Object[] cast(Object obj, Type[] types) {
         if (obj == null) {
             return null;
@@ -1401,38 +1299,16 @@ public class TypeUtils {
         return cast(object, String[].class);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> T cast(Object obj, Type type) {
-        return cast(obj, type, JSONFactory.getDefaultObjectReaderProvider());
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <T> T cast(Object obj, Type type, ObjectReaderProvider provider) {
         if (type instanceof Class) {
-            return cast(obj, (Class<T>) type, provider);
+            return cast(obj, (Class<T>) type);
         }
-
-        if (obj instanceof Collection) {
-            return (T) provider.getObjectReader(type)
-                    .createInstance((Collection) obj);
-        }
-
-        if (obj instanceof Map) {
-            return (T) provider.getObjectReader(type)
-                    .createInstance((Map) obj, 0L);
-        }
-
-        return JSON.parseObject(
-                JSON.toJSONString(obj),
-                type
-        );
-    }
-
-    public static <T> T cast(Object obj, Class<T> targetClass) {
-        return cast(obj, targetClass, JSONFactory.getDefaultObjectReaderProvider());
+        throw new JSONException("not support cast to type " + type + ", from " + obj.getClass());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <T> T cast(Object obj, Class<T> targetClass, ObjectReaderProvider provider) {
+    public static <T> T cast(Object obj, Class<T> targetClass) {
         if (obj == null) {
             return null;
         }
@@ -1441,49 +1317,10 @@ public class TypeUtils {
             return (T) obj;
         }
 
-        if (targetClass == Date.class) {
-            return (T) toDate(obj);
-        }
-
-        if (targetClass == Instant.class) {
-            return (T) toInstant(obj);
-        }
-
-        if (targetClass == LocalDate.class) {
-            if (obj instanceof Date) {
-                Date date = (Date) obj;
-                return (T) date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDate();
-            }
-        }
-
-        if (targetClass == LocalDateTime.class) {
-            if (obj instanceof Date) {
-                Date date = (Date) obj;
-                return (T) date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDateTime();
-            }
-        }
-
-        if (obj instanceof Date) {
-            long time = ((Date) obj).getTime();
-            String className = targetClass.getName();
-
-            switch (className) {
-                case "java.sql.Timestamp":
-                    return (T) JdbcSupport.createTimestamp(time);
-                case "java.sql.Date":
-                    return (T) JdbcSupport.createDate(time);
-                case "java.sql.Time":
-                    return (T) JdbcSupport.createTime(time);
-                default:
-                    break;
-            }
-        }
-
         if (targetClass == String.class) {
             if (obj instanceof Character || obj instanceof Number || obj instanceof Boolean || obj instanceof Enum) {
                 return (T) obj.toString();
             }
-
             return (T) JSON.toJSONString(obj);
         }
 
@@ -1499,15 +1336,6 @@ public class TypeUtils {
             return (T) new AtomicBoolean((Boolean) obj);
         }
 
-        if (obj instanceof Map) {
-            ObjectReader objectReader = provider.getObjectReader(targetClass);
-            return (T) objectReader.createInstance((Map) obj, 0L);
-        }
-
-        Function typeConvert = provider.getTypeConvert(obj.getClass(), targetClass);
-        if (typeConvert != null) {
-            return (T) typeConvert.apply(obj);
-        }
         if (targetClass.isEnum()) {
             if (obj instanceof Integer) {
                 int intValue = (Integer) obj;
@@ -1515,67 +1343,25 @@ public class TypeUtils {
                 if (intValue >= 0 && intValue < enumConstants.length) {
                     return (T) enumConstants[intValue];
                 }
-            } else {
-                String str = JSON.toJSONString(obj);
-                JSONReader jsonReader = JSONReader.of(str);
-                ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(targetClass);
-                return (T) objectReader.readObject(jsonReader, targetClass, null, 0);
+            } else if (obj instanceof String) {
+                return (T) Enum.valueOf((Class<Enum>) targetClass, (String) obj);
             }
         }
 
         if (obj instanceof String) {
             String json = (String) obj;
-            if (json.isEmpty()) {
-                if (targetClass == StringBuffer.class) {
-                    return (T) new StringBuffer();
-                } else if (targetClass == StringBuilder.class) {
-                    return (T) new StringBuilder();
-                }
-            }
             if (json.isEmpty() || "null".equals(json)) {
                 return null;
             }
 
-            JSONReader jsonReader;
-            char first = json.trim().charAt(0);
-            if (first == '"' || first == '{' || first == '[') {
-                jsonReader = JSONReader.of(json);
-            } else {
-                jsonReader = JSONReader.of(
-                        JSON.toJSONString(json));
+            if (targetClass == StringBuffer.class) {
+                return (T) new StringBuffer(json);
+            } else if (targetClass == StringBuilder.class) {
+                return (T) new StringBuilder(json);
             }
-
-            ObjectReader objectReader = JSONFactory
-                    .getDefaultObjectReaderProvider()
-                    .getObjectReader(targetClass);
-            return (T) objectReader.readObject(jsonReader, targetClass, null, 0);
-        }
-
-        if (obj instanceof Collection) {
-            return (T) provider.getObjectReader(targetClass)
-                    .createInstance((Collection) obj);
         }
 
         String className = targetClass.getName();
-        if (obj instanceof Integer || obj instanceof Long) {
-            long millis = ((Number) obj).longValue();
-            switch (className) {
-                case "java.sql.Date":
-                    return (T) JdbcSupport.createDate(millis);
-                case "java.sql.Timestamp":
-                    return (T) JdbcSupport.createTimestamp(millis);
-                case "java.sql.Time":
-                    return (T) JdbcSupport.createTime(millis);
-                case "java.time.LocalDateTime":
-                    return (T) LocalDateTime.ofInstant(
-                            Instant.ofEpochMilli(millis),
-                            DateUtils.DEFAULT_ZONE_ID);
-                default:
-                    break;
-            }
-        }
-        // fix org.bson.types.Decimal128 to Double
-        String objClassName = obj.getClass().getName();
         throw new JSONException("can not cast to " + className + ", from " + obj.getClass());
     }
 
@@ -1769,7 +1555,6 @@ public class TypeUtils {
             NAME_MAPPINGS.put(clazz, clazz.getSimpleName());
         }
 
-        TYPE_MAPPINGS.put("JO10", JSONObject1O.class);
         TYPE_MAPPINGS.put("[O", Object[].class);
         TYPE_MAPPINGS.put("[Ljava.lang.Object;", Object[].class);
         TYPE_MAPPINGS.put("[java.lang.Object", Object[].class);
@@ -1885,7 +1670,15 @@ public class TypeUtils {
             return new BigDecimal(str);
         }
 
-        return cast(value, BigDecimal.class);
+        if (value instanceof BigInteger) {
+            return new BigDecimal((BigInteger) value);
+        }
+
+        if (value instanceof Float || value instanceof Double) {
+            return BigDecimal.valueOf(((Number) value).doubleValue());
+        }
+
+        throw new JSONException("can not cast to BigDecimal from " + value.getClass());
     }
 
     public static BigDecimal toBigDecimal(long i) {
@@ -1893,15 +1686,11 @@ public class TypeUtils {
     }
 
     public static BigDecimal toBigDecimal(float f) {
-        byte[] bytes = new byte[15];
-        int size = NumberUtils.writeFloat(bytes, 0, f, true, false);
-        return parseBigDecimal(bytes, 0, size);
+        return BigDecimal.valueOf(f);
     }
 
     public static BigDecimal toBigDecimal(double d) {
-        byte[] bytes = new byte[24];
-        int size = NumberUtils.writeDouble(bytes, 0, d, true, false);
-        return parseBigDecimal(bytes, 0, size);
+        return BigDecimal.valueOf(d);
     }
 
     public static BigDecimal toBigDecimal(String str) {
