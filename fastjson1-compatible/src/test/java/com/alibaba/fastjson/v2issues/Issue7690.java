@@ -54,6 +54,18 @@ public class Issue7690 {
     }
 
     @Test
+    public void testArrayGetReturnsLiveWrapperForCoreJSONObject() {
+        JSONArray arr = new JSONArray();
+        arr.add(new com.alibaba.fastjson2.JSONObject());
+
+        JSONObject obj = (JSONObject) arr.get(0);
+        obj.put("value", 42);
+
+        JSONObject obj2 = (JSONObject) arr.get(0);
+        assertEquals(42, obj2.get("value"));
+    }
+
+    @Test
     public void testLiveWrapperIterationExposesUnderlyingCoreNestedContainers() {
         JSONObject root = new JSONObject();
         JSONPath.set(root, "$.a.b.c", 1);
