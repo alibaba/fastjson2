@@ -2,27 +2,19 @@
 
 ## Overview
 
-Fastjson2 is a high-performance JSON library for Java, designed as the next-generation version of Fastjson. It supports both JSON and JSONB (binary JSON) formats, with deeply optimized parsing and serialization capabilities targeting JDK 8 through 21+.
+Fastjson2 is a high-performance JSON library for Java, targeting JDK 8 and later. This document describes the trimmed codebase, which consists of a single `core` module that handles text JSON serialization and deserialization. The library is organized into three layers: the public API, encoding-specific readers and writers, and the object mapping layer that produces `ObjectReader` and `ObjectWriter` instances for Java types.
 
 ## Project Structure
 
 ```
 fastjson2/
-├── core/                      # Core library (JDK 8+)
-├── extension/                 # Base extensions (Arrow, ClickHouse, Geo, Retrofit, etc.)
-├── extension-jaxrs/           # JAX-RS integration
-├── extension-solon/           # Solon framework integration
-├── extension-spring5/         # Spring 5 integration (Web MVC, WebFlux, Data Redis, Messaging)
-├── extension-spring6/         # Spring 6 integration
-├── fastjson1-compatible/      # Fastjson 1.x API compatibility layer
-├── kotlin/                    # Kotlin extension functions and DSL
-├── codegen/                   # Compile-time code generation (APT)
-├── benchmark/                 # JMH performance benchmarks
-├── safemode-test/             # SafeMode test suite
-├── android-test/              # Android compatibility tests
-├── test-jdk17/                # JDK 17 feature tests (Records, sealed classes)
-├── test-jdk25/                # JDK 25 feature tests
-└── docs/                      # Documentation
+├── core/                      # The library module (JDK 8+); the only Maven module
+├── docs/                      # Documentation (English and Chinese)
+├── src/                       # Build configuration (checkstyle rules, modernizer violations)
+├── scripts/                   # Helper scripts (version bump)
+├── .github/workflows/         # CI workflow (ci.yaml)
+├── pom.xml, mvnw, mvnw.cmd    # Maven build and wrapper
+└── README.md, README_cn.md    # Project readmes
 ```
 
 ## Core Module Architecture
@@ -30,80 +22,63 @@ fastjson2/
 ### Component Overview
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                        JSON API Layer                            │
-│          JSON.java  │  JSONB.java  │  JSONPath.java              │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   ┌─────────────────────┐         ┌─────────────────────┐       │
-│   │    Reader Layer      │         │    Writer Layer      │       │
-│   │                     │         │                     │       │
-│   │  JSONReaderUTF8     │         │  JSONWriterUTF8     │       │
-│   │  JSONReaderUTF16    │         │  JSONWriterUTF16    │       │
-│   │  JSONReaderASCII    │         │  JSONWriterJSONB    │       │
-│   │  JSONReaderJSONB    │         │                     │       │
-│   └────────┬────────────┘         └────────┬────────────┘       │
-│            │                               │                     │
-│   ┌────────┴────────────┐         ┌────────┴────────────┐       │
-│   │  Object Mapping      │         │  Object Mapping      │       │
-│   │                     │         │                     │       │
-│   │  ObjectReader       │         │  ObjectWriter       │       │
-│   │  FieldReader        │         │  FieldWriter        │       │
-│   │  ObjectReaderCreator│         │  ObjectWriterCreator│       │
-│   │    ├── ASM          │         │    ├── ASM          │       │
-│   │    └── Lambda/Refl. │         │    └── Lambda/Refl. │       │
-│   │                     │         │                     │       │
-│   └─────────────────────┘         └─────────────────────┘       │
-│                                                                  │
-│   ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐      │
-│   │  Annotations  │  │   Filters    │  │   JSON Schema    │      │
-│   │  @JSONField  │  │  ValueFilter │  │   JSONSchema     │      │
-│   │  @JSONType   │  │  NameFilter  │  │                  │      │
-│   │  @JSONCreator│  │  Property... │  │                  │      │
-│   └──────────────┘  └──────────────┘  └──────────────────┘      │
-│                                                                  │
-│   ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐      │
-│   │  JSONPath     │  │  Support     │  │  Utilities       │      │
-│   │  Segment     │  │  CSV         │  │  BeanUtils       │      │
-│   │  Filter      │  │  GeoJSON     │  │  TypeUtils       │      │
-│   │  Parser      │  │  Retrofit    │  │  FieldInfo       │      │
-│   └──────────────┘  └──────────────┘  └──────────────────┘      │
-└──────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│                          JSON API Layer                            │
+│   JSON · JSONObject · JSONArray · JSONFactory · TypeReference      │
+│   JSONReader · JSONWriter · SymbolTable · PropertyNamingStrategy   │
+├────────────────────────────────────────────────────────────────────┤
+│   ┌──────────────────────┐      ┌──────────────────────┐           │
+│   │      Reader Layer     │      │      Writer Layer     │           │
+│   │   JSONReaderUTF8     │      │   JSONWriterUTF8     │           │
+│   │   JSONReaderUTF16    │      │   JSONWriterUTF16    │           │
+│   │   JSONReaderASCII    │      │   (JDK 8/9 variants) │           │
+│   └─────────┬────────────┘      └─────────┬────────────┘           │
+│   ┌─────────┴────────────┐      ┌─────────┴────────────┐           │
+│   │  Object Mapping (r)   │      │  Object Mapping (w)   │           │
+│   │   ObjectReader        │      │   ObjectWriter        │           │
+│   │   ObjectReaderCreator │      │   ObjectWriterCreator │           │
+│   │   ObjectReaderProvider│      │   ObjectWriterProvider│           │
+│   │   ObjectReaderBaseModule      │   ObjectWriterBaseModule        │
+│   └───────────────────────┘      └───────────────────────┘           │
+│   ┌─────────────┐  ┌──────────────┐  ┌───────────────────┐          │
+│   │ Annotations  │  │   Filters    │  │     Utilities     │          │
+│   │  (6 files)  │  │  (19 files)  │  │  BeanUtils       │          │
+│   │  @JSONField │  │  ValueFilter │  │  TypeUtils       │          │
+│   │  @JSONType  │  │  NameFilter  │  │  FieldInfo       │          │
+│   └─────────────┘  └──────────────┘  │  internal.asm    │          │
+│                                      └───────────────────┘          │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 1. JSON API Layer
 
-The public-facing API through which users interact with the library:
+The public-facing API that users interact with:
 
-- **`JSON.java`** - Main entry point with static methods (`parseObject`, `parseArray`, `toJSONString`, `toJSONBytes`)
-- **`JSONObject.java`** - JSON object (extends `LinkedHashMap<String, Object>`, maintains insertion order)
-- **`JSONArray.java`** - JSON array (extends `ArrayList<Object>`)
-- **`JSONB.java`** - Binary JSON format support
-- **`JSONPath.java`** - JSONPath query engine with SQL:2016 compatibility
-- **`JSONFactory.java`** - Factory for creating reader/writer instances with thread-local caching
+- **`JSON`** - Interface with static entry points (`parseObject`, `parseArray`, `toJSONString`, plus byte-array output overloads)
+- **`JSONObject`** / **`JSONArray`** - `LinkedHashMap<String, Object>` and `ArrayList<Object>` subclasses that keep insertion order
+- **`JSONFactory`** - Owns the default providers, creates read/write contexts, keeps thread-local creator and provider overrides
+- **`JSONReader`** / **`JSONWriter`** (abstract) - Define the parsing and serialization contracts; `JSONReader.of(...)` selects the concrete parser
+- **`TypeReference`** / **`SymbolTable`** - Generic type capture; field-name interning for reuse
+- **`PropertyNamingStrategy`** / **`JSONException`** - Name conversion; base runtime exception
 
 ### 2. Reader Layer (Parsing / Deserialization)
 
-Encoding-specific parsers that convert input to Java objects:
+| Class | Input | Notes |
+|-------|-------|-------|
+| `JSONReaderUTF8` | UTF-8 `byte[]` | Byte-level scanner with character-classification lookup tables |
+| `JSONReaderUTF16` | UTF-16 `byte[]`, `char[]`, `String` | Used for text and UTF-16 inputs |
+| `JSONReaderASCII` | ASCII / ISO-8859-1 `byte[]` | Fast path for ASCII-only content |
 
-| Class | Input | Optimization |
-|-------|-------|-------------|
-| `JSONReaderUTF8` | UTF-8 `byte[]` | SIMD via Vector API (JDK 17+) |
-| `JSONReaderUTF16` | UTF-16 `char[]` / `String` | Compact string optimization (JDK 9+) |
-| `JSONReaderASCII` | ASCII `byte[]` | Fast path for ASCII-only content |
-| `JSONReaderJSONB` | JSONB `byte[]` | Binary format decoder |
-
-The abstract `JSONReader` base class defines the parsing contract. `JSONFactory` selects the appropriate implementation based on input type and JDK version.
+`JSONReader.of(...)` picks the implementation: UTF-8 goes to `JSONReaderUTF8`, ASCII or ISO-8859-1 to `JSONReaderASCII`, UTF-16 and character input to `JSONReaderUTF16`.
 
 ### 3. Writer Layer (Serialization)
 
-Encoding-specific writers that convert Java objects to output:
-
 | Class | Output | Notes |
 |-------|--------|-------|
-| `JSONWriterUTF8` | UTF-8 `byte[]` | Default for `toJSONBytes()` |
-| `JSONWriterUTF16` | UTF-16 `String` | Default for `toJSONString()` |
-| `JSONWriterJSONB` | JSONB `byte[]` | Binary format encoder |
+| `JSONWriterUTF8` | UTF-8 `byte[]` | Used for byte-array output |
+| `JSONWriterUTF16` | UTF-16 `String` | Used for `toJSONString` |
+
+`JSONWriterUTF16` has runtime variants selected by JDK version: `JSONWriterUTF16JDK8` / `JSONWriterUTF16JDK8UF` for JDK 8, and `JSONWriterUTF16` / `JSONWriterUTF16JDK9UF` for JDK 9+ (the `UF` variants use `Unsafe` field access).
 
 ### 4. Object Mapping Layer
 
@@ -112,218 +87,143 @@ Encoding-specific writers that convert Java objects to output:
 | Class | Purpose |
 |-------|---------|
 | `ObjectReader<T>` | Interface for type-specific deserialization |
-| `ObjectReaderProvider` | Manages reader instances with concurrent caching |
-| `FieldReader` | Handles individual field deserialization |
-| `ObjectReaderBaseModule` | Base module for reader extensions |
-| `ObjectReaderCreator` | Base factory for creating readers (uses LambdaMetafactory internally for field access) |
-| `ObjectReaderCreatorASM` | ASM bytecode-generated readers (highest performance) |
-| `ObjectReaderAdapter` | Adapter pattern for readers |
+| `ObjectReaderCreator` | Builds `ObjectReader` instances; uses `LambdaMetafactory` for constructor and field access |
+| `ObjectReaderProvider` | Owns the reader cache and registered modules; resolves types, handles AutoType |
+| `ObjectReaderBaseModule` | Registers built-in readers for JDK and common types |
+| `ObjectReaders` | Factory helpers for common reader shapes |
+| `ObjectReaderException` | Exception type for deserialization failures |
+
+The creator produces per-field reader objects via `createFieldReaders(...)` and wraps them in the generated `ObjectReader`; field-level readers are an internal detail, not a named public type.
 
 #### Writer Package (`com.alibaba.fastjson2.writer`)
 
 | Class | Purpose |
 |-------|---------|
 | `ObjectWriter<T>` | Interface for type-specific serialization |
-| `ObjectWriterProvider` | Manages writer instances with concurrent caching |
-| `FieldWriter` | Handles individual field serialization |
-| `ObjectWriterBaseModule` | Base module for writer extensions |
-| `ObjectWriterCreator` | Base factory for creating writers |
-| `ObjectWriterCreatorASM` | ASM bytecode-generated writers (highest performance) |
+| `ObjectWriterCreator` | Builds `ObjectWriter` instances with `LambdaMetafactory`-based field access |
+| `ObjectWriterProvider` | Owns the writer cache and registered modules |
+| `ObjectWriterBaseModule` | Registers built-in writers for JDK and common types |
+| `ObjectWriters` | Factory helpers for common writer shapes |
+| `ObjectWriterException` | Exception type for serialization failures |
 
-#### Creator Selection Strategy
+The `com.alibaba.fastjson2.modules` package defines the extension interfaces used above: `ObjectReaderModule`, `ObjectWriterModule`, `ObjectCodecProvider`, `ObjectReaderAnnotationProcessor`, and `ObjectWriterAnnotationProcessor`.
 
-FASTJSON 2 selects the optimal ObjectReader/ObjectWriter creator based on the runtime environment:
+### 5. Creator Selection Strategy
+
+The providers choose how type-specific readers and writers are created:
 
 ```
-JDK 8 server  → ObjectReaderCreatorASM (best performance)
-JDK 17 server → ObjectReaderCreatorASM + Vector API optimizations
-Android        → ObjectReaderCreator (LambdaMetafactory-based, no ASM on Android)
-GraalVM Native → ObjectReaderCreator (reflection-based, no dynamic bytecode)
-SafeMode       → ObjectReaderCreator (reflection-based)
+fastjson2.creator property → "reflect" | "lambda" | "asm" (default "asm")
+Standard JDK (8+)          → LambdaMetafactory-based accessors, JIT enabled
+Dalvik-based runtime or    → JIT disabled (detected via JDKUtils)
+GraalVM native image
+SafeMode                   → AutoType resolution disabled
 ```
 
-### 5. JSONPath Layer
-
-Full JSONPath implementation compatible with SQL:2016:
-
-- **`JSONPath`** - Query compilation and execution
-- **`JSONPathSegment`** - Base class for path segments
-- **`JSONPathSegmentIndex`** - Array index access (`$[0]`, `$[-1]`)
-- **`JSONPathSegmentName`** - Object property access (`$.name`)
-- **`JSONPathParser`** - JSONPath expression parser
-- **`JSONPathFilter`** - Filter operations (`$[?(@.price > 10)]`)
-
-JSONPath instances are immutable and thread-safe after construction. They should be cached and reused.
+- `JSONFactory.CREATOR` reads the `fastjson2.creator` system property; the provider switch handles `"reflect"`, `"lambda"`, and `"asm"` alike, and every branch resolves to the same `ObjectReaderCreator` / `ObjectWriterCreator` class.
+- `ObjectReaderCreator.JIT` is enabled unless the runtime is Dalvik-based or GraalVM (both detected by `JDKUtils`); JIT mode builds constructor suppliers and typed functions through `LambdaMetafactory` with a trusted lookup.
+- SafeMode, enabled through the `fastjson.parser.safeMode` or `fastjson2.parser.safeMode` property, makes `ObjectReaderProvider` return null for unresolvable AutoType names.
 
 ### 6. Annotation Layer (`com.alibaba.fastjson2.annotation`)
 
 | Annotation | Target | Purpose |
 |------------|--------|---------|
-| `@JSONField` | Field, Method, Parameter | Field-level config (name, format, features, ordinal) |
-| `@JSONType` | Class, Interface | Class-level config (naming, ignores, features, ordering) |
-| `@JSONCreator` | Constructor, Method | Specify deserialization constructor or factory method |
-| `@JSONCompiler` | Class | Enable compile-time code generation |
+| `@JSONField` | Method, Field, Parameter | Field-level config (name, format, features, ordinal) |
+| `@JSONType` | Type | Class-level config (naming, ignores, features, ordering) |
+| `@JSONCreator` | Method, Constructor | Marks a deserialization constructor or factory method |
+| `@JSONBuilder` | Type | Marks a builder class for builder-based deserialization |
+| `@JSONCompiler` | Type, Method, Constructor | Compiler hint for reader/writer generation |
+| `@JSONCompiled` | Any | Marks types with precompiled readers/writers |
 
 ### 7. Filter Layer (`com.alibaba.fastjson2.filter`)
 
-Serialization filters applied during the write phase:
+The filter package contains 19 classes:
 
-| Filter | Description |
-|--------|-------------|
-| `ValueFilter` | Transform property values before output |
-| `NameFilter` | Rename properties before output |
-| `ContextNameFilter` | Context-aware property renaming |
-| `ContextValueFilter` | Context-aware value transformation |
-| `PropertyFilter` | Conditionally include/exclude properties |
-| `PropertyPreFilter` | Pre-serialization property filtering |
-| `AfterFilter` | Append content after object serialization |
-| `BeforeFilter` | Prepend content before object serialization |
-| `LabelFilter` | Label-based selective serialization |
-| `AutoTypeBeforeHandler` | Whitelist-based AutoType control for deserialization |
-
-### 8. Schema Layer (`com.alibaba.fastjson2.schema`)
-
-- **`JSONSchema`** - JSON Schema validation (draft support)
-- Validates `JSONObject`, JavaBeans, and raw JSON data
-- Can be configured via `@JSONField(schema = "...")` annotations
+- Serialization filters: `AfterFilter`, `BeforeFilter`, `BeanContext`, `CompositeLabelFilter`, `CompositePropertyFilter`, `CompositePropertyPreFilter`, `ContextNameFilter`, `ContextValueFilter`, `Filter`, `LabelFilter`, `Labels`, `NameFilter`, `PascalNameFilter`, `PropertyFilter`, `PropertyPreFilter`, `SimplePropertyPreFilter`, `ValueFilter`
+- Deserialization filters: `ContextAutoTypeBeforeHandler` (AutoType validation), `ExtraProcessor` (extra properties)
 
 ## Key Design Patterns
 
 ### Factory Pattern
-- `JSONFactory` creates reader/writer instances with thread-local recycling
-- `ObjectReaderCreator` / `ObjectWriterCreator` create type-specific readers/writers
+- `JSONFactory` creates read/write contexts and owns the default providers
+- `ObjectReaderCreator` / `ObjectWriterCreator` create type-specific readers and writers
 
 ### Provider Pattern
-- `ObjectReaderProvider` manages reader instances with `ConcurrentHashMap` caching
-- `ObjectWriterProvider` manages writer instances with `ConcurrentHashMap` caching
-- First access triggers creation; subsequent accesses retrieve from cache
+- `ObjectReaderProvider` / `ObjectWriterProvider` cache readers and writers in `ConcurrentMap`s, each own a `CopyOnWriteArrayList` of modules, and create on first access
 
 ### Strategy Pattern
-- `JSONReader` implementations for different encodings (UTF-8, UTF-16, ASCII, JSONB)
-- `JSONWriter` implementations for different output formats
-- `ObjectReaderCreator` (base, uses Lambda/reflection) and `ObjectReaderCreatorASM` (bytecode) selected by environment
-
-### Visitor Pattern
-- `JSONPath` segment traversal through document structure
-- `JSONReader` token-based parsing
+- `JSONReader` / `JSONWriter` implementations for different encodings and output formats
+- The `fastjson2.creator` property selects the creator strategy (all values resolve to one creator class in this build)
 
 ### Module Pattern
-- `ObjectReaderModule` / `ObjectWriterModule` allow extensions to register custom type handlers
-- Framework integrations (Spring, JAX-RS) use modules to hook into the serialization pipeline
+- `ObjectReaderModule` / `ObjectWriterModule` register custom type handlers and annotation processors
+- The base modules register built-in readers and writers for JDK and common types
 
 ## Performance Optimizations
 
-### 1. ASM Code Generation
-- Generates optimized bytecode at runtime for object readers/writers
-- Switch-case on field name hash for O(1) field lookup during deserialization
-- Eliminates reflection overhead for field access
-- Located in `ObjectReaderCreatorASM` and `ObjectWriterCreatorASM`
+### 1. LambdaMetafactory Accessors
+- `ObjectReaderCreator` / `ObjectWriterCreator` build constructor suppliers and field accessors through `LambdaMetafactory` with a trusted lookup, avoiding per-call reflection
 
-### 2. Lambda Metafactory
-- Uses `LambdaMetafactory` for method handles on JDK 8+
-- Near-native-call performance for getter/setter invocations
-- Used by `ObjectReaderCreator` and `ObjectWriterCreator` for field access
+### 2. Symbol Table
+- `SymbolTable` interns field names on first encounter and reuses them across parses, cutting allocation and GC pressure
 
-### 3. Vector API (JDK 17+)
-- SIMD optimizations for bulk character processing in UTF-8/UTF-16 parsers
-- Accelerates string scanning, whitespace skipping, and validation
-- Located in `JSONReaderUTF8` and `JSONReaderUTF16`
+### 3. Thread-Local Creators and Providers
+- `JSONFactory` keeps thread-local `ObjectReaderCreator`, `ObjectReaderProvider`, and `ObjectWriterCreator` slots so per-thread overrides never touch the shared defaults
 
-### 4. String Interning
-- `SymbolTable` for efficient string reuse of field names
-- Reduces memory allocation and GC pressure during parsing
-- Keys are interned on first encounter and reused on subsequent parses
-
-### 5. Lazy Parsing
-- JSONPath supports partial parsing without full document deserialization
-- Only the targeted path is parsed; rest of the document is skipped
-- Critical for extracting fields from large JSON documents
-
-### 6. Thread-Local Buffers
-- `JSONFactory` provides thread-local reader/writer instances
-- Buffer recycling reduces allocation overhead in high-throughput scenarios
-
-## JSONB Binary Format
-
-JSONB is a binary representation of JSON with the following design:
-
-- **Compact encoding**: Small integers (-16 to 47) require only 1 byte
-- **Schema-less**: No pre-defined schema needed
-- **Type-rich**: Supports all JSON types plus binary data
-- **Symbol table**: Optional key compression for repeated field names
-- **Multi-encoding**: Strings can be stored as UTF-8, UTF-16, ASCII, or GB18030
-
-Format specification: [JSONB Format Documentation](https://alibaba.github.io/fastjson2/JSONB/jsonb_format_en)
+### 4. Parser Fast Paths
+- Byte classification tables in `JSONReaderUTF8`, an ASCII-only shortcut in `JSONReaderASCII`, and JDK-version-specific `JSONWriterUTF16` variants
 
 ## Thread Safety
 
 | Component | Thread-Safe? | Notes |
 |-----------|:---:|-------|
-| `JSON` static methods | Yes | Main entry point |
-| `JSONObject` / `JSONArray` | No | Like `HashMap`/`ArrayList` |
-| `JSONReader` / `JSONWriter` | No | Create per-operation |
+| `JSON` static methods | Yes | Main entry point; delegates to providers |
+| `JSONObject` / `JSONArray` | No | Like `HashMap` / `ArrayList` |
+| `JSONReader` / `JSONWriter` | No | Create per operation |
 | `ObjectReader` / `ObjectWriter` | Yes | After initialization |
-| `JSONPath` | Yes | Immutable after construction |
-| `ObjectReaderProvider` / `ObjectWriterProvider` | Yes | ConcurrentHashMap-based |
-| `JSONFactory` | Yes | Thread-local instances |
+| `ObjectReaderProvider` / `ObjectWriterProvider` | Yes | `ConcurrentMap` caches, `CopyOnWriteArrayList` modules |
+| `JSONFactory` | Yes | Static defaults plus thread-local overrides |
 
 ## Extension Points
 
 ### 1. Module System
-- `ObjectReaderModule` - Register custom deserialization modules
-- `ObjectWriterModule` - Register custom serialization modules
-- Modules are registered via `JSONFactory.getDefaultObjectReaderProvider().register(module)`
+- `ObjectReaderModule` / `ObjectWriterModule` (plus `ObjectCodecProvider` and the two annotation processors) are registered via `JSONFactory.getDefaultObjectReaderProvider().register(module)` and the writer provider equivalent
 
-### 2. Custom ObjectReader/ObjectWriter
-- Implement `ObjectReader<T>` for custom deserialization logic
-- Implement `ObjectWriter<T>` for custom serialization logic
-- Register via `JSON.register(Class, ObjectReader/ObjectWriter)`
+### 2. Custom ObjectReader / ObjectWriter
+- Implement `ObjectReader<T>` / `ObjectWriter<T>` and register with `ObjectReaderProvider.register(Type, ObjectReader)` / `ObjectWriterProvider.register(Type, ObjectWriter)`
 
 ### 3. Filters
-- Apply during serialization for value transformation, name mapping, property filtering
-- Register per-call via `JSON.toJSONString(obj, filter)` or globally
+- Passed to `toJSONString` overloads for value transformation, renaming, and property filtering per call
 
 ### 4. MixIn Annotations
-- Inject annotations on third-party classes without modifying source
-- `JSON.mixIn(TargetClass.class, MixInClass.class)`
+- `ObjectReaderProvider.mixIn(target, mixinSource)` / `ObjectWriterProvider.mixIn(target, mixinSource)` inject annotations on third-party classes without modifying their source
 
 ### 5. AutoType Handlers
-- `AutoTypeBeforeHandler` - Custom type validation before deserialization
-- `JSONReader.autoTypeFilter(...)` - Whitelist-based type filtering per call
+- `JSONReader.autoTypeFilter(...)` whitelists types per call; `ObjectReaderProvider.addAutoTypeAccept(String)` extends the global accept list; `ContextAutoTypeBeforeHandler` validates type names before resolution
 
 ## Module Dependencies
 
-```
-core (JDK 8+)
-├── extension (core)
-│   ├── extension-spring5 (core, extension)
-│   ├── extension-spring6 (core, extension)
-│   ├── extension-solon (core, extension)
-│   └── extension-jaxrs (core, extension)
-├── fastjson1-compatible (core)
-├── kotlin (core)
-├── codegen (core)
-└── benchmark (core)
-```
+The repository contains a single Maven module, `core` (JDK 8+), with no internal dependencies; everything else comes from the root POM.
 
 ## Build System
 
-- **Build tool**: Maven with multi-module structure
-- **Java baseline**: JDK 8 (core)
-- **Kotlin**: Version 2.1.20
-- **ASM**: Embedded internally in `com.alibaba.fastjson2.internal.asm` (for bytecode generation)
-- **Testing**: JUnit 5, Kotest (Kotlin module)
-- **Code style**: Checkstyle (`src/checkstyle/fastjson2-checks.xml`)
-- **CI**: GitHub Actions across JDK 8/11/17/21/25 on Ubuntu/Windows/macOS
+- **Build tool**: Maven via the `mvnw` wrapper; multi-module layout with one module (`core`)
+- **Java baseline**: JDK 8 (`maven.compiler.source` / `target` = 8)
+- **ASM**: A self-contained ASM implementation is embedded at `com.alibaba.fastjson2.internal.asm` for bytecode-level support
+- **Testing**: JUnit 5 (via the JUnit BOM, version 5.13.4)
+- **Code style**: Checkstyle (`src/checkstyle/fastjson2-checks.xml`); modernizer checks (`src/violations.xml`)
+- **CI**: GitHub Actions runs the suite on JDK 8/11/17/21/25 across Ubuntu, Windows, and macOS (JDK 25 excluded on macOS), in both the default creator mode and the `fastjson2.creator=reflect` mode
 
 ## Documentation
 
-- [Features Reference](features_en.md) - All JSONReader/JSONWriter features
-- [Annotations Guide](annotations_en.md) - @JSONField, @JSONType, @JSONCreator
-- [JSONB Format](https://alibaba.github.io/fastjson2/JSONB/jsonb_format_en) - Binary format specification
-- [JSONPath Guide](JSONPath/jsonpath_en.md) - JSONPath syntax and examples
-- [Kotlin Support](Kotlin/kotlin_en.md) - Kotlin API extensions
-- [Spring Integration](Spring/spring_support_en.md) - Spring Framework setup
-- [Performance Guide](performance_en.md) - Tuning tips and best practices
-- [FAQ](FAQ_en.md) - Frequently asked questions
-- [Benchmarks](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark) - Performance data
+- [Features Reference](features_en.md) - All `JSONReader` / `JSONWriter` features (Chinese: features_cn.md)
+- [Annotations Guide](annotations_en.md) - `@JSONField`, `@JSONType`, `@JSONCreator` (Chinese: annotations_cn.md)
+- [Reader Design](design_jsonreader_en.md) / [Writer Design](design_jsonwriter_en.md) - Layer internals (Chinese: design_jsonreader_cn.md, design_jsonwriter_cn.md)
+- [AutoType Security](autotype_en.md) - AutoType mechanism and configuration (Chinese: autotype_cn.md)
+- [MixIn Annotations](mixin_en.md) - Inject annotations on third-party classes (Chinese: mixin_cn.md)
+- [Custom Reader/Writer](register_custom_reader_writer_en.md) - Implement custom `ObjectReader` / `ObjectWriter` (Chinese: register_custom_reader_writer_cn.md)
+- [Filter System](Filter/index_en.md) - Serialization filters (Chinese: Filter/index_cn.md)
+- [JSONType @seealso](jsontype_seealso_en.md) - Polymorphic type configuration (Chinese: jsontype_seealso_cn.md)
+- [Performance Guide](performance_en.md) - Tuning tips (Chinese: performance_cn.md)
+- [FAQ](FAQ_en.md) - Frequently asked questions (Chinese: FAQ_cn.md)
+- [v1 to v2 Migration](fastjson_1_upgrade_en.md) - Upgrade guide (Chinese: fastjson_1_upgrade_cn.md)

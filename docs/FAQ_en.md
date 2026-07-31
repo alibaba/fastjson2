@@ -4,25 +4,17 @@
 
 ### What is the difference between FASTJSON and FASTJSON 2?
 
-FASTJSON 2 is a complete rewrite of the original FASTJSON library, designed for the next decade. Key differences:
+FASTJSON 2 is a rewrite of the original FASTJSON library. Key differences:
 
 - **New package**: `com.alibaba.fastjson2` (v1 was `com.alibaba.fastjson`)
-- **Better performance**: Significant improvements across all operations
+- **Performance**: Optimized serialization and deserialization implementations
 - **More secure**: AutoType disabled by default, no hardcoded whitelist
-- **Modern Java**: JDK 11/17/21 optimizations, Record support, Vector API
-- **Binary format**: Native JSONB support
-- **JSON Schema**: Built-in validation
-
-### Can FASTJSON 2 coexist with FASTJSON 1.x?
-
-Yes. Because they use different package names (`com.alibaba.fastjson2` vs `com.alibaba.fastjson`), both can exist in the same project. However, using the compatibility module (`com.alibaba:fastjson:2.x`) will conflict with FASTJSON 1.x since they share the same package.
+- **Modern Java**: JDK 11/17/21 optimizations, Record support
 
 ### What Java versions are supported?
 
 - **Core library**: Java 8+
 - **Full feature set**: Java 11+ (compact string optimizations)
-- **Vector API optimizations**: Java 17+
-- **Android**: Android 8+ (API level 26+)
 
 ### Does FASTJSON 2 support GraalVM Native Image?
 
@@ -214,77 +206,14 @@ SafeMode completely disables AutoType, even if explicitly configured in the code
 ### How do I get the best parsing performance?
 
 1. **Use byte[] input** when possible - `JSON.parseObject(bytes, Type.class)` avoids String conversion overhead.
-2. **Reuse JSONPath instances** - `JSONPath.of("$.id")` is cacheable and thread-safe.
-3. **Use partial parsing** - For large documents, use JSONPath to extract only what you need.
-4. **Use JSONB** - For internal service communication, JSONB is significantly faster than text JSON.
-5. **Avoid unnecessary features** - Each enabled feature adds a small overhead.
+2. **Avoid unnecessary features** - Each enabled feature adds a small overhead.
 
 ### How do I get the best serialization performance?
 
 1. **Use byte[] output** - `JSON.toJSONBytes(obj)` is faster than `JSON.toJSONString(obj)` for most use cases.
 2. **Use BeanToArray** - `JSONWriter.Feature.BeanToArray` produces smaller output and is faster to serialize.
-3. **Use JSONB** - For binary protocols, JSONB is significantly faster.
-
-### How does FASTJSON 2 compare to Jackson and Gson?
-
-FASTJSON 2 consistently outperforms Jackson and Gson in benchmarks. See the detailed benchmark data at [fastjson_benchmark](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark).
-
-## Spring Integration
-
-### How do I replace Jackson with FASTJSON 2 in Spring Boot?
-
-Add the extension dependency and configure the message converter. See the full [Spring Integration Guide](Spring/spring_support_en.md).
-
-Quick setup for Spring 6.x:
-
-```java
-@Configuration
-public class JsonConfig extends WebMvcConfigurationSupport {
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-        converters.add(0, converter);
-    }
-}
-```
-
-### How do I use FASTJSON 2 with Spring Data Redis?
-
-Use `GenericFastJsonRedisSerializer`:
-
-```java
-@Bean
-public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
-    RedisTemplate<String, Object> template = new RedisTemplate<>();
-    template.setConnectionFactory(factory);
-    template.setDefaultSerializer(new GenericFastJsonRedisSerializer());
-    return template;
-}
-```
 
 ## Migration from Fastjson 1.x
-
-### What is the easiest way to migrate?
-
-Use the compatibility package as a drop-in replacement:
-
-```xml
-<dependency>
-    <groupId>com.alibaba</groupId>
-    <artifactId>fastjson</artifactId>
-    <version>2.0.63</version>
-</dependency>
-```
-
-This provides the same package name (`com.alibaba.fastjson`) with FASTJSON 2's engine underneath.
-
-### What changed with `ParserConfig.getGlobalInstance().addAccept()`?
-
-In FASTJSON 2, use `ObjectReaderProvider`:
-
-```java
-JSONFactory.getDefaultObjectReaderProvider().addAutoTypeAccept("com.mycompany.xxx");
-```
 
 ### What replaces `ObjectSerializer` and `ObjectDeserializer`?
 

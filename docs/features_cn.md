@@ -46,9 +46,10 @@ public class Model {
 |---------------------------------|-----------------------------------------------------------------------------------------------------|
 | FieldBased                      | 基于字段反序列化，如果不配置，会默认基于public的field和getter方法序列化。配置后，会基于非static的field（包括private）做反序列化。在fieldbase配置下会更安全 |
 | IgnoreNoneSerializable          | 反序列化忽略非Serializable类型的字段                                                                            |
+| ErrorOnNoneSerializable         | 反序列化时遇到非Serializable类型抛异常                                                                           |
 | SupportArrayToBean              | 支持数组映射到Bean的方式                                                                                         |
-| InitStringFieldAsEmpty          | 初始化String字段为空字符串\"\"                                                                                  |
-| SupportAutoType                 | 支持自动类型，要读取带\"@type\"类型信息的JSON数据，需要显式打开SupportAutoType                                                 |
+| InitStringFieldAsEmpty          | 初始化String字段为空字符串""                                                                                  |
+| SupportAutoType                 | 支持自动类型，要读取带"@type"类型信息的JSON数据，需要显式打开SupportAutoType                                                 |
 | SupportSmartMatch               | 默认下是camel case精确匹配，打开这个后，能够智能识别camel/upper/pascal/snake/Kebab五种case                                  |
 | UseNativeObject                 | 默认是使用JSONObject和JSONArray，配置后会使用LinkedHashMap和ArrayList                                             |
 | SupportClassForName             | 支持类型为Class的字段，使用Class.forName。为了安全这个是默认关闭的                                                          |
@@ -63,7 +64,21 @@ public class Model {
 | AllowUnQuotedFieldNames         | 支持不带双引号的字段名                                                                                         |
 | NonStringKeyAsString            | 非String类型的Key当做String处理                                                                             |
 | Base64StringAsByteArray         | 将Base64格式的字符串反序列化为byte[]                                                                           |
+| IgnoreCheckClose                | 反序列化时忽略资源关闭检查                                                                                       |
+| ErrorOnNullForPrimitives        | 基本类型字段遇到null值时抛异常（默认以默认值初始化）                                                                         |
+| NullOnError                     | 反序列化出错时返回null而非抛异常                                                                                  |
+| IgnoreAutoTypeNotMatch          | 忽略AutoType类型不匹配                                                                                     |
+| NonZeroNumberCastToBooleanAsTrue| 非零数值转为boolean时按true处理                                                                              |
+| IgnoreNullPropertyValue         | 忽略值为null的属性                                                                                         |
+| ErrorOnUnknownProperties        | JSON中出现目标类不存在的属性时抛异常                                                                                |
+| EmptyStringAsNull               | 将空字符串""转换为null                                                                                      |
+| NonErrorOnNumberOverflow        | 数字溢出时不抛异常                                                                                           |
+| UseBigIntegerForInts            | 未指定具体类型的整数读取为BigInteger                                                                            |
+| UseLongForInts                  | 未指定具体类型且值在int范围内的整数读取为Long                                                                          |
 | DisableSingleQuote              | 不允许在key和value中使用单引号                                                                                   |
+| UseDoubleForDecimals            | 小数数值读取为double                                                                                        |
+| DisableReferenceDetect          | 不处理JSON引用（如$ref）                                                                                     |
+| DisableStringArrayUnwrapping    | 默认情况下单元素字符串数组会解包为字符串，开启后保持为数组                                                                        |
 
 # 5. JSONWriter.Feature介绍
 
@@ -71,10 +86,12 @@ public class Model {
 |-----------------------------------|------------------------------------------------------------------------------------------------------------------|
 | FieldBased                        | 基于字段序列化，如果不配置，会默认基于public的field和getter方法序列化。配置后，会基于非static的field（包括private）做序列化。                                 |
 | IgnoreNoneSerializable            | 序列化忽略非Serializable类型的字段                                                                                          |
-| BeanToArray                       | 将对象序列为[101,\"XX\"]这样的数组格式，这样的格式会更小                                                                                 |
+| ErrorOnNoneSerializable           | 序列化非Serializable对象时报错                                                                                            |
+| BeanToArray                       | 将对象序列为[101,"XX"]这样的数组格式，这样的格式会更小                                                                                 |
 | WriteNulls                        | 序列化输出空值字段                                                                                                        |
+| WriteMapNullValue                 | 序列化输出Map中值为null的条目                                                                                              |
 | BrowserCompatible                 | 在大范围超过JavaScript支持的整数，输出为字符串格式                                                                                   |
-| NullAsDefaultValue                | 将null值输出为缺省值，整数类型的Number输出为0，小数类型的Number输出为0.0，String类型输出为\"\"，Character类型输出为\\u0000，数组和Collection类型输出为[]，其余类型输出{}。 |
+| NullAsDefaultValue                | 将null值输出为缺省值，整数类型的Number输出为0，小数类型的Number输出为0.0，String类型输出为""，Character类型输出为\u0000，数组和Collection类型输出为[]，其余类型输出{}。 |
 | WriteBooleanAsNumber              | 将true输出为1，false输出为0                                                                                              |
 | WriteNonStringValueAsString       | 将非String类型的值输出为String，不包括对象和数据类型                                                                                 |
 | WriteClassName                    | 序列化时输出类型信息                                                                                                       |
@@ -86,27 +103,35 @@ public class Model {
 | IgnoreErrorGetter                 | 忽略getter方法的错误                                                                                                    |
 | PrettyFormat                      | 格式化输出                                                                                                            |
 | ReferenceDetection                | 打开引用检测，这个缺省是关闭的，和fastjson 1.x不一致                                                                                 |
-| WriteNameAsSymbol                 | 将字段名按照symbol输出，这个仅在JSONB下起作用                                                                                     |
+| WriteNameAsSymbol                 | 将字段名按照symbol输出                                                                                                  |
 | WriteBigDecimalAsPlain            | 序列化BigDecimal使用toPlainString，避免科学计数法                                                                             |
 | UseSingleQuotes                   | 使用单引号                                                                                                            |
-| MapSortField                      | 对Map中的KeyValue按照Key做排序后再输出。在有些验签的场景需要使用这个Feature                                                                 |
-| WriteNullListAsEmpty              | 将List类型字段的空值序列化输出为空数组\"[]\"                                                                                        |
-| WriteNullStringAsEmpty            | 将String类型字段的空值序列化输出为空字符串\"\"                                                                                       |
+| MapSortField                      | 对Map中的KeyValue按照Key做排序后再输出。在有些验签的场景需要使用这个Feature（已弃用，改用SortMapEntriesByKeys）                                     |
+| WriteNullListAsEmpty              | 将List类型字段的空值序列化输出为空数组"[]"                                                                                        |
+| WriteNullStringAsEmpty            | 将String类型字段的空值序列化输出为空字符串""                                                                                       |
 | WriteNullNumberAsZero             | 将Number类型字段的空值序列化输出为0                                                                                            |
 | WriteNullBooleanAsFalse           | 将Boolean类型字段的空值序列化输出为false                                                                                       |
-| NotWriteEmptyArray                | 数组类型字段当length为0时不输出                                                                                              |
+| NotWriteEmptyArray                | 数组类型字段当length为0时不输出（已弃用，改用IgnoreEmpty）                                                                          |
+| IgnoreEmpty                       | 忽略空值字段（空集合、空字符串等）                                                                                              |
 | WriteNonStringKeyAsString         | 将Map中的非String类型的Key当做String类型输出                                                                                  |
-| ErrorOnNoneSerializable           | 序列化非Serializable对象时报错                                                                                            |
 | WritePairAsJavaBean               | 将 Apache Commons 包中的Pair对象当做JavaBean序列化                                                                           |
-| BrowserSecure                     | 浏览器安全，将会'<' '>' '(' ')'字符做转义输出                                                                                   |
+| OptimizedForAscii                 | 对纯ASCII内容使用优化的序列化路径                                                                                             |
+| EscapeNoneAscii                   | 非ASCII字符使用转义输出                                                                                                  |
+| WriteByteArrayAsBase64            | 将byte[]序列化为Base64字符串                                                                                             |
+| IgnoreNonFieldGetter              | 只考虑对应实际字段的getter方法                                                                                              |
+| LargeObject                       | 这个是一个保护措施，是为了防止序列化有循环引用对象消耗过大资源的保护措施。                                                                            |
 | WriteLongAsString                 | 将Long序列化为String                                                                                                  |
+| BrowserSecure                     | 浏览器安全，将会'<' '>' '(' ')'字符做转义输出                                                                                   |
 | WriteEnumUsingOrdinal             | 序列化Enum使用Ordinal，缺省是name                                                                                         |
 | WriteThrowableClassName           | 序列化Throwable时带上类型信息                                                                                              |
-| LargeObject                       | 这个是一个保护措施，是为了防止序列化有循环引用对象消耗过大资源的保护措施。                                                                            |
 | UnquoteFieldName                  | 不带引号输出Key                                                                                                        |
 | NotWriteSetClassName              | 当打开WriteClassName时又不想输出Set的类型信息，使用这个Feature                                                                      |
 | NotWriteNumberClassName           | 当打开WriteClassName时又不想输出Number的类型信息，比如L/S/B/F/D这种后缀，使用这个Feature                                                   |
-| WriteFloatSpecialAsString         | 启用后，NaN/Infinity将被序列化为“NaN”、“Infinity”、“-Infinity”    |
+| SortMapEntriesByKeys              | 序列化Map前按Key排序，用于验签等需要稳定输出顺序的场景                                                                                 |
+| PrettyFormatWith2Space            | 格式化输出使用2个空格缩进（需同时开启PrettyFormat）                                                                              |
+| PrettyFormatWith4Space            | 格式化输出使用4个空格缩进（需同时开启PrettyFormat）                                                                              |
+| WriterUtilDateAsMillis            | 将java.util.Date序列化为毫秒时间戳                                                                                        |
+| WriteFloatSpecialAsString         | 启用后，NaN/Infinity将被序列化为"NaN"、"Infinity"、"-Infinity"    |
 
 # 6. 使用示例
 
@@ -143,25 +168,7 @@ User user2 = JSON.parseObject(json, User.class,
 
 ## 7.1 默认开启的特性
 
-在 fastjson 1.x 中，默认开启的特性如下：
-
-**序列化**：
-* `SerializerFeature.QuoteFieldNames`
-* `SerializerFeature.SkipTransientField`
-* `SerializerFeature.WriteEnumUsingName`
-* `SerializerFeature.SortField`
-
-**反序列化**：
-* `Feature.AutoCloseSource`
-* `Feature.InternFieldNames`
-* `Feature.UseBigDecimal`
-* `Feature.AllowUnQuotedFieldNames`
-* `Feature.AllowSingleQuotes`
-* `Feature.AllowArbitraryCommas`
-* `Feature.SortFeidFastMatch`
-* `Feature.IgnoreNotMatch`
-
-在 fastjson 2.x 中，**所有特性默认关闭**。
+与 fastjson 1.x 不同，本库中所有 Feature 默认关闭。
 
 ## 7.2 1.x特性变更
 

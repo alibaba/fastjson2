@@ -1,6 +1,6 @@
 # Performance Guide
 
-FASTJSON 2 is designed for maximum performance. This guide covers tuning strategies and best practices to get the most out of the library.
+This guide covers tuning strategies and best practices for FASTJSON 2.
 
 ## Performance Architecture
 
@@ -12,15 +12,11 @@ At runtime, FASTJSON 2 generates optimized bytecode for object readers and write
 
 - **When**: First time a type is serialized/deserialized (one-time cost)
 - **Where**: `ObjectReaderCreatorASM`, `ObjectWriterCreatorASM`
-- **Fallback**: Reflection-based creator when ASM is unavailable (Android, GraalVM Native Image)
+- **Fallback**: Reflection-based creator when ASM is unavailable (e.g., GraalVM Native Image)
 
 ### Lambda Metafactory
 
 On JDK 8+, FASTJSON 2 uses `LambdaMetafactory` to create high-performance method handles as an alternative to reflection. This provides near-native-call performance for getter/setter invocations.
-
-### Vector API (JDK 17+)
-
-On JDK 17+, FASTJSON 2 leverages SIMD (Single Instruction, Multiple Data) instructions via the Vector API for bulk character processing in UTF-8 and UTF-16 parsers. This dramatically accelerates string scanning and validation.
 
 ### String Interning
 
@@ -54,41 +50,7 @@ byte[] output = JSON.toJSONBytes(user);
 
 This avoids the overhead of String encoding/decoding. It is especially effective for HTTP/RPC scenarios where data arrives as bytes.
 
-### 2. Use JSONB for Internal Communication
-
-**Impact: Very High**
-
-For service-to-service communication, JSONB (binary JSON) provides 3-9x faster performance and smaller payload sizes compared to text JSON:
-
-```java
-// Serialize
-byte[] bytes = JSONB.toBytes(user);
-
-// Deserialize
-User user = JSONB.parseObject(bytes, User.class);
-
-// Even faster with BeanToArray
-byte[] bytes = JSONB.toBytes(user, JSONWriter.Feature.BeanToArray);
-User user = JSONB.parseObject(bytes, User.class, JSONReader.Feature.SupportArrayToBean);
-```
-
-### 3. Use JSONPath for Partial Parsing
-
-**Impact: High (for large documents)**
-
-When you only need specific fields from a large JSON document, use JSONPath to extract them without parsing the entire document:
-
-```java
-// Cache the JSONPath instance (thread-safe)
-static final JSONPath ID_PATH = JSONPath.of("$.id");
-static final JSONPath NAME_PATH = JSONPath.of("$.name");
-
-// Extract specific fields
-Object id = ID_PATH.extract(JSONReader.of(json));
-Object name = NAME_PATH.extract(JSONReader.of(json));
-```
-
-### 4. Use BeanToArray for Compact Serialization
+### 2. Use BeanToArray for Compact Serialization
 
 **Impact: Medium**
 
@@ -100,7 +62,7 @@ String json = JSON.toJSONString(user, JSONWriter.Feature.BeanToArray);
 User user = JSON.parseObject(json, User.class, JSONReader.Feature.SupportArrayToBean);
 ```
 
-### 5. Minimize Feature Usage
+### 3. Minimize Feature Usage
 
 **Impact: Low-Medium**
 
@@ -118,7 +80,7 @@ String json = JSON.toJSONString(user,
     JSONWriter.Feature.MapSortField);       // skip if order doesn't matter
 ```
 
-### 6. Use FieldBased for Maximum Speed
+### 4. Use FieldBased for Maximum Speed
 
 **Impact: Medium**
 
@@ -131,7 +93,7 @@ User user = JSON.parseObject(json, User.class, JSONReader.Feature.FieldBased);
 
 > Note: This accesses private fields via reflection/ASM, which may not work in all environments.
 
-### 7. Cache ObjectReader/ObjectWriter for Custom Types
+### 5. Cache ObjectReader/ObjectWriter for Custom Types
 
 **Impact: Medium**
 
@@ -143,7 +105,7 @@ class MoneyWriter implements ObjectWriter<Money> {
     static final MoneyWriter INSTANCE = new MoneyWriter();
     // ...
 }
-JSON.register(Money.class, MoneyWriter.INSTANCE);
+JSONFactory.getDefaultObjectWriterProvider().register(Money.class, MoneyWriter.INSTANCE);
 ```
 
 ## Thread Safety
@@ -156,7 +118,6 @@ Understanding thread safety helps avoid unnecessary synchronization:
 | `JSONObject` / `JSONArray` | No | Not synchronized, like `HashMap`/`ArrayList` |
 | `JSONReader` / `JSONWriter` | No | Create per-operation, never share across threads |
 | `ObjectReader` / `ObjectWriter` | Yes | After initialization, safe to share |
-| `JSONPath` | Yes | Cache and reuse across threads |
 | `ObjectReaderProvider` / `ObjectWriterProvider` | Yes | Internal caching is thread-safe |
 
 ## JVM Tuning
@@ -166,28 +127,9 @@ Understanding thread safety helps avoid unnecessary synchronization:
 ```
 # Enable compact strings (JDK 9+, on by default)
 -XX:+CompactStrings
-
-# For JDK 17+, enable Vector API incubator module
---add-modules jdk.incubator.vector
 ```
 
 ### Memory Considerations
 
 - FASTJSON 2 uses thread-local buffers for serialization, which reduces GC pressure but increases per-thread memory.
 - For applications with many threads, monitor thread-local buffer usage.
-- JSONB typically uses less memory than text JSON due to compact encoding.
-
-## Benchmarking
-
-FASTJSON 2 includes JMH benchmarks in the `benchmark/` module. To run:
-
-```bash
-cd benchmark
-mvn clean package
-java -jar target/benchmarks.jar
-```
-
-For published benchmark results comparing FASTJSON 2 with Jackson, Gson, and other libraries, see:
-- [Benchmark Results](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark)
-- [JSONB vs Hessian/Kryo](JSONB/jsonb_vs_hessian_kryo_en.md)
-- [Android Benchmarks](Android/android_benchmark_en.md)

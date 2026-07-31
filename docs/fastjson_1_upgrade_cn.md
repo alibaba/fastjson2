@@ -42,8 +42,8 @@ import com.alibaba.fastjson2.JSONArray;
   * 方法名有调整，例如`JSON.parse(String)`返回Object，1.x中常用的解析入口在2.x中对应`JSON.parseObject(String, Class)`，序列化入口仍是`JSON.toJSONString(Object)`
 
 ## 3. 常见问题
-### 3.1. ParserConfig.getGlobalInstance().addAccept()如何替代
-在1.x中通过ParserConfig添加autoType白名单，在2.x中对应的功能由ObjectReaderProvider提供，可以如下的方式配置autoType白名单。
+### 3.1. 1.x中autoType白名单配置如何替代
+在1.x中，autoType白名单通过全局配置添加；在2.x中，对应的功能由ObjectReaderProvider提供，可以如下的方式配置autoType白名单。
 ```java
 JSONFactory.getDefaultObjectReaderProvider().addAutoTypeAccept("com.mycompany.xxx");
 ```

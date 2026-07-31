@@ -48,6 +48,7 @@ public class Model {
 |---------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | FieldBased                      | Field-based deserialization. If not configured, it will be serialized based on public field and getter methods by default. After configuration, it will be deserialized based on non-static fields (including private). It will be safer under FieldBased configuration. |
 | IgnoreNoneSerializable          | Deserialization ignores fields of non-Serializable types.                                                                                                                                                                                                                |
+| ErrorOnNoneSerializable         | Throw an exception when encountering non-Serializable types during deserialization.                                                                                                                                                                                      |
 | SupportArrayToBean              | Support mapping arrays to Bean objects.                                                                                                                                                                                                                                  |
 | InitStringFieldAsEmpty          | Initialize the String field to the empty string, e.g: "".                                                                                                                                                                                                                |
 | SupportAutoType                 | Automatic type is supported. To read JSON data with "@type" type information, you need to open SupportAutoType explicitly.                                                                                                                                               |
@@ -65,7 +66,21 @@ public class Model {
 | AllowUnQuotedFieldNames         | Support field names without double quotes.                                                                                                                                                                                                                               |
 | NonStringKeyAsString            | Treat non-String keys as String.                                                                                                                                                                                                                                         |
 | Base64StringAsByteArray         | Deserialize Base64 formatted strings as byte[].                                                                                                                                                                                                                          |
+| IgnoreCheckClose                | Ignore resource cleanup checks during deserialization.                                                                                                                                                                                                                   |
+| ErrorOnNullForPrimitives        | Throw an exception when a null value is found for a primitive type field (by default, primitives are initialized with their default values).                                                                                                                             |
+| NullOnError                     | Return null instead of throwing an exception on deserialization errors.                                                                                                                                                                                                  |
+| IgnoreAutoTypeNotMatch          | Ignore type mismatches in AutoType scenarios.                                                                                                                                                                                                                            |
+| NonZeroNumberCastToBooleanAsTrue| Treat non-zero numbers as true when casting to boolean.                                                                                                                                                                                                                  |
+| IgnoreNullPropertyValue         | Ignore properties whose value is null.                                                                                                                                                                                                                                  |
+| ErrorOnUnknownProperties        | Throw an exception when JSON contains properties that do not exist in the target class.                                                                                                                                                                                  |
+| EmptyStringAsNull               | Convert empty strings ("") to null.                                                                                                                                                                                                                                     |
+| NonErrorOnNumberOverflow        | Do not throw an exception on numeric overflow.                                                                                                                                                                                                                           |
+| UseBigIntegerForInts            | Deserialize untyped integral numbers as BigInteger.                                                                                                                                                                                                                      |
+| UseLongForInts                  | Deserialize small untyped integral numbers as Long.                                                                                                                                                                                                                      |
 | DisableSingleQuote              | Do not allow single quote in key name and values.                                                                                                                                                                                                                        |
+| UseDoubleForDecimals            | Deserialize decimal values as double.                                                                                                                                                                                                                                    |
+| DisableReferenceDetect          | Do not process JSON references (such as $ref).                                                                                                                                                                                                                           |
+| DisableStringArrayUnwrapping    | By default, single-element string arrays are unwrapped to the string value; when enabled, they are kept as arrays.                                                                                                                                                        |
 
 # 5. JSONWriter.Feature
 
@@ -73,8 +88,10 @@ public class Model {
 |-----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | FieldBased                        | Field-based serialization. If not configured, it will be serialized based on public field and getter methods by default. After configuration, it will be serialized based on non-static fields (including private).        |
 | IgnoreNoneSerializable            | Serialization ignores fields of non-Serializable types.                                                                                                                                                                 |
+| ErrorOnNoneSerializable           | Throw an error when serializing non-Serializable objects.                                                                                                                                                               |
 | BeanToArray                       | Sequence the objects into an array format like [101,"XX"], which will be smaller.                                                                                                                                       |
 | WriteNulls                        | Serialize and output null value fields.                                                                                                                                                                                 |
+| WriteMapNullValue                 | Serialize and output map entries whose value is null.                                                                                                                                                                   |
 | BrowserCompatible                 | For integers that exceed the range supported by JavaScript, output them in string format.                                                                                                                               |
 | NullAsDefaultValue                | Output null values as default values: Number types as 0, decimal Number types as 0.0, String type as "", Character type as \u0000, array and Collection types as [], and others as {}.                                   |
 | WriteBooleanAsNumber              | Write true as 1 and false as 0.                                                                                                                                                                                         |
@@ -88,26 +105,34 @@ public class Model {
 | IgnoreErrorGetter                 | Ignore errors in getter methods.                                                                                                                                                                                        |
 | PrettyFormat                      | Format the output.                                                                                                                                                                                                      |
 | ReferenceDetection                | Turn on reference detection, which is turned off by default, which is inconsistent with fastjson 1.x.                                                                                                                   |
-| WriteNameAsSymbol                 | Output field names as symbols, this only works under JSONB.                                                                                                                                                             |
+| WriteNameAsSymbol                 | Output field names as symbols.                                                                                                                                                                                          |
 | WriteBigDecimalAsPlain            | Serialize BigDecimal using toPlainString, avoiding scientific notation.                                                                                                                                                 |
 | UseSingleQuotes                   | Use single quotes.                                                                                                                                                                                                      |
-| MapSortField                      | Sort the KeyValue in Map by Key before output. This Feature is needed in some signature verification scenarios.                                                                                                        |
+| MapSortField                      | Sort the KeyValue in Map by Key before output. This Feature is needed in some signature verification scenarios. (Deprecated, use SortMapEntriesByKeys instead.)                                                          |
 | WriteNullListAsEmpty              | Serialize null value fields of List type as empty array "[]".                                                                                                                                                           |
 | WriteNullStringAsEmpty            | Serialize null value fields of String type as empty string "".                                                                                                                                                          |
 | WriteNullNumberAsZero             | Serialize null value fields of Number type as 0.                                                                                                                                                                        |
 | WriteNullBooleanAsFalse           | Serialize null value fields of Boolean type as false.                                                                                                                                                                   |
-| NotWriteEmptyArray                | Do not output array type fields when length is 0.                                                                                                                                                                       |
+| NotWriteEmptyArray                | Do not output array type fields when length is 0. (Deprecated, use IgnoreEmpty instead.)                                                                                                                                |
+| IgnoreEmpty                       | Ignore empty values (empty collections, empty strings, etc.).                                                                                                                                                           |
 | WriteNonStringKeyAsString         | Treat non-String keys in Map as String type for output.                                                                                                                                                                 |
-| ErrorOnNoneSerializable           | Throw an error when serializing non-Serializable objects.                                                                                                                                                               |
 | WritePairAsJavaBean               | Serialize Pair objects from Apache Commons as JavaBean.                                                                                                                                                                 |
-| BrowserSecure                     | Browser security, will escape '<' '>' '(' ')' characters for output.                                                                                                                                                    |
+| OptimizedForAscii                 | Use an optimized serialization path for ASCII-only content.                                                                                                                                                             |
+| EscapeNoneAscii                   | Escape non-ASCII characters in the output.                                                                                                                                                                              |
+| WriteByteArrayAsBase64            | Serialize byte[] as Base64-encoded strings.                                                                                                                                                                             |
+| IgnoreNonFieldGetter              | Only consider getter methods that correspond to actual fields.                                                                                                                                                          |
+| LargeObject                       | This is a protection measure to prevent serialization of circular reference objects from consuming excessive resources.                                                                                                 |
 | WriteLongAsString                 | Serialize Long as String.                                                                                                                                                                                               |
+| BrowserSecure                     | Browser security, will escape '<' '>' '(' ')' characters for output.                                                                                                                                                    |
 | WriteEnumUsingOrdinal             | Serialize Enum using Ordinal, the default is name.                                                                                                                                                                      |
 | WriteThrowableClassName           | Include type information when serializing Throwable.                                                                                                                                                                    |
-| LargeObject                       | This is a protection measure to prevent serialization of circular reference objects from consuming excessive resources.                                                                                                 |
 | UnquoteFieldName                  | Output Key without quotes.                                                                                                                                                                                              |
 | NotWriteSetClassName              | When WriteClassName is turned on and you don't want to output the type information of Set, use this Feature.                                                                                                            |
 | NotWriteNumberClassName           | When WriteClassName is turned on and you don't want to output the type information of Number, such as the suffixes L/S/B/F/D, use this Feature.                                                                         |
+| SortMapEntriesByKeys              | Sort Map entries by key before output, for scenarios such as signature verification that require a stable output order.                                                                                                 |
+| PrettyFormatWith2Space            | Pretty-print using 2 spaces for indentation (requires PrettyFormat to be enabled).                                                                                                                                      |
+| PrettyFormatWith4Space            | Pretty-print using 4 spaces for indentation (requires PrettyFormat to be enabled).                                                                                                                                      |
+| WriterUtilDateAsMillis            | Serialize java.util.Date as millisecond timestamps.                                                                                                                                                                    |
 | WriteFloatSpecialAsString         | When enabled, NaN/Infinity will be serialized as "NaN", "Infinity", "-Infinity".    |
 
 # 6. Usage Examples
@@ -145,25 +170,7 @@ User user2 = JSON.parseObject(json, User.class,
 
 ## 7.1 Features Enabled by Default
 
-In fastjson 1.x, the default enabled features are as follows:
-
-**Serialization**
-* `SerializerFeature.QuoteFieldNames`
-* `SerializerFeature.SkipTransientField`
-* `SerializerFeature.WriteEnumUsingName`
-* `SerializerFeature.SortField`
-
-**Deserialization**
-* `Feature.AutoCloseSource`
-* `Feature.InternFieldNames`
-* `Feature.UseBigDecimal`
-* `Feature.AllowUnQuotedFieldNames`
-* `Feature.AllowSingleQuotes`
-* `Feature.AllowArbitraryCommas`
-* `Feature.SortFeidFastMatch`
-* `Feature.IgnoreNotMatch`
-
-In fastjson 2.x, **all features are OFF by default**.
+Unlike fastjson 1.x, all Features in this library are OFF by default.
 
 ## 7.2 Changes from 1.x to 2.x
 

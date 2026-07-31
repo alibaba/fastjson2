@@ -42,8 +42,8 @@ import com.alibaba.fastjson2.JSONArray;
     *   Method names have changed. For example, `JSON.parse(String)` returns `Object`, while the common v1 parsing entry point now maps to `JSON.parseObject(String, Class)` in v2. The serialization entry point is still `JSON.toJSONString(Object)`.
 
 ## 3. Common Issues
-### 3.1. How to replace `ParserConfig.getGlobalInstance().addAccept()`?
-In v1, the autoType whitelist was configured through `ParserConfig`. In v2, the corresponding functionality is provided by `ObjectReaderProvider`. You can configure the autoType whitelist as follows:
+### 3.1. How to replace the v1 autoType whitelist configuration?
+In v1, the autoType whitelist was configured through a global configuration. In v2, the corresponding functionality is provided by `ObjectReaderProvider`. You can configure the autoType whitelist as follows:
 ```java
 JSONFactory.getDefaultObjectReaderProvider().addAutoTypeAccept("com.mycompany.xxx");
 ```

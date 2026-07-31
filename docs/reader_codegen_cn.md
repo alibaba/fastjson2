@@ -1,9 +1,7 @@
-# 反序列化CodeGen算法介绍
-fastjson2会使用codegen来优化反序列化的性能，用到的codegen技术包括：
-* ASM 基于内置asm 9.2裁剪版实现的动态字节码生成类
-* Annotation Process Tools(APT)
+# 反序列化字段匹配算法介绍
+fastjson2使用字段名hash和字段名前缀字节匹配来优化反序列化性能。本仓库是基于fastjson2 2.0.63裁剪的版本，仅保留core模块，编译期的Annotation Process Tools(APT)代码生成模块不属于本仓库，反序列化代码不在编译期生成。
 
-## 1. 实现算法介绍
+## 1. 字段匹配算法介绍
 
 ![image](images/reader_codegen_01.png)
 
@@ -21,11 +19,9 @@ public class Image {
 }
 ```
 
-生成如下的代码来快速将json中的name和字段关联起来：
+fastjson2在匹配字段名时，不需要将整个key读取出来做字符串比较。JSONReader提供了`readFieldNameHashCode()`计算字段名hash，JSONReaderUTF8还提供了基于字段名前缀字节的快速匹配方法`nextIfName4Match*`，把key的前几个字节当作一个int值来比较。基于这些原语的字段分发表意如下：
 ```java
-public final class Image_FASTJSONReader
-    extends com.alibaba.fastjson2.reader.ObjectReader5 {
-
+public final class Image_FASTJSONReader {
     public Object readObject(
             com.alibaba.fastjson2.JSONReader jsonReader,
             java.lang.reflect.Type fieldType,
@@ -78,7 +74,7 @@ public final class Image_FASTJSONReader
 
 相关方法在JSONReader中的实现
 ```java
-class JSONReaderUTF8 implements JSONReader {
+class JSONReaderUTF8 extends JSONReader {
     public final int getRawInt() {
         if (offset + 3 < bytes.length) {
             return UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 1);
@@ -127,12 +123,10 @@ class JSONReaderUTF8 implements JSONReader {
 }
 ```
 
-这样的实现好处是，不需要将key读取出来，也不需要将使用JSONReader#readFieldNameHashCode，通过key的前缀3个字符读取一个int值，使用switch来路由到相应字段的处理。
+这样的实现好处是，不需要将key读取出来做字符串比较，而是通过key的前缀字节读取一个int值，使用switch来路由到相应字段的处理。
 
-## 2. 算法实现代码
-生成代码的实现：
-* ASM实现 com.alibaba.fastjson2.reader.ObjectReaderCreatorASM#genRead243
-* APT实现 com.alibaba.fastjson2.internal.processor.JSONCompiledAnnotationProcessor.genRead243
-
-
-
+## 2. 实现说明
+* 字段hash匹配：`JSONReader#readFieldNameHashCode`、`JSONReaderUTF8#getRawInt`、`JSONReaderUTF8#nextIfName4Match*`
+* ObjectReader创建：`com.alibaba.fastjson2.reader.ObjectReaderCreator`，基于反射和LambdaMetafactory生成字段访问器
+* 内置ASM（`com.alibaba.fastjson2.internal.asm`，裁剪版ASM 9.2）用于构造器参数名读取：`ASMUtils#lookupParameterNames`
+* 编译期APT代码生成（codegen模块）不属于本仓库，`@JSONCompiler`、`@JSONCompiled`注解仅保留文件，不会在编译期生成反序列化代码

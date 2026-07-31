@@ -4,25 +4,17 @@
 
 ### FASTJSON 和 FASTJSON 2 有什么区别？
 
-FASTJSON 2 是对原始 FASTJSON 库的全面重写，面向未来十年设计。主要区别：
+FASTJSON 2 是对原始 FASTJSON 库的重写。主要区别：
 
 - **新包名**: `com.alibaba.fastjson2`（v1 为 `com.alibaba.fastjson`）
-- **更好的性能**: 所有操作均有显著提升
+- **性能**: 优化的序列化与反序列化实现
 - **更安全**: AutoType 默认关闭，无硬编码白名单
-- **现代 Java**: JDK 11/17/21 优化，Record 支持，Vector API
-- **二进制格式**: 原生 JSONB 支持
-- **JSON Schema**: 内置校验功能
-
-### FASTJSON 2 可以和 FASTJSON 1.x 共存吗？
-
-可以。由于使用不同的包名（`com.alibaba.fastjson2` vs `com.alibaba.fastjson`），两者可以在同一项目中共存。但使用兼容模块（`com.alibaba:fastjson:2.x`）时会与 FASTJSON 1.x 冲突，因为它们共享相同的包名。
+- **现代 Java**: JDK 11/17/21 优化，Record 支持
 
 ### 支持哪些 Java 版本？
 
 - **核心库**: Java 8+
 - **完整功能集**: Java 11+（compact string 优化）
-- **Vector API 优化**: Java 17+
-- **Android**: Android 8+（API level 26+）
 
 ### FASTJSON 2 支持 GraalVM Native Image 吗？
 
@@ -214,77 +206,14 @@ SafeMode 完全禁用 AutoType，即使在代码中显式配置也无效。通�
 ### 如何获得最佳解析性能？
 
 1. **尽量使用 byte[] 输入** - `JSON.parseObject(bytes, Type.class)` 可避免 String 转换开销。
-2. **复用 JSONPath 实例** - `JSONPath.of("$.id")` 是线程安全的，可缓存重复使用。
-3. **使用部分解析** - 对于大型文档，使用 JSONPath 仅提取需要的数据。
-4. **使用 JSONB** - 内部服务通信时，JSONB 比文本 JSON 快得多。
-5. **避免不必要的 Feature** - 每个启用的 Feature 会增加少量开销。
+2. **避免不必要的 Feature** - 每个启用的 Feature 会增加少量开销。
 
 ### 如何获得最佳序列化性能？
 
 1. **使用 byte[] 输出** - `JSON.toJSONBytes(obj)` 在大多数场景下比 `JSON.toJSONString(obj)` 更快。
 2. **使用 BeanToArray** - `JSONWriter.Feature.BeanToArray` 产生更小的输出且序列化更快。
-3. **使用 JSONB** - 对于二进制协议，JSONB 性能显著更优。
-
-### FASTJSON 2 与 Jackson 和 Gson 相比如何？
-
-FASTJSON 2 在基准测试中始终优于 Jackson 和 Gson。详细数据请参阅 [fastjson_benchmark](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark)。
-
-## Spring 集成
-
-### 如何在 Spring Boot 中用 FASTJSON 2 替换 Jackson？
-
-添加扩展依赖并配置消息转换器。详见完整的 [Spring 集成指南](Spring/spring_support_cn.md)。
-
-Spring 6.x 快速配置：
-
-```java
-@Configuration
-public class JsonConfig extends WebMvcConfigurationSupport {
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-        converters.add(0, converter);
-    }
-}
-```
-
-### 如何在 Spring Data Redis 中使用 FASTJSON 2？
-
-使用 `GenericFastJsonRedisSerializer`：
-
-```java
-@Bean
-public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
-    RedisTemplate<String, Object> template = new RedisTemplate<>();
-    template.setConnectionFactory(factory);
-    template.setDefaultSerializer(new GenericFastJsonRedisSerializer());
-    return template;
-}
-```
 
 ## 从 Fastjson 1.x 迁移
-
-### 最简单的迁移方式是什么？
-
-使用兼容包直接替换：
-
-```xml
-<dependency>
-    <groupId>com.alibaba</groupId>
-    <artifactId>fastjson</artifactId>
-    <version>2.0.63</version>
-</dependency>
-```
-
-这提供与 v1 相同的包名（`com.alibaba.fastjson`），底层使用 FASTJSON 2 引擎。
-
-### `ParserConfig.getGlobalInstance().addAccept()` 如何替换？
-
-在 FASTJSON 2 中，使用 `ObjectReaderProvider`：
-
-```java
-JSONFactory.getDefaultObjectReaderProvider().addAutoTypeAccept("com.mycompany.xxx");
-```
 
 ### `ObjectSerializer` 和 `ObjectDeserializer` 的替代方案是什么？
 

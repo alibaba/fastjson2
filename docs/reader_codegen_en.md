@@ -1,9 +1,7 @@
-# Introduction to the Deserialization CodeGen Algorithm
-fastjson2 uses codegen to optimize deserialization performance. The codegen techniques used include:
-*   ASM: Dynamic bytecode class generation based on a built-in, trimmed version of ASM 9.2.
-*   Annotation Processing Tools (APT)
+# Introduction to the Deserialization Field-Matching Algorithm
+fastjson2 uses field-name hashing and field-name prefix byte matching to optimize deserialization performance. This repository is a trimmed fork based on fastjson2 2.0.63, keeping only the `core` module. The compile-time Annotation Processing Tools (APT) code generation module is not part of this repository; deserialization code is not generated at compile time.
 
-## 1. Introduction to the Implementation Algorithm
+## 1. Introduction to the Field-Matching Algorithm
 
 ![image](images/reader_codegen_01.png)
 
@@ -21,11 +19,9 @@ public class Image {
 }
 ```
 
-The following code is generated to quickly associate the names in the JSON with the fields:
+When matching field names, fastjson2 does not read the whole key and compare it as a string. `JSONReader` provides `readFieldNameHashCode()` to compute a field-name hash, and `JSONReaderUTF8` also provides `nextIfName4Match*` fast-matching methods that compare the leading bytes of the key as a single `int`. The field dispatch built on these primitives looks conceptually like this:
 ```java
-public final class Image_FASTJSONReader
-    extends com.alibaba.fastjson2.reader.ObjectReader5 {
-
+public final class Image_FASTJSONReader {
     public Object readObject(
             com.alibaba.fastjson2.JSONReader jsonReader,
             java.lang.reflect.Type fieldType,
@@ -78,7 +74,7 @@ public final class Image_FASTJSONReader
 
 The implementation of the related methods in `JSONReader` is as follows:
 ```java
-class JSONReaderUTF8 implements JSONReader {
+class JSONReaderUTF8 extends JSONReader {
     public final int getRawInt() {
         if (offset + 3 < bytes.length) {
             return UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 1);
@@ -127,9 +123,10 @@ class JSONReaderUTF8 implements JSONReader {
 }
 ```
 
-The advantage of this implementation is that it doesn't need to read the entire key, nor does it need to use `JSONReader#readFieldNameHashCode`. Instead, it reads an integer value from the first few bytes of the key and uses a `switch` statement to route to the corresponding field's processing logic.
+The advantage of this implementation is that it doesn't need to read the entire key and compare it as a string. Instead, it reads an integer value from the leading bytes of the key and uses a `switch` statement to route to the corresponding field's processing logic.
 
-## 2. Algorithm Implementation Code
-Code Generation Implementation:
-*   ASM Implementation: `com.alibaba.fastjson2.reader.ObjectReaderCreatorASM#genRead243`
-*   APT Implementation: `com.alibaba.fastjson2.internal.processor.JSONCompiledAnnotationProcessor.genRead243`
+## 2. Implementation Notes
+*   Field hash matching: `JSONReader#readFieldNameHashCode`, `JSONReaderUTF8#getRawInt`, `JSONReaderUTF8#nextIfName4Match*`
+*   ObjectReader creation: `com.alibaba.fastjson2.reader.ObjectReaderCreator`, which builds field accessors based on reflection and `LambdaMetafactory`
+*   Embedded ASM (`com.alibaba.fastjson2.internal.asm`, a trimmed ASM 9.2) is used for constructor parameter name lookup: `ASMUtils#lookupParameterNames`
+*   Compile-time APT code generation (the codegen module) is not part of this repository. The `@JSONCompiler` and `@JSONCompiled` annotations exist as files only; no deserialization code is generated at compile time.
