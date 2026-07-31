@@ -1,37 +1,18 @@
 # FASTJSON 1.x升级指南
 
 ## 1. 为什么要升级
-* 性能更好，具体性能数据 https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark
+* 性能更好，整体性能优于1.x版本
 * 支持JDK新特性，包括JDK 14引入的Record，Lambda表达式的更原生支持，GraalVM Native-Image支持
-* 原生支持kotlin
-* 支持 JSON Schema https://github.com/alibaba/fastjson2/wiki/json_schema_cn
-* 统一文本和二进制API，在RPC、Redis场景也可以使用FASTJSON v2
-* 更安全，完全删除autoType白名单，提升安全性 https://github.com/alibaba/fastjson2/wiki/fastjson2_autotype_cn
-* 新版本会长期维护，目标为下一个时间提供高性能JSON库，提需求能更快得到响应，提BUG也更快修复
+* 更安全，完全删除autoType白名单，AutoType缺省关闭，提升安全性
 
 ## 2. 如何升级
 
-### 2.1. 如何获得最新版本
-FASTJSON v2项目目前处于活跃状态，会不定期发布新版本，你可以在fastjson2发布地址中获得最新版本 [https://github.com/alibaba/fastjson2/releases](https://github.com/alibaba/fastjson2/releases)
+### 2.1. 版本说明
+本仓库是基于fastjson2 2.0.63裁剪的版本，仅保留core模块，提供核心的JSON序列化与反序列化功能，不包含1.x兼容包及其它扩展模块。
 
+升级方式是使用fastjson v2新的API。
 
-可以两种模式升级：
-* 兼容模式
-* 使用fastjson v2新的API
-
-### 2.2. 兼容模式升级
-升级可以通过兼容模式升级，兼容模式不需要改代码，但在深度使用的场景，不能做到完全兼容，通过这样的模式升级虽然省事，但请认真测试，遇到问题反馈到 [https://github.com/alibaba/fastjson2/issues](https://github.com/alibaba/fastjson2/issues)
-
-* 兼容模式Maven依赖
-```xml
-<dependency>
-    <groupId>com.alibaba</groupId>
-    <artifactId>fastjson</artifactId>
-    <version>${fastjson2.version}</version>
-</dependency>
-```
-
-### 2.3. 使用新API升级
+### 2.2. 使用新API升级
 使用新API是建议的升级方式，使用新的API能获得更多的功能。
 
 * 包名变更
@@ -53,43 +34,30 @@ import com.alibaba.fastjson2.JSONArray;
 </dependency>
 ```
 
-如果你需要用到spring支持的功能，还需要依赖`fastjson2-extension`
-```xml
-<dependency>
-    <groupId>com.alibaba.fastjson2</groupId>
-    <artifactId>fastjson2-extension</artifactId>
-    <version>${fastjson2.version}</version>
-</dependency>
-```
-
-如果你是在kotlin中使用fastjson，需要依赖`fastjson2-kotlin`
-```xml
-<dependency>
-    <groupId>com.alibaba.fastjson2</groupId>
-    <artifactId>fastjson2-kotlin</artifactId>
-    <version>${fastjson2.version}</version>
-</dependency>
-```
+* 行为差异
+  * AutoType缺省关闭，1.x默认带白名单，2.x没有任何白名单，必须显式打开
+  * 所有Feature缺省关闭，1.x默认开启多个Feature
+  * 循环引用检测缺省关闭，1.x默认开启
+  * SmartMatch缺省关闭，1.x默认开启
+  * 方法名有调整，例如`JSON.parse(String)`返回Object，1.x中常用的解析入口在2.x中对应`JSON.parseObject(String, Class)`，序列化入口仍是`JSON.toJSONString(Object)`
 
 ## 3. 常见问题
-### 3.1. ParserConfig.getGlobalInstance().addAccept()如何兼容
-在2.x版本中，ParserConfig添加autoType白名单的功能在ObjectReaderProvider中提供，可以如下的方式配置autoType白名单。
+### 3.1. ParserConfig.getGlobalInstance().addAccept()如何替代
+在1.x中通过ParserConfig添加autoType白名单，在2.x中对应的功能由ObjectReaderProvider提供，可以如下的方式配置autoType白名单。
 ```java
 JSONFactory.getDefaultObjectReaderProvider().addAutoTypeAccept("com.mycompany.xxx");
 ```
 
 ### 3.2. ObjectSerializer 和 ObjectDeserializer 被移除了，有什么新的代替方案
 FASTJSON v2中有比较完善的扩展机制，如下：
-* Annotation介绍 [https://alibaba.github.io/fastjson2/annotations_cn](https://alibaba.github.io/fastjson2/annotations_cn)
-* Annotation注入介绍 [https://alibaba.github.io/fastjson2/mixin_cn](https://alibaba.github.io/fastjson2/mixin_cn)
-* Feature介绍 [https://alibaba.github.io/fastjson2/features_cn](https://alibaba.github.io/fastjson2/features_cn)
-* 使用Mixin注入Annotation定制序列化和反序列化 [https://alibaba.github.io/fastjson2/mixin_cn](https://alibaba.github.io/fastjson2/mixin_cn)
-* 实现ObjectWriter和ObjectReader实现定制序列化和反序列化 [https://alibaba.github.io/fastjson2/register_custom_reader_writer_cn](https://alibaba.github.io/fastjson2/register_custom_reader_writer_cn)
+* Annotation介绍 [annotations_cn.md](annotations_cn.md)
+* Feature介绍 [features_cn.md](features_cn.md)
+* 使用Mixin注入Annotation定制序列化和反序列化 [mixin_cn.md](mixin_cn.md)
+* 实现ObjectWriter和ObjectReader实现定制序列化和反序列化 [register_custom_reader_writer_cn.md](register_custom_reader_writer_cn.md)
 
 ### 3.3. 常见的类扩展升级映射
 | fastjson1                                                   | fastjson2                                             |
 |-------------------------------------------------------------|-------------------------------------------------------|
-| com.alibaba.fastjson.parser.ParserConfig                    | com.alibaba.fastjson2.reader.ObjectReaderProvider     |
 | com.alibaba.fastjson.parser.deserializer.ExtraProcessor     | com.alibaba.fastjson2.filter.ExtraProcessor           |
 | com.alibaba.fastjson.parser.deserializer.ObjectDeserializer | com.alibaba.fastjson2.reader.ObjectReader             |
 | com.alibaba.fastjson.serializer.AfterFilter                 | com.alibaba.fastjson2.filter.AfterFilter              |
@@ -101,7 +69,6 @@ FASTJSON v2中有比较完善的扩展机制，如下：
 | com.alibaba.fastjson.serializer.PropertyFilter              | com.alibaba.fastjson2.filter.PropertyFilter           |
 | com.alibaba.fastjson.serializer.ObjectSerializer            | com.alibaba.fastjson2.writer.ObjectWriter             |
 | com.alibaba.fastjson.serializer.SerializeConfig             | com.alibaba.fastjson2.writer.ObjectWriterProvider     |
-| com.alibaba.fastjson.serializer.ToStringSerializer          | com.alibaba.fastjson2.writer.ObjectWriterImplToString |
 | com.alibaba.fastjson.serializer.ValueFilter                 | com.alibaba.fastjson2.filter.ValueFilter              |
 | com.alibaba.fastjson.serializer.SerializerFeature           | com.alibaba.fastjson2.JSONWriter.Feature              |
 | com.alibaba.fastjson.parser.Feature                         | com.alibaba.fastjson2.JSONReader.Feature              |

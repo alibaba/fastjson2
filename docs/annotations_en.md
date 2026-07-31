@@ -76,7 +76,7 @@ public static class VO {
 
 ### 1.5 Configure Serialize Features
 
-The serialized Feature can be specified through JSONField.serializeFeatures. More configuration features reference [https://alibaba.github.io/fastjson2/features_cn](https://alibaba.github.io/fastjson2/features_cn) 。
+The serialized Feature can be specified through JSONField.serializeFeatures. More configuration features reference [features_en.md](features_en.md) 。
 ```java
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter.Feature;
@@ -345,4 +345,4 @@ public class Bean2 {
 # 3. Inject Annotation based on mixin mechanism
 
 When you need to customize and serialize some classes in LIB, and you cannot modify the code of these classes, you can use the Minxin function of FASTJSON2 to inject Annotation.
-For specific usage, refer to here: [https://alibaba.github.io/fastjson2/mixin_cn](https://alibaba.github.io/fastjson2/mixin_cn)
+For specific usage, refer to here: [mixin_en.md](mixin_en.md)

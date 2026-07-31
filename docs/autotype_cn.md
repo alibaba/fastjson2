@@ -9,15 +9,15 @@ FASTJSON支持AutoType功能，这个功能会在序列化的JSON字符串中带
 * 显式打开后，会经过内置黑名单过滤。该黑名单能拦截大部分常见风险，这个机制不能保证绝对安全，打开AutoType不应该在暴露在公网的场景下使用。
 
 ### 2.1 accept前缀不覆盖黑名单类型（2.0.63 起）
-`ClassLoader`子类和JDK SQL的`DataSource`/`RowSet`实现是反序列化利用链的常见入口，**用前缀注册accept不再放行这些类型**，必须写全类名才算显式授权。适用于`addAutoTypeAccept`、`-Dfastjson2.autoTypeAccept`、`JSONReader.autoTypeFilter`，以及fastjson 1.x兼容模式的`ParserConfig.addAccept`。
+`ClassLoader`子类和JDK SQL的`DataSource`/`RowSet`实现是反序列化利用链的常见入口，**用前缀注册accept不再放行这些类型**，必须写全类名才算显式授权。适用于`addAutoTypeAccept`、`-Dfastjson2.autoTypeAccept`、`JSONReader.autoTypeFilter`。
 
 ```java
 // 2.0.63 之前：前缀accept会放行 DruidDataSource
 // 2.0.63 起：被拒绝
-ParserConfig.getGlobalInstance().addAccept("com.alibaba.druid.pool.");
+JSONFactory.getDefaultObjectReaderProvider().addAutoTypeAccept("com.alibaba.druid.pool.");
 
 // 确实需要时，写全类名
-ParserConfig.getGlobalInstance().addAccept("com.alibaba.druid.pool.DruidDataSource");
+JSONFactory.getDefaultObjectReaderProvider().addAutoTypeAccept("com.alibaba.druid.pool.DruidDataSource");
 ```
 
 在此之前，注册了accept前缀的类型比完全没有注册的类型检查更松：同一个类型名在没有accept前缀时会被黑名单拦下，加了前缀反而能加载出来。
