@@ -12,6 +12,7 @@ import com.alibaba.fastjson2.util.*;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
@@ -1042,7 +1043,93 @@ public class ObjectWriterBaseModule
             return new ObjectWriter<JSONObject>() {
                 @Override
                 public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-                    jsonWriter.write((JSONObject) object);
+                    if (object == null) {
+                        jsonWriter.writeNull();
+                        return;
+                    }
+
+                    Map map = (Map) object;
+                    if (map.isEmpty()) {
+                        jsonWriter.writeRaw('{', '}');
+                        return;
+                    }
+
+                    jsonWriter.startObject();
+
+                    boolean first = true;
+                    for (Object o : map.entrySet()) {
+                        Map.Entry entry = (Map.Entry) o;
+                        Object value = entry.getValue();
+                        if (value == null && (jsonWriter.getFeatures() & JSONWriter.Feature.WriteMapNullValue.mask) == 0) {
+                            continue;
+                        }
+
+                        if (!first) {
+                            jsonWriter.writeComma();
+                        }
+                        first = false;
+
+                        Object key = entry.getKey();
+                        if (key instanceof String) {
+                            jsonWriter.writeString((String) key);
+                        } else {
+                            jsonWriter.writeAny(key);
+                        }
+
+                        jsonWriter.writeColon();
+
+                        if (value == null) {
+                            jsonWriter.writeNull();
+                            continue;
+                        }
+
+                        Class<?> valueClass = value.getClass();
+                        if (valueClass == String.class) {
+                            jsonWriter.writeString((String) value);
+                            continue;
+                        }
+                        if (valueClass == Integer.class) {
+                            jsonWriter.writeInt32((Integer) value);
+                            continue;
+                        }
+                        if (valueClass == Long.class) {
+                            jsonWriter.writeInt64((Long) value);
+                            continue;
+                        }
+                        if (valueClass == Boolean.class) {
+                            jsonWriter.writeBool((Boolean) value);
+                            continue;
+                        }
+                        if (valueClass == BigDecimal.class) {
+                            jsonWriter.writeDecimal((BigDecimal) value, features, null);
+                            continue;
+                        }
+                        if (valueClass == Double.class) {
+                            jsonWriter.writeDouble((Double) value);
+                            continue;
+                        }
+                        if (valueClass == Float.class) {
+                            jsonWriter.writeFloat((Float) value);
+                            continue;
+                        }
+                        if (valueClass == JSONArray.class) {
+                            jsonWriter.write((JSONArray) value);
+                            continue;
+                        }
+                        if (valueClass == JSONObject.class) {
+                            jsonWriter.write((JSONObject) value);
+                            continue;
+                        }
+
+                        ObjectWriter valueWriter = jsonWriter.context.getObjectWriter(valueClass, valueClass);
+                        if (valueWriter != null) {
+                            valueWriter.write(jsonWriter, value, key, valueClass, features);
+                        } else {
+                            jsonWriter.writeAny(value);
+                        }
+                    }
+
+                    jsonWriter.endObject();
                 }
             };
         }
@@ -1050,7 +1137,73 @@ public class ObjectWriterBaseModule
             return new ObjectWriter<JSONArray>() {
                 @Override
                 public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-                    jsonWriter.write((JSONArray) object);
+                    if (object == null) {
+                        jsonWriter.writeNull();
+                        return;
+                    }
+
+                    List list = (List) object;
+                    int size = list.size();
+                    if (size == 0) {
+                        jsonWriter.writeRaw('[', ']');
+                        return;
+                    }
+
+                    jsonWriter.startArray();
+
+                    for (int i = 0; i < size; i++) {
+                        if (i != 0) {
+                            jsonWriter.writeComma();
+                        }
+
+                        Object item = list.get(i);
+                        if (item == null) {
+                            jsonWriter.writeNull();
+                            continue;
+                        }
+
+                        Class<?> itemClass = item.getClass();
+                        if (itemClass == String.class) {
+                            jsonWriter.writeString((String) item);
+                            continue;
+                        }
+                        if (itemClass == Integer.class) {
+                            jsonWriter.writeInt32((Integer) item);
+                            continue;
+                        }
+                        if (itemClass == Long.class) {
+                            jsonWriter.writeInt64((Long) item);
+                            continue;
+                        }
+                        if (itemClass == Boolean.class) {
+                            jsonWriter.writeBool((Boolean) item);
+                            continue;
+                        }
+                        if (itemClass == BigDecimal.class) {
+                            jsonWriter.writeDecimal((BigDecimal) item, features, null);
+                            continue;
+                        }
+                        if (itemClass == Double.class) {
+                            jsonWriter.writeDouble((Double) item);
+                            continue;
+                        }
+                        if (itemClass == Float.class) {
+                            jsonWriter.writeFloat((Float) item);
+                            continue;
+                        }
+                        if (itemClass == JSONArray.class) {
+                            jsonWriter.write((JSONArray) item);
+                            continue;
+                        }
+                        if (itemClass == JSONObject.class) {
+                            jsonWriter.write((JSONObject) item);
+                            continue;
+                        }
+
+                        jsonWriter.writeAny(item);
+                    }
+
+                    jsonWriter.endArray();
                 }
             };
         }

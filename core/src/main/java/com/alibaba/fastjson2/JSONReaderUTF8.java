@@ -4507,10 +4507,20 @@ class JSONReaderUTF8
             int offset = this.offset;
             if (offset + 2 < bytes.length && bytes[offset] == 'u' && bytes[offset + 1] == 'l' && bytes[offset + 2] == 'l') {
                 offset += 3;
-                this.offset = offset;
-                if (offset < bytes.length) {
-                    this.ch = (char) bytes[offset];
+                int c = offset >= end ? EOI : (char) bytes[offset++];
+                while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+                    c = offset >= end ? EOI : (char) bytes[offset++];
                 }
+                if (comma = (c == ',')) {
+                    c = offset >= end ? EOI : (char) bytes[offset++];
+                    while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+                        c = offset >= end ? EOI : (char) bytes[offset++];
+                    }
+                }
+                this.ch = (char) c;
+                this.offset = offset;
+            } else {
+                throw new JSONException(info("json syntax error, not match null"));
             }
         }
     }
@@ -4546,7 +4556,8 @@ class JSONReaderUTF8
         boolean val;
         final byte[] bytes = this.bytes;
         int offset = this.offset;
-        byte ch = (byte) this.ch;
+        int end = this.end;
+        int ch = this.ch;
         if (ch == 't' && offset + 2 < bytes.length && bytes[offset] == 'r' && bytes[offset + 1] == 'u' && bytes[offset + 2] == 'e') {
             offset += 3;
             val = true;
@@ -4570,9 +4581,22 @@ class JSONReaderUTF8
             } else {
                 throw new JSONException(info("can not convert to boolean : " + str));
             }
+            return val;
+        }
+
+        ch = offset >= end ? EOI : (char) bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            ch = offset >= end ? EOI : bytes[offset++];
+        }
+
+        if (comma = (ch == ',')) {
+            ch = offset >= end ? EOI : bytes[offset++];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                ch = offset >= end ? EOI : bytes[offset++];
+            }
         }
         this.offset = offset;
-        ch = bytes[offset];
         this.ch = (char) ch;
         return val;
     }
