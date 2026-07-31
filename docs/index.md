@@ -1,29 +1,19 @@
-# 0. FASTJSON 2.0介绍
+# FASTJSON2 精简版
 
-`FASTJSON v2`是`FASTJSON`项目的重要升级，目标是为下一个十年提供一个高性能的`JSON`库。通过同一套`API`，
+基于 `FASTJSON2 2.0.63` 裁剪的 JSON 库，仅保留 `JSON` 文本协议（`JSON/JSONB` 中已移除 `JSONB`）与核心树 API。面向需要纯 `JSON` 解析/序列化的场景，无多余模块。
 
-- 支持`JSON/JSONB`两种协议，[`JSONPath`](https://alibaba.github.io/fastjson2/JSONPath/jsonpath_cn) 是一等公民。
-- 支持全量解析和部分解析。
-- 支持`Java`服务端、客户端`Android`、大数据场景。
-- 支持`Kotlin`
-- 支持`JSON Schema` [https://alibaba.github.io/fastjson2/JSONSchema/json_schema_cn](https://alibaba.github.io/fastjson2/JSONSchema/json_schema_cn)
-- 支持`Android`
-- 支持`Graal Native-Image`
+## 功能范围
 
-![fastjson](images/logo.jpg "fastjson")
+- `JSON` 文本协议解析与序列化（`String` / `byte[]` 输入，UTF-8 / UTF-16）
+- `JSONObject` / `JSONArray` 树模型
+- `JavaBean` 反序列化与序列化（含 ASM / 反射两种实现）
+- 注解：`@JSONField`、`@JSONType`、`@JSONCreator`、`@JSONCompiled` 等
+- 序列化过滤器（`NameFilter` / `ValueFilter` / `PropertyFilter` 等）
+- `AutoType` 反序列化支持（默认关闭）
 
-相关文档：
+已移除：`JSONB` 二进制协议、`JSONPath`、`JSON Schema`、`CSV`、`Kotlin` 模块、`Spring` 扩展、`Android`、`fastjson1-compatible` 兼容层、JMH benchmark。
 
-- `JSONB`格式文档：  
-  [https://alibaba.github.io/fastjson2/JSONB/jsonb_format_cn](https://alibaba.github.io/fastjson2/JSONB/jsonb_format_cn)
-- `FASTJSON v2`性能有了很大提升，具体性能数据看这里：  
-  [https://alibaba.github.io/fastjson2/benchmark_cn](https://alibaba.github.io/fastjson2/benchmark_cn)
-
-# 1. 使用准备
-
-## 1.1 添加依赖
-
-在`fastjson v2`中，`groupId`和`1.x`不一样，是`com.alibaba.fastjson2`：
+## 1. 添加依赖
 
 `Maven`:
 
@@ -43,316 +33,95 @@ dependencies {
 }
 ```
 
-可以在 [maven.org](https://search.maven.org/artifact/com.alibaba.fastjson2/fastjson2) 查看最新可用的版本。
+## 2. 解析
 
-## 1.2 其他模块
-
-### `Fastjson v1`兼容模块
-
-如果原来使用`fastjson 1.2.x`版本，可以使用兼容包，兼容包不能保证100%兼容，请仔细测试验证，发现问题请及时反馈。
-
-`Maven`:
-
-```xml
-<dependency>
-    <groupId>com.alibaba</groupId>
-    <artifactId>fastjson</artifactId>
-    <version>2.0.63</version>
-</dependency>
-```
-
-`Gradle`:
-
-```groovy
-dependencies {
-    implementation 'com.alibaba:fastjson:2.0.63'
-}
-```
-
-### `Fastjson Kotlin`集成模块
-
-如果项目使用`Kotlin`，可以使用`fastjson-kotlin`模块，使用方式上采用`kotlin`的特性。
-
-`Maven`:
-
-```xml
-<dependency>
-    <groupId>com.alibaba.fastjson2</groupId>
-    <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.63</version>
-</dependency>
-```
-
-`Gradle`:
-
-```kotlin
-dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.63")
-}
-```
-
-### `Fastjson Extension`扩展模块
-
-如果项目使用`SpringFramework`等框架，可以使用`fastjson-extension`模块，使用方式参考 [SpringFramework Support](https://alibaba.github.io/fastjson2/Spring/spring_support_cn)。
-
-`Maven`:
-
-```xml
-<dependency>
-    <groupId>com.alibaba.fastjson2</groupId>
-    <artifactId>fastjson2-extension</artifactId>
-    <version>2.0.63</version>
-</dependency>
-```
-
-`Gradle`:
-
-```groovy
-dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.63'
-}
-```
-
-# 2 简单使用
-
-在`fastjson v2`中，`package`和`1.x`不一样，是`com.alibaba.fastjson2`。如果你之前用的是`fastjson1`，大多数情况直接更包名就即可。
-
-### 2.1 将`JSON`解析为`JSONObject`
-
-`Java`:
+### 2.1 解析为 `JSONObject`
 
 ```java
-String text = "...";
+String text = "{\"id\":1,\"name\":\"fastjson2\"}";
 JSONObject data = JSON.parseObject(text);
+```
 
+`byte[]` 输入：
+
+```java
 byte[] bytes = ...;
 JSONObject data = JSON.parseObject(bytes);
 ```
 
-`Kotlin`:
-
-```kotlin
-import com.alibaba.fastjson2.*
-
-val text = ... // String
-val data = text.parseObject()
-
-val bytes = ... // ByteArray
-val data = bytes.parseObject() // JSONObject
-```
-
-### 2.2 将`JSON`解析为`JSONArray`
-
-`Java`:
+### 2.2 解析为 `JSONArray`
 
 ```java
-String text = "...";
+String text = "[1,2,3]";
 JSONArray data = JSON.parseArray(text);
 ```
 
-`Kotlin`:
-
-```kotlin
-import com.alibaba.fastjson2.*
-
-val text = ... // String
-val data = text.parseArray() // JSONArray
-```
-
-### 2.3 将`JSON`解析为`Java`对象
-
-`Java`:
+### 2.3 解析为 `JavaBean`
 
 ```java
-String text = "...";
-User data = JSON.parseObject(text, User.class);
+String text = "{\"id\":1,\"name\":\"fastjson2\"}";
+User user = JSON.parseObject(text, User.class);
 ```
 
-`Kotlin`:
-
-```kotlin
-import com.alibaba.fastjson2.*
-
-val text = ... // String
-val data = text.to<User>() // User
-val data = text.parseObject<User>() // User
-```
-
-### 2.4 将`Java`对象序列化为`JSON`
-
-`Java`:
+### 2.4 解析为任意类型
 
 ```java
-Object data = "...";
-String text = JSON.toJSONString(data);
-byte[] text = JSON.toJSONBytes(data);
+Object value = JSON.parse("{\"id\":1}");       // JSONObject
+Object value = JSON.parse("[1,2,3]");          // JSONArray
+Object value = JSON.parse("1.5");              // BigDecimal
 ```
 
-`Kotlin`:
-
-```kotlin
-import com.alibaba.fastjson2.*
-
-val data = ... // Any
-val text = data.toJSONString() // String
-val bytes = data.toJSONByteArray() // ByteArray
-```
-
-### 2.5 使用`JSONObject`、`JSONArray`
-
-#### 2.5.1 获取简单属性
+## 3. 序列化
 
 ```java
-String text = "{\"id\": 2,\"name\": \"fastjson2\"}";
-JSONObject obj = JSON.parseObject(text);
+String text = JSON.toJSONString(obj);          // String
+byte[] bytes = JSON.toJSONBytes(obj);          // byte[]
+```
+
+`JSONObject` / `JSONArray` 实例方法：
+
+```java
+String text = obj.toJSONString();
+String text = obj.toJSONString(JSONWriter.Feature.PrettyFormat);
+```
+
+## 4. `JSONObject` / `JSONArray` 使用
+
+### 4.1 读取属性
+
+```java
+JSONObject obj = JSON.parseObject("{\"id\":2,\"name\":\"fastjson2\",\"enable\":true}");
 
 int id = obj.getIntValue("id");
 String name = obj.getString("name");
+boolean enable = obj.getBooleanValue("enable");
 ```
+
+### 4.2 读取嵌套结构
 
 ```java
-String text = "[2, \"fastjson2\"]";
-JSONArray array = JSON.parseArray(text);
-
-int id = array.getIntValue(0);
-String name = array.getString(1);
+JSONArray array = obj.getJSONArray("items");
+JSONObject child = obj.getJSONObject("child");
 ```
 
-#### 2.5.2 读取`JavaBean`
-
-`Java`:
+### 4.3 修改
 
 ```java
-JSONArray array = ...
-JSONObject obj = ...
-
-User user = array.getObject(0, User.class);
-User user = obj.getObject("key", User.class);
+obj.put("key", value);
+obj.remove("key");
+obj.containsKey("key");
 ```
 
-`Kotlin`:
+### 4.4 `Map` / `List` 语义
 
-```kotlin
-val array = ... // JSONArray
-val obj = ... // JSONObject
+`JSONObject` 继承自 `Map<String, Object>`，`JSONArray` 继承自 `List<Object>`，可直接使用集合 API。
 
-val user = array.getObject<User>(0)
-val user = obj.getObject<User>("key")
-```
+## 5. 进阶
 
-#### 2.5.3 转为`JavaBean`
-
-`Java`:
-
-```java
-JSONArray array = ...
-JSONObject obj = ...
-
-User user = obj.toJavaObject(User.class);
-List<User> users = array.toJavaList(User.class);
-```
-
-`Kotlin`:
-
-```kotlin
-val array = ... // JSONArray
-val obj = ... // JSONObject
-
-val user = obj.toObject<User>() // User
-val users = array.toList<User>() // List<User>
-```
-
-### 2.6 将`JavaBean`对象序列化为`JSON`
-
-`Java`:
-
-```java
-class User {
-    public int id;
-    public String name;
-}
-
-User user = new User();
-user.id = 2;
-user.name = "FastJson2";
-
-String text = JSON.toJSONString(user);
-byte[] bytes = JSON.toJSONBytes(user);
-```
-
-`Kotlin`:
-
-```kotlin
-class User(
-    var id: Int,
-    var name: String
-)
-
-val user = User()
-user.id = 2
-user.name = "FastJson2"
-
-val text = user.toJSONString() // String
-val bytes = user.toJSONByteArray() // ByteArray
-```
-
-序列化结果:
-
-```json
-{
-    "id"   : 2,
-    "name" : "FastJson2"
-}
-```
-
-# 3. 进阶使用
-
-### 3.1 使用`JSONB`
-
-#### 3.1.1 将`JavaBean`对象序列化`JSONB`
-
-```java
-User user = ...;
-byte[] bytes = JSONB.toBytes(user);
-byte[] bytes = JSONB.toBytes(user, JSONWriter.Feature.BeanToArray);
-```
-
-#### 3.1.2 将`JSONB`数据解析为`JavaBean`
-
-```java
-byte[] bytes = ...
-User user = JSONB.parseObject(bytes, User.class);
-User user = JSONB.parseObject(bytes, User.class, JSONReader.Feature.SupportBeanArrayMapping);
-```
-
-### 3.2 使用`JSONPath`
-
-#### 3.2.1 使用`JSONPath`读取部分数据
-
-```java
-String text = ...;
-JSONPath path = JSONPath.of("$.id"); // 缓存起来重复使用能提升性能
-
-JSONReader parser = JSONReader.of(text);
-Object result = path.extract(parser);
-```
-
-#### 3.2.2 使用`JSONPath`读取部分`byte[]`的数据
-
-```java
-byte[] bytes = ...;
-JSONPath path = JSONPath.of("$.id"); // 缓存起来重复使用能提升性能
-
-JSONReader parser = JSONReader.of(bytes);
-Object result = path.extract(parser);
-```
-
-#### 3.2.3 使用`JSONPath`读取部分`byte[]`的数据
-
-```java
-byte[] bytes = ...;
-JSONPath path = JSONPath.of("$.id"); // 缓存起来重复使用能提升性能
-
-JSONReader parser = JSONReader.ofJSONB(bytes); // 注意这里使用ofJSONB方法
-Object result = path.extract(parser);
-```
+| 主题 | 文档 |
+|------|------|
+| 序列化特性 | [features_cn.md](features_cn.md) |
+| 注解 | [annotations_cn.md](annotations_cn.md) |
+| 自定义序列化器 | [register_custom_reader_writer_cn.md](register_custom_reader_writer_cn.md) |
+| 过滤器 | [Filter/index_cn.md](Filter/index_cn.md) |
+| 性能优化 | [performance_cn.md](performance_cn.md) |
