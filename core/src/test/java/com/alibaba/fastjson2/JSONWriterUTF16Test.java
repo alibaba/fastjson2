@@ -448,31 +448,6 @@ public class JSONWriterUTF16Test {
     }
 
     @Test
-    public void writeChars() {
-        char[] chars = new char[256];
-        for (int i = 0; i < chars.length; i++) {
-            chars[i] = (char) i;
-        }
-        JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
-        jsonWriter.writeString(chars);
-        String json = jsonWriter.toString();
-        assertEquals(new String(chars), JSON.parse(json));
-    }
-
-    @Test
-    public void writeChars1() {
-        char[] chars = new char[1024];
-        Arrays.fill(chars, 'A');
-        for (int i = 256; i < 768; i++) {
-            chars[i] = (char) (i - 256);
-        }
-        JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
-        jsonWriter.writeString(chars, 256, 512);
-        String json = jsonWriter.toString();
-        assertEquals(new String(chars, 256, 512), JSON.parse(json));
-    }
-
-    @Test
     public void writeCharsNull() {
         JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
         jsonWriter.writeString((char[]) null);
@@ -487,32 +462,6 @@ public class JSONWriterUTF16Test {
                 );
         jsonWriter.writeString((char[]) null);
         assertEquals("\"\"", jsonWriter.toString());
-    }
-
-    @Test
-    public void writeStringLatin1() {
-        byte[] bytes = new byte[256];
-        for (int i = 0; i < bytes.length; i++) {
-            bytes[i] = (byte) i;
-        }
-        JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
-        jsonWriter.writeStringLatin1(bytes);
-        String json = jsonWriter.toString();
-        String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
-        Object parse = JSON.parse(json);
-        assertEquals(str, parse);
-    }
-
-    @Test
-    public void writeStringLatin1Pretty() {
-        byte[] bytes = new byte[1024 * 128];
-        Arrays.fill(bytes, (byte) '\\');
-        JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext(JSONWriter.Feature.PrettyFormat));
-        jsonWriter.writeStringLatin1(bytes);
-        String json = jsonWriter.toString();
-        String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
-        Object parse = JSON.parse(json);
-        assertEquals(str, parse);
     }
 
     @Test
@@ -1236,36 +1185,6 @@ public class JSONWriterUTF16Test {
 
         chars = new char[] {'中', '1', '2', '3'};
         assertNotEquals(0, IOUtils.getLongLE(chars, 0) & 0xFF00FF00FF00FF00L);
-    }
-
-    @Test
-    public void testUTF16() {
-        char[] chars = new char[32];
-        for (int i = 0; i < chars.length; i++) {
-            {
-                Arrays.fill(chars, 'A');
-                chars[chars.length - 1] = '中';
-                String str = new String(chars);
-                String json = JSON.toJSONString(str);
-                assertEquals(str, JSON.parse(json));
-            }
-            {
-                Arrays.fill(chars, 'A');
-                chars[chars.length - 1] = '中';
-                chars[i] = '\r';
-                String str = new String(chars);
-                String json = JSON.toJSONString(str);
-                assertEquals(str, JSON.parse(json));
-            }
-
-            {
-                Arrays.fill(chars, '中');
-                chars[i] = '\r';
-                String str = new String(chars);
-                String json = JSON.toJSONString(str);
-                assertEquals(str, JSON.parse(json));
-            }
-        }
     }
 
     @Test

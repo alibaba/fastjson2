@@ -446,30 +446,6 @@ public class ObjectReaderCreator {
                 }
             };
         }
-        if (objectClass == Object.class) {
-            return new ObjectReader<T>() {
-                @Override
-                public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-                    if (jsonReader.isObject()) {
-                        return (T) jsonReader.readObject();
-                    }
-                    if (jsonReader.isArray()) {
-                        return (T) jsonReader.readArray();
-                    }
-                    if (jsonReader.isString()) {
-                        return (T) jsonReader.readString();
-                    }
-                    if (jsonReader.isBool()) {
-                        return (T) (Boolean) jsonReader.readBoolValue();
-                    }
-                    if (jsonReader.isNumber()) {
-                        return (T) jsonReader.readNumber();
-                    }
-                    jsonReader.readNull();
-                    return null;
-                }
-            };
-        }
         throw new UnsupportedOperationException();
     }
 

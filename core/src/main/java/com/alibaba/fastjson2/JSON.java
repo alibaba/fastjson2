@@ -27,7 +27,6 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReader.EOI;
 import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
-import static com.alibaba.fastjson2.JSONReader.Feature.UseNativeObject;
 
 /**
  * This is the main entry point for using fastjson2 API.
@@ -125,22 +124,14 @@ public interface JSON {
             Object object;
             char ch = reader.current();
 
-            if (context.objectSupplier == null
-                    && (context.features & UseNativeObject.mask) == 0
-                    && (ch == '{' || ch == '[')
-            ) {
+            if (ch == '{' || ch == '[') {
                 if (ch == '{') {
-                    JSONObject jsonObject = new JSONObject();
-                    reader.read(jsonObject, 0);
-                    object = jsonObject;
+                    object = reader.readObject();
                 } else {
-                    JSONArray array = new JSONArray();
-                    reader.read(array);
-                    object = array;
+                    object = reader.readArray();
                 }
             } else {
-                ObjectReader<?> objectReader = provider.getObjectReader(Object.class, false);
-                object = objectReader.readObject(reader, null, null, 0);
+                object = reader.readAny();
             }
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -2497,8 +2488,7 @@ public interface JSON {
             if (reader.nextIfNull()) {
                 return null;
             }
-            JSONArray array = new JSONArray();
-            reader.read(array);
+            JSONArray array = new JSONArray(reader.readArray());
 
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -2525,8 +2515,7 @@ public interface JSON {
             if (reader.nextIfNull()) {
                 return null;
             }
-            JSONArray array = new JSONArray();
-            reader.read(array);
+            JSONArray array = new JSONArray(reader.readArray());
 
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -2556,8 +2545,7 @@ public interface JSON {
             if (reader.nextIfNull()) {
                 return null;
             }
-            JSONArray array = new JSONArray();
-            reader.read(array);
+            JSONArray array = new JSONArray(reader.readArray());
 
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -2584,8 +2572,7 @@ public interface JSON {
             if (reader.nextIfNull()) {
                 return null;
             }
-            JSONArray array = new JSONArray();
-            reader.read(array);
+            JSONArray array = new JSONArray(reader.readArray());
 
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -2613,8 +2600,7 @@ public interface JSON {
             if (reader.nextIfNull()) {
                 return null;
             }
-            JSONArray array = new JSONArray();
-            reader.read(array);
+            JSONArray array = new JSONArray(reader.readArray());
 
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -2665,8 +2651,7 @@ public interface JSON {
             if (reader.nextIfNull()) {
                 return null;
             }
-            JSONArray array = new JSONArray();
-            reader.read(array);
+            JSONArray array = new JSONArray(reader.readArray());
 
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -2694,8 +2679,7 @@ public interface JSON {
             if (reader.nextIfNull()) {
                 return null;
             }
-            JSONArray array = new JSONArray();
-            reader.read(array);
+            JSONArray array = new JSONArray(reader.readArray());
 
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -2723,8 +2707,7 @@ public interface JSON {
             if (reader.nextIfNull()) {
                 return null;
             }
-            JSONArray array = new JSONArray();
-            reader.read(array);
+            JSONArray array = new JSONArray(reader.readArray());
 
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));

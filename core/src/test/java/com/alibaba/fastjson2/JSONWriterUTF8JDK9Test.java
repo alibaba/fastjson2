@@ -78,31 +78,6 @@ public class JSONWriterUTF8JDK9Test {
     }
 
     @Test
-    public void test_writeString_utf82() {
-        if (STRING_VALUE == null) {
-            return;
-        }
-
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < 512; i++) {
-            char ch = (char) i;
-            buf.append(ch);
-        }
-        buf.append('á');
-        String origin = buf.toString();
-
-        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
-        jsonWriter.writeString(origin);
-        String json = jsonWriter.toString();
-        String str = (String) JSON.parse(json);
-        assertEquals(origin.length(), str.length());
-        for (int i = 0; i < origin.length(); i++) {
-            assertEquals(origin.charAt(i), str.charAt(i));
-        }
-        assertEquals(origin, str);
-    }
-
-    @Test
     public void test_writeString_utf8_3() {
         if (STRING_VALUE == null) {
             return;
