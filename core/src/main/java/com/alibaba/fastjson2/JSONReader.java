@@ -43,6 +43,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.*;
  *
  * @since 2.0.0
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class JSONReader
         implements Closeable {
     static final int MAX_EXP = 2047;

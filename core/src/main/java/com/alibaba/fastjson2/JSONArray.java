@@ -10,6 +10,7 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONObject.NONE_DIRECT_FEATURES;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
+@SuppressWarnings("unchecked")
 public class JSONArray
         extends ArrayList<Object> {
     private static final long serialVersionUID = 1L;

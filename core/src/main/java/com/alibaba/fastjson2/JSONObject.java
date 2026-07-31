@@ -19,7 +19,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.ANDROID;
 import static com.alibaba.fastjson2.util.JDKUtils.GRAAL;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"unchecked", "deprecation"})
 public class JSONObject
         extends LinkedHashMap<String, Object>
         implements InvocationHandler {
