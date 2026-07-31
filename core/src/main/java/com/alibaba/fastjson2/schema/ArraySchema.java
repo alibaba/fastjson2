@@ -143,9 +143,9 @@ public final class ArraySchema
     }
 
     @Override
-    protected ValidateResult validateInternal(Object value) {
+    protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         if (value == null) {
-            return typed ? FAIL_INPUT_NULL : SUCCESS;
+            return typed ? handleError(handler, null, path, FAIL_INPUT_NULL) : SUCCESS;
         }
 
         if (encoded) {
@@ -153,44 +153,74 @@ public final class ArraySchema
                 try {
                     value = JSON.parseArray((String) value);
                 } catch (JSONException e) {
-                    return FAIL_INPUT_NOT_ENCODED;
+                    return handleError(handler, value, path, FAIL_INPUT_NOT_ENCODED);
                 }
             } else {
-                return FAIL_INPUT_NOT_ENCODED;
+                return handleError(handler, value, path, FAIL_INPUT_NOT_ENCODED);
             }
         }
 
         if (value instanceof Object[]) {
             final Object[] items = (Object[]) value;
-            return validateItems(value, items.length, i -> items[i]);
+            return validateItems(value, items.length, i -> items[i], handler, path);
         }
 
         if (value.getClass().isArray()) {
             final int size = Array.getLength(value);
             final Object finalValue = value;
-            return validateItems(finalValue, size, i -> Array.get(finalValue, i));
+            return validateItems(finalValue, size, i -> Array.get(finalValue, i), handler, path);
         }
 
         if (value instanceof Collection) {
             final Collection<?> items = (Collection<?>) value;
             final Iterator<?> iterator = items.iterator();
-            return validateItems(value, items.size(), i -> iterator.next());
+            return validateItems(value, items.size(), i -> iterator.next(), handler, path);
         }
 
-        return typed ? FAIL_TYPE_NOT_MATCH : SUCCESS;
+        return typed ? handleError(handler, value, path, FAIL_TYPE_NOT_MATCH) : SUCCESS;
     }
 
-    private ValidateResult validateItems(final Object value, final int size, IntFunction<Object> itemGetter) {
+    private ValidateResult validateItems(final Object value, final int size, IntFunction<Object> itemGetter, ValidationHandler handler, String path) {
+        boolean totalSuccess = true;
+        ValidateResult firstFail = null;
+
         if (minLength >= 0 && size < minLength) {
-            return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
+            ValidateResult raw = new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
+            ValidateResult r = handleError(handler, value, path, raw);
+            if (handler == null || r.isAbort()) {
+                return r;
+            }
+
+            totalSuccess = false;
+            if (firstFail == null) {
+                firstFail = r;
+            }
         }
 
         if (maxLength >= 0 && size > maxLength) {
-            return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
+            ValidateResult raw = new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
+            ValidateResult r = handleError(handler, value, path, raw);
+            if (handler == null || r.isAbort()) {
+                return r;
+            }
+
+            totalSuccess = false;
+            if (firstFail == null) {
+                firstFail = r;
+            }
         }
 
         if (!additionalItems && size > prefixItems.length) {
-            return new ValidateResult(false, "additional items not match, max size %s, but %s", prefixItems.length, size);
+            ValidateResult raw = new ValidateResult(false, "additional items not match, max size %s, but %s", prefixItems.length, size);
+            ValidateResult r = handleError(handler, value, path, raw);
+            if (handler == null || r.isAbort()) {
+                return r;
+            }
+
+            totalSuccess = false;
+            if (firstFail == null) {
+                firstFail = r;
+            }
         }
 
         final boolean isCollection = value instanceof Collection;
@@ -198,30 +228,52 @@ public final class ArraySchema
         int containsCount = 0;
         for (int index = 0; index < size; index++) {
             Object item = itemGetter.apply(index);
+            String itemPath = path + "[" + index + "]";
 
             boolean prefixMatch = false;
             if (index < prefixItems.length) {
-                ValidateResult result = prefixItems[index].validate(item);
+                ValidateResult result = prefixItems[index].validateInternal(item, handler, itemPath);
                 if (!result.isSuccess()) {
-                    return result;
+                    if (handler == null || result.isAbort()) {
+                        return result;
+                    }
+
+                    totalSuccess = false;
+                    if (firstFail == null) {
+                        firstFail = result;
+                    }
                 }
                 prefixMatch = true;
             } else if (isCollection && itemSchema == null && additionalItem != null) { // 只有 Collection 才会执行这部分校验
-                ValidateResult result = additionalItem.validate(item);
+                ValidateResult result = additionalItem.validateInternal(item, handler, itemPath);
                 if (!result.isSuccess()) {
-                    return result;
+                    if (handler == null || result.isAbort()) {
+                        return result;
+                    }
+
+                    totalSuccess = false;
+                    if (firstFail == null) {
+                        firstFail = result;
+                    }
                 }
             }
 
             if (!prefixMatch && itemSchema != null) {
-                ValidateResult result = itemSchema.validate(item);
+                ValidateResult result = itemSchema.validateInternal(item, handler, itemPath);
                 if (!result.isSuccess()) {
-                    return result;
+                    if (handler == null || result.isAbort()) {
+                        return result;
+                    }
+
+                    totalSuccess = false;
+                    if (firstFail == null) {
+                        firstFail = result;
+                    }
                 }
             }
 
             if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
-                ValidateResult result = this.contains.validate(item);
+                ValidateResult result = this.contains.validateInternal(item, null, itemPath);
                 if (result == SUCCESS) {
                     containsCount++;
                 }
@@ -237,51 +289,85 @@ public final class ArraySchema
                 }
 
                 if (!uniqueItemsSet.add(item)) {
-                    return UNIQUE_ITEMS_NOT_MATCH;
+                    ValidateResult r = handleError(handler, item, itemPath, UNIQUE_ITEMS_NOT_MATCH);
+                    if (handler == null || r.isAbort()) {
+                        return r;
+                    }
+
+                    totalSuccess = false;
+                    if (firstFail == null) {
+                        firstFail = UNIQUE_ITEMS_NOT_MATCH;
+                    }
                 }
             }
         }
 
         if (!isCollection || this.contains != null) {
+            ValidateResult containsError = null;
             if (minContains >= 0 && containsCount < minContains) {
-                return new ValidateResult(false, "minContains not match, expect %s, but %s", minContains, containsCount);
+                containsError = new ValidateResult(false, "minContains not match, expect %s, but %s", minContains, containsCount);
+            } else if (maxContains >= 0 && containsCount > maxContains) {
+                containsError = new ValidateResult(false, "maxContains not match, expect %s, but %s", maxContains, containsCount);
+            } else if (this.contains != null && containsCount == 0 && minContains != 0) {
+                containsError = CONTAINS_NOT_MATCH;
             }
 
-            if (isCollection) { // Collection 和 数组 的部分校验规则不一样
-                if (containsCount == 0 && minContains != 0) {
-                    return CONTAINS_NOT_MATCH;
+            if (containsError != null) {
+                ValidateResult r = handleError(handler, value, path, containsError);
+                if (handler == null || r.isAbort()) {
+                    return r;
                 }
-            } else if (this.contains != null && containsCount == 0) {
-                return CONTAINS_NOT_MATCH;
-            }
 
-            if (maxContains >= 0 && containsCount > maxContains) {
-                return new ValidateResult(false, "maxContains not match, expect %s, but %s", maxContains, containsCount);
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = containsError;
+                }
             }
         }
 
         if (allOf != null) {
-            ValidateResult result = allOf.validate(value);
+            ValidateResult result = allOf.validateInternal(value, handler, path);
             if (!result.isSuccess()) {
-                return result;
+                if (handler == null || result.isAbort()) {
+                    return result;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = result;
+                }
             }
         }
 
         if (anyOf != null) {
-            ValidateResult result = anyOf.validate(value);
+            ValidateResult result = anyOf.validateInternal(value, handler, path);
             if (!result.isSuccess()) {
-                return result;
+                if (handler == null || result.isAbort()) {
+                    return result;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = result;
+                }
             }
         }
 
         if (oneOf != null) {
-            ValidateResult result = oneOf.validate(value);
+            ValidateResult result = oneOf.validateInternal(value, handler, path);
             if (!result.isSuccess()) {
-                return result;
+                if (handler == null || result.isAbort()) {
+                    return result;
+                }
+
+                totalSuccess = false;
+                if (firstFail == null) {
+                    firstFail = result;
+                }
             }
         }
 
-        return SUCCESS;
+        return totalSuccess ? SUCCESS : (firstFail != null ? firstFail : new ValidateResult(false, "Array validation failed"));
     }
 
     @Override

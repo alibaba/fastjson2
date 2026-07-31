@@ -14,11 +14,12 @@ final class NullSchema
     }
 
     @Override
-    protected ValidateResult validateInternal(Object value) {
+    protected ValidateResult validateInternal(Object value, ValidationHandler handler, String path) {
         if (value == null) {
             return SUCCESS;
         }
 
-        return new ValidateResult(false, "expect type %s, but %s", Type.Null, value.getClass());
+        ValidateResult raw = new ValidateResult(false, "expect type %s, but %s", Type.Null, value.getClass());
+        return handleError(handler, value, path, raw);
     }
 }
