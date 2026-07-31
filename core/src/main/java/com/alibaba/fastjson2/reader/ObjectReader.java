@@ -43,8 +43,6 @@ import java.util.function.Function;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ObjectReader<T> {
-    long HASH_TYPE = Fnv.hashCode64("@type");
-    String VALUE_NAME = "@value";
 
     /**
      * @return {@link T}
@@ -198,15 +196,6 @@ public interface ObjectReader<T> {
      */
     default String getTypeKey() {
         return "@type";
-    }
-
-    /**
-     * Gets the hash code of the type key used for auto-type support.
-     *
-     * @return the hash code of the type key
-     */
-    default long getTypeKeyHash() {
-        return HASH_TYPE;
     }
 
     /**
@@ -369,7 +358,7 @@ public interface ObjectReader<T> {
             }
             long hash = jsonReader.readFieldNameHashCode();
 
-            if (hash == getTypeKeyHash() && i == 0) {
+            if (hash == Fnv.hashCode64(getTypeKey()) && i == 0) {
                 long typeHash = jsonReader.readTypeHashCode();
                 ObjectReader reader = autoType(context, typeHash);
 

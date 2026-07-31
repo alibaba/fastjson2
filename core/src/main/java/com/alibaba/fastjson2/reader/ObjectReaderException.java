@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.BeanUtils;
-import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
@@ -12,13 +11,6 @@ import java.util.*;
 
 final class ObjectReaderException<T>
         implements ObjectReader<T> {
-    static final long HASH_TYPE = Fnv.hashCode64("@type");
-    static final long HASH_MESSAGE = Fnv.hashCode64("message");
-    static final long HASH_DETAIL_MESSAGE = Fnv.hashCode64("detailMessage");
-    static final long HASH_LOCALIZED_MESSAGE = Fnv.hashCode64("localizedMessage");
-    static final long HASH_CAUSE = Fnv.hashCode64("cause");
-    static final long HASH_STACKTRACE = Fnv.hashCode64("stackTrace");
-    static final long HASH_SUPPRESSED_EXCEPTIONS = Fnv.hashCode64("suppressedExceptions");
 
     final Class<T> objectClass;
     private final Object fieldReaderStackTrace;
