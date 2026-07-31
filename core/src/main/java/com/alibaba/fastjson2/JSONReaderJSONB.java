@@ -1435,14 +1435,28 @@ final class JSONReaderJSONB
         }
 
         if (type == BC_BINARY) {
-            return readInt32Value();
+            int len = readInt32Value();
+            checkArrayLen(len, offset, end);
+            return len;
         }
 
         if (type != BC_ARRAY) {
             throw new JSONException("array not support input " + error(type));
         }
 
-        return readInt32Value();
+        int len = readInt32Value();
+        checkArrayLen(len, offset, end);
+        return len;
+    }
+
+    static void checkArrayLen(int len, int offset, int end) {
+        // Each array/collection element occupies at least one byte in the JSONB stream,
+        // so a declared length larger than the remaining buffer is malformed input.
+        // Guards against a small crafted payload declaring Integer.MAX_VALUE elements
+        // that triggers an immediate over-sized array pre-allocation (OOM / DoS).
+        if (len < 0 || len > end - offset) {
+            throw new JSONException("array length out of range: " + len + ", available: " + (end - offset));
+        }
     }
 
     public String error(byte type) {
