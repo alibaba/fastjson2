@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.internal.asm.ASMUtils;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 
@@ -97,11 +96,10 @@ final class ObjectReaderException<T>
             int paramCount = constructor.getParameterCount();
             String[] parameterNames = null;
             if (paramCount > 0) {
-                parameterNames = ASMUtils.lookupParameterNames(constructor);
-
                 Parameter[] parameters = constructor.getParameters();
+                parameterNames = new String[parameters.length];
                 FieldInfo fieldInfo = new FieldInfo();
-                for (int i = 0; i < parameters.length && i < parameterNames.length; i++) {
+                for (int i = 0; i < parameters.length; i++) {
                     fieldInfo.init();
 
                     Parameter parameter = parameters[i];
@@ -110,6 +108,8 @@ final class ObjectReaderException<T>
                     provider.getFieldInfo(fieldInfo, objectClass, constructor, i, parameter);
                     if (fieldInfo.fieldName != null) {
                         parameterNames[i] = fieldInfo.fieldName;
+                    } else {
+                        parameterNames[i] = parameter.getName();
                     }
                 }
             }
