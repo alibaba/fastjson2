@@ -26,8 +26,32 @@ public class Issue7734 {
         assertEquals("{\"quantity\":\"200\"}", JSON.toJSONString(bean));
     }
 
+    @Test
+    public void testBigDecimalArray() {
+        BeanArray bean = new BeanArray();
+        bean.values = new BigDecimal[]{new BigDecimal("200"), new BigDecimal("300")};
+        assertEquals("{\"values\":[\"200\",\"300\"]}", JSON.toJSONString(bean));
+    }
+
+    @Test
+    public void testDouble() {
+        BeanDouble bean = new BeanDouble();
+        bean.price = 6.56;
+        assertEquals("{\"price\":\"6.56\"}", JSON.toJSONString(bean));
+    }
+
     public static class Bean {
         @JsonFormat(shape = JsonFormat.Shape.STRING)
         public BigDecimal quantity;
+    }
+
+    public static class BeanArray {
+        @JsonFormat(shape = JsonFormat.Shape.STRING)
+        public BigDecimal[] values;
+    }
+
+    public static class BeanDouble {
+        @JsonFormat(shape = JsonFormat.Shape.STRING)
+        public Double price;
     }
 }
