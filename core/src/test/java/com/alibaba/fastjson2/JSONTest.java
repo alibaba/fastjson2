@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -881,6 +882,60 @@ public class JSONTest {
     public static class User {
         public int id;
         public String name;
+    }
+
+    public static class AutoTypeBase {
+        public int id;
+    }
+
+    public static class AutoTypeDerived
+            extends AutoTypeBase {
+        public String name;
+    }
+
+    /**
+     * Verifies that {@link JSON#parseArray(String, Class, Filter, JSONReader.Feature...)}
+     * actually passes the {@link Filter} to {@code JSONFactory.createReadContext(filter, features)}.
+     *
+     * <p>If a future refactor accidentally drops the filter (e.g. calls
+     * {@code createReadContext(features)} instead), the AutoTypeBeforeHandler
+     * would be silently ignored — a security regression with no test to catch it.</p>
+     */
+    @Test
+    public void test_parseArray_withFilter() {
+        AutoTypeDerived derived = new AutoTypeDerived();
+        derived.id = 101;
+        derived.name = "fastjson2";
+        String jsonArray = "[" + JSON.toJSONString(derived, JSONWriter.Feature.WriteClassName) + "]";
+
+        // 1. Filter allows AutoTypeDerived → @type honoured, derived type returned.
+        //    If the filter were silently dropped, @type would be ignored and
+        //    AutoTypeBase would be returned instead.
+        Filter allowFilter = JSONReader.autoTypeFilter(AutoTypeDerived.class);
+        List<AutoTypeBase> allowed = JSON.parseArray(jsonArray, AutoTypeBase.class, allowFilter);
+        assertEquals(1, allowed.size());
+        assertSame(AutoTypeDerived.class, allowed.get(0).getClass());
+        assertEquals(101, allowed.get(0).id);
+        assertEquals("fastjson2", ((AutoTypeDerived) allowed.get(0)).name);
+
+        // 2. Direct proof: a tracking handler records whether it was invoked.
+        //    If the filter never reaches createReadContext, the flag stays false.
+        AtomicBoolean handlerInvoked = new AtomicBoolean(false);
+        JSONReader.AutoTypeBeforeHandler trackingHandler = (typeName, expectClass, f) -> {
+            handlerInvoked.set(true);
+            return null;
+        };
+        JSON.parseArray(jsonArray, AutoTypeBase.class, trackingHandler);
+        assertTrue(handlerInvoked.get(), "AutoTypeBeforeHandler must be invoked by parseArray");
+
+        // 3. Without filter → @type ignored, declared type returned.
+        List<AutoTypeBase> noFilter = JSON.parseArray(jsonArray, AutoTypeBase.class);
+        assertEquals(1, noFilter.size());
+        assertSame(AutoTypeBase.class, noFilter.get(0).getClass());
+
+        // 4. Edge cases: null / empty text → null.
+        assertNull(JSON.parseArray(null, AutoTypeBase.class, allowFilter));
+        assertNull(JSON.parseArray("", AutoTypeBase.class, allowFilter));
     }
 
     public static class MyList<T>
