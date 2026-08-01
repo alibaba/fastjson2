@@ -188,18 +188,6 @@ final class ObjectWriterImplCollection
             }
 
             if (itemRefDetect) {
-                String refPath = jsonWriter.setPath(i, o);
-                if (refPath != null) {
-                    jsonWriter.writeReference(refPath);
-                    jsonWriter.popPath(o);
-                    i++;
-                    continue;
-                }
-            }
-
-            boolean itemRefDetect = refDetect && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
-
-            if (itemRefDetect) {
                 String refPath = jsonWriter.setPath(i, o, unstableIndex, setElement);
                 if (refPath != null) {
                     jsonWriter.writeReference(refPath);
