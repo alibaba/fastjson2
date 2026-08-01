@@ -2431,7 +2431,6 @@ class JSONWriterUTF16
         }
 
         final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
-                | PrettyFormat.mask
                 | NotWriteEmptyArray.mask
                 | NotWriteDefaultValue.mask;
 

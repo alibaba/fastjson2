@@ -2158,7 +2158,7 @@ final class JSONWriterUTF8
             return;
         }
 
-        if ((context.features & (MASK_REFERENCE_DETECTION | MASK_PRETTY_FORMAT | MASK_NOT_WRITE_EMPTY_ARRAY | MASK_NOT_WRITE_DEFAULT_VALUE)) != 0) {
+        if ((context.features & (MASK_REFERENCE_DETECTION | MASK_NOT_WRITE_EMPTY_ARRAY | MASK_NOT_WRITE_DEFAULT_VALUE)) != 0) {
             throw new JSONException("not support write value type : " + array.getClass().getName());
         }
 
