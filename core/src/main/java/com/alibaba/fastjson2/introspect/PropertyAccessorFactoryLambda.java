@@ -310,9 +310,9 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
                     }
                     return create(name, propertyClass, propertyType, getObject(getter), setObject(name, setter), exceptionHandler);
                 }
-            } catch (Throwable ignored) {
-                if (ignored instanceof IllegalArgumentException) {
-                    throw (IllegalArgumentException) ignored;
+            } catch (Throwable e) {
+                if (e instanceof IllegalArgumentException) {
+                    throw (IllegalArgumentException) e;
                 }
                 // Lambda creation failed, fallback to parent's reflection implementation
             }
