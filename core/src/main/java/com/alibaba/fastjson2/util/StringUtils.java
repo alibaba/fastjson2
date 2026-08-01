@@ -78,17 +78,17 @@ public class StringUtils {
                     break;
                 default:
                     if (ch == quote) {
-                        putByte(bytes, off, (byte) '\\');
+                        bytes[off] = '\\';
                         bytes[off + 1] = quote;
                         off += 2;
                     } else if (ch < 0) {
                         // latin
                         int c = ch & 0xFF;
-                        putByte(bytes, off, (byte) (0xc0 | (c >> 6)));
-                        putByte(bytes, off + 1, (byte) (0x80 | (c & 0x3f)));
+                        bytes[off] = (byte) (0xc0 | (c >> 6));
+                        bytes[off + 1] = (byte) (0x80 | (c & 0x3f));
                         off += 2;
                     } else {
-                        putByte(bytes, off++, ch);
+                        bytes[off++] = ch;
                     }
                     break;
             }
@@ -180,7 +180,7 @@ public class StringUtils {
         boolean escapeNoneAscii = (features & MASK_ESCAPE_NONE_ASCII) != 0;
         boolean browserSecure = (features & MASK_BROWSER_SECURE) != 0;
 
-        putByte(bytes, off++, quote);
+        bytes[off++] = quote;
 
         int coff = 0, char_len = value.length >> 1;
         while (coff < char_len) {
@@ -234,24 +234,24 @@ public class StringUtils {
                             writeU4HexU(bytes, off, c);
                             off += 6;
                         } else {
-                            putByte(bytes, off++, (byte) c);
+                            bytes[off++] = (byte) c;
                         }
                         break;
                     default:
                         if (c == quote) {
-                            putByte(bytes, off, (byte) '\\');
-                            putByte(bytes, off + 1, (byte) quote);
+                            bytes[off] = '\\';
+                            bytes[off + 1] = quote;
                             off += 2;
                         } else {
-                            putByte(bytes, off++, (byte) c);
+                            bytes[off++] = (byte) c;
                         }
                         break;
                 }
             } else {
                 if (c < 0x800) {
                     // 2 bytes, 11 bits
-                    putByte(bytes, off, (byte) (0xc0 | (c >> 6)));
-                    putByte(bytes, off + 1, (byte) (0x80 | (c & 0x3f)));
+                    bytes[off] = (byte) (0xc0 | (c >> 6));
+                    bytes[off + 1] = (byte) (0x80 | (c & 0x3f));
                     off += 2;
                 } else if (escapeNoneAscii) {
                     writeU4HexU(bytes, off, c);
@@ -268,37 +268,37 @@ public class StringUtils {
                                 coff++;
                                 uc = ((c << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00'); // Character.toCodePoint(c, d)
                             } else {
-                                putByte(bytes, off++, (byte) '?');
+                                bytes[off++] = (byte) '?';
                                 continue;
                             }
                         }
                     } else {
                         //
                         // Character.isLowSurrogate(c)
-                        putByte(bytes, off++, (byte) '?');
+                        bytes[off++] = (byte) '?';
                         continue;
                     }
 
                     if (uc < 0) {
-                        putByte(bytes, off++, (byte) '?');
+                        bytes[off++] = (byte) '?';
                     } else {
-                        putByte(bytes, off, (byte) (0xf0 | ((uc >> 18))));
-                        putByte(bytes, off + 1, (byte) (0x80 | ((uc >> 12) & 0x3f)));
-                        putByte(bytes, off + 2, (byte) (0x80 | ((uc >> 6) & 0x3f)));
-                        putByte(bytes, off + 3, (byte) (0x80 | (uc & 0x3f)));
+                        bytes[off] = (byte) (0xf0 | ((uc >> 18)));
+                        bytes[off + 1] = (byte) (0x80 | ((uc >> 12) & 0x3f));
+                        bytes[off + 2] = (byte) (0x80 | ((uc >> 6) & 0x3f));
+                        bytes[off + 3] = (byte) (0x80 | (uc & 0x3f));
                         off += 4;
                     }
                 } else {
                     // 3 bytes, 16 bits
-                    putByte(bytes, off, (byte) (0xe0 | ((c >> 12))));
-                    putByte(bytes, off + 1, (byte) (0x80 | ((c >> 6) & 0x3f)));
-                    putByte(bytes, off + 2, (byte) (0x80 | (c & 0x3f)));
+                    bytes[off] = (byte) (0xe0 | ((c >> 12)));
+                    bytes[off + 1] = (byte) (0x80 | ((c >> 6) & 0x3f));
+                    bytes[off + 2] = (byte) (0x80 | (c & 0x3f));
                     off += 3;
                 }
             }
         }
 
-        putByte(bytes, off, quote);
+        bytes[off] = quote;
         return off + 1;
     }
 

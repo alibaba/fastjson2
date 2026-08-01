@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
@@ -16,6 +17,10 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("date")
+@Tag("annotation")
+@Tag("compat-jackson")
 public class Issue2005 {
     @Test
     public void test() {

@@ -1,12 +1,14 @@
 package com.alibaba.fastjson2.issues_1600;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
 public class Issue1686_1 {
     @Test
     public void test_nest_map_subclass() {

@@ -1,12 +1,14 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("reader")
 public class FieldReaderAtomicReferenceTest {
     @Test
     public void test() {

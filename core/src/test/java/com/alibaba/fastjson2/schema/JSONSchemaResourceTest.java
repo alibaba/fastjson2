@@ -1,10 +1,12 @@
 package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
 
+@Tag("schema")
 public class JSONSchemaResourceTest {
     @Test
     public void test_draft2020_additionalProperties() {

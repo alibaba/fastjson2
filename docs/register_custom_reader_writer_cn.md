@@ -111,9 +111,9 @@ class InstantReader implements ObjectReader {
 }
 ```
 
-## 2.3 注册Writer
+## 2.3 注册Reader
 ```java
-JSON.register(Instant.class, ObjectReader.INSTANCE);
+JSON.register(Instant.class, InstantReader.INSTANCE);
 ```
 
 ## 2.4 注册内置的ObjectReaders提供的一些内置实现

@@ -11,6 +11,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.function.Function;
 
 class FieldWriterEnum
         extends FieldWriter {
@@ -30,13 +32,15 @@ class FieldWriterEnum
             int ordinal,
             long features,
             String format,
+            Locale locale,
             String label,
             Type fieldType,
             Class<? extends Enum> enumClass,
             Field field,
-            Method method
+            Method method,
+            Function function
     ) {
-        super(name, ordinal, features, format, null, label, fieldType, enumClass, field, method);
+        super(name, ordinal, features, format, locale, label, fieldType, enumClass, field, method, function);
 
         this.enumType = enumClass;
         this.enumConstants = enumClass.getEnumConstants();

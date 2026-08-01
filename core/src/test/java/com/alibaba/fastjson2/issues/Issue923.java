@@ -8,11 +8,14 @@ import lombok.ToString;
 import lombok.Value;
 import lombok.With;
 import lombok.experimental.NonFinal;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("annotation")
 public class Issue923 {
     @Test
     public void test() {

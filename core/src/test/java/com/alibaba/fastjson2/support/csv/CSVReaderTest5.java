@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.support.csv;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -10,6 +11,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("util")
 public class CSVReaderTest5 {
     @Test
     public void testInputStreamFile() throws Exception {

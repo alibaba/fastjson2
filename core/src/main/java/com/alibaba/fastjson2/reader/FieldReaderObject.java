@@ -6,20 +6,15 @@ import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
+import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-
 public class FieldReaderObject<T>
         extends FieldReader<T> {
     protected ObjectReader initReader;
-    protected final BiConsumer function;
 
     public FieldReaderObject(
             String fieldName,
@@ -35,8 +30,45 @@ public class FieldReaderObject<T>
             Field field,
             BiConsumer function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field);
-        this.function = function;
+        this(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, null, null);
+    }
+
+    public FieldReaderObject(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            Field field,
+            BiConsumer function,
+            ObjectReader initReader
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, null, null);
+        this.initReader = initReader;
+    }
+
+    public FieldReaderObject(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            Field field,
+            BiConsumer function,
+            String paramName,
+            Parameter parameter
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
     }
 
     @Override
@@ -123,6 +155,7 @@ public class FieldReaderObject<T>
 
         Object value;
         try {
+            char first = jsonReader.current();
             if (jsonReader.nextIfNullOrEmptyString()) {
                 if (defaultValue != null) {
                     value = defaultValue;
@@ -134,6 +167,16 @@ public class FieldReaderObject<T>
                     value = OptionalDouble.empty();
                 } else if (fieldClass == Optional.class) {
                     value = Optional.empty();
+                } else if (first != 'n') {
+                    if (Map.class.isAssignableFrom(fieldClass) && fieldClass.equals(fieldType)) {
+                        value = getObjectReader(jsonReader).createInstance();
+                    } else if (Temporal.class.isAssignableFrom(fieldClass)) {
+                        value = null;
+                    } else if (fieldClass == byte[].class) {
+                        value = new byte[0];
+                    } else {
+                        value = "";
+                    }
                 } else {
                     value = null;
                 }
@@ -182,7 +225,9 @@ public class FieldReaderObject<T>
                 jsonReader.skipValue();
                 return;
             } else if ((contextFeatures & JSONReader.Feature.ErrorOnNoneSerializable.mask) != 0) {
-                throw new JSONException("not support none-Serializable");
+                if (fieldClass != Object.class || (jsonReader.isObject() || jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY)) {
+                    throw new JSONException("not support none-Serializable");
+                }
             }
         }
 
@@ -201,85 +246,66 @@ public class FieldReaderObject<T>
         }
 
         Object value = initReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+        if (value == null
+                && (jsonReader.features(this.features) & JSONReader.Feature.ErrorOnNullForPrimitives.mask) != 0
+                && fieldClass.isPrimitive()
+        ) {
+            throw new JSONException(jsonReader.info("primitive value not support input null"));
+        }
         accept(object, value);
     }
 
     @Override
     public void accept(T object, boolean value) {
-        accept(object, Boolean.valueOf(value));
+        propertyAccessor.setBooleanValue(object, value);
     }
 
     @Override
     public void accept(T object, byte value) {
-        accept(object, Byte.valueOf(value));
+        propertyAccessor.setByteValue(object, value);
     }
 
     @Override
     public void accept(T object, short value) {
-        accept(object, Short.valueOf(value));
+        propertyAccessor.setShortValue(object, value);
     }
 
     @Override
     public void accept(T object, int value) {
-        accept(object, Integer.valueOf(value));
+        propertyAccessor.setIntValue(object, value);
     }
 
     @Override
     public void accept(T object, long value) {
-        accept(object, Long.valueOf(value));
+        propertyAccessor.setLongValue(object, value);
     }
 
     @Override
     public void accept(T object, float value) {
-        accept(object, Float.valueOf(value));
+        propertyAccessor.setFloatValue(object, value);
     }
 
     @Override
     public void accept(T object, double value) {
-        accept(object, Double.valueOf(value));
+        propertyAccessor.setDoubleValue(object, value);
     }
 
     @Override
     public void accept(T object, char value) {
-        accept(object, Character.valueOf(value));
+        propertyAccessor.setCharValue(object, value);
     }
 
     @Override
     public void accept(T object, Object value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        if (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
+        if (isParameter() || (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0)) {
             return;
-        }
-
-        if (fieldClass == char.class) {
-            if (value instanceof String) {
-                String str = (String) value;
-                if (str.length() > 0) {
-                    value = str.charAt(0);
-                } else {
-                    value = '\0';
-                }
-            }
         }
 
         if (value != null && !fieldClass.isInstance(value)) {
             value = TypeUtils.cast(value, fieldType);
         }
 
-        try {
-            if (function != null) {
-                function.accept(object, value);
-            } else if (method != null) {
-                method.invoke(object, value);
-            } else {
-                UNSAFE.putObject(object, fieldOffset, value);
-            }
-        } catch (Exception e) {
-            throw new JSONException("set " + (function != null ? super.toString() : fieldName) + " error", e);
-        }
+        propertyAccessor.setObject(object, value);
     }
 
     @Override

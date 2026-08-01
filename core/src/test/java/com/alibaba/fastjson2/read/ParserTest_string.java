@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.read;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -11,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@Tag("reader")
 public class ParserTest_string {
     String str = " { \n" +
             "     \"id\" : 123456789 ,\n" +
@@ -163,13 +165,13 @@ public class ParserTest_string {
         assertEquals(Fnv.hashCode64("v12"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v12"), lexer.getNameHashCodeLCase());
         assertEquals("v12", lexer.getFieldName());
-        assertEquals("1234", lexer
+        assertEquals("[1234]", lexer
                 .readString());
 
         assertEquals(Fnv.hashCode64("v13"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v13"), lexer.getNameHashCodeLCase());
         assertEquals("v13", lexer.getFieldName());
-        assertEquals("12.34", lexer.readString());
+        assertEquals("[12.34]", lexer.readString());
 
         assertEquals(Fnv.hashCode64("v14"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v14"), lexer.getNameHashCodeLCase());

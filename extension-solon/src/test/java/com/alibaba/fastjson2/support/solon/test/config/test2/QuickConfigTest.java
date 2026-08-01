@@ -1,10 +1,11 @@
 package com.alibaba.fastjson2.support.solon.test.config.test2;
 
-import com.alibaba.fastjson2.support.solon.Fastjson2RenderFactory;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.support.solon.Fastjson2EntityConverter;
 import com.alibaba.fastjson2.support.solon.test._model.OrderDo;
 import com.alibaba.fastjson2.support.solon.test._model.UserDo;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.noear.snack.ONode;
 import org.noear.solon.annotation.Import;
 import org.noear.solon.annotation.Inject;
 import org.noear.solon.core.handle.ContextEmpty;
@@ -21,7 +22,7 @@ import java.util.Map;
 @SolonTest
 public class QuickConfigTest {
     @Inject
-    Fastjson2RenderFactory renderFactory;
+    Fastjson2EntityConverter entityConverter;
 
     @Test
     public void hello2() throws Throwable {
@@ -36,15 +37,15 @@ public class QuickConfigTest {
         userDo.setMap1(data);
 
         ContextEmpty ctx = new ContextEmpty();
-        renderFactory.create().render(userDo, ctx);
+        entityConverter.write(userDo, ctx);
         String output = ctx.attr("output");
 
         System.out.println(output);
 
-        assert ONode.load(output).count() == 5;
+        Assertions.assertEquals(5, JSONObject.parseObject(output).size());
 
-        //error: int 没转为 string
-        assert "{\"b1\":1,\"d1\":1.0,\"map1\":{\"time\":\"2023-01-16 17:39:53\",\"long\":\"12\",\"int\":12},\"n1\":\"1\",\"s1\":\"noear\"}".equals(output);
+        //完美
+        Assertions.assertEquals("{\"b1\":1,\"d1\":1.0,\"map1\":{\"time\":\"2023-01-16 17:39:53\",\"long\":\"12\",\"int\":12},\"n1\":\"1\",\"s1\":\"noear\"}", output);
     }
 
     @Test
@@ -54,11 +55,11 @@ public class QuickConfigTest {
         data.put("order", new OrderDo());
 
         ContextEmpty ctx = new ContextEmpty();
-        renderFactory.create().render(data, ctx);
+        entityConverter.write(data, ctx);
         String output = ctx.attr("output");
 
         System.out.println(output);
 
-        assert "{\"long\":\"1\",\"order\":{\"orderId\":\"2\"}}".equals(output);
+        Assertions.assertEquals("{\"long\":\"1\",\"order\":{\"orderId\":\"2\"}}", output);
     }
 }

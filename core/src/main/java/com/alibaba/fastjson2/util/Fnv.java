@@ -32,12 +32,7 @@ public final class Fnv {
                     ch = (char) (ch + 32);
                 }
 
-                if (j == 0) {
-                    nameValue = (byte) ch;
-                } else {
-                    nameValue <<= 8;
-                    nameValue += ch;
-                }
+                nameValue = (nameValue << 8) | ch;
                 j++;
             }
 
@@ -79,6 +74,66 @@ public final class Fnv {
         return hashCode;
     }
 
+    public static long hashCode64(byte[] bytes, int offset, int len, boolean ascii) {
+        if (!ascii) {
+            return hashCode64UTF8(bytes, offset, len);
+        }
+        if (len > 0 && len <= 8) {
+            long nameValue = IOUtils.getLongLE(bytes, offset) & (0xFFFFFFFFFFFFFFFFL >>> ((8 - len) << 3));
+            if (nameValue != 0) {
+                return nameValue;
+            }
+        }
+
+        long hashCode = MAGIC_HASH_CODE;
+        for (int i = 0; i < len; ++i) {
+            byte ch = bytes[offset + i];
+            hashCode ^= ch;
+            hashCode *= MAGIC_PRIME;
+        }
+        return hashCode;
+    }
+
+    private static long hashCode64UTF8(byte[] bytes, int offset, int len) {
+        char[] chars = new char[len];
+        int char_len = IOUtils.decodeUTF8(bytes, offset, len, chars);
+        return hashCode64(chars, 0, char_len);
+    }
+
+    public static long hashCode64(char[] chars, int offset, int len) {
+        if (len <= 8) {
+            boolean ascii = true;
+            long nameValue = 0;
+
+            for (int i = 0; i < len; ++i) {
+                char ch = chars[offset + i];
+                if (ch > 0xFF || (i == 0 && ch == 0)) {
+                    ascii = false;
+                    break;
+                }
+            }
+
+            if (ascii) {
+                for (int i = len - 1; i >= 0; --i) {
+                    char ch = chars[offset + i];
+                    nameValue = (nameValue << 8) | ch;
+                }
+
+                if (nameValue != 0) {
+                    return nameValue;
+                }
+            }
+        }
+
+        long hashCode = MAGIC_HASH_CODE;
+        for (int i = 0; i < len; ++i) {
+            char ch = chars[offset + i];
+            hashCode ^= ch;
+            hashCode *= MAGIC_PRIME;
+        }
+        return hashCode;
+    }
+
     public static long hashCode64(String name) {
         if (name.length() <= 8) {
             boolean ascii = true;
@@ -95,12 +150,7 @@ public final class Fnv {
             if (ascii) {
                 for (int i = name.length() - 1; i >= 0; --i) {
                     char ch = name.charAt(i);
-                    if (i == name.length() - 1) {
-                        nameValue = (byte) ch;
-                    } else {
-                        nameValue <<= 8;
-                        nameValue += ch;
-                    }
+                    nameValue = (nameValue << 8) | ch;
                 }
 
                 if (nameValue != 0) {

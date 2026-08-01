@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONType;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -12,10 +13,13 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("date")
+@Tag("annotation")
 public class Issue2959 {
     @Test
     public void test() {
-        String expectedJson = "{\"projectNO\":null,\"orderNO\":null,\"orderType\":null,\"pN\":null,\"qty\":null,\"description\":null,\"customerCode\":null,\"customerName\":null,\"currency\":null,\"netPrice\":null,\"uSD\":null,\"rate\":null,\"orderDate\":null,\"requestDate\":null,\"planedDate\":null,\"this$0\":null}";
+        String expectedJson = "{\"projectNO\":null,\"orderNO\":null,\"orderType\":null,\"pN\":null,\"qty\":null,\"description\":null,\"customerCode\":null,\"customerName\":null,\"currency\":null,\"netPrice\":null,\"uSD\":null,\"rate\":null,\"orderDate\":null,\"requestDate\":null,\"planedDate\":null}";
         String actualJson = JSON.toJSONString(new TobeDelivery(), JSONWriter.Feature.WriteNulls);
 
         // Parse the JSON strings into Maps for comparison
@@ -27,7 +31,7 @@ public class Issue2959 {
 
     @Data
     @JSONType(alphabetic = false)
-    public class TobeDelivery {
+    public static class TobeDelivery {
         private String projectNO;
         private String orderNO;
         private String orderType;

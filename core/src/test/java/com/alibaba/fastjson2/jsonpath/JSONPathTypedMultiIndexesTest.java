@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.jsonpath;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONPath;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -12,6 +13,7 @@ import java.time.ZoneId;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("jsonpath")
 public class JSONPathTypedMultiIndexesTest {
     @Test
     public void test() {

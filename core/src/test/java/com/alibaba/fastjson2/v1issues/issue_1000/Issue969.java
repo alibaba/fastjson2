@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.v1issues.issue_1000;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Created by wenshao on 08/05/2017.
  */
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue969 {
     @Test
     public void test_for_issue() throws Exception {

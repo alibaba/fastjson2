@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.filter.NameFilter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -14,6 +15,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("date")
 public class Issue1348 {
     @Test
     public void test() {

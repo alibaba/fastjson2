@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.v1issues.issue_1300;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -11,6 +12,8 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Created by wenshao on 30/07/2017.
  */
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue1330_float {
     @Test
     public void test() throws Exception {

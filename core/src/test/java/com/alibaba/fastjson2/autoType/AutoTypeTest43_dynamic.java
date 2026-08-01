@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.autoType;
 
 import com.alibaba.fastjson2.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("autotype")
 public class AutoTypeTest43_dynamic {
     @Test
     public void test_0() throws Exception {

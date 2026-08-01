@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -10,6 +11,7 @@ import java.util.Random;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class IOUtilsTest {
     @Test
     public void size() {
@@ -355,20 +357,14 @@ public class IOUtilsTest {
         char[] chars = "1234ABcd".toCharArray();
         assertEquals("1234", Integer.toHexString(IOUtils.hexDigit4(chars, 0)));
         assertEquals("34ab", Integer.toHexString(IOUtils.hexDigit4(chars, 2)));
-    }
 
-    static int hexDigit4(byte[] bytes, int offset) {
-        long v = Long.reverseBytes(UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
-        v = (v & 0x0F0F0F0F_0F0F0F0FL) + ((((v & 0x40404040_40404040L) >> 2) | ((v & 0x40404040_40404040L) << 1)) >>> 4);
-        v = ((v >>> 28) & 0xF0000000L)
-                + ((v >>> 24) & 0xF000000)
-                + ((v >>> 20) & 0xF00000)
-                + ((v >>> 16) & 0xF0000)
-                + ((v >>> 12) & 0xF000)
-                + ((v >>> 8) & 0xF00)
-                + ((v >>> 4) & 0xF0)
-                + (v & 0xF);
-        return (int) v;
+        assertThrows(JSONException.class, () -> IOUtils.hexDigit4("123".getBytes(StandardCharsets.US_ASCII), 0, 3));
+        assertThrows(JSONException.class, () -> IOUtils.hexDigit4("123".getBytes(StandardCharsets.US_ASCII), 0, 4));
+        assertThrows(JSONException.class, () -> IOUtils.hexDigit4("1234".getBytes(StandardCharsets.US_ASCII), 0, 3));
+
+        assertThrows(JSONException.class, () -> IOUtils.hexDigit4("123".toCharArray(), 0, 3));
+        assertThrows(JSONException.class, () -> IOUtils.hexDigit4("123".toCharArray(), 0, 4));
+        assertThrows(JSONException.class, () -> IOUtils.hexDigit4("1234".toCharArray(), 0, 3));
     }
 
     @Test
@@ -488,5 +484,127 @@ public class IOUtilsTest {
                 assertEquals(Long.toString(-value), new String(bytes, 0, off));
             }
         }
+    }
+
+    @Test
+    public void testIsNumber() {
+        // Test String version
+        assertTrue(IOUtils.isNumber("123"));
+        assertTrue(IOUtils.isNumber("-123"));
+        assertTrue(IOUtils.isNumber("+123"));
+        assertTrue(IOUtils.isNumber("0"));
+        assertTrue(IOUtils.isNumber("999999999"));
+
+        assertFalse(IOUtils.isNumber("12.3"));
+        assertFalse(IOUtils.isNumber("abc"));
+        assertFalse(IOUtils.isNumber(""));
+        assertFalse(IOUtils.isNumber("123a"));
+        assertFalse(IOUtils.isNumber("++123"));
+        assertFalse(IOUtils.isNumber("--123"));
+        assertFalse(IOUtils.isNumber("12+3"));
+        assertFalse(IOUtils.isNumber("12-3"));
+        assertFalse(IOUtils.isNumber("-"));
+        assertFalse(IOUtils.isNumber("+"));
+
+        // Test char[] version
+        char[] chars1 = "123".toCharArray();
+        assertTrue(IOUtils.isNumber(chars1, 0, chars1.length));
+
+        char[] chars2 = "-123".toCharArray();
+        assertTrue(IOUtils.isNumber(chars2, 0, chars2.length));
+        assertFalse(IOUtils.isNumber(chars2, 0, 1));
+
+        char[] chars3 = "+123".toCharArray();
+        assertTrue(IOUtils.isNumber(chars3, 0, chars3.length));
+        assertFalse(IOUtils.isNumber(chars3, 0, 1));
+
+        char[] chars4 = "12.3".toCharArray();
+        assertFalse(IOUtils.isNumber(chars4, 0, chars4.length));
+
+        char[] chars5 = "123a".toCharArray();
+        assertFalse(IOUtils.isNumber(chars5, 0, chars5.length));
+
+        char[] chars6 = "12+3".toCharArray();
+        assertFalse(IOUtils.isNumber(chars6, 0, chars6.length));
+
+        // Test with offset and length
+        char[] chars7 = "abc123def".toCharArray();
+        assertTrue(IOUtils.isNumber(chars7, 3, 3)); // "123" part
+        assertFalse(IOUtils.isNumber(chars7, 0, chars7.length)); // entire string
+
+        // Test byte[] version
+        byte[] bytes1 = "123".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.isNumber(bytes1, 0, bytes1.length));
+
+        byte[] bytes2 = "-123".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.isNumber(bytes2, 0, bytes2.length));
+        assertFalse(IOUtils.isNumber(bytes2, 0, 1));
+
+        byte[] bytes3 = "+123".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.isNumber(bytes3, 0, bytes3.length));
+        assertFalse(IOUtils.isNumber(bytes3, 0, 1));
+
+        byte[] bytes4 = "12.3".getBytes(StandardCharsets.UTF_8);
+        assertFalse(IOUtils.isNumber(bytes4, 0, bytes4.length));
+
+        byte[] bytes5 = "123a".getBytes(StandardCharsets.UTF_8);
+        assertFalse(IOUtils.isNumber(bytes5, 0, bytes5.length));
+
+        // Test with offset and length
+        byte[] bytes6 = "abc123def".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.isNumber(bytes6, 3, 3)); // "123" part
+        assertFalse(IOUtils.isNumber(bytes6, 0, bytes6.length)); // entire string
+    }
+
+    @Test
+    public void regionMatches_prefixAtEnd() {
+        // Bug #2: regionMatches used >= instead of >, rejecting valid match at array end
+        byte[] bytes = "base64".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.regionMatches(bytes, 0, "base64"),
+                "should match when prefix covers exactly the whole array");
+
+        byte[] bytes2 = "xxbase64".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.regionMatches(bytes2, 2, "base64"),
+                "should match when prefix ends exactly at array end");
+
+        // Still works for normal cases
+        byte[] bytes3 = "base64,data".getBytes(StandardCharsets.UTF_8);
+        assertTrue(IOUtils.regionMatches(bytes3, 0, "base64"));
+
+        // Still rejects overflow
+        byte[] bytes4 = "base6".getBytes(StandardCharsets.UTF_8);
+        assertFalse(IOUtils.regionMatches(bytes4, 0, "base64"),
+                "should reject when prefix extends beyond array");
+
+        // Still rejects mismatch
+        byte[] bytes5 = "base65".getBytes(StandardCharsets.UTF_8);
+        assertFalse(IOUtils.regionMatches(bytes5, 0, "base64"));
+    }
+
+    @Test
+    public void parseInt_errorMessageShowsOriginalInput() {
+        // Bug #4: parseInt used mutated off in error message, causing wrong substring or AIOOBE
+        byte[] buf = "12abc".getBytes(StandardCharsets.UTF_8);
+        NumberFormatException ex = assertThrows(NumberFormatException.class,
+                () -> IOUtils.parseInt(buf, 0, buf.length));
+        // The error message should contain the original input "12abc", not a shifted substring
+        assertEquals("12abc", ex.getMessage());
+    }
+
+    @Test
+    public void parseInt_errorMessageWithOffset() {
+        // Test with non-zero starting offset
+        byte[] buf = "xx99xyz".getBytes(StandardCharsets.UTF_8);
+        NumberFormatException ex = assertThrows(NumberFormatException.class,
+                () -> IOUtils.parseInt(buf, 2, 5));  // "99xyz"
+        assertEquals("99xyz", ex.getMessage());
+    }
+
+    @Test
+    public void parseInt_errorMessageSingleCharNonDigit() {
+        byte[] buf = "a".getBytes(StandardCharsets.UTF_8);
+        NumberFormatException ex = assertThrows(NumberFormatException.class,
+                () -> IOUtils.parseInt(buf, 0, 1));
+        assertEquals("a", ex.getMessage());
     }
 }

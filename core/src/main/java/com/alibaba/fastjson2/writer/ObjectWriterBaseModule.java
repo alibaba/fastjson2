@@ -22,6 +22,10 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.*;
+import java.time.chrono.HijrahDate;
+import java.time.chrono.JapaneseDate;
+import java.time.chrono.MinguoDate;
+import java.time.chrono.ThaiBuddhistDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
@@ -256,6 +260,10 @@ public class ObjectWriterBaseModule
                 if (!rootName.isEmpty()) {
                     beanInfo.rootName = rootName;
                 }
+
+                if (beanInfo.skipTransient) {
+                    beanInfo.skipTransient = jsonType.skipTransient();
+                }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
                 BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));
@@ -298,11 +306,34 @@ public class ObjectWriterBaseModule
             int modifiers = field.getModifiers();
             boolean isTransient = Modifier.isTransient(modifiers);
             if (isTransient) {
-                fieldInfo.ignore = true;
+                fieldInfo.isTransient = true;
+                if (fieldInfo.skipTransient && beanInfo.skipTransient) {
+                    fieldInfo.ignore = true;
+                }
             }
 
             JSONField jsonField = null;
             Annotation[] annotations = getAnnotations(field);
+            if (annotations.length == 0 && KotlinUtils.isKotlin(objectClass)) {
+                annotations = getAnnotations(field.getType());
+                Constructor kotlinConstructor = KotlinUtils.getKotlinConstructor(getConstructor(objectClass));
+                if (kotlinConstructor != null) {
+                    String[] paramNames = KotlinUtils.getKoltinConstructorParameters(objectClass);
+                    for (int i = 0; i < paramNames.length; i++) {
+                        if (paramNames[i].equals(field.getName())) {
+                            annotations = kotlinConstructor.getParameterAnnotations()[i];
+                            break;
+                        }
+                    }
+                    if (fieldInfo.ignore) {
+                        for (Annotation annotation : annotations) {
+                            if (annotation.annotationType() == JSONField.class) {
+                                fieldInfo.ignore = !((JSONField) annotation).serialize();
+                            }
+                        }
+                    }
+                }
+            }
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
                 if (jsonField == null) {
@@ -370,7 +401,7 @@ public class ObjectWriterBaseModule
                         break;
                     case "com.fasterxml.jackson.annotation.JsonBackReference":
                         if (useJacksonAnnotation) {
-                            fieldInfo.features |= FieldInfo.BACKR_EFERENCE;
+                            fieldInfo.features |= FieldInfo.BACKR_REFERENCE;
                         }
                         break;
                     default:
@@ -773,6 +804,11 @@ public class ObjectWriterBaseModule
 
             if (JDKUtils.CLASS_TRANSIENT != null && method.getAnnotation(JDKUtils.CLASS_TRANSIENT) != null) {
                 fieldInfo.ignore = true;
+                fieldInfo.isTransient = true;
+                if (!beanInfo.skipTransient) {
+                    fieldInfo.skipTransient = false;
+                    fieldInfo.ignore = false;
+                }
             }
 
             if (objectClass != null) {
@@ -794,12 +830,13 @@ public class ObjectWriterBaseModule
                 Class[] interfaces = objectClass.getInterfaces();
                 for (Class anInterface : interfaces) {
                     Method interfaceMethod = BeanUtils.getMethod(anInterface, method);
-                    if (interfaceMethod != null) {
+                    if (superclass != null && interfaceMethod != null) {
                         getFieldInfo(beanInfo, fieldInfo, superclass, interfaceMethod);
                     }
                 }
             }
 
+            fieldInfo.isPrivate = false;
             Annotation[] annotations = getAnnotations(method);
             processAnnotations(fieldInfo, annotations);
 
@@ -863,7 +900,9 @@ public class ObjectWriterBaseModule
                         processJSONField1x(fieldInfo, annotation);
                         break;
                     case "java.beans.Transient":
-                        fieldInfo.ignore = true;
+                        if (fieldInfo.skipTransient) {
+                            fieldInfo.ignore = true;
+                        }
                         fieldInfo.isTransient = true;
                         break;
                     case "com.fasterxml.jackson.annotation.JsonProperty": {
@@ -945,13 +984,20 @@ public class ObjectWriterBaseModule
                 fieldInfo.ignore = ignore;
             }
 
+            if (!jsonField.skipTransient()) {
+                fieldInfo.skipTransient = false;
+                if (fieldInfo.isTransient && !fieldInfo.isPrivate) {
+                    fieldInfo.ignore = false;
+                }
+            }
+
             if (jsonField.unwrapped()) {
                 fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
             }
 
             for (JSONWriter.Feature feature : jsonField.serializeFeatures()) {
                 fieldInfo.features |= feature.mask;
-                if (fieldInfo.ignore && !ignore && feature == JSONWriter.Feature.FieldBased) {
+                if (fieldInfo.ignore && !fieldInfo.isTransient && !ignore && feature == JSONWriter.Feature.FieldBased) {
                     fieldInfo.ignore = false;
                 }
             }
@@ -1095,9 +1141,23 @@ public class ObjectWriterBaseModule
             case "org.bson.types.Decimal128":
                 return LambdaMiscCodec.getObjectWriter(objectType, objectClass);
             case "java.nio.HeapByteBuffer":
+            case "java.nio.HeapByteBufferR":
             case "java.nio.DirectByteBuffer":
+            case "java.nio.DirectByteBufferR":
+            case "java.nio.MappedByteBuffer":
                 return new ObjectWriterImplInt8ValueArray(
-                        o -> ((ByteBuffer) o).array()
+                        o -> {
+                            ByteBuffer buffer = (ByteBuffer) o;
+                            if (buffer.hasArray()) {
+                                return buffer.array();
+                            }
+                            // For DirectByteBuffer or read-only buffers that don't have a backing array
+                            int position = buffer.position();
+                            byte[] bytes = new byte[buffer.remaining()];
+                            buffer.get(bytes);
+                            buffer.position(position); // restore position
+                            return bytes;
+                        }
                 );
             case "java.awt.Color":
                 try {
@@ -1445,7 +1505,10 @@ public class ObjectWriterBaseModule
                 return ObjectWriterImplInstant.INSTANCE;
             }
 
-            if (Duration.class == clazz || Period.class == clazz) {
+            if (Duration.class == clazz || Period.class == clazz
+                    || Year.class == clazz || YearMonth.class == clazz || MonthDay.class == clazz
+                    || HijrahDate.class == clazz || JapaneseDate.class == clazz
+                    || MinguoDate.class == clazz || ThaiBuddhistDate.class == clazz) {
                 return ObjectWriterImplToString.INSTANCE;
             }
 

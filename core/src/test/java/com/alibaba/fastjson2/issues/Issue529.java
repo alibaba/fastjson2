@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
@@ -10,10 +11,11 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("regression")
 public class Issue529 {
     @Test
     public void test() {
-        URL resource = Issue529.class.getClassLoader().getResource("issue529.json");
+        URL resource = Issue529.class.getClassLoader().getResource("issues/issue529.json");
         DTO dto = JSON.parseObject(resource, DTO.class);
         assertNotNull(dto);
         assertEquals(1, dto.checkedSkuList.get(0).cartType);

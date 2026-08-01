@@ -16,6 +16,7 @@ public class StructInfo {
     final boolean disableJSONB;
     final boolean disableAutoType;
     final boolean disableArrayMapping;
+    final boolean record;
 
     String typeKey;
     int readerFeatures;
@@ -38,6 +39,7 @@ public class StructInfo {
         this.binaryName = binaryName;
 
         this.modifiers = Analysis.getModifiers(element.getModifiers());
+        this.record = "RECORD".equals(element.getKind().name());
 
         AnnotationMirror jsonType = null;
         for (AnnotationMirror mirror : element.getAnnotationMirrors()) {
@@ -122,6 +124,13 @@ public class StructInfo {
     }
 
     public List<AttributeInfo> getReaderAttributes() {
+        if (record) {
+            return attributes.values()
+                    .stream()
+                    .filter(AttributeInfo::supportSet)
+                    .collect(Collectors.toList());
+        }
+
         return attributes.values()
                 .stream()
                 .filter(AttributeInfo::supportSet)

@@ -65,10 +65,12 @@ public abstract class BeanUtils {
             3724195282986200606L,
             3742915795806478647L,
             3977020351318456359L,
+            4775491097662790952L,
             4882459834864833642L,
             6033839080488254886L,
             7981148566008458638L,
-            8344106065386396833L
+            8344106065386396833L,
+            9215465129261900012L
     };
 
     public static String[] getRecordFieldNames(Class<?> recordType) {
@@ -119,7 +121,9 @@ public abstract class BeanUtils {
             if (Modifier.isStatic(modifiers) && !enumClass) {
                 continue;
             }
-
+            if (ignore(field.getType())) {
+                continue;
+            }
             fieldReaders.accept(field);
         }
     }
@@ -209,6 +213,28 @@ public abstract class BeanUtils {
         }
 
         return fieldMap.get(fieldName);
+    }
+
+    public static Type resolveCollectionItemType(Type fieldTypeResolved, Class<?> fieldClass) {
+        Type contextType = fieldTypeResolved != null ? fieldTypeResolved : fieldClass;
+
+        Type listType = getGenericSupertype(contextType, fieldClass, List.class);
+
+        if (listType == null || listType == List.class) {
+            listType = getGenericSupertype(contextType, fieldClass, Collection.class);
+        }
+
+        listType = BeanUtils.resolve(contextType, fieldClass, listType);
+
+        if (listType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) listType;
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+
+            if (actualTypeArguments.length == 1) {
+                return actualTypeArguments[0];
+            }
+        }
+        return null;
     }
 
     public static Method getSetter(Class objectClass, String methodName) {
@@ -444,6 +470,9 @@ public abstract class BeanUtils {
             return;
         }
 
+        if (isRecord(objectClass)) {
+            return;
+        }
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
             methods = getMethods(objectClass);
@@ -561,7 +590,8 @@ public abstract class BeanUtils {
             }
 
             final int methodNameLength = methodName.length();
-            boolean nameMatch = methodNameLength > 3 && (methodName.startsWith("set") || returnType == objectClass);
+            boolean nameMatch = methodNameLength > 3
+                    && (methodName.startsWith("set") || returnType == objectClass);
             if (!nameMatch) {
                 if (mixin != null) {
                     Method mixinMethod = getMethod(mixin, method);
@@ -1130,11 +1160,79 @@ public abstract class BeanUtils {
     private static Method[] getMethods(Class objectClass) {
         Method[] methods;
         try {
-            methods = objectClass.getMethods();
+            if (isRecord(objectClass)) {
+                methods = getRecordMethods(objectClass);
+            } else {
+                methods = objectClass.getMethods();
+            }
         } catch (NoClassDefFoundError ignored) {
             methods = new Method[0];
         }
         return methods;
+    }
+
+    private static Method[] getRecordMethods(Class<?> recordClass) {
+        if (JVM_VERSION < 14 && ANDROID_SDK_INT < 33) {
+            return new Method[0];
+        }
+
+        try {
+            if (RECORD_GET_RECORD_COMPONENTS == null) {
+                RECORD_GET_RECORD_COMPONENTS = Class.class.getMethod("getRecordComponents");
+            }
+
+            if (RECORD_COMPONENT_GET_NAME == null) {
+                Class<?> c = Class.forName("java.lang.reflect.RecordComponent");
+                RECORD_COMPONENT_GET_NAME = c.getMethod("getName");
+            }
+
+            final Object[] components = (Object[]) RECORD_GET_RECORD_COMPONENTS.invoke(recordClass);
+            final Method[] allMethods = recordClass.getMethods();
+
+            String[] componentNames = new String[components.length];
+            for (int i = 0; i < components.length; i++) {
+                componentNames[i] = (String) RECORD_COMPONENT_GET_NAME.invoke(components[i]);
+            }
+
+            Method[] orderedComponents = new Method[components.length];
+            boolean[] isComponentMethod = new boolean[allMethods.length];
+
+            for (int i = 0; i < allMethods.length; i++) {
+                Method method = allMethods[i];
+                if (method.getParameterCount() == 0) {
+                    String methodName = method.getName();
+
+                    for (int j = 0; j < componentNames.length; j++) {
+                        if (componentNames[j].equals(methodName)) {
+                            if (orderedComponents[j] == null) {
+                                orderedComponents[j] = method;
+                                isComponentMethod[i] = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            Method[] results = new Method[allMethods.length];
+            int index = 0;
+            for (Method m : orderedComponents) {
+                if (m != null) {
+                    results[index++] = m;
+                }
+            }
+
+            for (int i = 0; i < allMethods.length; i++) {
+                if (!isComponentMethod[i]) {
+                    results[index++] = allMethods[i];
+                }
+            }
+
+            return results;
+        } catch (Exception e) {
+            throw new RuntimeException(String.format(
+                    "Failed to access Methods needed to support `java.lang.Record`: (%s) %s",
+                    e.getClass().getName(), e.getMessage()), e);
+        }
     }
 
     private static boolean isJSONField(AnnotatedElement element) {
@@ -1331,6 +1429,16 @@ public abstract class BeanUtils {
         }
 
         return fieldName;
+    }
+
+    public static Field getField(Class objectClass, String fieldName) {
+        Field[] fields = new Field[1];
+        declaredFields(objectClass, field -> {
+            if (field.getName().equals(fieldName)) {
+                fields[0] = field;
+            }
+        });
+        return fields[0];
     }
 
     public static Field getField(Class objectClass, Method method) {
@@ -2804,32 +2912,22 @@ public abstract class BeanUtils {
 
     public static void processJacksonJsonFormat(FieldInfo fieldInfo, Annotation annotation) {
         Class<? extends Annotation> annotationClass = annotation.getClass();
+        final String[] jsonFormatValues = new String[3]; // 0:pattern; 1:shape; 2:locale
         BeanUtils.annotationMethods(annotationClass, m -> {
             String name = m.getName();
             try {
                 Object result = m.invoke(annotation);
                 switch (name) {
                     case "pattern": {
-                        String pattern = (String) result;
-                        if (pattern.length() != 0) {
-                            fieldInfo.format = pattern;
-                        }
+                        jsonFormatValues[0] = (String) result;
                         break;
                     }
                     case "shape": {
-                        String shape = ((Enum) result).name();
-                        if ("STRING".equals(shape)) {
-                            fieldInfo.features |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
-                        } else if ("NUMBER".equals(shape)) {
-                            fieldInfo.format = "millis";
-                        }
+                        jsonFormatValues[1] = ((Enum) result).name();
                         break;
                     }
                     case "locale": {
-                        String locale = (String) result;
-                        if (!locale.isEmpty() && !"##default".equals(locale)) {
-                            fieldInfo.locale = Locale.forLanguageTag(locale);
-                        }
+                        jsonFormatValues[2] = (String) result;
                         break;
                     }
                     default:
@@ -2839,6 +2937,20 @@ public abstract class BeanUtils {
                 // ignored
             }
         });
+
+        if (jsonFormatValues[0].length() != 0) {
+            fieldInfo.format = jsonFormatValues[0];
+        }
+
+        if ("STRING".equals(jsonFormatValues[1]) && fieldInfo.format == null) {
+            fieldInfo.format = "string";
+        } else if ("NUMBER".equals(jsonFormatValues[1])) {
+            fieldInfo.format = "millis";
+        }
+
+        if (!jsonFormatValues[2].isEmpty() && !"##default".equals(jsonFormatValues[2])) {
+            fieldInfo.locale = Locale.forLanguageTag(jsonFormatValues[2]);
+        }
     }
 
     public static void processJacksonJsonFormat(BeanInfo beanInfo, Annotation annotation) {

@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.ValueFilter;
 import lombok.Data;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -12,6 +13,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
  * @author 张治保
  * @since 2024/10/9
  */
+@Tag("regression")
 public class Issue3076 {
     @SneakyThrows
     @Test

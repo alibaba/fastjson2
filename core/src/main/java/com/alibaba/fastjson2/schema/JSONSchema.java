@@ -31,17 +31,20 @@ public abstract class JSONSchema {
 
     final String title;
     final String description;
+    final String customErrorMessage;
 
     static final JSONReader.Context CONTEXT = JSONFactory.createReadContext();
 
     JSONSchema(JSONObject input) {
         this.title = input.getString("title");
         this.description = input.getString("description");
+        this.customErrorMessage = input.getString("error");
     }
 
     JSONSchema(String title, String description) {
         this.title = title;
         this.description = description;
+        this.customErrorMessage = null;
     }
 
     void addResolveTask(UnresolvedReference.ResolveTask task){
@@ -686,7 +689,17 @@ public abstract class JSONSchema {
 
     public abstract Type getType();
 
-    public abstract ValidateResult validate(Object value);
+    protected abstract ValidateResult validateInternal(Object value);
+
+    public final ValidateResult validate(Object value) {
+        ValidateResult result = validateInternal(value);
+
+        if (!result.isSuccess() && this.customErrorMessage != null) {
+            return new ValidateResult(false, this.customErrorMessage);
+        }
+
+        return result;
+    }
 
     public boolean isValid(Object value) {
         return validate(value)
@@ -728,28 +741,75 @@ public abstract class JSONSchema {
                 .isSuccess();
     }
 
-    public ValidateResult validate(long value) {
-        return validate((Object) value);
+    protected ValidateResult validateInternal(long value) {
+        return validateInternal((Object) value);
     }
 
-    public ValidateResult validate(double value) {
-        return validate((Object) value);
+    public final ValidateResult validate(long value) {
+        ValidateResult result = validateInternal(value);
+        if (!result.isSuccess() && customErrorMessage != null) {
+            return new ValidateResult(false, customErrorMessage);
+        }
+        return result;
+    }
+    protected ValidateResult validateInternal(double value) {
+        return validateInternal((Object) value);
     }
 
-    public ValidateResult validate(Float value) {
-        return validate((Object) value);
+    public final ValidateResult validate(double value) {
+        ValidateResult result = validateInternal(value);
+        if (!result.isSuccess() && customErrorMessage != null) {
+            return new ValidateResult(false, customErrorMessage);
+        }
+        return result;
     }
 
-    public ValidateResult validate(Double value) {
-        return validate((Object) value);
+    protected ValidateResult validateInternal(Double value) {
+        return validateInternal((Object) value);
     }
 
-    public ValidateResult validate(Integer value) {
-        return validate((Object) value);
+    public final ValidateResult validate(Double value) {
+        ValidateResult result = validateInternal(value);
+        if (!result.isSuccess() && customErrorMessage != null) {
+            return new ValidateResult(false, customErrorMessage);
+        }
+        return result;
     }
 
-    public ValidateResult validate(Long value) {
-        return validate((Object) value);
+    protected ValidateResult validateInternal(Integer value) {
+        return validateInternal((Object) value);
+    }
+
+    public final ValidateResult validate(Integer value) {
+        ValidateResult result = validateInternal(value);
+        if (!result.isSuccess() && customErrorMessage != null) {
+            return new ValidateResult(false, customErrorMessage);
+        }
+        return result;
+    }
+
+    protected ValidateResult validateInternal(Long value) {
+        return validateInternal((Object) value);
+    }
+
+    public final ValidateResult validate(Long value) {
+        ValidateResult result = validateInternal(value);
+        if (!result.isSuccess() && customErrorMessage != null) {
+            return new ValidateResult(false, customErrorMessage);
+        }
+        return result;
+    }
+
+    protected ValidateResult validateInternal(Float value) {
+        return validateInternal((Object) value);
+    }
+
+    public final ValidateResult validate(Float value) {
+        ValidateResult result = validateInternal(value);
+        if (!result.isSuccess() && customErrorMessage != null) {
+            return new ValidateResult(false, customErrorMessage);
+        }
+        return result;
     }
 
     public void assertValidate(Object value) {

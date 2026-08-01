@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("codec")
 public class SeeAlsoTest3 {
     @Test
     public void test_seeAlso() throws Exception {

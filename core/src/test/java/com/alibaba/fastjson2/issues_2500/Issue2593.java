@@ -2,12 +2,14 @@ package com.alibaba.fastjson2.issues_2500;
 
 import com.alibaba.fastjson2.JSON;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
 public class Issue2593 {
     @Test
     public void test() {

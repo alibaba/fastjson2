@@ -3,10 +3,12 @@ package com.alibaba.fastjson2.annotation;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.annotation.JsonValue;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("annotation")
 public class JSONDirectTest {
     @Test
     public void test_feature() {

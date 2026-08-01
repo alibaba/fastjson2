@@ -186,7 +186,7 @@ public class FastJsonConfig {
      * @return the dateFormat
      */
     public String getDateFormat() {
-        dateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        dateFormat = JSON.DEFAULT_DATE_FORMAT;
         return dateFormat;
     }
 
@@ -194,7 +194,7 @@ public class FastJsonConfig {
      * @param dateFormat the dateFormat to set
      */
     public void setDateFormat(String dateFormat) {
-        JSON.DEFFAULT_DATE_FORMAT = dateFormat;
+        JSON.DEFAULT_DATE_FORMAT = dateFormat;
         this.dateFormat = dateFormat;
     }
 

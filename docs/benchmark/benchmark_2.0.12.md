@@ -50,7 +50,7 @@ Bean bean = JSON.parseJSONObject(str, Bean.class);
 
 这个场景是fastjson1最强的场景；
 
-在ecs.c7.xlarge-oracle-jdk1.8.0_341_x64环境中，只相当于只相当于fastjson2的76.16%;jackson则只相当于fastjson2的41.62%; gson是fastjson2的34.44%.
+在ecs.c7.xlarge-oracle-jdk1.8.0_341_x64环境中，只相当于fastjson2的76.16%；jackson则只相当于fastjson2的41.62%；gson是fastjson2的34.44%。
 
 性能排序如下：
 ```java
@@ -224,7 +224,7 @@ byte[] utf8Bytes = ...;
 Bean bean = JSON.parseJSONObject(utf8Bytes, Bean.class);
 ```
 
-这个场景fastjson2同样表现出了卓越的性能；在JDK8下，fastjson1和jackson的性能分别之后fastjson2的50.49%和63.22%;
+这个场景fastjson2同样表现出了卓越的性能；在JDK8下，fastjson1和jackson的性能分别之后fastjson2的50.49%和63.22%；
 gson不直接支持输入utf8Bytes，需要先构造字符串，性能只有fastjson2的35%。
 
 性能排序如下：
@@ -312,7 +312,7 @@ byte[] utf8Bytes = ...;
 JSONObject jsonObject = JSON.parseJSONObject(utf8Bytes);
 ```
 
-这个场景fastjson2同样表现出了卓越的性能；在JDK8下，fastjson1和jackson的性能分别之后fastjson2的50.49%和63.22%;
+这个场景fastjson2同样表现出了卓越的性能；在JDK8下，fastjson1和jackson的性能分别之后fastjson2的50.49%和63.22%；
 gson不直接支持输入utf8Bytes，需要先构造字符串，性能只有fastjson2的35%。
 
 性能排序如下：

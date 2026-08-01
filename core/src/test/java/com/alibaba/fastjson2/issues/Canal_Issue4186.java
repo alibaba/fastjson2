@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.filter.Filter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -9,6 +10,9 @@ import java.io.Serializable;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("regression")
+@Tag("jsonb")
+@Tag("autotype")
 public class Canal_Issue4186 {
     final Filter autoTypeFilter = JSONReader.autoTypeFilter(Canal_Issue4186.class.getName());
 

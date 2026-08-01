@@ -5,12 +5,16 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("date")
+@Tag("filter")
 public class Issue769 {
     @Test
     public void testCase() {

@@ -1,11 +1,13 @@
 package com.alibaba.fastjson2.schema;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static com.alibaba.fastjson2.schema.StringSchema.isEmail;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("schema")
 public class EmailValidatorTest {
     @Test
     public void test() {

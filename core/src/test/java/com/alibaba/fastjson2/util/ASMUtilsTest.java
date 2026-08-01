@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.util;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.time.format.DateTimeParseException;
 import static com.alibaba.fastjson2.internal.asm.ASMUtils.lookupParameterNames;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
+@Tag("util")
 public class ASMUtilsTest {
     @Test
     public void test() throws Exception {

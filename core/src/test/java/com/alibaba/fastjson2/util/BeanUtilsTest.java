@@ -6,6 +6,7 @@ import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtConstructor;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.*;
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author kon, created on 2022/4/27T11:04.
  * @version 1.0.0-SNAPSHOT
  */
+@Tag("util")
 public class BeanUtilsTest {
     @Test
     public void declaredFields() {
@@ -303,10 +305,12 @@ public class BeanUtilsTest {
                 "org.mockito.internal.creation.bytebuddy.MockMethodInterceptor",
                 "sun.nio.ch.FileChannelImpl",
                 "java.io.InputStream",
+                "java.lang.ClassLoader",
                 "java.util.concurrent.locks.Lock",
                 "java.util.concurrent.locks.ReentrantLock",
                 "java.security.ProtectionDomain",
-                "java.lang.ref.ReferenceQueue"
+                "java.lang.ref.ReferenceQueue",
+                "java.io.OutputStream"
         };
 
         long[] hashCodes = new long[names.length];

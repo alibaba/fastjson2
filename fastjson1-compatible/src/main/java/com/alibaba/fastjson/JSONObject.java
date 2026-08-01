@@ -127,15 +127,7 @@ public class JSONObject
             val = map.get(key.toString());
         }
 
-        if (val instanceof com.alibaba.fastjson2.JSONObject) {
-            val = new com.alibaba.fastjson.JSONObject((com.alibaba.fastjson2.JSONObject) val);
-        }
-
-        if (val instanceof com.alibaba.fastjson2.JSONArray) {
-            val = new com.alibaba.fastjson.JSONArray((com.alibaba.fastjson2.JSONArray) val);
-        }
-
-        return val;
+        return adaptResult(val);
     }
 
     public JSONObject getJSONObject(String key) {
@@ -249,7 +241,7 @@ public class JSONObject
         boolean fieldBased = jsonReader.getContext().isEnabled(JSONReader.Feature.FieldBased);
         ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
 
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        String defaultDateFormat = JSON.DEFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             jsonReader
                     .getContext()
@@ -290,7 +282,7 @@ public class JSONObject
         ObjectReader objectReader = provider.getObjectReader(type);
         JSONReader jsonReader = JSONReader.of(json);
 
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        String defaultDateFormat = JSON.DEFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             jsonReader
                     .getContext()
@@ -408,7 +400,7 @@ public class JSONObject
         boolean fieldBased = jsonReader.getContext().isEnabled(JSONReader.Feature.FieldBased);
         ObjectReader objectReader = provider.getObjectReader(type, fieldBased);
 
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        String defaultDateFormat = JSON.DEFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             jsonReader
                     .getContext()

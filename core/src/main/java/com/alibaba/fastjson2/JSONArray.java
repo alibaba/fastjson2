@@ -14,7 +14,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
+import java.time.*;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.Function;
@@ -150,7 +150,9 @@ public class JSONArray
         }
 
         if (value instanceof Object[]) {
-            return JSONArray.of((Object[]) value);
+            JSONArray array = JSONArray.of((Object[]) value);
+            set(index, array);
+            return array;
         }
 
         Class<?> valueClass = value.getClass();
@@ -161,6 +163,7 @@ public class JSONArray
                 Object item = Array.get(value, i);
                 jsonArray.add(item);
             }
+            set(index, jsonArray);
             return jsonArray;
         }
 
@@ -205,12 +208,13 @@ public class JSONArray
 
         Class valueClass = value.getClass();
         ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
-        if (objectWriter instanceof ObjectWriterAdapter) {
-            ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) objectWriter;
-            return writerAdapter.toJSONObject(value);
-        }
 
-        return null;
+        JSONObject jsonObject = (objectWriter instanceof ObjectWriterAdapter)
+                ? ((ObjectWriterAdapter) objectWriter).toJSONObject(value)
+                : (JSONObject) JSON.toJSON(value);
+
+        set(index, jsonObject);
+        return jsonObject;
     }
 
     /**
@@ -221,10 +225,22 @@ public class JSONArray
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public String getString(int index) {
+        return getString(index, null);
+    }
+
+    /**
+     * Returns the {@link String} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @param defaultValue the default mapping of the index
+     * @return {@link String} or null
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     */
+    public String getString(int index, String defaultValue) {
         Object value = get(index);
 
         if (value == null) {
-            return null;
+            return defaultValue;
         }
 
         if (value instanceof String) {
@@ -273,7 +289,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -282,7 +298,7 @@ public class JSONArray
             return Double.parseDouble(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Double");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to double");
     }
 
     /**
@@ -295,27 +311,8 @@ public class JSONArray
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public double getDoubleValue(int index) {
-        Object value = get(index);
-
-        if (value == null) {
-            return 0D;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0D;
-            }
-
-            return Double.parseDouble(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to double value");
+        Double value = getDouble(index);
+        return value == null ? 0D : value;
     }
 
     /**
@@ -343,7 +340,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -352,7 +349,7 @@ public class JSONArray
             return Float.parseFloat(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Float");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to float");
     }
 
     /**
@@ -365,27 +362,8 @@ public class JSONArray
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public float getFloatValue(int index) {
-        Object value = get(index);
-
-        if (value == null) {
-            return 0F;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).floatValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0F;
-            }
-
-            return Float.parseFloat(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to float value");
+        Float value = getFloat(index);
+        return value == null ? 0F : value;
     }
 
     /**
@@ -412,10 +390,14 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (long) Double.parseDouble(str);
             }
 
             return Long.parseLong(str);
@@ -449,10 +431,14 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (long) Double.parseDouble(str);
             }
 
             return Long.parseLong(str);
@@ -485,10 +471,14 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (int) Double.parseDouble(str);
             }
 
             return Integer.parseInt(str);
@@ -522,10 +512,14 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (int) Double.parseDouble(str);
             }
 
             return Integer.parseInt(str);
@@ -559,7 +553,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -568,7 +562,7 @@ public class JSONArray
             return Short.parseShort(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Short");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to short");
     }
 
     /**
@@ -581,27 +575,8 @@ public class JSONArray
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public short getShortValue(int index) {
-        Object value = get(index);
-
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).shortValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0;
-            }
-
-            return Short.parseShort(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to short value");
+        Short value = getShort(index);
+        return value == null ? 0 : value;
     }
 
     /**
@@ -625,7 +600,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -634,7 +609,7 @@ public class JSONArray
             return Byte.parseByte(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Byte");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to byte");
     }
 
     /**
@@ -647,27 +622,8 @@ public class JSONArray
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public byte getByteValue(int index) {
-        Object value = get(index);
-
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).byteValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0;
-            }
-
-            return Byte.parseByte(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to byte value");
+        Byte value = getByte(index);
+        return value == null ? 0 : value;
     }
 
     /**
@@ -703,7 +659,7 @@ public class JSONArray
             return "true".equalsIgnoreCase(str) || "1".equals(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Boolean");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to boolean");
     }
 
     /**
@@ -715,26 +671,8 @@ public class JSONArray
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public boolean getBooleanValue(int index) {
-        Object value = get(index);
-
-        if (value == null) {
-            return false;
-        }
-
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).intValue() == 1;
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            return "true".equalsIgnoreCase(str) || "1".equals(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to boolean value");
+        Boolean value = getBoolean(index);
+        return value != null && value;
     }
 
     /**
@@ -767,7 +705,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -823,7 +761,7 @@ public class JSONArray
         }
 
         if (value instanceof String) {
-            return toBigDecimal((String) value);
+            return toBigDecimal(((String) value).trim());
         }
 
         if (value instanceof Boolean) {
@@ -851,6 +789,10 @@ public class JSONArray
             return (Date) value;
         }
 
+        if (value instanceof String) {
+            return DateUtils.parseDate((String) value);
+        }
+
         if (value instanceof Number) {
             long millis = ((Number) value).longValue();
             if (millis == 0) {
@@ -863,6 +805,12 @@ public class JSONArray
     }
 
     /**
+     * Returns the {@link Date} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @param defaultValue default value to return if the element is null
+     * @return {@link Date} or defaultValue
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      * @since 2.0.27
      */
     public Date getDate(int index, Date defaultValue) {
@@ -900,6 +848,198 @@ public class JSONArray
         }
 
         return TypeUtils.toInstant(value);
+    }
+
+    /**
+     * Returns the {@link LocalDate} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @return {@link LocalDate} or null
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     * @since 2.0.57
+     */
+    public LocalDate getLocalDate(int index) {
+        return getLocalDate(index, null);
+    }
+
+    /**
+     * Returns the {@link LocalDate} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @param defaultValue default value to return if the element is null
+     * @return {@link LocalDate} or defaultValue
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     * @since 2.0.57
+     */
+    public LocalDate getLocalDate(int index, LocalDate defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof LocalDate) {
+            return (LocalDate) value;
+        }
+        return TypeUtils.cast(value, LocalDate.class);
+    }
+
+    /**
+     * Returns the {@link LocalTime} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @return {@link LocalTime} or null
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     * @since 2.0.57
+     */
+    public LocalTime getLocalTime(int index) {
+        return getLocalTime(index, null);
+    }
+
+    /**
+     * Returns the {@link LocalTime} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @param defaultValue default value to return if the element is null
+     * @return {@link LocalTime} or defaultValue
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     * @since 2.0.57
+     */
+    public LocalTime getLocalTime(int index, LocalTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof LocalTime) {
+            return (LocalTime) value;
+        }
+        return TypeUtils.cast(value, LocalTime.class);
+    }
+
+    /**
+     * Returns the {@link OffsetTime} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @return {@link OffsetTime} or null
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     * @since 2.0.57
+     */
+    public OffsetTime getOffsetTime(int index) {
+        return getOffsetTime(index, null);
+    }
+
+    /**
+     * Returns the {@link OffsetTime} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @param defaultValue default value to return if the element is null
+     * @return {@link OffsetTime} or defaultValue
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     * @since 2.0.57
+     */
+    public OffsetTime getOffsetTime(int index, OffsetTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof OffsetTime) {
+            return (OffsetTime) value;
+        }
+        return TypeUtils.cast(value, OffsetTime.class);
+    }
+
+    /**
+     * Returns the {@link LocalDateTime} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @return {@link LocalDateTime} or null
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     * @since 2.0.57
+     */
+    public LocalDateTime getLocalDateTime(int index) {
+        return getLocalDateTime(index, null);
+    }
+
+    /**
+     * Returns the {@link LocalDateTime} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @param defaultValue default value to return if the element is null
+     * @return {@link LocalDateTime} or defaultValue
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     * @since 2.0.57
+     */
+    public LocalDateTime getLocalDateTime(int index, LocalDateTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof LocalDateTime) {
+            return (LocalDateTime) value;
+        }
+        return TypeUtils.cast(value, LocalDateTime.class);
+    }
+
+    /**
+     * Returns the {@link OffsetDateTime} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @return {@link OffsetDateTime} or null
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     * @since 2.0.57
+     */
+    public OffsetDateTime getOffsetDateTime(int index) {
+        return getOffsetDateTime(index, null);
+    }
+
+    /**
+     * Returns the {@link OffsetDateTime} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @param defaultValue default value to return if the element is null
+     * @return {@link OffsetDateTime} or defaultValue
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     * @since 2.0.57
+     */
+    public OffsetDateTime getOffsetDateTime(int index, OffsetDateTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof OffsetDateTime) {
+            return (OffsetDateTime) value;
+        }
+        return TypeUtils.cast(value, OffsetDateTime.class);
+    }
+
+    /**
+     * Returns the {@link ZonedDateTime} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @return {@link ZonedDateTime} or null
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     * @since 2.0.57
+     */
+    public ZonedDateTime getZonedDateTime(int index) {
+        return getZonedDateTime(index, null);
+    }
+
+    /**
+     * Returns the {@link ZonedDateTime} at the specified location in this {@link JSONArray}.
+     *
+     * @param index index of the element to return
+     * @param defaultValue default value to return if the element is null
+     * @return {@link ZonedDateTime} or defaultValue
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     * @since 2.0.57
+     */
+    public ZonedDateTime getZonedDateTime(int index, ZonedDateTime defaultValue) {
+        Object value = super.get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof ZonedDateTime) {
+            return (ZonedDateTime) value;
+        }
+        return TypeUtils.cast(value, ZonedDateTime.class);
     }
 
     /**
@@ -1323,12 +1463,24 @@ public class JSONArray
         return creator.apply(object);
     }
 
+    /**
+     * Adds a new {@link JSONObject} to the end of this {@link JSONArray}.
+     *
+     * @return the newly created {@link JSONObject}
+     * @since 2.0.3
+     */
     public JSONObject addObject() {
         JSONObject object = new JSONObject();
         add(object);
         return object;
     }
 
+    /**
+     * Adds a new {@link JSONArray} to the end of this {@link JSONArray}.
+     *
+     * @return the newly created {@link JSONArray}
+     * @since 2.0.3
+     */
     public JSONArray addArray() {
         JSONArray array = new JSONArray();
         add(array);
@@ -1343,6 +1495,8 @@ public class JSONArray
      * </pre>
      *
      * @param element element to be appended to this list
+     * @return this {@link JSONArray} instance
+     * @since 2.0.3
      */
     public JSONArray fluentAdd(Object element) {
         add(element);
@@ -1350,6 +1504,9 @@ public class JSONArray
     }
 
     /**
+     * Chained clear operation that removes all elements from this {@link JSONArray}.
+     *
+     * @return this {@link JSONArray} instance
      * @since 2.0.3
      */
     public JSONArray fluentClear() {
@@ -1358,6 +1515,10 @@ public class JSONArray
     }
 
     /**
+     * Chained remove operation that removes the element at the specified position.
+     *
+     * @param index the index of the element to be removed
+     * @return this {@link JSONArray} instance
      * @since 2.0.3
      */
     public JSONArray fluentRemove(int index) {
@@ -1366,6 +1527,11 @@ public class JSONArray
     }
 
     /**
+     * Chained set operation that replaces the element at the specified position.
+     *
+     * @param index index of the element to replace
+     * @param element element to be stored at the specified position
+     * @return this {@link JSONArray} instance
      * @since 2.0.3
      */
     public JSONArray fluentSet(int index, Object element) {
@@ -1374,6 +1540,10 @@ public class JSONArray
     }
 
     /**
+     * Chained remove operation that removes the first occurrence of the specified element.
+     *
+     * @param o element to be removed from this list, if present
+     * @return this {@link JSONArray} instance
      * @since 2.0.3
      */
     public JSONArray fluentRemove(Object o) {
@@ -1382,6 +1552,10 @@ public class JSONArray
     }
 
     /**
+     * Chained remove operation that removes from this list all of its elements that are contained in the specified collection.
+     *
+     * @param c collection containing elements to be removed from this list
+     * @return this {@link JSONArray} instance
      * @since 2.0.3
      */
     public JSONArray fluentRemoveAll(Collection<?> c) {
@@ -1390,6 +1564,10 @@ public class JSONArray
     }
 
     /**
+     * Chained add operation that appends all of the elements in the specified collection to the end of this list.
+     *
+     * @param c collection containing elements to be added to this list
+     * @return this {@link JSONArray} instance
      * @since 2.0.3
      */
     public JSONArray fluentAddAll(Collection<?> c) {
@@ -1398,6 +1576,10 @@ public class JSONArray
     }
 
     /**
+     * Checks if this {@link JSONArray} is valid against the specified {@link JSONSchema}.
+     *
+     * @param schema the {@link JSONSchema} to validate against
+     * @return true if this {@link JSONArray} is valid against the schema, false otherwise
      * @since 2.0.3
      */
     public boolean isValid(JSONSchema schema) {
@@ -1406,6 +1588,11 @@ public class JSONArray
                 .isSuccess();
     }
 
+    /**
+     * Creates and returns a copy of this {@link JSONArray}.
+     *
+     * @return a clone of this instance
+     */
     @Override
     public Object clone() {
         return new JSONArray(this);

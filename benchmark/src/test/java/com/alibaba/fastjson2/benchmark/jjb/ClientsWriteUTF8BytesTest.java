@@ -13,7 +13,7 @@ public class ClientsWriteUTF8BytesTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("ClientsWriteUTF8Bytes-jsonb millis : " + millis);
-            // zulu17.40.19 : 609
+            // zulu17.40.19 : 609 413
             // zulu17.40.19_vec :
         }
     }
@@ -54,8 +54,8 @@ public class ClientsWriteUTF8BytesTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("ClientsWriteUTF8Bytes-wast millis : " + millis);
-            // zulu8.70.0.23 :
-            // zulu17.40.19 : 1364
+            // zulu8.70.0.23 : 1420
+            // zulu17.40.19 : 1364 1055
             // zulu17.40.19_vec :
             // zulu17.40.19_reflect :
         }
@@ -68,9 +68,8 @@ public class ClientsWriteUTF8BytesTest {
                 benchmark.fastjson2_str(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("ClientsWriteUTF8Bytes-fastjson2 millis : " + millis);
-            // zulu17.40.19 :
-            // zulu17.40.19_vec : 1139 1313 1307 1206
+            System.out.println("ClientsWriteUTF8Bytes-fastjson2_str millis : " + millis);
+            // zulu17.40.19 : 1158 1192
         }
     }
 

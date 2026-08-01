@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -9,6 +10,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("codec")
 public class ParseSetTest {
     @Test
     public void test_Set() {

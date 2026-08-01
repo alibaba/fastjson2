@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.apache.dubbo.common.serialize.fastjson2.FastJson2ObjectInput;
 import org.apache.dubbo.common.serialize.fastjson2.FastJson2ObjectOutput;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -19,6 +20,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author 张治保
  * @since 2024/1/15
  */
+@Tag("regression")
+@Tag("jsonb")
+@Tag("autotype")
 public class Issue2181 {
     @ToString
     @Getter

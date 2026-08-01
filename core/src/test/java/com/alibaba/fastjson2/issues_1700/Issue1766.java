@@ -5,11 +5,13 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.schema.ArraySchema;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.schema.ObjectSchema;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("regression")
 public class Issue1766 {
     @Test
     public void test() {

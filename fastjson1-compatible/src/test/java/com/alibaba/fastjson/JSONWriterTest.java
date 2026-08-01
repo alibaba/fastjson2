@@ -55,6 +55,6 @@ public class JSONWriterTest {
         assertTrue(context.isEnabled(com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray));
 
         writer.config(SerializerFeature.WriteDateUseDateFormat, true);
-        assertEquals(JSON.DEFFAULT_DATE_FORMAT, context.getDateFormat());
+        assertEquals(JSON.DEFAULT_DATE_FORMAT, context.getDateFormat());
     }
 }

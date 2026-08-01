@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues_2300;
 
 import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import java.util.Set;
  * @author 张治保
  * @since 2024/3/8
  */
+@Tag("regression")
 public class Issue2302 {
     @Test
     void test() {

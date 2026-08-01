@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import lombok.Data;
 import org.json.JSONException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -12,6 +13,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+@Tag("regression")
 public class Issue1479 {
     @Test
     public void test() throws JSONException {

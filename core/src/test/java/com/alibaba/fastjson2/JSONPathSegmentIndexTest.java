@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -13,6 +14,7 @@ import java.util.function.BiFunction;
 import static com.alibaba.fastjson2.JSONReader.EOI;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("jsonpath")
 public class JSONPathSegmentIndexTest {
     enum ContextRootType {
         t_null,

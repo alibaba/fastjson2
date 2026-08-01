@@ -1,11 +1,13 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Tag("writer")
 public class ObjectWriterImplListEnumTest {
     @Test
     public void testNullEnumObjInList() {

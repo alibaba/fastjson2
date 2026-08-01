@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -9,6 +10,7 @@ import java.sql.Clob;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class JdbcSupportTest {
     String[] strings = new String[]{
             "abc", "中国", "\0\1\2\3\4\5"

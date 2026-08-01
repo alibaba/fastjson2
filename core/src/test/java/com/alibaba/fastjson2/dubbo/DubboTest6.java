@@ -10,6 +10,7 @@ import org.apache.dubbo.springboot.demo.BusinessException;
 import org.apache.dubbo.springboot.demo.ParamsDTO;
 import org.apache.dubbo.springboot.demo.ParamsItemDTO;
 import org.apache.dubbo.springboot.demo.ServiceException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.DefaultAopProxyFactory;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("integration")
 public class DubboTest6 {
     @Test
     public void test() {

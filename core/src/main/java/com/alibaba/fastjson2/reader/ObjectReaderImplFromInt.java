@@ -1,8 +1,11 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Type;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntFunction;
 
 public final class ObjectReaderImplFromInt<T>
@@ -18,6 +21,14 @@ public final class ObjectReaderImplFromInt<T>
     public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfNull()) {
             return null;
+        }
+
+        if (objectClass == AtomicInteger.class && jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
+            long typeHash = jsonReader.readTypeHashCode();
+            if (typeHash != 7576651708426282938L) { // Fnv.hashCode64("AtomicInteger")
+                String typeName = jsonReader.getString();
+                throw new JSONException(jsonReader.info(typeName));
+            }
         }
 
         return creator.apply(

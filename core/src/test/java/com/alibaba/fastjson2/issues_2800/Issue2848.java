@@ -1,12 +1,14 @@
 package com.alibaba.fastjson2.issues_2800;
 
 import com.alibaba.fastjson2.support.csv.CSVWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
+@Tag("regression")
 public class Issue2848 {
     @Test
     public void test() throws Exception {

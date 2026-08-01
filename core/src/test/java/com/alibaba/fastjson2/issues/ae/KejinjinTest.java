@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import com.fasterxml.jackson.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -13,6 +14,9 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("annotation")
+@Tag("compat-jackson")
 public class KejinjinTest {
     @Test
     public void test() {

@@ -22,11 +22,41 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 import static com.alibaba.fastjson2.writer.ObjectWriterProvider.NAME_COMPATIBLE_WITH_FILED;
 
+/**
+ * ObjectWriterCreator is responsible for creating ObjectWriter instances for
+ * serializing Java objects into JSON format. It provides factory methods for
+ * creating ObjectWriters for various types of objects and fields.
+ *
+ * <p>This class supports various features including:
+ * <ul>
+ *   <li>Creation of ObjectWriters for different object types</li>
+ *   <li>Creation of FieldWriters for different field types</li>
+ *   <li>Lambda expression support for getter methods</li>
+ *   <li>Custom field writer creation with various configurations</li>
+ *   <li>JIT compilation support for improved performance</li>
+ * </ul>
+ *
+ * <p>Example usage:
+ * <pre>
+ * // Get default creator
+ * ObjectWriterCreator creator = JSONFactory.getDefaultObjectWriterCreator();
+ *
+ * // Create ObjectWriter for a class
+ * ObjectWriter&lt;User&gt; writer = creator.createObjectWriter(User.class);
+ *
+ * // Create FieldWriter for a field
+ * Field field = User.class.getDeclaredField("name");
+ * FieldWriter&lt;User&gt; fieldWriter = creator.createFieldWriter("name", null, field);
+ * </pre>
+ *
+ * @since 2.0.0
+ */
 public class ObjectWriterCreator {
     public static final ObjectWriterCreator INSTANCE = new ObjectWriterCreator();
 
@@ -46,17 +76,41 @@ public class ObjectWriterCreator {
     protected final AtomicInteger jitErrorCount = new AtomicInteger();
     protected volatile Throwable jitErrorLast;
 
+    /**
+     * Constructs a new ObjectWriterCreator instance.
+     */
     public ObjectWriterCreator() {
     }
 
+    /**
+     * Creates an ObjectWriter for the specified list of FieldWriters.
+     *
+     * @param fieldWriters the list of FieldWriters to use
+     * @return an ObjectWriter instance
+     */
     public ObjectWriter createObjectWriter(List<FieldWriter> fieldWriters) {
         return new ObjectWriterAdapter(null, null, null, 0, fieldWriters);
     }
 
+    /**
+     * Creates an ObjectWriter for the specified array of FieldWriters.
+     *
+     * @param fieldWriters the array of FieldWriters to use
+     * @return an ObjectWriter instance
+     */
     public ObjectWriter createObjectWriter(FieldWriter... fieldWriters) {
         return createObjectWriter(Arrays.asList(fieldWriters));
     }
 
+    /**
+     * Creates an ObjectWriter for the specified object type with names, types, and supplier.
+     *
+     * @param <T> the type of objects that the ObjectWriter can serialize
+     * @param names the field names
+     * @param types the field types
+     * @param supplier the FieldSupplier to use
+     * @return an ObjectWriter instance
+     */
     public <T> ObjectWriter<T> createObjectWriter(String[] names, Type[] types, FieldSupplier<T> supplier) {
         FieldWriter[] fieldWriters = new FieldWriter[names.length];
         for (int i = 0; i < names.length; i++) {
@@ -68,6 +122,12 @@ public class ObjectWriterCreator {
         return createObjectWriter(fieldWriters);
     }
 
+    /**
+     * Creates an ObjectWriter for the specified object type.
+     *
+     * @param objectType the class of objects to serialize
+     * @return an ObjectWriter instance
+     */
     public ObjectWriter createObjectWriter(Class objectType) {
         return createObjectWriter(
                 objectType,
@@ -76,11 +136,26 @@ public class ObjectWriterCreator {
         );
     }
 
+    /**
+     * Creates an ObjectWriter for the specified object type and field writers.
+     *
+     * @param objectType the class of objects to serialize
+     * @param fieldWriters the field writers to use
+     * @return an ObjectWriter instance
+     */
     public ObjectWriter createObjectWriter(Class objectType,
                                            FieldWriter... fieldWriters) {
         return createObjectWriter(objectType, 0, fieldWriters);
     }
 
+    /**
+     * Creates an ObjectWriter for the specified object class, features, and field writers.
+     *
+     * @param objectClass the class of objects to serialize
+     * @param features the features to use
+     * @param fieldWriters the field writers to use
+     * @return an ObjectWriter instance
+     */
     public ObjectWriter createObjectWriter(
             Class objectClass,
             long features,
@@ -135,7 +210,18 @@ public class ObjectWriterCreator {
         return new ObjectWriterAdapter(objectClass, null, null, features, Arrays.asList(fieldWriters));
     }
 
-    protected FieldWriter creteFieldWriter(
+    /**
+     * Creates a FieldWriter for the specified field.
+     *
+     * @param objectClass the class containing the field
+     * @param writerFeatures the writer features to use
+     * @param provider the ObjectWriterProvider to use
+     * @param beanInfo the BeanInfo to use
+     * @param fieldInfo the FieldInfo to use
+     * @param field the Field to create a writer for
+     * @return a FieldWriter instance, or null if the field should be ignored
+     */
+    protected FieldWriter createFieldWriter(
             Class objectClass,
             long writerFeatures,
             ObjectWriterProvider provider,
@@ -143,7 +229,7 @@ public class ObjectWriterCreator {
             FieldInfo fieldInfo,
             Field field
     ) {
-        fieldInfo.features = writerFeatures;
+        fieldInfo.features = writerFeatures & ~BeanToArray.mask;
         provider.getFieldInfo(beanInfo, fieldInfo, objectClass, field);
 
         if (fieldInfo.ignore || isFunction(field.getType())) {
@@ -271,6 +357,14 @@ public class ObjectWriterCreator {
                 fieldInfo.contentAs);
     }
 
+    /**
+     * Creates an ObjectWriter for the specified object class, features, and modules.
+     *
+     * @param objectClass the class of objects to serialize
+     * @param features the features to use
+     * @param modules the ObjectWriterModules to use
+     * @return an ObjectWriter instance
+     */
     public ObjectWriter createObjectWriter(
             Class objectClass,
             long features,
@@ -285,6 +379,12 @@ public class ObjectWriterCreator {
         return createObjectWriter(objectClass, features, provider);
     }
 
+    /**
+     * Sets default values for the specified field writers using the default constructor of the object class.
+     *
+     * @param fieldWriters the list of FieldWriters to set default values for
+     * @param objectClass the class of objects to create default instances from
+     */
     protected void setDefaultValue(List<FieldWriter> fieldWriters, Class objectClass) {
         Constructor constructor = BeanUtils.getDefaultConstructor(objectClass, true);
         if (constructor == null) {
@@ -312,6 +412,16 @@ public class ObjectWriterCreator {
         }
     }
 
+    /**
+     * Creates an ObjectWriter for the specified object class, features, and provider.
+     * This is the main method for creating ObjectWriters that handles all the complexity
+     * of analyzing the class structure and creating appropriate FieldWriters.
+     *
+     * @param objectClass the class of objects to serialize
+     * @param features the features to use
+     * @param provider the ObjectWriterProvider to use
+     * @return an ObjectWriter instance
+     */
     public ObjectWriter createObjectWriter(
             final Class objectClass,
             final long features,
@@ -322,10 +432,13 @@ public class ObjectWriterCreator {
 
         provider.getBeanInfo(beanInfo, objectClass);
 
-        if (beanInfo.serializer != null && ObjectWriter.class.isAssignableFrom(beanInfo.serializer)) {
+        Class serializer = beanInfo.serializer;
+        if (serializer != null && ObjectWriter.class.isAssignableFrom(serializer)) {
             try {
-                return (ObjectWriter) beanInfo.serializer.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+                Constructor constructor = serializer.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                return (ObjectWriter) constructor.newInstance();
+            } catch (Exception e) {
                 throw new JSONException("create serializer error", e);
             }
         }
@@ -351,8 +464,11 @@ public class ObjectWriterCreator {
             Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
-                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
+                FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
+                    if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
+                        ((FieldWriterObject) fieldWriter).writeUsing = true;
+                    }
                     fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
                 }
             });
@@ -368,14 +484,17 @@ public class ObjectWriterCreator {
             }
 
             if (!fieldWritersCreated) {
-                Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
+                Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
 
                 if (!record) {
                     BeanUtils.declaredFields(objectClass, field -> {
                         fieldInfo.init();
-                        fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
-                        FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
+                        fieldInfo.ignore = fieldInfo.isPrivate = (field.getModifiers() & Modifier.PUBLIC) == 0;
+                        FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
+                            if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
+                                ((FieldWriterObject) fieldWriter).writeUsing = true;
+                            }
                             FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
 
                             if (origin != null && origin.compareTo(fieldWriter) > 0) {
@@ -464,6 +583,7 @@ public class ObjectWriterCreator {
                                     fieldInfo.ordinal,
                                     fieldInfo.features,
                                     fieldInfo.format,
+                                    fieldInfo.locale,
                                     fieldInfo.label,
                                     method,
                                     writeUsingWriter,
@@ -490,6 +610,9 @@ public class ObjectWriterCreator {
                         );
                     }
 
+                    if (fieldInfo.writeUsing != null && fieldWriter instanceof FieldWriterObject) {
+                        ((FieldWriterObject) fieldWriter).writeUsing = true;
+                    }
                     FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
 
                     if (origin != null && origin.compareTo(fieldWriter) > 0) {
@@ -506,7 +629,11 @@ public class ObjectWriterCreator {
                             sameFieldName = (char) (firstChar - 32) + fieldName.substring(1);
                         }
                         if (sameFieldName != null) {
-                            fieldWriterMap.remove(sameFieldName);
+                            FieldWriter sameNameFieldWriter = fieldWriterMap.get(sameFieldName);
+                            if (sameNameFieldWriter != null
+                                    && (sameNameFieldWriter.method == null || sameNameFieldWriter.method.equals(method))) {
+                                fieldWriterMap.remove(sameFieldName);
+                            }
                         }
                     }
                 });
@@ -605,6 +732,17 @@ public class ObjectWriterCreator {
         return writerAdapter;
     }
 
+    /**
+     * Gets the field name for the specified method based on various naming strategies and configurations.
+     *
+     * @param objectClass the class containing the method
+     * @param provider the ObjectWriterProvider to use
+     * @param beanInfo the BeanInfo containing configuration
+     * @param record whether the class is a record
+     * @param fieldInfo the FieldInfo containing field configuration
+     * @param method the method to get the field name for
+     * @return the field name
+     */
     protected static String getFieldName(
             Class objectClass,
             ObjectWriterProvider provider,
@@ -632,7 +770,7 @@ public class ObjectWriterCreator {
                     }
 
                     if ((len == 1 && c0 >= 'a' && c0 <= 'z')
-                            || (len > 2 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
+                            || (len > 1 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
                     ) {
                         char[] chars = fieldName.toCharArray();
                         if (c0 >= 'a') {
@@ -643,8 +781,18 @@ public class ObjectWriterCreator {
                         String fieldName1 = new String(chars);
                         field = BeanUtils.getDeclaredField(objectClass, fieldName1);
 
-                        if (field != null && (len == 1 || Modifier.isPublic(field.getModifiers()))) {
-                            fieldName = field.getName();
+                        if (field != null) {
+                            boolean ucaseAll = true;
+                            for (int i = 2; i < chars.length; i++) {
+                                char c = chars[i];
+                                if (c >= 'a' && c <= 'z') {
+                                    ucaseAll = false;
+                                    break;
+                                }
+                            }
+                            if (ucaseAll || Modifier.isPublic(field.getModifiers())) {
+                                fieldName = field.getName();
+                            }
                         }
                     }
                 }
@@ -655,6 +803,12 @@ public class ObjectWriterCreator {
         return fieldName;
     }
 
+    /**
+     * Configures serialize filters for the specified ObjectWriterAdapter.
+     *
+     * @param beanInfo the BeanInfo containing filter configuration
+     * @param writerAdapter the ObjectWriterAdapter to configure filters for
+     */
     protected static void configSerializeFilters(BeanInfo beanInfo, ObjectWriterAdapter writerAdapter) {
         for (Class<? extends Filter> filterClass : beanInfo.serializeFilters) {
             if (!Filter.class.isAssignableFrom(filterClass)) {
@@ -670,6 +824,12 @@ public class ObjectWriterCreator {
         }
     }
 
+    /**
+     * Handles field ignores based on the BeanInfo configuration.
+     *
+     * @param beanInfo the BeanInfo containing ignore configuration
+     * @param fieldWriters the list of FieldWriters to process
+     */
     protected void handleIgnores(BeanInfo beanInfo, List<FieldWriter> fieldWriters) {
         if (beanInfo.ignores == null || beanInfo.ignores.length == 0) {
             return;
@@ -686,10 +846,30 @@ public class ObjectWriterCreator {
         }
     }
 
+    /**
+     * Creates a FieldWriter for the specified field with default configuration.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param fieldName the name of the field
+     * @param format the date format to use
+     * @param field the Field to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter<T> createFieldWriter(String fieldName, String format, Field field) {
         return createFieldWriter(JSONFactory.getDefaultObjectWriterProvider(), fieldName, 0, 0L, format, null, field, null);
     }
 
+    /**
+     * Creates a FieldWriter for the specified field with ordinal and features.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use
+     * @param format the date format to use
+     * @param field the Field to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter<T> createFieldWriter(
             String fieldName,
             int ordinal,
@@ -700,6 +880,19 @@ public class ObjectWriterCreator {
         return createFieldWriter(JSONFactory.getDefaultObjectWriterProvider(), fieldName, ordinal, features, format, null, field, null);
     }
 
+    /**
+     * Creates a FieldWriter for the specified field with comprehensive configuration.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use
+     * @param format the date format to use
+     * @param label the label for the field
+     * @param field the Field to create a writer for
+     * @param initObjectWriter the initial ObjectWriter to use
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter<T> createFieldWriter(
             String fieldName,
             int ordinal,
@@ -712,6 +905,20 @@ public class ObjectWriterCreator {
         return createFieldWriter(JSONFactory.getDefaultObjectWriterProvider(), fieldName, ordinal, features, format, label, field, initObjectWriter);
     }
 
+    /**
+     * Creates a FieldWriter for the specified field with provider and comprehensive configuration.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param provider the ObjectWriterProvider to use
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use
+     * @param format the date format to use
+     * @param label the label for the field
+     * @param field the Field to create a writer for
+     * @param initObjectWriter the initial ObjectWriter to use
+     * @return a FieldWriter instance
+     */
     public final <T> FieldWriter<T> createFieldWriter(
             ObjectWriterProvider provider,
             String fieldName,
@@ -735,6 +942,21 @@ public class ObjectWriterCreator {
         );
     }
 
+    /**
+     * Creates a FieldWriter for the specified field with locale and comprehensive configuration.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param provider the ObjectWriterProvider to use
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use
+     * @param format the date format to use
+     * @param locale the locale to use
+     * @param label the label for the field
+     * @param field the Field to create a writer for
+     * @param initObjectWriter the initial ObjectWriter to use
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter<T> createFieldWriter(
             ObjectWriterProvider provider,
             String fieldName,
@@ -760,6 +982,22 @@ public class ObjectWriterCreator {
         );
     }
 
+    /**
+     * Creates a FieldWriter for the specified field with contentAs and comprehensive configuration.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param provider the ObjectWriterProvider to use
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use
+     * @param format the date format to use
+     * @param locale the locale to use
+     * @param label the label for the field
+     * @param field the Field to create a writer for
+     * @param initObjectWriter the initial ObjectWriter to use
+     * @param contentAs the contentAs class
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter<T> createFieldWriter(
             ObjectWriterProvider provider,
             String fieldName,
@@ -805,7 +1043,7 @@ public class ObjectWriterCreator {
 //                fieldType = fieldClass = Boolean.class;
 //            }
 
-            FieldWriterObject objImp = new FieldWriterObject(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, null);
+            FieldWriterObject objImp = new FieldWriterObject(fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, null, null);
             objImp.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objImp.initObjectWriter = initObjectWriter;
@@ -814,62 +1052,74 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == boolean.class) {
-            return new FieldWriterBoolValField(fieldName, ordinal, features, format, label, field, fieldClass);
+            return new FieldWriterBoolValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == byte.class) {
-            return new FieldWriterInt8ValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterInt8Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == short.class) {
-            return new FieldWriterInt16ValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterInt16Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == int.class) {
-            return new FieldWriterInt32Val(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterInt32Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
-                return new FieldWriterInt64ValField(fieldName, ordinal, features, format, label, field);
+                return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
             }
-            return new FieldWriterMillisField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterMillis<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == float.class) {
-            return new FieldWriterFloatValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterFloatValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == Float.class) {
-            return new FieldWriterFloatField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterFloat<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == double.class) {
-            return new FieldWriterDoubleValField(fieldName, ordinal, format, label, field);
+            return new FieldWriterDoubleValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == Double.class) {
-            return new FieldWriterDoubleField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterDouble<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == char.class) {
-            return new FieldWriterCharValField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterCharValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
+        }
+
+        if (fieldClass == Character.class) {
+            return new FieldWriterChar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldWriterBigIntField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterBigInt(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterBigDecimal(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
         if (fieldClass == java.util.Date.class) {
-            return new FieldWriterDateField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterDate<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
+        }
+
+        if (fieldClass == LocalDate.class) {
+            return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
+        }
+
+        if (fieldClass == OffsetDateTime.class) {
+            return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null);
         }
 
         if (fieldClass == String.class) {
-            return new FieldWriterStringField(fieldName, ordinal, features, format, label, field);
+            return new FieldWriterString<>(fieldName, ordinal, features, format, locale, label, field, null, null);
         }
 
         if (fieldClass.isEnum()) {
@@ -888,31 +1138,41 @@ public class ObjectWriterCreator {
             if (enumValueField == null && !writeEnumAsJavaBean) {
                 String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
                 if (enumAnnotationNames == null) {
-                    return new FieldWriterEnum(fieldName, ordinal, features, format, label, fieldType, (Class<? extends Enum>) fieldClass, field, null);
+                    return new FieldWriterEnum(fieldName, ordinal, features, format, locale, label, fieldClass, (Class<? extends Enum>) fieldClass, field, null, null);
                 }
             }
         }
 
-        if (fieldClass == List.class || fieldClass == ArrayList.class) {
+        if (fieldClass == List.class || fieldClass == ArrayList.class || fieldClass == Iterable.class) {
             Type itemType = null;
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
             }
-            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, contentAs);
+            return new FieldWriterList(fieldName, itemType, ordinal, features, format, locale, label, fieldType, fieldClass, field, null, null, contentAs);
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterMapField(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, contentAs);
+            return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, null, contentAs);
         }
 
         if (fieldClass.isArray() && !fieldClass.getComponentType().isPrimitive()) {
             Class<?> itemClass = fieldClass.getComponentType();
-            return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, label, itemClass, fieldClass, field);
+            return new FieldWriterObjectArray(fieldName, itemClass, ordinal, features, format, label, itemClass, fieldClass, field, null, null);
         }
 
-        return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null);
+        return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, field.getGenericType(), fieldClass, field, null, null);
     }
 
+    /**
+     * Creates a FieldWriter for the specified method with default configuration.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param objectType the class containing the method
+     * @param fieldName the name of the field
+     * @param dateFormat the date format to use
+     * @param method the Method to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter<T> createFieldWriter(Class<T> objectType,
                                                 String fieldName,
                                                 String dateFormat,
@@ -930,6 +1190,21 @@ public class ObjectWriterCreator {
         return createFieldWriter(null, objectType, fieldName, ordinal, features, format, null, method, null);
     }
 
+    /**
+     * Creates a FieldWriter for the specified method with comprehensive configuration.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param provider the ObjectWriterProvider to use
+     * @param objectType the class containing the method
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use
+     * @param format the date format to use
+     * @param label the label for the field
+     * @param method the Method to create a writer for
+     * @param initObjectWriter the initial ObjectWriter to use
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter<T> createFieldWriter(
             ObjectWriterProvider provider,
             Class<T> objectType,
@@ -955,6 +1230,22 @@ public class ObjectWriterCreator {
         );
     }
 
+    /**
+     * Creates a FieldWriter for the specified method with locale and comprehensive configuration.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param provider the ObjectWriterProvider to use
+     * @param objectType the class containing the method
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use
+     * @param format the date format to use
+     * @param locale the locale to use
+     * @param label the label for the field
+     * @param method the Method to create a writer for
+     * @param initObjectWriter the initial ObjectWriter to use
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter<T> createFieldWriter(
             ObjectWriterProvider provider,
             Class<T> objectType,
@@ -970,6 +1261,23 @@ public class ObjectWriterCreator {
         return createFieldWriter(provider, objectType, fieldName, ordinal, features, format, locale, label, method, initObjectWriter, null);
     }
 
+    /**
+     * Creates a FieldWriter for the specified method with contentAs and comprehensive configuration.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param provider the ObjectWriterProvider to use
+     * @param objectType the class containing the method
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use
+     * @param format the date format to use
+     * @param locale the locale to use
+     * @param label the label for the field
+     * @param method the Method to create a writer for
+     * @param initObjectWriter the initial ObjectWriter to use
+     * @param contentAs the contentAs class
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter<T> createFieldWriter(
             ObjectWriterProvider provider,
             Class<T> objectType,
@@ -987,12 +1295,12 @@ public class ObjectWriterCreator {
         Class<?> fieldClass = method.getReturnType();
         Type fieldType = method.getGenericReturnType();
 
-        if (initObjectWriter == null && provider != null) {
+        if (initObjectWriter == null && provider != null && (format == null || format.isEmpty() || fieldClass != Date.class)) {
             initObjectWriter = getInitWriter(provider, fieldClass);
         }
 
         if (initObjectWriter != null) {
-            FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
+            FieldWriterObject objMethod = new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method, null);
             objMethod.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objMethod.initObjectWriter = initObjectWriter;
@@ -1008,44 +1316,78 @@ public class ObjectWriterCreator {
                 ? null
                 : BeanUtils.getField(objectType, method);
 
-        if (fieldClass == boolean.class || fieldClass == Boolean.class) {
-            return new FieldWriterBoolMethod(fieldName, ordinal, features, format, label, field, method, fieldClass);
+        if (fieldClass == boolean.class) {
+            return new FieldWriterBoolValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == int.class || fieldClass == Integer.class) {
-            return new FieldWriterInt32Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+        if (fieldClass == Boolean.class) {
+            return new FieldWriterBool<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == float.class || fieldClass == Float.class) {
-            return new FieldWriterFloatMethod<>(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method);
+        if (fieldClass == int.class) {
+            return new FieldWriterInt32Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == double.class || fieldClass == Double.class) {
-            return new FieldWriterDoubleMethod<>(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, method);
+        if (fieldClass == Integer.class) {
+            return new FieldWriterInt32<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == float.class) {
+            return new FieldWriterFloatValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == Float.class) {
+            return new FieldWriterFloat<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == double.class) {
+            return new FieldWriterDoubleValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == Double.class) {
+            return new FieldWriterDouble<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == long.class || fieldClass == Long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
-                return new FieldWriterInt64Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+                if (fieldClass == long.class) {
+                    return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+                }
+
+                if (fieldClass == Long.class) {
+                    return new FieldWriterInt64<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+                }
             }
 
-            return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
+            return new FieldWriterMillis<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == short.class || fieldClass == Short.class) {
-            return new FieldWriterInt16Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+        if (fieldClass == short.class) {
+            return new FieldWriterInt16Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == byte.class || fieldClass == Byte.class) {
-            return new FieldWriterInt8Method(fieldName, ordinal, features, format, label, field, method, fieldClass);
+        if (fieldClass == Short.class) {
+            return new FieldWriterInt16<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
-        if (fieldClass == char.class || fieldClass == Character.class) {
-            return new FieldWriterCharMethod(fieldName, ordinal, features, format, label, field, method, fieldClass);
+        if (fieldClass == byte.class) {
+            return new FieldWriterInt8Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == Byte.class) {
+            return new FieldWriterInt8<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == char.class) {
+            return new FieldWriterCharValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
+        }
+
+        if (fieldClass == Character.class) {
+            return new FieldWriterChar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalMethod<>(fieldName, ordinal, features, format, label, field, method);
+            return new FieldWriterBigDecimal(fieldName, ordinal, features, format, locale, label, field, method, null);
         }
 
         if (fieldClass.isEnum()
@@ -1054,7 +1396,7 @@ public class ObjectWriterCreator {
         ) {
             String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
             if (enumAnnotationNames == null) {
-                return new FieldWriterEnumMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
+                return new FieldWriterEnum(fieldName, ordinal, features, format, locale, label, fieldClass, (Class<? extends Enum>) fieldClass, field, method, null);
             }
         }
 
@@ -1067,70 +1409,166 @@ public class ObjectWriterCreator {
                 }
             }
 
-            return new FieldWriterDateMethod(fieldName, ordinal, features, format, label, fieldClass, field, method);
+            return new FieldWriterDate<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == LocalDate.class) {
+            return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
+        }
+
+        if (fieldClass == OffsetDateTime.class) {
+            return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
+        }
+
+        if (Calendar.class.isAssignableFrom(fieldClass)) {
+            return new FieldWriterCalendar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == String.class) {
-            return new FieldWriterStringMethod(fieldName, ordinal, format, label, features, field, method);
+            return new FieldWriterString<>(fieldName, ordinal, features, format, locale, label, field, method, null);
         }
 
-        if (fieldClass == List.class || fieldClass == Iterable.class) {
+        if (fieldClass == List.class || fieldClass == ArrayList.class || fieldClass == Iterable.class) {
             Type itemType;
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
             } else {
                 itemType = Object.class;
             }
-            return new FieldWriterListMethod(fieldName, itemType, ordinal, features, format, label, null, method, fieldType, fieldClass, contentAs);
+            return new FieldWriterList(fieldName, itemType, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null, contentAs);
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterMapMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method, contentAs);
+            return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null, contentAs);
         }
 
         if (fieldClass == Float[].class || fieldClass == Double[].class || fieldClass == BigDecimal[].class) {
-            return new FieldWriterObjectArrayMethod(fieldName, fieldClass.getComponentType(), ordinal, features, format, label, fieldType, fieldClass, field, method);
+            return new FieldWriterObjectArray(fieldName, fieldClass.getComponentType(), ordinal, features, format, label, fieldType, fieldClass, field, method, null);
         }
 
-        return new FieldWriterObjectMethod(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, null, method);
+        return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
     }
 
+    /**
+     * Creates a FieldWriter for the specified function that returns a long value.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param fieldName the name of the field
+     * @param function the ToLongFunction to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter createFieldWriter(String fieldName, ToLongFunction<T> function) {
-        return new FieldWriterInt64ValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterInt64Value<>(fieldName, 0, 0, null, null, null, long.class, long.class, null, null, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified function that returns an int value.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param fieldName the name of the field
+     * @param function the ToIntFunction to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter createFieldWriter(String fieldName, ToIntFunction<T> function) {
-        return new FieldWriterInt32ValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterInt32Value<>(fieldName, 0, 0, null, null, null, int.class, int.class, null, null, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified field, method, and function that returns an int value.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param fieldName the name of the field
+     * @param field the Field to create a writer for
+     * @param method the Method to create a writer for
+     * @param function the ToIntFunction to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter createFieldWriter(String fieldName, Field field, Method method, ToIntFunction<T> function) {
-        return new FieldWriterInt32ValFunc(fieldName, 0, 0, null, null, field, method, function);
+        return new FieldWriterInt32Value<>(fieldName, 0, 0, null, null, null, int.class, int.class, field, method, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified function that returns a short value.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param fieldName the name of the field
+     * @param function the ToShortFunction to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter createFieldWriter(String fieldName, ToShortFunction<T> function) {
-        return new FieldWriterInt16ValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterInt16Value<>(fieldName, 0, 0, null, null, null, short.class, short.class, null, null, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified function that returns a byte value.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param fieldName the name of the field
+     * @param function the ToByteFunction to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter createFieldWriter(String fieldName, ToByteFunction<T> function) {
-        return new FieldWriterInt8ValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterInt8Value<>(fieldName, 0, 0, null, null, null, byte.class, byte.class, null, null, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified function that returns a float value.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param fieldName the name of the field
+     * @param function the ToFloatFunction to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter createFieldWriter(String fieldName, ToFloatFunction<T> function) {
-        return new FieldWriterFloatValueFunc(fieldName, 0, 0L, null, null, null, null, function);
+        return new FieldWriterFloatValue<>(fieldName, 0, 0, null, null, null, double.class, double.class, null, null, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified function that returns a double value.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param fieldName the name of the field
+     * @param function the ToDoubleFunction to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter createFieldWriter(String fieldName, ToDoubleFunction<T> function) {
-        return new FieldWriterDoubleValueFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterDoubleValue<>(fieldName, 0, 0, null, null, null, double.class, double.class, null, null, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified function that returns a char value.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param fieldName the name of the field
+     * @param function the ToCharFunction to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter createFieldWriter(String fieldName, ToCharFunction<T> function) {
-        return new FieldWriterCharValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterCharValue<>(fieldName, 0, 0, null, null, null, char.class, char.class, null, null, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified predicate function that returns a boolean value.
+     *
+     * @param <T> the type of objects that the FieldWriter can serialize
+     * @param fieldName the name of the field
+     * @param function the Predicate to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T> FieldWriter createFieldWriter(String fieldName, Predicate<T> function) {
-        return new FieldWriterBoolValFunc(fieldName, 0, 0, null, null, null, null, function);
+        return new FieldWriterBoolValue<>(fieldName, 0, 0, null, null, null, boolean.class, boolean.class, null, null, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified function with default configuration.
+     *
+     * @param <T> the type of objects that owns the field
+     * @param <V> the type of field values
+     * @param fieldName the name of the field
+     * @param fieldClass the class of the field
+     * @param function the Function to create a writer fork
+     * @return a FieldWriter instance
+     */
     public <T, V> FieldWriter createFieldWriter(
             String fieldName,
             Class fieldClass,
@@ -1139,6 +1577,18 @@ public class ObjectWriterCreator {
         return createFieldWriter(null, null, fieldName, 0, 0, null, null, fieldClass, fieldClass, null, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified field, method, and function.
+     *
+     * @param <T> the type of objects that owns the field
+     * @param <V> the type of field values
+     * @param fieldName the name of the field
+     * @param fieldClass the class of the field
+     * @param field the Field to create a writer for
+     * @param method the Method to create a writer for
+     * @param function the Function to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T, V> FieldWriter createFieldWriter(
             String fieldName,
             Class fieldClass,
@@ -1149,6 +1599,17 @@ public class ObjectWriterCreator {
         return createFieldWriter(null, null, fieldName, 0, 0, null, null, fieldClass, fieldClass, field, method, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified function with field type and class.
+     *
+     * @param <T> the type of objects that owns the field
+     * @param <V> the type of field values
+     * @param fieldName the name of the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param function the Function to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T, V> FieldWriter createFieldWriter(
             String fieldName,
             Type fieldType,
@@ -1158,6 +1619,18 @@ public class ObjectWriterCreator {
         return createFieldWriter(null, null, fieldName, 0, 0, null, null, fieldType, fieldClass, null, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified function with features and format.
+     *
+     * @param <T> the type of objects that owns the field
+     * @param <V> the type of field values
+     * @param fieldName the name of the field
+     * @param features the features to use
+     * @param format the date format to use
+     * @param fieldClass the class of the field
+     * @param function the Function to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T, V> FieldWriter createFieldWriter(
             String fieldName,
             long features,
@@ -1168,6 +1641,24 @@ public class ObjectWriterCreator {
         return createFieldWriter(null, null, fieldName, 0, features, format, null, fieldClass, fieldClass, null, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified function with provider, object class, and comprehensive configuration.
+     *
+     * @param <T> the type of objects that owns the field
+     * @param <V> the type of field values
+     * @param provider the ObjectWriterProvider to use
+     * @param objectClass the class containing the field
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use
+     * @param format the date format to use
+     * @param label the label for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param method the Method to create a writer for
+     * @param function the Function to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T, V> FieldWriter<T> createFieldWriter(
             ObjectWriterProvider provider,
             Class<T> objectClass,
@@ -1185,6 +1676,25 @@ public class ObjectWriterCreator {
                 provider, objectClass, fieldName, ordinal, features, format, null, label, fieldType, fieldClass, null, method, function);
     }
 
+    /**
+     * Creates a FieldWriter for the specified function with provider, object class, field, method, and comprehensive configuration.
+     *
+     * @param <T> the type of objects that owns the field
+     * @param <V> the type of field values
+     * @param provider the ObjectWriterProvider to use
+     * @param objectClass the class containing the field
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use
+     * @param format the date format to use
+     * @param label the label for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param field the Field to create a writer for
+     * @param method the Method to create a writer for
+     * @param function the Function to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T, V> FieldWriter<T> createFieldWriter(
             ObjectWriterProvider provider,
             Class<T> objectClass,
@@ -1216,6 +1726,26 @@ public class ObjectWriterCreator {
         );
     }
 
+    /**
+     * Creates a FieldWriter for the specified function with provider, object class, locale, and comprehensive configuration.
+     *
+     * @param <T> the type of objects that owns the field
+     * @param <V> the type of field values
+     * @param provider the ObjectWriterProvider to use
+     * @param objectClass the class containing the field
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use
+     * @param format the date format to use
+     * @param locale the locale to use
+     * @param label the label for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param field the Field to create a writer for
+     * @param method the Method to create a writer for
+     * @param function the Function to create a writer for
+     * @return a FieldWriter instance
+     */
     public <T, V> FieldWriter<T> createFieldWriter(
             ObjectWriterProvider provider,
             Class<T> objectClass,
@@ -1249,6 +1779,27 @@ public class ObjectWriterCreator {
         );
     }
 
+    /**
+     * Creates a FieldWriter for the specified function with provider, object class, contentAs, and comprehensive configuration.
+     *
+     * @param <T> the type of objects that owns the field
+     * @param <V> the type of field values
+     * @param provider the ObjectWriterProvider to use
+     * @param objectClass the class containing the field
+     * @param fieldName the name of the field
+     * @param ordinal the ordinal position of the field
+     * @param features the features to use
+     * @param format the date format to use
+     * @param locale the locale to use
+     * @param label the label for the field
+     * @param fieldType the type of the field
+     * @param fieldClass the class of the field
+     * @param field the Field to create a writer for
+     * @param method the Method to create a writer for
+     * @param function the Function to create a writer for
+     * @param contentAs the contentAs class
+     * @return a FieldWriter instance
+     */
     public <T, V> FieldWriter<T> createFieldWriter(
             ObjectWriterProvider provider,
             Class<T> objectClass,
@@ -1266,51 +1817,51 @@ public class ObjectWriterCreator {
             Class<?> contentAs
     ) {
         if (fieldClass == Byte.class) {
-            return new FieldWriterInt8Func(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterInt8(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == Short.class) {
-            return new FieldWriterInt16Func(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterInt16(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == Integer.class) {
-            return new FieldWriterInt32Func(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterInt32(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == Long.class) {
-            return new FieldWriterInt64Func(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterInt64(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldWriterBigIntFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterBigInt(fieldName, ordinal, features, format, locale, label, field, method, function);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterBigDecimal(fieldName, ordinal, features, format, locale, label, field, method, function);
         }
 
         if (fieldClass == String.class) {
-            return new FieldWriterStringFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterString<>(fieldName, ordinal, features, format, locale, label, field, method, function);
         }
 
         if (fieldClass == Date.class) {
-            return new FieldWriterDateFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterDate<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, function);
         }
 
         if (fieldClass == LocalDate.class) {
-            return new FieldWriterLocalDateFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterLocalDate(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == OffsetDateTime.class) {
-            return new FieldWriterOffsetDateTimeFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterOffsetDateTime(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
         if (fieldClass == UUID.class) {
-            return new FieldWriterUUIDFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterUUID(fieldName, ordinal, features, format, locale, label, field, method, function);
         }
 
         if (Calendar.class.isAssignableFrom(fieldClass)) {
-            return new FieldWriterCalendarFunc(fieldName, ordinal, features, format, label, field, method, function);
+            return new FieldWriterCalendar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, function);
         }
 
         if (fieldClass.isEnum()) {
@@ -1331,7 +1882,7 @@ public class ObjectWriterCreator {
             if (!writeEnumAsJavaBean && BeanUtils.getEnumValueField(fieldClass, provider) == null) {
                 String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
                 if (enumAnnotationNames == null) {
-                    return new FieldWriterEnumFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+                    return new FieldWriterEnum(fieldName, ordinal, features, format, locale, label, fieldClass, (Class<? extends Enum>) fieldClass, field, method, function);
                 }
             }
         }
@@ -1341,26 +1892,23 @@ public class ObjectWriterCreator {
             Type rawType = parameterizedType.getRawType();
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
-            if (rawType == List.class || rawType == ArrayList.class) {
+            if (rawType == List.class || rawType == ArrayList.class || rawType == Iterable.class) {
                 if (actualTypeArguments.length == 1) {
                     Type itemType = actualTypeArguments[0];
-                    if (itemType == String.class) {
-                        return new FieldWriterListStrFunc(fieldName, ordinal, features, format, label, field, method, function, fieldType, fieldClass);
-                    }
-                    return new FieldWriterListFunc(fieldName, ordinal, features, format, label, itemType, field, method, function, fieldType, fieldClass, contentAs);
+                    return new FieldWriterList(fieldName, itemType, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function, contentAs);
                 }
             }
 
             if (rawType instanceof Class && Map.class.isAssignableFrom((Class) rawType)) {
-                return new FieldWriterMapFunction(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function, contentAs);
+                return new FieldWriterMap(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function, contentAs);
             }
         }
 
         if (Modifier.isFinal(fieldClass.getModifiers())) {
-            return new FieldWriterObjectFuncFinal(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
+            return new FieldWriterObjectFinal(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         }
 
-        return new FieldWriterObjectFunc(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
+        return new FieldWriterObject(fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
     }
 
     static class LambdaInfo {
@@ -1473,6 +2021,22 @@ public class ObjectWriterCreator {
             ObjectWriter initObjectWriter,
             Class<?> contentAs
     ) {
+        return createFieldWriterLambda(provider, objectClass, fieldName, ordinal, features, format, null, label, method, initObjectWriter, contentAs);
+    }
+
+    <T> FieldWriter<T> createFieldWriterLambda(
+            ObjectWriterProvider provider,
+            Class<T> objectClass,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            String label,
+            Method method,
+            ObjectWriter initObjectWriter,
+            Class<?> contentAs
+    ) {
         Class<?> fieldClass = method.getReturnType();
         Type fieldType = method.getGenericReturnType();
 
@@ -1494,54 +2058,58 @@ public class ObjectWriterCreator {
         Field field = BeanUtils.getField(objectClass, method);
 
         if (fieldClass == int.class) {
-            return new FieldWriterInt32ValFunc(fieldName, ordinal, features, format, label, null, method, (ToIntFunction<T>) lambda);
+            return new FieldWriterInt32Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == long.class) {
             if (format == null || format.isEmpty() || "string".equals(format)) {
-                return new FieldWriterInt64ValFunc(fieldName, ordinal, features, format, label, field, method, (ToLongFunction) lambda);
+                return new FieldWriterInt64Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
             }
 
-            return new FieldWriterMillisFunc(fieldName, ordinal, features, format, label, field, method, (ToLongFunction) lambda);
+            return new FieldWriterMillis<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == boolean.class) {
-            return new FieldWriterBoolValFunc(fieldName, ordinal, features, format, label, field, method, (Predicate<T>) lambda);
+            return new FieldWriterBoolValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == Boolean.class) {
-            return new FieldWriterBooleanFunc(fieldName, ordinal, features, format, label, field, method, (Function) lambda);
+            return new FieldWriterBool<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == short.class) {
-            return new FieldWriterInt16ValFunc(fieldName, ordinal, features, format, label, field, method, (ToShortFunction) lambda);
+            return new FieldWriterInt16Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == byte.class) {
-            return new FieldWriterInt8ValFunc(fieldName, ordinal, features, format, label, field, method, (ToByteFunction) lambda);
+            return new FieldWriterInt8Value<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == float.class) {
-            return new FieldWriterFloatValueFunc(fieldName, ordinal, features, format, label, field, method, (ToFloatFunction) lambda);
+            return new FieldWriterFloatValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == Float.class) {
-            return new FieldWriterFloatFunc(fieldName, ordinal, features, format, label, field, method, (Function) lambda);
+            return new FieldWriterFloat<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == double.class) {
-            return new FieldWriterDoubleValueFunc(fieldName, ordinal, features, format, label, field, method, (ToDoubleFunction) lambda);
+            return new FieldWriterDoubleValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == Double.class) {
-            return new FieldWriterDoubleFunc(fieldName, ordinal, features, format, label, field, method, (Function) lambda);
+            return new FieldWriterDouble<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         if (fieldClass == char.class) {
-            return new FieldWriterCharValFunc(fieldName, ordinal, features, format, label, field, method, (ToCharFunction) lambda);
+            return new FieldWriterCharValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
+        }
+
+        if (fieldClass == Character.class) {
+            return new FieldWriterChar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, lambda);
         }
 
         Function function = (Function) lambda;
-        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, null, label, fieldType, fieldClass, field, method, function, contentAs);
+        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function, contentAs);
     }
 }

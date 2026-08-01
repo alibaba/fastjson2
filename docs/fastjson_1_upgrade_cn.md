@@ -20,7 +20,7 @@ FASTJSON v2项目目前处于活跃状态，会不定期发布新版本，你可
 * 使用fastjson v2新的API
 
 ### 2.2. 兼容模式升级
-升级可以通过兼容模式升级，兼容模式不需要改代码，但在深度使用的场景，不能做到完全兼容，通过这样的模式升级虽然省事，请认证测试，遇到问题反馈到 [https://github.com/alibaba/fastjson2/issues](https://github.com/alibaba/fastjson2/issues)
+升级可以通过兼容模式升级，兼容模式不需要改代码，但在深度使用的场景，不能做到完全兼容，通过这样的模式升级虽然省事，但请认真测试，遇到问题反馈到 [https://github.com/alibaba/fastjson2/issues](https://github.com/alibaba/fastjson2/issues)
 
 * 兼容模式Maven依赖
 ```xml
@@ -34,7 +34,7 @@ FASTJSON v2项目目前处于活跃状态，会不定期发布新版本，你可
 ### 2.3. 使用新API升级
 使用新API是建议的升级方式，使用新的API能获得更多的功能。
 
-* 包名编程
+* 包名变更
   `FASTJSON` v2和1.x版本使用不同的package，新的package名称是com.alibaba.fastjson2，新package和之前不同，可以实现1.x和2.x共存
 
 ```java
@@ -103,8 +103,8 @@ FASTJSON v2中有比较完善的扩展机制，如下：
 | com.alibaba.fastjson.serializer.SerializeConfig             | com.alibaba.fastjson2.writer.ObjectWriterProvider     |
 | com.alibaba.fastjson.serializer.ToStringSerializer          | com.alibaba.fastjson2.writer.ObjectWriterImplToString |
 | com.alibaba.fastjson.serializer.ValueFilter                 | com.alibaba.fastjson2.filter.ValueFilter              |
-| com.alibaba.fastjson.serializer.SerializerFeature           | com.alibaba.fastjson2.JSONReader.Feature              |
-| com.alibaba.fastjson.parser.Feature                         | com.alibaba.fastjson2.JSONWriter.Feature              |
+| com.alibaba.fastjson.serializer.SerializerFeature           | com.alibaba.fastjson2.JSONWriter.Feature              |
+| com.alibaba.fastjson.parser.Feature                         | com.alibaba.fastjson2.JSONReader.Feature              |
 
 
 ### 3.4 SerializerFeature.UseISO8601DateFormat在fastjson2的替代方案

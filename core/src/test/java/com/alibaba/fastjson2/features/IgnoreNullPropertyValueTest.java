@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.features;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreNullPropertyValue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("features")
 public class IgnoreNullPropertyValueTest {
     @Test
     public void test() {

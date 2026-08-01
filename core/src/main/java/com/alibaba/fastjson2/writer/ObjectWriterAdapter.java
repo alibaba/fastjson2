@@ -302,7 +302,7 @@ public class ObjectWriterAdapter<T>
 
         jsonWriter.startObject();
 
-        if (((features | this.features) & WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
+        if (jsonWriter.isWriteTypeInfo(object, this.features | features)) {
             writeTypeInfo(jsonWriter);
         }
 
@@ -393,7 +393,7 @@ public class ObjectWriterAdapter<T>
             return;
         }
 
-        if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
+        if (jsonWriter.isWriteTypeInfo(object, fieldType, this.features | features)) {
             if (jsonWriter.jsonb) {
                 writeClassInfo(jsonWriter);
                 jsonWriter.startObject();
@@ -674,6 +674,25 @@ public class ObjectWriterAdapter<T>
 
             if (fieldValue == object) {
                 fieldValue = jsonObject;
+            }
+            if (fieldValue instanceof Enum) {
+                if ((features & WriteEnumsUsingName.mask) != 0) {
+                    fieldValue = ((Enum) fieldValue).name();
+                }
+            }
+            if (fieldWriter instanceof FieldWriterObject && fieldValue != null && !(fieldValue instanceof Map)) {
+                ObjectWriter valueWriter = fieldWriter.getInitWriter();
+                if (valueWriter == null) {
+                    valueWriter = JSONFactory.getObjectWriter(fieldWriter.fieldType, this.features | features);
+                }
+                if (valueWriter instanceof ObjectWriterAdapter) {
+                    ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) valueWriter;
+                    if (!objectWriterAdapter.getFieldWriters().isEmpty()) {
+                        fieldValue = objectWriterAdapter.toJSONObject(fieldValue);
+                    } else {
+                        fieldValue = JSON.toJSON(fieldValue);
+                    }
+                }
             }
             jsonObject.put(fieldWriter.fieldName, fieldValue);
         }

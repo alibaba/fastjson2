@@ -3,12 +3,14 @@ package com.alibaba.fastjson2.dubbo;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("integration")
 public class DubboTest0 {
     @Test
     public void test() {

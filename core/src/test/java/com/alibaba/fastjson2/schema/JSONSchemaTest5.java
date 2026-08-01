@@ -2,11 +2,13 @@ package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("schema")
 public class JSONSchemaTest5 {
     @Test
     public void testObject() {

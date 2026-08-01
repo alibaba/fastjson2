@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.read;
 
 import com.alibaba.fastjson2.JSONReader;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -8,6 +9,7 @@ import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("reader")
 public class BigIntTest {
     /**
      * This mask is used to obtain the value of an int as if it were unsigned.

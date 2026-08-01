@@ -1,7 +1,8 @@
 package com.alibaba.fastjson2.support.solon.test.config.test3;
 
-import com.alibaba.fastjson2.support.solon.Fastjson2RenderFactory;
+import com.alibaba.fastjson2.support.solon.Fastjson2EntityConverter;
 import com.alibaba.fastjson2.support.solon.test._model.UserDo;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.noear.solon.annotation.Import;
 import org.noear.solon.annotation.Inject;
@@ -19,7 +20,7 @@ import java.util.Map;
 @SolonTest
 public class QuickConfigTest {
     @Inject
-    Fastjson2RenderFactory renderFactory;
+    Fastjson2EntityConverter entityConverter;
 
     @Test
     public void hello2() throws Throwable {
@@ -34,12 +35,12 @@ public class QuickConfigTest {
         userDo.setMap1(data);
 
         ContextEmpty ctx = new ContextEmpty();
-        renderFactory.create().render(userDo, ctx);
+        entityConverter.write(userDo, ctx);
         String output = ctx.attr("output");
 
         System.out.println(output);
 
-        //error: int 没转为 string
-        assert "{\"b0\":0,\"b1\":1,\"d0\":0,\"d1\":1.0,\"list0\":[],\"map0\":null,\"map1\":{\"null\":null,\"time\":\"2023-01-16 17:39:53\",\"long\":\"12\",\"int\":12},\"n0\":\"0\",\"n1\":\"1\",\"obj0\":null,\"s0\":\"\",\"s1\":\"noear\"}".equals(output);
+        //完美
+        Assertions.assertEquals("{\"b0\":0,\"b1\":1,\"d0\":0.0,\"d1\":1.0,\"list0\":[],\"map0\":null,\"map1\":{\"null\":null,\"time\":\"2023-01-16 17:39:53\",\"long\":\"12\",\"int\":12},\"n0\":\"0\",\"n1\":\"1\",\"obj0\":null,\"s0\":\"\",\"s1\":\"noear\"}", output);
     }
 }

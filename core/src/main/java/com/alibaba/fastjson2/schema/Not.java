@@ -27,7 +27,7 @@ final class Not
     }
 
     @Override
-    public ValidateResult validate(Object value) {
+    protected ValidateResult validateInternal(Object value) {
         if (schema != null) {
             if (schema.validate(value).isSuccess()) {
                 return FAIL_NOT;

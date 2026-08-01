@@ -23,6 +23,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.chrono.HijrahDate;
+import java.time.chrono.JapaneseDate;
+import java.time.chrono.MinguoDate;
+import java.time.chrono.ThaiBuddhistDate;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
@@ -33,6 +37,7 @@ import static com.alibaba.fastjson2.util.BeanUtils.*;
 
 public class ObjectReaderBaseModule
         implements ObjectReaderModule {
+    static Method METHOD_getPermittedSubclasses;
     final ObjectReaderProvider provider;
     final ReaderAnnotationProcessor annotationProcessor;
 
@@ -281,11 +286,6 @@ public class ObjectReaderBaseModule
                             processJacksonJsonFormat(beanInfo, annotation);
                         }
                         break;
-                    case "com.fasterxml.jackson.annotation.JsonInclude":
-                        if (useJacksonAnnotation) {
-                            processJacksonJsonInclude(beanInfo, annotation);
-                        }
-                        break;
                     case "com.fasterxml.jackson.annotation.JsonSubTypes":
                         if (useJacksonAnnotation) {
                             processJacksonJsonSubTypes(beanInfo, annotation);
@@ -296,6 +296,36 @@ public class ObjectReaderBaseModule
                         break;
                     default:
                         break;
+                }
+            }
+
+            if (JDKUtils.JVM_VERSION >= 17
+                    && beanInfo.seeAlso == null
+                    && objectClass.isAnnotationPresent(JSONType.class)
+            ) {
+                try {
+                    Method method = METHOD_getPermittedSubclasses;
+                    if (method == null) {
+                        method = Class.class.getMethod("getPermittedSubclasses");
+                        METHOD_getPermittedSubclasses = method;
+                    }
+                    Class[] classes = (Class[]) method.invoke(objectClass);
+                    beanInfo.seeAlso = classes;
+                    beanInfo.seeAlsoNames = new String[classes.length];
+                    for (int i = 0; i < classes.length; i++) {
+                        Class<?> item = classes[i];
+
+                        BeanInfo itemBeanInfo = new BeanInfo(provider);
+                        processSeeAlsoAnnotation(itemBeanInfo, item);
+                        String typeName = itemBeanInfo.typeName;
+                        if (typeName == null || typeName.isEmpty()) {
+                            typeName = item.getSimpleName();
+                        }
+                        beanInfo.seeAlsoNames[i] = typeName;
+                    }
+                    beanInfo.readerFeatures |= JSONReader.Feature.SupportAutoType.mask;
+                } catch (Throwable ignored) {
+                    // ignore
                 }
             }
 
@@ -310,7 +340,7 @@ public class ObjectReaderBaseModule
             if (beanInfo.creatorConstructor == null
                     && (beanInfo.readerFeatures & JSONReader.Feature.FieldBased.mask) == 0
                     && beanInfo.kotlin) {
-                KotlinUtils.getConstructor(objectClass, beanInfo);
+                KotlinUtils.getConstructor(objectClass, beanInfo, true);
             }
         }
 
@@ -828,11 +858,6 @@ public class ObjectReaderBaseModule
                             processGsonSerializedName(fieldInfo, annotation);
                         }
                         break;
-                    case "com.fasterxml.jackson.annotation.JsonInclude":
-                        if (useJacksonAnnotation) {
-                            processJacksonJsonInclude(fieldInfo, annotation);
-                        }
-                        break;
                     default:
                         break;
                 }
@@ -863,21 +888,31 @@ public class ObjectReaderBaseModule
             }
 
             BeanUtils.declaredFields(objectClass, field -> {
-                if (field.getName().equals(fieldName)) {
+                String name = "";
+                if (field.getType() == boolean.class || field.getType() == Boolean.class) {
+                    if (field.getName().startsWith("is")) {
+                        name = field.getName().substring(2);
+                        if (!name.isEmpty()) {
+                            name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+                        }
+                    }
+                }
+
+                if (field.getName().equals(fieldName) || name.equals(fieldName)) {
                     int modifiers = field.getModifiers();
-                    if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
+                    if (!Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
                     }
                     fieldInfo.features |= FieldInfo.FIELD_MASK;
                 } else if (field.getName().equals(fieldName1)) {
                     int modifiers = field.getModifiers();
-                    if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
+                    if (!Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
                     }
                     fieldInfo.features |= FieldInfo.FIELD_MASK;
                 } else if (field.getName().equals(fieldName2)) {
                     int modifiers = field.getModifiers();
-                    if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
+                    if (!Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
                     }
                     fieldInfo.features |= FieldInfo.FIELD_MASK;
@@ -960,7 +995,7 @@ public class ObjectReaderBaseModule
                         break;
                     case "com.fasterxml.jackson.annotation.JsonBackReference":
                         if (useJacksonAnnotation) {
-                            fieldInfo.features |= FieldInfo.BACKR_EFERENCE;
+                            fieldInfo.features |= FieldInfo.BACKR_REFERENCE;
                         }
                         break;
                     default:
@@ -1598,6 +1633,34 @@ public class ObjectReaderBaseModule
             return new ObjectReaderImplFromString(Period.class, (Function<String, Period>) Period::parse);
         }
 
+        if (type == Year.class) {
+            return ObjectReaderImplYear.INSTANCE;
+        }
+
+        if (type == YearMonth.class) {
+            return ObjectReaderImplYearMonth.INSTANCE;
+        }
+
+        if (type == MonthDay.class) {
+            return ObjectReaderImplMonthDay.INSTANCE;
+        }
+
+        if (type == HijrahDate.class) {
+            return ObjectReaderImplHijrahDate.INSTANCE;
+        }
+
+        if (type == JapaneseDate.class) {
+            return ObjectReaderImplJapaneseDate.INSTANCE;
+        }
+
+        if (type == MinguoDate.class) {
+            return ObjectReaderImplMinguoDate.INSTANCE;
+        }
+
+        if (type == ThaiBuddhistDate.class) {
+            return ObjectReaderImplThaiBuddhistDate.INSTANCE;
+        }
+
         if (type == AtomicBoolean.class) {
             return new ObjectReaderImplFromBoolean(
                     AtomicBoolean.class,
@@ -1910,6 +1973,7 @@ public class ObjectReaderBaseModule
                 || type == AbstractCollection.class
                 || type == AbstractList.class
                 || type == ArrayList.class
+                || type == Stack.class
         ) {
             return ObjectReaderImplList.of(type, null, 0);
             // return new ObjectReaderImplList(type, (Class) type, ArrayList.class, Object.class, null);
@@ -2090,7 +2154,8 @@ public class ObjectReaderBaseModule
                         || rawType == List.class
                         || rawType == AbstractCollection.class
                         || rawType == AbstractList.class
-                        || rawType == ArrayList.class) {
+                        || rawType == ArrayList.class
+                        || rawType == Stack.class) {
                     if (itemClass == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, ArrayList.class);
                     } else if (itemClass == Long.class) {
@@ -2155,6 +2220,8 @@ public class ObjectReaderBaseModule
                     case "com.google.common.collect.ImmutableSet":
                     case "com.google.common.collect.SingletonImmutableSet":
                         return ObjectReaderImplList.of(type, null, 0);
+                    case "cn.hutool.core.lang.tree.Tree":
+                        return ObjectReaderImplMap.of(null, (Class<?>) rawType, 0L);
                 }
 
                 if (rawType == Optional.class) {

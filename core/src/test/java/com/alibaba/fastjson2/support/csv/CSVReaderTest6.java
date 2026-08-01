@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.stream.StreamReader;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -21,6 +22,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class CSVReaderTest6 {
     @Test
     public void test() {

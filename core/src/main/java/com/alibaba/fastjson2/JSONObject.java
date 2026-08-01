@@ -18,7 +18,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
+import java.time.*;
 import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.Consumer;
@@ -184,11 +184,25 @@ public class JSONObject
     }
 
     /**
+     * Iterates over the JSONArray elements associated with the given key.
+     *
+     * @param key the key whose associated JSONArray is to be iterated
+     * @param action the action to be performed for each JSONObject element
      * @since 2.0.52
-     * @param key
-     * @param action
+     * @deprecated Typo in the method name. Use {@link #forEachArrayObject(String, Consumer) forEachArrayObject} instead
      */
+    @Deprecated
     public void forEchArrayObject(String key, Consumer<JSONObject> action) {
+        forEachArrayObject(key, action);
+    }
+
+    /**
+     * Iterates over the JSONArray elements associated with the given key.
+     *
+     * @param key the key whose associated JSONArray is to be iterated
+     * @param action the action to be performed for each JSONObject element
+     */
+    public void forEachArrayObject(String key, Consumer<JSONObject> action) {
         JSONArray array = getJSONArray(key);
         if (array == null) {
             return;
@@ -247,7 +261,9 @@ public class JSONObject
         }
 
         if (value instanceof Object[]) {
-            return JSONArray.of((Object[]) value);
+            JSONArray array = JSONArray.of((Object[]) value);
+            put(key, array);
+            return array;
         }
 
         Class<?> valueClass = value.getClass();
@@ -258,12 +274,22 @@ public class JSONObject
                 Object item = Array.get(value, i);
                 jsonArray.add(item);
             }
+            put(key, jsonArray);
             return jsonArray;
         }
 
         return null;
     }
 
+    /**
+     * Returns a list of objects of the specified type from the associated JSONArray in this {@link JSONObject}.
+     *
+     * @param <T> the type of elements in the list
+     * @param key the key whose associated value is to be returned
+     * @param itemClass the class of the items in the list
+     * @param features features to be enabled in parsing
+     * @return a list of objects or null
+     */
     public <T> List<T> getList(String key, Class<T> itemClass, JSONReader.Feature... features) {
         JSONArray jsonArray = getJSONArray(key);
         if (jsonArray == null) {
@@ -311,12 +337,13 @@ public class JSONObject
         ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
         if (objectWriter instanceof ObjectWriterAdapter) {
             ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) objectWriter;
-            return writerAdapter.toJSONObject(value);
+            JSONObject jsonObject = writerAdapter.toJSONObject(value);
+            put(key, jsonObject);
+            return jsonObject;
         }
 
         return null;
     }
-
     /**
      * Returns the {@link String} of the associated keys in this {@link JSONObject}.
      *
@@ -324,10 +351,21 @@ public class JSONObject
      * @return {@link String} or null
      */
     public String getString(String key) {
+        return getString(key, null);
+    }
+
+    /**
+     * Returns the {@link String} of the associated keys in this {@link JSONObject}.
+     *
+     * @param key the key whose associated value is to be returned
+     * @param defaultValue the default mapping of the key
+     * @return {@link String} or null
+     */
+    public String getString(String key, String defaultValue) {
         Object value = super.get(key);
 
         if (value == null) {
-            return null;
+            return defaultValue;
         }
 
         if (value instanceof String) {
@@ -375,7 +413,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -384,7 +422,7 @@ public class JSONObject
             return Double.parseDouble(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Double");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to double");
     }
 
     /**
@@ -396,27 +434,8 @@ public class JSONObject
      * @throws JSONException Unsupported type conversion to double value
      */
     public double getDoubleValue(String key) {
-        Object value = super.get(key);
-
-        if (value == null) {
-            return 0D;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0D;
-            }
-
-            return Double.parseDouble(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to double value");
+        Double value = getDouble(key);
+        return value == null ? 0D : value;
     }
 
     /**
@@ -443,7 +462,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -452,7 +471,7 @@ public class JSONObject
             return Float.parseFloat(str);
         }
 
-        throw new JSONException("Can not cast '" + value.getClass() + "' to Float");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to float");
     }
 
     /**
@@ -464,27 +483,8 @@ public class JSONObject
      * @throws JSONException Unsupported type conversion to float value
      */
     public float getFloatValue(String key) {
-        Object value = super.get(key);
-
-        if (value == null) {
-            return 0F;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).floatValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0F;
-            }
-
-            return Float.parseFloat(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to float value");
+        Float value = getFloat(key);
+        return value == null ? 0F : value;
     }
 
     /**
@@ -511,7 +511,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -564,7 +564,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return defaultValue;
@@ -604,7 +604,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -657,7 +657,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return defaultValue;
@@ -697,7 +697,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -742,7 +742,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -858,11 +858,11 @@ public class JSONObject
             return null;
         }
 
-        if (value instanceof BigInteger) {
-            return (BigInteger) value;
-        }
-
         if (value instanceof Number) {
+            if (value instanceof BigInteger) {
+                return (BigInteger) value;
+            }
+
             if (value instanceof BigDecimal) {
                 return ((BigDecimal) value).toBigInteger();
             }
@@ -872,7 +872,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
+            String str = ((String) value).trim();
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
@@ -927,8 +927,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
-            return toBigDecimal(str);
+            return toBigDecimal(((String) value).trim());
         }
 
         if (value instanceof Boolean) {
@@ -1004,6 +1003,144 @@ public class JSONObject
         }
 
         return TypeUtils.toInstant(value);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalDate getLocalDate(String key) {
+        return getLocalDate(key, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalDate getLocalDate(String key, LocalDate defaultValue) {
+        Object value = super.get(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof LocalDate) {
+            return (LocalDate) value;
+        }
+        return TypeUtils.cast(value, LocalDate.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalTime getLocalTime(String key) {
+        return getLocalTime(key, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalTime getLocalTime(String key, LocalTime defaultValue) {
+        Object value = super.get(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof LocalTime) {
+            return (LocalTime) value;
+        }
+        return TypeUtils.cast(value, LocalTime.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public OffsetTime getOffsetTime(String key) {
+        return getOffsetTime(key, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public OffsetTime getOffsetTime(String key, OffsetTime defaultValue) {
+        Object value = super.get(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof OffsetTime) {
+            return (OffsetTime) value;
+        }
+        return TypeUtils.cast(value, OffsetTime.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalDateTime getLocalDateTime(String key) {
+        return getLocalDateTime(key, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public LocalDateTime getLocalDateTime(String key, LocalDateTime defaultValue) {
+        Object value = super.get(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof LocalDateTime) {
+            return (LocalDateTime) value;
+        }
+        return TypeUtils.cast(value, LocalDateTime.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public OffsetDateTime getOffsetDateTime(String key) {
+        return getOffsetDateTime(key, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public OffsetDateTime getOffsetDateTime(String key, OffsetDateTime defaultValue) {
+        Object value = super.get(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof OffsetDateTime) {
+            return (OffsetDateTime) value;
+        }
+        return TypeUtils.cast(value, OffsetDateTime.class);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public ZonedDateTime getZonedDateTime(String key) {
+        return getZonedDateTime(key, null);
+    }
+
+    /**
+     *
+     * @since 2.0.57
+     */
+    public ZonedDateTime getZonedDateTime(String key, ZonedDateTime defaultValue) {
+        Object value = super.get(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof ZonedDateTime) {
+            return (ZonedDateTime) value;
+        }
+        return TypeUtils.cast(value, ZonedDateTime.class);
     }
 
     /**
@@ -1384,14 +1521,18 @@ public class JSONObject
     }
 
     /**
+     * Handles method invocations on a proxy instance.
+     *
      * @param proxy proxy object, currently useless
      * @param method methods that need reflection
      * @param args parameters of invoke
+     * @return the result of the method invocation
+     * @throws Throwable if an error occurs during method invocation
      * @throws UnsupportedOperationException If reflection for this method is not supported
      * @throws ArrayIndexOutOfBoundsException If the length of args does not match the length of the method parameter
      */
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final String methodName = method.getName();
         int parameterCount = method.getParameterCount();
@@ -1537,6 +1678,10 @@ public class JSONObject
     }
 
     /**
+     * Gets the JSON field name from the method's annotations.
+     *
+     * @param method the method to get the JSON field name from
+     * @return the JSON field name, or null if not found
      * @since 2.0.4
      */
     private String getJSONFieldName(Method method) {
@@ -1561,12 +1706,24 @@ public class JSONObject
         return name;
     }
 
+    /**
+     * Creates and puts a new JSONArray with the specified name.
+     *
+     * @param name the name for the new JSONArray
+     * @return the created JSONArray
+     */
     public JSONArray putArray(String name) {
         JSONArray array = new JSONArray();
         put(name, array);
         return array;
     }
 
+    /**
+     * Creates and puts a new JSONObject with the specified name.
+     *
+     * @param name the name for the new JSONObject
+     * @return the created JSONObject
+     */
     public JSONObject putObject(String name) {
         JSONObject object = new JSONObject();
         put(name, object);
@@ -1574,6 +1731,8 @@ public class JSONObject
     }
 
     /**
+     * Consumer for processing method names.
+     *
      * @since 2.0.3
      */
     static class NameConsumer
@@ -1617,6 +1776,10 @@ public class JSONObject
     }
 
     /**
+     * Checks if this JSONObject is valid according to the specified JSON schema.
+     *
+     * @param schema the JSON schema to validate against
+     * @return true if this JSONObject is valid according to the schema, false otherwise
      * @since 2.0.4
      */
     public boolean isValid(JSONSchema schema) {
@@ -1624,6 +1787,10 @@ public class JSONObject
     }
 
     /**
+     * Applies a name filter to an iterable collection.
+     *
+     * @param iterable the iterable collection to apply the filter to
+     * @param nameFilter the name filter to apply
      * @since 2.0.3
      */
     static void nameFilter(Iterable<?> iterable, NameFilter nameFilter) {
@@ -1637,9 +1804,13 @@ public class JSONObject
     }
 
     /**
+     * Applies a name filter to a map.
+     *
+     * @param map the map to apply the filter to
+     * @param nameFilter the name filter to apply
      * @since 2.0.3
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     static void nameFilter(Map map, NameFilter nameFilter) {
         JSONObject changed = null;
         for (Iterator<?> it = map.entrySet().iterator(); it.hasNext(); ) {
@@ -1671,6 +1842,10 @@ public class JSONObject
     }
 
     /**
+     * Applies a value filter to an iterable collection.
+     *
+     * @param iterable the iterable collection to apply the filter to
+     * @param valueFilter the value filter to apply
      * @since 2.0.3
      */
     @SuppressWarnings("rawtypes")
@@ -1685,9 +1860,13 @@ public class JSONObject
     }
 
     /**
+     * Applies a value filter to a map.
+     *
+     * @param map the map to apply the filter to
+     * @param valueFilter the value filter to apply
      * @since 2.0.3
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     static void valueFilter(Map map, ValueFilter valueFilter) {
         for (Object o : map.entrySet()) {
             Map.Entry entry = (Map.Entry) o;
@@ -1711,6 +1890,9 @@ public class JSONObject
     }
 
     /**
+     * Applies a value filter to this JSONObject.
+     *
+     * @param valueFilter the value filter to apply
      * @since 2.0.3
      */
     public void valueFilter(ValueFilter valueFilter) {
@@ -1718,6 +1900,9 @@ public class JSONObject
     }
 
     /**
+     * Applies a name filter to this JSONObject.
+     *
+     * @param nameFilter the name filter to apply
      * @since 2.0.3
      */
     public void nameFilter(NameFilter nameFilter) {
@@ -1733,6 +1918,10 @@ public class JSONObject
     }
 
     /**
+     * Evaluates a JSONPath expression against this JSONObject.
+     *
+     * @param path the JSONPath expression to evaluate
+     * @return the result of evaluating the JSONPath expression
      * @see JSONPath#paths(Object)
      */
     public Object eval(JSONPath path) {
@@ -1740,9 +1929,11 @@ public class JSONObject
     }
 
     /**
-     * if value instance of Map or Collection, return size, other return 0
+     * Returns the size of the value associated with the given key if it is a Map or Collection.
+     * For other types, returns 0.
      *
-     * @param key
+     * @param key the key whose associated value's size is to be returned
+     * @return the size of the value if it is a Map or Collection, otherwise 0
      * @since 2.0.24
      */
     public int getSize(String key) {

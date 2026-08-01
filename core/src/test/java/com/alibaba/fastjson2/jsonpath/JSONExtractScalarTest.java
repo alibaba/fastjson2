@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.jsonpath;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
@@ -8,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("jsonpath")
 public class JSONExtractScalarTest {
     private String str;
     private byte[] utf8Bytes;

@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.filter.Filter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -18,6 +19,7 @@ import java.util.function.Function;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("regression")
 public class Issue389 {
     @Test
     public void test() {
@@ -30,7 +32,7 @@ public class Issue389 {
         assertNull(JSON.parse((String) null, JSONReader.Feature.SupportSmartMatch));
         assertNull(JSON.parse("", JSONReader.Feature.SupportSmartMatch));
         assertNull(JSON.parse((String) null, (JSONReader.Context) null));
-        assertNull(JSON.parse((InputStream) null, null));
+        assertNull(JSON.parse((InputStream) null, (JSONReader.Context) null));
         assertNull(JSON.parseObject(null, StandardCharsets.ISO_8859_1, null));
         assertNull(JSON.parse("", (JSONReader.Context) null));
 

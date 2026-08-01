@@ -40,7 +40,11 @@ final class ObjectWriterImplDoubleValueArray
         } else {
             array = (double[]) object;
         }
-        jsonWriter.writeDouble(array);
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(array);
+        } else {
+            jsonWriter.writeDouble(array);
+        }
     }
 
     @Override
@@ -53,7 +57,11 @@ final class ObjectWriterImplDoubleValueArray
         }
 
         if (format == null) {
-            jsonWriter.writeDouble(array);
+            if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
+                jsonWriter.writeString(array);
+            } else {
+                jsonWriter.writeDouble(array);
+            }
         } else {
             jsonWriter.writeDouble(array, format);
         }

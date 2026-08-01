@@ -1,11 +1,13 @@
 package com.alibaba.fastjson2;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("jsonpath")
 public class JSONPathTypedTest {
     @Test
     public void test() {

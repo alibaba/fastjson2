@@ -14,32 +14,41 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents a generic type {@code T}. Java doesn't yet provide a way to
- * represent generic types, so this class does. Forces clients to create a
- * subclass of this class which enables retrieval the type information even at runtime.
- * <p>
- * This syntax cannot be used to create type literals that have wildcard
- * parameters, such as {@code Class<T>} or {@code List<? extends CharSequence>}.
- * <p>
- * For example, to create a type literal for {@code List<String>}, you can
- * create an empty anonymous inner class:
+ * Represents a generic type {@code T}.
+ *
+ * <p>Java doesn't yet provide a way to represent generic types, so this class does.
+ * Forces clients to create a subclass of this class which enables retrieval the type
+ * information even at runtime.</p>
+ *
+ * <p>This syntax cannot be used to create type literals that have wildcard
+ * parameters, such as {@code Class<T>} or {@code List<? extends CharSequence>}.</p>
+ *
+ * <p>For example, to create a type literal for {@code List<String>}, you can
+ * create an empty anonymous inner class:</p>
  * <pre>{@code
  * TypeReference<List<String>> typeReference = new TypeReference<List<String>>(){};
  * }</pre>
- * For example, use it quickly
- * <pre>{@code String text = "{\"id\":1,\"name\":\"kraity\"}";
+ *
+ * <p>For example, use it quickly:</p>
+ * <pre>{@code
+ * String text = "{\"id\":1,\"name\":\"kraity\"}";
  * User user = new TypeReference<User>(){}.parseObject(text);
  * }</pre>
+ *
+ * @param <T> the type refered to
+ * @author wenshao[szujobs@hotmail.com]
+ * @since 2.0.2
  */
+
 public abstract class TypeReference<T> {
     protected final Type type;
     protected final Class<? super T> rawType;
 
     /**
      * Constructs a new type literal. Derives represented class from type parameter.
-     * <p>
-     * Clients create an empty anonymous subclass. Doing so embeds the type
-     * parameter in the anonymous class's type hierarchy, so we can reconstitute it at runtime despite erasure.
+     *
+     * <p>Clients create an empty anonymous subclass. Doing so embeds the type
+     * parameter in the anonymous class's type hierarchy, so we can reconstitute it at runtime despite erasure.</p>
      */
     @SuppressWarnings("unchecked")
     public TypeReference() {
@@ -49,6 +58,8 @@ public abstract class TypeReference<T> {
     }
 
     /**
+     * Constructs a new type literal with the specified type.
+     *
      * @param type specify the {@link Type} to be converted
      * @throws NullPointerException If the {@link Type} is null
      */
@@ -63,7 +74,9 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * E.g.
+     * Constructs a new type literal with the specified actual type arguments.
+     *
+     * <p>For example:</p>
      * <pre>{@code
      * Class<T> klass = ...;
      * TypeReference<Response<T>> ref = new TypeReference<Response<T>>(new Type[]{klass}){};
@@ -93,14 +106,18 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * Get the {@link Type}
+     * Gets the type literal.
+     *
+     * @return the {@link Type}
      */
     public final Type getType() {
         return type;
     }
 
     /**
-     * Get the raw {@link Class}
+     * Gets the raw type.
+     *
+     * @return the raw {@link Class}
      */
     public final Class<? super T> getRawType() {
         return rawType;
@@ -223,7 +240,10 @@ public abstract class TypeReference<T> {
     }
 
     /**
+     * Gets a type reference for the specified type.
+     *
      * @param type specify the {@link Type} to be converted
+     * @return the type reference
      */
     public static TypeReference<?> get(Type type) {
         return new TypeReference<Object>(type) {
@@ -232,10 +252,13 @@ public abstract class TypeReference<T> {
     }
 
     /**
+     * Canonicalize the type.
+     *
      * @param thisClass this class
      * @param type the parameterizedType
      * @param actualTypeArguments an array of Type objects representing the actual type arguments to this type
      * @param actualIndex the actual index
+     * @return the canonicalized type
      * @since 2.0.3
      */
     private static Type canonicalize(Class<?> thisClass,
@@ -312,10 +335,23 @@ public abstract class TypeReference<T> {
         );
     }
 
+    /**
+     * Creates a multi-type from the specified types.
+     *
+     * @param types the types
+     * @return the multi-type
+     */
     public static Type of(Type... types) {
         return new MultiType(types);
     }
 
+    /**
+     * Creates a collection type with the specified collection class and element class.
+     *
+     * @param collectionClass the collection class
+     * @param elementClass the element class
+     * @return the parameterized type
+     */
     public static Type collectionType(
             Class<? extends Collection> collectionClass,
             Class<?> elementClass
@@ -323,10 +359,24 @@ public abstract class TypeReference<T> {
         return new ParameterizedTypeImpl(collectionClass, elementClass);
     }
 
+    /**
+     * Creates an array type with the specified element type.
+     *
+     * @param elementType the element type
+     * @return the generic array type
+     */
     public static Type arrayType(Class<?> elementType) {
         return new BeanUtils.GenericArrayTypeImpl(elementType);
     }
 
+    /**
+     * Creates a map type with the specified map class, key class and value class.
+     *
+     * @param mapClass the map class
+     * @param keyClass the key class
+     * @param valueClass the value class
+     * @return the parameterized type
+     */
     public static Type mapType(
             Class<? extends Map> mapClass,
             Class<?> keyClass,
@@ -335,6 +385,13 @@ public abstract class TypeReference<T> {
         return new ParameterizedTypeImpl(mapClass, keyClass, valueClass);
     }
 
+    /**
+     * Creates a map type with the specified key class and value type.
+     *
+     * @param keyClass the key class
+     * @param valueType the value type
+     * @return the parameterized type
+     */
     public static Type mapType(
             Class<?> keyClass,
             Type valueType
@@ -342,10 +399,24 @@ public abstract class TypeReference<T> {
         return new ParameterizedTypeImpl(Map.class, keyClass, valueType);
     }
 
+    /**
+     * Creates a parameterized type with the specified parametrized class and parameter classes.
+     *
+     * @param parametrized the parametrized class
+     * @param parameterClasses the parameter classes
+     * @return the parameterized type
+     */
     public static Type parametricType(Class<?> parametrized, Class<?>... parameterClasses) {
         return new ParameterizedTypeImpl(parametrized, parameterClasses);
     }
 
+    /**
+     * Creates a parameterized type with the specified parametrized class and parameter types.
+     *
+     * @param parametrized the parametrized class
+     * @param parameterTypes the parameter types
+     * @return the parameterized type
+     */
     public static Type parametricType(Class<?> parametrized, Type... parameterTypes) {
         return new ParameterizedTypeImpl(parametrized, parameterTypes);
     }

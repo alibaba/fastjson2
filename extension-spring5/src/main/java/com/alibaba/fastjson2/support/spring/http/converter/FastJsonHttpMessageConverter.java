@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * Fastjson for Spring MVC Converter.
@@ -44,6 +46,7 @@ public class FastJsonHttpMessageConverter
      */
     public FastJsonHttpMessageConverter() {
         super(MediaType.ALL);
+        setDefaultCharset(StandardCharsets.UTF_8);
     }
 
     /**
@@ -91,24 +94,96 @@ public class FastJsonHttpMessageConverter
         return readType(getType(clazz, null), inputMessage);
     }
 
-    private Object readType(Type type, HttpInputMessage inputMessage) {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            InputStream in = inputMessage.getBody();
+    /** Default initialization capacity when content-length is not specified */
+    private static int REQUEST_BODY_INITIAL_CAPACITY = 8192;
 
-            byte[] buf = new byte[1024 * 64];
-            for (; ; ) {
-                int len = in.read(buf);
-                if (len == -1) {
-                    break;
-                }
+    public static void setRequestBodyInitialCapacity(int initialCapacity) {
+        if (initialCapacity < 128 || initialCapacity > 1024 * 1024) {
+            throw new IllegalArgumentException("invalid initialCapacity: " + initialCapacity);
+        }
+        REQUEST_BODY_INITIAL_CAPACITY = initialCapacity;
+    }
 
-                if (len > 0) {
-                    baos.write(buf, 0, len);
+    /**
+     * @param contentLength The content length of the request message. If -1 is passed, it means unknown.
+     */
+    protected static int calcInitialCapacity(long contentLength) {
+        return contentLength == -1 || contentLength > Integer.MAX_VALUE
+                ? REQUEST_BODY_INITIAL_CAPACITY
+                // The maximum limit is 1MB to prevent fake request headers
+                : (int) Math.min(contentLength, 1024 * 1024);
+    }
+
+    /**
+     * @param in the specified input stream
+     * @param contentLength -1 means unknown
+     */
+    protected static byte[] fastRead(final InputStream in, final long contentLength) throws IOException {
+        final int expectSize = calcInitialCapacity(contentLength);
+        byte[] body = new byte[expectSize];
+
+        int offset = in.read(body, 0, body.length);
+        if (offset == -1) {
+            body = new byte[0];
+        } else if (contentLength == -1 || offset != contentLength) {
+            final byte[] buf = new byte[1024];
+            int len = in.read(buf);
+            while (len != -1) { // Refer to the implementation of ByteArrayOutputStream
+                final int minRequired = offset + len;
+                final int oldLength = body.length;
+                if (minRequired > oldLength) {
+                    int newLength = newLength(oldLength, minRequired - oldLength, oldLength);
+                    byte[] newBody = Arrays.copyOf(body, newLength);
+                    System.arraycopy(buf, 0, newBody, offset, len);
+                    body = newBody;
+                } else {
+                    System.arraycopy(buf, 0, body, offset, len);
                 }
+                offset = minRequired;
+                len = in.read(buf);
             }
-            byte[] bytes = baos.toByteArray();
+            if (offset != body.length) {
+                body = Arrays.copyOf(body, offset);
+            }
+        }
+        return body;
+    }
 
-            return JSON.parseObject(bytes, type, config.getDateFormat(), config.getReaderFilters(), config.getReaderFeatures());
+    // see jdk.internal.util.ArraysSupport.SOFT_MAX_ARRAY_LENGTH
+    private static final int SOFT_MAX_ARRAY_LENGTH = Integer.MAX_VALUE - 8;
+
+    // see jdk.internal.util.ArraysSupport.newLength( )
+    private static int newLength(int oldLength, int minGrowth, int prefGrowth) {
+        // preconditions not checked because of inlining
+        // assert oldLength >= 0
+        // assert minGrowth > 0
+
+        int prefLength = oldLength + Math.max(minGrowth, prefGrowth); // might overflow
+        if (0 < prefLength && prefLength <= SOFT_MAX_ARRAY_LENGTH) {
+            return prefLength;
+        } else {
+            // put code cold in a separate method
+            return hugeLength(oldLength, minGrowth);
+        }
+    }
+
+    // see jdk.internal.util.ArraysSupport.hugeLength( )
+    private static int hugeLength(int oldLength, int minGrowth) {
+        int minLength = oldLength + minGrowth;
+        if (minLength < 0) { // overflow
+            throw new OutOfMemoryError("Required array length " + oldLength + " + " + minGrowth + " is too large");
+        } else if (minLength <= SOFT_MAX_ARRAY_LENGTH) {
+            return SOFT_MAX_ARRAY_LENGTH;
+        } else {
+            return minLength;
+        }
+    }
+
+    protected Object readType(Type type, HttpInputMessage inputMessage) {
+        final long contentLength = inputMessage.getHeaders().getContentLength(); // -1 表示未知
+        try {
+            final byte[] body = fastRead(inputMessage.getBody(), contentLength);
+            return JSON.parseObject(body, type, config.readerContext());
         } catch (JSONException ex) {
             throw new HttpMessageNotReadableException("JSON parse error: " + ex.getMessage(), ex, inputMessage);
         } catch (IOException ex) {
@@ -136,10 +211,7 @@ public class FastJsonHttpMessageConverter
                 }
 
                 contentLength = JSON.writeTo(
-                        baos, object,
-                        config.getDateFormat(),
-                        config.getWriterFilters(),
-                        config.getWriterFeatures()
+                        baos, object, config.writerContext()
                 );
             }
 

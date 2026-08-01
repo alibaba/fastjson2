@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.date;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
@@ -12,6 +13,7 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("date")
 public class DateFormatTest {
     @Test
     public void test0() {

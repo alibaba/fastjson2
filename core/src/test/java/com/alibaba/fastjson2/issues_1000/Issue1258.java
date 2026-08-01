@@ -8,11 +8,14 @@ import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("regression")
+@Tag("annotation")
 public class Issue1258 {
     @Getter
     @Setter

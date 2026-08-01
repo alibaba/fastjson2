@@ -2,10 +2,13 @@ package com.alibaba.fastjson2.v1issues.issue_3400;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue_20201016_01 {
     @Test
     public void testToString() {
@@ -19,7 +22,7 @@ public class Issue_20201016_01 {
 
         String s = JSON.toJSONString(config, JSONWriter.Feature.WriteNulls, JSONWriter.Feature.NullAsDefaultValue);
 
-        assertEquals("{\"agent\":null,\"creator\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"},\"owner\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"}}", s);
+        assertEquals("{\"agent\":{},\"creator\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"},\"owner\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"}}", s);
     }
 
     @Test

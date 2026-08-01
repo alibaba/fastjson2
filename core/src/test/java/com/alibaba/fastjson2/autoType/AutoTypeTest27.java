@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.autoType;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -10,6 +11,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+@Tag("autotype")
 public class AutoTypeTest27 {
     @Test
     public void test_unmodifiableCollection() throws Exception {
@@ -156,6 +158,33 @@ public class AutoTypeTest27 {
     @Test
     public void test_subList() throws Exception {
         ArrayList list = new ArrayList();
+        list.add(0);
+        list.add(1);
+        list.add(2);
+        Bean1 bean = new Bean1();
+        bean.items = list.subList(0, 1);
+
+        byte[] bytes = JSONB.toBytes(bean,
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue
+        );
+
+        JSONB.dump(bytes);
+
+        Bean1 bean2 = (Bean1) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
+        assertNotNull(bean2);
+        assertNotNull(bean2.items);
+
+        assertSame(bean.items.size(), bean2.items.size());
+        assertSame(bean.items.stream().findFirst().get(), bean2.items.stream().findFirst().get());
+    }
+
+    @Test
+    public void test_subList2() throws Exception {
+        LinkedList list = new LinkedList();
         list.add(0);
         list.add(1);
         list.add(2);

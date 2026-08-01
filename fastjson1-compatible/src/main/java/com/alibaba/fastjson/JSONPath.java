@@ -50,23 +50,11 @@ public class JSONPath {
     }
 
     public static Object eval(String rootObject, String path) {
-        Object result = com.alibaba.fastjson2.JSONPath.eval(rootObject, path);
-        return adaptResult(result);
+        return JSON.adaptResult(com.alibaba.fastjson2.JSONPath.eval(rootObject, path));
     }
 
     public static Object eval(Object rootObject, String path) {
-        com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
-        Object result = jsonPath.eval(rootObject);
-        return adaptResult(result);
-    }
-
-    private static Object adaptResult(Object result) {
-        if (result instanceof com.alibaba.fastjson2.JSONArray) {
-            result = new JSONArray((com.alibaba.fastjson2.JSONArray) result);
-        } else if (result instanceof com.alibaba.fastjson2.JSONObject) {
-            result = new JSONObject((com.alibaba.fastjson2.JSONObject) result);
-        }
-        return result;
+        return JSON.adaptResult(com.alibaba.fastjson2.JSONPath.of(path).eval(rootObject));
     }
 
     public static boolean set(Object rootObject, String path, Object value) {
@@ -90,7 +78,7 @@ public class JSONPath {
         JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
         JSONReader jsonReader = JSONReader.of(json, context);
         Object result = jsonPath.extract(jsonReader);
-        return adaptResult(result);
+        return JSON.adaptResult(result);
     }
 
     public static boolean remove(Object root, String path) {

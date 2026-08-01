@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.filter;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("filter")
 public class ValueFilterTest5 {
     @Test
     public void valueFilter() {

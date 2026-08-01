@@ -1,7 +1,9 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -17,6 +19,7 @@ import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID;
 import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class DateUtilsTest {
     Locale locale;
     @BeforeEach
@@ -2866,6 +2869,15 @@ public class DateUtilsTest {
     }
 
     @Test
+    public void parseLocalTime15() {
+        String str = "\"10:01:26.775328\"";
+        LocalTime ldt = LocalTime.of(10, 1, 26, 775328000);
+        assertEquals(ldt, JSON.parseObject(str, LocalTime.class));
+        assertEquals(ldt, JSON.parseObject(str.toCharArray(), LocalTime.class));
+        assertEquals(ldt, JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), LocalTime.class));
+    }
+
+    @Test
     public void testNull() {
         assertNull(DateUtils.parseDateYMDHMS19(null));
         assertNull(DateUtils.parseDateYMDHMS19(""));
@@ -2916,5 +2928,13 @@ public class DateUtilsTest {
         System.out.println((t >> 24) & 0xFF);
         System.out.println((t >> 48) & 0xFF);
 //        System.out.println(Integer.toString('-') + "\t" + Integer.toBinaryString('-'));
+    }
+
+    @Test
+    public void ymdTest() {
+        String str = "2019-10-14T10:28:31.669682461Z";
+        byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
+        LocalDate localDate = DateUtils.localDateYMD(utf8, 0);
+        assertEquals("2019-10-14", localDate.toString());
     }
 }

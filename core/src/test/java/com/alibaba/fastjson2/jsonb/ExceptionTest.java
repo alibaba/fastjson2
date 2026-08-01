@@ -3,12 +3,14 @@ package com.alibaba.fastjson2.jsonb;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("jsonb")
 public class ExceptionTest {
     @Test
     public void test_exception() {

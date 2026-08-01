@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.util;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -8,6 +9,7 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@Tag("util")
 public class RyuDoubleTest {
     @Test
     public void test1() {
@@ -25,7 +27,7 @@ public class RyuDoubleTest {
         for (int i = 0; i < 1_000_000; i++) {
             double d = r.nextDouble();
             String s0 = Double.toString(d);
-            int size = NumberUtils.writeDouble(bytes, 0, d, false);
+            int size = NumberUtils.writeDouble(bytes, 0, d, false, false);
             String s1 = new String(bytes, 0, size, StandardCharsets.US_ASCII);
             boolean eq = s0.equals(s1);
             if (!eq) {
@@ -44,7 +46,7 @@ public class RyuDoubleTest {
 
     static String toString(double value) {
         byte[] bytes = new byte[24];
-        int len = NumberUtils.writeDouble(bytes, 0, value, false);
+        int len = NumberUtils.writeDouble(bytes, 0, value, false, false);
         return new String(bytes, 0, len);
     }
 }

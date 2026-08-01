@@ -5,12 +5,15 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.junit.Assert;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Rongzhen Yan
  */
+@Tag("regression")
 public class Issue828 {
     @Test
     public void test() {
@@ -24,7 +27,7 @@ public class Issue828 {
 
         A object = new A("a value", null, "c value");
         String json1B = JSON.toJSONString(object);
-        Assert.assertEquals(json1A, json1B);
+        assertEquals(json1A, json1B);
 
         // test case2 with no feature
         JSONObject jsonObject2 = new JSONObject();
@@ -33,7 +36,7 @@ public class Issue828 {
         jsonObject2.put("c", "c value");
         String json2 = jsonObject2.toJSONString();
         System.out.println(json2);
-        Assert.assertEquals("{\"c\":\"c value\"}", json2);
+        assertEquals("{\"c\":\"c value\"}", json2);
 
         // test case3 with (WriteMapNullValue) feature
         JSONObject jsonObject3 = new JSONObject();
@@ -43,7 +46,7 @@ public class Issue828 {
         String json3 = jsonObject3.toJSONString(JSONWriter.Feature.WriteMapNullValue);
 
         System.out.println(json3);
-        Assert.assertEquals("{\"a\":null,\"b\":null,\"c\":\"c value\"}", json3);
+        assertEquals("{\"a\":null,\"b\":null,\"c\":\"c value\"}", json3);
 
         // test case4 with (WriteMapNullValue) feature
         JSONObject jsonObject4 = new JSONObject();
@@ -53,7 +56,7 @@ public class Issue828 {
         String json4 = jsonObject4.toJSONString(JSONWriter.Feature.WriteMapNullValue);
 
         System.out.println(json4);
-        Assert.assertEquals("{\"a\":null,\"b\":\"b value\",\"c\":null}", json4);
+        assertEquals("{\"a\":null,\"b\":\"b value\",\"c\":null}", json4);
     }
 
     @Data

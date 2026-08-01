@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.util.BeanUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.*;
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author lzhpo
  */
+@Tag("annotation")
 class JSONCreatorCombinationTest {
     @Test
     void testDirectlyGetFromClass() {

@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -12,6 +13,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("regression")
+@Tag("annotation")
 public class Issue2213 {
     @Test
     public void test() {

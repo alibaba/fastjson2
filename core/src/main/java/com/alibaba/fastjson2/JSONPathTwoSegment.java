@@ -261,4 +261,21 @@ class JSONPathTwoSegment
 
         return JSON.toJSONString(context1.value);
     }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+
+        JSONPathTwoSegment that = (JSONPathTwoSegment) object;
+        return first.equals(that.first) && second.equals(that.second);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = first.hashCode();
+        result = 31 * result + second.hashCode();
+        return result;
+    }
 }

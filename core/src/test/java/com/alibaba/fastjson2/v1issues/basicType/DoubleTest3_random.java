@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONReader.Feature;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.NumberUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -14,6 +15,8 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class DoubleTest3_random {
     private int loopCount = 1_000_000;
 
@@ -110,7 +113,7 @@ public class DoubleTest3_random {
         char[] chars = new char[64];
         for (int i = 0; i < loopCount; ++i) {
             double val = rand.nextDouble();
-            int len = NumberUtils.writeDouble(chars, 0, val, false);
+            int len = NumberUtils.writeDouble(chars, 0, val, false, false);
             JSONReader jsonReader = JSONReader.of(chars, 0, len);
             assertEquals(val, jsonReader.readDoubleValue());
         }

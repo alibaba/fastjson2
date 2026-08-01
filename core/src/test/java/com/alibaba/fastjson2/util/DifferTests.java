@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONObject;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -10,6 +11,7 @@ import java.util.LinkedHashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class DifferTests {
     @Test
     public void test() {

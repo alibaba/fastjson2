@@ -1,9 +1,16 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2_vo.Double1;
 import com.alibaba.fastjson2_vo.Double2;
 import com.alibaba.fastjson2_vo.Int1;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -13,10 +20,13 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 
+import static com.alibaba.fastjson2.util.JDKUtils.FIELD_BIGINTEGER_MAG_OFFSET;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static com.alibaba.fastjson2.util.TypeUtils.BIGINT_JAVASCRIPT_HIGH;
 import static com.alibaba.fastjson2.util.TypeUtils.BIGINT_JAVASCRIPT_LOW;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class TypeUtilsTest {
     @Test
     public void test_0() {
@@ -604,7 +614,7 @@ public class TypeUtilsTest {
             String s1 = Character.toString(i);
             String json = JSON.toJSONString(s1);
             assertEquals(s1, JSON.parse(json.toCharArray()));
-            assertEquals(s1, JSON.parse(json.getBytes()));
+            assertEquals(s1, JSON.parse(json.getBytes(StandardCharsets.UTF_8)));
         }
 
         for (char i = 0; i < 512; i++) {
@@ -612,7 +622,7 @@ public class TypeUtilsTest {
                 String s2 = new String(new char[]{i, j});
                 String json = JSON.toJSONString(s2);
                 assertEquals(s2, JSON.parse(json.toCharArray()));
-                assertEquals(s2, JSON.parse(json.getBytes()));
+                assertEquals(s2, JSON.parse(json.getBytes(StandardCharsets.UTF_8)));
             }
         }
     }
@@ -885,5 +895,49 @@ public class TypeUtilsTest {
         Double2 double2 = JSON.parseObject(json2Bytes, Double2.class);
         assertEquals(d1, double2.getV0000());
         assertEquals(d1, double2.getV0001());
+    }
+
+    @Test
+    public void test_gen_magic_table() {
+        BigInteger[] bigInts = new BigInteger[64];
+        bigInts[0] = BigInteger.ONE;
+        bigInts[1] = BigInteger.TEN;
+        long longValue = 10;
+        for (int i = 2; i < 19; ++i) {
+            longValue *= 10;
+            bigInts[i] = BigInteger.valueOf(longValue);
+        }
+        BigInteger bigInt = bigInts[18];
+        for (int i = 19; i < 64; ++i) {
+            bigInt = bigInt.multiply(BigInteger.TEN);
+            bigInts[i] = bigInt;
+        }
+
+        for (int i = 0; i < bigInts.length; i++) {
+            bigInt = bigInts[i];
+            int[] magic = (int[]) UNSAFE.getObject(bigInt, FIELD_BIGINTEGER_MAG_OFFSET);
+            String string = Arrays.toString(magic);
+            string = "{" + string.substring(1, string.length() - 1) + "},";
+            System.out.println(string);
+        }
+    }
+
+    @Test
+    public void test_double_value() {
+        String[] strings = {
+                "0.1E-23",
+                "0.1E-50",
+                "8388607.0",
+                "1.401298464324817E-112"
+        };
+
+        for (String str : strings) {
+            assertEquals(
+                    Float.parseFloat(str),
+                    JSONReader.of("\"" + str + "\"").readFloatValue());
+            assertEquals(
+                    Double.parseDouble(str),
+                    JSONReader.of("\"" + str + "\"").readDoubleValue());
+        }
     }
 }

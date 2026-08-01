@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.read.type;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -9,6 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("reader")
 public class AtomicTest {
     @Test
     public void testAtomicBoolean() {

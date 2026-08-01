@@ -3,12 +3,16 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("regression")
+@Tag("date")
+@Tag("annotation")
 public class Issue591 {
     @Test
     void test2() {

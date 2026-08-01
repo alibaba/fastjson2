@@ -5,10 +5,12 @@ import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.filter.NameFilter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
 public class Issue2478 {
     @Test
     public void jsonFastSerializationTest0() {

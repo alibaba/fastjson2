@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("date")
 public class DateFormatTest_Local_OptinalDate {
     @Test
     void localeDateTest() {

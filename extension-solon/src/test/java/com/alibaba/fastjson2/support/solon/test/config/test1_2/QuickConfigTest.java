@@ -1,7 +1,8 @@
 package com.alibaba.fastjson2.support.solon.test.config.test1_2;
 
-import com.alibaba.fastjson2.support.solon.Fastjson2RenderFactory;
+import com.alibaba.fastjson2.support.solon.Fastjson2EntityConverter;
 import com.alibaba.fastjson2.support.solon.test._model.CustomDateDo;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.noear.solon.annotation.Import;
 import org.noear.solon.annotation.Inject;
@@ -17,7 +18,7 @@ import java.util.Date;
 @SolonTest
 public class QuickConfigTest {
     @Inject
-    Fastjson2RenderFactory renderFactory;
+    Fastjson2EntityConverter entityConverter;
 
     @Test
     public void hello2() throws Throwable {
@@ -27,12 +28,12 @@ public class QuickConfigTest {
         dateDo.setDate2(new Date(1673861993477L));
 
         ContextEmpty ctx = new ContextEmpty();
-        renderFactory.create().render(dateDo, ctx);
+        entityConverter.write(dateDo, ctx);
         String output = ctx.attr("output");
 
         System.out.println(output);
 
-        //err: register 类型处理后，JSONField 失效了
-        assert "{\"date\":1673861993477,\"date2\":\"2023-01-16 17:39:53\"}".equals(output);
+        //完美
+        Assertions.assertEquals("{\"date\":1673861993477,\"date2\":\"2023-01-16 17:39:53\"}", output);
     }
 }

@@ -11,6 +11,24 @@ import java.time.LocalTime;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.NumberUtils.MULTIPLY_HIGH;
 
+/**
+ * IOUtils is a utility class that provides various I/O operations and helper methods
+ * for working with byte arrays, character arrays, and other data structures used in
+ * FASTJSON2 for serialization and deserialization.
+ *
+ * <p>This class contains optimized methods for:</p>
+ * <ul>
+ *   <li>Writing and reading primitive values to/from byte and character arrays</li>
+ *   <li>Handling UTF-8 and UTF-16 encoding/decoding</li>
+ *   <li>Working with date/time values</li>
+ *   <li>Performing low-level memory operations</li>
+ *   <li>Managing resource cleanup</li>
+ * </ul>
+ *
+ * <p>All methods in this class are static and thread-safe.</p>
+ *
+ * @since 2.0.0
+ */
 public class IOUtils {
     static final short DOT_ZERO_16 = BIG_ENDIAN ? (short) ('.' << 8 | '0') : (short) ('0' << 8 | '.');
     static final int DOT_ZERO_32 = BIG_ENDIAN ? '.' << 16 | '0' : '0' << 16 | '.';
@@ -61,7 +79,6 @@ public class IOUtils {
     };
 
     private static final short ZERO_DOT_LATIN1;
-    private static final int ZERO_DOT_UTF16;
 
     static {
         short[] shorts = new short[]{
@@ -105,13 +122,20 @@ public class IOUtils {
             DIGITS_K_64[i] = c0 + v;
         }
         ZERO_DOT_LATIN1 = UNSAFE.getShort(new byte[] {'0', '.'}, ARRAY_BYTE_BASE_OFFSET);
-        ZERO_DOT_UTF16 = UNSAFE.getInt(new char[] {'0', '.'}, ARRAY_CHAR_BASE_OFFSET);
     }
 
     private static short digitPair(int value) {
         return PACKED_DIGITS[value & 0x7f];
     }
 
+    /**
+     * Writes a pair of digits to a byte array at the specified position.
+     * This method is used for efficient digit pair writing during number formatting.
+     *
+     * @param buf the byte array buffer to write to
+     * @param charPos the position in the buffer where to write the digit pair
+     * @param value the value (0-99) to write as a digit pair
+     */
     public static void writeDigitPair(byte[] buf, int charPos, int value) {
         putShortLE(
                 buf,
@@ -119,6 +143,14 @@ public class IOUtils {
                 PACKED_DIGITS[value & 0x7f]);
     }
 
+    /**
+     * Writes a pair of digits to a character array at the specified position.
+     * This method is used for efficient digit pair writing during number formatting.
+     *
+     * @param buf the character array buffer to write to
+     * @param charPos the position in the buffer where to write the digit pair
+     * @param value the value (0-99) to write as a digit pair
+     */
     public static void writeDigitPair(char[] buf, int charPos, int value) {
         putIntLE(
                 buf,
@@ -126,6 +158,13 @@ public class IOUtils {
                 PACKED_DIGITS_UTF16[value & 0x7f]);
     }
 
+    /**
+     * Calculates the string size (number of digits) needed to represent an integer value.
+     * This method is used to determine the buffer size needed for number formatting.
+     *
+     * @param x the integer value to calculate the string size for
+     * @return the number of digits needed to represent the integer value
+     */
     public static int stringSize(int x) {
         for (int i = 0; ; i++) {
             if (x <= sizeTable[i]) {
@@ -134,6 +173,13 @@ public class IOUtils {
         }
     }
 
+    /**
+     * Calculates the string size (number of digits) needed to represent a long value.
+     * This method is used to determine the buffer size needed for number formatting.
+     *
+     * @param x the long value to calculate the string size for
+     * @return the number of digits needed to represent the long value
+     */
     public static int stringSize(long x) {
         long p = 10;
         for (int i = 1; i < 19; i++) {
@@ -145,6 +191,15 @@ public class IOUtils {
         return 19;
     }
 
+    /**
+     * Converts an integer to its character representation and writes it to a byte array.
+     * This method handles negative numbers and optimizes digit conversion by processing
+     * two digits at a time when possible.
+     *
+     * @param i the integer value to convert
+     * @param index the starting index in the buffer where to write the characters
+     * @param buf the byte array buffer to write the characters to
+     */
     public static void getChars(int i, int index, byte[] buf) {
         int q, r;
         int charPos = index;
@@ -176,6 +231,15 @@ public class IOUtils {
         }
     }
 
+    /**
+     * Converts an integer to its character representation and writes it to a character array.
+     * This method handles negative numbers and optimizes digit conversion by processing
+     * two digits at a time when possible.
+     *
+     * @param i the integer value to convert
+     * @param index the starting index in the buffer where to write the characters
+     * @param buf the character array buffer to write the characters to
+     */
     public static void getChars(int i, int index, char[] buf) {
         int q, r;
         int charPos = index;
@@ -208,6 +272,16 @@ public class IOUtils {
         }
     }
 
+    /**
+     * Converts a long integer to its character representation and writes it to a byte array.
+     * This method handles negative numbers and optimizes digit conversion by processing
+     * two digits at a time when possible, switching to int-based processing when the value
+     * fits in an integer.
+     *
+     * @param i the long integer value to convert
+     * @param index the starting index in the buffer where to write the characters
+     * @param buf the byte array buffer to write the characters to
+     */
     public static void getChars(long i, int index, byte[] buf) {
         long q;
         int charPos = index;
@@ -249,6 +323,16 @@ public class IOUtils {
         }
     }
 
+    /**
+     * Converts a long integer to its character representation and writes it to a character array.
+     * This method handles negative numbers and optimizes digit conversion by processing
+     * two digits at a time when possible, switching to int-based processing when the value
+     * fits in an integer.
+     *
+     * @param i the long integer value to convert
+     * @param index the starting index in the buffer where to write the characters
+     * @param buf the character array buffer to write the characters to
+     */
     public static void getChars(long i, int index, char[] buf) {
         long q;
         int charPos = index;
@@ -289,6 +373,17 @@ public class IOUtils {
         }
     }
 
+    /**
+     * Writes a decimal number to a byte array buffer
+     *
+     * @param buf byte array buffer
+     * @param off buffer starting offset
+     * @param unscaledVal unscaled value (precision part of BigDecimal)
+     * @param scale number of digits after the decimal point, caller must ensure scale &gt;= 0
+     * @return offset after writing
+     *
+     * Note: This method trusts that the caller has ensured scale &gt;= 0
+     */
     public static int writeDecimal(byte[] buf, int off, long unscaledVal, int scale) {
         if (unscaledVal < 0) {
             putByte(buf, off++, (byte) '-');
@@ -333,6 +428,17 @@ public class IOUtils {
         return IOUtils.writeInt64(buf, off, unscaledVal);
     }
 
+    /**
+     * Writes a decimal number to a character array buffer
+     *
+     * @param buf character array buffer
+     * @param off buffer starting offset
+     * @param unscaledVal unscaled value (precision part of BigDecimal)
+     * @param scale number of digits after the decimal point, caller must ensure scale &gt;= 0
+     * @return offset after writing
+     *
+     * Note: This method trusts that the caller has ensured scale &gt;= 0
+     */
     public static int writeDecimal(char[] buf, int off, long unscaledVal, int scale) {
         if (unscaledVal < 0) {
             putChar(buf, off++, '-');
@@ -343,11 +449,11 @@ public class IOUtils {
             int unscaleValSize = stringSize(unscaledVal);
             int insertionPoint = unscaleValSize - scale;
             if (insertionPoint == 0) {
-                putIntUnaligned(buf, off, ZERO_DOT_UTF16);
-                off += 2;
+                buf[off++] = '0';
+                buf[off++] = '.';
             } else if (insertionPoint < 0) {
-                putIntUnaligned(buf, off, ZERO_DOT_UTF16);
-                off += 2;
+                buf[off++] = '0';
+                buf[off++] = '.';
 
                 for (int i = 0; i < -insertionPoint; i++) {
                     putChar(buf, off++, '0');
@@ -377,6 +483,18 @@ public class IOUtils {
         return IOUtils.writeInt64(buf, off, unscaledVal);
     }
 
+    /**
+     * Encodes a UTF-16 byte array to UTF-8 byte array.
+     * This method converts characters from a source byte array (containing UTF-16 encoded data)
+     * to a destination byte array in UTF-8 encoding format.
+     *
+     * @param src the source byte array containing UTF-16 encoded data
+     * @param offset the starting offset in the source array
+     * @param len the number of bytes to encode from the source array
+     * @param dst the destination byte array to write UTF-8 encoded data to
+     * @param dp the starting position in the destination array
+     * @return the updated position in the destination array after encoding
+     */
     public static int encodeUTF8(byte[] src, int offset, int len, byte[] dst, int dp) {
         int sl = offset + len;
         while (offset < sl) {
@@ -407,6 +525,18 @@ public class IOUtils {
         return dp;
     }
 
+    /**
+     * Encodes a UTF-16 character array to UTF-8 byte array.
+     * This method converts characters from a source character array to a destination
+     * byte array in UTF-8 encoding format, with optimized handling for ASCII characters.
+     *
+     * @param src the source character array
+     * @param offset the starting offset in the source array
+     * @param len the number of characters to encode from the source array
+     * @param dst the destination byte array to write UTF-8 encoded data to
+     * @param dp the starting position in the destination array
+     * @return the updated position in the destination array after encoding
+     */
     public static int encodeUTF8(char[] src, int offset, int len, byte[] dst, int dp) {
         int sl = offset + len;
         int dlASCII = dp + Math.min(len, dst.length);
@@ -471,11 +601,23 @@ public class IOUtils {
         dst[dp + 3] = (byte) (0x80 | (uc & 0x3f));
     }
 
+    /**
+     * Checks if the given string represents a valid number.
+     * A valid number may have an optional leading '+' or '-' sign,
+     * followed by one or more digits.
+     *
+     * @param str the string to check
+     * @return true if the string represents a valid number, false otherwise
+     */
     public static boolean isNumber(String str) {
-        for (int i = 0; i < str.length(); ++i) {
+        int len = str.length();
+        if (len == 0) {
+            return false;
+        }
+        for (int i = 0; i < len; ++i) {
             char ch = str.charAt(i);
             if (ch == '+' || ch == '-') {
-                if (i != 0) {
+                if (i != 0 || len == 1) {
                     return false;
                 }
             } else if (ch < '0' || ch > '9') {
@@ -485,11 +627,24 @@ public class IOUtils {
         return true;
     }
 
-    public static boolean isNumber(char[] chars, int off, int len) {
+    /**
+     * Checks if the character array segment represents a valid number.
+     * A valid number may have an optional leading '+' or '-' sign,
+     * followed by one or more digits.
+     *
+     * @param buf the character array to check
+     * @param off the starting offset in the array
+     * @param len the number of characters to check
+     * @return true if the character array segment represents a valid number, false otherwise
+     */
+    public static boolean isNumber(char[] buf, int off, int len) {
+        if (len <= 0) {
+            return false;
+        }
         for (int i = off, end = off + len; i < end; ++i) {
-            char ch = chars[i];
+            char ch = buf[i];
             if (ch == '+' || ch == '-') {
-                if (i != 0) {
+                if (i != off || len == 1) {
                     return false;
                 }
             } else if (ch < '0' || ch > '9') {
@@ -499,11 +654,24 @@ public class IOUtils {
         return true;
     }
 
-    public static boolean isNumber(byte[] chars, int off, int len) {
+    /**
+     * Checks if the byte array segment represents a valid number.
+     * A valid number may have an optional leading '+' or '-' sign,
+     * followed by one or more digits.
+     *
+     * @param buf the byte array to check
+     * @param off the starting offset in the array
+     * @param len the number of bytes to check
+     * @return true if the byte array segment represents a valid number, false otherwise
+     */
+    public static boolean isNumber(byte[] buf, int off, int len) {
+        if (len <= 0) {
+            return false;
+        }
         for (int i = off, end = off + len; i < end; ++i) {
-            char ch = (char) chars[i];
+            char ch = (char) buf[i];
             if (ch == '+' || ch == '-') {
-                if (i != 0) {
+                if (i != off || len == 1) {
                     return false;
                 }
             } else if (ch < '0' || ch > '9') {
@@ -513,6 +681,13 @@ public class IOUtils {
         return true;
     }
 
+    /**
+     * Safely closes a Closeable resource, ignoring any exceptions that may occur.
+     * This method is a utility to close resources without having to handle
+     * IOException or other exceptions.
+     *
+     * @param x the Closeable resource to close, can be null
+     */
     public static void close(Closeable x) {
         if (x == null) {
             return;
@@ -525,6 +700,17 @@ public class IOUtils {
         }
     }
 
+    /**
+     * Decodes UTF-8 encoded byte array to a UTF-16 byte array.
+     * This method converts UTF-8 encoded data from a source byte array to UTF-16 encoded
+     * data in a destination byte array. Each UTF-16 character is stored as two consecutive bytes.
+     *
+     * @param src the source byte array containing UTF-8 encoded data
+     * @param off the starting offset in the source array
+     * @param len the number of bytes to decode from the source array
+     * @param dst the destination byte array to write UTF-16 encoded data to
+     * @return the number of bytes written to the destination array, or -1 if decoding fails
+     */
     public static int decodeUTF8(byte[] src, int off, int len, byte[] dst) {
         final int sl = off + len;
         int dp = 0;
@@ -628,6 +814,17 @@ public class IOUtils {
         return dp;
     }
 
+    /**
+     * Decodes UTF-8 encoded byte array to a character array.
+     * This method converts UTF-8 encoded data from a source byte array to Unicode characters
+     * in a destination character array, with optimized handling for ASCII characters.
+     *
+     * @param src the source byte array containing UTF-8 encoded data
+     * @param off the starting offset in the source array
+     * @param len the number of bytes to decode from the source array
+     * @param dst the destination character array to write decoded characters to
+     * @return the number of characters written to the destination array, or -1 if decoding fails
+     */
     public static int decodeUTF8(byte[] src, int off, int len, char[] dst) {
         final int sl = off + len;
         int dp = 0;
@@ -720,12 +917,32 @@ public class IOUtils {
         return dp;
     }
 
+    /**
+     * Counts the number of lines in a file.
+     * This method reads the specified file and counts the number of newline characters ('\
+')
+     * to determine the total number of lines in the file.
+     *
+     * @param file the File to count lines in
+     * @return the number of lines in the file
+     * @throws Exception if an I/O error occurs while reading the file
+     */
     public static long lines(File file) throws Exception {
         try (FileInputStream in = new FileInputStream(file)) {
             return lines(in);
         }
     }
 
+    /**
+     * Counts the number of lines in an InputStream.
+     * This method reads data from the specified InputStream and counts the number of
+     * newline characters ('\
+') to determine the total number of lines in the stream.
+     *
+     * @param in the InputStream to count lines in
+     * @return the number of lines in the stream
+     * @throws Exception if an I/O error occurs while reading the stream
+     */
     public static long lines(InputStream in) throws Exception {
         long lines = 0;
         byte[] buf = new byte[1024 * 8];
@@ -751,71 +968,94 @@ public class IOUtils {
         return lines;
     }
 
-    public static int writeLocalDate(byte[] bytes, int off, int year, int month, int dayOfMonth) {
-        if (year >= 0 && year < 10000) {
-            int y01 = year / 100;
-            writeDigitPair(bytes, off, y01);
-            putLongLE(
-                    bytes,
-                    off + 2,
-                    0x2d00002d0000L
-                            | digitPair(year - y01 * 100)
-                            | ((long) digitPair(month) << 24)
-                            | ((long) digitPair(dayOfMonth) << 48));
-            return off + 10;
-        }
-        return writeLocalDate0(bytes, off, year, month, dayOfMonth);
-    }
-
-    private static int writeLocalDate0(byte[] bytes, int off, int year, int month, int dayOfMonth) {
+    /**
+     * Writes a LocalDate value to a byte array in ISO8601 format (yyyy-MM-dd).
+     * This method formats a date with year, month, and day components and writes it to
+     * the specified byte array buffer at the given offset.
+     *
+     * @param buf the byte array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param year the year component of the date
+     * @param month the month component of the date (1-12)
+     * @param dayOfMonth the day component of the date (1-31)
+     * @return the updated offset after writing the date
+     */
+    public static int writeLocalDate(byte[] buf, int off, int year, int month, int dayOfMonth) {
         if (year < 0) {
-            putByte(bytes, off++, (byte) '-');
+            buf[off++] = '-';
             year = -year;
         } else if (year > 9999) {
-            putByte(bytes, off++, (byte) '+');
+            buf[off++] = '+';
         }
-        off = IOUtils.writeInt32(bytes, off, year);
-        putByte(bytes, off, (byte) '-');
-        writeDigitPair(bytes, off + 1, month);
-        putByte(bytes, off + 3, (byte) '-');
-        writeDigitPair(bytes, off + 4, dayOfMonth);
-        return off + 6;
-    }
+        int y01 = (int) (year * 1374389535L >> 37); //year / 100;
+        int y23 = year - y01 * 100;
 
-    public static int writeLocalDate(char[] chars, int off, int year, int month, int dayOfMonth) {
         if (year >= 0 && year < 10000) {
-            int y01 = year / 100;
-            int y23 = year - y01 * 100;
-            writeDigitPair(chars, off, y01);
-            writeDigitPair(chars, off + 2, y23);
-            putChar(chars, off + 4, '-');
-            writeDigitPair(chars, off + 5, month);
-            putChar(chars, off + 7, '-');
-            writeDigitPair(chars, off + 8, dayOfMonth);
-            return off + 10;
+            writeDigitPair(buf, off, y01);
+            off += 2;
+        } else {
+            off = IOUtils.writeInt32(buf, off, y01);
         }
 
-        return writeLocalDate0(chars, off, year, month, dayOfMonth);
+        putLongLE(buf, off,
+                0x2d00002d0000L
+                        | digitPair(y23)
+                        | ((long) digitPair(month) << 24)
+                        | ((long) digitPair(dayOfMonth) << 48));
+        return off + 8;
     }
 
-    public static int writeLocalDate0(char[] chars, int off, int year, int month, int dayOfMonth) {
+    /**
+     * Writes a LocalDate value to a character array in ISO8601 format (yyyy-MM-dd).
+     * This method formats a date with year, month, and day components and writes it to
+     * the specified character array buffer at the given offset.
+     *
+     * @param buf the character array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param year the year component of the date
+     * @param month the month component of the date (1-12)
+     * @param dayOfMonth the day component of the date (1-31)
+     * @return the updated offset after writing the date
+     */
+    public static int writeLocalDate(char[] buf, int off, int year, int month, int dayOfMonth) {
         if (year < 0) {
-            putChar(chars, off++, '-');
+            buf[off++] = '-';
             year = -year;
         } else if (year > 9999) {
-            putChar(chars, off++, '+');
+            buf[off++] = '+';
         }
-        off = IOUtils.writeInt32(chars, off, year);
-        putChar(chars, off, '-');
-        writeDigitPair(chars, off + 1, month);
-        putChar(chars, off + 3, '-');
-        writeDigitPair(chars, off + 4, dayOfMonth);
-        return off + 6;
+        int y01 = (int) (year * 1374389535L >> 37); // year / 100;
+        int y23 = year - y01 * 100;
+
+        if (year >= 0 && year < 10000) {
+            writeDigitPair(buf, off, y01);
+            off += 2;
+        } else {
+            off = IOUtils.writeInt32(buf, off, y01);
+        }
+
+        int p1 = PACKED_DIGITS_UTF16[month & 0x7f];
+        putLongLE(buf, off,
+                ((long) (p1 & 0xFFFF) << 48) | ((long) '-' << 32) | PACKED_DIGITS_UTF16[y23 & 0x7f]);
+        putLongLE(buf, off + 4,
+                ((long) (p1 & 0xFFFF0000) >> 16) | ((long) '-' << 16) | ((long) PACKED_DIGITS_UTF16[dayOfMonth & 0x7f] << 32));
+        return off + 8;
     }
 
-    public static void writeLocalTime(byte[] bytes, int off, int hour, int minute, int second) {
+    /**
+     * Writes a LocalTime value to a byte array in ISO8601 format (HH:mm:ss).
+     * This method formats a time with hour, minute, and second components and writes it to
+     * the specified byte array buffer at the given offset.
+     *
+     * @param buf the byte array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param hour the hour component of the time (0-23)
+     * @param minute the minute component of the time (0-59)
+     * @param second the second component of the time (0-59)
+     */
+    public static void writeLocalTime(byte[] buf, int off, int hour, int minute, int second) {
         putLongLE(
-                bytes,
+                buf,
                 off,
                 0x3a00003a0000L
                         | digitPair(hour)
@@ -823,19 +1063,39 @@ public class IOUtils {
                         | ((long) digitPair(second) << 48));
     }
 
-    public static int writeLocalTime(byte[] bytes, int off, LocalTime time) {
-        writeLocalTime(bytes, off, time.getHour(), time.getMinute(), time.getSecond());
+    /**
+     * Writes a LocalTime value to a byte array in ISO8601 format (HH:mm:ss[.nnnnnnnnn]).
+     * This method formats a time with hour, minute, second, and nanosecond components
+     * and writes it to the specified byte array buffer at the given offset.
+     *
+     * @param buf the byte array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param time the LocalTime object to write
+     * @return the updated offset after writing the time (including nanoseconds if present)
+     */
+    public static int writeLocalTime(byte[] buf, int off, LocalTime time) {
+        writeLocalTime(buf, off, time.getHour(), time.getMinute(), time.getSecond());
         off += 8;
         int nano = time.getNano();
-        return nano != 0 ? writeNano(bytes, off, nano) : off;
+        return nano != 0 ? writeNano(buf, off, nano) : off;
     }
 
-    public static int writeNano(byte[] bytes, int off, int nano) {
-        final int div = nano / 1000;
-        final int div2 = div / 1000;
+    /**
+     * Writes nanosecond values to a byte array.
+     * This method formats nanosecond values and writes them to the specified byte array
+     * buffer at the given offset, typically used for writing fractional seconds in time values.
+     *
+     * @param buf the byte array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param nano the nanosecond value to write (0-999,999,999)
+     * @return the updated offset after writing the nanoseconds
+     */
+    public static int writeNano(byte[] buf, int off, int nano) {
+        final int div = (int) (nano * 274877907L >> 38); //nano / 1000;
+        final int div2 = (int) (div * 274877907L >> 38); // div / 1000;
         final int rem1 = nano - div * 1000;
 
-        putIntLE(bytes, off, DIGITS_K_32[div2 & 0x3ff] & 0xffffff00 | '.');
+        putIntLE(buf, off, DIGITS_K_32[div2 & 0x3ff] & 0xffffff00 | '.');
         off += 4;
 
         int v;
@@ -850,23 +1110,33 @@ public class IOUtils {
             v = DIGITS_K_32[(div - div2 * 1000) & 0x3ff];
         }
 
-        putShortLE(bytes, off, (short) (v >> 8));
+        putShortLE(buf, off, (short) (v >> 8));
         off += 2;
         if (rem1 == 0) {
-            putByte(bytes, off, (byte) (v >> 24));
+            putByte(buf, off, (byte) (v >> 24));
             return off + 1;
         }
 
-        putIntLE(bytes, off, DIGITS_K_32[rem1] & 0xffffff00 | (v >> 24));
+        putIntLE(buf, off, DIGITS_K_32[rem1] & 0xffffff00 | (v >> 24));
         return off + 4;
     }
 
-    public static int writeNano(char[] chars, int off, int nano) {
-        final int div = nano / 1000;
-        final int div2 = div / 1000;
+    /**
+     * Writes nanosecond values to a character array.
+     * This method formats nanosecond values and writes them to the specified character array
+     * buffer at the given offset, typically used for writing fractional seconds in time values.
+     *
+     * @param buf the character array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param nano the nanosecond value to write (0-999,999,999)
+     * @return the updated offset after writing the nanoseconds
+     */
+    public static int writeNano(char[] buf, int off, int nano) {
+        final int div = (int) (nano * 274877907L >> 38); //nano / 1000;
+        final int div2 = (int) (div * 274877907L >> 38); // div / 1000;
         final int rem1 = nano - div * 1000;
 
-        putLongLE(chars, off, DIGITS_K_64[div2 & 0x3ff] & 0xffffffffffff0000L | DOT_X0);
+        putLongLE(buf, off, DIGITS_K_64[div2 & 0x3ff] & 0xffffffffffff0000L | DOT_X0);
         off += 4;
 
         long v;
@@ -881,51 +1151,77 @@ public class IOUtils {
             v = DIGITS_K_64[(div - div2 * 1000) & 0x3ff];
         }
 
-        putIntLE(chars, off, (int) (v >> 16));
+        putIntLE(buf, off, (int) (v >> 16));
         off += 2;
         if (rem1 == 0) {
-            putChar(chars, off, (char) (v >> 48));
+            putChar(buf, off, (char) (v >> 48));
             return off + 1;
         }
 
-        putLongLE(chars, off, DIGITS_K_64[rem1 & 0x3ff] & 0xffffffffffff0000L | (v >> 48));
+        putLongLE(buf, off, DIGITS_K_64[rem1 & 0x3ff] & 0xffffffffffff0000L | (v >> 48));
         return off + 4;
     }
 
-    public static void writeLocalTime(char[] chars, int off, int hour, int minute, int second) {
-        writeDigitPair(chars, off, hour);
-        putChar(chars, off + 2, ':');
-        writeDigitPair(chars, off + 3, minute);
-        putChar(chars, off + 5, ':');
-        writeDigitPair(chars, off + 6, second);
+    /**
+     * Writes a LocalTime value to a character array in ISO8601 format (HH:mm:ss).
+     * This method formats a time with hour, minute, and second components and writes it to
+     * the specified character array buffer at the given offset.
+     *
+     * @param buf the character array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param hour the hour component of the time (0-23)
+     * @param minute the minute component of the time (0-59)
+     * @param second the second component of the time (0-59)
+     */
+    public static void writeLocalTime(char[] buf, int off, int hour, int minute, int second) {
+        writeDigitPair(buf, off, hour);
+        putChar(buf, off + 2, ':');
+        writeDigitPair(buf, off + 3, minute);
+        putChar(buf, off + 5, ':');
+        writeDigitPair(buf, off + 6, second);
     }
 
-    public static int writeLocalTime(char[] chars, int off, LocalTime time) {
-        writeLocalTime(chars, off, time.getHour(), time.getMinute(), time.getSecond());
+    /**
+     * Writes a LocalTime value to a character array in ISO8601 format (HH:mm:ss[.nnnnnnnnn]).
+     * This method formats a time with hour, minute, second, and nanosecond components
+     * and writes it to the specified character array buffer at the given offset.
+     *
+     * @param buf the character array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param time the LocalTime object to write
+     * @return the updated offset after writing the time (including nanoseconds if present)
+     */
+    public static int writeLocalTime(char[] buf, int off, LocalTime time) {
+        writeLocalTime(buf, off, time.getHour(), time.getMinute(), time.getSecond());
         off += 8;
 
         int nano = time.getNano();
-        return nano != 0 ? writeNano(chars, off, nano) : off;
+        return nano != 0 ? writeNano(buf, off, nano) : off;
     }
 
     private static int writeInt4(byte[] buf, int off, int v) {
-        int v1 = v / 100;
-        putIntUnaligned(buf, off, mergeInt32(v - v1 * 100, v1));
+        int v1 = (int) (v * 1374389535L >> 37); // v / 100;
+        int v0 = v - v1 * 100;
+        int v2 = PACKED_DIGITS[v1 & 0x7f] | (PACKED_DIGITS[v0 & 0x7f] << 16);
+        if (BIG_ENDIAN) {
+            v2 = Integer.reverseBytes(v2);
+        }
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + off, v2);
         return off + 4;
     }
 
     private static int writeInt4(char[] buf, int off, int v) {
-        int v1 = v / 100;
+        int v1 = (int) (v * 1374389535L >> 37); // v / 100;
         putLongUnaligned(buf, off, mergeInt64(v - v1 * 100, v1));
         return off + 4;
     }
 
-    private static int mergeInt32(int v1, int v2) {
-        return convEndian(false, PACKED_DIGITS[v2 & 0x7f] | (PACKED_DIGITS[v1 & 0x7f] << 16));
-    }
-
     private static long mergeInt64(int v1, int v2) {
-        return convEndian(false, PACKED_DIGITS_UTF16[v2 & 0x7f] | ((long) PACKED_DIGITS_UTF16[v1 & 0x7f] << 32));
+        long v = PACKED_DIGITS_UTF16[v2 & 0x7f] | ((long) PACKED_DIGITS_UTF16[v1 & 0x7f] << 32);
+        if (BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
+        return v;
     }
 
     private static int writeInt3(byte[] buf, int off, int val) {
@@ -941,7 +1237,8 @@ public class IOUtils {
     }
 
     private static int writeInt8(byte[] buf, int off, int v1, int v2) {
-        int r1 = v1 / 100, r2 = v2 / 100;
+        int r1 = (int) (v1 * 1374389535L >> 37); // v1 / 100;
+        int r2 = (int) (v2 * 1374389535L >> 37); // v2 / 100;
         long v = (PACKED_DIGITS[r1 & 0x7f])
                 | (PACKED_DIGITS[(v1 - r1 * 100) & 0x7f] << 16)
                 | ((long) PACKED_DIGITS[r2 & 0x7f] << 32)
@@ -954,10 +1251,10 @@ public class IOUtils {
     }
 
     private static int writeInt8(char[] buf, int off, int v1, int v2) {
-        int r1 = v1 / 100;
+        int r1 = (int) (v1 * 1374389535L >> 37); // v1 / 100;
         long x1 = (PACKED_DIGITS_UTF16[r1 & 0x7f])
                 | ((long) PACKED_DIGITS_UTF16[(v1 - r1 * 100) & 0x7f] << 32);
-        int r2 = v2 / 100;
+        int r2 = (int) (v2 * 1374389535L >> 37); // v2 / 100;
         long x2 = (PACKED_DIGITS_UTF16[r2 & 0x7f])
                 | ((long) PACKED_DIGITS_UTF16[(v2 - r2 * 100) & 0x7f] << 32);
         if (BIG_ENDIAN) {
@@ -969,6 +1266,17 @@ public class IOUtils {
         return off + 8;
     }
 
+    /**
+     * Writes a 64-bit long integer value to a byte array.
+     * This method converts a long integer to its string representation and writes it
+     * to the specified byte array buffer at the given offset, handling negative values
+     * and optimizing for different value ranges.
+     *
+     * @param buf the byte array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param val the long integer value to write
+     * @return the updated offset after writing the value
+     */
     public static int writeInt64(byte[] buf, int off, long val) {
         if (val < 0) {
             if (val == Long.MIN_VALUE) {
@@ -1023,6 +1331,17 @@ public class IOUtils {
         return writeInt8(buf, off, v2, v1);
     }
 
+    /**
+     * Writes a 64-bit long integer value to a character array.
+     * This method converts a long integer to its string representation and writes it
+     * to the specified character array buffer at the given offset, handling negative values
+     * and optimizing for different value ranges.
+     *
+     * @param buf the character array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param val the long integer value to write
+     * @return the updated offset after writing the value
+     */
     public static int writeInt64(char[] buf, int off, long val) {
         if (val < 0) {
             if (val == Long.MIN_VALUE) {
@@ -1077,6 +1396,17 @@ public class IOUtils {
         return writeInt8(buf, off, v2, v1);
     }
 
+    /**
+     * Writes an 8-bit byte value as an integer to a byte array.
+     * This method converts a byte value to its string representation and writes it
+     * to the specified byte array buffer at the given position, handling negative values
+     * and optimizing for different value ranges.
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to start writing
+     * @param value the byte value to write as an integer
+     * @return the updated position after writing the value
+     */
     public static int writeInt8(final byte[] buf, int pos, final byte value) {
         int i;
         if (value < 0) {
@@ -1098,6 +1428,17 @@ public class IOUtils {
         return pos + 1;
     }
 
+    /**
+     * Writes an 8-bit byte value as an integer to a character array.
+     * This method converts a byte value to its string representation and writes it
+     * to the specified character array buffer at the given position, handling negative values
+     * and optimizing for different value ranges.
+     *
+     * @param buf the character array buffer to write to
+     * @param pos the position in the buffer where to start writing
+     * @param value the byte value to write as an integer
+     * @return the updated position after writing the value
+     */
     public static int writeInt8(char[] buf, int pos, final byte value) {
         int i;
         if (value < 0) {
@@ -1119,6 +1460,17 @@ public class IOUtils {
         return pos + 1;
     }
 
+    /**
+     * Writes a 16-bit short value as an integer to a byte array.
+     * This method converts a short value to its string representation and writes it
+     * to the specified byte array buffer at the given position, handling negative values
+     * and optimizing for different value ranges.
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to start writing
+     * @param value the short value to write as an integer
+     * @return the updated position after writing the value
+     */
     public static int writeInt16(byte[] buf, int pos, final short value) {
         int i;
         if (value < 0) {
@@ -1141,7 +1493,7 @@ public class IOUtils {
             return pos + 1;
         }
 
-        final int q1 = i / 1000;
+        final int q1 = (int) (i * 274877907L >> 38); // i / 1000;
         final int v2 = DIGITS_K_32[q1 & 0x3ff];
         if ((byte) v2 == 1) {
             putByte(buf, pos++, (byte) (v2 >> 16));
@@ -1150,6 +1502,17 @@ public class IOUtils {
         return pos + 4;
     }
 
+    /**
+     * Writes a 16-bit short value as an integer to a character array.
+     * This method converts a short value to its string representation and writes it
+     * to the specified character array buffer at the given position, handling negative values
+     * and optimizing for different value ranges.
+     *
+     * @param buf the character array buffer to write to
+     * @param pos the position in the buffer where to start writing
+     * @param value the short value to write as an integer
+     * @return the updated position after writing the value
+     */
     public static int writeInt16(char[] buf, int pos, final short value) {
         int i;
         if (value < 0) {
@@ -1172,7 +1535,7 @@ public class IOUtils {
             return pos + 1;
         }
 
-        final int q1 = i / 1000;
+        final int q1 = (int) (i * 274877907L >> 38); // i / 1000;
         final long v2 = DIGITS_K_64[q1 & 0x3ff];
         if ((byte) v2 == 1) {
             putChar(buf, pos++, (char) (v2 >> 32));
@@ -1181,6 +1544,17 @@ public class IOUtils {
         return pos + 4;
     }
 
+    /**
+     * Writes a 32-bit integer value to a byte array.
+     * This method converts a long value to its string representation and writes it
+     * to the specified byte array buffer at the given offset, handling negative values
+     * and optimizing for different value ranges.
+     *
+     * @param buf the byte array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param val the long value to write as an integer
+     * @return the updated offset after writing the value
+     */
     public static int writeInt32(final byte[] buf, int off, long val) {
         if (val < 0) {
             val = -val;
@@ -1197,7 +1571,7 @@ public class IOUtils {
             return off;
         }
         long numValue = val;
-        val = (int) MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710cb296L) >> 12;  // numValue / 100;
+        val = (int) (numValue * 1759218605L >> 44);  // numValue / 10000;
         v1 = (int) (numValue - val * 10000);
         if (val < 10000) {
             v = (int) val;
@@ -1211,11 +1585,22 @@ public class IOUtils {
         }
 
         numValue = val;
-        val = (int) MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710ccL); // numValue / 10000
+        val = (int) (numValue * 1759218605L >> 44);  // numValue / 10000;
         off = writeInt3(buf, off, (int) val);
         return writeInt8(buf, off, (int) (numValue - val * 10000), v1);
     }
 
+    /**
+     * Writes a 32-bit integer value to a character array.
+     * This method converts a long value to its string representation and writes it
+     * to the specified character array buffer at the given offset, handling negative values
+     * and optimizing for different value ranges.
+     *
+     * @param buf the character array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param val the long value to write as an integer
+     * @return the updated offset after writing the value
+     */
     public static int writeInt32(final char[] buf, int off, long val) {
         if (val < 0) {
             val = -val;
@@ -1232,7 +1617,7 @@ public class IOUtils {
             return off;
         }
         long numValue = val;
-        val = (int) MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710cb296L) >> 12;  // numValue / 100;
+        val = (int) (numValue * 1759218605L >> 44);  // numValue / 10000;
         v1 = (int) (numValue - val * 10000);
         if (val < 10000) {
             v = (int) val;
@@ -1246,133 +1631,435 @@ public class IOUtils {
         }
 
         numValue = val;
-        val = (int) MULTIPLY_HIGH.multiplyHigh(numValue, 0x68db8bac710ccL); // numValue / 10000
+        val = (int) (numValue * 1759218605L >> 44);  // numValue / 10000;
         off = writeInt3(buf, off, (int) val);
         return writeInt8(buf, off, (int) (numValue - val * 10000), v1);
     }
 
-    public static byte getByte(byte[] str, int pos) {
-        return UNSAFE.getByte(str, ARRAY_CHAR_BASE_OFFSET + pos);
+    /**
+     * Gets a byte value from a byte array at the specified position.
+     * This method retrieves a byte value from the specified byte array at the given position
+     * using unsafe memory operations for improved performance.
+     *
+     * @param buf the byte array buffer to read from
+     * @param pos the position in the buffer where to read the byte value
+     * @return the byte value at the specified position
+     */
+    public static byte getByte(byte[] buf, int pos) {
+        return UNSAFE.getByte(buf, ARRAY_BYTE_BASE_OFFSET + pos);
     }
 
+    /**
+     * Gets a character value from a character array at the specified position.
+     * This method retrieves a character value from the specified character array at the given position
+     * using unsafe memory operations for improved performance.
+     *
+     * @param buf the character array buffer to read from
+     * @param pos the position in the buffer where to read the character value
+     * @return the character value at the specified position
+     */
     public static char getChar(char[] buf, int pos) {
         return UNSAFE.getChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1));
     }
 
-    public static char getChar(byte[] str, int pos) {
-        return UNSAFE.getChar(str, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1));
+    /**
+     * Gets a character value from a byte array at the specified position.
+     * This method retrieves a character value from the specified byte array at the given position
+     * using unsafe memory operations for improved performance.
+     *
+     * @param buf the byte array buffer to read from
+     * @param pos the position in the buffer where to read the character value
+     * @return the character value at the specified position
+     */
+    public static char getChar(byte[] buf, int pos) {
+        return UNSAFE.getChar(buf, ARRAY_BYTE_BASE_OFFSET + ((long) pos << 1));
     }
 
-    public static void putByte(byte[] buf, int pos, byte v) {
-        UNSAFE.putByte(buf, ARRAY_CHAR_BASE_OFFSET + pos, v);
+    private static void putByte(byte[] buf, int pos, byte v) {
+        UNSAFE.putByte(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
     }
 
-    public static void putChar(char[] buf, int pos, char v) {
+    private static void putChar(char[] buf, int pos, char v) {
         UNSAFE.putChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 
+    /**
+     * Writes a short value to a byte array in big-endian byte order.
+     * This method puts a short value into the specified byte array at the given position
+     * using big-endian byte ordering (most significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the short value
+     * @param v the short value to write
+     */
     public static void putShortBE(byte[] buf, int pos, short v) {
         UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(true, v));
     }
 
+    /**
+     * Writes a short value to a byte array in little-endian byte order.
+     * This method puts a short value into the specified byte array at the given position
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the short value
+     * @param v the short value to write
+     */
     public static void putShortLE(byte[] buf, int pos, short v) {
         UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
     }
 
+    /**
+     * Writes an int value to a byte array in big-endian byte order.
+     * This method puts an int value into the specified byte array at the given position
+     * using big-endian byte ordering (most significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the int value
+     * @param v the int value to write
+     */
     public static void putIntBE(byte[] buf, int pos, int v) {
-        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(true, v));
+        if (!BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
     }
 
+    /**
+     * Writes an int value to a byte array in little-endian byte order.
+     * This method puts an int value into the specified byte array at the given position
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the int value
+     * @param v the int value to write
+     */
     public static void putIntLE(byte[] buf, int pos, int v) {
-        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
+        if (BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
     }
 
+    /**
+     * Writes an int value to a character array in little-endian byte order.
+     * This method puts an int value into the specified character array at the given position
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the character array buffer to write to
+     * @param pos the position in the buffer where to write the int value
+     * @param v the int value to write
+     */
     public static void putIntLE(char[] buf, int pos, int v) {
-        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), convEndian(false, v));
+        if (BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 
+    /**
+     * Writes a short value to a byte array without alignment considerations.
+     * This method puts a short value into the specified byte array at the given position
+     * without performing any byte order conversion or alignment adjustments.
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the short value
+     * @param v the short value to write
+     */
     public static void putShortUnaligned(byte[] buf, int pos, short v) {
-        UNSAFE.putShort(buf, ARRAY_CHAR_BASE_OFFSET + pos, v);
+        UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
     }
 
+    /**
+     * Writes an int value to a character array without alignment considerations.
+     * This method puts an int value into the specified character array at the given position
+     * without performing any byte order conversion or alignment adjustments.
+     *
+     * @param buf the character array buffer to write to
+     * @param pos the position in the buffer where to write the int value
+     * @param v the int value to write
+     */
     public static void putIntUnaligned(char[] buf, int pos, int v) {
         UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 
+    /**
+     * Writes an int value to a byte array without alignment considerations.
+     * This method puts an int value into the specified byte array at the given position
+     * without performing any byte order conversion or alignment adjustments.
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the int value
+     * @param v the int value to write
+     */
     public static void putIntUnaligned(byte[] buf, int pos, int v) {
         UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
     }
 
+    /**
+     * Writes a long value to a character array in little-endian byte order.
+     * This method puts a long value into the specified character array at the given position
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the character array buffer to write to
+     * @param pos the position in the buffer where to write the long value
+     * @param v the long value to write
+     */
     public static void putLongLE(char[] buf, int pos, long v) {
         UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), convEndian(false, v));
     }
 
+    /**
+     * Writes a long value to a character array without alignment considerations.
+     * This method puts a long value into the specified character array at the given position
+     * without performing any byte order conversion or alignment adjustments.
+     *
+     * @param buf the character array buffer to write to
+     * @param pos the position in the buffer where to write the long value
+     * @param v the long value to write
+     */
     public static void putLongUnaligned(char[] buf, int pos, long v) {
         UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), v);
     }
 
+    /**
+     * Writes a long value to a byte array without alignment considerations.
+     * This method puts a long value into the specified byte array at the given position
+     * without performing any byte order conversion or alignment adjustments.
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the long value
+     * @param v the long value to write
+     */
     public static void putLongUnaligned(byte[] buf, int pos, long v) {
         UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + pos, v);
     }
 
+    /**
+     * Writes a long value to a byte array in big-endian byte order.
+     * This method puts a long value into the specified byte array at the given position
+     * using big-endian byte ordering (most significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the long value
+     * @param v the long value to write
+     */
     public static void putLongBE(byte[] buf, int pos, long v) {
         UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(true, v));
     }
 
+    /**
+     * Writes a long value to a byte array in little-endian byte order.
+     * This method puts a long value into the specified byte array at the given position
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write the long value
+     * @param v the long value to write
+     */
     public static void putLongLE(byte[] buf, int pos, long v) {
         UNSAFE.putLong(buf, ARRAY_BYTE_BASE_OFFSET + pos, convEndian(false, v));
     }
 
-    public static int putBoolean(byte[] bytes, int off, boolean v) {
+    /**
+     * Writes a boolean value to a byte array as a string representation.
+     * This method writes either "true" or "false" to the specified byte array at the given offset.
+     * For true values, it writes "true" (4 bytes), and for false values, it writes "false" (5 bytes).
+     *
+     * @param buf the byte array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param v the boolean value to write
+     * @return the updated offset after writing the boolean value
+     */
+    public static int putBoolean(byte[] buf, int off, boolean v) {
         long address = ARRAY_BYTE_BASE_OFFSET + off;
         if (v) {
-            UNSAFE.putInt(bytes, address, TRUE);
+            UNSAFE.putInt(buf, address, TRUE);
             return off + 4;
         } else {
-            UNSAFE.putByte(bytes, address, (byte) 'f');
-            UNSAFE.putInt(bytes, address + 1, ALSE);
+            UNSAFE.putByte(buf, address, (byte) 'f');
+            UNSAFE.putInt(buf, address + 1, ALSE);
             return off + 5;
         }
     }
 
-    public static int putBoolean(char[] chars, int off, boolean v) {
+    /**
+     * Writes a boolean value to a character array as a string representation.
+     * This method writes either "true" or "false" to the specified character array at the given offset.
+     * For true values, it writes "true" (4 characters), and for false values, it writes "false" (5 characters).
+     *
+     * @param buf the character array buffer to write to
+     * @param off the offset in the buffer where to start writing
+     * @param v the boolean value to write
+     * @return the updated offset after writing the boolean value
+     */
+    public static int putBoolean(char[] buf, int off, boolean v) {
         long address = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
         if (v) {
-            UNSAFE.putLong(chars, address, TRUE_64);
+            UNSAFE.putLong(buf, address, TRUE_64);
             return off + 4;
         } else {
-            UNSAFE.putChar(chars, address, 'f');
-            UNSAFE.putLong(chars, address + 2, ALSE_64);
+            UNSAFE.putChar(buf, address, 'f');
+            UNSAFE.putLong(buf, address + 2, ALSE_64);
             return off + 5;
         }
     }
 
+    /**
+     * Checks if the specified position in a byte array contains the string "alse".
+     * This method is used to verify if a byte sequence matches the "alse" portion of "false".
+     *
+     * @param buf the byte array buffer to check
+     * @param pos the position in the buffer to check
+     * @return true if the position contains "alse", false otherwise
+     */
     public static boolean isALSE(byte[] buf, int pos) {
         return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == ALSE;
     }
 
+    /**
+     * Checks if the specified position in a byte array does not contain the string "alse".
+     * This method is used to verify if a byte sequence does not match the "alse" portion of "false".
+     *
+     * @param buf the byte array buffer to check
+     * @param pos the position in the buffer to check
+     * @return true if the position does not contain "alse", false otherwise
+     */
+    public static boolean notALSE(byte[] buf, int pos) {
+        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) != ALSE;
+    }
+
+    /**
+     * Checks if the specified position in a character array contains the string "alse".
+     * This method is used to verify if a character sequence matches the "alse" portion of "false".
+     *
+     * @param buf the character array buffer to check
+     * @param pos the position in the buffer to check
+     * @return true if the position contains "alse", false otherwise
+     */
     public static boolean isALSE(char[] buf, int pos) {
         return getLongUnaligned(buf, pos) == ALSE_64;
     }
 
+    /**
+     * Checks if the specified position in a character array does not contain the string "alse".
+     * This method is used to verify if a character sequence does not match the "alse" portion of "false".
+     *
+     * @param buf the character array buffer to check
+     * @param pos the position in the buffer to check
+     * @return true if the position does not contain "alse", false otherwise
+     */
+    public static boolean notALSE(char[] buf, int pos) {
+        return getLongUnaligned(buf, pos) != ALSE_64;
+    }
+
+    /**
+     * Checks if the specified position in a byte array contains the string "null".
+     * This method is used to verify if a byte sequence matches the string "null".
+     *
+     * @param buf the byte array buffer to check
+     * @param pos the position in the buffer to check
+     * @return true if the position contains "null", false otherwise
+     */
     public static boolean isNULL(byte[] buf, int pos) {
         return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) == NULL_32;
     }
 
+    /**
+     * Checks if the specified position in a byte array does not contain the string "null".
+     * This method is used to verify if a byte sequence does not match the string "null".
+     *
+     * @param buf the byte array buffer to check
+     * @param pos the position in the buffer to check
+     * @return true if the position does not contain "null", false otherwise
+     */
+    public static boolean notNULL(byte[] buf, int pos) {
+        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) != NULL_32;
+    }
+
+    /**
+     * Checks if the specified position in a byte array does not contain the string "true".
+     * This method is used to verify if a byte sequence does not match the string "true".
+     *
+     * @param buf the byte array buffer to check
+     * @param pos the position in the buffer to check
+     * @return true if the position does not contain "true", false otherwise
+     */
+    public static boolean notTRUE(byte[] buf, int pos) {
+        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + pos) != TRUE;
+    }
+
+    /**
+     * Checks if the specified position in a character array does not contain the string "true".
+     * This method is used to verify if a character sequence does not match the string "true".
+     *
+     * @param buf the character array buffer to check
+     * @param pos the position in the buffer to check
+     * @return true if the position does not contain "true", false otherwise
+     */
+    public static boolean notTRUE(char[] buf, int pos) {
+        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1)) != TRUE_64;
+    }
+
+    /**
+     * Checks if the specified position in a character array contains the string "null".
+     * This method is used to verify if a character sequence matches the string "null".
+     *
+     * @param buf the character array buffer to check
+     * @param pos the position in the buffer to check
+     * @return true if the position contains "null", false otherwise
+     */
     public static boolean isNULL(char[] buf, int pos) {
         return getLongUnaligned(buf, pos) == NULL_64;
     }
 
-    public static void putNULL(byte[] buf, int pos) {
-        UNSAFE.putInt(buf, ARRAY_CHAR_BASE_OFFSET + pos, NULL_32);
+    /**
+     * Checks if the specified position in a character array does not contain the string "null".
+     * This method is used to verify if a character sequence does not match the string "null".
+     *
+     * @param buf the character array buffer to check
+     * @param pos the position in the buffer to check
+     * @return true if the position does not contain "null", false otherwise
+     */
+    public static boolean notNULL(char[] buf, int pos) {
+        return getLongUnaligned(buf, pos) != NULL_64;
     }
 
+    /**
+     * Writes the string "null" to a byte array at the specified position.
+     * This method puts the byte representation of "null" into the specified byte array
+     * at the given position.
+     *
+     * @param buf the byte array buffer to write to
+     * @param pos the position in the buffer where to write "null"
+     */
+    public static void putNULL(byte[] buf, int pos) {
+        UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + pos, NULL_32);
+    }
+
+    /**
+     * Writes the string "null" to a character array at the specified position.
+     * This method puts the character representation of "null" into the specified character array
+     * at the given position.
+     *
+     * @param buf the character array buffer to write to
+     * @param pos the position in the buffer where to write "null"
+     */
     public static void putNULL(char[] buf, int pos) {
         UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) pos << 1), NULL_64);
     }
 
-    public static int digit4(char[] chars, int off) {
-        long x = getLongLE(chars, off);
+    /**
+     * Extracts a 4-digit number from a character array at the specified offset.
+     * This method performs optimized digit extraction by processing 4 characters at once
+     * using vector operations for improved performance.
+     *
+     * @param buf the character array to extract digits from
+     * @param off the offset in the array where to start extracting
+     * @return the extracted 4-digit number, or -1 if the characters are not valid digits
+     */
+    public static int digit4(char[] buf, int off) {
+        long x = getLongLE(buf, off);
         long d;
         if ((((x & 0xFFF0FFF0FFF0FFF0L) - 0x30003000300030L) | (((d = x & 0x0F000F000F000FL) + 0x06000600060006L) & 0xF000F000F000F0L)) != 0) {
             return -1;
@@ -1384,12 +2071,29 @@ public class IOUtils {
                 (d >> 48));
     }
 
-    public static int digit4(byte[] bytes, int off) {
+    /**
+     * Extracts a 4-digit number from a byte array at the specified offset.
+     * This method performs optimized digit extraction by processing 4 bytes at once
+     * using vector operations for improved performance.
+     *
+     * @param buf the byte array to extract digits from
+     * @param off the offset in the array where to start extracting
+     * @return the extracted 4-digit number, or -1 if the bytes are not valid digits
+     */
+    public static int digit4(byte[] buf, int off) {
         return digit4(
-                getIntLE(bytes, off)
+                getIntLE(buf, off)
         );
     }
 
+    /**
+     * Extracts a 4-digit number from an integer value.
+     * This method performs optimized digit extraction on a packed integer containing 4 digits
+     * using vector operations for improved performance.
+     *
+     * @param x the integer containing packed digit information
+     * @return the extracted 4-digit number, or -1 if the value does not contain valid digits
+     */
     private static int digit4(int x) {
         /*
             Here we are doing a 4-Byte Vector operation on the Int type.
@@ -1430,8 +2134,17 @@ public class IOUtils {
                 (d >> 24);
     }
 
-    public static int digit3(char[] chars, int off) {
-        long x = getIntLE(chars, off) + (((long) getChar(chars, off + 2)) << 32);
+    /**
+     * Extracts a 3-digit number from a character array at the specified offset.
+     * This method performs optimized digit extraction by processing 3 characters at once
+     * using vector operations for improved performance.
+     *
+     * @param buf the character array to extract digits from
+     * @param off the offset in the array where to start extracting
+     * @return the extracted 3-digit number, or -1 if the characters are not valid digits
+     */
+    public static int digit3(char[] buf, int off) {
+        long x = getIntLE(buf, off) + (((long) getChar(buf, off + 2)) << 32);
         long d;
         if ((((x & 0xFFF0FFF0FFF0L) - 0x3000300030L) | (((d = x & 0x0F000F000FL) + 0x0600060006L) & 0xF000F000F0L)) != 0) {
             return -1;
@@ -1439,12 +2152,29 @@ public class IOUtils {
         return (int) (((d & 0xF) * 10 + ((d >> 16) & 0xF)) * 10 + (d >> 32));
     }
 
-    public static int digit3(byte[] bytes, int off) {
+    /**
+     * Extracts a 3-digit number from a byte array at the specified offset.
+     * This method performs optimized digit extraction by processing 3 bytes at once
+     * using vector operations for improved performance.
+     *
+     * @param buf the byte array to extract digits from
+     * @param off the offset in the array where to start extracting
+     * @return the extracted 3-digit number, or -1 if the bytes are not valid digits
+     */
+    public static int digit3(byte[] buf, int off) {
         return digit3(
-                getShortLE(bytes, off) | (getByte(bytes, off + 2) << 16)
+                getShortLE(buf, off) | (getByte(buf, off + 2) << 16)
         );
     }
 
+    /**
+     * Extracts a 3-digit number from an integer value.
+     * This method performs optimized digit extraction on a packed integer containing 3 digits
+     * using vector operations for improved performance.
+     *
+     * @param x the integer containing packed digit information
+     * @return the extracted 3-digit number, or -1 if the value does not contain valid digits
+     */
     private static int digit3(int x) {
         int d;
         if ((((x & 0xF0F0F0) - 0x303030) | (((d = x & 0x0F0F0F) + 0x060606) & 0xF0F0F0)) != 0) {
@@ -1453,8 +2183,17 @@ public class IOUtils {
         return ((d & 0xF) * 10 + ((d >> 8) & 0xF)) * 10 + (d >> 16);
     }
 
-    public static int digit2(char[] chars, int off) {
-        int x = UNSAFE.getInt(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
+    /**
+     * Extracts a 2-digit number from a character array at the specified offset.
+     * This method performs optimized digit extraction by processing 2 characters at once
+     * using vector operations for improved performance.
+     *
+     * @param buf the character array to extract digits from
+     * @param off the offset in the array where to start extracting
+     * @return the extracted 2-digit number, or -1 if the characters are not valid digits
+     */
+    public static int digit2(char[] buf, int off) {
+        int x = UNSAFE.getInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
         if (BIG_ENDIAN) {
             x = Integer.reverseBytes(x);
         }
@@ -1465,8 +2204,17 @@ public class IOUtils {
         return (d & 0xF) * 10 + (d >> 16);
     }
 
-    public static int digit2(byte[] bytes, int off) {
-        short x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
+    /**
+     * Extracts a 2-digit number from a byte array at the specified offset.
+     * This method performs optimized digit extraction by processing 2 bytes at once
+     * using vector operations for improved performance.
+     *
+     * @param buf the byte array to extract digits from
+     * @param off the offset in the array where to start extracting
+     * @return the extracted 2-digit number, or -1 if the bytes are not valid digits
+     */
+    public static int digit2(byte[] buf, int off) {
+        short x = UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + off);
         if (BIG_ENDIAN) {
             x = Short.reverseBytes(x);
         }
@@ -1477,112 +2225,288 @@ public class IOUtils {
         return (d & 0xF) * 10 + (d >> 8);
     }
 
+    /**
+     * Checks if the 2 characters at the specified offset in a character array represent valid digits.
+     * This method performs optimized digit validation by processing 2 characters at once
+     * using vector operations for improved performance.
+     *
+     * @param buf the character array to check
+     * @param off the offset in the array where to start checking
+     * @return true if both characters represent valid digits (0-9), false otherwise
+     */
+    public static boolean isDigit2(char[] buf, int off) {
+        int x = UNSAFE.getShort(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
+        if (BIG_ENDIAN) {
+            x = Integer.reverseBytes(x);
+        }
+        return ((((x & 0xFFF0FFF0) - 0x300030) | (((x & 0x0F000F) + 0x060006) & 0xF000F0)) == 0);
+    }
+
+    /**
+     * Validates if the specified integer value represents a single digit (0-9).
+     * This method checks if the input value is within the valid digit range.
+     *
+     * @param d the integer value to check
+     * @return the input value if it's a valid digit (0-9), -1 otherwise
+     */
     public static int digit(int d) {
         return d >= 0 && d <= 9 ? d : -1;
     }
 
-    public static int digit1(char[] chars, int off) {
-        int d = UNSAFE.getByte(chars, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1)) - '0';
+    /**
+     * Extracts a single digit from a character array at the specified offset.
+     * This method performs optimized digit extraction for a single character.
+     *
+     * @param buf the character array to extract the digit from
+     * @param off the offset in the array where to extract the digit
+     * @return the extracted digit value (0-9), or -1 if the character is not a valid digit
+     */
+    public static int digit1(char[] buf, int off) {
+        int d = UNSAFE.getChar(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1)) - '0';
         return d >= 0 && d <= 9 ? d : -1;
     }
 
-    public static int digit1(byte[] bytes, int off) {
-        int d = UNSAFE.getByte(bytes, ARRAY_BYTE_BASE_OFFSET + off) - '0';
+    /**
+     * Extracts a single digit from a byte array at the specified offset.
+     * This method performs optimized digit extraction for a single byte.
+     *
+     * @param buf the byte array to extract the digit from
+     * @param off the offset in the array where to extract the digit
+     * @return the extracted digit value (0-9), or -1 if the byte is not a valid digit
+     */
+    public static int digit1(byte[] buf, int off) {
+        int d = UNSAFE.getByte(buf, ARRAY_BYTE_BASE_OFFSET + off) - '0';
         return d >= 0 && d <= 9 ? d : -1;
     }
 
-    public static int indexOfQuote(byte[] value, int quote, int fromIndex, int max) {
+    /**
+     * Finds the index of a quote character in a byte array.
+     * This method searches for either a single quote (') or double quote (") character
+     * within the specified range of the byte array.
+     *
+     * @param buf the byte array to search in
+     * @param quote the quote character to search for (either '\'' or '"')
+     * @param fromIndex the index to start searching from
+     * @param max the maximum index to search up to (exclusive)
+     * @return the index of the quote character, or -1 if not found
+     */
+    public static int indexOfQuote(byte[] buf, int quote, int fromIndex, int max) {
         if (INDEX_OF_CHAR_LATIN1 == null) {
-            return indexOfQuoteV(value, quote, fromIndex, max);
+            return indexOfQuoteV(buf, quote, fromIndex, max);
         }
         try {
-            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, quote, fromIndex, max);
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(buf, quote, fromIndex, max);
         } catch (Throwable e) {
             throw new JSONException(e.getMessage());
         }
     }
 
-    public static int indexOfQuoteV(byte[] value, int quote, int fromIndex, int max) {
+    /**
+     * Finds the index of a quote character in a byte array using vectorized operations.
+     * This method searches for either a single quote (') or double quote (") character
+     * within the specified range of the byte array using optimized vector operations.
+     *
+     * @param buf the byte array to search in
+     * @param quote the quote character to search for (either '\'' or '"')
+     * @param fromIndex the index to start searching from
+     * @param max the maximum index to search up to (exclusive)
+     * @return the index of the quote character, or -1 if not found
+     */
+    public static int indexOfQuoteV(byte[] buf, int quote, int fromIndex, int max) {
         int i = fromIndex;
         long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
         int upperBound = fromIndex + ((max - fromIndex) & ~7);
         long vectorQuote = quote == '\'' ? 0x2727_2727_2727_2727L : 0x2222_2222_2222_2222L;
-        while (i < upperBound && notContains(UNSAFE.getLong(value, address), vectorQuote)) {
+        while (i < upperBound && notContains(UNSAFE.getLong(buf, address), vectorQuote)) {
             i += 8;
             address += 8;
         }
-        return indexOfChar0(value, quote, i, max);
+        return indexOfChar(buf, quote, i, max);
     }
 
-    public static int indexOfDoubleQuote(byte[] value, int fromIndex, int max) {
+    /**
+     * Finds the index of a double quote character in a byte array.
+     * This method searches for a double quote (") character within the specified range
+     * of the byte array.
+     *
+     * @param buf the byte array to search in
+     * @param fromIndex the index to start searching from
+     * @param max the maximum index to search up to (exclusive)
+     * @return the index of the double quote character, or -1 if not found
+     */
+    public static int indexOfDoubleQuote(byte[] buf, int fromIndex, int max) {
         if (INDEX_OF_CHAR_LATIN1 == null) {
-            return indexOfDoubleQuoteV(value, fromIndex, max);
+            return indexOfDoubleQuoteV(buf, fromIndex, max);
         }
         try {
-            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, (int) '"', fromIndex, max);
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(buf, (int) '"', fromIndex, max);
         } catch (Throwable e) {
             throw new JSONException(e.getMessage());
         }
     }
 
-    public static int indexOfDoubleQuoteV(byte[] value, int fromIndex, int max) {
+    /**
+     * Finds the index of a double quote character in a byte array using vectorized operations.
+     * This method searches for a double quote (") character within the specified range
+     * of the byte array using optimized vector operations.
+     *
+     * @param buf the byte array to search in
+     * @param fromIndex the index to start searching from
+     * @param max the maximum index to search up to (exclusive)
+     * @return the index of the double quote character, or -1 if not found
+     */
+    public static int indexOfDoubleQuoteV(byte[] buf, int fromIndex, int max) {
         int i = fromIndex;
         long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
         int upperBound = fromIndex + ((max - fromIndex) & ~7);
-        while (i < upperBound && notContains(UNSAFE.getLong(value, address), 0x2222_2222_2222_2222L)) {
+        while (i < upperBound && notContains(UNSAFE.getLong(buf, address), 0x2222_2222_2222_2222L)) {
             i += 8;
             address += 8;
         }
-        return indexOfChar0(value, '"', i, max);
+        return indexOfChar(buf, '"', i, max);
     }
 
-    public static int indexOfLineSeparator(byte[] value, int fromIndex, int max) {
+    /**
+     * Finds the index of a line separator character in a byte array.
+     * This method searches for a newline ('\n') character within the specified range
+     * of the byte array.
+     *
+     * @param buf the byte array to search in
+     * @param fromIndex the index to start searching from
+     * @param max the maximum index to search up to (exclusive)
+     * @return the index of the line separator character, or -1 if not found
+     */
+    public static int indexOfLineSeparator(byte[] buf, int fromIndex, int max) {
         if (INDEX_OF_CHAR_LATIN1 == null) {
-            return indexOfLineSeparatorV(value, fromIndex, max);
+            return indexOfLineSeparatorV(buf, fromIndex, max);
         }
         try {
-            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, (int) '\n', fromIndex, max);
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(buf, (int) '\n', fromIndex, max);
         } catch (Throwable e) {
             throw new JSONException(e.getMessage());
         }
     }
 
-    public static int indexOfLineSeparatorV(byte[] value, int fromIndex, int max) {
+    /**
+     * Finds the index of a line separator character in a byte array using vectorized operations.
+     * This method searches for a newline ('\n') character within the specified range
+     * of the byte array using optimized vector operations.
+     *
+     * @param buf the byte array to search in
+     * @param fromIndex the index to start searching from
+     * @param max the maximum index to search up to (exclusive)
+     * @return the index of the line separator character, or -1 if not found
+     */
+    public static int indexOfLineSeparatorV(byte[] buf, int fromIndex, int max) {
         int i = fromIndex;
         long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
         int upperBound = fromIndex + ((max - fromIndex) & ~7);
-        while (i < upperBound && notContains(UNSAFE.getLong(value, address), 0x0A0A0A0A0A0A0A0AL)) {
+        while (i < upperBound && notContains(UNSAFE.getLong(buf, address), 0x0A0A0A0A0A0A0A0AL)) {
             i += 8;
             address += 8;
         }
-        return indexOfChar0(value, '\n', i, max);
+        return indexOfChar(buf, '\n', i, max);
     }
 
-    public static int indexOfSlash(byte[] value, int fromIndex, int max) {
+    /**
+     * Finds the index of a slash character in a byte array.
+     * This method searches for a backslash ('\') character within the specified range
+     * of the byte array.
+     *
+     * @param buf the byte array to search in
+     * @param fromIndex the index to start searching from
+     * @param max the maximum index to search up to (exclusive)
+     * @return the index of the slash character, or -1 if not found
+     */
+    public static int indexOfSlash(byte[] buf, int fromIndex, int max) {
         if (INDEX_OF_CHAR_LATIN1 == null) {
-            return indexOfSlashV(value, fromIndex, max);
+            return indexOfSlashV(buf, fromIndex, max);
         }
         try {
-            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(value, (int) '\\', fromIndex, max);
+            return (int) INDEX_OF_CHAR_LATIN1.invokeExact(buf, (int) '\\', fromIndex, max);
         } catch (Throwable e) {
             throw new JSONException(e.getMessage());
         }
     }
 
-    public static int indexOfSlashV(byte[] value, int fromIndex, int max) {
+    /**
+     * Finds the index of a slash character in a byte array using vectorized operations.
+     * This method searches for a backslash ('\') character within the specified range
+     * of the byte array using optimized vector operations.
+     *
+     * @param buf the byte array to search in
+     * @param fromIndex the index to start searching from
+     * @param max the maximum index to search up to (exclusive)
+     * @return the index of the slash character, or -1 if not found
+     */
+    public static int indexOfSlashV(byte[] buf, int fromIndex, int max) {
         int i = fromIndex;
         long address = ARRAY_BYTE_BASE_OFFSET + fromIndex;
         int upperBound = fromIndex + ((max - fromIndex) & ~7);
-        while (i < upperBound && notContains(UNSAFE.getLong(value, address), 0x5C5C5C5C5C5C5C5CL)) {
+        while (i < upperBound && notContains(UNSAFE.getLong(buf, address), 0x5C5C5C5C5C5C5C5CL)) {
             i += 8;
             address += 8;
         }
-        return indexOfChar0(value, '\\', i, max);
+        return indexOfChar(buf, '\\', i, max);
     }
 
-    private static int indexOfChar0(byte[] value, int ch, int fromIndex, int max) {
+    /**
+     * Checks if a byte array region matches a prefix string.
+     * This method compares a segment of a byte array with a string prefix to see
+     * if they match exactly.
+     *
+     * @param bytes the byte array to check
+     * @param off the offset in the byte array where to start checking
+     * @param prefix the string prefix to match against
+     * @return true if the byte array region matches the prefix, false otherwise
+     */
+    public static boolean regionMatches(byte[] bytes, int off, String prefix) {
+        int len = prefix.length();
+        if (off + len > bytes.length) {
+            return false;
+        }
+        for (int i = 0; i < len; i++) {
+            if (bytes[off + i] != prefix.charAt(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Finds the index of a character in a byte array.
+     * This method searches for a specific character within the specified range
+     * of the byte array.
+     *
+     * @param buf the byte array to search in
+     * @param ch the character to search for
+     * @param fromIndex the index to start searching from
+     * @param max the maximum index to search up to (exclusive)
+     * @return the index of the character, or -1 if not found
+     */
+    public static int indexOfChar(byte[] buf, int ch, int fromIndex, int max) {
         for (int i = fromIndex; i < max; i++) {
-            if (value[i] == ch) {
+            if (buf[i] == ch) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Finds the index of a character in a character array.
+     * This method searches for a specific character within the specified range
+     * of the character array.
+     *
+     * @param buf the character array to search in
+     * @param ch the character to search for
+     * @param fromIndex the index to start searching from
+     * @param max the maximum index to search up to (exclusive)
+     * @return the index of the character, or -1 if not found
+     */
+    public static int indexOfChar(char[] buf, int ch, int fromIndex, int max) {
+        for (int i = fromIndex; i < max; i++) {
+            if (buf[i] == ch) {
                 return i;
             }
         }
@@ -1604,87 +2528,279 @@ public class IOUtils {
         return (((x - 0x0101010101010101L) & ~x) & 0x8080808080808080L) == 0;
     }
 
-    public static int hexDigit4(byte[] bytes, int offset) {
-        int v = getIntLE(bytes, offset);
+    public static int hexDigit4(byte[] buf, int offset, int end) {
+        if (offset + 4 > Math.min(end, buf.length)) {
+            throw outOfBoundsCheckFromToIndex(offset, end);
+        }
+        return hexDigit4(buf, offset);
+    }
+
+    static JSONException outOfBoundsCheckFromToIndex(int offset, int end) {
+        return new JSONException("offset overflow, offset " + offset + ", end " + end);
+    }
+
+    /**
+     * Extracts a 4-digit hexadecimal number from a byte array at the specified offset.
+     * This method performs optimized hexadecimal digit extraction by processing 4 bytes at once
+     * using vector operations for improved performance.
+     *
+     * @param buf the byte array to extract hexadecimal digits from
+     * @param offset the offset in the array where to start extracting
+     * @return the extracted 4-digit hexadecimal number
+     */
+    public static int hexDigit4(byte[] buf, int offset) {
+        int v = getIntLE(buf, offset);
         v = (v & 0x0F0F0F0F) + ((((v & 0x40404040) >> 2) | ((v & 0x40404040) << 1)) >>> 4);
         return ((v & 0xF000000) >>> 24) + ((v & 0xF0000) >>> 12) + (v & 0xF00) + ((v & 0xF) << 12);
     }
 
-    public static int hexDigit4(char[] bytes, int offset) {
-        long v = getLongLE(bytes, offset);
+    public static int hexDigit4(char[] buf, int offset, int end) {
+        if (offset + 4 > Math.min(end, buf.length)) {
+            throw outOfBoundsCheckFromToIndex(offset, end);
+        }
+        return hexDigit4(buf, offset);
+    }
+
+    /**
+     * Extracts a 4-digit hexadecimal number from a character array at the specified offset.
+     * This method performs optimized hexadecimal digit extraction by processing 4 characters at once
+     * using vector operations for improved performance.
+     *
+     * @param buf the character array to extract hexadecimal digits from
+     * @param offset the offset in the array where to start extracting
+     * @return the extracted 4-digit hexadecimal number
+     */
+    public static int hexDigit4(char[] buf, int offset) {
+        long v = getLongLE(buf, offset);
         v = (v & 0x000F_000F_000F_000FL) + ((((v & 0x0004_0004_0004_00040L) >> 2) | ((v & 0x0004_0004_0004_00040L) << 1)) >>> 4);
         return (int) (((v & 0xF_0000_0000_0000L) >>> 48) + ((v & 0xF_0000_0000L) >>> 28) + ((v & 0xF_0000) >> 8) + ((v & 0xF) << 12));
     }
 
+    /**
+     * Checks if the specified character is a digit (0-9).
+     * This method determines if a character represents a valid decimal digit.
+     *
+     * @param ch the character to check
+     * @return true if the character is a digit (0-9), false otherwise
+     */
     public static boolean isDigit(int ch) {
         return ch >= '0' && ch <= '9';
     }
 
-    public static short getShortUnaligned(byte[] bytes, int offset) {
-        return UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+    /**
+     * Gets a short value from a byte array at the specified offset without alignment considerations.
+     * This method retrieves a short value from the specified byte array at the given offset
+     * without performing any byte order conversion or alignment adjustments.
+     *
+     * @param buf the byte array to read from
+     * @param offset the offset in the array where to read the short value
+     * @return the short value at the specified offset
+     */
+    public static short getShortUnaligned(byte[] buf, int offset) {
+        return UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + offset);
     }
 
-    public static short getShortBE(byte[] bytes, int offset) {
+    /**
+     * Gets a short value from a byte array at the specified offset in big-endian byte order.
+     * This method retrieves a short value from the specified byte array at the given offset
+     * using big-endian byte ordering (most significant byte first).
+     *
+     * @param buf the byte array to read from
+     * @param offset the offset in the array where to read the short value
+     * @return the short value at the specified offset in big-endian order
+     */
+    public static short getShortBE(byte[] buf, int offset) {
         return convEndian(true,
-                UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+                UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
-    public static short getShortLE(byte[] bytes, int offset) {
+    /**
+     * Gets a short value from a byte array at the specified offset in little-endian byte order.
+     * This method retrieves a short value from the specified byte array at the given offset
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the byte array to read from
+     * @param offset the offset in the array where to read the short value
+     * @return the short value at the specified offset in little-endian order
+     */
+    public static short getShortLE(byte[] buf, int offset) {
         return convEndian(false,
-                UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+                UNSAFE.getShort(buf, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
-    public static boolean isUTF8BOM(byte[] bytes, int off) {
+    /**
+     * Checks if the specified position in a byte array contains a UTF-8 Byte Order Mark (BOM).
+     * This method verifies if the first three bytes at the specified offset match the UTF-8 BOM
+     * sequence (0xEF, 0xBB, 0xBF).
+     *
+     * @param buf the byte array to check
+     * @param off the offset in the array where to check for the BOM
+     * @return true if the position contains a UTF-8 BOM, false otherwise
+     */
+    public static boolean isUTF8BOM(byte[] buf, int off) {
         // EF BB BF
-        return ((getIntLE(bytes, off)) & 0xFFFFFF) == 0xBFBBEF;
+        return ((getIntLE(buf, off)) & 0xFFFFFF) == 0xBFBBEF;
     }
 
-    public static int getIntBE(byte[] bytes, int offset) {
-        return convEndian(true,
-                UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+    /**
+     * Gets an int value from a byte array at the specified offset in big-endian byte order.
+     * This method retrieves an int value from the specified byte array at the given offset
+     * using big-endian byte ordering (most significant byte first).
+     *
+     * @param buf the byte array to read from
+     * @param offset the offset in the array where to read the int value
+     * @return the int value at the specified offset in big-endian order
+     */
+    public static int getIntBE(byte[] buf, int offset) {
+        int v = UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (!BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        return v;
     }
 
-    public static int getIntLE(byte[] bytes, int offset) {
+    /**
+     * Gets an int value from a byte array at the specified offset in little-endian byte order.
+     * This method retrieves an int value from the specified byte array at the given offset
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the byte array to read from
+     * @param offset the offset in the array where to read the int value
+     * @return the int value at the specified offset in little-endian order
+     */
+    public static int getIntLE(byte[] buf, int offset) {
+        int v = UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        return v;
+    }
+
+    /**
+     * Gets an int value from a character array at the specified offset in little-endian byte order.
+     * This method retrieves an int value from the specified character array at the given offset
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the character array to read from
+     * @param offset the offset in the array where to read the int value
+     * @return the int value at the specified offset in little-endian order
+     */
+    public static int getIntLE(char[] buf, int offset) {
+        int v = UNSAFE.getInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+        if (BIG_ENDIAN) {
+            v = Integer.reverseBytes(v);
+        }
+        return v;
+    }
+
+    /**
+     * Gets an int value from a byte array at the specified offset without alignment considerations.
+     * This method retrieves an int value from the specified byte array at the given offset
+     * without performing any byte order conversion or alignment adjustments.
+     *
+     * @param buf the byte array to read from
+     * @param offset the offset in the array where to read the int value
+     * @return the int value at the specified offset
+     */
+    public static int getIntUnaligned(byte[] buf, int offset) {
+        return UNSAFE.getInt(buf, ARRAY_BYTE_BASE_OFFSET + offset);
+    }
+
+    /**
+     * Gets an int value from a character array at the specified offset without alignment considerations.
+     * This method retrieves an int value from the specified character array at the given offset
+     * without performing any byte order conversion or alignment adjustments.
+     *
+     * @param buf the character array to read from
+     * @param offset the offset in the array where to read the int value
+     * @return the int value at the specified offset
+     */
+    public static int getIntUnaligned(char[] buf, int offset) {
+        return UNSAFE.getInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+    }
+
+    /**
+     * Gets a long value from a byte array at the specified offset in big-endian byte order.
+     * This method retrieves a long value from the specified byte array at the given offset
+     * using big-endian byte ordering (most significant byte first).
+     *
+     * @param buf the byte array to read from
+     * @param offset the offset in the array where to read the long value
+     * @return the long value at the specified offset in big-endian order
+     */
+    public static long getLongBE(byte[] buf, int offset) {
+        long v = UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + offset);
+        if (!BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
+        return v;
+    }
+
+    /**
+     * Gets a long value from a byte array at the specified offset without alignment considerations.
+     * This method retrieves a long value from the specified byte array at the given offset
+     * without performing any byte order conversion or alignment adjustments.
+     *
+     * @param buf the byte array to read from
+     * @param offset the offset in the array where to read the long value
+     * @return the long value at the specified offset
+     */
+    public static long getLongUnaligned(byte[] buf, int offset) {
+        return UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + offset);
+    }
+
+    /**
+     * Gets a long value from a character array at the specified offset without alignment considerations.
+     * This method retrieves a long value from the specified character array at the given offset
+     * without performing any byte order conversion or alignment adjustments.
+     *
+     * @param buf the character array to read from
+     * @param offset the offset in the array where to read the long value
+     * @return the long value at the specified offset
+     */
+    public static long getLongUnaligned(char[] buf, int offset) {
+        return UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+    }
+
+    /**
+     * Gets a long value from a byte array at the specified offset in little-endian byte order.
+     * This method retrieves a long value from the specified byte array at the given offset
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the byte array to read from
+     * @param offset the offset in the array where to read the long value
+     * @return the long value at the specified offset in little-endian order
+     */
+    public static long getLongLE(byte[] buf, int offset) {
         return convEndian(false,
-                UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
+                UNSAFE.getLong(buf, ARRAY_BYTE_BASE_OFFSET + offset));
     }
 
-    public static int getIntLE(char[] bytes, int offset) {
-        return convEndian(false,
-                UNSAFE.getInt(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1)));
+    /**
+     * Gets a long value from a character array at the specified offset in little-endian byte order.
+     * This method retrieves a long value from the specified character array at the given offset
+     * using little-endian byte ordering (least significant byte first).
+     *
+     * @param buf the character array to read from
+     * @param offset the offset in the array where to read the long value
+     * @return the long value at the specified offset in little-endian order
+     */
+    public static long getLongLE(char[] buf, int offset) {
+        long v = UNSAFE.getLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
+        if (BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
+        return v;
     }
 
-    public static int getIntUnaligned(byte[] bytes, int offset) {
-        return UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-    }
-
-    public static int getIntUnaligned(char[] bytes, int offset) {
-        return UNSAFE.getInt(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
-    }
-
-    public static long getLongBE(byte[] bytes, int offset) {
-        return convEndian(true,
-                UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
-    }
-
-    public static long getLongUnaligned(byte[] bytes, int offset) {
-        return UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-    }
-
-    public static long getLongUnaligned(char[] bytes, int offset) {
-        return UNSAFE.getLong(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1));
-    }
-
-    public static long getLongLE(byte[] bytes, int offset) {
-        return convEndian(false,
-                UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset));
-    }
-
-    public static long getLongLE(char[] bytes, int offset) {
-        return convEndian(false,
-                UNSAFE.getLong(bytes, ARRAY_CHAR_BASE_OFFSET + ((long) offset << 1)));
-    }
-
+    /**
+     * Converts a 2-digit hexadecimal value to its character representation.
+     * This method transforms a packed 2-digit hexadecimal value into its ASCII character
+     * representation using optimized bit operations.
+     *
+     * @param i the packed 2-digit hexadecimal value to convert
+     * @return the character representation of the hexadecimal value
+     */
     public static short hex2(int i) {
         i = ((i & 0xF0) >> 4) | ((i & 0xF) << 8);
         int m = (i + 0x06060606) & 0x10101010;
@@ -1692,6 +2808,14 @@ public class IOUtils {
                 + 0x30303030 + i);
     }
 
+    /**
+     * Converts a 2-digit hexadecimal value to its uppercase character representation.
+     * This method transforms a packed 2-digit hexadecimal value into its uppercase ASCII
+     * character representation using optimized bit operations.
+     *
+     * @param i the packed 2-digit hexadecimal value to convert
+     * @return the uppercase character representation of the hexadecimal value
+     */
     public static short hex2U(int i) {
         i = ((i & 0xF0) >> 4) | ((i & 0xF) << 8);
         int m = (i + 0x06060606) & 0x10101010;
@@ -1699,6 +2823,14 @@ public class IOUtils {
                 + 0x30303030 + i);
     }
 
+    /**
+     * Converts a 2-digit hexadecimal value to its UTF-16 character representation.
+     * This method transforms a packed 2-digit hexadecimal value into its UTF-16 character
+     * representation using optimized bit operations.
+     *
+     * @param i the packed 2-digit hexadecimal value to convert
+     * @return the UTF-16 character representation of the hexadecimal value
+     */
     public static int utf16Hex2(int i) {
         // 0x000F000F
         i = ((i & 0xF0) >> 4) | ((i & 0xF) << 16);
@@ -1707,6 +2839,14 @@ public class IOUtils {
                 + 0x00300030 + i;
     }
 
+    /**
+     * Converts a 4-digit hexadecimal value to its uppercase character representation.
+     * This method transforms a packed 4-digit hexadecimal value into its uppercase ASCII
+     * character representation using optimized bit operations.
+     *
+     * @param i the packed 4-digit hexadecimal value to convert
+     * @return the uppercase character representation of the hexadecimal value
+     */
     public static int hex4U(int i) {
         i = reverseBytesExpand(i);
         /*
@@ -1731,6 +2871,14 @@ public class IOUtils {
         return ((m * 7) >> 4) + 0x30303030 + i;
     }
 
+    /**
+     * Converts a 4-digit hexadecimal value to its uppercase UTF-16 character representation.
+     * This method transforms a packed 4-digit hexadecimal value into its uppercase UTF-16
+     * character representation using optimized bit operations.
+     *
+     * @param i the packed 4-digit hexadecimal value to convert
+     * @return the uppercase UTF-16 character representation of the hexadecimal value
+     */
     public static long utf16Hex4U(long i) {
         i = utf16ReverseBytesExpand(i);
         /*
@@ -1767,10 +2915,28 @@ public class IOUtils {
         return ((i & 0xF000L) >> 12) | ((i & 0xF00L) << 8) | ((i & 0xF0L) << 28) | ((i & 0xFL) << 48);
     }
 
-    static int convEndian(boolean big, int n) {
+    /**
+     * Converts an integer value between big-endian and little-endian byte orders.
+     * This method conditionally reverses the byte order of an integer value based on
+     * the specified endianness flag and the system's native endianness.
+     *
+     * @param big true to convert to big-endian, false to convert to little-endian
+     * @param n the integer value to convert
+     * @return the converted integer value in the specified byte order
+     */
+    public static int convEndian(boolean big, int n) {
         return big == BIG_ENDIAN ? n : Integer.reverseBytes(n);
     }
 
+    /**
+     * Converts a long value between big-endian and little-endian byte orders.
+     * This method conditionally reverses the byte order of a long value based on
+     * the specified endianness flag and the system's native endianness.
+     *
+     * @param big true to convert to big-endian, false to convert to little-endian
+     * @param n the long value to convert
+     * @return the converted long value in the specified byte order
+     */
     public static long convEndian(boolean big, long n) {
         return big == BIG_ENDIAN ? n : Long.reverseBytes(n);
     }
@@ -1779,18 +2945,28 @@ public class IOUtils {
         return big == BIG_ENDIAN ? n : Short.reverseBytes(n);
     }
 
-    public static boolean isLatin1(char[] chars, int off, int len) {
+    /**
+     * Checks if a character array segment contains only Latin-1 characters.
+     * This method verifies that all characters in the specified segment of the character
+     * array are within the Latin-1 character set (Unicode code points 0-255).
+     *
+     * @param buf the character array to check
+     * @param off the starting offset in the array
+     * @param len the number of characters to check
+     * @return true if all characters in the segment are Latin-1, false otherwise
+     */
+    public static boolean isLatin1(char[] buf, int off, int len) {
         int end = off + len;
         int upperBound = off + (len & ~7);
         long address = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
         while (off < upperBound
-                && (convEndian(false, UNSAFE.getLong(chars, address) | UNSAFE.getLong(chars, address + 8)) & 0xFF00FF00FF00FF00L) == 0
+                && (convEndian(false, UNSAFE.getLong(buf, address) | UNSAFE.getLong(buf, address + 8)) & 0xFF00FF00FF00FF00L) == 0
         ) {
             address += 16;
             off += 8;
         }
         while (off++ < end) {
-            if ((convEndian(false, UNSAFE.getShort(chars, address)) & 0xFF00) != 0) {
+            if ((convEndian(false, UNSAFE.getShort(buf, address)) & 0xFF00) != 0) {
                 return false;
             }
             address += 2;
@@ -1798,6 +2974,14 @@ public class IOUtils {
         return true;
     }
 
+    /**
+     * Checks if a string contains only ASCII characters.
+     * This method verifies that all characters in the specified string are within
+     * the ASCII character set (Unicode code points 0-127).
+     *
+     * @param str the string to check
+     * @return true if all characters in the string are ASCII, false otherwise
+     */
     public static boolean isASCII(String str) {
         if (STRING_VALUE != null && STRING_CODER != null) {
             return STRING_CODER.applyAsInt(str) == 0 && isASCII(STRING_VALUE.apply(str));
@@ -1810,40 +2994,68 @@ public class IOUtils {
         return true;
     }
 
-    public static boolean isASCII(byte[] bytes) {
-        return isASCII(bytes, 0, bytes.length);
+    /**
+     * Checks if a byte array contains only ASCII characters.
+     * This method verifies that all bytes in the specified byte array are within
+     * the ASCII character set (values 0-127).
+     *
+     * @param buf the byte array to check
+     * @return true if all bytes in the array are ASCII, false otherwise
+     */
+    public static boolean isASCII(byte[] buf) {
+        return isASCII(buf, 0, buf.length);
     }
 
-    public static boolean isASCII(byte[] bytes, int off, int len) {
+    /**
+     * Checks if a byte array segment contains only ASCII characters.
+     * This method verifies that all bytes in the specified segment of the byte array
+     * are within the ASCII character set (values 0-127).
+     *
+     * @param buf the byte array to check
+     * @param off the starting offset in the array
+     * @param len the number of bytes to check
+     * @return true if all bytes in the segment are ASCII, false otherwise
+     */
+    public static boolean isASCII(byte[] buf, int off, int len) {
         int end = off + len;
         int upperBound = off + (len & ~7);
         long address = ARRAY_BYTE_BASE_OFFSET + off;
-        while (off < upperBound && (UNSAFE.getLong(bytes, address) & 0x8080808080808080L) == 0) {
+        while (off < upperBound && (UNSAFE.getLong(buf, address) & 0x8080808080808080L) == 0) {
             address += 8;
             off += 8;
         }
 
         while (off++ < end) {
-            if ((UNSAFE.getByte(bytes, address++) & 0x80) != 0) {
+            if ((UNSAFE.getByte(buf, address++) & 0x80) != 0) {
                 return false;
             }
         }
         return true;
     }
 
-    public static boolean isNonSlashASCII(byte[] bytes, int off, int len) {
+    /**
+     * Checks if a byte array segment contains only ASCII characters and no backslash characters.
+     * This method verifies that all bytes in the specified segment of the byte array are within
+     * the ASCII character set (values 0-127) and do not contain any backslash ('\\') characters.
+     *
+     * @param buf the byte array to check
+     * @param off the starting offset in the array
+     * @param len the number of bytes to check
+     * @return true if all bytes in the segment are ASCII and not backslashes, false otherwise
+     */
+    public static boolean isNonSlashASCII(byte[] buf, int off, int len) {
         int end = off + len;
         int upperBound = off + (len & ~7);
         long addr = ARRAY_BYTE_BASE_OFFSET + off;
         long d, x;
         while (off < upperBound
-                && (((d = UNSAFE.getLong(bytes, addr)) | (((x = d ^ 0x5C5C5C5C5C5C5C5CL) - 0x0101010101010101L) & ~x)) & 0x8080808080808080L) == 0) {
+                && (((d = UNSAFE.getLong(buf, addr)) | (((x = d ^ 0x5C5C5C5C5C5C5C5CL) - 0x0101010101010101L) & ~x)) & 0x8080808080808080L) == 0) {
             addr += 8;
             off += 8;
         }
         while (off++ < end) {
             byte b;
-            if (((b = UNSAFE.getByte(bytes, addr++)) & 0x80) != 0 || b == '\\') {
+            if (((b = UNSAFE.getByte(buf, addr++)) & 0x80) != 0 || b == '\\') {
                 return false;
             }
         }
@@ -1854,8 +3066,20 @@ public class IOUtils {
         return c >= '0' && c <= '9';
     }
 
-    public static int parseInt(byte[] bytes, int off, int len) {
-        int fc = bytes[off];
+    /**
+     * Parses an integer value from a byte array segment.
+     * This method converts a sequence of ASCII digit characters in a byte array segment
+     * to an integer value, handling optional leading '+' or '-' signs.
+     *
+     * @param buf the byte array containing the digit characters
+     * @param off the starting offset in the array
+     * @param len the number of bytes to parse
+     * @return the parsed integer value
+     * @throws NumberFormatException if the byte array segment does not contain a valid integer representation
+     */
+    public static int parseInt(byte[] buf, int off, int len) {
+        int start = off;
+        int fc = buf[off];
         int result = isDigitLatin1(fc)
                 ? '0' - fc
                 : len != 1 && (fc == '-' || fc == '+')
@@ -1865,13 +3089,13 @@ public class IOUtils {
         off++;
         int d;
         while (off + 1 < end
-                && (d = IOUtils.digit2(bytes, off)) != -1
+                && (d = IOUtils.digit2(buf, off)) != -1
                 && Integer.MIN_VALUE / 100 <= result & result <= 0) {
             result = result * 100 - d;  // overflow from d => result > 0
             off += 2;
         }
         if (off < end
-                && isDigitLatin1(d = bytes[off])
+                && isDigitLatin1(d = buf[off])
                 && Integer.MIN_VALUE / 10 <= result & result <= 0) {
             result = result * 10 + '0' - d;  // overflow from '0' - d => result > 0
             off += 1;
@@ -1881,6 +3105,6 @@ public class IOUtils {
                 & (Integer.MIN_VALUE < result || fc == '-')) {
             return fc == '-' ? result : -result;
         }
-        throw new NumberFormatException(new String(bytes, off, len));
+        throw new NumberFormatException(new String(buf, start, len));
     }
 }

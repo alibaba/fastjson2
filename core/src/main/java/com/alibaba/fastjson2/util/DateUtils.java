@@ -19,14 +19,52 @@ import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.time.ZoneOffset.UTC;
 
+/**
+ * DateUtils provides utility methods for parsing and formatting dates in various formats.
+ * It supports multiple date formats including ISO 8601, RFC formats, and custom patterns.
+ *
+ * <p>This class offers functionality for:
+ * <ul>
+ *   <li>Parsing date strings in various formats to Date objects</li>
+ *   <li>Formatting Date objects to date strings</li>
+ *   <li>Working with different time zones and locales</li>
+ *   <li>Handling special date formats like cookies and HTTP headers</li>
+ *   <li>Converting between different date representations</li>
+ * </ul>
+ *
+ * <p>Example usage:
+ * <pre>
+ * // Parse a date string
+ * Date date = DateUtils.parseDate("2023-12-25 10:30:45");
+ *
+ * // Format a Date object
+ * String formatted = DateUtils.formatDate(new Date(), "yyyy-MM-dd HH:mm:ss");
+ *
+ * // Parse with specific format and time zone
+ * Date date2 = DateUtils.parseDate("2023/12/25 10:30:45", "yyyy/MM/dd HH:mm:ss", ZoneId.of("UTC"));
+ * </pre>
+ *
+ * @since 2.0.0
+ */
 public class DateUtils {
     public static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
     public static final String SHANGHAI_ZONE_ID_NAME = "Asia/Shanghai";
-    public static final ZoneId SHANGHAI_ZONE_ID
-            = SHANGHAI_ZONE_ID_NAME.equals(DEFAULT_ZONE_ID.getId())
-            ? DEFAULT_ZONE_ID
-            : ZoneId.of(SHANGHAI_ZONE_ID_NAME);
-    public static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
+    public static final ZoneId SHANGHAI_ZONE_ID;
+    public static final ZoneRules SHANGHAI_ZONE_RULES;
+    static {
+        ZoneId zoneId = null;
+        ZoneRules zoneRules = null;
+        try {
+            zoneId = SHANGHAI_ZONE_ID_NAME.equals(DEFAULT_ZONE_ID.getId())
+                    ? DEFAULT_ZONE_ID
+                    : ZoneId.of(SHANGHAI_ZONE_ID_NAME);
+            zoneRules = zoneId.getRules();
+        } catch (Exception ignored) {
+            // ignore
+        }
+        SHANGHAI_ZONE_ID = zoneId;
+        SHANGHAI_ZONE_RULES = zoneRules;
+    }
     public static final String OFFSET_8_ZONE_ID_NAME = "+08:00";
     public static final ZoneId OFFSET_8_ZONE_ID = ZoneId.of(OFFSET_8_ZONE_ID_NAME);
     public static final LocalDate LOCAL_DATE_19700101 = LocalDate.of(1970, 1, 1);
@@ -64,6 +102,13 @@ public class DateUtils {
         static final String[] CACHE = new String[1024];
     }
 
+    /**
+     * Parses a date string in the format "yyyy-MM-dd HH:mm:ss" to a Date object.
+     * Uses the default time zone for parsing.
+     *
+     * @param str the date string to parse, e.g., "2023-12-25 10:30:45"
+     * @return the parsed Date object, or null if the input string is null or empty
+     */
     public static Date parseDateYMDHMS19(String str) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -73,16 +118,32 @@ public class DateUtils {
         return new Date(millis);
     }
 
+    /**
+     * Parses a date string with the specified format to a Date object.
+     * Uses the default time zone for parsing.
+     *
+     * @param str the date string to parse
+     * @param format the format pattern to use for parsing
+     * @return the parsed Date object, or null if the input string is null, empty, or "null"
+     */
     public static Date parseDate(String str, String format) {
         return parseDate(str, format, DEFAULT_ZONE_ID);
     }
 
+    /**
+     * Parses a date string with the specified format and time zone to a Date object.
+     *
+     * @param str the date string to parse
+     * @param format the format pattern to use for parsing
+     * @param zoneId the time zone to use for parsing
+     * @return the parsed Date object, or null if the input string is null, empty, or "null"
+     */
     public static Date parseDate(String str, String format, ZoneId zoneId) {
         if (str == null || str.isEmpty() || "null".equals(str)) {
             return null;
         }
 
-        if (format == null || format.isEmpty()) {
+        if (format == null || format.isEmpty() || "string".equals(format)) {
             long millis = parseMillis(str, zoneId);
             if (millis == 0) {
                 return null;
@@ -152,6 +213,13 @@ public class DateUtils {
         return new Date(millis);
     }
 
+    /**
+     * Parses a date string to a Date object using default parsing rules.
+     * Uses the default time zone for parsing.
+     *
+     * @param str the date string to parse
+     * @return the parsed Date object, or null if the input string is null, empty, or "null"
+     */
     public static Date parseDate(String str) {
         long millis = parseMillis(str, DEFAULT_ZONE_ID);
         if (millis == 0) {
@@ -160,6 +228,14 @@ public class DateUtils {
         return new Date(millis);
     }
 
+    /**
+     * Parses a date string to a Date object using default parsing rules.
+     * Uses the specified time zone for parsing.
+     *
+     * @param str the date string to parse
+     * @param zoneId the time zone to use for parsing
+     * @return the parsed Date object, or null if the input string is null, empty, or "null"
+     */
     public static Date parseDate(String str, ZoneId zoneId) {
         long millis = parseMillis(str, zoneId);
         if (millis == 0) {
@@ -168,10 +244,25 @@ public class DateUtils {
         return new Date(millis);
     }
 
+    /**
+     * Parses a date string to milliseconds since epoch using default parsing rules.
+     * Uses the default time zone for parsing.
+     *
+     * @param str the date string to parse
+     * @return the parsed milliseconds since epoch, or 0 if the input string is null
+     */
     public static long parseMillis(String str) {
         return parseMillis(str, DEFAULT_ZONE_ID);
     }
 
+    /**
+     * Parses a date string to milliseconds since epoch using default parsing rules.
+     * Uses the specified time zone for parsing.
+     *
+     * @param str the date string to parse
+     * @param zoneId the time zone to use for parsing
+     * @return the parsed milliseconds since epoch, or 0 if the input string is null
+     */
     public static long parseMillis(String str, ZoneId zoneId) {
         if (str == null) {
             return 0;
@@ -186,6 +277,12 @@ public class DateUtils {
         return parseMillis(chars, 0, chars.length, zoneId);
     }
 
+    /**
+     * Parses a date string to a LocalDateTime object using default parsing rules.
+     *
+     * @param str the date string to parse
+     * @return the parsed LocalDateTime object, or null if the input string is null or empty
+     */
     public static LocalDateTime parseLocalDateTime(String str) {
         if (str == null) {
             return null;
@@ -193,6 +290,15 @@ public class DateUtils {
         return parseLocalDateTime(str, 0, str.length());
     }
 
+    /**
+     * Parses a date string to a LocalDateTime object using default parsing rules
+     * with specified offset and length.
+     *
+     * @param str the date string to parse
+     * @param off the offset in the string to start parsing from
+     * @param len the length of the substring to parse
+     * @return the parsed LocalDateTime object, or null if the input string is null or empty
+     */
     public static LocalDateTime parseLocalDateTime(String str, int off, int len) {
         if (str == null || len == 0) {
             return null;
@@ -208,7 +314,7 @@ public class DateUtils {
         } else {
             char[] chars = new char[len];
             str.getChars(off, off + len, chars, 0);
-            ldt = parseLocalDateTime(chars, off, len);
+            ldt = parseLocalDateTime(chars, 0, len);
         }
 
         if (ldt == null) {
@@ -230,6 +336,24 @@ public class DateUtils {
         return ldt;
     }
 
+    /**
+     * Parses a character array to a LocalDateTime object using default parsing rules
+     * with specified offset and length.
+     *
+     * @param str the character array to parse
+     * @param off the offset in the array to start parsing from
+     * @param len the length of the subarray to parse
+     * @return the parsed LocalDateTime object, or null if the input array is null or empty
+     */
+    /**
+     * Parses a character array to a LocalDateTime object using default parsing rules
+     * with specified offset and length.
+     *
+     * @param str the character array to parse
+     * @param off the offset in the array to start parsing from
+     * @param len the length of the subarray to parse
+     * @return the parsed LocalDateTime object, or null if the input array is null or empty
+     */
     public static LocalDateTime parseLocalDateTime(char[] str, int off, int len) {
         if (str == null || len == 0) {
             return null;
@@ -293,6 +417,14 @@ public class DateUtils {
         }
     }
 
+    /**
+     * Parses a byte array to a LocalTime object with 5-character format (HH:mm).
+     * Supports formats like "10:30".
+     *
+     * @param str the byte array to parse
+     * @param off the offset in the array to start parsing from
+     * @return the parsed LocalTime object, or null if the input array is null or too short
+     */
     public static LocalTime parseLocalTime5(byte[] str, int off) {
         if (off + 5 > str.length) {
             return null;
@@ -314,6 +446,14 @@ public class DateUtils {
         return localTime(hour, minute, second);
     }
 
+    /**
+     * Parses a character array to a LocalTime object with 5-character format (HH:mm).
+     * Supports formats like "10:30".
+     *
+     * @param str the character array to parse
+     * @param off the offset in the array to start parsing from
+     * @return the parsed LocalTime object, or null if the input array is null or too short
+     */
     public static LocalTime parseLocalTime5(char[] str, int off) {
         if (off + 5 > str.length) {
             return null;
@@ -334,8 +474,16 @@ public class DateUtils {
         return localTime(hour, minute, second);
     }
 
+    /**
+     * Parses a byte array to a LocalTime object with 6-character format (HHmmss).
+     * Supports formats like "103045".
+     *
+     * @param str the byte array to parse
+     * @param off the offset in the array to start parsing from
+     * @return the parsed LocalTime object, or null if the input array is null or too short
+     */
     public static LocalTime parseLocalTime6(byte[] str, int off) {
-        if (off + 5 > str.length) {
+        if (off + 6 > str.length) {
             return null;
         }
 
@@ -362,8 +510,16 @@ public class DateUtils {
         return localTime(hour, minute, second);
     }
 
+    /**
+     * Parses a character array to a LocalTime object with 6-character format (HHmmss).
+     * Supports formats like "103045".
+     *
+     * @param str the character array to parse
+     * @param off the offset in the array to start parsing from
+     * @return the parsed LocalTime object, or null if the input array is null or too short
+     */
     public static LocalTime parseLocalTime6(char[] str, int off) {
-        if (off + 5 > str.length) {
+        if (off + 6 > str.length) {
             return null;
         }
 
@@ -391,7 +547,7 @@ public class DateUtils {
     }
 
     public static LocalTime parseLocalTime7(byte[] str, int off) {
-        if (off + 5 > str.length) {
+        if (off + 7 > str.length) {
             return null;
         }
 
@@ -419,7 +575,7 @@ public class DateUtils {
     }
 
     public static LocalTime parseLocalTime7(char[] str, int off) {
-        if (off + 5 > str.length) {
+        if (off + 7 > str.length) {
             return null;
         }
 
@@ -522,7 +678,7 @@ public class DateUtils {
             if (millis > 0) {
                 millis *= 100000000;
             }
-            return ((hour | minute | second | minute) < 0)
+            return ((hour | minute | second | millis) < 0)
                     ? null
                     : LocalTime.of(hour, minute, second, millis);
         }
@@ -539,7 +695,7 @@ public class DateUtils {
             if (millis > 0) {
                 millis *= 100000000;
             }
-            return ((hour | minute | second | minute) < 0)
+            return ((hour | minute | second | millis) < 0)
                     ? null
                     : LocalTime.of(hour, minute, second, millis);
         }
@@ -572,7 +728,7 @@ public class DateUtils {
             if (millis > 0) {
                 millis *= 10000000;
             }
-            return ((hour | minute | second | minute) < 0)
+            return ((hour | minute | second | millis) < 0)
                     ? null
                     : LocalTime.of(hour, minute, second, millis);
         }
@@ -605,10 +761,35 @@ public class DateUtils {
             if (millis > 0) {
                 millis *= 1000000;
             }
-            return ((hour | minute | second | minute) < 0)
+            return ((hour | minute | second | millis) < 0)
                     ? null
                     : LocalTime.of(hour, minute, second, millis);
         }
+    }
+
+    public static LocalTime parseLocalTime15(byte[] str, int off) {
+        long hms;
+        if (off + 15 > str.length || (hms = hms(str, off)) == -1L || str[off + 8] != '.') {
+            return null;
+        }
+        int hour = (int) hms & 0xFF;
+        int minute = (int) (hms >> 24) & 0xFF;
+        int second = (int) (hms >> 48) & 0xFF;
+        int nanos = readNanos(str, 6, off + 9);
+        return nanos < 0 ? null : LocalTime.of(hour, minute, second, nanos);
+    }
+
+    public static LocalTime parseLocalTime15(char[] str, int off) {
+        if (off + 15 > str.length || str[off + 2] != ':' || str[off + 5] != ':' || str[off + 8] != '.') {
+            return null;
+        }
+        int hour = digit2(str, off);
+        int minute = digit2(str, off + 3);
+        int second = digit2(str, off + 6);
+        int nanos = readNanos(str, 6, off + 9);
+        return (hour | minute | second | nanos) < 0
+                ? null
+                : LocalTime.of(hour, minute, second, nanos);
     }
 
     public static LocalTime parseLocalTime18(byte[] str, int off) {
@@ -759,6 +940,15 @@ public class DateUtils {
         }
     }
 
+    /**
+     * Parses a character array to a LocalDate object using default parsing rules
+     * with specified offset and length.
+     *
+     * @param str the character array to parse
+     * @param off the offset in the array to start parsing from
+     * @param len the length of the subarray to parse
+     * @return the parsed LocalDate object, or null if the input array is null or empty
+     */
     public static LocalDate parseLocalDate(char[] str, int off, int len) {
         if (str == null || len == 0) {
             return null;
@@ -825,7 +1015,7 @@ public class DateUtils {
         ) {
             ZonedDateTime zdt = parseZonedDateTime(chars, off, len, zoneId);
             if (zdt == null) {
-                String input = new String(chars, off, len - off);
+                String input = new String(chars, off, len);
                 throw new DateTimeParseException("illegal input " + input, input, 0);
             }
             millis = zdt.toInstant().toEpochMilli();
@@ -917,7 +1107,7 @@ public class DateUtils {
         ) {
             ZonedDateTime zdt = parseZonedDateTime(chars, off, len, zoneId);
             if (zdt == null) {
-                String input = new String(chars, off, len - off);
+                String input = new String(chars, off, len);
                 throw new DateTimeParseException("illegal input " + input, input, 0);
             }
             millis = zdt.toInstant().toEpochMilli();
@@ -967,7 +1157,7 @@ public class DateUtils {
             }
 
             if (ldt == null) {
-                String input = new String(chars, off, len - off);
+                String input = new String(chars, off, len);
                 throw new DateTimeParseException("illegal input " + input, input, 0);
             }
 
@@ -2994,6 +3184,15 @@ public class DateUtils {
         return parseZonedDateTime(str, off, len, DEFAULT_ZONE_ID);
     }
 
+    /**
+     * Parses a character array to a ZonedDateTime object using default parsing rules
+     * with specified offset and length.
+     *
+     * @param str the character array to parse
+     * @param off the offset in the array to start parsing from
+     * @param len the length of the subarray to parse
+     * @return the parsed ZonedDateTime object, or null if the input array is null or empty
+     */
     public static ZonedDateTime parseZonedDateTime(char[] str, int off, int len) {
         return parseZonedDateTime(str, off, len, DEFAULT_ZONE_ID);
     }
@@ -7535,10 +7734,25 @@ public class DateUtils {
                 + second;
     }
 
+    /**
+     * Formats a Date object to a string in the format "yyyy-MM-dd HH:mm:ss".
+     * Uses the system default time zone for formatting.
+     *
+     * @param date the Date object to format
+     * @return the formatted date string, e.g., "2023-12-25 10:30:45"
+     */
     public static String formatYMDHMS19(Date date) {
         return formatYMDHMS19(date, DEFAULT_ZONE_ID);
     }
 
+    /**
+     * Formats a Date object to a string in the format "yyyy-MM-dd HH:mm:ss".
+     * Uses the specified time zone for formatting.
+     *
+     * @param date the Date object to format
+     * @param zoneId the time zone to use for formatting
+     * @return the formatted date string, e.g., "2023-12-25 10:30:45"
+     */
     public static String formatYMDHMS19(Date date, ZoneId zoneId) {
         if (date == null) {
             return null;
@@ -7646,6 +7860,13 @@ public class DateUtils {
         return new String(chars);
     }
 
+    /**
+     * Formats a Date object to a string in the format "yyyyMMdd".
+     * Uses the system default time zone for formatting.
+     *
+     * @param date the Date object to format
+     * @return the formatted date string, e.g., "20231225"
+     */
     public static String formatYMD8(Date date) {
         if (date == null) {
             return null;
@@ -7654,6 +7875,14 @@ public class DateUtils {
         return formatYMD8(date.getTime(), DEFAULT_ZONE_ID);
     }
 
+    /**
+     * Formats a timestamp in milliseconds to a string in the format "yyyyMMdd".
+     * Uses the specified time zone for formatting.
+     *
+     * @param timeMillis the timestamp in milliseconds to format
+     * @param zoneId the time zone to use for formatting
+     * @return the formatted date string, e.g., "20231225"
+     */
     public static String formatYMD8(long timeMillis, ZoneId zoneId) {
         final long SECONDS_PER_DAY = 60 * 60 * 24;
 
@@ -8996,9 +9225,8 @@ public class DateUtils {
 
     public static int readNanos(final byte[] bytes, final int len, final int offset) {
         int v = 0;
-        long address = ARRAY_BYTE_BASE_OFFSET + offset;
         for (int i = 0; i < len; i++) {
-            int d = UNSAFE.getByte(bytes, address + i) - '0';
+            int d = bytes[offset + i] - '0';
             if (d < 0 | d > 9) {
                 return -1;
             }
@@ -9006,6 +9234,18 @@ public class DateUtils {
         }
         v *= POWERS[(9 - len) & 0xF];
         return v;
+    }
+
+    public static ZoneOffset zoneOffset(byte[] bytes, int start, int len) {
+        return ZoneOffset.of(new String(bytes, start, len));
+    }
+
+    public static ZoneOffset zoneOffset(char[] bytes, int start, int len) {
+        return ZoneOffset.of(new String(bytes, start, len));
+    }
+
+    public static int nanos(int value, int nanoSize) {
+        return value * POWERS[(9 - nanoSize) & 0xF];
     }
 
     private static final int[] POWERS = {
@@ -9028,7 +9268,10 @@ public class DateUtils {
     };
 
     public static long hms(byte[] bytes, int off) {
-        long v = getLongLE(bytes, off);
+        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + off);
+        if (BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
         long d;
         if ((((v & 0xF0F0F0F0_F0F0F0F0L) - 0x30303030_30303030L) | (((d = v & 0x0F0F0F0F_0F0F0F0FL) + 0x06060006_06000606L) & 0xF0F000F0_F000F0F0L)) != 0
                 || (d & 0x00000F00_000F0000L) != 0x00000a00_000a0000L) { // 00:00:00
@@ -9037,23 +9280,41 @@ public class DateUtils {
         return ((d & 0x00F_0000_0F00_000FL) << 3) + ((d & 0x00F_0000_0F00_000FL) << 1) + ((d & 0xF00_000F_0000_0F00L) >> 8);
     }
 
-    public static long ymd(byte[] bytes, int off) {
-        long v = getLongLE(bytes, off);
-        long d;
-        if (((v & 0x0000FF00_00FF0000L) != 0x00002d00_002d0000L) // yy-mm-dd
-                || (((v & 0xF0F000F0_F000F0F0L) - 0x30300030_30003030L) | (((d = v & 0x0F0F000F_0F000F0FL) + 0x06060006_06000606L) & 0xF0F000F0_F000F0F0L)) != 0) {
-            return -1;
-        }
-        return ((d & 0x00F_0000_0F00_000FL) << 3) + ((d & 0x00F_0000_0F00_000FL) << 1) + ((d & 0xF00_000F_0000_0F00L) >> 8);
-    }
-
     public static int yy(byte[] bytes, int off) {
-        int x = getShortLE(bytes, off);
+        short x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
+        if (BIG_ENDIAN) {
+            x = Short.reverseBytes(x);
+        }
         int d;
         if ((((x & 0xF0F0) - 0x3030) | (((d = x & 0x0F0F) + 0x0606) & 0xF0F0)) != 0
         ) {
             return -1;
         }
         return (d & 0xF) * 1000 + (d >> 8) * 100;
+    }
+
+    public static LocalDate localDateYMD(byte[] bytes, int off) {
+        short x = UNSAFE.getShort(bytes, ARRAY_BYTE_BASE_OFFSET + off);
+        int d0;
+        if ((((x & 0xF0F0) - 0x3030) | (((d0 = x & 0x0F0F) + 0x0606) & 0xF0F0)) != 0
+        ) {
+            return null;
+        }
+
+        long v = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 2);
+        if (BIG_ENDIAN) {
+            v = Long.reverseBytes(v);
+        }
+        long d1;
+        if (((v & 0x0000FF00_00FF0000L) != 0x00002d00_002d0000L) // yy-mm-dd
+                || (((v & 0xF0F000F0_F000F0F0L) - 0x30300030_30003030L) | (((d1 = v & 0x0F0F000F_0F000F0FL) + 0x06060006_06000606L) & 0xF0F000F0_F000F0F0L)) != 0) {
+            return null;
+        }
+        long ymd = ((d1 & 0x00F_0000_0F00_000FL) << 3) + ((d1 & 0x00F_0000_0F00_000FL) << 1) + ((d1 & 0xF00_000F_0000_0F00L) >> 8);
+
+        int year = (d0 & 0xF) * 1000 + (d0 >> 8) * 100 + ((int) ymd & 0xFF);
+        int month = (int) (ymd >> 24) & 0xFF;
+        int dayOfMonth = (int) (ymd >> 48) & 0xFF;
+        return year == 0 && month == 0 && dayOfMonth == 0 ? null : LocalDate.of(year, month, dayOfMonth);
     }
 }

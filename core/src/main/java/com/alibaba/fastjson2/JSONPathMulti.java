@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 
 final class JSONPathMulti
@@ -455,5 +456,20 @@ final class JSONPathMulti
         }
 
         return JSON.toJSONString(context.value);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+
+        JSONPathMulti that = (JSONPathMulti) object;
+        return Objects.equals(segments, that.segments);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(segments);
     }
 }

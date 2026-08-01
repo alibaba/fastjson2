@@ -3,10 +3,12 @@ package com.alibaba.fastjson2.issues_1800;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("regression")
 public class Issue1828 {
     private static final int SIZE = 50 * 1024 * 1024;
 

@@ -29,28 +29,51 @@ import static com.alibaba.fastjson2.JSONReader.BigIntegerCreator.BIG_INTEGER_CRE
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
+/**
+ * JSONReader is the core class for reading and parsing JSON data in FASTJSON2.
+ * It provides methods to read various data types from JSON including primitives,
+ * objects, arrays, dates, and custom types.
+ *
+ * <p>JSONReader supports multiple input sources including strings, byte arrays,
+ * streams, and readers. It also supports different character encodings such as
+ * UTF-8, UTF-16, and ASCII.</p>
+ *
+ * <p>Example usage:
+ * <pre>
+ * String json = "{\"name\":\"John\", \"age\":30}";
+ * try (JSONReader reader = JSONReader.of(json)) {
+ *     JSONObject obj = reader.readObject();
+ *     String name = (String) obj.get("name");
+ *     Integer age = (Integer) obj.get("age");
+ * }
+ * </pre>
+ *
+ *
+ * @since 2.0.0
+ */
 public abstract class JSONReader
         implements Closeable {
     static final int MAX_EXP = 2047;
+    static final int MAX_NUMBER_DIGITS = 10_000;
 
-    static final byte JSON_TYPE_INT = 1;
-    static final byte JSON_TYPE_DEC = 2;
-    static final byte JSON_TYPE_STRING = 3;
-    static final byte JSON_TYPE_BOOL = 4;
-    static final byte JSON_TYPE_NULL = 5;
-    static final byte JSON_TYPE_OBJECT = 6;
-    static final byte JSON_TYPE_ARRAY = 7;
-    static final byte JSON_TYPE_BIG_DEC = 8;
-
-    static final byte JSON_TYPE_INT8 = 9;
-    static final byte JSON_TYPE_INT16 = 10;
-    static final byte JSON_TYPE_INT64 = 11;
-    static final byte JSON_TYPE_FLOAT = 12;
-    static final byte JSON_TYPE_DOUBLE = 13;
-    static final byte JSON_TYPE_NaN = 14;
+    static final byte
+            JSON_TYPE_INT = 1,
+            JSON_TYPE_DEC = 2,
+            JSON_TYPE_STRING = 3,
+            JSON_TYPE_BOOL = 4,
+            JSON_TYPE_NULL = 5,
+            JSON_TYPE_OBJECT = 6,
+            JSON_TYPE_ARRAY = 7,
+            JSON_TYPE_BIG_DEC = 8,
+            JSON_TYPE_INT8 = 9,
+            JSON_TYPE_INT16 = 10,
+            JSON_TYPE_INT64 = 11,
+            JSON_TYPE_FLOAT = 12,
+            JSON_TYPE_DOUBLE = 13,
+            JSON_TYPE_NaN = 14;
 
     static final char EOI = 0x1A;
-    static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
+    static final long SPACE = 1L | (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
 
     static final boolean[] INT_VALUE_END = new boolean[256];
     static {
@@ -59,6 +82,60 @@ public abstract class JSONReader
         for (char ch : chars) {
             INT_VALUE_END[ch] = false;
         }
+    }
+
+    static final byte[] CHAR1_ESCAPED;
+    static {
+        byte[] char1_escaped = new byte[128];
+        Arrays.fill(char1_escaped, (byte) -1);
+        byte[] mapping = new byte[] {
+                '0', '\0',
+                '1', '\1',
+                '2', '\2',
+                '3', '\3',
+                '4', '\4',
+                '5', '\5',
+                '6', '\6',
+                '7', '\7',
+                'b', '\b',
+                't', '\t',
+                'n', '\n',
+                'v', '\u000b',
+                'f', '\f',
+                'F', '\f',
+                'r', '\r',
+                '"', '"',
+                '\'', '\'',
+                '/', '/',
+                '.', '.',
+                '\\', '\\',
+                '#', '#',
+                '&', '&',
+                '[', '[',
+                ']', ']',
+                '@', '@',
+                '(', '(',
+                ')', ')',
+                '_', '_',
+                ',', ',',
+                '~', '~',
+                ' ', ' ',
+        };
+        for (int i = 0; i < mapping.length; i += 2) {
+            char1_escaped[mapping[i]] = mapping[i + 1];
+        }
+        CHAR1_ESCAPED = char1_escaped;
+    }
+
+    protected static int newCapacity(int minCapacity, int oldCapacity) {
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity < 0) {
+            newCapacity = minCapacity;
+        }
+        if (newCapacity < 0) {
+            throw new OutOfMemoryError();
+        }
+        return newCapacity;
     }
 
     protected final Context context;
@@ -70,6 +147,7 @@ public abstract class JSONReader
     protected int offset;
     protected char ch;
     protected boolean comma;
+    protected int nameBegin;
 
     protected boolean nameEscape;
     protected boolean valueEscape;
@@ -95,213 +173,939 @@ public abstract class JSONReader
 
     protected byte[] doubleChars;
 
+    /**
+     * Gets the current character being processed by the reader.
+     *
+     * @return The current character
+     */
+    /**
+     * Gets the current character being processed by the reader.
+     *
+     * @return The current character
+     */
     public final char current() {
         return ch;
     }
 
+    /**
+     * Checks if the reader has reached the end of the input.
+     *
+     * @return true if at the end of input, false otherwise
+     */
     public boolean isEnd() {
         return ch == EOI;
     }
 
+    /**
+     * Gets the type of the current JSON value.
+     * This method returns a byte value representing the type of the current JSON value
+     * being processed by the reader.
+     *
+     * @return The type of the current JSON value, or -128 if not applicable
+     * @since 2.0.51
+     */
     public byte getType() {
         return -128;
     }
 
+    /**
+     * Checks if the current character represents the start of an integer value.
+     *
+     * @return true if the current character is '-', '+', or a digit, false otherwise
+     */
     public boolean isInt() {
         return ch == '-' || ch == '+' || (ch >= '0' && ch <= '9');
     }
 
+    /**
+     * Checks if the current JSON value is null.
+     *
+     * @return true if the current value is null, false otherwise
+     */
     public abstract boolean isNull();
 
+    /**
+     * Checks if the reader has encountered a comma.
+     *
+     * @return true if a comma was encountered, false otherwise
+     */
     public final boolean hasComma() {
         return comma;
     }
 
+    /**
+     * Reads a Date value from JSON data, returning null if the value is null.
+     *
+     * @return The Date value, or null if the value is null in JSON
+     */
     public abstract Date readNullOrNewDate();
 
+    /**
+     * Checks if the current JSON value is null and advances the reader if it is.
+     *
+     * @return true if the current value is null, false otherwise
+     */
     public abstract boolean nextIfNull();
 
+    /**
+     * Constructs a new JSONReader with the specified context and configuration.
+     *
+     * @param context the reading context to use
+     * @param jsonb whether to use JSONB binary format
+     * @param utf8 whether to use UTF-8 encoding
+     * @since 2.0.51
+     */
     public JSONReader(Context context, boolean jsonb, boolean utf8) {
         this.context = context;
         this.jsonb = jsonb;
         this.utf8 = utf8;
     }
 
+    /**
+     * Gets the reading context for this JSONReader.
+     *
+     * @return The Context object
+     */
     public final Context getContext() {
         return context;
     }
 
+    /**
+     * Throws a JSONException if the specified class is not serializable and the
+     * ErrorOnNoneSerializable feature is enabled.
+     *
+     * @param objectClass The class to check for serializability
+     * @throws JSONException if the class is not serializable and the feature is enabled
+     */
     public final void errorOnNoneSerializable(Class objectClass) {
-        if ((context.features & Feature.ErrorOnNoneSerializable.mask) != 0
+        if ((context.features & MASK_ERROR_ON_NONE_SERIALIZABLE) != 0
                 && !Serializable.class.isAssignableFrom(objectClass)) {
-            throw new JSONException("not support none-Serializable, class " + objectClass.getName());
+            throw new JSONException("not support none-Serializable, class ".concat(objectClass.getName()));
         }
     }
 
+    /**
+     * Checks if a specific feature is enabled in the reading context.
+     *
+     * @param feature The feature to check
+     * @return true if the feature is enabled, false otherwise
+     */
     public final boolean isEnabled(Feature feature) {
         return (context.features & feature.mask) != 0;
     }
 
+    /**
+     * Gets the locale used for parsing in this JSONReader.
+     *
+     * @return The Locale object
+     */
     public final Locale getLocale() {
         return context.getLocale();
     }
 
+    /**
+     * Gets the zone ID used for date/time parsing in this JSONReader.
+     *
+     * @return The ZoneId object
+     */
     public final ZoneId getZoneId() {
         return context.getZoneId();
     }
 
+    /**
+     * Combines the context features with the specified additional features.
+     *
+     * @param features Additional features to combine with context features
+     * @return The combined features bitmask
+     */
     public final long features(long features) {
         return context.features | features;
     }
 
+    /**
+     * Gets the raw integer value from the current position in the JSON data.
+     *
+     * @return The raw integer value
+     */
     public abstract int getRawInt();
 
+    /**
+     * Gets the raw long value from the current position in the JSON data.
+     *
+     * @return The raw long value
+     */
     public abstract long getRawLong();
 
+    /**
+     * Checks if the next field name matches a 2-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @return true if the field name matches the 2-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match2();
 
+    /**
+     * Checks if the next value matches a 2-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @return true if the value matches the 2-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfValue4Match2() {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches a 3-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @return true if the field name matches the 3-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match3();
 
+    /**
+     * Checks if the next value matches a 3-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @return true if the value matches the 3-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfValue4Match3() {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches a 4-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param c4 the fourth character to match
+     * @return true if the field name matches the 4-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match4(byte c4);
 
+    /**
+     * Checks if the next value matches a 4-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param c4 the fourth character to match
+     * @return true if the value matches the 4-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfValue4Match4(byte c4) {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches a 5-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 4 bytes of the name to match
+     * @return true if the field name matches the 5-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match5(int name1);
 
+    /**
+     * Checks if the next value matches a 5-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param c4 the fourth character to match
+     * @param c5 the fifth character to match
+     * @return true if the value matches the 5-character pattern, false otherwise
+     * @since 2.0.51
+     */
+    /**
+     * Checks if the next value matches a 5-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param c4 the fourth character to match
+     * @param c5 the fifth character to match
+     * @return true if the value matches the 5-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfValue4Match5(byte c4, byte c5) {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches a 6-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 4 bytes of the name to match
+     * @return true if the field name matches the 6-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match6(int name1);
 
+    /**
+     * Checks if the next value matches a 6-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param name1 the first 4 bytes of the name to match
+     * @return true if the value matches the 6-character pattern, false otherwise
+     * @since 2.0.51
+     */
+    /**
+     * Checks if the next value matches a 6-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param name1 the first 4 bytes of the name to match
+     * @return true if the value matches the 6-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfValue4Match6(int name1) {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches a 7-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 4 bytes of the name to match
+     * @return true if the field name matches the 7-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match7(int name1);
 
+    /**
+     * Checks if the next value matches a 7-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param name1 the first 4 bytes of the name to match
+     * @return true if the value matches the 7-character pattern, false otherwise
+     * @since 2.0.51
+     */
+    /**
+     * Checks if the next value matches a 7-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param name1 the first 4 bytes of the name to match
+     * @return true if the value matches the 7-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfValue4Match7(int name1) {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches an 8-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 4 bytes of the name to match
+     * @param c8 the eighth character to match
+     * @return true if the field name matches the 8-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match8(int name1, byte c8);
 
+    /**
+     * Checks if the next value matches an 8-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param name1 the first 4 bytes of the name to match
+     * @param c8 the eighth character to match
+     * @return true if the value matches the 8-character pattern, false otherwise
+     * @since 2.0.51
+     */
+    /**
+     * Checks if the next value matches an 8-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param name1 the first 4 bytes of the name to match
+     * @param c8 the eighth character to match
+     * @return true if the value matches the 8-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfValue4Match8(int name1, byte c8) {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches a 9-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @return true if the field name matches the 9-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match9(long name1);
 
+    /**
+     * Checks if the next value matches a 9-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param name1 the first 4 bytes of the name to match
+     * @param c8 the eighth character to match
+     * @param c9 the ninth character to match
+     * @return true if the value matches the 9-character pattern, false otherwise
+     * @since 2.0.51
+     */
+    /**
+     * Checks if the next value matches a 9-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param name1 the first 4 bytes of the name to match
+     * @param c8 the eighth character to match
+     * @param c9 the ninth character to match
+     * @return true if the value matches the 9-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfValue4Match9(int name1, byte c8, byte c9) {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches a 10-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @return true if the field name matches the 10-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match10(long name1);
 
+    /**
+     * Checks if the next value matches a 10-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @return true if the value matches the 10-character pattern, false otherwise
+     * @since 2.0.51
+     */
+    /**
+     * Checks if the next value matches a 10-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @return true if the value matches the 10-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfValue4Match10(long name1) {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches an 11-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @return true if the field name matches the 11-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match11(long name1);
 
+    /**
+     * Checks if the next value matches an 11-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @return true if the value matches the 11-character pattern, false otherwise
+     * @since 2.0.51
+     */
+    /**
+     * Checks if the next value matches an 11-character pattern.
+     * This method is used for optimized value matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @return true if the value matches the 11-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfValue4Match11(long name1) {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches a 12-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the last 4 bytes of the name to match
+     * @return true if the field name matches the 12-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match12(long name1, byte name2);
 
+    /**
+     * Checks if the next field name matches a 13-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the last 4 bytes of the name to match
+     * @return true if the field name matches the 13-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match13(long name1, int name2);
 
+    /**
+     * Checks if the next field name matches a 14-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the last 4 bytes of the name to match
+     * @return true if the field name matches the 14-character pattern, false otherwise
+     * @since 2.0.51
+     */
+    /**
+     * Checks if the next field name matches a 14-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the last 4 bytes of the name to match
+     * @return true if the field name matches the 14-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfName4Match14(long name1, int name2) {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches a 15-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the last 4 bytes of the name to match
+     * @return true if the field name matches the 15-character pattern, false otherwise
+     * @since 2.0.51
+     */
+    /**
+     * Checks if the next field name matches a 15-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the last 4 bytes of the name to match
+     * @return true if the field name matches the 15-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfName4Match15(long name1, int name2) {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches a 16-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 4 bytes of the name to match
+     * @param name3 the last byte of the name to match
+     * @return true if the field name matches the 16-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match16(long name1, int name2, byte name3);
 
+    /**
+     * Checks if the next field name matches a 17-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the last 8 bytes of the name to match
+     * @return true if the field name matches the 17-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match17(long name1, long name2);
 
+    /**
+     * Checks if the next field name matches an 18-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the last 8 bytes of the name to match
+     * @return true if the field name matches the 18-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match18(long name1, long name2);
 
+    /**
+     * Checks if the next field name matches a 19-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the last 8 bytes of the name to match
+     * @return true if the field name matches the 19-character pattern, false otherwise
+     * @since 2.0.51
+     */
+    /**
+     * Checks if the next field name matches a 19-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the last 8 bytes of the name to match
+     * @return true if the field name matches the 19-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfName4Match19(long name1, long name2) {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches a 20-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the last byte of the name to match
+     * @return true if the field name matches the 20-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match20(long name1, long name2, byte name3);
 
+    /**
+     * Checks if the next field name matches a 21-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the last 4 bytes of the name to match
+     * @return true if the field name matches the 21-character pattern, false otherwise
+     * @since 2.0.51
+     */
+    /**
+     * Checks if the next field name matches a 21-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the last 4 bytes of the name to match
+     * @return true if the field name matches the 21-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfName4Match21(long name1, long name2, int name3) {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches a 22-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the last 4 bytes of the name to match
+     * @return true if the field name matches the 22-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match22(long name1, long name2, int name3);
 
+    /**
+     * Checks if the next field name matches a 23-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the last 4 bytes of the name to match
+     * @return true if the field name matches the 23-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match23(long name1, long name2, int name3);
 
+    /**
+     * Checks if the next field name matches a 24-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second to last 4 bytes of the name to match
+     * @param name4 the last byte of the name to match
+     * @return true if the field name matches the 24-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match24(long name1, long name2, int name3, byte name4);
 
+    /**
+     * Checks if the next field name matches a 25-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the last 8 bytes of the name to match
+     * @return true if the field name matches the 25-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match25(long name1, long name2, long name3);
 
+    /**
+     * Checks if the next field name matches a 26-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the last 8 bytes of the name to match
+     * @return true if the field name matches the 26-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match26(long name1, long name2, long name3);
 
+    /**
+     * Checks if the next field name matches a 27-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the last 8 bytes of the name to match
+     * @return true if the field name matches the 27-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match27(long name1, long name2, long name3);
 
+    /**
+     * Checks if the next field name matches a 28-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second to last 8 bytes of the name to match
+     * @param c28 the last byte of the name to match
+     * @return true if the field name matches the 28-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match28(long name1, long name2, long name3, byte c28);
 
+    /**
+     * Checks if the next field name matches a 29-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second to last 8 bytes of the name to match
+     * @param name4 the last 4 bytes of the name to match
+     * @return true if the field name matches the 29-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match29(long name1, long name2, long name3, int name4);
 
+    /**
+     * Checks if the next field name matches a 30-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second to last 8 bytes of the name to match
+     * @param name4 the last 4 bytes of the name to match
+     * @return true if the field name matches the 30-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match30(long name1, long name2, long name3, int name4);
 
+    /**
+     * Checks if the next field name matches a 31-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second to last 8 bytes of the name to match
+     * @param name4 the last 4 bytes of the name to match
+     * @return true if the field name matches the 31-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match31(long name1, long name2, long name3, int name4);
 
+    /**
+     * Checks if the next field name matches a 32-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second to last 8 bytes of the name to match
+     * @param name4 the second to last 4 bytes of the name to match
+     * @param c32 the last byte of the name to match
+     * @return true if the field name matches the 32-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match32(long name1, long name2, long name3, int name4, byte c32);
 
+    /**
+     * Checks if the next field name matches a 33-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second middle 8 bytes of the name to match
+     * @param name4 the last 8 bytes of the name to match
+     * @return true if the field name matches the 33-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match33(long name1, long name2, long name3, long name4);
 
+    /**
+     * Checks if the next field name matches a 34-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second middle 8 bytes of the name to match
+     * @param name4 the last 8 bytes of the name to match
+     * @return true if the field name matches the 34-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match34(long name1, long name2, long name3, long name4);
 
+    /**
+     * Checks if the next field name matches a 35-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second middle 8 bytes of the name to match
+     * @param name4 the last 8 bytes of the name to match
+     * @return true if the field name matches the 35-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match35(long name1, long name2, long name3, long name4);
 
+    /**
+     * Checks if the next field name matches a 36-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second middle 8 bytes of the name to match
+     * @param name4 the second to last 8 bytes of the name to match
+     * @param c35 the last byte of the name to match
+     * @return true if the field name matches the 36-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match36(long name1, long name2, long name3, long name4, byte c35);
 
+    /**
+     * Checks if the next field name matches a 37-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second middle 8 bytes of the name to match
+     * @param name4 the third to last 8 bytes of the name to match
+     * @param name5 the last 4 bytes of the name to match
+     * @return true if the field name matches the 37-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match37(long name1, long name2, long name3, long name4, int name5);
 
+    /**
+     * Checks if the next field name matches a 38-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second middle 8 bytes of the name to match
+     * @param name4 the third to last 8 bytes of the name to match
+     * @param name5 the last 4 bytes of the name to match
+     * @return true if the field name matches the 38-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match38(long name1, long name2, long name3, long name4, int name5);
 
+    /**
+     * Checks if the next field name matches a 39-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second middle 8 bytes of the name to match
+     * @param name4 the third to last 8 bytes of the name to match
+     * @param name5 the last 4 bytes of the name to match
+     * @return true if the field name matches the 39-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match39(long name1, long name2, long name3, long name4, int name5);
 
+    /**
+     * Checks if the next field name matches a 40-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second middle 8 bytes of the name to match
+     * @param name4 the third to last 8 bytes of the name to match
+     * @param name5 the second to last 4 bytes of the name to match
+     * @param c40 the last byte of the name to match
+     * @return true if the field name matches the 40-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match40(long name1, long name2, long name3, long name4, int name5, byte c40);
 
+    /**
+     * Checks if the next field name matches a 41-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second middle 8 bytes of the name to match
+     * @param name4 the third middle 8 bytes of the name to match
+     * @param name5 the last 8 bytes of the name to match
+     * @return true if the field name matches the 41-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match41(long name1, long name2, long name3, long name4, long name5);
 
+    /**
+     * Checks if the next field name matches a 42-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second middle 8 bytes of the name to match
+     * @param name4 the third middle 8 bytes of the name to match
+     * @param name5 the last 8 bytes of the name to match
+     * @return true if the field name matches the 42-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match42(long name1, long name2, long name3, long name4, long name5);
 
+    /**
+     * Checks if the next field name matches a 43-character pattern.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @param name1 the first 8 bytes of the name to match
+     * @param name2 the middle 8 bytes of the name to match
+     * @param name3 the second middle 8 bytes of the name to match
+     * @param name4 the third middle 8 bytes of the name to match
+     * @param name5 the last 8 bytes of the name to match
+     * @return true if the field name matches the 43-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfName4Match43(long name1, long name2, long name3, long name4, long name5);
 
+    /**
+     * Checks if the next field name matches an 8-character pattern with no additional characters.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @return true if the field name matches the 8-character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfName8Match0() {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches an 8-character pattern with 1 additional character.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @return true if the field name matches the 8+1 character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfName8Match1() {
         return false;
     }
 
+    /**
+     * Checks if the next field name matches an 8-character pattern with 2 additional characters.
+     * This method is used for optimized field name matching in JSONB format.
+     *
+     * @return true if the field name matches the 8+2 character pattern, false otherwise
+     * @since 2.0.51
+     */
     public boolean nextIfName8Match2() {
         return false;
     }
 
+    /**
+     * Handles resolve tasks for circular references in the JSON data.
+     * This method processes all pending reference resolution tasks after the main
+     * parsing is complete, resolving circular references and updating the object graph.
+     *
+     * @param root The root object of the parsed JSON structure
+     */
     public final void handleResolveTasks(Object root) {
         if (resolveTasks == null) {
             return;
@@ -406,101 +1210,132 @@ public abstract class JSONReader
         }
     }
 
+    /**
+     * Gets an ObjectReader for the specified type from the context's provider.
+     *
+     * @param type The type for which to get an ObjectReader
+     * @return An ObjectReader for the specified type
+     */
     public final ObjectReader getObjectReader(Type type) {
-        boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
-        return context.provider.getObjectReader(type, fieldBased);
+        return context.provider.getObjectReader(type, (context.features & MASK_FIELD_BASED) != 0);
     }
 
+    /**
+     * Checks if the SmartMatch feature is enabled in the context.
+     *
+     * @return true if SmartMatch is enabled, false otherwise
+     */
     public final boolean isSupportSmartMatch() {
-        return (context.features & Feature.SupportSmartMatch.mask) != 0;
+        return (context.features & MASK_SUPPORT_SMART_MATCH) != 0;
     }
 
+    /**
+     * Checks if the InitStringFieldAsEmpty feature is enabled in the context.
+     *
+     * @return true if InitStringFieldAsEmpty is enabled, false otherwise
+     */
     public final boolean isInitStringFieldAsEmpty() {
-        return (context.features & Feature.InitStringFieldAsEmpty.mask) != 0;
+        return (context.features & MASK_INIT_STRING_FIELD_AS_EMPTY) != 0;
     }
 
+    /**
+     * Checks if the SmartMatch feature is enabled, considering additional features.
+     *
+     * @param features Additional features to consider
+     * @return true if SmartMatch is enabled with the given features, false otherwise
+     */
     public final boolean isSupportSmartMatch(long features) {
-        return ((context.features | features) & Feature.SupportSmartMatch.mask) != 0;
+        return ((context.features | features) & MASK_SUPPORT_SMART_MATCH) != 0;
     }
 
+    /**
+     * Checks if the SupportArrayToBean feature is enabled in the context.
+     *
+     * @return true if SupportArrayToBean is enabled, false otherwise
+     */
     public final boolean isSupportBeanArray() {
-        return (context.features & Feature.SupportArrayToBean.mask) != 0;
+        return (context.features & MASK_SUPPORT_ARRAY_TO_BEAN) != 0;
     }
 
+    /**
+     * Checks if the SupportArrayToBean feature is enabled, considering additional features.
+     *
+     * @param features Additional features to consider
+     * @return true if SupportArrayToBean is enabled with the given features, false otherwise
+     */
     public final boolean isSupportBeanArray(long features) {
-        return ((context.features | features) & Feature.SupportArrayToBean.mask) != 0;
+        return ((context.features | features) & MASK_SUPPORT_ARRAY_TO_BEAN) != 0;
     }
 
+    /**
+     * Checks if the SupportAutoType feature is enabled, considering additional features.
+     *
+     * @param features Additional features to consider
+     * @return true if SupportAutoType is enabled with the given features, false otherwise
+     */
     public final boolean isSupportAutoType(long features) {
-        return ((context.features | features) & Feature.SupportAutoType.mask) != 0;
+        return ((context.features | features) & MASK_SUPPORT_AUTO_TYPE) != 0;
     }
 
+    /**
+     * Checks if the SupportAutoType feature or handler is enabled, considering additional features.
+     *
+     * @param features Additional features to consider
+     * @return true if SupportAutoType or a handler is enabled with the given features, false otherwise
+     */
     public final boolean isSupportAutoTypeOrHandler(long features) {
-        return ((context.features | features) & Feature.SupportAutoType.mask) != 0 || context.autoTypeBeforeHandler != null;
+        return ((context.features | features) & MASK_SUPPORT_AUTO_TYPE) != 0 || context.autoTypeBeforeHandler != null;
     }
 
+    /**
+     * Checks if this reader is using JSONB binary format.
+     *
+     * @return true if using JSONB format, false otherwise
+     */
     public final boolean isJSONB() {
         return jsonb;
     }
 
+    /**
+     * Checks if the IgnoreNoneSerializable feature is enabled in the context.
+     *
+     * @return true if IgnoreNoneSerializable is enabled, false otherwise
+     */
     public final boolean isIgnoreNoneSerializable() {
-        return (context.features & Feature.IgnoreNoneSerializable.mask) != 0;
+        return (context.features & MASK_IGNORE_NONE_SERIALIZABLE) != 0;
     }
 
+    /**
+     * Checks if there is an auto-type before handler configured in the context.
+     *
+     * @return true if there is an auto-type before handler, false otherwise
+     */
+    public boolean hasAutoTypeBeforeHandler() {
+        return context.autoTypeBeforeHandler != null;
+    }
+
+    /**
+     * Checks the auto type for the specified class and hash, considering additional features.
+     *
+     * @param expectClass The expected class
+     * @param expectClassHash The expected class hash
+     * @param features Additional features to consider
+     * @return An ObjectReader for the auto-detected type, or null if not found
+     */
     public ObjectReader checkAutoType(Class expectClass, long expectClassHash, long features) {
         return null;
     }
 
     final char char1(int c) {
-        switch (c) {
-            case '0':
-                return '\0';
-            case '1':
-                return '\1';
-            case '2':
-                return '\2';
-            case '3':
-                return '\3';
-            case '4':
-                return '\4';
-            case '5':
-                return '\5';
-            case '6':
-                return '\6';
-            case '7':
-                return '\7';
-            case 'b': // 8
-                return '\b';
-            case 't': // 9
-                return '\t';
-            case 'n': // 10
-                return '\n';
-            case 'v': // 11
-                return '\u000B';
-            case 'f': // 12
-            case 'F':
-                return '\f';
-            case 'r': // 13
-                return '\r';
-            case '"': // 34
-            case '\'': // 39
-            case '/': // 47
-            case '.': // 47
-            case '\\': // 92
-            case '#':
-            case '&':
-            case '[':
-            case ']':
-            case '@':
-            case '(':
-            case ')':
-            case '_':
-            case ',':
-            case '~':
-                return (char) c;
-            default:
-                throw new JSONException(info("unclosed.str '\\" + (char) c));
+        byte b = CHAR1_ESCAPED[c & 0x7f];
+        if (b == -1) {
+            throw char1Error(c);
         }
+        return (char) b;
+    }
+
+    protected JSONException char1Error(int c) {
+        return new JSONException(info("unclosed.str '\\" + (char) c));
     }
 
     static char char2(int c1, int c2) {
@@ -508,12 +1343,33 @@ public abstract class JSONReader
                 + DIGITS2[c2]);
     }
 
+    /**
+     * Checks if the current character is the start of a JSON object ('{') and advances the reader if it is.
+     *
+     * @return true if the current character is '{', false otherwise
+     */
     public abstract boolean nextIfObjectStart();
 
+    /**
+     * Checks if the current value is a null or empty string and advances the reader if it is.
+     *
+     * @return true if the current value is null or an empty string, false otherwise
+     */
     public abstract boolean nextIfNullOrEmptyString();
 
+    /**
+     * Checks if the current character is the end of a JSON object ('}') and advances the reader if it is.
+     *
+     * @return true if the current character is '}', false otherwise
+     */
     public abstract boolean nextIfObjectEnd();
 
+    /**
+     * Starts reading a JSON array, advancing the reader to the first element.
+     *
+     * @return The maximum integer value as a placeholder
+     * @throws JSONException if the current character is not the start of an array ('[')
+     */
     public int startArray() {
         if (!nextIfArrayStart()) {
             throw new JSONException(info("illegal input, expect '[', but " + ch));
@@ -521,10 +1377,27 @@ public abstract class JSONReader
         return Integer.MAX_VALUE;
     }
 
+    /**
+     * Checks if the current value represents a reference.
+     *
+     * @return true if the current value represents a reference, false otherwise
+     */
     public abstract boolean isReference();
 
+    /**
+     * Reads a reference value from JSON data.
+     *
+     * @return The reference value as a string
+     */
     public abstract String readReference();
 
+    /**
+     * Reads a reference value from JSON data and adds it to the specified list at the given index.
+     *
+     * @param list The list to which the reference should be added
+     * @param i The index at which to add the reference in the list
+     * @return true if a reference was read and added, false otherwise
+     */
     public final boolean readReference(List list, int i) {
         if (!isReference()) {
             return false;
@@ -532,6 +1405,13 @@ public abstract class JSONReader
         return readReference0(list, i);
     }
 
+    /**
+     * Reads a reference value from JSON data and adds it to the specified collection at the given index.
+     *
+     * @param list The collection to which the reference should be added
+     * @param i The index at which to add the reference in the collection
+     * @return true if a reference was read and added, false otherwise
+     */
     public boolean readReference(Collection list, int i) {
         if (!isReference()) {
             return false;
@@ -580,14 +1460,34 @@ public abstract class JSONReader
         resolveTasks.add(new ResolveTask(null, object, i, reference));
     }
 
+    /**
+     * Checks if the current character represents the start of a JSON array.
+     *
+     * @return true if the current character is '[', false otherwise
+     */
+    /**
+     * Checks if the current character represents the start of a JSON array.
+     *
+     * @return true if the current character is '[', false otherwise
+     */
     public boolean isArray() {
         return this.ch == '[';
     }
 
+    /**
+     * Checks if the current character represents the start of a JSON object.
+     *
+     * @return true if the current character is '{', false otherwise
+     */
     public boolean isObject() {
         return this.ch == '{';
     }
 
+    /**
+     * Checks if the current character represents the start of a JSON number.
+     *
+     * @return true if the current character is a digit or sign, false otherwise
+     */
     public boolean isNumber() {
         switch (this.ch) {
             case '-':
@@ -608,62 +1508,186 @@ public abstract class JSONReader
         }
     }
 
+    /**
+     * Checks if the current character represents the start of a JSON string.
+     *
+     * @return true if the current character is a quote, false otherwise
+     */
     public boolean isString() {
         return this.ch == '"' || this.ch == '\'';
     }
 
+    /**
+     * Checks if the current character represents the start of a JSON boolean.
+     *
+     * @return true if the current character is 't' (true) or 'f' (false), false otherwise
+     */
+    public boolean isBool() {
+        return this.ch == 't' || this.ch == 'f';
+    }
+
+    /**
+     * Advances the reader to the end of the current JSON array.
+     */
     public void endArray() {
         next();
     }
 
+    /**
+     * Checks if the current character matches the specified character and advances the reader if it does.
+     *
+     * @param ch The character to match
+     * @return true if the current character matches the specified character, false otherwise
+     */
     public abstract boolean nextIfMatch(char ch);
 
+    /**
+     * Checks if the current character is a comma (',') and advances the reader if it is.
+     *
+     * @return true if the current character is a comma, false otherwise
+     */
     public abstract boolean nextIfComma();
 
+    /**
+     * Checks if the current character is the start of a JSON array ('[') and advances the reader if it is.
+     *
+     * @return true if the current character is '[', false otherwise
+     */
     public abstract boolean nextIfArrayStart();
 
+    /**
+     * Checks if the current character is the end of a JSON array (']') and advances the reader if it is.
+     *
+     * @return true if the current character is ']', false otherwise
+     */
     public abstract boolean nextIfArrayEnd();
 
+    /**
+     * Checks if the current value represents a Set and advances the reader if it is.
+     * This method is used to detect Set-type collections during JSON parsing.
+     *
+     * @return true if the current value represents a Set, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfSet();
 
+    /**
+     * Checks if the current value represents infinity and advances the reader if it is.
+     * This method is used to detect infinity values during JSON parsing.
+     *
+     * @return true if the current value represents infinity, false otherwise
+     * @since 2.0.51
+     */
     public abstract boolean nextIfInfinity();
 
+    /**
+     * Reads a pattern string from the JSON data.
+     * This method is used to read regular expression patterns or other pattern strings.
+     *
+     * @return The pattern string read from the JSON data
+     * @since 2.0.51
+     */
     public abstract String readPattern();
 
     public final int getOffset() {
         return offset;
     }
 
+    /**
+     * Advances the reader to the next character in the JSON data.
+     */
     public abstract void next();
 
+    /**
+     * Advances the reader to the next character in the JSON data, skipping comment processing.
+     */
     public void nextWithoutComment() {
         next();
     }
 
+    /**
+     * Reads the hash code of the current JSON value.
+     *
+     * @return The hash code of the current value
+     */
     public abstract long readValueHashCode();
 
+    /**
+     * Reads the hash code of the current type in the JSON data.
+     *
+     * @return The hash code of the current type
+     */
     public long readTypeHashCode() {
         return readValueHashCode();
     }
 
+    /**
+     * Reads the hash code of the current field name in a JSON object.
+     *
+     * @return The hash code of the current field name
+     */
     public abstract long readFieldNameHashCode();
 
+    public long readFieldNameHashCode(int keySie, int min, int max) {
+        return readFieldNameHashCode();
+    }
+
+    public long readFieldNameHashCodeE(int size0, int size1, int size3) {
+        return readFieldNameHashCode();
+    }
+
+    /**
+     * Reads the hash code of the current field name in lowercase.
+     *
+     * @return The hash code of the current field name in lowercase
+     */
     public abstract long getNameHashCodeLCase();
 
+    /**
+     * Reads the current field name in a JSON object.
+     *
+     * @return The current field name
+     */
     public abstract String readFieldName();
 
+    /**
+     * Gets the current field name in a JSON object.
+     *
+     * @return The current field name
+     */
     public abstract String getFieldName();
 
+    /**
+     * Sets the type redirect flag for this reader.
+     *
+     * @param typeRedirect true to enable type redirection, false to disable
+     */
     public final void setTypeRedirect(boolean typeRedirect) {
         this.typeRedirect = typeRedirect;
     }
 
+    /**
+     * Checks if type redirection is enabled for this reader.
+     *
+     * @return true if type redirection is enabled, false otherwise
+     */
     public final boolean isTypeRedirect() {
         return typeRedirect;
     }
 
+    /**
+     * Reads the hash code of the current field name in a JSON object without requiring quotes.
+     *
+     * @return The hash code of the current field name
+     */
     public abstract long readFieldNameHashCodeUnquote();
 
+    /**
+     * Reads the current field name in a JSON object without requiring quotes.
+     *
+     * @return The current field name
+     * @throws JSONException if the field name is null or empty
+     */
     public final String readFieldNameUnquote() {
         if (ch == '/') {
             skipComment();
@@ -676,16 +1700,40 @@ public abstract class JSONReader
         return name;
     }
 
+    /**
+     * Skips the current field name in a JSON object.
+     *
+     * @return true if the field name was successfully skipped, false otherwise
+     */
     public abstract boolean skipName();
 
+    /**
+     * Skips the current JSON value, advancing the reader to the next value or end of the current structure.
+     */
     public abstract void skipValue();
 
+    /**
+     * Checks if the current value represents binary data.
+     *
+     * @return true if the current value is binary data, false otherwise
+     */
     public boolean isBinary() {
         return false;
     }
 
+    /**
+     * Reads a hexadecimal string from JSON data and converts it to a byte array.
+     *
+     * @return The byte array representation of the hexadecimal string
+     */
     public abstract byte[] readHex();
 
+    /**
+     * Reads binary data from JSON data.
+     *
+     * @return The byte array representation of the binary data
+     * @throws JSONException if there is an error parsing the binary data
+     */
     public byte[] readBinary() {
         if (ch == 'x') {
             return readHex();
@@ -726,8 +1774,19 @@ public abstract class JSONReader
         throw new JSONException(info("not support read binary"));
     }
 
+    /**
+     * Reads a 32-bit integer value from JSON data.
+     *
+     * @return The 32-bit integer value
+     */
     public abstract int readInt32Value();
 
+    /**
+     * Reads an array of 32-bit integer values from JSON data.
+     *
+     * @return The array of 32-bit integer values
+     * @throws JSONException if there is an error parsing the JSON
+     */
     public int[] readInt32ValueArray() {
         if (nextIfNull()) {
             return null;
@@ -770,10 +1829,23 @@ public abstract class JSONReader
         throw new JSONException(info("TODO"));
     }
 
+    /**
+     * Checks if the next value matches the specified type and advances the reader if it does.
+     *
+     * @param type The type to match
+     * @return true if the next value matches the specified type, false otherwise
+     * @throws JSONException as this operation is not supported
+     */
     public boolean nextIfMatch(byte type) {
         throw new JSONException("UnsupportedOperation");
     }
 
+    /**
+     * Checks if the next value matches any type and advances the reader if it does.
+     *
+     * @return true if the next value matches any type, false otherwise
+     * @throws JSONException as this operation is not supported
+     */
     public boolean nextIfMatchTypedAny() {
         throw new JSONException("UnsupportedOperation");
     }
@@ -788,6 +1860,11 @@ public abstract class JSONReader
 
     public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5);
 
+    /**
+     * Reads a Byte object from JSON data.
+     *
+     * @return The Byte object, or null if the value is null in JSON
+     */
     public final Byte readInt8() {
         Integer i = readInt32();
         if (i == null) {
@@ -796,11 +1873,21 @@ public abstract class JSONReader
         return i.byteValue();
     }
 
+    /**
+     * Reads a byte value from JSON data.
+     *
+     * @return The byte value
+     */
     public byte readInt8Value() {
         int i = readInt32Value();
         return (byte) i;
     }
 
+    /**
+     * Reads a Short object from JSON data.
+     *
+     * @return The Short object, or null if the value is null in JSON
+     */
     public final Short readInt16() {
         Integer i = readInt32();
         if (i == null) {
@@ -809,18 +1896,38 @@ public abstract class JSONReader
         return i.shortValue();
     }
 
+    /**
+     * Reads a short value from JSON data.
+     *
+     * @return The short value
+     */
     public short readInt16Value() {
         int i = readInt32Value();
         return (short) i;
     }
 
+    /**
+     * Reads an Integer object from JSON data.
+     *
+     * @return The Integer object, or null if the value is null in JSON
+     */
     public abstract Integer readInt32();
 
+    /**
+     * Reads a 32-bit integer value from JSON data, handling overflow conditions.
+     *
+     * @return The 32-bit integer value
+     */
     protected final int readInt32ValueOverflow() {
         readNumber0();
         return getInt32Value();
     }
 
+    /**
+     * Reads a 64-bit long value from JSON data, handling overflow conditions.
+     *
+     * @return The 64-bit long value
+     */
     protected final long readInt64ValueOverflow() {
         readNumber0();
         return getInt64Value();
@@ -987,19 +2094,7 @@ public abstract class JSONReader
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 : mag3;
                 }
-                Number number = getNumber();
-                if (number instanceof BigInteger) {
-                    BigInteger bigInt = (BigInteger) number;
-                    if ((context.features & Feature.NonErrorOnNumberOverflow.mask) != 0) {
-                        return bigInt.longValue();
-                    }
-                    try {
-                        return bigInt.longValueExact();
-                    } catch (ArithmeticException e) {
-                        throw numberError();
-                    }
-                }
-                return number.doubleValue();
+                return getNumber().doubleValue();
             case JSON_TYPE_DEC:
             case JSON_TYPE_INT64:
             case JSON_TYPE_FLOAT:
@@ -1051,6 +2146,12 @@ public abstract class JSONReader
         return (float) getDoubleValue();
     }
 
+    /**
+     * Reads an array of 64-bit long values from JSON data.
+     *
+     * @return The array of 64-bit long values
+     * @throws JSONException if there is an error parsing the JSON
+     */
     public long[] readInt64ValueArray() {
         if (nextIfNull()) {
             return null;
@@ -1070,15 +2171,7 @@ public abstract class JSONReader
 
                 values[size++] = readInt64Value();
             }
-            nextIfComma();
-
-            long[] array;
-            if (size == values.length) {
-                array = values;
-            } else {
-                array = Arrays.copyOf(values, size);
-            }
-            return array;
+            return size == values.length ? values : Arrays.copyOf(values, size);
         }
 
         if (isString()) {
@@ -1087,18 +2180,38 @@ public abstract class JSONReader
                 return null;
             }
 
-            throw new JSONException(info("not support input " + str));
+            throw error("not support input ".concat(str));
         }
 
         throw new JSONException(info("TODO"));
     }
 
+    /**
+     * Reads a 64-bit long value from JSON data.
+     *
+     * @return The 64-bit long value
+     */
     public abstract long readInt64Value();
 
+    /**
+     * Reads a Long object from JSON data.
+     *
+     * @return The Long object, or null if the value is null in JSON
+     */
     public abstract Long readInt64();
 
+    /**
+     * Reads a float value from JSON data.
+     *
+     * @return The float value
+     */
     public abstract float readFloatValue();
 
+    /**
+     * Reads a Float object from JSON data.
+     *
+     * @return The Float object, or null if the value is null in JSON
+     */
     public Float readFloat() {
         if (nextIfNull()) {
             return null;
@@ -1112,8 +2225,18 @@ public abstract class JSONReader
         return value;
     }
 
+    /**
+     * Reads a double value from JSON data.
+     *
+     * @return The double value
+     */
     public abstract double readDoubleValue();
 
+    /**
+     * Reads a Double object from JSON data.
+     *
+     * @return The Double object, or null if the value is null in JSON
+     */
     public final Double readDouble() {
         if (nextIfNull()) {
             return null;
@@ -1127,20 +2250,46 @@ public abstract class JSONReader
         return value;
     }
 
+    /**
+     * Reads a Number value from JSON data.
+     *
+     * @return The Number value
+     */
     public Number readNumber() {
         readNumber0();
         return getNumber();
     }
 
+    /**
+     * Reads a BigInteger value from JSON data.
+     *
+     * @return The BigInteger value
+     */
     public BigInteger readBigInteger() {
         readNumber0();
         return getBigInteger();
     }
 
+    /**
+     * Reads a BigDecimal value from JSON data.
+     *
+     * @return The BigDecimal value
+     */
     public abstract BigDecimal readBigDecimal();
 
+    /**
+     * Reads a UUID value from JSON data.
+     *
+     * @return The UUID value
+     */
     public abstract UUID readUUID();
 
+    /**
+     * Reads a LocalDate value from JSON data.
+     *
+     * @return The LocalDate value, or null if the value is null in JSON
+     * @throws JSONException if there is an error parsing the date
+     */
     public LocalDate readLocalDate() {
         if (nextIfNull()) {
             return null;
@@ -1223,6 +2372,12 @@ public abstract class JSONReader
         throw new JSONException("not support input : " + str);
     }
 
+    /**
+     * Reads a LocalDateTime value from JSON data.
+     *
+     * @return The LocalDateTime value, or null if the value is null in JSON
+     * @throws JSONException if there is an error parsing the date/time
+     */
     public LocalDateTime readLocalDateTime() {
         if (isInt()) {
             long millis = readInt64Value();
@@ -1373,6 +2528,12 @@ public abstract class JSONReader
 
     public abstract OffsetDateTime readOffsetDateTime();
 
+    /**
+     * Reads a ZonedDateTime value from JSON data.
+     *
+     * @return The ZonedDateTime value, or null if the value is null in JSON
+     * @throws JSONException if there is an error parsing the date/time
+     */
     public ZonedDateTime readZonedDateTime() {
         if (isInt()) {
             long millis = readInt64Value();
@@ -1476,6 +2637,12 @@ public abstract class JSONReader
 
     public abstract OffsetTime readOffsetTime();
 
+    /**
+     * Reads a Calendar value from JSON data.
+     *
+     * @return The Calendar value, or null if the value is null in JSON
+     * @throws JSONException if there is an error parsing the date
+     */
     public Calendar readCalendar() {
         if (isString()) {
             long millis = readMillisFromString();
@@ -1502,6 +2669,12 @@ public abstract class JSONReader
         return calendar;
     }
 
+    /**
+     * Reads a Date value from JSON data.
+     *
+     * @return The Date value, or null if the value is null in JSON
+     * @throws JSONException if there is an error parsing the date
+     */
     public Date readDate() {
         if (isInt()) {
             long millis = readInt64Value();
@@ -1544,6 +2717,12 @@ public abstract class JSONReader
         return new Date(millis);
     }
 
+    /**
+     * Reads a LocalTime value from JSON data.
+     *
+     * @return The LocalTime value, or null if the value is null in JSON
+     * @throws JSONException if there is an error parsing the time
+     */
     public LocalTime readLocalTime() {
         if (nextIfNull()) {
             return null;
@@ -1574,6 +2753,8 @@ public abstract class JSONReader
                 return readLocalTime11();
             case 12:
                 return readLocalTime12();
+            case 15:
+                return readLocalTime15();
             case 18:
                 return readLocalTime18();
             case 19:
@@ -1601,12 +2782,28 @@ public abstract class JSONReader
         throw new JSONException("not support len : " + str);
     }
 
+    /**
+     * Gets the length of the current string value in the JSON data.
+     *
+     * @return The length of the current string value
+     */
     protected abstract int getStringLength();
 
+    /**
+     * Checks if the current value represents a date.
+     *
+     * @return true if the current value represents a date, false otherwise
+     */
     public boolean isDate() {
         return false;
     }
 
+    /**
+     * Reads an Instant value from JSON data.
+     *
+     * @return The Instant value, or null if the value is null in JSON
+     * @throws JSONException if there is an error parsing the instant
+     */
     public Instant readInstant() {
         if (nextIfNull()) {
             return null;
@@ -1638,6 +2835,12 @@ public abstract class JSONReader
                 zdt.toLocalTime().getNano());
     }
 
+    /**
+     * Reads milliseconds from a string value in JSON data.
+     *
+     * @return The milliseconds value
+     * @throws JSONException if there is an error parsing the string
+     */
     public final long readMillisFromString() {
         wasNull = false;
         String format = context.dateFormat;
@@ -1831,6 +3034,11 @@ public abstract class JSONReader
 
     protected abstract LocalDateTime readLocalDateTime20();
 
+    /**
+     * Reads milliseconds from a 19-character date string in JSON data.
+     *
+     * @return The milliseconds value
+     */
     public abstract long readMillis19();
 
     protected abstract LocalDateTime readLocalDateTimeX(int len);
@@ -1851,6 +3059,8 @@ public abstract class JSONReader
 
     protected abstract LocalTime readLocalTime12();
 
+    protected abstract LocalTime readLocalTime15();
+
     protected abstract LocalTime readLocalTime18();
 
     protected abstract LocalDate readLocalDate8();
@@ -1863,12 +3073,24 @@ public abstract class JSONReader
 
     protected abstract ZonedDateTime readZonedDateTimeX(int len);
 
+    /**
+     * Reads a number value from JSON data and passes it to a consumer.
+     *
+     * @param consumer The consumer to accept the number value
+     * @param quoted Whether the number should be quoted in the output
+     */
     public void readNumber(ValueConsumer consumer, boolean quoted) {
         readNumber0();
         Number number = getNumber();
         consumer.accept(number);
     }
 
+    /**
+     * Reads a string value from JSON data and passes it to a consumer.
+     *
+     * @param consumer The consumer to accept the string value
+     * @param quoted Whether the string should be quoted in the output
+     */
     public void readString(ValueConsumer consumer, boolean quoted) {
         String str = readString(); //
         if (quoted) {
@@ -1878,10 +3100,58 @@ public abstract class JSONReader
         }
     }
 
-    protected abstract void readNumber0();
-
+    /**
+     * Reads a string value from JSON data.
+     *
+     * @return The string value
+     */
     public abstract String readString();
 
+    /**
+     * Reads a number value from JSON data and stores it in internal fields.
+     * This is a low-level method used by other number reading methods.
+     */
+    protected abstract void readNumber0();
+
+    /**
+     * Reads a Base64 encoded string from JSON data and decodes it to bytes.
+     *
+     * @return The decoded byte array
+     */
+    /**
+     * Reads a Base64 encoded string from JSON data and decodes it to bytes.
+     *
+     * @return The decoded byte array
+     */
+    public byte[] readBase64() {
+        String str = readString();
+        if (str != null) {
+            String prefix = "data:image/";
+            int p0, p1;
+            String base64 = "base64";
+            if (str.startsWith(prefix)
+                    && (p0 = str.indexOf(';', prefix.length() + 1)) != -1
+                    && (p1 = str.indexOf(',', p0 + 1)) != -1 && str.regionMatches(p0 + 1, base64, 0, base64.length())) {
+                str = str.substring(p1 + 1);
+            }
+        }
+        if (str.isEmpty()) {
+            return new byte[0];
+        }
+        return Base64.getDecoder().decode(str);
+    }
+
+    /**
+     * Reads a JSON array of strings and returns it as a String array.
+     *
+     * @return The String array
+     */
+    /**
+     * Reads a JSON array of strings and returns it as a String array.
+     *
+     * @return The String array, or null if the value is null in JSON
+     * @throws JSONException if there is an error parsing the JSON
+     */
     public String[] readStringArray() {
         if ((ch == 'n') && nextIfNull()) {
             return null;
@@ -1912,7 +3182,6 @@ public abstract class JSONReader
 
                 values[size++] = readString();
             }
-            nextIfComma();
 
             if (values.length == size) {
                 return values;
@@ -1932,6 +3201,11 @@ public abstract class JSONReader
         throw new JSONException(info("not support input"));
     }
 
+    /**
+     * Reads a character value from JSON data.
+     *
+     * @return The character value
+     */
     public char readCharValue() {
         String str = readString();
         if (str == null || str.isEmpty()) {
@@ -1941,6 +3215,11 @@ public abstract class JSONReader
         return str.charAt(0);
     }
 
+    /**
+     * Reads a Character object from JSON data.
+     *
+     * @return The Character object, or null if the value is null in JSON
+     */
     public Character readCharacter() {
         String str = readString();
         if (str == null || str.isEmpty()) {
@@ -1950,10 +3229,27 @@ public abstract class JSONReader
         return str.charAt(0);
     }
 
+    /**
+     * Reads a null value from JSON data and advances the reader.
+     */
     public abstract void readNull();
 
+    protected double readNaN() {
+        throw new JSONException("not support");
+    }
+
+    /**
+     * Checks if the current JSON value is null and advances the reader if it is.
+     *
+     * @return true if the current value is null, false otherwise
+     */
     public abstract boolean readIfNull();
 
+    /**
+     * Gets the current string value from the JSON data.
+     *
+     * @return The current string value
+     */
     public abstract String getString();
 
     public boolean wasNull() {
@@ -2041,6 +3337,11 @@ public abstract class JSONReader
     }
 
     /**
+     * Reads JSON data into a Map using a specified ObjectReader for the values.
+     *
+     * @param object The Map to populate with data
+     * @param itemReader The ObjectReader to use for reading values
+     * @param features Reader features to apply during reading
      * @since 2.0.35
      */
     public void read(Map object, ObjectReader itemReader, long features) {
@@ -2074,6 +3375,13 @@ public abstract class JSONReader
                 continue;
             }
 
+            if ((contextFeatures & Feature.SupportAutoType.mask) != 0
+                    && name.equals("@type")
+                    && object.getClass().getName().equals(value)
+            ) {
+                continue;
+            }
+
             Object origin = map.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -2091,6 +3399,12 @@ public abstract class JSONReader
         nextIfComma();
     }
 
+    /**
+     * Reads JSON data into a Map with specified features.
+     *
+     * @param object The Map to populate with data
+     * @param features Reader features to apply during reading
+     */
     public void read(Map object, long features) {
         if (ch == '\'' && ((context.features & Feature.DisableSingleQuote.mask) != 0)) {
             throw notSupportName();
@@ -2294,6 +3608,14 @@ public abstract class JSONReader
         nextIfComma();
     }
 
+    /**
+     * Reads JSON data into a Map with specified key and value types.
+     *
+     * @param object The Map to populate with data
+     * @param keyType The type of keys in the map
+     * @param valueType The type of values in the map
+     * @param features Reader features to apply during reading
+     */
     public final void read(Map object, Type keyType, Type valueType, long features) {
         boolean match = nextIfObjectStart();
         if (!match) {
@@ -2333,6 +3655,13 @@ public abstract class JSONReader
                 continue;
             }
 
+            if ((contextFeatures & Feature.SupportAutoType.mask) != 0
+                    && name.equals("@type")
+                    && object.getClass().getName().equals(value)
+            ) {
+                continue;
+            }
+
             Object origin = object.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -2356,6 +3685,12 @@ public abstract class JSONReader
         return (T) objectReader.readObject(this, null, null, 0);
     }
 
+    /**
+     * Reads JSON data and returns it as a Map.
+     *
+     * @return A Map representation of the JSON data
+     * @throws JSONException if there is an error parsing the JSON
+     */
     public Map<String, Object> readObject() {
         nextIfObjectStart();
 
@@ -2474,6 +3809,13 @@ public abstract class JSONReader
                 continue;
             }
 
+            if ((context.features & Feature.SupportAutoType.mask) != 0
+                    && name.equals("@type")
+                    && object.getClass().getName().equals(val)
+            ) {
+                continue;
+            }
+
             Object origin;
             if (innerMap != null) {
                 origin = innerMap.put(name, val);
@@ -2502,13 +3844,23 @@ public abstract class JSONReader
         return object;
     }
 
+    /**
+     * Skips a comment in the JSON data, advancing the reader to the end of the comment.
+     */
     public abstract void skipComment();
 
+    /**
+     * Reads a boolean value from JSON data.
+     *
+     * @return The boolean value, or null if the value is null in JSON
+     * @throws JSONException if there is an error parsing the JSON
+     */
     public Boolean readBool() {
         if (nextIfNull()) {
             return null;
         }
 
+        wasNull = false;
         boolean boolValue = readBoolValue();
         if (!boolValue && wasNull) {
             return null;
@@ -2516,12 +3868,34 @@ public abstract class JSONReader
         return boolValue;
     }
 
+    /**
+     * Reads a boolean value from JSON data as a primitive boolean.
+     *
+     * @return The boolean value
+     * @throws JSONException if there is an error parsing the JSON
+     */
+    /**
+     * Reads a boolean value from JSON data.
+     *
+     * @return The boolean value
+     */
     public abstract boolean readBoolValue();
 
+    /**
+     * Reads any JSON value and returns it as an Object.
+     *
+     * @return The JSON value as an Object
+     */
     public Object readAny() {
         return read(Object.class);
     }
 
+    /**
+     * Reads a JSON array with elements of a specified type.
+     *
+     * @param itemType The type of elements in the array
+     * @return A List containing the array elements
+     */
     public List readArray(Type itemType) {
         if (nextIfNull()) {
             return null;
@@ -2533,10 +3907,21 @@ public abstract class JSONReader
 
             boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
             ObjectReader objectReader = context.provider.getObjectReader(itemType, fieldBased);
-            for (Object item; !nextIfArrayEnd(); list.add(item)) {
+            for (int i = 0; !nextIfArrayEnd(); i++) {
                 int mark = offset;
-                item = objectReader.readObject(this, null, null, 0);
-
+                Object item;
+                if (isReference()) {
+                    String reference = readReference();
+                    if ("..".equals(reference)) {
+                        item = list;
+                    } else {
+                        item = null;
+                        addResolveTask(list, i, JSONPath.of(reference));
+                    }
+                } else {
+                    item = objectReader.readObject(this, null, null, 0);
+                }
+                list.add(item);
                 if (mark == offset || ch == '}' || ch == EOI) {
                     throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
                 }
@@ -2557,6 +3942,12 @@ public abstract class JSONReader
         return list;
     }
 
+    /**
+     * Reads a JSON array with elements of specified types.
+     *
+     * @param types The types of elements in the array
+     * @return A List containing the array elements
+     */
     public List readList(Type[] types) {
         if (nextIfNull()) {
             return null;
@@ -2589,6 +3980,12 @@ public abstract class JSONReader
         return list;
     }
 
+    /**
+     * Reads a JSON array with elements of specified types into an Object array.
+     *
+     * @param types The types of elements in the array
+     * @return An Object array containing the array elements
+     */
     public final Object[] readArray(Type[] types) {
         if (nextIfNull()) {
             return null;
@@ -2664,18 +4061,33 @@ public abstract class JSONReader
         }
     }
 
+    /**
+     * Reads a JSON array and returns it as a JSONArray.
+     *
+     * @return A JSONArray representation of the JSON array
+     */
     public final JSONArray readJSONArray() {
         JSONArray array = new JSONArray();
         read(array);
         return array;
     }
 
+    /**
+     * Reads a JSON object and returns it as a JSONObject.
+     *
+     * @return A JSONObject representation of the JSON object
+     */
     public final JSONObject readJSONObject() {
         JSONObject object = new JSONObject();
         read(object, 0L);
         return object;
     }
 
+    /**
+     * Reads a JSON array and returns it as a List.
+     *
+     * @return A List representation of the JSON array
+     */
     public List readArray() {
         next();
 
@@ -2735,8 +4147,19 @@ public abstract class JSONReader
                     val = null;
                     break;
                 }
+                case 'N':
+                    val = readNaN();
+                    break;
+                case 'S':
+                    if (nextIfSet()) {
+                        val = read(java.util.Set.class);
+                    } else {
+                        throw new JSONException(info());
+                    }
+                    break;
                 case '/':
                     skipComment();
+                    --i;
                     continue;
                 default:
                     throw new JSONException(info());
@@ -3000,85 +4423,22 @@ public abstract class JSONReader
             }
             case JSON_TYPE_DEC: {
                 BigDecimal decimal = null;
+                boolean needsExponent = false;
 
                 if (mag0 == 0 && mag1 == 0) {
                     if (mag2 == 0 && mag3 >= 0) {
                         int unscaledVal = negative ? -mag3 : mag3;
                         decimal = BigDecimal.valueOf(unscaledVal, scale);
+                        needsExponent = true;
                     } else {
                         long v3 = mag3 & 0XFFFFFFFFL;
                         long v2 = mag2 & 0XFFFFFFFFL;
 
                         if (v2 <= Integer.MAX_VALUE) {
-                            long v23 = (v2 << 32) + (v3);
+                            long v23 = (v2 << 32) + v3;
                             long unscaledVal = negative ? -v23 : v23;
-
-                            if (exponent == 0) {
-                                if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
-                                    boolean isNegative;
-                                    long unsignedUnscaledVal;
-                                    if (unscaledVal < 0) {
-                                        isNegative = true;
-                                        unsignedUnscaledVal = -unscaledVal;
-                                    } else {
-                                        isNegative = false;
-                                        unsignedUnscaledVal = unscaledVal;
-                                    }
-
-                                    /*
-                                     * If both unscaledVal and the scale can be exactly
-                                     * represented as float values, perform a single float
-                                     * multiply or divide to compute the (properly
-                                     * rounded) result.
-                                     */
-
-                                    int len = IOUtils.stringSize(unsignedUnscaledVal);
-                                    if (doubleChars == null) {
-                                        doubleChars = new byte[20];
-                                    }
-                                    IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
-                                    return TypeUtils.floatValue(isNegative, len - scale, doubleChars, len);
-                                } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
-                                    boolean isNegative;
-                                    long unsignedUnscaledVal;
-                                    if (unscaledVal < 0) {
-                                        isNegative = true;
-                                        unsignedUnscaledVal = -unscaledVal;
-                                    } else {
-                                        isNegative = false;
-                                        unsignedUnscaledVal = unscaledVal;
-                                    }
-
-                                    /*
-                                     * If both unscaledVal and the scale can be exactly
-                                     * represented as double values, perform a single
-                                     * double multiply or divide to compute the (properly
-                                     * rounded) result.
-                                     */
-                                    if (unsignedUnscaledVal < 1L << 52) {
-                                        // Don't have too guard against
-                                        // Math.abs(MIN_VALUE) because of outer check
-                                        // against INFLATED.
-                                        if (scale > 0 && scale < DOUBLE_10_POW.length) {
-                                            return (double) unscaledVal / DOUBLE_10_POW[scale];
-                                        } else if (scale < 0 && scale > -DOUBLE_10_POW.length) {
-                                            return (double) unscaledVal * DOUBLE_10_POW[-scale];
-                                        }
-                                    }
-
-                                    int len = unsignedUnscaledVal < 10000000000000000L
-                                            ? 16
-                                            : unsignedUnscaledVal < 100000000000000000L
-                                            ? 17
-                                            : unsignedUnscaledVal < 1000000000000000000L ? 18 : 19;
-                                    if (doubleChars == null) {
-                                        doubleChars = new byte[20];
-                                    }
-                                    IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
-                                    return TypeUtils.doubleValue(isNegative, len - scale, doubleChars, len);
-                                }
-                            }
                             decimal = BigDecimal.valueOf(unscaledVal, scale);
+                            needsExponent = true;
                         }
                     }
                 }
@@ -3099,10 +4459,16 @@ public abstract class JSONReader
                     }
                 }
 
-                if (exponent != 0 && (context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
+                if (exponent != 0) {
                     String decimalStr = decimal.toPlainString();
-                    return Double.parseDouble(
-                            decimalStr + "E" + exponent);
+                    if ((context.features & (Feature.UseBigDecimalForDoubles.mask | Feature.UseBigDecimalForFloats.mask)) == 0) {
+                        return Double.parseDouble(
+                                decimalStr + "E" + exponent);
+                    }
+                    if (needsExponent) {
+                        return decimal.signum() == 0 ? BigDecimal.ZERO : new BigDecimal(decimalStr + "E" + exponent);
+                    }
+                    return decimal.signum() == 0 ? BigDecimal.ZERO : decimal;
                 }
 
                 if ((context.features & Feature.UseDoubleForDecimals.mask) != 0) {
@@ -3112,7 +4478,10 @@ public abstract class JSONReader
                 return decimal;
             }
             case JSON_TYPE_BIG_DEC: {
-                if (scale > 0) {
+                boolean hasExponent = stringValue.indexOf('e') != -1 || stringValue.indexOf('E') != -1;
+                if (hasExponent) {
+                    return toBigDecimal(stringValue);
+                } else if (scale > 0) {
                     if (scale > defaultDecimalMaxScale) {
                         throw new JSONException("scale overflow : " + scale);
                     }
@@ -3168,6 +4537,11 @@ public abstract class JSONReader
     }
 
     @Override
+    /**
+     * Closes the JSONReader and releases any resources associated with it.
+     *
+     * @throws IOException if an I/O error occurs
+     */
     public abstract void close();
 
     protected final int toInt32(String val) {
@@ -3264,6 +4638,12 @@ public abstract class JSONReader
         return writer.toString();
     }
 
+    /**
+     * Creates a JSONReader from a byte array containing UTF-8 encoded JSON.
+     *
+     * @param utf8Bytes The byte array containing UTF-8 encoded JSON
+     * @return A JSONReader instance
+     */
     public static JSONReader of(byte[] utf8Bytes) {
         return of(utf8Bytes, 0, utf8Bytes.length, StandardCharsets.UTF_8, createReadContext());
     }
@@ -3277,6 +4657,12 @@ public abstract class JSONReader
         return JSONReaderUTF8.of(utf8Bytes, 0, utf8Bytes.length, context);
     }
 
+    /**
+     * Creates a JSONReader from a character array containing JSON data.
+     *
+     * @param chars The character array containing JSON data
+     * @return A JSONReader instance
+     */
     public static JSONReader of(char[] chars) {
         return ofUTF16(
                 null,
@@ -3294,6 +4680,12 @@ public abstract class JSONReader
         return ofUTF16(null, chars, 0, chars.length, context);
     }
 
+    /**
+     * Creates a JSONReader from a byte array containing JSONB (binary JSON) data.
+     *
+     * @param jsonbBytes The byte array containing JSONB data
+     * @return A JSONReader instance for JSONB data
+     */
     public static JSONReader ofJSONB(byte[] jsonbBytes) {
         return new JSONReaderJSONB(
                 JSONFactory.createReadContext(),
@@ -3365,7 +4757,7 @@ public abstract class JSONReader
         }
 
         if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
-            return new JSONReaderASCII(context, null, bytes, offset, length);
+            return JSONReaderASCII.of(context, null, bytes, offset, length);
         }
 
         throw new JSONException("not support charset " + charset);
@@ -3389,7 +4781,7 @@ public abstract class JSONReader
         }
 
         if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
-            return new JSONReaderASCII(context, null, bytes, offset, length);
+            return JSONReaderASCII.of(context, null, bytes, offset, length);
         }
 
         throw new JSONException("not support charset " + charset);
@@ -3417,6 +4809,13 @@ public abstract class JSONReader
         }
     }
 
+    /**
+     * Creates a JSONReader from an InputStream containing JSON data.
+     *
+     * @param is The InputStream containing JSON data
+     * @param charset The character encoding of the JSON data
+     * @return A JSONReader instance
+     */
     public static JSONReader of(InputStream is, Charset charset) {
         Context context = JSONFactory.createReadContext();
         return of(is, charset, context);
@@ -3436,12 +4835,18 @@ public abstract class JSONReader
         }
 
         if (charset == StandardCharsets.US_ASCII) {
-            return new JSONReaderASCII(context, is);
+            return JSONReaderASCII.of(context, is);
         }
 
         return JSONReader.of(new InputStreamReader(is, charset), context);
     }
 
+    /**
+     * Creates a JSONReader from a Reader containing JSON data.
+     *
+     * @param is The Reader containing JSON data
+     * @return A JSONReader instance
+     */
     public static JSONReader of(Reader is) {
         return new JSONReaderUTF16(
                 JSONFactory.createReadContext(),
@@ -3479,6 +4884,12 @@ public abstract class JSONReader
         return of(str, context);
     }
 
+    /**
+     * Creates a JSONReader from a String containing JSON data.
+     *
+     * @param str The String containing JSON data
+     * @return A JSONReader instance
+     */
     public static JSONReader of(String str) {
         return of(str, JSONFactory.createReadContext());
     }
@@ -3494,7 +4905,7 @@ public abstract class JSONReader
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
+                    return JSONReaderASCII.of(context, str, bytes, 0, bytes.length);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -3512,6 +4923,14 @@ public abstract class JSONReader
         return ofUTF16(str, chars, 0, length, context);
     }
 
+    /**
+     * Creates a JSONReader from a substring of a String containing JSON data.
+     *
+     * @param str The String containing JSON data
+     * @param offset The starting position of the substring
+     * @param length The length of the substring
+     * @return A JSONReader instance
+     */
     public static JSONReader of(String str, int offset, int length) {
         return of(str, offset, length, JSONFactory.createReadContext());
     }
@@ -3527,7 +4946,7 @@ public abstract class JSONReader
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    return new JSONReaderASCII(context, str, bytes, offset, length);
+                    return JSONReaderASCII.of(context, str, bytes, offset, length);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -3843,6 +5262,70 @@ public abstract class JSONReader
         return new ContextAutoTypeBeforeHandler(includeBasic, types);
     }
 
+    /**
+     * Context holds the configuration and state information for JSON reading operations.
+     * It controls various aspects of the deserialization process including formatting,
+     * features, providers, and other settings that affect how JSON data is parsed and
+     * converted to Java objects.
+     *
+     * <p>The Context class is responsible for:</p>
+     * <ul>
+     *   <li>Managing reader features that control deserialization behavior</li>
+     *   <li>Handling date/time formatting and timezone settings</li>
+     *   <li>Providing object and array suppliers for custom collection creation</li>
+     *   <li>Managing auto-type handlers for security and customization</li>
+     *   <li>Storing parser configuration such as max nesting level and buffer size</li>
+     * </ul>
+     *
+     * <p>Context instances can be created in several ways:</p>
+     * <pre>
+     * // Using default configuration
+     * JSONReader.Context context = new JSONReader.Context();
+     *
+     * // With specific features enabled
+     * JSONReader.Context context = new JSONReader.Context(
+     *     JSONReader.Feature.FieldBased,
+     *     JSONReader.Feature.TrimString
+     * );
+     *
+     * // With custom date format
+     * JSONReader.Context context = new JSONReader.Context("yyyy-MM-dd HH:mm:ss");
+     *
+     * // With custom provider and features
+     * ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+     * JSONReader.Context context = new JSONReader.Context(provider,
+     *     JSONReader.Feature.FieldBased
+     * );
+     * </pre>
+     *
+     * <p>Once created, a Context can be configured further:</p>
+     * <pre>
+     * context.setZoneId(ZoneId.of("UTC"));
+     * context.setLocale(Locale.US);
+     * context.setMaxLevel(1000);
+     * context.setBufferSize(64 * 1024);
+     * context.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+     * </pre>
+     *
+     * <p>Context instances are typically used when creating JSONReader instances:</p>
+     * <pre>
+     * JSONReader.Context context = new JSONReader.Context();
+     * context.config(JSONReader.Feature.FieldBased);
+     *
+     * try (JSONReader reader = JSONReader.of(json, context)) {
+     *     MyObject obj = reader.read(MyObject.class);
+     * }
+     * </pre>
+     *
+     * <p>Note that Context instances are not thread-safe and should not be shared
+     * between multiple concurrent reading operations. Each JSONReader should have
+     * its own Context instance or use the default context provided by factory methods.</p>
+     *
+     * @see JSONReader
+     * @see JSONReader.Feature
+     * @see ObjectReaderProvider
+     * @since 2.0.0
+     */
     public static final class Context {
         String dateFormat;
         boolean formatComplex;
@@ -3871,6 +5354,11 @@ public abstract class JSONReader
         final ObjectReaderProvider provider;
         final SymbolTable symbolTable;
 
+        /**
+         * Creates a new Context with the specified object reader provider.
+         *
+         * @param provider the object reader provider to use
+         */
         public Context(ObjectReaderProvider provider) {
             this.features = defaultReaderFeatures;
             this.provider = provider;
@@ -3885,6 +5373,12 @@ public abstract class JSONReader
             }
         }
 
+        /**
+         * Creates a new Context with the specified object reader provider and features.
+         *
+         * @param provider the object reader provider to use
+         * @param features the initial features bitmask
+         */
         public Context(ObjectReaderProvider provider, long features) {
             this.features = features;
             this.provider = provider;
@@ -3899,6 +5393,11 @@ public abstract class JSONReader
             }
         }
 
+        /**
+         * Creates a new Context with the specified features.
+         *
+         * @param features the features to enable
+         */
         public Context(Feature... features) {
             this.features = defaultReaderFeatures;
             this.provider = JSONFactory.getDefaultObjectReaderProvider();
@@ -3917,6 +5416,12 @@ public abstract class JSONReader
             }
         }
 
+        /**
+         * Creates a new Context with the specified date format and features.
+         *
+         * @param dateFormat the date format pattern to use
+         * @param features the features to enable
+         */
         public Context(String dateFormat, Feature... features) {
             this.features = defaultReaderFeatures;
             this.provider = JSONFactory.getDefaultObjectReaderProvider();
@@ -3936,6 +5441,12 @@ public abstract class JSONReader
             setDateFormat(dateFormat);
         }
 
+        /**
+         * Creates a new Context with the specified object reader provider and features.
+         *
+         * @param provider the object reader provider to use
+         * @param features the features to enable
+         */
         public Context(ObjectReaderProvider provider, Feature... features) {
             this.features = defaultReaderFeatures;
             this.provider = provider;
@@ -3954,6 +5465,13 @@ public abstract class JSONReader
             }
         }
 
+        /**
+         * Creates a new Context with the specified object reader provider, filter, and features.
+         *
+         * @param provider the object reader provider to use
+         * @param filter the filter to configure
+         * @param features the features to enable
+         */
         public Context(ObjectReaderProvider provider, Filter filter, Feature... features) {
             this.features = defaultReaderFeatures;
             this.provider = provider;
@@ -3974,6 +5492,12 @@ public abstract class JSONReader
             }
         }
 
+        /**
+         * Creates a new Context with the specified object reader provider and symbol table.
+         *
+         * @param provider the object reader provider to use
+         * @param symbolTable the symbol table to use
+         */
         public Context(ObjectReaderProvider provider, SymbolTable symbolTable) {
             this.features = defaultReaderFeatures;
             this.provider = provider;
@@ -3986,6 +5510,13 @@ public abstract class JSONReader
             }
         }
 
+        /**
+         * Creates a new Context with the specified object reader provider, symbol table, and features.
+         *
+         * @param provider the object reader provider to use
+         * @param symbolTable the symbol table to use
+         * @param features the features to enable
+         */
         public Context(ObjectReaderProvider provider, SymbolTable symbolTable, Feature... features) {
             this.features = defaultReaderFeatures;
             this.provider = provider;
@@ -4002,6 +5533,14 @@ public abstract class JSONReader
             }
         }
 
+        /**
+         * Creates a new Context with the specified object reader provider, symbol table, filters, and features.
+         *
+         * @param provider the object reader provider to use
+         * @param symbolTable the symbol table to use
+         * @param filters the filters to configure
+         * @param features the features to enable
+         */
         public Context(ObjectReaderProvider provider, SymbolTable symbolTable, Filter[] filters, Feature... features) {
             this.features = defaultReaderFeatures;
             this.provider = provider;
@@ -4020,47 +5559,106 @@ public abstract class JSONReader
             }
         }
 
+        /**
+         * Checks if the context is configured to format Unix time.
+         *
+         * @return true if Unix time formatting is enabled, false otherwise
+         */
         public boolean isFormatUnixTime() {
             return formatUnixTime;
         }
 
+        /**
+         * Checks if the context is configured to format dates in yyyyMMddHHmmss format (19 characters).
+         *
+         * @return true if this format is enabled, false otherwise
+         */
         public boolean isFormatyyyyMMddhhmmss19() {
             return formatyyyyMMddhhmmss19;
         }
 
+        /**
+         * Checks if the context is configured to format dates in yyyy-MM-dd'T'HH:mm:ss format (19 characters).
+         *
+         * @return true if this format is enabled, false otherwise
+         */
         public boolean isFormatyyyyMMddhhmmssT19() {
             return formatyyyyMMddhhmmssT19;
         }
 
+        /**
+         * Checks if the context is configured to format dates in yyyyMMdd format (8 characters).
+         *
+         * @return true if this format is enabled, false otherwise
+         */
         public boolean isFormatyyyyMMdd8() {
             return formatyyyyMMdd8;
         }
 
+        /**
+         * Checks if the context is configured to format milliseconds.
+         *
+         * @return true if millisecond formatting is enabled, false otherwise
+         */
         public boolean isFormatMillis() {
             return formatMillis;
         }
 
+        /**
+         * Checks if the context is configured to format dates in ISO8601 format.
+         *
+         * @return true if ISO8601 formatting is enabled, false otherwise
+         */
         public boolean isFormatISO8601() {
             return formatISO8601;
         }
 
+        /**
+         * Checks if the context is configured to format dates with hour information.
+         *
+         * @return true if hour formatting is enabled, false otherwise
+         */
         public boolean isFormatHasHour() {
             return formatHasHour;
         }
 
+        /**
+         * Gets an ObjectReader for the specified type.
+         *
+         * @param type The type for which to get an ObjectReader
+         * @return An ObjectReader for the specified type
+         */
         public ObjectReader getObjectReader(Type type) {
             boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
             return provider.getObjectReader(type, fieldBased);
         }
 
+        /**
+         * Gets the ObjectReaderProvider used by this context.
+         *
+         * @return The ObjectReaderProvider
+         */
         public ObjectReaderProvider getProvider() {
             return provider;
         }
 
+        /**
+         * Gets an ObjectReader for the specified type hash code.
+         *
+         * @param hashCode The hash code of the type
+         * @return An ObjectReader for the specified type hash code, or null if not found
+         */
         public ObjectReader getObjectReaderAutoType(long hashCode) {
             return provider.getObjectReader(hashCode);
         }
 
+        /**
+         * Gets an ObjectReader for the specified type name and expected class.
+         *
+         * @param typeName The type name
+         * @param expectClass The expected class
+         * @return An ObjectReader for the specified type, or null if not found
+         */
         public ObjectReader getObjectReaderAutoType(String typeName, Class expectClass) {
             if (autoTypeBeforeHandler != null) {
                 Class<?> autoTypeClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
@@ -4073,10 +5671,23 @@ public abstract class JSONReader
             return provider.getObjectReader(typeName, expectClass, features);
         }
 
+        /**
+         * Gets the AutoTypeBeforeHandler configured for this context.
+         *
+         * @return The AutoTypeBeforeHandler, or null if not configured
+         */
         public AutoTypeBeforeHandler getContextAutoTypeBeforeHandler() {
             return autoTypeBeforeHandler;
         }
 
+        /**
+         * Gets an ObjectReader for the specified type name, expected class, and additional features.
+         *
+         * @param typeName The type name
+         * @param expectClass The expected class
+         * @param features Additional features to consider
+         * @return An ObjectReader for the specified type, or null if not found
+         */
         public ObjectReader getObjectReaderAutoType(String typeName, Class expectClass, long features) {
             if (autoTypeBeforeHandler != null) {
                 Class<?> autoTypeClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
@@ -4089,30 +5700,65 @@ public abstract class JSONReader
             return provider.getObjectReader(typeName, expectClass, this.features | features);
         }
 
+        /**
+         * Gets the ExtraProcessor configured for this context.
+         *
+         * @return The ExtraProcessor, or null if not configured
+         */
         public ExtraProcessor getExtraProcessor() {
             return extraProcessor;
         }
 
+        /**
+         * Sets the ExtraProcessor for this context.
+         *
+         * @param extraProcessor The ExtraProcessor to set
+         */
         public void setExtraProcessor(ExtraProcessor extraProcessor) {
             this.extraProcessor = extraProcessor;
         }
 
+        /**
+         * Gets the object supplier configured for this context.
+         *
+         * @return The object supplier
+         */
         public Supplier<Map> getObjectSupplier() {
             return objectSupplier;
         }
 
+        /**
+         * Sets the object supplier for this context.
+         *
+         * @param objectSupplier The object supplier to set
+         */
         public void setObjectSupplier(Supplier<Map> objectSupplier) {
             this.objectSupplier = objectSupplier;
         }
 
+        /**
+         * Gets the array supplier configured for this context.
+         *
+         * @return The array supplier
+         */
         public Supplier<List> getArraySupplier() {
             return arraySupplier;
         }
 
+        /**
+         * Sets the array supplier for this context.
+         *
+         * @param arraySupplier The array supplier to set
+         */
         public void setArraySupplier(Supplier<List> arraySupplier) {
             this.arraySupplier = arraySupplier;
         }
 
+        /**
+         * Gets the date formatter configured for this context.
+         *
+         * @return The DateTimeFormatter, or null if not configured
+         */
         public DateTimeFormatter getDateFormatter() {
             if (dateFormatter == null && dateFormat != null && !formatMillis && !formatISO8601 && !formatUnixTime) {
                 dateFormatter = locale == null
@@ -4122,14 +5768,29 @@ public abstract class JSONReader
             return dateFormatter;
         }
 
+        /**
+         * Sets the date formatter for this context.
+         *
+         * @param dateFormatter The DateTimeFormatter to set
+         */
         public void setDateFormatter(DateTimeFormatter dateFormatter) {
             this.dateFormatter = dateFormatter;
         }
 
+        /**
+         * Gets the date format pattern configured for this context.
+         *
+         * @return The date format pattern, or null if not set
+         */
         public String getDateFormat() {
             return dateFormat;
         }
 
+        /**
+         * Sets the date format pattern for this context.
+         *
+         * @param format The date format pattern to set
+         */
         public void setDateFormat(String format) {
             if (format != null) {
                 if (format.isEmpty()) {
@@ -4151,6 +5812,7 @@ public abstract class JSONReader
                         break;
                     case "yyyyMMddHHmmssSSSZ":
                         useSimpleFormatter = true;
+                        break;
                     case "yyyy-MM-dd HH:mm:ss":
                     case "yyyy-MM-ddTHH:mm:ss":
                         formatyyyyMMddhhmmss19 = true;
@@ -4197,6 +5859,11 @@ public abstract class JSONReader
             this.useSimpleFormatter = useSimpleFormatter;
         }
 
+        /**
+         * Gets the ZoneId configured for this context.
+         *
+         * @return The ZoneId
+         */
         public ZoneId getZoneId() {
             if (zoneId == null) {
                 zoneId = DateUtils.DEFAULT_ZONE_ID;
@@ -4204,33 +5871,68 @@ public abstract class JSONReader
             return zoneId;
         }
 
+        /**
+         * Gets the features bitmask for this context.
+         *
+         * @return The features bitmask
+         */
         public long getFeatures() {
             return features;
         }
 
         /**
+         * Sets the features bitmask for this context.
+         *
+         * @param features The features bitmask to set
          * @since 2.0.51
          */
         public void setFeatures(long features) {
             this.features = features;
         }
 
+        /**
+         * Sets the ZoneId for this context.
+         *
+         * @param zoneId The ZoneId to set
+         */
         public void setZoneId(ZoneId zoneId) {
             this.zoneId = zoneId;
         }
 
+        /**
+         * Gets the maximum nesting level allowed for this context.
+         *
+         * @return The maximum nesting level
+         */
         public int getMaxLevel() {
             return maxLevel;
         }
 
+        /**
+         * Sets the maximum nesting level allowed for this context.
+         *
+         * @param maxLevel The maximum nesting level to set
+         */
         public void setMaxLevel(int maxLevel) {
             this.maxLevel = maxLevel;
         }
 
+        /**
+         * Gets the buffer size configured for this context.
+         *
+         * @return The buffer size in bytes
+         */
         public int getBufferSize() {
             return bufferSize;
         }
 
+        /**
+         * Sets the buffer size for this context.
+         *
+         * @param bufferSize The buffer size to set in bytes
+         * @return This Context instance for method chaining
+         * @throws IllegalArgumentException if bufferSize is negative
+         */
         public Context setBufferSize(int bufferSize) {
             if (bufferSize < 0) {
                 throw new IllegalArgumentException("buffer size can not be less than zero");
@@ -4239,28 +5941,59 @@ public abstract class JSONReader
             return this;
         }
 
+        /**
+         * Gets the Locale configured for this context.
+         *
+         * @return The Locale
+         */
         public Locale getLocale() {
             return locale;
         }
 
+        /**
+         * Sets the Locale for this context.
+         *
+         * @param locale The Locale to set
+         */
         public void setLocale(Locale locale) {
             this.locale = locale;
         }
 
+        /**
+         * Gets the TimeZone configured for this context.
+         *
+         * @return The TimeZone
+         */
         public TimeZone getTimeZone() {
             return timeZone;
         }
 
+        /**
+         * Sets the TimeZone for this context.
+         *
+         * @param timeZone The TimeZone to set
+         */
         public void setTimeZone(TimeZone timeZone) {
             this.timeZone = timeZone;
         }
 
+        /**
+         * Configures features for this context.
+         *
+         * @param features The features to enable
+         */
         public void config(Feature... features) {
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
             }
         }
 
+        /**
+         * Configures a filter and features for this context.
+         *
+         * @param filter The filter to configure
+         * @param features The features to enable
+         */
         public void config(Filter filter, Feature... features) {
             if (filter instanceof AutoTypeBeforeHandler) {
                 autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
@@ -4275,6 +6008,11 @@ public abstract class JSONReader
             }
         }
 
+        /**
+         * Configures a filter for this context.
+         *
+         * @param filter The filter to configure
+         */
         public void config(Filter filter) {
             if (filter instanceof AutoTypeBeforeHandler) {
                 autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
@@ -4285,6 +6023,12 @@ public abstract class JSONReader
             }
         }
 
+        /**
+         * Configures filters and features for this context.
+         *
+         * @param filters The filters to configure
+         * @param features The features to enable
+         */
         public void config(Filter[] filters, Feature... features) {
             for (Filter filter : filters) {
                 if (filter instanceof AutoTypeBeforeHandler) {
@@ -4301,6 +6045,11 @@ public abstract class JSONReader
             }
         }
 
+        /**
+         * Configures filters for this context.
+         *
+         * @param filters The filters to configure
+         */
         public void config(Filter[] filters) {
             for (Filter filter : filters) {
                 if (filter instanceof AutoTypeBeforeHandler) {
@@ -4313,10 +6062,22 @@ public abstract class JSONReader
             }
         }
 
+        /**
+         * Checks if the specified feature is enabled in this context.
+         *
+         * @param feature The feature to check
+         * @return true if the feature is enabled, false otherwise
+         */
         public boolean isEnabled(Feature feature) {
             return (this.features & feature.mask) != 0;
         }
 
+        /**
+         * Configures a specific feature for this context.
+         *
+         * @param feature The feature to configure
+         * @param state true to enable the feature, false to disable it
+         */
         public void config(Feature feature, boolean state) {
             if (state) {
                 features |= feature.mask;
@@ -4326,83 +6087,364 @@ public abstract class JSONReader
         }
     }
 
+    protected static final long MASK_FIELD_BASED = 1L;
+    protected static final long MASK_IGNORE_NONE_SERIALIZABLE = 1L << 1;
+    protected static final long MASK_ERROR_ON_NONE_SERIALIZABLE = 1L << 2;
+    protected static final long MASK_SUPPORT_ARRAY_TO_BEAN = 1L << 3;
+    protected static final long MASK_INIT_STRING_FIELD_AS_EMPTY = 1L << 4;
+    protected static final long MASK_SUPPORT_AUTO_TYPE = 1L << 5;
+    protected static final long MASK_SUPPORT_SMART_MATCH = 1L << 6;
     protected static final long MASK_TRIM_STRING = 1L << 14;
+    protected static final long MASK_ALLOW_UN_QUOTED_FIELD_NAMES = 1L << 17;
     protected static final long MASK_EMPTY_STRING_AS_NULL = 1L << 27;
+    protected static final long MASK_DISABLE_SINGLE_QUOTE = 1L << 31L;
+    protected static final long MASK_DISABLE_REFERENCE_DETECT = 1L << 33;
 
+    /**
+     * Feature is used to control the behavior of JSON reading and parsing in FASTJSON2.
+     * Each feature represents a specific configuration option that can be enabled or disabled
+     * to customize how JSON data is processed during deserialization.
+     *
+     * <p>Features can be enabled in several ways:
+     * <ul>
+     *   <li>Using factory methods like {@link JSONReader#of(String, Context)} with {@link JSONFactory#createReadContext(JSONReader.Feature...)}</li>
+     *   <li>Using {@link Context#config(Feature...)} method</li>
+     *   <li>Using {@link JSONFactory#getDefaultReaderFeatures()} for global configuration</li>
+     * </ul>
+     *
+     *
+     * <p>Example usage:
+     * <pre>
+     * // Enable FieldBased feature for this reader only
+     * try (JSONReader reader = JSONReader.of(json, JSONReader.Feature.FieldBased)) {
+     *     MyObject obj = reader.read(MyObject.class);
+     * }
+     *
+     * // Enable multiple features
+     * try (JSONReader reader = JSONReader.of(json,
+     *         JSONReader.Feature.FieldBased,
+     *         JSONReader.Feature.TrimString)) {
+     *     MyObject obj = reader.read(MyObject.class);
+     * }
+     *
+     * // Using context configuration
+     * JSONReader.Context context = new JSONReader.Context();
+     * context.config(JSONReader.Feature.FieldBased);
+     * try (JSONReader reader = JSONReader.of(json, context)) {
+     *     MyObject obj = reader.read(MyObject.class);
+     * }
+     * </pre>
+     *
+     *
+     * <p>Features are implemented as bitmask flags for efficient storage and checking.
+     * Each feature has a unique mask value that is used internally to determine
+     * whether the feature is enabled in a given configuration.</p>
+     *
+     * @see JSONReader.Context
+     * @see JSONFactory
+     * @since 2.0.0
+     */
     public enum Feature {
-        FieldBased(1),
-        IgnoreNoneSerializable(1 << 1),
         /**
+         * Feature that determines whether to use field-based deserialization instead of getter/setter-based deserialization.
+         * When enabled, fields are directly accessed rather than using getter and setter methods.
+         * This can improve performance but may bypass validation logic in setters.
+         *
+         * <p>By default, this feature is disabled, meaning that getter/setter-based deserialization is used.</p>
+         *
+         * @since 2.0.0
+         */
+        FieldBased(MASK_FIELD_BASED),
+
+        /**
+         * Feature that determines whether to ignore non-serializable classes during deserialization.
+         * When enabled, classes that do not implement {@link java.io.Serializable} will be ignored
+         * rather than causing an exception to be thrown.
+         *
+         * <p>By default, this feature is disabled, meaning that non-serializable classes are not ignored.</p>
+         *
+         * @since 2.0.0
+         */
+        IgnoreNoneSerializable(MASK_IGNORE_NONE_SERIALIZABLE),
+
+        /**
+         * Feature that determines whether to throw an exception when encountering non-serializable classes
+         * during deserialization.
+         * When enabled, an exception will be thrown if a class does not implement {@link java.io.Serializable}.
+         *
+         * <p>By default, this feature is disabled, meaning that no exception is thrown for non-serializable classes.</p>
+         *
          * @since 2.0.14
          */
-        ErrorOnNoneSerializable(1 << 2),
-        SupportArrayToBean(1 << 3),
-        InitStringFieldAsEmpty(1 << 4),
+        ErrorOnNoneSerializable(MASK_ERROR_ON_NONE_SERIALIZABLE),
+
         /**
-         * It is not safe to explicitly turn on autoType, it is recommended to use AutoTypeBeforeHandler
+         * Feature that determines whether to support deserializing JSON arrays into Java beans.
+         * When enabled, JSON arrays can be mapped to Java bean properties, with each array element
+         * corresponding to a property in the bean.
+         *
+         * <p>By default, this feature is disabled, meaning that array-to-bean conversion is not supported.</p>
+         *
+         * @since 2.0.0
+         */
+        SupportArrayToBean(MASK_SUPPORT_ARRAY_TO_BEAN),
+
+        /**
+         * Feature that determines whether to initialize string fields as empty strings instead of null values.
+         * When enabled, string fields will be initialized with empty strings ("") rather than null.
+         *
+         * <p>By default, this feature is disabled, meaning that string fields are initialized with null values.</p>
+         *
+         * @since 2.0.0
+         */
+        InitStringFieldAsEmpty(MASK_INIT_STRING_FIELD_AS_EMPTY),
+
+        /**
+         * Feature that enables automatic type detection during deserialization.
+         * It is not safe to explicitly turn on autoType, it is recommended to use AutoTypeBeforeHandler.
+         *
+         * <p>This feature is deprecated and should not be used in production code.</p>
+         *
+         * @deprecated It is not safe to explicitly turn on autoType, it is recommended to use AutoTypeBeforeHandler
+         * @since 2.0.0
          */
         @Deprecated
-        SupportAutoType(1 << 5),
-        SupportSmartMatch(1 << 6),
-        UseNativeObject(1 << 7),
-        SupportClassForName(1 << 8),
-        IgnoreSetNullValue(1 << 9),
-        UseDefaultConstructorAsPossible(1 << 10),
-        UseBigDecimalForFloats(1 << 11),
-        UseBigDecimalForDoubles(1 << 12),
-        ErrorOnEnumNotMatch(1 << 13),
-        TrimString(MASK_TRIM_STRING),
-        ErrorOnNotSupportAutoType(1 << 15),
-        DuplicateKeyValueAsArray(1 << 16),
-        AllowUnQuotedFieldNames(1 << 17),
-        NonStringKeyAsString(1 << 18),
+        SupportAutoType(MASK_SUPPORT_AUTO_TYPE),
+
         /**
+         * Feature that enables smart matching of field names during deserialization.
+         * When enabled, field names in JSON can be matched to Java bean properties in a case-insensitive
+         * manner or with other smart matching rules.
+         *
+         * <p>By default, this feature is disabled, meaning that exact field name matching is required.</p>
+         *
+         * @since 2.0.0
+         */
+        SupportSmartMatch(MASK_SUPPORT_SMART_MATCH),
+
+        /**
+         * Feature that determines whether to use native Java objects (HashMap, ArrayList) instead of
+         * FASTJSON's JSONObject and JSONArray during deserialization.
+         * When enabled, standard Java collections are used rather than FASTJSON-specific ones.
+         *
+         * <p>By default, this feature is disabled, meaning that FASTJSON's JSONObject and JSONArray are used.</p>
+         *
+         * @since 2.0.0
+         */
+        UseNativeObject(1 << 7),
+
+        /**
+         * Feature that enables support for Class.forName() during deserialization.
+         * When enabled, the deserializer can use Class.forName() to load classes by name.
+         *
+         * <p>By default, this feature is disabled.</p>
+         *
+         * @since 2.0.0
+         */
+        SupportClassForName(1 << 8),
+
+        /**
+         * Feature that determines whether to ignore null values when setting properties.
+         * When enabled, null values in JSON will not be set on Java bean properties,
+         * preserving their default values.
+         *
+         * <p>By default, this feature is disabled, meaning that null values are set on properties.</p>
+         *
+         * @since 2.0.0
+         */
+        IgnoreSetNullValue(1 << 9),
+
+        /**
+         * Feature that determines whether to use default constructors as much as possible during deserialization.
+         * When enabled, the deserializer will prefer to use default (no-argument) constructors when creating objects.
+         *
+         * <p>By default, this feature is disabled.</p>
+         *
+         * @since 2.0.0
+         */
+        UseDefaultConstructorAsPossible(1 << 10),
+
+        /**
+         * Feature that determines whether to deserialize floating-point numbers as BigDecimal
+         * when the target type is float.
+         * When enabled, float values will be represented with higher precision using BigDecimal.
+         *
+         * <p>By default, this feature is disabled, meaning that standard float precision is used.</p>
+         *
+         * @since 2.0.0
+         */
+        UseBigDecimalForFloats(1 << 11),
+
+        /**
+         * Feature that determines whether to deserialize floating-point numbers as BigDecimal
+         * when the target type is double.
+         * When enabled, double values will be represented with higher precision using BigDecimal.
+         *
+         * <p>By default, this feature is disabled, meaning that standard double precision is used.</p>
+         *
+         * @since 2.0.0
+         */
+        UseBigDecimalForDoubles(1 << 12),
+
+        /**
+         * Feature that determines whether to throw an exception when an enum value in JSON does not
+         * match any of the defined enum constants.
+         * When enabled, an exception will be thrown if an unknown enum value is encountered.
+         *
+         * <p>By default, this feature is disabled, meaning that unknown enum values are ignored.</p>
+         *
+         * @since 2.0.0
+         */
+        ErrorOnEnumNotMatch(1 << 13),
+
+        /**
+         * Feature that determines whether to trim whitespace from string values during deserialization.
+         * When enabled, leading and trailing whitespace will be removed from string values.
+         *
+         * <p>By default, this feature is disabled, meaning that string values are not trimmed.</p>
+         *
+         * @since 2.0.0
+         */
+        TrimString(MASK_TRIM_STRING),
+
+        /**
+         * Feature that determines whether to throw an exception when autoType is not supported.
+         * When enabled, an exception will be thrown if autoType functionality is not available.
+         *
+         * <p>By default, this feature is disabled.</p>
+         *
+         * @since 2.0.0
+         */
+        ErrorOnNotSupportAutoType(1 << 15),
+
+        /**
+         * Feature that determines how to handle duplicate keys in JSON objects.
+         * When enabled, duplicate keys will be stored as arrays rather than overwriting previous values.
+         *
+         * <p>By default, this feature is disabled, meaning that duplicate keys overwrite previous values.</p>
+         *
+         * @since 2.0.0
+         */
+        DuplicateKeyValueAsArray(1 << 16),
+
+        /**
+         * Feature that determines whether to allow unquoted field names in JSON.
+         * When enabled, field names in JSON objects do not need to be enclosed in quotes.
+         *
+         * <p>By default, this feature is disabled, meaning that field names must be quoted.</p>
+         *
+         * @since 2.0.0
+         */
+        AllowUnQuotedFieldNames(MASK_ALLOW_UN_QUOTED_FIELD_NAMES),
+
+        /**
+         * Feature that determines whether to treat non-string keys as strings during deserialization.
+         * When enabled, keys in JSON objects that are not strings will be converted to string representation.
+         *
+         * <p>By default, this feature is disabled.</p>
+         *
+         * @since 2.0.0
+         */
+        NonStringKeyAsString(1 << 18),
+
+        /**
+         * Feature that determines whether to treat Base64-encoded strings as byte arrays during deserialization.
+         * When enabled, strings that contain Base64-encoded data will be automatically decoded to byte arrays.
+         *
+         * <p>By default, this feature is disabled.</p>
+         *
          * @since 2.0.13
          */
         Base64StringAsByteArray(1 << 19),
 
         /**
+         * Feature that determines whether to ignore checking for resource cleanup.
+         * When enabled, the deserializer will not perform checks to ensure proper resource cleanup.
+         *
+         * <p>By default, this feature is disabled.</p>
+         *
          * @since 2.0.16
          */
         IgnoreCheckClose(1 << 20),
+
         /**
+         * Feature that determines whether to throw an exception when null values are encountered
+         * for primitive types during deserialization.
+         * When enabled, an exception will be thrown if a null value is found for a primitive type field.
+         *
+         * <p>By default, this feature is disabled, meaning that primitive types are initialized with default values.</p>
+         *
          * @since 2.0.20
          */
         ErrorOnNullForPrimitives(1 << 21),
 
         /**
+         * Feature that determines whether to return null on error during deserialization.
+         * When enabled, errors during deserialization will result in null values rather than exceptions.
+         *
+         * <p>By default, this feature is disabled.</p>
+         *
          * @since 2.0.20
          */
         NullOnError(1 << 22),
 
         /**
+         * Feature that determines whether to ignore autoType mismatches during deserialization.
+         * When enabled, mismatches between expected and actual types in autoType scenarios will be ignored.
+         *
+         * <p>By default, this feature is disabled.</p>
+         *
          * @since 2.0.21
          */
         IgnoreAutoTypeNotMatch(1 << 23),
 
         /**
+         * Feature that determines whether to cast non-zero numbers to boolean true during deserialization.
+         * When enabled, any non-zero numeric value will be treated as true when converting to boolean.
+         *
+         * <p>By default, this feature is disabled.</p>
+         *
          * @since 2.0.24
          */
         NonZeroNumberCastToBooleanAsTrue(1 << 24),
 
         /**
+         * Feature that determines whether to ignore null property values during deserialization.
+         * When enabled, properties with null values in JSON will be ignored rather than set to null.
+         *
+         * <p>By default, this feature is disabled.</p>
+         *
          * @since 2.0.40
          */
         IgnoreNullPropertyValue(1 << 25),
 
         /**
+         * Feature that determines whether to throw an exception when unknown properties are encountered
+         * during deserialization.
+         * When enabled, an exception will be thrown if JSON contains properties that do not exist in the target class.
+         *
+         * <p>By default, this feature is disabled, meaning that unknown properties are ignored.</p>
+         *
          * @since 2.0.42
          */
         ErrorOnUnknownProperties(1 << 26),
 
         /**
-         * empty string "" convert to null
+         * Feature that determines whether to convert empty strings to null values during deserialization.
+         * When enabled, empty string values ("") in JSON will be converted to null values.
+         *
+         * <p>By default, this feature is disabled, meaning that empty strings are preserved as empty strings.</p>
          *
          * @since 2.0.48
          */
         EmptyStringAsNull(MASK_EMPTY_STRING_AS_NULL),
 
         /**
+         * Feature that determines whether to avoid throwing exceptions on number overflow during deserialization.
+         * When enabled, numeric overflow conditions will not cause exceptions to be thrown.
+         *
+         * <p>By default, this feature is disabled, meaning that number overflow will cause exceptions.</p>
+         *
          * @since 2.0.48
          */
         NonErrorOnNumberOverflow(1 << 28),
@@ -4449,14 +6491,42 @@ public abstract class JSONReader
 
         /**
          * Feature that disables the support for single quote.
+         * When enabled, single quotes are not allowed as string delimiters in JSON.
+         *
+         * <p>By default, this feature is disabled, meaning that single quotes are supported.</p>
+         *
          * @since 2.0.53
          */
-        DisableSingleQuote(1L << 31L),
+        DisableSingleQuote(MASK_DISABLE_SINGLE_QUOTE),
 
         /**
+         * Feature that determines whether to deserialize decimal numbers as double values.
+         * When enabled, decimal values will be represented as double precision floating-point numbers.
+         *
+         * <p>By default, this feature is disabled.</p>
+         *
          * @since 2.0.53
          */
-        UseDoubleForDecimals(1L << 32L);
+        UseDoubleForDecimals(1L << 32L),
+
+        /**
+         * Feature that disables reference detection during deserialization.
+         * When enabled, JSON references (such as those using $ref) will not be processed.
+         *
+         * <p>By default, this feature is disabled, meaning that reference detection is enabled.</p>
+         *
+         * @since 2.0.56
+         */
+        DisableReferenceDetect(MASK_DISABLE_REFERENCE_DETECT),
+
+        /**
+         * Feature that determines whether to unwrap single-element string arrays to scalar values.
+         * When enabled, JSON arrays containing a single string element will be
+         * unwrapped to just that string value rather than returning the array.
+         * For example, ["value"] would be returned as "value".
+         * @since 2.0.60
+         */
+        DisableStringArrayUnwrapping(1L << 34L);
 
         public final long mask;
 
@@ -4464,6 +6534,12 @@ public abstract class JSONReader
             this.mask = mask;
         }
 
+        /**
+         * Combines the masks of the specified features into a single bitmask.
+         *
+         * @param features The features to combine
+         * @return A bitmask representing the combined features, or 0 if features is null
+         */
         public static long of(Feature[] features) {
             if (features == null) {
                 return 0;
@@ -4478,16 +6554,29 @@ public abstract class JSONReader
             return value;
         }
 
+        /**
+         * Checks if this feature is enabled in the specified features bitmask.
+         *
+         * @param features The features bitmask to check
+         * @return true if this feature is enabled, false otherwise
+         */
         public boolean isEnabled(long features) {
             return (features & mask) != 0;
         }
 
+        /**
+         * Checks if the specified feature is enabled in the given features bitmask.
+         *
+         * @param features The features bitmask to check
+         * @param feature The feature to check for
+         * @return true if the specified feature is enabled, false otherwise
+         */
         public static boolean isEnabled(long features, Feature feature) {
             return (features & feature.mask) != 0;
         }
     }
 
-    static class ResolveTask {
+    static final class ResolveTask {
         final FieldReader fieldReader;
         final Object object;
         final Object name;
@@ -4515,6 +6604,21 @@ public abstract class JSONReader
         this.ch = (char) savePoint.current;
     }
 
+    final boolean checkNameBegin(int quote) {
+        long features = context.features;
+        if (quote == '\'' && ((features & MASK_DISABLE_SINGLE_QUOTE) != 0)) {
+            throw notSupportName();
+        }
+        if (quote != '"' && quote != '\'') {
+            if ((features & MASK_ALLOW_UN_QUOTED_FIELD_NAMES) != 0) {
+                readFieldNameHashCodeUnquote();
+                return true;
+            }
+            throw notSupportName();
+        }
+        return false;
+    }
+
     final JSONException notSupportName() {
         return new JSONException(info("not support unquoted name"));
     }
@@ -4525,6 +6629,18 @@ public abstract class JSONReader
 
     final JSONException error(String message) {
         return new JSONException(info(message));
+    }
+
+    final JSONException error(String message, int ch) {
+        return new JSONException(info(message).concat(Integer.toString(ch)));
+    }
+
+    final JSONException error(String message, Exception cause) {
+        return new JSONException(info(message), cause);
+    }
+
+    final JSONException error() {
+        throw new JSONValidException("error, offset " + offset + ", char " + (char) ch);
     }
 
     final JSONException error(int offset, int ch) {
@@ -4670,6 +6786,15 @@ public abstract class JSONReader
         }
     }
 
+    /**
+     * Gets an ObjectReader for the specified type hash, expected class, and features.
+     * This method handles auto-type detection and applies any configured auto-type before handlers.
+     *
+     * @param typeHash The hash code of the type
+     * @param expectClass The expected class
+     * @param features Additional features to consider
+     * @return An ObjectReader for the specified type, or null if not found
+     */
     public ObjectReader getObjectReaderAutoType(long typeHash, Class expectClass, long features) {
         ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
         if (autoTypeObjectReader != null) {
@@ -4694,7 +6819,12 @@ public abstract class JSONReader
                 List array = readArray();
                 if (array.size() == 1) {
                     Object item = array.get(0);
-                    return item == null ? null : item.toString();
+                    if (item == null) {
+                        return null;
+                    }
+                    if ((context.features & Feature.DisableStringArrayUnwrapping.mask) == 0 && item instanceof String) {
+                        return item.toString();
+                    }
                 }
                 return toString(array);
             case '{':
@@ -4732,14 +6862,27 @@ public abstract class JSONReader
         if ((features & MASK_TRIM_STRING) != 0) {
             str = str.trim();
         }
-        return (features & MASK_EMPTY_STRING_AS_NULL) != 0 && str.isEmpty() ? null : str;
+        if ((features & MASK_EMPTY_STRING_AS_NULL) != 0 && str.isEmpty()) {
+            return null;
+        }
+        return str;
     }
 
-    protected static int firstIntValue(int ch) {
-        return ch >= '0' && ch <= '9'
-                ? '0' - ch
-                : ch == '-' || ch == '+'
-                ? 0
-                : 1;  // or any value > 0
+    protected final long readFieldNameHashCodeError(int nameBegin, int ch) {
+        if ((context.features & MASK_ALLOW_UN_QUOTED_FIELD_NAMES) != 0 && isFirstIdentifier(ch)) {
+            return readFieldNameHashCodeUnquote();
+        }
+        if (ch == '}' || nextIfNull()) {
+            return -1;
+        }
+
+        String errorMsg, preFieldName;
+        if (ch == '[' && nameBegin > 0 && (preFieldName = getFieldName()) != null) {
+            errorMsg = "illegal fieldName input " + ch + ", previous fieldName " + preFieldName;
+        } else {
+            errorMsg = "illegal fieldName input" + ch;
+        }
+
+        throw new JSONException(info(errorMsg));
     }
 }

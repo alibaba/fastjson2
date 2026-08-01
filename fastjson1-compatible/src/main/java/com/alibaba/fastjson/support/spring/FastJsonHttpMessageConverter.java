@@ -51,6 +51,7 @@ public class FastJsonHttpMessageConverter
      */
     public FastJsonHttpMessageConverter() {
         super(MediaType.ALL);
+        setDefaultCharset(com.alibaba.fastjson.util.IOUtils.UTF8);
     }
 
     /**

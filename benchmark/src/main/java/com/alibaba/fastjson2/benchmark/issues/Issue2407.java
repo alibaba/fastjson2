@@ -7,14 +7,17 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class Issue2407 {
     static String str;
+    static byte[] utf8;
 
     static {
         try {
             InputStream is = Issue2407.class.getClassLoader().getResourceAsStream("issue/issue2407.json");
             str = IOUtils.toString(is, "UTF-8");
+            utf8 = str.getBytes(StandardCharsets.UTF_8);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -31,6 +34,13 @@ public class Issue2407 {
     public void parseArray1(Blackhole bh) {
         bh.consume(
                 JSON.parseArray(str, Bean.class)
+        );
+    }
+
+//    @Benchmark
+    public void parseArray1_utf8(Blackhole bh) {
+        bh.consume(
+                JSON.parseArray(utf8, Bean.class)
         );
     }
 

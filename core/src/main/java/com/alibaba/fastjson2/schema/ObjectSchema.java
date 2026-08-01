@@ -389,7 +389,7 @@ public final class ObjectSchema
     }
 
     @Override
-    public ValidateResult validate(Object value) {
+    protected ValidateResult validateInternal(Object value) {
         if (value == null) {
             return typed ? FAIL_INPUT_NULL : SUCCESS;
         }

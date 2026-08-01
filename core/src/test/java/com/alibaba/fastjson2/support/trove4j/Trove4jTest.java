@@ -7,11 +7,13 @@ import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.set.hash.TLongHashSet;
 import gnu.trove.set.hash.TShortHashSet;
 import gnu.trove.stack.array.TByteArrayStack;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteByteArrayAsBase64;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("util")
 public class Trove4jTest {
     @Test
     public void testByteArray() {

@@ -16,7 +16,7 @@ public class UnresolvedReference
     }
 
     @Override
-    public ValidateResult validate(Object value) {
+    protected ValidateResult validateInternal(Object value) {
         return JSONSchema.SUCCESS;
     }
 

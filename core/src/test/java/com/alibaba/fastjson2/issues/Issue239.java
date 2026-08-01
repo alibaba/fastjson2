@@ -6,10 +6,13 @@ import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("regression")
+@Tag("annotation")
 public class Issue239 {
     @Test
     public void test() {

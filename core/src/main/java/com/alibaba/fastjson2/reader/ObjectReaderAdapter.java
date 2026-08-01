@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
@@ -26,6 +27,7 @@ public class ObjectReaderAdapter<T>
     final short[] mappingLCase;
 
     final Constructor constructor;
+    final int parameterCount;
     volatile boolean instantiationError;
 
     // seeAlso
@@ -123,6 +125,9 @@ public class ObjectReaderAdapter<T>
 
         if (constructor != null) {
             constructor.setAccessible(true);
+            parameterCount = constructor.getParameterCount();
+        } else {
+            parameterCount = -1;
         }
 
         if (typeKey == null || typeKey.isEmpty()) {
@@ -196,6 +201,13 @@ public class ObjectReaderAdapter<T>
             this.seeAlsoNames = null;
         }
         this.seeAlsoDefault = seeAlsoDefault;
+
+        int min = 0, max = 0;
+        for (FieldReader fieldReader : fieldReaders) {
+            int length = fieldReader.fieldName.length();
+            min = Math.min(min, length);
+            max = Math.max(max, length);
+        }
     }
 
     @Override
@@ -219,7 +231,13 @@ public class ObjectReaderAdapter<T>
 
     public void apply(Consumer<FieldReader> fieldReaderConsumer) {
         for (FieldReader fieldReader : fieldReaders) {
-            fieldReaderConsumer.accept(fieldReader);
+            try {
+                fieldReaderConsumer.accept(fieldReader);
+            } catch (RuntimeException e) {
+                if (!ignoreError(fieldReader)) {
+                    throw e;
+                }
+            }
         }
     }
 
@@ -254,6 +272,10 @@ public class ObjectReaderAdapter<T>
 
     @Override
     public T readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.jsonb) {
+            return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
         if (!serializable) {
             jsonReader.errorOnNoneSerializable(objectClass);
         }
@@ -262,7 +284,14 @@ public class ObjectReaderAdapter<T>
         Object object = creator.get();
 
         for (int i = 0; i < fieldReaders.length; i++) {
-            fieldReaders[i].readFieldValue(jsonReader, object);
+            FieldReader fieldReader = fieldReaders[i];
+            try {
+                fieldReader.readFieldValue(jsonReader, object);
+            } catch (RuntimeException e) {
+                if (!ignoreError(fieldReader)) {
+                    throw e;
+                }
+            }
         }
 
         if (!jsonReader.nextIfArrayEnd()) {
@@ -295,7 +324,13 @@ public class ObjectReaderAdapter<T>
         if (entryCnt == fieldReaders.length) {
             for (int i = 0; i < fieldReaders.length; i++) {
                 FieldReader fieldReader = fieldReaders[i];
-                fieldReader.readFieldValue(jsonReader, object);
+                try {
+                    fieldReader.readFieldValue(jsonReader, object);
+                } catch (RuntimeException e) {
+                    if (!ignoreError(fieldReader)) {
+                        throw e;
+                    }
+                }
             }
         } else {
             readArrayMappingJSONBObject0(jsonReader, object, entryCnt);
@@ -314,7 +349,13 @@ public class ObjectReaderAdapter<T>
                 continue;
             }
             FieldReader fieldReader = fieldReaders[i];
-            fieldReader.readFieldValue(jsonReader, object);
+            try {
+                fieldReader.readFieldValue(jsonReader, object);
+            } catch (RuntimeException e) {
+                if (!ignoreError(fieldReader)) {
+                    throw e;
+                }
+            }
         }
 
         for (int i = fieldReaders.length; i < entryCnt; i++) {
@@ -325,7 +366,7 @@ public class ObjectReaderAdapter<T>
     protected Object createInstance0(long features) {
         if ((features & JSONReader.Feature.UseDefaultConstructorAsPossible.mask) != 0
                 && constructor != null
-                && constructor.getParameterCount() == 0) {
+                && parameterCount == 0) {
             T object;
             try {
                 object = (T) constructor.newInstance();
@@ -402,7 +443,7 @@ public class ObjectReaderAdapter<T>
 
         if (constructor != null) {
             try {
-                T object = (T) constructor.newInstance();
+                T object = (T) constructor.newInstance(new Object[parameterCount]);
                 if (hasDefaultValue) {
                     initDefaultValue(object);
                 }
@@ -413,6 +454,10 @@ public class ObjectReaderAdapter<T>
         }
 
         throw new JSONException("create instance error, " + objectClass, error);
+    }
+
+    protected final boolean ignoreError(FieldReader fieldReader) {
+        return (fieldReader.features & JSONReader.Feature.NullOnError.mask) != 0;
     }
 
     @Override
@@ -439,6 +484,25 @@ public class ObjectReaderAdapter<T>
             fieldReader = getFieldReaderLCase(hashCodeL);
         }
         return fieldReader;
+    }
+
+    protected final Map<Long, Object> readFieldValue(long hashCode, JSONReader jsonReader, long features, Map<Long, Object> map) {
+        FieldReader fieldReader = getFieldReader(hashCode);
+        if (fieldReader == null
+                && jsonReader.isSupportSmartMatch(this.features | features)) {
+            long hashCodeL = jsonReader.getNameHashCodeLCase();
+            fieldReader = getFieldReaderLCase(hashCodeL);
+        }
+
+        if (fieldReader != null) {
+            if (map == null) {
+                map = new LinkedHashMap<>();
+            }
+            map.put(fieldReader.fieldNameHash, fieldReader.readFieldValue(jsonReader));
+        } else {
+            jsonReader.skipValue();
+        }
+        return map;
     }
 
     protected final void readFieldValue(long hashCode, JSONReader jsonReader, long features, Object object) {
@@ -612,7 +676,7 @@ public class ObjectReaderAdapter<T>
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         Object typeKey = map.get(this.typeKey);
 
-        long features2 = features | this.features;
+        long features2 = features | this.features | JSONFactory.getDefaultReaderFeatures();
         if (typeKey instanceof String) {
             String typeName = (String) typeKey;
             long typeHash = Fnv.hashCode64(typeName);
@@ -642,31 +706,50 @@ public class ObjectReaderAdapter<T>
                 FieldReader fieldReader = fieldReaders[i];
                 Object fieldValue = map.get(fieldReader.fieldName);
                 if (fieldValue == null) {
-                    continue;
-                }
-
-                if (fieldValue.getClass() == fieldReader.fieldType) {
-                    fieldReader.accept(object, fieldValue);
-                } else {
-                    if ((fieldReader instanceof FieldReaderList)
-                            && fieldValue instanceof JSONArray
-                    ) {
-                        ObjectReader objectReader = fieldReader.getObjectReader(provider);
-                        Object fieldValueList = objectReader.createInstance((JSONArray) fieldValue, features);
-                        fieldReader.accept(object, fieldValueList);
-                        continue;
-                    } else if (fieldValue instanceof JSONObject
-                            && fieldReader.fieldType != JSONObject.class
-                    ) {
-                        JSONObject jsonObject = (JSONObject) fieldValue;
-                        Object fieldValueJavaBean = provider
-                                .getObjectReader(fieldReader.fieldType, fieldBased)
-                                .createInstance(jsonObject, features);
-                        fieldReader.accept(object, fieldValueJavaBean);
+                    if ((features2 & JSONReader.Feature.IgnoreSetNullValue.mask) != 0 || !map.containsKey(fieldReader.fieldName)) {
                         continue;
                     }
+                }
 
-                    fieldReader.acceptAny(object, fieldValue, features);
+                if (fieldReader.field != null && Modifier.isFinal(fieldReader.field.getModifiers())) {
+                    try {
+                        Object value = fieldReader.method.invoke(object);
+                        if (value instanceof Collection && !((Collection) value).isEmpty()) {
+                            continue;
+                        }
+                    } catch (Exception e) {
+                        // just ignore
+                    }
+                }
+
+                try {
+                    if (fieldValue == null || fieldValue.getClass() == fieldReader.fieldType) {
+                        fieldReader.accept(object, fieldValue);
+                    } else {
+                        if ((fieldReader instanceof FieldReaderList)
+                                && fieldValue instanceof JSONArray
+                        ) {
+                            ObjectReader objectReader = fieldReader.getObjectReader(provider);
+                            Object fieldValueList = objectReader.createInstance((JSONArray) fieldValue, features);
+                            fieldReader.accept(object, fieldValueList);
+                            continue;
+                        } else if (fieldValue instanceof JSONObject
+                                && fieldReader.fieldType != JSONObject.class
+                        ) {
+                            JSONObject jsonObject = (JSONObject) fieldValue;
+                            Object fieldValueJavaBean = provider
+                                    .getObjectReader(fieldReader.fieldType, fieldBased)
+                                    .createInstance(jsonObject, features);
+                            fieldReader.accept(object, fieldValueJavaBean);
+                            continue;
+                        }
+
+                        fieldReader.acceptAny(object, fieldValue, features);
+                    }
+                } catch (RuntimeException e) {
+                    if (!ignoreError(fieldReader)) {
+                        throw e;
+                    }
                 }
             }
         } else {
@@ -684,6 +767,12 @@ public class ObjectReaderAdapter<T>
                         && fieldValue.getClass() == fieldReader.fieldType
                 ) {
                     fieldReader.accept(object, fieldValue);
+                } else if (fieldValue != null
+                        && "com.alibaba.fastjson.JSONObject".equals(fieldValue.getClass().getName())) {
+                    Object fieldValueJavaBean = provider
+                            .getObjectReader(fieldReader.fieldType)
+                            .createInstance((Map) fieldValue, features);
+                    fieldReader.accept(object, fieldValueJavaBean);
                 } else {
                     fieldReader.acceptAny(object, fieldValue, features);
                 }

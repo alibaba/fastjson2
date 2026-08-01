@@ -32,53 +32,52 @@ public class TypeUtils {
     public static final Field FIELD_JSON_OBJECT_1x_map;
     public static final Class CLASS_JSON_ARRAY_1x;
 
-    public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
-    public static final Class CLASS_SINGLE_LIST = Collections.singletonList(1).getClass();
-    public static final Class CLASS_UNMODIFIABLE_COLLECTION = Collections.unmodifiableCollection(new ArrayList<>()).getClass();
-    public static final Class CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(new ArrayList<>()).getClass();
-    public static final Class CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(new HashSet<>()).getClass();
-    public static final Class CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(new TreeSet<>()).getClass();
-    public static final Class CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
+    public static final Class
+            CLASS_SINGLE_SET = Collections.singleton(1).getClass(),
+            CLASS_SINGLE_LIST = Collections.singletonList(1).getClass(),
+            CLASS_UNMODIFIABLE_COLLECTION = Collections.unmodifiableCollection(new ArrayList<>()).getClass(),
+            CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(new ArrayList<>()).getClass(),
+            CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(new HashSet<>()).getClass(),
+            CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(new TreeSet<>()).getClass(),
+            CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
     public static final ParameterizedType PARAM_TYPE_LIST_STR = new ParameterizedTypeImpl(List.class, String.class);
 
-    public static final MethodType METHOD_TYPE_SUPPLIER = MethodType.methodType(Supplier.class);
-    public static final MethodType METHOD_TYPE_FUNCTION = MethodType.methodType(Function.class);
-    public static final MethodType METHOD_TYPE_TO_INT_FUNCTION = MethodType.methodType(ToIntFunction.class);
-    public static final MethodType METHOD_TYPE_TO_LONG_FUNCTION = MethodType.methodType(ToLongFunction.class);
-    public static final MethodType METHOD_TYPE_OBJECT_INT_CONSUMER = MethodType.methodType(ObjIntConsumer.class);
-    public static final MethodType METHOD_TYPE_INT_FUNCTION = MethodType.methodType(IntFunction.class);
-    public static final MethodType METHOD_TYPE_LONG_FUNCTION = MethodType.methodType(LongFunction.class);
-    public static final MethodType METHOD_TYPE_BI_FUNCTION = MethodType.methodType(BiFunction.class);
-    public static final MethodType METHOD_TYPE_BI_CONSUMER = MethodType.methodType(BiConsumer.class);
-    public static final MethodType METHOD_TYPE_VOO = MethodType.methodType(void.class, Object.class, Object.class);
-
-    public static final MethodType METHOD_TYPE_OBJECT = MethodType.methodType(Object.class);
-    public static final MethodType METHOD_TYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class);
-    public static final MethodType METHOD_TYPE_INT_OBJECT = MethodType.methodType(int.class, Object.class);
-    public static final MethodType METHOD_TYPE_LONG_OBJECT = MethodType.methodType(long.class, Object.class);
-    public static final MethodType METHOD_TYPE_VOID_OBJECT_INT = MethodType.methodType(void.class, Object.class, int.class);
-    public static final MethodType METHOD_TYPE_OBJECT_LONG = MethodType.methodType(Object.class, long.class);
-    public static final MethodType METHOD_TYPE_VOID_LONG = MethodType.methodType(void.class, long.class);
-    public static final MethodType METHOD_TYPE_OBJECT_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class, Object.class);
-
-    public static final MethodType METHOD_TYPE_VOID = MethodType.methodType(void.class);
-    public static final MethodType METHOD_TYPE_VOID_INT = MethodType.methodType(void.class, int.class);
-    public static final MethodType METHOD_TYPE_VOID_STRING = MethodType.methodType(void.class, String.class);
-    public static final MethodType METHOD_TYPE_OBJECT_INT = MethodType.methodType(Object.class, int.class);
-
-    public static final BigInteger BIGINT_INT32_MIN = BigInteger.valueOf(Integer.MIN_VALUE);
-    public static final BigInteger BIGINT_INT32_MAX = BigInteger.valueOf(Integer.MAX_VALUE);
-    public static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
-    public static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
+    public static final MethodType
+            METHOD_TYPE_SUPPLIER = MethodType.methodType(Supplier.class),
+            METHOD_TYPE_FUNCTION = MethodType.methodType(Function.class),
+            METHOD_TYPE_TO_INT_FUNCTION = MethodType.methodType(ToIntFunction.class),
+            METHOD_TYPE_TO_LONG_FUNCTION = MethodType.methodType(ToLongFunction.class),
+            METHOD_TYPE_OBJECT_INT_CONSUMER = MethodType.methodType(ObjIntConsumer.class),
+            METHOD_TYPE_INT_FUNCTION = MethodType.methodType(IntFunction.class),
+            METHOD_TYPE_LONG_FUNCTION = MethodType.methodType(LongFunction.class),
+            METHOD_TYPE_DOUBLE_FUNCTION = MethodType.methodType(DoubleFunction.class),
+            METHOD_TYPE_BI_FUNCTION = MethodType.methodType(BiFunction.class),
+            METHOD_TYPE_BI_CONSUMER = MethodType.methodType(BiConsumer.class),
+            METHOD_TYPE_VOO = MethodType.methodType(void.class, Object.class, Object.class),
+            METHOD_TYPE_OBJECT = MethodType.methodType(Object.class),
+            METHOD_TYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class),
+            METHOD_TYPE_INT_OBJECT = MethodType.methodType(int.class, Object.class),
+            METHOD_TYPE_LONG_OBJECT = MethodType.methodType(long.class, Object.class),
+            METHOD_TYPE_VOID_OBJECT_INT = MethodType.methodType(void.class, Object.class, int.class),
+            METHOD_TYPE_OBJECT_LONG = MethodType.methodType(Object.class, long.class),
+            METHOD_TYPE_OBJECT_DOUBLE = MethodType.methodType(Object.class, double.class),
+            METHOD_TYPE_VOID_LONG = MethodType.methodType(void.class, long.class),
+            METHOD_TYPE_OBJECT_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class, Object.class),
+            METHOD_TYPE_VOID = MethodType.methodType(void.class),
+            METHOD_TYPE_VOID_INT = MethodType.methodType(void.class, int.class),
+            METHOD_TYPE_VOID_STRING = MethodType.methodType(void.class, String.class),
+            METHOD_TYPE_OBJECT_INT = MethodType.methodType(Object.class, int.class);
 
     static final long LONG_JAVASCRIPT_LOW = -9007199254740991L;
     static final long LONG_JAVASCRIPT_HIGH = 9007199254740991L;
 
-    static final BigDecimal DECIMAL_JAVASCRIPT_LOW = BigDecimal.valueOf(LONG_JAVASCRIPT_LOW);
-    static final BigDecimal DECIMAL_JAVASCRIPT_HIGH = BigDecimal.valueOf(LONG_JAVASCRIPT_HIGH);
-
-    static final BigInteger BIGINT_JAVASCRIPT_LOW = BigInteger.valueOf(LONG_JAVASCRIPT_LOW);
-    static final BigInteger BIGINT_JAVASCRIPT_HIGH = BigInteger.valueOf(LONG_JAVASCRIPT_HIGH);
+    public static final BigInteger
+            BIGINT_INT32_MIN = BigInteger.valueOf(Integer.MIN_VALUE),
+            BIGINT_INT32_MAX = BigInteger.valueOf(Integer.MAX_VALUE),
+            BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE),
+            BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE),
+            BIGINT_JAVASCRIPT_LOW = BigInteger.valueOf(LONG_JAVASCRIPT_LOW),
+            BIGINT_JAVASCRIPT_HIGH = BigInteger.valueOf(LONG_JAVASCRIPT_HIGH);
 
     /**
      * All the positive powers of 10 that can be
@@ -369,7 +368,7 @@ public class TypeUtils {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
-                return 0;
+                return isNegative ? -0D : 0D;
             }
             return doubleValue(isNegative, decExp, digits, nDigits);
         } catch (StringIndexOutOfBoundsException ignored) {
@@ -503,7 +502,7 @@ public class TypeUtils {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
-                return 0;
+                return isNegative ? -0D : 0D;
             }
             return doubleValue(isNegative, decExp, digits, nDigits);
         } catch (StringIndexOutOfBoundsException ignored) {
@@ -637,7 +636,7 @@ public class TypeUtils {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
-                return 0;
+                return isNegative ? -0F : 0F;
             }
             return floatValue(isNegative, decExp, digits, nDigits);
         } catch (StringIndexOutOfBoundsException ignored) {
@@ -770,7 +769,7 @@ public class TypeUtils {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
-                return 0;
+                return isNegative ? -0F : 0F;
             }
             return floatValue(isNegative, decExp, digits, nDigits);
         } catch (StringIndexOutOfBoundsException ignored) {
@@ -1447,8 +1446,38 @@ public class TypeUtils {
             return (T) toInstant(obj);
         }
 
+        if (targetClass == LocalDate.class) {
+            if (obj instanceof Date) {
+                Date date = (Date) obj;
+                return (T) date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDate();
+            }
+        }
+
+        if (targetClass == LocalDateTime.class) {
+            if (obj instanceof Date) {
+                Date date = (Date) obj;
+                return (T) date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDateTime();
+            }
+        }
+
+        if (obj instanceof Date) {
+            long time = ((Date) obj).getTime();
+            String className = targetClass.getName();
+
+            switch (className) {
+                case "java.sql.Timestamp":
+                    return (T) JdbcSupport.createTimestamp(time);
+                case "java.sql.Date":
+                    return (T) JdbcSupport.createDate(time);
+                case "java.sql.Time":
+                    return (T) JdbcSupport.createTime(time);
+                default:
+                    break;
+            }
+        }
+
         if (targetClass == String.class) {
-            if (obj instanceof Character) {
+            if (obj instanceof Character || obj instanceof Number || obj instanceof Boolean || obj instanceof Enum) {
                 return (T) obj.toString();
             }
 
@@ -1492,6 +1521,13 @@ public class TypeUtils {
 
         if (obj instanceof String) {
             String json = (String) obj;
+            if (json.isEmpty()) {
+                if (targetClass == StringBuffer.class) {
+                    return (T) new StringBuffer();
+                } else if (targetClass == StringBuilder.class) {
+                    return (T) new StringBuilder();
+                }
+            }
             if (json.isEmpty() || "null".equals(json)) {
                 return null;
             }
@@ -1883,13 +1919,13 @@ public class TypeUtils {
 
     public static BigDecimal toBigDecimal(float f) {
         byte[] bytes = new byte[15];
-        int size = NumberUtils.writeFloat(bytes, 0, f, true);
+        int size = NumberUtils.writeFloat(bytes, 0, f, true, false);
         return parseBigDecimal(bytes, 0, size);
     }
 
     public static BigDecimal toBigDecimal(double d) {
         byte[] bytes = new byte[24];
-        int size = NumberUtils.writeDouble(bytes, 0, d, true);
+        int size = NumberUtils.writeDouble(bytes, 0, d, true, false);
         return parseBigDecimal(bytes, 0, size);
     }
 
@@ -1952,8 +1988,8 @@ public class TypeUtils {
     /**
      * decimal is integer, check has non-zero small
      *
-     * @param decimal
-     * @return
+     * @param decimal the BigDecimal value to check
+     * @return true if the decimal is an integer, false otherwise
      */
     public static boolean isInteger(BigDecimal decimal) {
         int scale = decimal.scale();
@@ -2089,6 +2125,7 @@ public class TypeUtils {
 
     public static int parseInt(byte[] bytes, int off, int len) {
         /* Accumulating negatively avoids surprises near MAX_VALUE */
+        int start = off;
         int max = off + len;
         int fc = bytes[off++];
         int result = IOUtils.isDigit(fc)
@@ -2114,10 +2151,11 @@ public class TypeUtils {
                 & (Integer.MIN_VALUE < result || fc == '-')) {
             return fc == '-' ? result : -result;
         }
-        throw new NumberFormatException("parseInt error " + new String(bytes, off, len));
+        throw new NumberFormatException("parseInt error " + new String(bytes, start, len));
     }
 
     public static int parseInt(char[] chars, int off, int len) {
+        int start = off;
         int max = off + len;
         int fc = chars[off++];
         int result = IOUtils.isDigit(fc)
@@ -2143,10 +2181,11 @@ public class TypeUtils {
                 & (Integer.MIN_VALUE < result || fc == '-')) {
             return fc == '-' ? result : -result;
         }
-        throw new NumberFormatException("parseInt error " + new String(chars, off, len));
+        throw new NumberFormatException("parseInt error " + new String(chars, start, len));
     }
 
     public static long parseLong(byte[] bytes, int off, int len) {
+        int start = off;
         int max = off + len;
         int fc = bytes[off++];
         long result = IOUtils.isDigit(fc)
@@ -2172,10 +2211,11 @@ public class TypeUtils {
                 & (Long.MIN_VALUE < result || fc == '-')) {
             return fc == '-' ? result : -result;
         }
-        throw new NumberFormatException("parseInt error " + new String(bytes, off, len));
+        throw new NumberFormatException("parseInt error " + new String(bytes, start, len));
     }
 
     public static long parseLong(char[] chars, int off, int len) {
+        int start = off;
         int max = off + len;
         int fc = chars[off++];
         long result = IOUtils.isDigit(fc)
@@ -2201,7 +2241,7 @@ public class TypeUtils {
                 & (Long.MIN_VALUE < result || fc == '-')) {
             return fc == '-' ? result : -result;
         }
-        throw new NumberFormatException("parseInt error " + new String(chars, off, len));
+        throw new NumberFormatException("parseInt error " + new String(chars, start, len));
     }
 
     public static BigDecimal parseBigDecimal(char[] bytes, int off, int len) {
@@ -2787,8 +2827,44 @@ public class TypeUtils {
         return null;
     }
 
+    /**
+     * Tests whether a type name carries a character that cannot appear in a Java binary class name
+     * but is meaningful in a URL. A nested jar URL such as {@code jar:http://host/x.jar!/} is
+     * resolvable by some class loaders, so a type name carrying one must never reach one.
+     *
+     * <p>Every autoType entry point shares this predicate; validating in only some of them is the
+     * asymmetry that lets a type name reach a class loader through the unchecked path.
+     *
+     * <p>Internal, public only because the autoType entry points live in different packages.
+     *
+     * @param typeName the type name to test
+     * @return true if the type name must be rejected without being resolved
+     */
+    public static boolean hasIllegalTypeNameChars(String typeName) {
+        return typeName.indexOf(':') >= 0 || typeName.indexOf('!') >= 0;
+    }
+
+    /**
+     * Normalizes a type name the way the autoType accept-list rolling hash normalizes it, so that a
+     * nested class matches whether it is written with its binary name ({@code a.b.Outer$Inner}) or
+     * its canonical name ({@code a.b.Outer.Inner}). Following that existing rolling-hash rule means
+     * the two spellings are equivalent as accept entries.
+     *
+     * <p>Internal, public only because the autoType entry points live in different packages.
+     *
+     * @param typeName the type name to normalize
+     * @return the normalized type name
+     */
+    public static String normalizeAcceptName(String typeName) {
+        return typeName.indexOf('$') >= 0 ? typeName.replace('$', '.') : typeName;
+    }
+
     public static Class loadClass(String className) {
         if (className.length() >= 192) {
+            return null;
+        }
+
+        if (hasIllegalTypeNameChars(className)) {
             return null;
         }
 
@@ -3070,9 +3146,24 @@ public class TypeUtils {
     }
 
     public static boolean isProxy(Class<?> clazz) {
+        // Check if the class name contains Spring Cloud RefreshScope indicators
+        String className = clazz.getName();
+        int p = className.indexOf('$');
+        if (p != -1
+                && (className.contains("$EnhancerBySpringCGLIB$")
+                || className.contains("$EnhancerByCGLIB$")
+                || className.contains("$FastClassBySpringCGLIB$")
+                || className.contains("$FastClassByCGLIB$")
+                || className.contains("$EnhancerBySpringCGLIB$")
+                || className.contains("$EnhancerByCGLIB$"))) {
+            return true;
+        }
+
+        // Check interfaces for RefreshScope marker or other proxy indicators
         for (Class<?> item : clazz.getInterfaces()) {
             String interfaceName = item.getName();
             switch (interfaceName) {
+                case "org.springframework.cloud.context.config.annotation.RefreshScope":
                 case "org.springframework.cglib.proxy.Factory":
                 case "javassist.util.proxy.ProxyObject":
                 case "org.apache.ibatis.javassist.util.proxy.ProxyObject":
@@ -3082,9 +3173,22 @@ public class TypeUtils {
                 case "net.sf.cglib.proxy.Factory":
                     return true;
                 default:
+                    // Check if interface name contains Spring-related patterns
+                    if (interfaceName.startsWith("org.springframework.cloud.context.config.annotation.") &&
+                            interfaceName.endsWith("RefreshScope")) {
+                        return true;
+                    }
                     break;
             }
         }
+
+        // Check if class name follows Spring proxy patterns
+        if (className.contains("$SpringCGLIB$")
+                || className.contains("$SpringCGLIB$")
+                || className.contains("$EnhancerBySpringCGLIB$")) {
+            return true;
+        }
+
         return false;
     }
 
@@ -3689,47 +3793,15 @@ public class TypeUtils {
         return colonCount > 0 && colonCount < 8;
     }
 
-    private static final BigInteger[] BIG_TEN_POWERS_TABLE;
-
-    static {
-        BigInteger[] bigInts = new BigInteger[128];
-        bigInts[0] = BigInteger.ONE;
-        bigInts[1] = BigInteger.TEN;
-        long longValue = 10;
-        for (int i = 2; i < 19; ++i) {
-            longValue *= 10;
-            bigInts[i] = BigInteger.valueOf(longValue);
-        }
-        BigInteger bigInt = bigInts[18];
-        for (int i = 19; i < 128; ++i) {
-            bigInt = bigInt.multiply(BigInteger.TEN);
-            bigInts[i] = bigInt;
-        }
-        BIG_TEN_POWERS_TABLE = bigInts;
-    }
-
-    private static long divideAndRemainder(BigInteger m, BigInteger n) {
-        if (FIELD_BIGINTEGER_MAG_OFFSET == -1) {
-            return divideAndRemainder0(m, n);
-        }
-        MutableBigInteger q = new MutableBigInteger(),
-                a = new MutableBigInteger((int[]) UNSAFE.getObject(m, FIELD_BIGINTEGER_MAG_OFFSET)),
-                b = new MutableBigInteger((int[]) UNSAFE.getObject(n, FIELD_BIGINTEGER_MAG_OFFSET));
-        a.divideKnuth(b, q, false);
-        return q.longValue(m.signum() == n.signum() ? 1 : -1);
-    }
-
-    private static long divideAndRemainder0(BigInteger m, BigInteger n) {
-        return m.divideAndRemainder(n)[0]
-                .longValue();
-    }
+    private static final int P_D = 53; // Double.PRECISION
+    private static final int Q_MIN_D = -1074; //(Double.MIN_EXPONENT - (P_D - 1));
+    private static final int Q_MAX_D = 971; // (Double.MAX_EXPONENT - (P_D - 1));
+    private static final double L = 3.321928094887362;
+    private static final int P_F = 24;
+    private static final int Q_MIN_F = -149;
+    private static final int Q_MAX_F = 104;
 
     public static double doubleValue(int signNum, long intCompact, int scale) {
-        final int P_D = 53; // Double.PRECISION
-        final int Q_MIN_D = -1074; //(Double.MIN_EXPONENT - (P_D - 1));
-        final int Q_MAX_D = 971; // (Double.MAX_EXPONENT - (P_D - 1));
-        final double L = 3.321928094887362;
-
         int bitLength = 64 - Long.numberOfLeadingZeros(intCompact);
         long qb = bitLength - (long) Math.ceil(scale * L);
         if (qb < Q_MIN_D - 2) {  // qb < -1_076
@@ -3740,47 +3812,26 @@ public class TypeUtils {
             return signNum * Double.POSITIVE_INFINITY;
         }
 
-        if (scale < 0) {
-            BigInteger pow10 = BIG_TEN_POWERS_TABLE[-scale];
-            BigInteger w = BigInteger.valueOf(intCompact);
-            return signNum * w.multiply(pow10).doubleValue();
-        }
         if (scale == 0) {
             return signNum * (double) intCompact;
         }
 
-        BigInteger w = BigInteger.valueOf(intCompact);
         int ql = (int) qb - (P_D + 3);  // narrowing qb to an int is safe
-        BigInteger pow10 = BIG_TEN_POWERS_TABLE[scale];
-        BigInteger m, n;
-        if (ql <= 0) {
-            m = w.shiftLeft(-ql);
-            n = pow10;
-        } else {
-            m = w;
-            n = pow10.shiftLeft(ql);
-        }
+        long i = MutableBigInteger.divideKnuthLong(intCompact, ql, scale);
 
-        long i = divideAndRemainder(m, n);
-        int sb = m.signum();
         int dq = (Long.SIZE - (P_D + 2)) - Long.numberOfLeadingZeros(i);
         int eq = (Q_MIN_D - 2) - ql;
         if (dq >= eq) {
-            return signNum * Math.scalb((double) (i | sb), ql);
+            return signNum * Math.scalb((double) (i | 1), ql);
         }
 
         /* Subnormal */
         long mask = (1L << eq) - 1;
-        long j = i >> eq | Long.signum(i & mask) | sb;
+        long j = i >> eq | Long.signum(i & mask) | 1;
         return signNum * Math.scalb((double) j, Q_MIN_D - 2);
     }
 
     public static float floatValue(int signNum, long intCompact, int scale) {
-        final int P_F = 24;
-        final int Q_MIN_F = -149;
-        final int Q_MAX_F = 104;
-        final double L = 3.321928094887362;
-
         int bitLength = 64 - Long.numberOfLeadingZeros(intCompact);
         long qb = bitLength - (long) Math.ceil(scale * L);
         if (qb < Q_MIN_F - 2) {  // qb < -151
@@ -3789,25 +3840,14 @@ public class TypeUtils {
         if (qb > Q_MAX_F + P_F + 1) {  // qb > 129
             return signNum * Float.POSITIVE_INFINITY;
         }
-        if (scale < 0) {
-            BigInteger w = BigInteger.valueOf(intCompact);
-            return signNum * w.multiply(BIG_TEN_POWERS_TABLE[-scale]).floatValue();
+        if (scale == 0) {
+            return signNum * (float) intCompact;
         }
 
-        BigInteger w = BigInteger.valueOf(intCompact);
-        int ql = (int) qb - (P_F + 3);
-        BigInteger pow10 = BIG_TEN_POWERS_TABLE[scale];
-        BigInteger m, n;
-        if (ql <= 0) {
-            m = w.shiftLeft(-ql);
-            n = pow10;
-        } else {
-            m = w;
-            n = pow10.shiftLeft(ql);
-        }
-        BigInteger[] qr = m.divideAndRemainder(n);
-        int i = qr[0].intValue();
-        int sb = qr[1].signum();
+        int ql = (int) qb - (P_F + 3);  // narrowing qb to an int is safe
+        int i = (int) MutableBigInteger.divideKnuthLong(intCompact, ql, scale);
+
+        int sb = intCompact == 0 ? 0 : 1;
         int dq = (Integer.SIZE - (P_F + 2)) - Integer.numberOfLeadingZeros(i);
         int eq = (Q_MIN_F - 2) - ql;
         if (dq >= eq) {
@@ -3822,8 +3862,23 @@ public class TypeUtils {
         return i >= LONG_JAVASCRIPT_LOW && i <= LONG_JAVASCRIPT_HIGH;
     }
 
-    public static boolean isJavaScriptSupport(BigDecimal i) {
-        return i.precision() >= 16 && isJavaScriptSupport(i.unscaledValue());
+    public static boolean isJavaScriptSupport(BigDecimal decimal) {
+        boolean jsSupport = decimal.precision() < 16 || isJavaScriptSupport(decimal.unscaledValue());
+        if (!jsSupport && decimal.scale() != 0) {
+            //Use double for comparison
+            //double and javascript number have the same precision
+            //In extreme cases, precision loss may occur.
+            //There will be a loss of precision between [4.9e-324, 5e-324), which will be converted to 5e-324 by JavaScript.
+            //This situation can be ignored
+            double doubleValue;
+            try {
+                doubleValue = decimal.doubleValue();
+            } catch (Exception ex) {
+                return false;
+            }
+            jsSupport = decimal.compareTo(BigDecimal.valueOf(doubleValue)) == 0;
+        }
+        return jsSupport;
     }
 
     public static boolean isJavaScriptSupport(BigInteger i) {
@@ -3839,5 +3894,21 @@ public class TypeUtils {
             }
         }
         return Object.class;
+    }
+
+    public static List toList(Object object) {
+        if (object == null) {
+            return null;
+        } else if (object instanceof List) {
+            return (List) object;
+        } else if (object instanceof Iterable) {
+            List list = new ArrayList();
+            for (Object item : (Iterable) object) {
+                list.add(item);
+            }
+            return list;
+        } else {
+            throw new JSONException("Can not cast '" + object.getClass() + "' to List");
+        }
     }
 }

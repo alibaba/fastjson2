@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.jsonb.basic;
 
 import com.alibaba.fastjson2.JSONB;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("jsonb")
 public class MapTest {
     /**
      * 0xa6 0xa5

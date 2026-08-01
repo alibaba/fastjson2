@@ -7,14 +7,17 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.eishay.vo.MediaContent;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.IdentityHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("benchmark")
 public class JSONBArrayMapping {
     static final JSONReader.Feature[] jsonbReaderFeaturesSupportBeanArray = {
             JSONReader.Feature.SupportAutoType,
@@ -62,6 +65,9 @@ public class JSONBArrayMapping {
         assertEquals(5, refs.size());
 
         byte[] bytes = writer.getBytes();
+        System.out.println(JSONB.toJSONString(bytes));
+        assertEquals(270, bytes.length);
+        assertEquals(1425615208, Arrays.hashCode(bytes));
         Object object1 = JSONB.parseObject(bytes, Object.class, jsonbReaderFeaturesSupportBeanArray);
 
         assertEquals(

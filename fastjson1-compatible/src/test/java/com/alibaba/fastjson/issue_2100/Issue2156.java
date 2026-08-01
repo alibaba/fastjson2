@@ -43,7 +43,7 @@ public class Issue2156 {
     @Test
     public void test_for_issue_time() throws Exception {
         java.sql.Time date = java.sql.Time.valueOf("12:13:14");
-        String str = JSON.toJSONStringWithDateFormat(date, JSON.DEFFAULT_DATE_FORMAT);
+        String str = JSON.toJSONStringWithDateFormat(date, JSON.DEFAULT_DATE_FORMAT);
         assertEquals("\"12:13:14\"", str);
     }
 }

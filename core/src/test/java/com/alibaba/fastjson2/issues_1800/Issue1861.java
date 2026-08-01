@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_1800;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.validation.Valid;
@@ -12,6 +13,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("regression")
+@Tag("date")
+@Tag("compat-jackson")
 public class Issue1861 {
     @Test
     public void test() {

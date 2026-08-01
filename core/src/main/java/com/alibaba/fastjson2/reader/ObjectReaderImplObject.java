@@ -160,6 +160,10 @@ public final class ObjectReaderImplObject
                     break;
                 }
 
+                if (jsonReader.current() == '/') {
+                    jsonReader.skipComment();
+                }
+
                 Object name;
                 if (i == 0 && typeName == null && hash != 0) {
                     name = jsonReader.getFieldName();
@@ -205,7 +209,17 @@ public final class ObjectReaderImplObject
                         value = jsonReader.readArray();
                         break;
                     case '{':
-                        value = jsonReader.readObject();
+                        if (jsonReader.isReference()) {
+                            String reference = jsonReader.readReference();
+                            if ("..".equals(reference)) {
+                                value = object;
+                            } else {
+                                jsonReader.addResolveTask(object, name, JSONPath.of(reference));
+                                continue;
+                            }
+                        } else {
+                            value = jsonReader.readObject();
+                        }
                         break;
                     case '"':
                     case '\'':

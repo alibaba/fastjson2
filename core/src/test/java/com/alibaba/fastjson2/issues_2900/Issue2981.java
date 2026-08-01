@@ -3,10 +3,14 @@ package com.alibaba.fastjson2.issues_2900;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONType;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("autotype")
+@Tag("annotation")
 public class Issue2981 {
     @Test
     public void test() {

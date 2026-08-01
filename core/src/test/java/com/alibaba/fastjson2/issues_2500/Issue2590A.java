@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_2500;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.PropertyPreFilter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("regression")
 public class Issue2590A {
     @Test
     public void test_map1_childItem() {

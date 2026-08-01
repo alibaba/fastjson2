@@ -1,8 +1,10 @@
 package com.alibaba.fastjson2.write.complex;
 
 import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+@Tag("writer")
 public class ObjectTest {
     @Test
     public void test_0() throws Exception {

@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.DateUtils;
@@ -16,12 +15,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-
 public final class FieldReaderInstant<T>
         extends FieldReaderDateTimeCodec<T> {
-    final BiConsumer<T, Instant> function;
-
     FieldReaderInstant(
             String fieldName,
             Type fieldType,
@@ -48,9 +43,9 @@ public final class FieldReaderInstant<T>
                 schema,
                 method,
                 field,
+                function,
                 ObjectReaderImplInstant.of(format, locale)
         );
-        this.function = function;
     }
 
     @Override
@@ -120,41 +115,10 @@ public final class FieldReaderInstant<T>
 
     @Override
     protected void accept(T object, Instant instant) {
-        if (schema != null) {
-            schema.assertValidate(instant);
-        }
-
-        if (object == null) {
-            throw new JSONException("set " + fieldName + " error, object is null");
-        }
-
         if (instant == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
             return;
         }
 
-        if (function != null) {
-            function.accept(object, instant);
-            return;
-        }
-
-        if (method != null) {
-            try {
-                method.invoke(object, instant);
-            } catch (Exception e) {
-                throw new JSONException("set " + fieldName + " error", e);
-            }
-            return;
-        }
-
-        if (fieldOffset != -1) {
-            UNSAFE.putObject(object, fieldOffset, instant);
-            return;
-        }
-
-        try {
-            field.set(object, instant);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, instant);
     }
 }

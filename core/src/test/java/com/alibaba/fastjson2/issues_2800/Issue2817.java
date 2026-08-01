@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_2800;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -10,6 +11,9 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("date")
+@Tag("compat-jackson")
 public class Issue2817 {
     @Test
     public void test() {

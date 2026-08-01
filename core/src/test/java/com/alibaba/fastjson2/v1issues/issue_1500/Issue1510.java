@@ -5,12 +5,15 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue1510 {
     @Test
     public void test_for_issue() throws Exception {

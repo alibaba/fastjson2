@@ -3,11 +3,13 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.schema.ValidateResult;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("regression")
 public class Issue770 {
     @Test
     public void test() {

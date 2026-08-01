@@ -580,6 +580,7 @@ final class JSONReaderJSONB
             }
             case BC_BIGINT: {
                 int len = readInt32Value();
+                checkBigintLen(len, offset, end);
                 byte[] buf = new byte[len];
                 System.arraycopy(bytes, offset, buf, 0, len);
                 offset += len;
@@ -694,6 +695,9 @@ final class JSONReaderJSONB
             }
             case BC_BINARY: {
                 int len = readLength();
+                if (len < 0 || len > end - offset) {
+                    throw new JSONException("BC_BINARY length out of range: " + len);
+                }
                 byte[] binary = Arrays.copyOfRange(this.bytes, offset, offset + len);
                 offset += len;
                 return binary;
@@ -3253,6 +3257,7 @@ final class JSONReaderJSONB
                 return Long.toString(int64Value);
             case BC_BIGINT: {
                 int len = readInt32Value();
+                checkBigintLen(len, offset, end);
                 byte[] bytes = new byte[len];
                 System.arraycopy(this.bytes, offset, bytes, 0, len);
                 offset += len;
@@ -3669,6 +3674,10 @@ final class JSONReaderJSONB
                 }
                 return decimal.intValue();
             }
+            case BC_TIMESTAMP_MILLIS:
+                long millis = getLongBE(bytes, check7(offset, end));
+                offset += 8;
+                return (int) millis;
             default:
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
@@ -3698,6 +3707,9 @@ final class JSONReaderJSONB
         }
 
         int len = readLength();
+        if (len < 0 || len > end - offset) {
+            throw new JSONException("BC_BINARY length out of range: " + len);
+        }
         byte[] bytes = new byte[len];
         System.arraycopy(this.bytes, offset, bytes, 0, len);
         offset += len;
@@ -3942,9 +3954,9 @@ final class JSONReaderJSONB
                     String str = readFixedAsciiString(strlen);
                     offset += strlen;
                     if (str.indexOf('.') == -1) {
-                        return new BigInteger(str).intValue();
+                        return new BigInteger(str).floatValue();
                     } else {
-                        return toBigDecimal(str).intValue();
+                        return toBigDecimal(str).floatValue();
                     }
                 }
                 break;
@@ -4094,9 +4106,9 @@ final class JSONReaderJSONB
                     String str = readFixedAsciiString(strlen);
                     offset += strlen;
                     if (str.indexOf('.') == -1) {
-                        return new BigInteger(str).intValue();
+                        return new BigInteger(str).doubleValue();
                     } else {
-                        return toBigDecimal(str).intValue();
+                        return toBigDecimal(str).doubleValue();
                     }
                 }
                 break;
@@ -4176,6 +4188,7 @@ final class JSONReaderJSONB
             }
             case BC_BIGINT: {
                 int len = readInt32Value();
+                checkBigintLen(len, offset, end);
                 byte[] bytes = new byte[len];
                 System.arraycopy(this.bytes, offset, bytes, 0, len);
                 offset += len;
@@ -4405,6 +4418,7 @@ final class JSONReaderJSONB
             );
         } else if (type == BC_BIGINT) {
             int len = readInt32Value();
+            checkBigintLen(len, offset, end);
             byte[] bytes = new byte[len];
             System.arraycopy(this.bytes, offset, bytes, 0, len);
             offset += len;
@@ -4467,6 +4481,9 @@ final class JSONReaderJSONB
             }
             case BC_BINARY: {
                 int len = readInt32Value();
+                if (len < 0 || len > end - offset) {
+                    throw new JSONException("BC_BINARY length out of range: " + len);
+                }
                 byte[] buf = new byte[len];
                 System.arraycopy(this.bytes, offset, buf, 0, len);
                 offset += len;
@@ -4873,6 +4890,9 @@ final class JSONReaderJSONB
     public Instant readInstant() {
         int type = bytes[offset++];
         switch (type) {
+            case BC_NULL: {
+                return null;
+            }
             case BC_TIMESTAMP: {
                 return Instant.ofEpochSecond(
                         readInt64Value(),
@@ -5454,6 +5474,18 @@ final class JSONReaderJSONB
             throw new JSONException("date only support string input");
         }
         offset += 13;
+        return time;
+    }
+
+    @Override
+    protected LocalTime readLocalTime15() {
+        LocalTime time;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 15
+                || (time = DateUtils.parseLocalTime15(bytes, offset + 1)) == null
+        ) {
+            throw new JSONException("date only support string input");
+        }
+        offset += 16;
         return time;
     }
 
@@ -6269,6 +6301,12 @@ final class JSONReaderJSONB
             throw outOfBoundsCheckFromToIndex(off, end);
         }
         return off;
+    }
+
+    static void checkBigintLen(int len, int offset, int end) {
+        if (len < 0 || len > end - offset) {
+            throw new JSONException("BC_BIGINT length out of range: " + len + ", available: " + (end - offset));
+        }
     }
 
     static JSONException outOfBoundsCheckFromToIndex(int offset, int end) {

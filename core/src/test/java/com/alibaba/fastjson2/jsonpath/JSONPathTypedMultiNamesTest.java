@@ -1,6 +1,12 @@
 package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONPath;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -11,6 +17,7 @@ import java.time.ZoneId;
 import static com.alibaba.fastjson2.JSONPath.Feature.NullOnError;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("jsonpath")
 public class JSONPathTypedMultiNamesTest {
     @Test
     public void test() {
@@ -84,6 +91,24 @@ public class JSONPathTypedMultiNamesTest {
         assertNull(result3[3]);
 
         assertThrows(JSONException.class, () -> jsonPath.extract("["));
+    }
+
+    @Test
+    public void testArrayNullOnError() {
+        JSONPath jsonPath = JSONPath.of(
+                new String[]{"$.a[0].x0", "$.a[0].x1"},
+                new Type[]{Long.class, String.class},
+                null,
+                new long[]{
+                        NullOnError.mask,
+                        NullOnError.mask
+                },
+                ZoneId.systemDefault()
+        );
+
+        Object[] result = (Object[]) jsonPath.extract("{\"a\":[{\"x0\":\"xx\",\"x1\":\"xx\"}]}");
+        assertNull(result[0]);
+        assertNotNull(result[1]);
     }
 
     static class Bean {

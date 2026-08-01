@@ -1,10 +1,12 @@
 package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.JSONObject;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("schema")
 public class ConstStringTest {
     @Test
     public void test() {

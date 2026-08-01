@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -11,6 +12,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("codec")
 public class ParseMapTest {
     @Test
     public void test_ConcurrentMap() {

@@ -10,8 +10,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Locale;
+import java.util.function.Function;
 
-abstract class FieldWriterMap
+final class FieldWriterMap
         extends FieldWriterObject {
     protected final Class<?> contentAs;
     protected Type contentAsFieldType;
@@ -32,9 +33,10 @@ abstract class FieldWriterMap
             Class fieldClass,
             Field field,
             Method method,
+            Function function,
             Class<?> contentAs
     ) {
-        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method);
+        super(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, function);
         Type keyType = null, valueType = null;
         Type contentAsFieldType = null;
         if (fieldType instanceof ParameterizedType) {

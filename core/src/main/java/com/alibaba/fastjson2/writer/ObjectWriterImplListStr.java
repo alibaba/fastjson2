@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.alibaba.fastjson2.util.TypeUtils.toList;
 import static com.alibaba.fastjson2.writer.ObjectWriterImplList.CLASS_SUBLIST;
 
 final class ObjectWriterImplListStr
@@ -21,7 +22,7 @@ final class ObjectWriterImplListStr
             return;
         }
 
-        List list = (List) object;
+        List list = toList(object);
 
         jsonWriter.startArray();
         for (int i = 0; i < list.size(); i++) {
@@ -68,7 +69,7 @@ final class ObjectWriterImplListStr
             );
         }
 
-        List<String> list = (List) object;
+        List<String> list = toList(object);
         jsonWriter.writeString(list);
     }
 }

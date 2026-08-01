@@ -58,6 +58,10 @@ public class EishayWriteUTF8Bytes {
         bh.consume(JSON.toJSONBytes(mc, StandardCharsets.UTF_8, featuresContext));
     }
 
+    public void wast(Blackhole bh) {
+        bh.consume(io.github.wycst.wast.json.JSON.toJsonBytes(mc, StandardCharsets.UTF_8));
+    }
+
     @Benchmark
     public void jackson(Blackhole bh) throws Exception {
         bh.consume(mapper.writeValueAsBytes(mc));

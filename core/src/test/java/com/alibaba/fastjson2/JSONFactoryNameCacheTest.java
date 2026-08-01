@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE;
 import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE2;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("util")
 public class JSONFactoryNameCacheTest {
     @Test
     public void test() throws Exception {

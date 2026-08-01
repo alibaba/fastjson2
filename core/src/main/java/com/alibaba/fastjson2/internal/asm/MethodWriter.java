@@ -166,6 +166,10 @@ public final class MethodWriter {
         visitInsn(Opcodes.RETURN);
     }
 
+    public void ireturn() {
+        visitInsn(Opcodes.IRETURN);
+    }
+
     public void areturn() {
         visitInsn(Opcodes.ARETURN);
     }
@@ -194,6 +198,41 @@ public final class MethodWriter {
         visitInsn(Opcodes.ICONST_5);
     }
 
+    public void iconst_n(int n) {
+        switch (n) {
+            case 0:
+                iconst_0();
+                break;
+            case 1:
+                iconst_1();
+                break;
+            case 2:
+                iconst_2();
+                break;
+            case 3:
+                iconst_3();
+                break;
+            case 4:
+                iconst_4();
+                break;
+            case 5:
+                iconst_5();
+                break;
+            case -1:
+                iconst_m1();
+                break;
+            default:
+                if (n >= -128 && n < 127) {
+                    bipush(n);
+                } else if (n >= -32768 && n < 32767) {
+                    sipush(n);
+                } else {
+                    visitLdcInsn(n);
+                }
+                break;
+        }
+    }
+
     public void iconst_m1() {
         visitInsn(Opcodes.ICONST_M1);
     }
@@ -212,6 +251,14 @@ public final class MethodWriter {
 
     public void iadd() {
         visitInsn(Opcodes.IADD);
+    }
+
+    public void isub() {
+        visitInsn(Opcodes.ISUB);
+    }
+
+    public void imul() {
+        visitInsn(Opcodes.IMUL);
     }
 
     public void bastore() {
@@ -254,6 +301,27 @@ public final class MethodWriter {
         visitInsn(Opcodes.I2L);
     }
 
+    public void i2f() {
+        visitInsn(Opcodes.I2F);
+    }
+
+    public void i2d() {
+        visitInsn(Opcodes.I2D);
+    }
+
+    public void cmpWithZero(Class<?> fieldClass) {
+        if (fieldClass == long.class) {
+            visitInsn(Opcodes.LCONST_0);
+            visitInsn(Opcodes.LCMP);
+        } else if (fieldClass == double.class) {
+            visitInsn(Opcodes.DCONST_0);
+            visitInsn(Opcodes.DCMPL);
+        } else if (fieldClass == float.class) {
+            visitInsn(Opcodes.FCONST_0);
+            visitInsn(Opcodes.FCMPL);
+        }
+    }
+
     public void lxor() {
         visitInsn(Opcodes.LXOR);
     }
@@ -264,6 +332,10 @@ public final class MethodWriter {
 
     public void aaload() {
         visitInsn(Opcodes.AALOAD);
+    }
+
+    public void aastore() {
+        visitInsn(Opcodes.AASTORE);
     }
 
     private void visitInsn(final int opcode) {
@@ -365,6 +437,14 @@ public final class MethodWriter {
         visitInsn(Opcodes.DUP);
     }
 
+    public void dup(Class<?> fieldClass) {
+        if (fieldClass == long.class || fieldClass == double.class) {
+            visitInsn(Opcodes.DUP2);
+        } else {
+            visitInsn(Opcodes.DUP);
+        }
+    }
+
     public void dup2() {
         visitInsn(Opcodes.DUP2);
     }
@@ -414,6 +494,10 @@ public final class MethodWriter {
 
     public void new_(final String type) {
         visitTypeInsn(Opcodes.NEW, type);
+    }
+
+    public void anewArray(final String type) {
+        visitTypeInsn(Opcodes.ANEWARRAY, type);
     }
 
     public void instanceOf(final String type) {
@@ -558,7 +642,32 @@ public final class MethodWriter {
         boolean nextInsnIsJumpTarget = false;
         if ((label.flags & Label.FLAG_RESOLVED) != 0
                 && label.bytecodeOffset - code.length < Short.MIN_VALUE) {
-            throw new JSONException("not supported");
+            // Case of a backward jump with an offset < -32768. In this case we automatically replace GOTO
+            // with GOTO_W, JSR with JSR_W and IFxxx <l> with IFNOTxxx <L> GOTO_W <l> L:..., where
+            // IFNOTxxx is the "opposite" opcode of IFxxx (e.g. IFNE for IFEQ) and where <L> designates
+            // the instruction just after the GOTO_W.
+            if (baseOpcode == Opcodes.GOTO) {
+                code.putByte(Constants.GOTO_W);
+            } else if (baseOpcode == Opcodes.JSR) {
+                code.putByte(Constants.JSR_W);
+            } else {
+                // Put the "opposite" opcode of baseOpcode. This can be done by flipping the least
+                // significant bit for IFNULL and IFNONNULL, and similarly for IFEQ ... IF_ACMPEQ (with a
+                // pre and post offset by 1). The jump offset is 8 bytes (3 for IFNOTxxx, 5 for GOTO_W).
+                code.putByte(baseOpcode >= Opcodes.IFNULL ? baseOpcode ^ 1 : ((baseOpcode + 1) ^ 1) - 1);
+                code.putShort(8);
+                // Here we could put a GOTO_W in theory, but if ASM specific instructions are used in this
+                // method or another one, and if the class has frames, we will need to insert a frame after
+                // this GOTO_W during the additional ClassReader -> ClassWriter round trip to remove the ASM
+                // specific instructions. To not miss this additional frame, we need to use an ASM_GOTO_W
+                // here, which has the unfortunate effect of forcing this additional round trip (which in
+                // some case would not have been really necessary, but we can't know this at this point).
+                code.putByte(Constants.ASM_GOTO_W);
+                hasAsmInstructions = true;
+                // The instruction after the GOTO_W becomes the target of the IFNOT instruction.
+                nextInsnIsJumpTarget = true;
+            }
+            label.put(code, code.length - 1, true);
         } else if (baseOpcode != opcode) {
             // Case of a GOTO_W or JSR_W specified by the user (normally ClassReader when used to remove
             // ASM specific instructions). In this case we keep the original instruction.
@@ -590,6 +699,9 @@ public final class MethodWriter {
             // If the next instruction starts a new basic block, call visitLabel to add the label of this
             // instruction as a successor of the current block, and to start a new basic block.
             if (nextBasicBlock != null) {
+                if (nextInsnIsJumpTarget) {
+                    nextBasicBlock.flags |= Label.FLAG_JUMP_TARGET;
+                }
                 visitLabel(nextBasicBlock);
             }
             if (baseOpcode == Opcodes.GOTO) {

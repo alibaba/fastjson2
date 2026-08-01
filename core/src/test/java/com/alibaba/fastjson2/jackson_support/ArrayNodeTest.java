@@ -3,8 +3,10 @@ package com.alibaba.fastjson2.jackson_support;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+@Tag("compat-jackson")
 public class ArrayNodeTest {
     @Test
     public void test() throws Exception {

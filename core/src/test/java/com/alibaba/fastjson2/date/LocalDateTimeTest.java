@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import static com.alibaba.fastjson2.annotation.JSONCompiler.CompilerOption.LAMBD
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+@Tag("date")
 public class LocalDateTimeTest {
     @Test
     public void test() {

@@ -592,17 +592,7 @@ public class JSONArray
 
     @Override
     public Object get(int index) {
-        Object value = list.get(index);
-
-        if (value instanceof com.alibaba.fastjson2.JSONObject) {
-            return new JSONObject((com.alibaba.fastjson2.JSONObject) value);
-        }
-
-        if (value instanceof com.alibaba.fastjson2.JSONArray) {
-            return new JSONArray((com.alibaba.fastjson2.JSONArray) value);
-        }
-
-        return value;
+        return adaptResult(list.get(index));
     }
 
     /**
@@ -845,7 +835,7 @@ public class JSONArray
         ObjectReader objectReader = provider.getObjectReader(clazz);
         JSONReader jsonReader = JSONReader.of(json);
 
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        String defaultDateFormat = JSON.DEFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             jsonReader
                     .getContext()

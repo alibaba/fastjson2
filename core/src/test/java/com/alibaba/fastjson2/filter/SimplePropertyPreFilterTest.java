@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.filter;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("filter")
 public class SimplePropertyPreFilterTest {
     @Test
     public void test() {
@@ -40,7 +42,7 @@ public class SimplePropertyPreFilterTest {
         list.add(beanA);
 
         String str = JSON.toJSONString(list, filters, JSONWriter.Feature.WriteMapNullValue);
-        assertEquals("[{\"b\":{\"age\":\"20\",\"id\":\"1\",\"uname\":\"user1\"},\"c\":{\"season\":\"2024\"},\"number\":2}]", str);
+        assertEquals("[{\"b\":{\"age\":\"20\",\"uname\":\"user1\"},\"c\":{\"season\":\"2024\"},\"number\":2}]", str);
     }
 
     @Data

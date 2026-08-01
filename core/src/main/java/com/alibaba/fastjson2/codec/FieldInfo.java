@@ -20,7 +20,7 @@ public class FieldInfo {
     public static final long DISABLE_ARRAY_MAPPING = 1L << 58;
     public static final long DISABLE_AUTO_TYPE = 1L << 59;
     public static final long DISABLE_JSONB = 1L << 60;
-    public static final long BACKR_EFERENCE = 1L << 61;
+    public static final long BACKR_REFERENCE = 1L << 61;
     public static final long RECORD = 1L << 62;
     public static final long CONTENT_AS = 1L << 63;
 
@@ -37,6 +37,8 @@ public class FieldInfo {
     public Class<?> readUsing;
     public boolean fieldClassMixIn;
     public boolean isTransient;
+    public boolean skipTransient;
+    public boolean isPrivate;
     public String defaultValue;
     public Locale locale;
     public String schema;
@@ -96,6 +98,8 @@ public class FieldInfo {
         readUsing = null;
         fieldClassMixIn = false;
         isTransient = false;
+        skipTransient = true;
+        isPrivate = true;
         defaultValue = null;
         locale = null;
         schema = null;

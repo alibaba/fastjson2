@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.issues_2400;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.TypeReference;
+import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author hnyyghk
  * @since 2024-04-24
  */
+@Tag("regression")
+@Tag("autotype")
 public class Issue2475 {
     @Test
     void testList() {
@@ -78,8 +80,13 @@ public class Issue2475 {
         Map<String, Date> data = new HashMap<>();
         data.put("date", date);
         String str = JSON.toJSONString(data, JSONWriter.Feature.WriteClassName);
+        String expected = "{\"@type\":\"java.util.HashMap\",\"date\":new Date(1324138987429)}";
+        assertEquals(expected, str);
+        assertEquals(expected, new String(JSON.toJSONBytes(data, JSONWriter.Feature.WriteClassName)));
 
-        Bean data1 = JSON.parseObject(str, Bean.class);
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        JSONReader.Context context = JSONFactory.createReadContext(provider);
+        Bean data1 = JSON.parseObject(str, Bean.class, context);
         assertEquals(date.getTime(), data1.date.getTime());
     }
 

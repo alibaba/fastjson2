@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.date;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.util.DateUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZoneId;
@@ -11,6 +12,7 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("date")
 public class DateTest {
     static final long millis = DateUtils.parseMillis("2023-03-11T11:33:22Z");
 

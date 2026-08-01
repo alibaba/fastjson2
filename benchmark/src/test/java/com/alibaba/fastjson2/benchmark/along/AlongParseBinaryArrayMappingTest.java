@@ -37,17 +37,17 @@ public class AlongParseBinaryArrayMappingTest {
         }
     }
 
-    public static void fury() throws Exception {
-        System.out.println("AlongParseBinaryArrayMapping-fury size " + AlongParseBinaryArrayMapping.furyBytes.length); // 449
+    public static void fory() throws Exception {
+        System.out.println("AlongParseBinaryArrayMapping-fory size " + AlongParseBinaryArrayMapping.foryBytes.length); // 449
         System.out.println();
 
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < LOOP; ++i) {
-                benchmark.fury(BH);
+                benchmark.fory(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("AlongParseBinaryArrayMapping-fury millis : " + millis);
+            System.out.println("AlongParseBinaryArrayMapping-fory millis : " + millis);
             // zulu8.68.0.21 : 2050
             // zulu11.52.13 :
             // zulu17.32.13 : 1587 1154
@@ -57,6 +57,6 @@ public class AlongParseBinaryArrayMappingTest {
     public static void main(String[] args) throws Exception {
         jsonb();
 //        jsonbFeatures();
-//        fury();
+//        fory();
     }
 }

@@ -22,8 +22,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
+import java.util.function.ObjLongConsumer;
 
-public class ASMUtils {
+public final class ASMUtils {
     public static final String TYPE_UNSAFE_UTILS = JDKUtils.class.getName().replace('.', '/');
 
     public static final String TYPE_OBJECT_WRITER_ADAPTER
@@ -58,6 +59,7 @@ public class ASMUtils {
     public static final String TYPE_OBJECT_READER_10 = ObjectReader10.class.getName().replace('.', '/');
     public static final String TYPE_OBJECT_READER_11 = ObjectReader11.class.getName().replace('.', '/');
     public static final String TYPE_OBJECT_READER_12 = ObjectReader12.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_NONE_DEFAULT_CONSTRUCTOR = ObjectReaderNoneDefaultConstructor.class.getName().replace('.', '/');
     public static final String TYPE_BYTE_ARRAY_VALUE_CONSUMER = ByteArrayValueConsumer.class.getName().replace('.', '/');
     public static final String TYPE_CHAR_ARRAY_VALUE_CONSUMER = CharArrayValueConsumer.class.getName().replace('.', '/');
     public static final String TYPE_TYPE_UTILS = TypeUtils.class.getName().replace('.', '/');
@@ -77,6 +79,7 @@ public class ASMUtils {
     public static final String DESC_JSON_READER = 'L' + TYPE_JSON_READER + ';';
     public static final String DESC_JSON_WRITER = 'L' + TYPE_JSON_WRITER + ';';
     public static final String DESC_OBJECT_READER = 'L' + TYPE_OBJECT_READER + ';';
+    public static final String DESC_OBJECT_READER_ADAPTER = 'L' + TYPE_OBJECT_READER_ADAPTER + ';';
     public static final String DESC_OBJECT_WRITER = 'L' + TYPE_OBJECT_WRITER + ';';
     public static final String DESC_SUPPLIER = "Ljava/util/function/Supplier;";
     public static final String DESC_JSONSCHEMA = 'L' + JSONSchema.class.getName().replace('.', '/') + ';';

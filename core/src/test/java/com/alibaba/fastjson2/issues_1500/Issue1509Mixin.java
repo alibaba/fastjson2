@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -17,6 +18,10 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("regression")
+@Tag("jsonb")
+@Tag("autotype")
+@Tag("annotation")
 public class Issue1509Mixin {
     @Test
     public void test() {

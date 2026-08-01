@@ -113,19 +113,27 @@ class JSONPathTypedMultiNames
                     continue;
                 }
 
-                Object result = fieldWriter.getFieldValue(object);
+                Object result;
+                try {
+                    result = fieldWriter.getFieldValue(object);
 
-                Type type = types[i];
-                if (result != null && result.getClass() != type) {
-                    if (type == Long.class) {
-                        result = TypeUtils.toLong(result);
-                    } else if (type == BigDecimal.class) {
-                        result = TypeUtils.toBigDecimal(result);
-                    } else if (type == String[].class) {
-                        result = TypeUtils.toStringArray(result);
-                    } else {
-                        result = TypeUtils.cast(result, type);
+                    Type type = types[i];
+                    if (result != null && result.getClass() != type) {
+                        if (type == Long.class) {
+                            result = TypeUtils.toLong(result);
+                        } else if (type == BigDecimal.class) {
+                            result = TypeUtils.toBigDecimal(result);
+                        } else if (type == String[].class) {
+                            result = TypeUtils.toStringArray(result);
+                        } else {
+                            result = TypeUtils.cast(result, type);
+                        }
                     }
+                } catch (Exception e) {
+                    if (!ignoreError(i)) {
+                        throw new JSONException("jsonpath eval path, path : " + paths[i] + ", msg : " + e.getMessage(), e);
+                    }
+                    result = null;
                 }
                 array[i] = result;
             }

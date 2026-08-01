@@ -68,18 +68,18 @@ public class GenericFastJsonRedisSerializerTest {
         assertEquals(baseResult2.getCode(), "1000");
         assertEquals(baseResult2.getData().size(), 3);
 
-        String json = "{\n" +
-                "\"@type\": \"com.alibaba.fastjson2.spring.GenericFastJsonRedisSerializerTest$BaseResult\",\n" +
-                "\"code\": \"1000\",\n" +
-                "\"data\": [\n" +
-                "\"按手动控制按钮\",\n" +
-                "\"不停机\",\n" +
-                "\"不转动\",\n" +
-                "\"传动轴振动大\",\n" +
-                "\"第一推进器\",\n" +
-                "\"电机不运行\",\n" +
-                "],\n" +
-                "\"msg\": \"success\"\n" +
+        String json = "{" +
+                "\"@type\": \"com.alibaba.fastjson2.spring.GenericFastJsonRedisSerializerTest$BaseResult\"," +
+                "\"code\": \"1000\"," +
+                "\"data\": [" +
+                "\"button1\"," +
+                "\"button2\"," +
+                "\"button3\"," +
+                "\"button4\"," +
+                "\"button5\"," +
+                "\"button6\"" +
+                "]," +
+                "\"msg\": \"success\"" +
                 "}";
 
         BaseResult<List<String>> baseResult3 = (BaseResult<List<String>>) genericFastJsonRedisSerializer.deserialize(json.getBytes());

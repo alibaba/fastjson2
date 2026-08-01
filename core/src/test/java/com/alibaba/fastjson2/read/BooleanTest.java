@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.read;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.util.DateUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -11,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import static com.alibaba.fastjson2.JSONReader.Feature.NonZeroNumberCastToBooleanAsTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("reader")
 public class BooleanTest {
     @Test
     public void test() {

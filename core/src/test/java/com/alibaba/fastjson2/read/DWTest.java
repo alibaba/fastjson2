@@ -1,10 +1,16 @@
 package com.alibaba.fastjson2.read;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+@Tag("reader")
 public class DWTest {
     @Test
     public void test_parse_object_with_array_field() {

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues_1000;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -9,6 +10,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("annotation")
 public class Issue1147 {
     @Test
     public void test_for_issue() {

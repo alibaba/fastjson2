@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import lombok.Data;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -14,6 +15,7 @@ import java.util.List;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("features")
 public class PrettyFormatTest {
     @Test
     public void testArray() {
@@ -242,14 +244,14 @@ public class PrettyFormatTest {
         jsonWriter.close();
 
         assertEquals("{\n" +
-                "\t\"id\"123\n" +
+                "\t\"id\":123\n" +
                 "}", jsonWriter.toString());
 
         jsonWriter.incrementIndent();
         assertEquals(1, jsonWriter.level());
         jsonWriter.println();
         assertEquals("{\n" +
-                "\t\"id\"123\n" +
+                "\t\"id\":123\n" +
                 "}\n\t", jsonWriter.toString());
         jsonWriter.decrementIdent();
         assertEquals(0, jsonWriter.level());
@@ -266,14 +268,14 @@ public class PrettyFormatTest {
         jsonWriter.close();
 
         assertEquals("{\n" +
-                "\t\"id\"123\n" +
+                "\t\"id\":123\n" +
                 "}", jsonWriter.toString());
 
         jsonWriter.incrementIndent();
         assertEquals(1, jsonWriter.level());
         jsonWriter.println();
         assertEquals("{\n" +
-                "\t\"id\"123\n" +
+                "\t\"id\":123\n" +
                 "}\n\t", jsonWriter.toString());
         jsonWriter.decrementIdent();
         assertEquals(0, jsonWriter.level());

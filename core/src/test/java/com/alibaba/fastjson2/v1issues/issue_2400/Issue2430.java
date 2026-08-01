@@ -3,9 +3,12 @@ package com.alibaba.fastjson2.v1issues.issue_2400;
 import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.ArrayListMultimap;
 import org.json.JSONException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+@Tag("regression")
+@Tag("compat-fastjson1")
 public class Issue2430 {
     @Test
     public void testForIssue() throws JSONException {

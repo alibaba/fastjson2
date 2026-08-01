@@ -14,7 +14,7 @@ final class NullSchema
     }
 
     @Override
-    public ValidateResult validate(Object value) {
+    protected ValidateResult validateInternal(Object value) {
         if (value == null) {
             return SUCCESS;
         }

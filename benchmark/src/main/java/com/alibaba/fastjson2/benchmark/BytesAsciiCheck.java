@@ -65,7 +65,7 @@ public class BytesAsciiCheck {
         );
     }
 
-//    @Benchmark
+    @Benchmark
     public void direct(Blackhole bh) throws Throwable {
         bh.consume(hasNegatives(bytes, 0, bytes.length));
     }
@@ -95,17 +95,17 @@ public class BytesAsciiCheck {
         bh.consume(com.alibaba.fastjson2.util.IOUtils.indexOfSlash(bytes, 0, bytes.length));
     }
 
-//    @Benchmark
+    @Benchmark
     public void indexOfSlashV(Blackhole bh) throws Throwable {
         bh.consume(com.alibaba.fastjson2.util.IOUtils.indexOfSlashV(bytes, 0, bytes.length));
     }
 
-//    @Benchmark
+    @Benchmark
     public void indexOfChar(Blackhole bh) throws Throwable {
         bh.consume(indexOfChar(bytes, '\'', 0, bytes.length));
     }
 
-//    @Benchmark
+    @Benchmark
     public void indexOfString(Blackhole bh) throws Throwable {
         bh.consume(str.indexOf('\\'));
     }
@@ -133,7 +133,7 @@ public class BytesAsciiCheck {
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)
-                .threads(1)
+                .threads(16)
                 .forks(1)
                 .build();
         new Runner(options).run();

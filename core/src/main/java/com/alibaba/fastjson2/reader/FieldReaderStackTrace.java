@@ -56,6 +56,6 @@ public class FieldReaderStackTrace
             }
         }
 
-        function.accept(object, value);
+        propertyAccessor.setObject(object, value);
     }
 }

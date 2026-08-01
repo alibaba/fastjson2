@@ -1,12 +1,14 @@
 package com.alibaba.fastjson2.util;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+@Tag("util")
 public class DynamicClassLoaderTest {
     @Test
     public void definePackage() throws Exception {

@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -15,6 +16,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("autotype")
 public class AutoTypeTest42_guava {
     @Test
     public void test_0() {

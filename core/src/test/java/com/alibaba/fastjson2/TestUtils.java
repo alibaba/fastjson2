@@ -63,7 +63,7 @@ public class TestUtils {
         }
 
         return new JSONWriter[]{
-                new JSONWriterUTF8JDK9(JSONFactory.createWriteContext()),
+                new JSONWriterUTF8(JSONFactory.createWriteContext()),
                 new JSONWriterUTF16(JSONFactory.createWriteContext()),
                 new JSONWriterUTF16JDK9UF(JSONFactory.createWriteContext())
         };
@@ -161,7 +161,7 @@ public class TestUtils {
         return new JSONReader[]{
                 new JSONReaderUTF8(JSONFactory.createReadContext(), utf8Bytes, 0, utf8Bytes.length),
                 new JSONReaderUTF16(JSONFactory.createReadContext(), utf16Bytes, 0, utf16Bytes.length),
-                new JSONReaderASCII(JSONFactory.createReadContext(), null, utf8Bytes, 0, utf8Bytes.length)
+                JSONReaderASCII.of(JSONFactory.createReadContext(), null, utf8Bytes, 0, utf8Bytes.length)
         };
     }
 

@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -13,6 +14,9 @@ import java.sql.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("date")
+@Tag("annotation")
 public class Issue781 {
     @BeforeEach
     public void setUp() {

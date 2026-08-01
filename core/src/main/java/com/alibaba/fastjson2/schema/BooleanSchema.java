@@ -14,7 +14,7 @@ public final class BooleanSchema
     }
 
     @Override
-    public ValidateResult validate(Object value) {
+    protected ValidateResult validateInternal(Object value) {
         if (value == null) {
             return FAIL_INPUT_NULL;
         }

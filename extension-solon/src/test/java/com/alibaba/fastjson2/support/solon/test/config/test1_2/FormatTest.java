@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import org.junit.jupiter.api.Assertions;
 
 import java.lang.reflect.Type;
 import java.util.Date;
@@ -32,7 +33,7 @@ public class FormatTest {
         String json = JSON.toJSONString(dateDo, context);
         System.out.println(json); //{"date":1673861993477,"date2":1673861993477}
 
-        assert "{\"date\":1673861993477,\"date2\":\"2023-01-16 17:39:53\"}".equals(json);
+        Assertions.assertEquals("{\"date\":1673861993477,\"date2\":\"2023-01-16 17:39:53\"}", json);
     }
 
     public static class CustomDateDo {

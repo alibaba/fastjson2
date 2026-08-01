@@ -5,8 +5,11 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_NULL;
@@ -16,8 +19,12 @@ public class ObjectReaderNoneDefaultConstructor<T>
         extends ObjectReaderAdapter<T> {
     final String[] paramNames;
     final FieldReader[] setterFieldReaders;
-    private final Function<Map<Long, Object>, T> creator;
+    final Function<Map<Long, Object>, T> creatorFunction;
     final Map<Long, FieldReader> paramFieldReaderMap;
+    final Constructor noneDefaultConstructor;
+    final BiFunction bifunction;
+    final Function function;
+    final FactoryFunction factoryFunction;
 
     public ObjectReaderNoneDefaultConstructor(
             Class objectClass,
@@ -47,11 +54,29 @@ public class ObjectReaderNoneDefaultConstructor<T>
         );
 
         this.paramNames = paramNames;
-        this.creator = creator;
+        this.creatorFunction = creator;
         this.setterFieldReaders = setterFieldReaders;
         this.paramFieldReaderMap = new HashMap<>();
         for (FieldReader paramFieldReader : paramFieldReaders) {
             paramFieldReaderMap.put(paramFieldReader.fieldNameHash, paramFieldReader);
+        }
+        if (creatorFunction instanceof ConstructorFunction) {
+            noneDefaultConstructor = ((ConstructorFunction) creator).constructor;
+        } else {
+            noneDefaultConstructor = null;
+        }
+        if (creator instanceof ConstructorFunction) {
+            bifunction = ((ConstructorFunction<T>) creator).biFunction;
+            function = ((ConstructorFunction<T>) creator).function;
+            factoryFunction = null;
+        } else if (creator instanceof FactoryFunction) {
+            bifunction = ((FactoryFunction<T>) creator).biFunction;
+            function = ((FactoryFunction<T>) creator).function;
+            factoryFunction = (FactoryFunction) creator;
+        } else {
+            bifunction = null;
+            function = null;
+            factoryFunction = null;
         }
     }
 
@@ -65,9 +90,14 @@ public class ObjectReaderNoneDefaultConstructor<T>
         return a;
     }
 
+    @SuppressWarnings("rawtypes")
+    public Collection<FieldReader> getParameterFieldReaders() {
+        return paramFieldReaderMap.values();
+    }
+
     @Override
     public T createInstanceNoneDefaultConstructor(Map<Long, Object> values) {
-        return creator.apply(values);
+        return creatorFunction.apply(values);
     }
 
     @Override
@@ -191,6 +221,40 @@ public class ObjectReaderNoneDefaultConstructor<T>
     }
 
     @Override
+    public T readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.jsonb) {
+            return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
+        jsonReader.nextIfArrayStart();
+        LinkedHashMap<Long, Object> valueMap = null;
+
+        for (int i = 0; i < fieldReaders.length; i++) {
+            FieldReader fieldReader = fieldReaders[i];
+            Object fieldValue = fieldReader.readFieldValue(jsonReader);
+            if (valueMap == null) {
+                valueMap = new LinkedHashMap<>();
+            }
+            long hash = fieldReader.fieldNameHash;
+            valueMap.put(hash, fieldValue);
+        }
+
+        if (!jsonReader.nextIfArrayEnd()) {
+            throw new JSONException(jsonReader.info("array not end, " + jsonReader.current()));
+        }
+
+        jsonReader.nextIfComma();
+        return createInstanceNoneDefaultConstructor(
+                valueMap == null
+                        ? Collections.emptyMap()
+                        : valueMap);
+    }
+
+    @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (!serializable) {
             jsonReader.errorOnNoneSerializable(objectClass);
@@ -295,6 +359,21 @@ public class ObjectReaderNoneDefaultConstructor<T>
             ) {
                 long hashCodeLCase = jsonReader.getNameHashCodeLCase();
                 fieldReader = getFieldReaderLCase(hashCodeLCase);
+                if (fieldReader == null) {
+                    String name = jsonReader.getFieldName();
+                    if (name.startsWith("is")) {
+                        String fieldName1 = name.substring(2);
+                        long hashCode64LCase = Fnv.hashCode64LCase(fieldName1);
+                        FieldReader fieldReader1 = getFieldReaderLCase(hashCode64LCase);
+                        if (fieldReader1 != null) {
+                            Class fieldClass = fieldReader1.fieldClass;
+                            if (fieldClass == Boolean.class || fieldClass == boolean.class) {
+                                fieldReader = fieldReader1;
+                            }
+                        }
+                    }
+                }
+
                 if (fieldReader != null
                         && valueMap != null
                         && valueMap.containsKey(fieldReader.fieldNameHash)) {
@@ -322,8 +401,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
 
             long hash;
-            if (fieldReader instanceof FieldReaderObjectParam) {
-                hash = ((FieldReaderObjectParam<?>) fieldReader).paramNameHash;
+            if (fieldReader.isParameter()) {
+                hash = fieldReader.paramNameHash;
             } else {
                 hash = fieldReader.fieldNameHash;
             }
@@ -342,7 +421,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         }
 
         Map<Long, Object> argsMap = valueMap == null ? Collections.emptyMap() : valueMap;
-        T object = creator.apply(argsMap);
+        T object = creatorFunction.apply(argsMap);
 
         if (setterFieldReaders != null && valueMap != null) {
             for (int i = 0; i < setterFieldReaders.length; i++) {
@@ -416,8 +495,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
 
             long hash;
-            if (fieldReader instanceof FieldReaderObjectParam) {
-                hash = ((FieldReaderObjectParam<?>) fieldReader).paramNameHash;
+            if (fieldReader.isParameter()) {
+                hash = fieldReader.paramNameHash;
             } else {
                 hash = fieldReader.fieldNameHash;
             }
@@ -477,8 +556,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 }
 
                 long hash;
-                if (fieldReader instanceof FieldReaderObjectParam) {
-                    hash = ((FieldReaderObjectParam<?>) fieldReader).paramNameHash;
+                if (fieldReader.isParameter()) {
+                    hash = fieldReader.paramNameHash;
                 } else {
                     hash = fieldReader.fieldNameHash;
                 }
@@ -498,6 +577,17 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 Object fieldValue = map.get(fieldReader.fieldName);
                 if (fieldValue == null) {
                     continue;
+                }
+
+                if (fieldReader.field != null && Modifier.isFinal(fieldReader.field.getModifiers())) {
+                    try {
+                        Object value = fieldReader.method.invoke(object);
+                        if (value instanceof Collection && !((Collection) value).isEmpty()) {
+                            continue;
+                        }
+                    } catch (Exception e) {
+                        // just ignore
+                    }
                 }
 
                 Class<?> valueClass = fieldValue.getClass();
@@ -520,5 +610,23 @@ public class ObjectReaderNoneDefaultConstructor<T>
         }
 
         return object;
+    }
+
+    public T createInstance(Object[] args) {
+        try {
+            if (function != null) {
+                return (T) function.apply(args[0]);
+            }
+            if (bifunction != null) {
+                return (T) bifunction.apply(args[0], args[1]);
+            }
+            if (factoryFunction != null) {
+                return (T) factoryFunction.createInstance(args);
+            }
+            return (T) noneDefaultConstructor.newInstance(args);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException |
+                 InvocationTargetException e) {
+            throw new JSONException("invoke constructor error, " + constructor, e);
+        }
     }
 }

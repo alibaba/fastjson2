@@ -1,9 +1,11 @@
 package com.alibaba.fastjson2.util;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("util")
 public class DoubleToDecimalTest {
     double[] doubles = new double[] {
             -0.0,
@@ -37,7 +39,7 @@ public class DoubleToDecimalTest {
 
         for (int i = 0; i < doubles.length; i++) {
             double d = doubles[i];
-            int size = NumberUtils.writeDouble(bytes, 0, d, false);
+            int size = NumberUtils.writeDouble(bytes, 0, d, false, false);
             String str = new String(bytes, 0, size);
             assertEquals(d, Double.parseDouble(str));
         }
@@ -49,7 +51,7 @@ public class DoubleToDecimalTest {
 
         for (int i = 0; i < doubles.length; i++) {
             double d = doubles[i];
-            int size = NumberUtils.writeDouble(chars, 0, d, false);
+            int size = NumberUtils.writeDouble(chars, 0, d, false, false);
             String str = new String(chars, 0, size);
             assertEquals(d, Double.parseDouble(str));
         }
@@ -61,7 +63,7 @@ public class DoubleToDecimalTest {
 
         for (int i = 0; i < floats.length; i++) {
             float f = floats[i];
-            int size = NumberUtils.writeFloat(bytes, 0, f, false);
+            int size = NumberUtils.writeFloat(bytes, 0, f, false, false);
             String str = new String(bytes, 0, size);
             assertEquals(Float.toString(f), str);
         }
@@ -73,7 +75,7 @@ public class DoubleToDecimalTest {
 
         for (int i = 0; i < floats.length; i++) {
             float f = floats[i];
-            int size = NumberUtils.writeFloat(chars, 0, f, false);
+            int size = NumberUtils.writeFloat(chars, 0, f, false, false);
             String str = new String(chars, 0, size);
             assertEquals(Float.toString(f), str);
         }
@@ -90,7 +92,7 @@ public class DoubleToDecimalTest {
         byte[] bytes = new byte[24];
         for (int i = 0; i < floats.length; i++) {
             float f = floats[i];
-            int size = NumberUtils.writeFloat(bytes, 0, f, true);
+            int size = NumberUtils.writeFloat(bytes, 0, f, true, false);
             String str = new String(bytes, 0, size);
             assertEquals("null", str);
         }
@@ -107,7 +109,7 @@ public class DoubleToDecimalTest {
         char[] chars = new char[24];
         for (int i = 0; i < floats.length; i++) {
             float f = floats[i];
-            int size = NumberUtils.writeFloat(chars, 0, f, true);
+            int size = NumberUtils.writeFloat(chars, 0, f, true, false);
             String str = new String(chars, 0, size);
             assertEquals("null", str);
         }
@@ -124,7 +126,7 @@ public class DoubleToDecimalTest {
         byte[] bytes = new byte[24];
         for (int i = 0; i < doubles.length; i++) {
             double f = doubles[i];
-            int size = NumberUtils.writeDouble(bytes, 0, f, true);
+            int size = NumberUtils.writeDouble(bytes, 0, f, true, false);
             String str = new String(bytes, 0, size);
             assertEquals("null", str);
         }
@@ -136,7 +138,7 @@ public class DoubleToDecimalTest {
             double d = doubles[i];
             byte[] bytes = new byte[25];
             bytes[0] = '[';
-            int size = NumberUtils.writeDouble(bytes, 1, d, false) - 1;
+            int size = NumberUtils.writeDouble(bytes, 1, d, false, false) - 1;
             String str = new String(bytes, 1, size);
             assertEquals(d, Double.parseDouble(str), str);
         }
@@ -148,7 +150,7 @@ public class DoubleToDecimalTest {
             double d = doubles[i];
             char[] bytes = new char[25];
             bytes[0] = '[';
-            int size = NumberUtils.writeDouble(bytes, 1, d, false) - 1;
+            int size = NumberUtils.writeDouble(bytes, 1, d, false, false) - 1;
             String str = new String(bytes, 1, size);
             assertEquals(d, Double.parseDouble(str), str);
         }

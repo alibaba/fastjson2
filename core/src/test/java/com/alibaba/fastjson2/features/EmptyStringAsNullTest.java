@@ -1,8 +1,13 @@
 package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
 import lombok.Data;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -14,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author 张治保
  * @since 2024/3/13
  */
+@Tag("features")
 public class EmptyStringAsNullTest {
     @Test
     void testString() {

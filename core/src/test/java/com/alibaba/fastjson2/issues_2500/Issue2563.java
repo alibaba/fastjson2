@@ -5,10 +5,14 @@ import com.alibaba.fastjson2.JSONB;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.joda.time.DateTime;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("jsonb")
+@Tag("compat-jackson")
 public class Issue2563 {
     DateTime nowD = new DateTime(2018, 7, 14, 12, 13, 14, 0);
 

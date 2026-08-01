@@ -6,11 +6,13 @@ import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static com.alibaba.fastjson2.annotation.JSONCompiler.CompilerOption.LAMBDA;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("reader")
 public class FieldReaderInt64ValueFuncTest {
     @Test
     public void test() {

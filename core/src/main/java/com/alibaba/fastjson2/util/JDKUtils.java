@@ -70,31 +70,30 @@ public class JDKUtils {
 
     static {
         Unsafe unsafe;
-        long offset, charOffset;
         try {
             Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
             theUnsafeField.setAccessible(true);
             unsafe = (Unsafe) theUnsafeField.get(null);
-            offset = unsafe.arrayBaseOffset(byte[].class);
-            charOffset = unsafe.arrayBaseOffset(char[].class);
+            ARRAY_BYTE_BASE_OFFSET = unsafe.arrayBaseOffset(byte[].class);
+            ARRAY_CHAR_BASE_OFFSET = unsafe.arrayBaseOffset(char[].class);
         } catch (Throwable e) {
             throw new JSONException("init unsafe error", e);
         }
 
         UNSAFE = unsafe;
-        ARRAY_BYTE_BASE_OFFSET = offset;
-        ARRAY_CHAR_BASE_OFFSET = charOffset;
 
-        if (offset == -1) {
+        if (ARRAY_BYTE_BASE_OFFSET == -1 || ARRAY_CHAR_BASE_OFFSET == -1) {
             throw new JSONException("init JDKUtils error", initErrorLast);
         }
 
         int jvmVersion = -1, android_sdk_int = -1;
         boolean openj9 = false, android = false, graal = false;
         try {
-            String jmvName = System.getProperty("java.vm.name");
-            openj9 = jmvName.contains("OpenJ9");
-            android = "Dalvik".equals(jmvName);
+            String jvmName = System.getProperty("java.vm.name");
+            if (jvmName != null) {
+                openj9 = jvmName.contains("OpenJ9");
+                android = "Dalvik".equals(jvmName);
+            }
             graal = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
             if (openj9 || android || graal) {
                 FIELD_STRING_VALUE_ERROR = true;
@@ -102,10 +101,10 @@ public class JDKUtils {
 
             String javaSpecVer = System.getProperty("java.specification.version");
             // android is 0.9
-            if (javaSpecVer.startsWith("1.")) {
+            if (javaSpecVer != null && javaSpecVer.startsWith("1.")) {
                 javaSpecVer = javaSpecVer.substring(2);
             }
-            if (javaSpecVer.indexOf('.') == -1) {
+            if (javaSpecVer != null && javaSpecVer.indexOf('.') == -1) {
                 jvmVersion = Integer.parseInt(javaSpecVer);
             }
 
@@ -449,6 +448,19 @@ public class JDKUtils {
     public static boolean isSQLDataSourceOrRowSet(Class<?> type) {
         return (CLASS_SQL_DATASOURCE != null && CLASS_SQL_DATASOURCE.isAssignableFrom(type))
                 || (CLASS_SQL_ROW_SET != null && CLASS_SQL_ROW_SET.isAssignableFrom(type));
+    }
+
+    /**
+     * Tests whether a class is a well known deserialization gadget entry point, namely a
+     * {@link ClassLoader} subclass or a JDK SQL {@code DataSource}/{@code RowSet} implementation.
+     * Such types must not be resolved by matching an autoType whitelist prefix; only an accept
+     * entry naming the type in full is treated as an explicit opt-in.
+     *
+     * @param type the class to test
+     * @return true if the class must not be resolved through a whitelist prefix match
+     */
+    public static boolean isAutoTypeDenyClass(Class<?> type) {
+        return ClassLoader.class.isAssignableFrom(type) || isSQLDataSourceOrRowSet(type);
     }
 
     public static void setReflectErrorLast(Throwable error) {

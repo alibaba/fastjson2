@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.stream;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("stream")
 public class JSONStreamReaderTest1 {
     @Test
     public void testUTF8() throws Exception {

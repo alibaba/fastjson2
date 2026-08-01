@@ -4,14 +4,17 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("reader")
 public class ArrayMappingTest {
     @Test
     public void test_arrayMapping() {
@@ -153,5 +156,63 @@ public class ArrayMappingTest {
         vo.setV0000(Collections.singletonList("1"));
         byte[] jsonbBytes = JSON.toJSONBytes(vo, JSONWriter.Feature.BeanToArray);
         assertEquals("[[\"1\"]]", new String(jsonbBytes));
+    }
+
+    @Test
+    public void test_3() {
+        Bean vo = new Bean();
+        vo.values.add(new Int1());
+        {
+            byte[] jsonbBytes = JSONB.toBytes(vo, JSONWriter.Feature.BeanToArray);
+            assertEquals("[\n" +
+                    "\t[\n" +
+                    "\t\t[0]\n" +
+                    "\t]\n" +
+                    "]", JSONB.toJSONString(jsonbBytes));
+        }
+    }
+
+    public class Bean {
+        private List<Int1> values = new ArrayList<>();
+
+        public List<Int1> getValues() {
+            return values;
+        }
+    }
+
+    @Test
+    public void test_4() {
+        Bean4 vo = new Bean4();
+        vo.value = OffsetDateTime.MIN;
+        {
+            byte[] jsonbBytes = JSONB.toBytes(vo, JSONWriter.Feature.BeanToArray);
+            assertEquals("[15]", JSONB.toJSONString(jsonbBytes, true));
+        }
+    }
+
+    public static class Bean4 {
+        public OffsetDateTime value;
+    }
+
+    @Test
+    public void test_5() {
+        Bean5 vo = new Bean5();
+        vo.values.add(new String1("abc"));
+        {
+            byte[] jsonbBytes = JSONB.toBytes(vo, JSONWriter.Feature.BeanToArray);
+            assertEquals("[\n" +
+                    "\t[\n" +
+                    "\t\t[\"abc\"]\n" +
+                    "\t]\n" +
+                    "]", JSONB.toJSONString(jsonbBytes));
+        }
+    }
+
+    public class Bean5 {
+        private List<String1> values = new ArrayList<>();
+
+        public List<String1> getValues() {
+            return values;
+        }
     }
 }

@@ -1,10 +1,12 @@
 package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("annotation")
 public class JSONFieldTest2 {
     @Test
     public void test_alternateNames() {
@@ -57,6 +59,32 @@ public class JSONFieldTest2 {
         @JSONCreator
         public VO3(@JSONField(name = "id", alternateNames = "uid") int id) {
             this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
+
+    @Test
+    public void test_alternateNames_4() {
+        VO4 vo = JSON.parseObject("{\"id\":101}", VO4.class);
+        assertEquals(101, vo.id);
+
+        VO4 vo2 = JSON.parseObject("{\"uid\":101}", VO4.class);
+        assertEquals(101, vo2.id);
+    }
+
+    public static class VO4 {
+        private int id;
+
+        private VO4(int id) {
+            this.id = id;
+        }
+
+        @JSONCreator
+        public static VO4 valueOf(@JSONField(name = "id", alternateNames = "uid") int id) {
+            return new VO4(id);
         }
 
         public int getId() {

@@ -1,10 +1,12 @@
 package com.alibaba.fastjson2.filter;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@Tag("filter")
 public class ContextAutoTypeBeforeHandlerTest {
     @Test
     public void checkAutoType() {

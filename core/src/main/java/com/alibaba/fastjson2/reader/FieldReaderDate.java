@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.DateUtils;
@@ -16,12 +15,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
-
 final class FieldReaderDate<T>
         extends FieldReaderDateTimeCodec<T> {
-    final BiConsumer<T, Date> function;
-
     public FieldReaderDate(
             String fieldName,
             Type fieldType,
@@ -45,11 +40,12 @@ final class FieldReaderDate<T>
                 format,
                 locale,
                 defaultValue,
-                schema, method,
+                schema,
+                method,
                 field,
+                function,
                 ObjectReaderImplDate.of(format, locale)
         );
-        this.function = function;
     }
 
     @Override
@@ -73,34 +69,7 @@ final class FieldReaderDate<T>
 
     @Override
     protected void accept(T object, Date value) {
-        if (function != null) {
-            function.accept(object, value);
-            return;
-        }
-
-        if (object == null) {
-            throw new JSONException("set " + fieldName + " error, object is null");
-        }
-
-        if (method != null) {
-            try {
-                method.invoke(object, value);
-            } catch (Exception e) {
-                throw new JSONException("set " + fieldName + " error", e);
-            }
-            return;
-        }
-
-        if (fieldOffset != -1) {
-            UNSAFE.putObject(object, fieldOffset, value);
-            return;
-        }
-
-        try {
-            field.set(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        propertyAccessor.setObject(object, value);
     }
 
     @Override

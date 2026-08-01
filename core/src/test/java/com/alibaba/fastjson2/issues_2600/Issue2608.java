@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues_2600;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -9,6 +10,8 @@ import java.util.List;
 import static com.alibaba.fastjson2.JSONReader.Feature.SupportAutoType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("regression")
+@Tag("autotype")
 public class Issue2608 {
     @Test
     public void testLong() {

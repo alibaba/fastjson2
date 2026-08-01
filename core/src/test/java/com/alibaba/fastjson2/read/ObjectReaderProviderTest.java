@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
@@ -31,6 +32,7 @@ import java.util.logging.Logger;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("reader")
 public class ObjectReaderProviderTest {
     @Test
     public void testReader() {

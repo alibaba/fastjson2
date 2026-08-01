@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.TreeMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@Tag("reader")
 public class ObjectReaderImplMapTypedTest {
     @Test
     public void test() {

@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.support.csv;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -10,6 +11,7 @@ import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("util")
 public class HHSTest {
     static final String file = "csv/HHS_IDs.csv";
 

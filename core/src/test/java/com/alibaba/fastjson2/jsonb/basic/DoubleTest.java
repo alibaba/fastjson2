@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.jsonb.basic;
 
 import com.alibaba.fastjson2.JSONB;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
@@ -8,6 +9,7 @@ import java.util.Random;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("jsonb")
 public class DoubleTest {
     /**
      * 0xb2
@@ -210,5 +212,12 @@ public class DoubleTest {
             Double parsed = (Double) JSONB.parse(bytes);
             assertEquals(parsed.doubleValue(), doubleValue);
         }
+    }
+
+    @Test
+    public void testDoublePrecisionLoss() {
+        byte[] jsonbBytes = JSONB.toBytes("123.456");
+        Double value = JSONB.parseObject(jsonbBytes, Double.class);
+        assertEquals(123.456D, value, 0.0001);
     }
 }
