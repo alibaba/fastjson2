@@ -49,6 +49,17 @@ public class JSONBArrayItemCountTest {
     }
 
     @Test
+    public void testBinaryArrayItemCountOverflow() {
+        // 0x91 = BC_BINARY, 0x48 = BC_INT32, 0x7FFFFFFF = Integer.MAX_VALUE
+        byte[] binaryMaxCnt = {
+                (byte) 0x91,
+                (byte) 0x48,
+                (byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
+        };
+        assertThrows(JSONException.class, () -> JSONB.parseObject(binaryMaxCnt, int[].class));
+    }
+
+    @Test
     public void testInt64ValueArrayItemCountOverflow() {
         assertThrows(JSONException.class, () -> JSONB.parseObject(ARRAY_MAX_CNT, long[].class));
     }
@@ -97,6 +108,16 @@ public class JSONBArrayItemCountTest {
                 41, 42, 43, 44, 45, 46, 47, 10
         };
         assertThrows(JSONException.class, () -> JSONB.parseObject(buffer, 0, 2, int[].class));
+    }
+
+    @Test
+    public void testItemCountExactlyMatchesRemainingBytes() {
+        // BC_ARRAY, count=3 (single-byte int 0x03), three 1-byte items
+        byte[] buffer = {
+                (byte) 0xA4, 0x03,
+                0x01, 0x02, 0x03
+        };
+        assertArrayEquals(new int[]{1, 2, 3}, JSONB.parseObject(buffer, int[].class));
     }
 
     @Test
