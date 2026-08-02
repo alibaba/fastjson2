@@ -3196,6 +3196,18 @@ public abstract class JSONWriter
     }
 
     /**
+     * Collapses a repeated reference path to {@code "#-1"} for JSONB writers.
+     * Equal {@code ".."} paths are excluded: they may target different parents.
+     */
+    final String collapseReference(String path) {
+        if (lastReference == path && !"..".equals(path)) {
+            return "#-1";
+        }
+        lastReference = path;
+        return path;
+    }
+
+    /**
      * Writes a reference to a previously serialized object.
      * This is used for handling circular references and avoiding infinite loops during serialization.
      *

@@ -22,13 +22,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static com.alibaba.fastjson2.testutil.SharedReferenceAsserts.*;
 import static com.alibaba.fastjson2.testutil.SharedReferenceModels.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests shared references in collections using JSONB.
  *
- * <p>Keep test cases aligned with
+ * <p>Assertion helpers live in {@link com.alibaba.fastjson2.testutil.SharedReferenceAsserts}.
+ * Keep test cases aligned with
  * {@code com.alibaba.fastjson2.writer.SharedReferenceInCollectionTest}.</p>
  */
 @Tag("jsonb")
@@ -59,6 +61,8 @@ public class SharedReferenceInCollectionTest {
             JSONWriter.Feature.WriteNameAsSymbol
     };
 
+    private static final Codec CODEC = jsonb(WRITER_FEATURES, READER_FEATURES);
+
     // 1. Cross-element shared values
 
     // 1.1 HashSet Map elements share an inlined Set
@@ -66,7 +70,7 @@ public class SharedReferenceInCollectionTest {
     public void testHashSetWithSharedInnerSet() {
         Type type = new TypeReference<HashSet<Map<String, Object>>>() {
         }.getType();
-        assertMapRowsPreserved(buildMapRows(new HashSet<>()), type);
+        assertMapRowsPreserved(CODEC, buildMapRows(new HashSet<>()), type);
     }
 
     // 1.2 LinkedHashSet Map elements share an inlined Set
@@ -74,7 +78,7 @@ public class SharedReferenceInCollectionTest {
     public void testLinkedHashSetWithSharedInnerSet() {
         Type type = new TypeReference<LinkedHashSet<Map<String, Object>>>() {
         }.getType();
-        assertMapRowsPreserved(buildMapRows(new LinkedHashSet<>()), type);
+        assertMapRowsPreserved(CODEC, buildMapRows(new LinkedHashSet<>()), type);
     }
 
     // 1.3 Two HashSet elements share an inlined Set
@@ -91,7 +95,7 @@ public class SharedReferenceInCollectionTest {
 
         Type type = new TypeReference<HashSet<Map<String, Object>>>() {
         }.getType();
-        assertMapRowsPreserved(outer, type);
+        assertMapRowsPreserved(CODEC, outer, type);
     }
 
     // 1.4 HashSet Bean elements preserve values and hash buckets
@@ -99,7 +103,7 @@ public class SharedReferenceInCollectionTest {
     public void testHashSetWithSharedInnerSetBean() {
         Type type = new TypeReference<HashSet<Bean>>() {
         }.getType();
-        assertBeanRowsPreserved(buildBeanRows(new HashSet<>()), type);
+        assertBeanRowsPreserved(CODEC, buildBeanRows(new HashSet<>()), type);
     }
 
     // 1.5 LinkedHashSet Bean elements preserve shared values
@@ -107,7 +111,7 @@ public class SharedReferenceInCollectionTest {
     public void testLinkedHashSetWithSharedInnerSetBean() {
         Type type = new TypeReference<LinkedHashSet<Bean>>() {
         }.getType();
-        assertBeanRowsPreserved(buildBeanRows(new LinkedHashSet<>()), type);
+        assertBeanRowsPreserved(CODEC, buildBeanRows(new LinkedHashSet<>()), type);
     }
 
     // 1.6 TreeSet Bean elements preserve shared values
@@ -115,7 +119,7 @@ public class SharedReferenceInCollectionTest {
     public void testTreeSetWithSharedInnerSetBean() {
         Type type = new TypeReference<TreeSet<Bean>>() {
         }.getType();
-        assertBeanRowsPreserved(buildBeanRows(new TreeSet<>()), type);
+        assertBeanRowsPreserved(CODEC, buildBeanRows(new TreeSet<>()), type);
     }
 
     // 2. Shared fields within one element
@@ -125,7 +129,7 @@ public class SharedReferenceInCollectionTest {
     public void testHashSetWithSharedReferenceInsideMapElement() {
         Type type = new TypeReference<HashSet<Map<String, Object>>>() {
         }.getType();
-        assertMapAliasesPreserved(buildAliasedMapRows(new HashSet<>(), 3), type);
+        assertMapAliasesPreserved(CODEC, buildAliasedMapRows(new HashSet<>(), 3), type);
     }
 
     // 2.2 HashSet Bean fields share an inlined Set
@@ -133,7 +137,7 @@ public class SharedReferenceInCollectionTest {
     public void testHashSetWithSharedReferenceInsideBeanElement() {
         Type type = new TypeReference<HashSet<AliasedBean>>() {
         }.getType();
-        assertAliasedBeanRowsPreserved(buildAliasedBeanRows(new HashSet<>()), type);
+        assertAliasedBeanRowsPreserved(CODEC, buildAliasedBeanRows(new HashSet<>()), type);
     }
 
     // 2.3 ReferenceDetection alone inlines shared fields
@@ -158,7 +162,7 @@ public class SharedReferenceInCollectionTest {
     public void testSingleElementHashSetWithSharedReferenceInsideElement() {
         Type type = new TypeReference<HashSet<Map<String, Object>>>() {
         }.getType();
-        assertMapAliasesPreserved(buildAliasedMapRows(new HashSet<>(), 1), type);
+        assertMapAliasesPreserved(CODEC, buildAliasedMapRows(new HashSet<>(), 1), type);
     }
 
     // 2.5 A LinkedHashSet element has shared fields
@@ -166,7 +170,7 @@ public class SharedReferenceInCollectionTest {
     public void testLinkedHashSetWithSharedReferenceInsideElement() {
         Type type = new TypeReference<LinkedHashSet<Map<String, Object>>>() {
         }.getType();
-        assertMapAliasesPreserved(buildAliasedMapRows(new LinkedHashSet<>(), 3), type);
+        assertMapAliasesPreserved(CODEC, buildAliasedMapRows(new LinkedHashSet<>(), 3), type);
     }
 
     // 2.6 A TreeSet Bean element has shared fields
@@ -174,7 +178,7 @@ public class SharedReferenceInCollectionTest {
     public void testTreeSetWithSharedReferenceInsideBeanElement() {
         Type type = new TypeReference<TreeSet<AliasedBean>>() {
         }.getType();
-        assertAliasedBeanRowsPreserved(buildAliasedBeanRows(new TreeSet<>()), type);
+        assertAliasedBeanRowsPreserved(CODEC, buildAliasedBeanRows(new TreeSet<>()), type);
     }
 
     // 2.7 ArrayDeque preserves shared field identity
@@ -206,7 +210,7 @@ public class SharedReferenceInCollectionTest {
         Type type = new TypeReference<LinkedHashSet<Map<String, Object>>>() {
         }.getType();
 
-        assertMapAliasesPreserved(original, type);
+        assertMapAliasesPreserved(CODEC, original, type);
     }
 
     // 2.9 Nested HashSet elements inline shared fields
@@ -530,7 +534,7 @@ public class SharedReferenceInCollectionTest {
 
         Type type = new TypeReference<HashSet<Map<String, Object>>>() {
         }.getType();
-        assertMapRowsPreserved(outer, type);
+        assertMapRowsPreserved(CODEC, outer, type);
     }
 
     // 7. Cyclic references
@@ -545,7 +549,7 @@ public class SharedReferenceInCollectionTest {
         Set<CyclicBean> set = new HashSet<>();
         set.add(bean);
 
-        assertSelfCyclesPreserved(set);
+        assertSelfCyclesPreserved(CODEC, set);
     }
 
     // 7.2 Single-element Set handles an indirect cycle
@@ -561,7 +565,7 @@ public class SharedReferenceInCollectionTest {
         Set<CyclicBean> set = new HashSet<>();
         set.add(a);
 
-        assertIndirectCyclesPreserved(set);
+        assertIndirectCyclesPreserved(CODEC, set);
     }
 
     // 7.3 Single element preserves its Set back-reference
@@ -573,7 +577,7 @@ public class SharedReferenceInCollectionTest {
         bean.parentSet = set;
         set.add(bean);
 
-        assertSetBackReferencesPreserved(set);
+        assertSetBackReferencesPreserved(CODEC, set);
     }
 
     // 7.4 Multi-element Set handles self-references.
@@ -589,10 +593,12 @@ public class SharedReferenceInCollectionTest {
             set.add(bean);
         }
 
-        assertSelfCyclesPreserved(set);
+        assertSelfCyclesPreserved(CODEC, set);
     }
 
-    // 7.5 Multi-element Set handles an indirect cycle
+    // 7.5 Multi-element HashSet + indirect cycle: only checks no overflow.
+    // Round-trip deferred — back-edge still emits "$[i]", which HashSet cannot
+    // stably resolve when size > 1 (7.2 covers the single-element round-trip).
     @Test
     public void testMultiElementIndirectCycleDoesNotOverflow() {
         CyclicBean a = new CyclicBean();
@@ -623,7 +629,7 @@ public class SharedReferenceInCollectionTest {
             set.add(bean);
         }
 
-        assertSetBackReferencesPreserved(set);
+        assertSetBackReferencesPreserved(CODEC, set);
     }
 
     // 7.7 Set reuse of a stable-path cycle does not overflow
@@ -929,187 +935,5 @@ public class SharedReferenceInCollectionTest {
 
         List<Map<String, Object>> nestedBack = back.get(0);
         assertEquals(nestedBack.get(0), nestedBack.get(1));
-    }
-
-    private static void assertMapRowsPreserved(Set<Map<String, Object>> original, Type targetType) {
-        byte[] bytes = JSONB.toBytes(original, WRITER_FEATURES);
-        assertTrue(
-                !JSONB.toJSONString(bytes).contains("$ref"),
-                "cross-element shared references in a Set must be inlined"
-        );
-        Set<Map<String, Object>> back = JSONB.parseObject(bytes, targetType, READER_FEATURES);
-
-        assertEquals(original.size(), back.size());
-        Set<String> expectedCodes = new HashSet<>(Arrays.asList("c1", "c2", "c3"));
-        for (Map<String, Object> row : back) {
-            Object codes = row.get("codes");
-            assertNotNull(codes, "codes should not be null after round-trip, sn=" + row.get("sn"));
-            assertEquals(expectedCodes, new HashSet<>((Collection<?>) codes), "codes changed, sn=" + row.get("sn"));
-            assertTrue(back.contains(row), "Set hash bucket is broken, sn=" + row.get("sn"));
-        }
-    }
-
-    private static void assertBeanRowsPreserved(Set<Bean> original, Type targetType) {
-        byte[] bytes = JSONB.toBytes(original, WRITER_FEATURES);
-        assertTrue(
-                !JSONB.toJSONString(bytes).contains("$ref"),
-                "cross-element shared Bean fields in a Set must be inlined"
-        );
-        Set<Bean> back = JSONB.parseObject(bytes, targetType, READER_FEATURES);
-
-        assertEquals(original.size(), back.size());
-        Set<String> expectedCodes = new HashSet<>(Arrays.asList("c1", "c2", "c3"));
-        for (Bean bean : back) {
-            assertNotNull(bean.codes, "codes should not be null after round-trip, sn=" + bean.sn);
-            assertEquals(expectedCodes, bean.codes, "codes changed after round-trip, sn=" + bean.sn);
-        }
-
-        // contains detects hash bucket corruption that Set.equals can miss
-        for (Bean bean : original) {
-            assertTrue(back.contains(bean), "back is missing bean " + bean.sn + " (broken hash bucket)");
-        }
-    }
-
-    private static void assertMapAliasesPreserved(
-            Collection<Map<String, Object>> original,
-            Type targetType
-    ) {
-        byte[] bytes = JSONB.toBytes(original, WRITER_FEATURES);
-        assertTrue(
-                !JSONB.toJSONString(bytes).contains("$ref"),
-                "same-element shared references in a Set must be inlined"
-        );
-
-        Collection<Map<String, Object>> back = JSONB.parseObject(bytes, targetType, READER_FEATURES);
-        assertAliasedMapRows(back, original.size());
-        if (original.contains(null)) {
-            assertTrue(back.contains(null), "null element should be preserved");
-        }
-    }
-
-    private static void assertAliasedMapRows(
-            Collection<Map<String, Object>> rows,
-            int expectedSize
-    ) {
-        assertNotNull(rows);
-        assertEquals(expectedSize, rows.size());
-        Set<String> expectedCodes = new HashSet<>(Arrays.asList("c1", "c2", "c3"));
-        for (Map<String, Object> row : rows) {
-            if (row == null) {
-                continue;
-            }
-            Object codes = row.get("codes");
-            Object codesAlias = row.get("codesAlias");
-            assertNotNull(codes, "codes should not be null, sn=" + row.get("sn"));
-            assertNotNull(codesAlias, "codesAlias should not be null, sn=" + row.get("sn"));
-            assertEquals(expectedCodes, new HashSet<>((Collection<?>) codes));
-            assertEquals(expectedCodes, new HashSet<>((Collection<?>) codesAlias));
-            if (rows instanceof Set) {
-                assertTrue(((Set<?>) rows).contains(row), "Set hash bucket is broken, sn=" + row.get("sn"));
-            }
-        }
-    }
-
-    private static void assertAliasedBeanRowsPreserved(
-            Set<AliasedBean> original,
-            Type targetType
-    ) {
-        byte[] bytes = JSONB.toBytes(original, WRITER_FEATURES);
-        assertTrue(
-                !JSONB.toJSONString(bytes).contains("$ref"),
-                "same-element shared Bean fields in a Set must be inlined"
-        );
-        Set<AliasedBean> back = JSONB.parseObject(bytes, targetType, READER_FEATURES);
-
-        assertEquals(original.size(), back.size());
-        Set<String> expectedCodes = new HashSet<>(Arrays.asList("c1", "c2", "c3"));
-        for (AliasedBean bean : back) {
-            assertNotNull(bean.codes, "codes should not be null, sn=" + bean.sn);
-            assertNotNull(bean.codesAlias, "codesAlias should not be null, sn=" + bean.sn);
-            assertEquals(expectedCodes, bean.codes);
-            assertEquals(expectedCodes, bean.codesAlias);
-        }
-        for (AliasedBean bean : original) {
-            assertTrue(back.contains(bean), "back is missing bean " + bean.sn + " (broken Set structure)");
-        }
-    }
-
-    private static void assertEnclosingSharedWrapperPreserved(
-            EnclosingSharedWrapper original,
-            EnclosingSharedWrapper back
-    ) {
-        assertNotNull(back);
-        assertEquals(original.shared, back.shared);
-        assertEquals(original.data.size(), back.data.size());
-        for (Bean bean : back.data) {
-            assertNotNull(bean.codes, "codes should not be null, sn=" + bean.sn);
-            assertEquals(original.shared, bean.codes, "codes changed, sn=" + bean.sn);
-        }
-        for (Bean bean : original.data) {
-            assertTrue(back.data.contains(bean), "back is missing bean " + bean.sn + " (broken hash bucket)");
-        }
-    }
-
-    private static void assertSelfCyclesPreserved(Set<CyclicBean> original) {
-        Type type = new TypeReference<HashSet<CyclicBean>>() {
-        }.getType();
-
-        byte[] bytes = assertDoesNotThrow(() -> JSONB.toBytes(original, WRITER_FEATURES));
-        Set<CyclicBean> jsonbBack = JSONB.parseObject(bytes, type, READER_FEATURES);
-        assertEquals(original.size(), jsonbBack.size());
-        for (CyclicBean bean : jsonbBack) {
-            assertSame(bean, bean.self, "JSONB self-cycle should be preserved, name=" + bean.name);
-        }
-    }
-
-    private static void assertIndirectCyclesPreserved(Set<CyclicBean> original) {
-        Type type = new TypeReference<HashSet<CyclicBean>>() {
-        }.getType();
-        byte[] bytes = assertDoesNotThrow(() -> JSONB.toBytes(original, WRITER_FEATURES));
-        Set<CyclicBean> back = JSONB.parseObject(bytes, type, READER_FEATURES);
-
-        assertEquals(original.size(), back.size());
-        CyclicBean cycle = null;
-        for (CyclicBean bean : back) {
-            if ("a".equals(bean.name)) {
-                cycle = bean;
-                break;
-            }
-        }
-        assertNotNull(cycle, "cycle root should be preserved");
-        assertNotNull(cycle.child, "cycle child should be preserved");
-        assertSame(cycle, cycle.child.child, "indirect cycle should be preserved");
-    }
-
-    private static void assertStableAndSetCycles(Map<String, Object> back) {
-        Map<?, ?> stable = (Map<?, ?>) back.get("stable");
-        Map<?, ?> stableChild = (Map<?, ?>) stable.get("child");
-        assertSame(stable, stableChild.get("child"), "stable-path cycle should be preserved");
-
-        Collection<?> set = (Collection<?>) back.get("set");
-        assertEquals(1, set.size());
-        Map<?, ?> setElement = (Map<?, ?>) set.iterator().next();
-        Map<?, ?> setChild = (Map<?, ?>) setElement.get("child");
-        assertSame(setElement, setChild.get("child"), "inlined Set cycle should be preserved");
-    }
-
-    private static void assertSetBackReferencesPreserved(Set<SetBackRefBean> original) {
-        Type type = new TypeReference<HashSet<SetBackRefBean>>() {
-        }.getType();
-
-        byte[] bytes = assertDoesNotThrow(() -> JSONB.toBytes(original, WRITER_FEATURES));
-        Set<SetBackRefBean> jsonbBack = JSONB.parseObject(bytes, type, READER_FEATURES);
-        assertEquals(original.size(), jsonbBack.size());
-        for (SetBackRefBean bean : jsonbBack) {
-            assertSame(jsonbBack, bean.parentSet, "JSONB Set back-reference should be preserved");
-        }
-    }
-
-    private static void assertAliasedListRows(List<Map<String, Object>> rows) {
-        assertEquals(2, rows.size());
-        for (Map<String, Object> row : rows) {
-            assertNotNull(row.get("codes"));
-            assertSame(row.get("codes"), row.get("codesAlias"), "List should preserve shared identity");
-        }
     }
 }
