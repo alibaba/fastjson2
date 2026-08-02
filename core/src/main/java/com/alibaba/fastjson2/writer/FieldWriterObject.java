@@ -102,9 +102,14 @@ public class FieldWriterObject<T>
      * {@code toJSONString}. Notably this requires an exact class match (plus the writeUsing / Map /
      * List / primitive-boxing exceptions), so a subclass value does NOT match and must be
      * re-resolved by its actual class to avoid silently dropping the subclass fields.
+     * Returns {@code false} when {@link #initValueClass} is {@code null} (no value has been
+     * observed for this field yet, so nothing is cached to match against).
      */
     public boolean isTypeMatch(Class valueClass) {
         final Class initValueClass = this.initValueClass;
+        if (initValueClass == null) {
+            return false;
+        }
         boolean typeMatch = initValueClass == valueClass
                 || (writeUsing && initValueClass.isAssignableFrom(valueClass))
                 || (initValueClass == Map.class && initValueClass.isAssignableFrom(valueClass))

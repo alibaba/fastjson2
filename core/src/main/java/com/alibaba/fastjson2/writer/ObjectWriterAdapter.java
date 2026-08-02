@@ -697,6 +697,13 @@ public class ObjectWriterAdapter<T>
                 if (objectFieldWriter.initValueClass != null
                         && !objectFieldWriter.isTypeMatch(fieldValue.getClass())) {
                     valueWriter = JSONFactory.getObjectWriter(fieldValue.getClass(), this.features | features);
+                    // When the re-resolved writer is not an ObjectWriterAdapter (arrays, Date, enums,
+                    // etc.), convert the value via JSON.toJSON so it matches the shape the unprimed
+                    // path and toJSONString produce, instead of leaving the raw Java object in the
+                    // JSONObject. See issue #7714.
+                    if (!(valueWriter instanceof ObjectWriterAdapter)) {
+                        fieldValue = JSON.toJSON(fieldValue);
+                    }
                 }
                 if (valueWriter instanceof ObjectWriterAdapter) {
                     ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) valueWriter;

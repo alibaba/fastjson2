@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -145,5 +146,30 @@ public class Issue7714 {
         // aligning toJSONObject's type-match with the write path).
         String expected = JSON.toJSONString(m2);
         assertEquals(expected, ((JSONObject) r).toJSONString());
+    }
+
+    @Test
+    public void toJSON_nonAdapterValueAfterBeanCacheConvertsLikeUnprimed() {
+        // Prime the payload FieldWriterObject with a bean so initValueClass is set, then send a
+        // value whose writer re-resolves to a non-ObjectWriterAdapter (an int[]). The re-resolved
+        // writer is not an adapter, so the value must still be converted via JSON.toJSON to a
+        // JSONArray — matching the unprimed path and toJSONString — rather than stored as a raw
+        // int[] whose shape depends on cache priming order.
+        DefaultMessage m1 = new DefaultMessage();
+        DataChangeNotification dcn = new DataChangeNotification();
+        dcn.setKey("K1");
+        dcn.setTenantId("10000");
+        m1.setPayload(dcn);
+        JSON.toJSONString(m1);
+
+        DefaultMessage m2 = new DefaultMessage();
+        m2.setPayload(new int[]{1, 2, 3});
+        Object r = JSON.toJSON(m2);
+
+        Object payload = ((JSONObject) r).get("payload");
+        assertTrue(payload instanceof JSONArray, "payload should be a JSONArray, not the raw int[]");
+        JSONArray array = (JSONArray) payload;
+        assertEquals(3, array.size());
+        assertEquals(1, array.getIntValue(0));
     }
 }
