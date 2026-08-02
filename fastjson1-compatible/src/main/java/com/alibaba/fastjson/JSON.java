@@ -2318,6 +2318,22 @@ public abstract class JSON
         return adaptResult(result, 0);
     }
 
+    /**
+     * Returns a live wrapper sharing state with the underlying fastjson2 container;
+     * mutations propagate to the parent. Use in {@code get()}-family accessors where
+     * JSONPath navigation must see writes. Use {@link #adaptResult(Object)} for
+     * independent snapshots.
+     */
+    static Object adaptResultLive(Object result) {
+        if (result instanceof com.alibaba.fastjson2.JSONObject) {
+            return new JSONObject((com.alibaba.fastjson2.JSONObject) result);
+        }
+        if (result instanceof com.alibaba.fastjson2.JSONArray) {
+            return new JSONArray((com.alibaba.fastjson2.JSONArray) result);
+        }
+        return result;
+    }
+
     private static Object adaptResult(Object result, int level) {
         if (level > MAX_LEVEL) {
             throw new JSONException("level too large : " + level);

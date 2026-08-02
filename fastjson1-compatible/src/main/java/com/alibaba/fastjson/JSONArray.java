@@ -592,7 +592,8 @@ public class JSONArray
 
     @Override
     public Object get(int index) {
-        return adaptResult(list.get(index));
+        Object value = list.get(index);
+        return adaptResultLive(value);
     }
 
     /**
