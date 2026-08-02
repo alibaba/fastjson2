@@ -228,16 +228,21 @@ public class JDKUtils {
 
         MethodHandles.Lookup trustedLookup = null;
         if (!ANDROID) {
+            // MethodHandles.Lookup.IMPL_LOOKUP is read straight from memory, which bypasses class
+            // initialization. Calling MethodHandles.lookup() first forces MethodHandles.Lookup to be
+            // initialized, otherwise the field is still null and every trustedLookup() call degrades
+            // to a lookup without private access, breaking LambdaMetafactory. see issue #7691
+            MethodHandles.Lookup callerLookup = MethodHandles.lookup();
             try {
                 Class lookupClass = MethodHandles.Lookup.class;
                 Field implLookup = lookupClass.getDeclaredField("IMPL_LOOKUP");
                 long fieldOffset = UNSAFE.staticFieldOffset(implLookup);
-                trustedLookup = (MethodHandles.Lookup) UNSAFE.getObject(lookupClass, fieldOffset);
+                trustedLookup = (MethodHandles.Lookup) UNSAFE.getObject(UNSAFE.staticFieldBase(implLookup), fieldOffset);
             } catch (Throwable ignored) {
                 // ignored
             }
             if (trustedLookup == null) {
-                trustedLookup = MethodHandles.lookup();
+                trustedLookup = callerLookup;
             }
         }
         IMPL_LOOKUP = trustedLookup;
