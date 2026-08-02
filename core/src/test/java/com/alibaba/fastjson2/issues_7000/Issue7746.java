@@ -7,7 +7,9 @@ import com.alibaba.fastjson2.TypeReference;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -66,6 +68,34 @@ public class Issue7746 {
                 }.getType()
         );
         assertSelfReferencesPreserved(parsed, names);
+    }
+
+    /**
+     * Covers ObjectWriterImplMap's writeReference("..") path, which Bean field writers do not hit.
+     */
+    @Test
+    public void testMapSelfReference() {
+        String[] names = {"a", "b", "c"};
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (String name : names) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", name);
+            map.put("self", map);
+            list.add(map);
+        }
+
+        byte[] bytes = JSONB.toBytes(list, JSONWriter.Feature.ReferenceDetection);
+        List<Map<String, Object>> parsed = JSONB.parseObject(
+                bytes,
+                new TypeReference<List<Map<String, Object>>>() {
+                }.getType()
+        );
+        assertEquals(names.length, parsed.size());
+        for (int i = 0; i < names.length; i++) {
+            Map<String, Object> map = parsed.get(i);
+            assertEquals(names[i], map.get("name"));
+            assertSame(map, map.get("self"));
+        }
     }
 
     static List<SelfBean> selfReferencingList(String... names) {
