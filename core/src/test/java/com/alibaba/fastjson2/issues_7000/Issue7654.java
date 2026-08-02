@@ -1,6 +1,10 @@
 package com.alibaba.fastjson2.issues_7000;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,13 +14,23 @@ public class Issue7654 {
     @Test
     public void testNonStaticInnerClass() {
         String json = "{\"issues\":[],\"summary\":{\"errors\":0,\"warnings\":0,\"messagesProcessed\":7,\"messagesAccepted\":7,\"messagesInvalid\":0}}";
-        AmzListingJsonFeedResult result = JSON.parseObject(json, AmzListingJsonFeedResult.class);
-        assertNotNull(result.getSummary());
-        assertEquals(7, result.getSummary().getMessagesAccepted());
-        assertEquals(7, result.getSummary().getMessagesProcessed());
-        assertEquals(0, result.getSummary().getErrors());
-        assertEquals(0, result.getSummary().getWarnings());
-        assertEquals(0, result.getSummary().getMessagesInvalid());
+        assertSummary(JSON.parseObject(json, AmzListingJsonFeedResult.class).getSummary());
+
+        String summaryJson = "{\"errors\":0,\"warnings\":0,\"messagesProcessed\":7,\"messagesAccepted\":7,\"messagesInvalid\":0}";
+        for (ObjectReaderCreator creator : TestUtils.readerCreators()) {
+            ObjectReader<AmzListingJsonFeedResult.Summary> objectReader
+                    = creator.createObjectReader(AmzListingJsonFeedResult.Summary.class);
+            assertSummary(objectReader.readObject(JSONReader.of(summaryJson), 0));
+        }
+    }
+
+    private static void assertSummary(AmzListingJsonFeedResult.Summary summary) {
+        assertNotNull(summary);
+        assertEquals(7, summary.getMessagesAccepted());
+        assertEquals(7, summary.getMessagesProcessed());
+        assertEquals(0, summary.getErrors());
+        assertEquals(0, summary.getWarnings());
+        assertEquals(0, summary.getMessagesInvalid());
     }
 
     /**
@@ -29,6 +43,13 @@ public class Issue7654 {
         Outer.Inner inner = JSON.parseObject("{\"value\":123}", Outer.Inner.class);
         assertNotNull(inner);
         assertEquals(123, inner.getValue());
+
+        for (ObjectReaderCreator creator : TestUtils.readerCreators()) {
+            ObjectReader<Outer.Inner> objectReader = creator.createObjectReader(Outer.Inner.class);
+            Outer.Inner value = objectReader.readObject(JSONReader.of("{\"value\":123}"), 0);
+            assertNotNull(value);
+            assertEquals(123, value.getValue());
+        }
     }
 
     public static class Outer {

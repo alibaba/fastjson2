@@ -124,8 +124,8 @@ final class ConstructorFunction<T>
         if (index == 0 && enclosingParamType != null) {
             try {
                 return JDKUtils.UNSAFE.allocateInstance(enclosingParamType);
-            } catch (Throwable ignored) {
-                // fall back to null below
+            } catch (InstantiationException ignored) {
+                // the enclosing type cannot be allocated, fall back to the default value below
             }
         }
         return TypeUtils.getDefaultValue(paramClass);
