@@ -118,6 +118,14 @@ public class Issue7669 {
             (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
     };
 
+    // 0x91 = BC_BINARY (routed through startArray() via typed array deserialization),
+    // 0x48 = BC_INT32, 0x7FFFFFFF = Integer.MAX_VALUE
+    static final byte[] BINARY_ARRAY_PAYLOAD_MAX_LEN = {
+            (byte) 0x91,
+            (byte) 0x48,
+            (byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
+    };
+
     @Test
     public void testArrayDeclaredLengthOOM_int() {
         assertThrows(JSONException.class, () -> JSONB.parseObject(ARRAY_PAYLOAD_MAX_LEN, int[].class));
@@ -139,8 +147,22 @@ public class Issue7669 {
     }
 
     @Test
+    public void testArrayDeclaredLengthOOM_binaryBranch() {
+        // The BC_BINARY branch of startArray() received the same checkArrayLen guard;
+        // a crafted payload must be rejected through this path too (parseObject typed
+        // array deserialization routes it through startArray()).
+        assertThrows(JSONException.class, () -> JSONB.parseObject(BINARY_ARRAY_PAYLOAD_MAX_LEN, int[].class));
+    }
+
+    @Test
     public void testArrayValidPayloadStillWorks() {
-        int[] value = {1, 2, 3};
+        // ARRAY_FIX_LEN = 15: arrays with <= 15 elements are encoded as BC_ARRAY_FIX
+        // and bypass startArray()'s checkLength entirely. Use 32 elements to force
+        // BC_ARRAY encoding so this test actually exercises the guarded path.
+        int[] value = new int[32];
+        for (int i = 0; i < value.length; i++) {
+            value[i] = i;
+        }
         byte[] jsonbBytes = JSONB.toBytes(value);
         int[] result = JSONB.parseObject(jsonbBytes, int[].class);
         assertArrayEquals(value, result);
