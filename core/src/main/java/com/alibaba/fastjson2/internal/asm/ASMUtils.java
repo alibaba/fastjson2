@@ -221,6 +221,39 @@ public final class ASMUtils {
         descMapping.put(FieldReader[].class, DESC_FIELD_READER_ARRAY);
     }
 
+    /**
+     * Sanitizes a class simple name so that it can be embedded in a generated class name.
+     * Array types like {@code "Class[]"} become {@code "ClassArray"}, and any other character
+     * that is not valid in a class name is replaced with an underscore.
+     *
+     * @param simpleName the simple name to sanitize, may be null
+     * @return a name safe to use in a generated class name, never null
+     */
+    public static String sanitizeClassName(String simpleName) {
+        if (simpleName == null || simpleName.isEmpty()) {
+            return "";
+        }
+        if (simpleName.endsWith("[]")) {
+            return sanitizeClassName(simpleName.substring(0, simpleName.length() - 2)) + "Array";
+        }
+        StringBuilder buf = null;
+        for (int i = 0; i < simpleName.length(); i++) {
+            char c = simpleName.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
+                if (buf != null) {
+                    buf.append(c);
+                }
+            } else {
+                if (buf == null) {
+                    buf = new StringBuilder(simpleName.length());
+                    buf.append(simpleName, 0, i);
+                }
+                buf.append('_');
+            }
+        }
+        return buf != null ? buf.toString() : simpleName;
+    }
+
     public static String type(Class<?> clazz) {
         String type = typeMapping.get(clazz);
         if (type != null) {
