@@ -3187,11 +3187,7 @@ public interface JSONB {
          * @return the new offset
          */
         static int writeReference(byte[] bytes, int off, String path, JSONWriter jsonWriter) {
-            if (jsonWriter.lastReference == path) {
-                path = "#-1";
-            } else {
-                jsonWriter.lastReference = path;
-            }
+            path = jsonWriter.collapseReference(path);
             bytes[off] = BC_REFERENCE;
             return writeString(bytes, off + 1, path);
         }
