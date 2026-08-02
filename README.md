@@ -65,7 +65,7 @@ Add the dependency and start parsing JSON in seconds:
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.63</version>
+    <version>2.0.64</version>
 </dependency>
 ```
 
@@ -91,7 +91,7 @@ The `groupId` for FASTJSON 2 is `com.alibaba.fastjson2` (different from 1.x):
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.63</version>
+    <version>2.0.64</version>
 </dependency>
 ```
 
@@ -99,7 +99,7 @@ The `groupId` for FASTJSON 2 is `com.alibaba.fastjson2` (different from 1.x):
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.63'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.64'
 }
 ```
 
@@ -115,7 +115,7 @@ If you are migrating from `fastjson 1.2.x`, you can use the compatibility packag
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.63</version>
+    <version>2.0.64</version>
 </dependency>
 ```
 
@@ -123,7 +123,7 @@ If you are migrating from `fastjson 1.2.x`, you can use the compatibility packag
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba:fastjson:2.0.63'
+    implementation 'com.alibaba:fastjson:2.0.64'
 }
 ```
 
@@ -137,7 +137,7 @@ For projects using Kotlin, the `fastjson2-kotlin` module provides idiomatic Kotl
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.63</version>
+    <version>2.0.64</version>
 </dependency>
 ```
 
@@ -161,7 +161,7 @@ Add the Kotlin standard library and reflection library as needed. The reflection
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.63")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.64")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
 }
@@ -177,7 +177,7 @@ For Spring Framework projects, use the appropriate extension module. See the ful
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring5</artifactId>
-    <version>2.0.63</version>
+    <version>2.0.64</version>
 </dependency>
 ```
 
@@ -187,7 +187,7 @@ For Spring Framework projects, use the appropriate extension module. See the ful
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring6</artifactId>
-    <version>2.0.63</version>
+    <version>2.0.64</version>
 </dependency>
 ```
 
@@ -196,9 +196,9 @@ For Spring Framework projects, use the appropriate extension module. See the ful
 ```groovy
 dependencies {
     // Choose one based on your Spring version:
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.63'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.64'
     // or
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.63'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.64'
 }
 ```
 
