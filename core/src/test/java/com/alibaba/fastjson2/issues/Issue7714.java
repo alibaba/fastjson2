@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * {@code JSONException: key get error} (a wrapped ClassCastException), and — for a subclass
  * value — silently dropping the subclass fields by reusing the parent writer.
  */
+@Tag("regression")
 public class Issue7714 {
     public static class DataChangeNotification {
         private String key;
