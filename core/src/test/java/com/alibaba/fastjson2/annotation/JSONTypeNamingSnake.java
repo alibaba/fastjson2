@@ -52,4 +52,14 @@ public class JSONTypeNamingSnake {
             this.beanName = beanName;
         }
     }
+
+    @JSONType(naming = PropertyNamingStrategy.SnakeCase)
+    static class ClassDto {
+        public String currencyCode = "840";
+    }
+
+    @Test
+    public void testClass() {
+        assertEquals("{\"currency_code\":\"840\"}", JSON.toJSONString(new ClassDto()));
+    }
 }
