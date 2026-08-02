@@ -1194,7 +1194,28 @@ public class ObjectReaderProvider
                     }
                 }
                 if (typeArguments.length == 1 && List.class.isAssignableFrom(rawClass)) {
-                    return ObjectReaderImplList.of(objectType, rawClass, 0);
+                    // Honor a custom deserializer declared on the List subclass (e.g.
+                    // @JSONType(deserializer = ...), @JSONType(deserializeUsing = ...) or Jackson's
+                    // @JsonDeserialize(using = ...)) before the list fast-path. Otherwise the generic
+                    // list reader is returned and the user's deserializer directive is silently bypassed.
+                    BeanInfo beanInfo = new BeanInfo(this);
+                    getBeanInfo(beanInfo, rawClass);
+                    if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
+                        ObjectReader deserializerReader;
+                        try {
+                            Constructor<?> constructor = beanInfo.deserializer.getDeclaredConstructor();
+                            constructor.setAccessible(true);
+                            deserializerReader = (ObjectReader) constructor.newInstance();
+                        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+                                | InvocationTargetException e) {
+                            throw new JSONException("create deserializer error", e);
+                        }
+                        ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, deserializerReader);
+                        return previous != null ? previous : deserializerReader;
+                    }
+                    ObjectReader listReader = ObjectReaderImplList.of(objectType, rawClass, 0);
+                    ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, listReader);
+                    return previous != null ? previous : listReader;
                 }
 
                 if (typeArguments.length == 2 && Map.class.isAssignableFrom(rawClass)) {
