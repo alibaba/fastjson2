@@ -272,7 +272,7 @@ public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factor
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.63</version>
+    <version>2.0.64</version>
 </dependency>
 ```
 
