@@ -1454,8 +1454,17 @@ final class JSONReaderJSONB
         // so a declared length larger than the remaining buffer is malformed input.
         // Guards against a small crafted payload declaring Integer.MAX_VALUE elements
         // that triggers an immediate over-sized array pre-allocation (OOM / DoS).
+        checkLength(len, offset, end, "array length");
+    }
+
+    // Shared bounds-check for lengths declared in untrusted JSONB (see #7669).
+    // `label` identifies the context in the error message (e.g. "array length",
+    // "BC_BIGINT length"). A declared length larger than the remaining buffer is
+    // malformed input and must be rejected before any pre-allocation.
+    static void checkLength(int len, int offset, int end, String label) {
         if (len < 0 || len > end - offset) {
-            throw new JSONException("array length out of range: " + len + ", available: " + (end - offset));
+            throw new JSONException(
+                    label + " out of range at offset " + offset + "/" + end + ": " + len + ", available: " + (end - offset));
         }
     }
 
@@ -6318,9 +6327,7 @@ final class JSONReaderJSONB
     }
 
     static void checkBigintLen(int len, int offset, int end) {
-        if (len < 0 || len > end - offset) {
-            throw new JSONException("BC_BIGINT length out of range: " + len + ", available: " + (end - offset));
-        }
+        checkLength(len, offset, end, "BC_BIGINT length");
     }
 
     static JSONException outOfBoundsCheckFromToIndex(int offset, int end) {
