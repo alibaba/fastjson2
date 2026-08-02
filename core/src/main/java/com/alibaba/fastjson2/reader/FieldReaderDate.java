@@ -64,6 +64,9 @@ final class FieldReaderDate<T>
             }
             date = null;
         }
+        if (date == null && ignoreSetNullValue(jsonReader)) {
+            return;
+        }
         accept(object, date);
     }
 

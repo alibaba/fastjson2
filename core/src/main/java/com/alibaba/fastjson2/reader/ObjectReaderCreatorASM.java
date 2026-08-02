@@ -3014,7 +3014,9 @@ public class ObjectReaderCreatorASM
 
         MethodWriter mw = mwc.mw;
 
-        if ((fieldFeatures & (JSONReader.Feature.NullOnError.mask | JSONReader.Feature.IgnoreSetNullValue.mask)) != 0) {
+        if ((fieldFeatures & JSONReader.Feature.NullOnError.mask) != 0
+                || ((fieldFeatures & JSONReader.Feature.IgnoreSetNullValue.mask) != 0
+                    && !(context.objectReaderAdapter instanceof ObjectReaderNoneDefaultConstructor))) {
             mw.aload(THIS);
             mw.getfield(classNameType, fieldReader(fieldReaderIndex), DESC_FIELD_READER);
             mw.aload(JSON_READER);
