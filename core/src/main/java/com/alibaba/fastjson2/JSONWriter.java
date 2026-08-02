@@ -320,7 +320,13 @@ public abstract class JSONWriter
      * @return the previous path as a string, or null if no previous path exists
      */
     public final String setPath(int index, Object object) {
-        return setPath(index, object, false);
+        // Call setPath0 directly: extra delegation layers here enlarge the inlined frame of
+        // hot callers such as ObjectWriterImplList.write, which recurses once per nesting level.
+        if (!isRefDetect(object)) {
+            return null;
+        }
+
+        return setPath0(index, object, false, false);
     }
 
     /**
@@ -328,7 +334,7 @@ public abstract class JSONWriter
      *
      * @param index the index to set the path for
      * @param object the object to set the path for
-     * @param unstableIndex true if this index belongs to a {@link Set}
+     * @param unstableIndex true if this index belongs to an unordered {@link Set}
      * @return the previous path as a string, or null if no previous path exists
      */
     public final String setPath(int index, Object object, boolean unstableIndex) {
@@ -369,7 +375,7 @@ public abstract class JSONWriter
      *
      * @param index the index to set the path for
      * @param object the object to set the path for
-     * @param unstableIndex true if this index belongs to a {@link Set}
+     * @param unstableIndex true if this index belongs to an unordered {@link Set}
      * @return the previous path as a string, or null if no previous path exists
      */
     public final String setPath0(int index, Object object, boolean unstableIndex) {
@@ -432,10 +438,11 @@ public abstract class JSONWriter
 
         // Inline when delayed resolution could change a Set element's hash/ordering, or when the
         // target path uses an unordered Set index. Ordered Set element paths remain referenceable.
+        // Evaluate Set flags before isActiveReference to short-circuit the common no-Set case.
         if (previous != Path.ROOT
                 && previous != Path.MANGER_REFERNCE
-                && !isActiveReference(previous)
                 && (isUnderSetElement(this.path) || isUnderUnstable(previous))
+                && !isActiveReference(previous)
         ) {
             if (refRestores == null) {
                 refRestores = new IdentityHashMap<>(8);
@@ -454,7 +461,7 @@ public abstract class JSONWriter
     }
 
     private boolean isActiveReference(Path reference) {
-        // walk ancestors; match by identity or location (ignore unstableIndex)
+        // walk ancestors; match by identity or location (ignore unstableIndex and setElement)
         for (Path current = path.parent; current != null; current = current.parent) {
             if (current == reference || sameLocation(current, reference)) {
                 return true;
@@ -464,7 +471,9 @@ public abstract class JSONWriter
     }
 
     /**
-     * Whether two paths denote the same JSON location, ignoring {@link Path#unstableIndex}.
+     * Whether two paths denote the same JSON location, ignoring {@link Path#unstableIndex}
+     * and {@link Path#setElement}. Both flags are omitted on purpose: after the index-path
+     * cache is refreshed, a stale ancestor Path must still match by location.
      */
     private static boolean sameLocation(Path left, Path right) {
         while (left != null && right != null) {
@@ -4681,7 +4690,7 @@ public abstract class JSONWriter
          *
          * @param parent the parent path, or null for the root path
          * @param index the array index for this path segment
-         * @param unstableIndex true if this index belongs to a {@link Set}
+         * @param unstableIndex true if this index belongs to an unordered {@link Set}
          */
         public Path(Path parent, int index, boolean unstableIndex) {
             this(parent, index, unstableIndex, unstableIndex);

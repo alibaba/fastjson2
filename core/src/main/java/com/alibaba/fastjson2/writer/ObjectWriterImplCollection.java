@@ -83,10 +83,7 @@ final class ObjectWriterImplCollection
 
         boolean refDetect = jsonWriter.isRefDetect();
         boolean setElement = collection instanceof Set;
-        // LinkedHashSet and SortedSet have deterministic, referenceable element indexes.
-        boolean unstableIndex = setElement
-                && !(collection instanceof LinkedHashSet)
-                && !(collection instanceof SortedSet);
+        boolean unstableIndex = isUnorderedSet(collection);
 
         jsonWriter.startArray(collection.size());
 
@@ -153,10 +150,7 @@ final class ObjectWriterImplCollection
 
         boolean refDetect = jsonWriter.isRefDetect();
         boolean setElement = object instanceof Set;
-        // LinkedHashSet and SortedSet have deterministic, referenceable element indexes.
-        boolean unstableIndex = setElement
-                && !(object instanceof LinkedHashSet)
-                && !(object instanceof SortedSet);
+        boolean unstableIndex = isUnorderedSet(object);
 
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
@@ -206,5 +200,16 @@ final class ObjectWriterImplCollection
             ++i;
         }
         jsonWriter.endArray();
+    }
+
+    /**
+     * True for Sets whose element indexes are not treated as stable $ref targets.
+     * Only {@link LinkedHashSet} and {@link SortedSet} are excluded; other ordered Sets
+     * (e.g. CopyOnWriteArraySet, synchronizedSet wrappers) are treated as unordered.
+     */
+    private static boolean isUnorderedSet(Object collection) {
+        return collection instanceof Set
+                && !(collection instanceof LinkedHashSet)
+                && !(collection instanceof SortedSet);
     }
 }
