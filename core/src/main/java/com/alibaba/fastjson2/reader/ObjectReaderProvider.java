@@ -1193,7 +1193,7 @@ public class ObjectReaderProvider
                         return rawClassReader;
                     }
                 }
-                if (typeArguments.length == 1 && ArrayList.class.isAssignableFrom(rawClass)) {
+                if (typeArguments.length == 1 && List.class.isAssignableFrom(rawClass)) {
                     return ObjectReaderImplList.of(objectType, rawClass, 0);
                 }
 
