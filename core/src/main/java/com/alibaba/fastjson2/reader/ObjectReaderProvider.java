@@ -1194,10 +1194,10 @@ public class ObjectReaderProvider
                     }
                 }
                 if (typeArguments.length == 1 && List.class.isAssignableFrom(rawClass)) {
-                    // Honor a custom deserializer declared on the List subclass (e.g.
-                    // @JSONType(deserializer = ...), @JSONType(deserializeUsing = ...) or Jackson's
-                    // @JsonDeserialize(using = ...)) before the list fast-path. Otherwise the generic
-                    // list reader is returned and the user's deserializer directive is silently bypassed.
+                    // Honor a custom deserializer declared on the List subclass — any ObjectReader
+                    // populated into beanInfo.deserializer by getBeanInfo (e.g. @JSONType(deserializer = ...))
+                    // — before the list fast-path. Otherwise the generic list reader is returned and the
+                    // user's deserializer directive is silently bypassed.
                     BeanInfo beanInfo = new BeanInfo(this);
                     getBeanInfo(beanInfo, rawClass);
                     if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {

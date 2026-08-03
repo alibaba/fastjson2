@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * lost its generic element type — elements were decoded as JSONObject.
  */
 @Tag("regression")
-public class Issue7684Test {
+public class Issue7684 {
     public static class CustomList<E> extends AbstractList<E> {
         private final List<E> list = new ArrayList<>();
 
