@@ -399,6 +399,11 @@ public class ObjectReaderCreatorASM
                 || (objectReaderAdapter.noneDefaultConstructor != null && objectReaderAdapter.noneDefaultConstructor.getParameterCount() != paramFieldReaders.length)
                 || (constructorFunction instanceof FactoryFunction && ((FactoryFunction<T>) constructorFunction).paramNames.length != paramFieldReaders.length)
                 || paramFieldReaders.length > 64
+                // a non-static inner class constructor carries the synthetic enclosing instance
+                // parameter, which the generated reader cannot allocate; use the reflective
+                // ConstructorFunction that allocates it
+                || (objectReaderAdapter.noneDefaultConstructor != null
+                && BeanUtils.getEnclosingInstanceParamType(objectReaderAdapter.noneDefaultConstructor) != null)
         ) {
             match = false;
         }
