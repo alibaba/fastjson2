@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.reflect.Constructor;
@@ -21,9 +22,7 @@ final class ConstructorSupplier
         this.useClassNewInstance = constructor.getParameterCount() == 0
                 && Modifier.isPublic(constructor.getModifiers())
                 && Modifier.isPublic(objectClass.getModifiers());
-        this.paramType = constructor.getParameterCount() == 1
-                ? constructor.getParameterTypes()[0]
-                : null;
+        this.paramType = BeanUtils.getEnclosingInstanceParamType(constructor);
     }
 
     @Override
@@ -31,14 +30,24 @@ final class ConstructorSupplier
         try {
             if (useClassNewInstance) {
                 return objectClass.newInstance();
-            } else {
-                if (paramType != null) {
-                    Object dummy = JDKUtils.UNSAFE.allocateInstance(paramType);
-                    return constructor.newInstance(dummy);
-                } else {
-                    return constructor.newInstance();
-                }
             }
+
+            if (paramType != null) {
+                Object dummy;
+                try {
+                    dummy = JDKUtils.UNSAFE.allocateInstance(paramType);
+                } catch (InstantiationException ignored) {
+                    // the enclosing class cannot be allocated (for example an abstract class),
+                    // pass null as before JDK 25
+                    dummy = null;
+                }
+                return constructor.newInstance(dummy);
+            }
+
+            if (constructor.getParameterCount() == 1) {
+                return constructor.newInstance(new Object[1]);
+            }
+            return constructor.newInstance();
         } catch (Throwable e) {
             throw new JSONException("create instance error", e);
         }

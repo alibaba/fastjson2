@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.internal.asm.ASMUtils;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -64,14 +65,7 @@ final class ConstructorFunction<T>
             hashCodes[i] = Fnv.hashCode64(name);
         }
 
-        Class declaringClass = constructor.getDeclaringClass();
-        Class enclosingClass = declaringClass.getDeclaringClass();
-        this.enclosingParamType = enclosingClass != null
-                && !Modifier.isStatic(declaringClass.getModifiers())
-                && parameters.length > 0
-                && parameters[0].getType() == enclosingClass
-                ? enclosingClass
-                : null;
+        this.enclosingParamType = BeanUtils.getEnclosingInstanceParamType(constructor);
 
         this.alternateConstructors = alternateConstructors;
         if (alternateConstructors != null) {
@@ -118,7 +112,10 @@ final class ConstructorFunction<T>
     /**
      * Default for a parameter absent from the JSON. Parameter 0 of a non-static inner class
      * constructor is the enclosing instance, which is never present in the JSON, so allocate a
-     * bare one rather than passing null.
+     * bare one rather than passing null. When the enclosing class cannot be allocated (for
+     * example an abstract class), fall back to null as before JDK 25; inner classes compiled
+     * by JDK 25+ then reject the null enclosing instance, which is unavoidable because an
+     * abstract enclosing class cannot be instantiated.
      */
     private Object defaultArg(int index, Class<?> paramClass) {
         if (index == 0 && enclosingParamType != null) {

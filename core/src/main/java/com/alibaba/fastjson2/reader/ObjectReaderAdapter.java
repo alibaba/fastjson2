@@ -447,9 +447,16 @@ public class ObjectReaderAdapter<T>
                 T object;
                 if (parameterCount == 0) {
                     object = (T) constructor.newInstance();
-                } else if (parameterCount == 1) {
+                } else if (parameterCount == 1 && BeanUtils.getEnclosingInstanceParamType(constructor) != null) {
                     Class<?> paramType = constructor.getParameterTypes()[0];
-                    Object dummy = JDKUtils.UNSAFE.allocateInstance(paramType);
+                    Object dummy;
+                    try {
+                        dummy = JDKUtils.UNSAFE.allocateInstance(paramType);
+                    } catch (InstantiationException ignored) {
+                        // the enclosing class cannot be allocated (for example an abstract class),
+                        // pass null as before JDK 25
+                        dummy = null;
+                    }
                     object = (T) constructor.newInstance(dummy);
                 } else {
                     object = (T) constructor.newInstance(new Object[parameterCount]);

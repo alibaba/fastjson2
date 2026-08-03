@@ -633,7 +633,12 @@ public class ObjectReaderCreatorASM
                 mw.invokevirtual("sun/misc/Unsafe", "allocateInstance", "(Ljava/lang/Class;)Ljava/lang/Object;");
                 mw.areturn();
                 mw.visitMaxs(3, 3);
-            } else if (defaultConstructor != null && Modifier.isPublic(defaultConstructor.getModifiers()) && Modifier.isPublic(objectClass.getModifiers())) {
+            } else if (defaultConstructor != null
+                    && Modifier.isPublic(defaultConstructor.getModifiers())
+                    && Modifier.isPublic(objectClass.getModifiers())
+                    && enclosingTypeVisible(defaultConstructor)) {
+                // a non-public enclosing type cannot be referenced from the generated class,
+                // so skip the override and let the reflective ObjectReaderAdapter.createInstance handle it
                 MethodWriter mw = cw.visitMethod(
                         Opcodes.ACC_PUBLIC,
                         methodName,
@@ -708,8 +713,10 @@ public class ObjectReaderCreatorASM
             Class paramType = defaultConstructor.getParameterTypes()[0];
             // ldc/checkcast on the enclosing type are access-checked against the generated class,
             // which lives in DynamicClassLoader; a non-public enclosing type fails with
-            // IllegalAccessError there, so keep passing null for it as before.
-            if (Modifier.isPublic(paramType.getModifiers())) {
+            // IllegalAccessError there. An abstract enclosing type cannot be allocated via
+            // Unsafe.allocateInstance (it throws InstantiationException at runtime). In both
+            // cases keep passing null as before JDK 25.
+            if (Modifier.isPublic(paramType.getModifiers()) && !Modifier.isAbstract(paramType.getModifiers())) {
                 mw.getstatic(TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
                 mw.visitLdcInsn(paramType);
                 mw.invokevirtual("sun/misc/Unsafe", "allocateInstance", "(Ljava/lang/Class;)Ljava/lang/Object;");
@@ -719,6 +726,16 @@ public class ObjectReaderCreatorASM
             }
             mw.invokespecial(TYPE_OBJECT, "<init>", "(" + ASMUtils.desc(paramType) + ")V");
         }
+    }
+
+    /**
+     * Whether the enclosing type referenced by the given inner class constructor can be loaded
+     * via {@code ldc}/{@code checkcast} from a generated reader class. A non-public enclosing
+     * type cannot, so instance creation must be delegated to the reflective creator instead.
+     */
+    private static boolean enclosingTypeVisible(Constructor constructor) {
+        return constructor.getParameterCount() == 0
+                || Modifier.isPublic(constructor.getParameterTypes()[0].getModifiers());
     }
 
     private void genMethodGetFieldReader(ObjectReadContext context) {
@@ -2963,7 +2980,8 @@ public class ObjectReaderCreatorASM
         int objectModifiers = objectClass == null ? Modifier.PUBLIC : objectClass.getModifiers();
         boolean publicObject = Modifier.isPublic(objectModifiers) && (objectClass == null || !classLoader.isExternalClass(objectClass));
 
-        if (defaultConstructor == null || !publicObject || !Modifier.isPublic(defaultConstructor.getModifiers())) {
+        if (defaultConstructor == null || !publicObject || !Modifier.isPublic(defaultConstructor.getModifiers())
+                || !enclosingTypeVisible(defaultConstructor)) {
             if (creator != null) {
                 mw.aload(THIS);
                 mw.getfield(classNameType, "creator", "Ljava/util/function/Supplier;");
