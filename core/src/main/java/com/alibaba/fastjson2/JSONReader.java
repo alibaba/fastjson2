@@ -4111,11 +4111,11 @@ public abstract class JSONReader
                     val = readArray();
                     break;
                 case '{':
-                    if (context.autoTypeBeforeHandler != null
+                    if (isReference()) {
+                        val = JSONPath.of(readReference());
+                    } else if (context.autoTypeBeforeHandler != null
                             || (context.features & (Feature.SupportAutoType.mask | Feature.ErrorOnNotSupportAutoType.mask)) != 0) {
                         val = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, 0);
-                    } else if (isReference()) {
-                        val = JSONPath.of(readReference());
                     } else {
                         val = readObject();
                     }

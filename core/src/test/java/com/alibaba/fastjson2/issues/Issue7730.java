@@ -15,10 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * https://github.com/alibaba/fastjson2/issues/7730
@@ -127,12 +125,33 @@ public class Issue7730 {
 
     @Test
     public void whitelistedListVsRejectedListConsistency() {
-        // Whitelisted element restores; non-whitelisted element in an array is rejected.
+        // Two-sided consistency: a whitelisted element restores, and a non-whitelisted
+        // element in an array is rejected. Both paths must apply the accept whitelist
+        // the same way — the rejection path is what makes ErrorOnNotSupportAutoType
+        // meaningful, so guard it alongside the accept path.
         String accepted = JSON.toJSONString(
                 new ArrayList<>(Arrays.asList(new Bean("x"))), JSONWriter.Feature.WriteClassName);
         Object parsed = JSON.parse(accepted, context());
-        assertTrue(parsed instanceof List);
-        assertFalse(((List<?>) parsed).isEmpty());
         assertInstanceOf(Bean.class, ((List<?>) parsed).get(0));
+
+        String rejected = "[{\"@type\":\"java.io.File\",\"path\":\"/tmp/x\"}]";
+        assertThrows(JSONException.class, () -> JSON.parse(rejected, context()));
+    }
+
+    @Test
+    public void refInArrayUnderErrorOnNotSupportAutoType() {
+        // $ref array element under ErrorOnNotSupportAutoType must still resolve when
+        // the caller uses an API that runs handleResolveTasks (e.g. parseObject with
+        // a Type). Routing array elements through ObjectReaderImplObject for the
+        // autoType whitelist must not bypass the isReference() check — otherwise
+        // {"$ref":"$[0]"} would become a literal JSONObject instead of a reference.
+        JSONReader.Context ctx = JSONFactory.createReadContext(JSONReader.Feature.ErrorOnNotSupportAutoType);
+        ctx.getProvider().addAutoTypeAccept("com.alibaba.fastjson2.issues.");
+        ctx.getProvider().addAutoTypeAccept("java.util.");
+
+        String json = "[{\"id\":\"a\"},{\"$ref\":\"$[0]\"}]";
+        Object parsed = JSON.parseObject(json, Object.class, ctx);
+        List<?> list = (List<?>) parsed;
+        assertEquals(list.get(0), list.get(1));
     }
 }
