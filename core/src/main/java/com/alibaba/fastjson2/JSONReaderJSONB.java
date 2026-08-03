@@ -2556,7 +2556,7 @@ final class JSONReaderJSONB
                 if (type >= BC_ARRAY_FIX_MIN && type <= BC_ARRAY) {
                     int itemCnt;
                     if (type == BC_ARRAY) {
-                        itemCnt = readInt32Value();
+                        itemCnt = checkItemCnt(readInt32Value());
                     } else {
                         itemCnt = type - BC_ARRAY_FIX_MIN;
                     }

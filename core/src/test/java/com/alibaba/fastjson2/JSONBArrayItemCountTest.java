@@ -100,6 +100,38 @@ public class JSONBArrayItemCountTest {
     }
 
     @Test
+    public void testReadObjectNoTypeItemCountOverflow() {
+        // the no-type overload routes through readObject()'s field-value branch
+        assertThrows(JSONException.class, () -> JSONB.parseObject(OBJECT_ARRAY_LARGE_CNT));
+    }
+
+    @Test
+    public void testNestedArrayItemCountOverflow() {
+        // outer BC_ARRAY with count 2, first element a small int, second element a
+        // nested BC_ARRAY declaring 0x0FFFFFFF items with no bytes left; parseArray
+        // routes the nested element through readArray() rather than readAny()
+        byte[] buffer = {
+                (byte) 0xA4, 0x02,
+                0x01,
+                (byte) 0xA4, (byte) 0x48, (byte) 0x0F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
+        };
+        assertThrows(JSONException.class, () -> JSONB.parseArray(buffer));
+    }
+
+    @Test
+    public void testSkipValueItemCountOverflow() {
+        // BC_OBJECT with unknown field "x" whose value declares Integer.MAX_VALUE items
+        // and no bytes behind it, so the bean reader skips it through skipValue()'s
+        // BC_ARRAY branch and the item loop would run past the end of the input
+        byte[] buffer = {
+                (byte) 0xA6,
+                (byte) 0x4A, (byte) 0x78,
+                (byte) 0xA4, (byte) 0x48, (byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
+        };
+        assertThrows(JSONException.class, () -> JSONB.parseObject(buffer, Bean.class));
+    }
+
+    @Test
     public void testItemCountMustNotReadBeyondEnd() {
         // a two byte frame declaring eight items, followed in the same buffer by data
         // that belongs to the next frame
@@ -145,5 +177,9 @@ public class JSONBArrayItemCountTest {
             ints[i] = i;
         }
         assertArrayEquals(ints, JSONB.parseObject(JSONB.toBytes(ints), int[].class));
+    }
+
+    public static class Bean {
+        public int id;
     }
 }
