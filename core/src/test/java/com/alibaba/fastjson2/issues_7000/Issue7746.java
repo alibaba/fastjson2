@@ -13,6 +13,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * https://github.com/alibaba/fastjson2/issues/7746
@@ -96,6 +97,37 @@ public class Issue7746 {
             assertEquals(names[i], map.get("name"));
             assertSame(map, map.get("self"));
         }
+    }
+
+    /**
+     * Covers ASM {@code JSONB.IO.writeReference}: Collection-typed bean fields that share one
+     * instance go through that path under ReferenceDetection, not JSONWriterJSONB.writeReference.
+     */
+    @Test
+    public void testAsmCollectionFieldRefs() {
+        List<String> shared = new ArrayList<>();
+        shared.add("x");
+
+        CollectionRefBean bean = new CollectionRefBean();
+        bean.first = shared;
+        bean.second = shared;
+        bean.third = shared;
+
+        byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.ReferenceDetection);
+        String dump = JSONB.toJSONString(bytes);
+        assertTrue(dump.contains("#-1"), dump);
+
+        CollectionRefBean parsed = JSONB.parseObject(bytes, CollectionRefBean.class);
+        assertSame(parsed.first, parsed.second);
+        assertSame(parsed.first, parsed.third);
+        assertEquals(1, parsed.first.size());
+        assertEquals("x", parsed.first.get(0));
+    }
+
+    public static class CollectionRefBean {
+        public List<String> first;
+        public List<String> second;
+        public List<String> third;
     }
 
     static List<SelfBean> selfReferencingList(String... names) {

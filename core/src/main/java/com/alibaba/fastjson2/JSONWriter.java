@@ -3081,15 +3081,15 @@ public abstract class JSONWriter
     }
 
     /**
-     * For JSONB, collapses a path equal to {@link #lastReference} into {@code "#-1"}.
-     * {@code ".."} is excluded: consecutive equal {@code ".."} paths may refer to different
+     * For JSONB, collapses a path identical to {@link #lastReference} into {@code "#-1"}.
+     * {@code ".."} is excluded: consecutive identical {@code ".."} paths may refer to different
      * enclosing objects.
      *
      * @param path the reference path about to be written
      * @return {@code "#-1"} if collapsed, otherwise {@code path}
      */
     final String collapseReference(String path) {
-        if (Objects.equals(path, lastReference) && !"..".equals(path)) {
+        if (path == lastReference && !"..".equals(path)) {
             return "#-1";
         }
         lastReference = path;
