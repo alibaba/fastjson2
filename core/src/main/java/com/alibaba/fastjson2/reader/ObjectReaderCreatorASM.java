@@ -298,7 +298,8 @@ public class ObjectReaderCreatorASM
                 }
 
                 Class fieldClass = fieldReader.fieldClass;
-                if (fieldClass != null && !Modifier.isPublic(fieldClass.getModifiers())) {
+                if (fieldClass != null
+                        && (!Modifier.isPublic(fieldClass.getModifiers()) || classLoader.isExternalClass(fieldClass))) {
                     match = false;
                     break;
                 }
