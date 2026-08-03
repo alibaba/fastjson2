@@ -1279,6 +1279,11 @@ public class ObjectReaderCreator {
             String[] parameterNames = beanInfo.createParameterNames;
             if (record && parameterNames == null) {
                 parameterNames = BeanUtils.getRecordFieldNames(objectClass);
+                if (beanInfo.namingStrategy != null && parameterNames != null) {
+                    for (int i = 0; i < parameterNames.length; i++) {
+                        parameterNames[i] = BeanUtils.fieldName(parameterNames[i], beanInfo.namingStrategy);
+                    }
+                }
             }
 
             if (parameterNames == null || parameterNames.length == 0) {
