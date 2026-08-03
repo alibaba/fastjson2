@@ -140,17 +140,30 @@ public class Issue7730 {
 
     @Test
     public void refInArrayUnderErrorOnNotSupportAutoType() {
-        // $ref array element under ErrorOnNotSupportAutoType must still resolve when
-        // the caller uses an API that runs handleResolveTasks (e.g. parseObject with
-        // a Type). Routing array elements through ObjectReaderImplObject for the
-        // autoType whitelist must not bypass the isReference() check — otherwise
-        // {"$ref":"$[0]"} would become a literal JSONObject instead of a reference.
+        // $ref array element under ErrorOnNotSupportAutoType must resolve via
+        // parseObject(String, Type, Context), which runs handleResolveTasks.
         JSONReader.Context ctx = JSONFactory.createReadContext(JSONReader.Feature.ErrorOnNotSupportAutoType);
         ctx.getProvider().addAutoTypeAccept("com.alibaba.fastjson2.issues.");
         ctx.getProvider().addAutoTypeAccept("java.util.");
 
         String json = "[{\"id\":\"a\"},{\"$ref\":\"$[0]\"}]";
         Object parsed = JSON.parseObject(json, Object.class, ctx);
+        List<?> list = (List<?>) parsed;
+        assertEquals(list.get(0), list.get(1));
+    }
+
+    @Test
+    public void refInArrayViaParseWithContext() {
+        // $ref array element under ErrorOnNotSupportAutoType must also resolve via
+        // JSON.parse(String, Context), the untyped entry point. Previously this
+        // overload did not invoke handleResolveTasks, so $ref array elements
+        // became null (data loss). Regression guard for that pre-existing bug.
+        JSONReader.Context ctx = JSONFactory.createReadContext(JSONReader.Feature.ErrorOnNotSupportAutoType);
+        ctx.getProvider().addAutoTypeAccept("com.alibaba.fastjson2.issues.");
+        ctx.getProvider().addAutoTypeAccept("java.util.");
+
+        String json = "[{\"id\":\"a\"},{\"$ref\":\"$[0]\"}]";
+        Object parsed = JSON.parse(json, ctx);
         List<?> list = (List<?>) parsed;
         assertEquals(list.get(0), list.get(1));
     }
