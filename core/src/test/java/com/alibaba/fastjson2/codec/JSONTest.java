@@ -946,6 +946,39 @@ public class JSONTest {
         // 4. Edge cases: null / empty text → null.
         assertNull(JSON.parseArray(null, AutoTypeBase.class, allowFilter));
         assertNull(JSON.parseArray("", AutoTypeBase.class, allowFilter));
+
+        // 5. Trailing content: pins the features varargs and the EOI guard together.
+        //    The default (empty varargs) must reject trailing input with JSONException;
+        //    passing IgnoreCheckClose through the varargs must suppress the guard.
+        //    A refactor that dropped either `features` from createReadContext(filter, features)
+        //    or the `reader.ch != EOI` branch would flip one of these assertions.
+        assertThrows(JSONException.class,
+                () -> JSON.parseArray(jsonArray + " trailing", AutoTypeBase.class, allowFilter));
+        List<AutoTypeBase> lenient = JSON.parseArray(jsonArray + " trailing",
+                AutoTypeBase.class, allowFilter, JSONReader.Feature.IgnoreCheckClose);
+        assertEquals(1, lenient.size());
+        assertSame(AutoTypeDerived.class, lenient.get(0).getClass());
+        assertEquals(101, lenient.get(0).id);
+    }
+
+    /**
+     * Verifies that {@link JSON#parseArray(String, Class, Filter, JSONReader.Feature...)}
+     * resolves {@code $ref} references through {@code handleResolveTasks}.
+     *
+     * <p>The {@code reader.resolveTasks != null} branch in
+     * {@code JSON.parseArray(String, Class, Filter, Feature...)} is otherwise never
+     * reached: {@link #test_parseArray_withFilter()} only feeds {@code @type}-based
+     * input that produces no reference tasks.</p>
+     */
+    @Test
+    public void test_parseArray_withFilter_ref() {
+        Filter allowFilter = JSONReader.autoTypeFilter(AutoTypeDerived.class);
+
+        List<AutoTypeBase> refs = JSON.parseArray(
+                "[{\"id\":1},{\"$ref\":\"$[0]\"}]", AutoTypeBase.class, allowFilter);
+        assertEquals(2, refs.size());
+        assertEquals(1, refs.get(0).id);
+        assertSame(refs.get(0), refs.get(1));
     }
 
     public static class MyList<T>
