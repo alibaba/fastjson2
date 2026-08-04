@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -39,6 +40,15 @@ public class Issue7748 {
         assertSame(isolated(Generator.class), generator.getClass());
     }
 
+    @Test
+    public void listItem() throws Exception {
+        Class<?> beanClass = isolated(Issue7748ListBean.class);
+        Object bean = JSON.parseObject("{\"generators\":{}}", beanClass);
+
+        Collection<?> generators = (Collection<?>) beanClass.getMethod("getGenerators").invoke(bean);
+        assertSame(isolated(Generator.class), generators.iterator().next().getClass());
+    }
+
     private Class<?> isolated(Class<?> clazz) throws ClassNotFoundException {
         Class<?> isolated = classLoader.loadClass(clazz.getName());
         assertNotSame(clazz, isolated);
@@ -54,7 +64,8 @@ public class Issue7748 {
 
         @Override
         protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-            if (!name.startsWith(Issue7748Bean.class.getName())) {
+            if (!name.startsWith(Issue7748Bean.class.getName())
+                    && !name.equals(Issue7748ListBean.class.getName())) {
                 return super.loadClass(name, resolve);
             }
 
