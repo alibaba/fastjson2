@@ -1,5 +1,6 @@
 package com.alibaba.fastjson.parser;
 
+import com.alibaba.fastjson.PropertyNamingStrategy;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
@@ -70,5 +71,17 @@ public class ParserConfigTest {
         assertNotSame(config0.provider, config1.provider);
 
         assertSame(JSONFactory.getDefaultObjectReaderProvider(), ParserConfig.getGlobalInstance().provider);
+    }
+
+    @Test
+    public void propertyNamingStrategyField() {
+        // Regression for issue #7704: fastjson 1.x ParserConfig exposes a public
+        // propertyNamingStrategy field; migration code assigns it directly. The compat
+        // package previously lacked the field, raising NoSuchFieldError. Mirror what
+        // SerializeConfig already exposes.
+        ParserConfig config = new ParserConfig();
+        assertNull(config.propertyNamingStrategy);
+        config.propertyNamingStrategy = PropertyNamingStrategy.SnakeCase;
+        assertSame(PropertyNamingStrategy.SnakeCase, config.propertyNamingStrategy);
     }
 }

@@ -127,7 +127,7 @@ public class JSONObject
             val = map.get(key.toString());
         }
 
-        return adaptResult(val);
+        return adaptResultLive(val);
     }
 
     public JSONObject getJSONObject(String key) {

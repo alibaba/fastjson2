@@ -308,6 +308,12 @@ public class ObjectReaderCreatorASM
                     match = false;
                     break;
                 }
+
+                if (fieldReader.fieldClass == Number.class
+                        && !Number.class.equals(fieldReader.fieldType)) {
+                    match = false;
+                    break;
+                }
             }
         }
 
@@ -423,6 +429,12 @@ public class ObjectReaderCreatorASM
 
                 if (fieldReader instanceof FieldReaderMap
                         && ((FieldReaderMap<?>) fieldReader).arrayToMapKey != null) {
+                    match = false;
+                    break;
+                }
+
+                if (fieldReader.fieldClass == Number.class
+                        && !Number.class.equals(fieldReader.fieldType)) {
                     match = false;
                     break;
                 }
@@ -4173,7 +4185,7 @@ public class ObjectReaderCreatorASM
             this.fieldNameCharLengthMin = charLenMin;
             this.fieldNameCharLengthMax = charLenMax;
 
-            String className = "ORG_" + seed.incrementAndGet() + "_" + fieldReaders.length + (objectClass == null ? "" : "_" + objectClass.getSimpleName());
+            String className = "ORG_" + seed.incrementAndGet() + "_" + fieldReaders.length + (objectClass == null ? "" : "_" + sanitizeClassName(objectClass.getSimpleName()));
 
             Package pkg = ObjectReaderCreatorASM.class.getPackage();
             if (pkg != null) {
@@ -4237,7 +4249,7 @@ public class ObjectReaderCreatorASM
         String className = (bytes ? "VBACG_" : "VCACG_")
                 + seed.incrementAndGet()
                 + "_" + fieldReaderArray.length
-                + "_" + objectClass.getSimpleName();
+                + "_" + sanitizeClassName(objectClass.getSimpleName());
         String classNameType;
         String classNameFull;
 
