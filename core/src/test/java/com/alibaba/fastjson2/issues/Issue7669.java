@@ -167,4 +167,26 @@ public class Issue7669 {
         int[] result = JSONB.parseObject(jsonbBytes, int[].class);
         assertArrayEquals(value, result);
     }
+
+    // --- R2-2 hardening: pin the position-relative bound (len > end - offset),
+    // not an absolute bound. The malformed BC_ARRAY below is NOT at the buffer
+    // end: an outer BC_ARRAY_FIX (0x95, 1 element) wraps an inner BC_ARRAY (0xA4)
+    // declaring 5 elements while only 1 byte (0xF0) remains. A guard that
+    // degenerates to `len > end` would let this slip through and later die with
+    // ArrayIndexOutOfBoundsException instead of JSONException.
+    // 0x95 = BC_ARRAY_FIX(1 elem), 0xA4 = BC_ARRAY, 0x48 = BC_INT32,
+    // 0x00000005 = declares 5 elements, 0xF0 = 1 trailing byte
+    static final byte[] NESTED_ARRAY_BAD_LEN = {
+            (byte) 0x95,
+            (byte) 0xA4,
+            (byte) 0x48,
+            0x00, 0x00, 0x00, 0x05,
+            (byte) 0xF0
+    };
+
+    @Test
+    public void testArrayDeclaredLengthNotAtBufferEnd() {
+        assertThrows(JSONException.class,
+                () -> JSONB.parseObject(NESTED_ARRAY_BAD_LEN, int[][].class));
+    }
 }
