@@ -404,6 +404,8 @@ final class JSONReaderJSONB
                         len = valueType - BC_ARRAY_FIX_MIN;
                     }
 
+                    checkLength(len, offset, end, "array length");
+
                     if (len == 0) {
                         if ((features & Feature.UseNativeObject.mask) != 0) {
                             value = new ArrayList<>();
@@ -927,6 +929,8 @@ final class JSONReaderJSONB
                             ? readLength()
                             : type - BC_ARRAY_FIX_MIN;
 
+                    checkLength(len, offset, end, "array length");
+
                     if (len == 0) {
                         if ((context.features & Feature.UseNativeObject.mask) != 0) {
                             return new ArrayList<>();
@@ -1097,6 +1101,8 @@ final class JSONReaderJSONB
                 int len = valueType == BC_ARRAY
                         ? readLength()
                         : valueType - BC_ARRAY_FIX_MIN;
+
+                checkLength(len, offset, end, "array length");
 
                 if (len == 0) {
                     if ((context.features & Feature.UseNativeObject.mask) != 0) {
