@@ -685,6 +685,26 @@ public class ObjectWriterAdapter<T>
                 if (valueWriter == null) {
                     valueWriter = JSONFactory.getObjectWriter(fieldWriter.fieldType, this.features | features);
                 }
+                // The cached writer was selected by the first value seen on this field (e.g. an Object
+                // or generic field whose fieldClass erases to Object). When a later value has a
+                // different runtime type, reusing that writer throws ClassCastException (wrapped as
+                // "key get error"); and a subclass value would be written with the parent writer,
+                // silently dropping the subclass fields. Re-resolve by the actual value class using
+                // the same typeMatch check the write path applies in
+                // FieldWriterObject.getObjectWriter(jsonWriter, valueClass), so toJSON stays
+                // consistent with toJSONString. See issue #7714.
+                FieldWriterObject objectFieldWriter = (FieldWriterObject) fieldWriter;
+                if (objectFieldWriter.initValueClass != null
+                        && !objectFieldWriter.isTypeMatch(fieldValue.getClass())) {
+                    valueWriter = JSONFactory.getObjectWriter(fieldValue.getClass(), this.features | features);
+                    // When the re-resolved writer is not an ObjectWriterAdapter (arrays, Date, enums,
+                    // etc.), convert the value via JSON.toJSON so it matches the shape the unprimed
+                    // path and toJSONString produce, instead of leaving the raw Java object in the
+                    // JSONObject. See issue #7714.
+                    if (!(valueWriter instanceof ObjectWriterAdapter)) {
+                        fieldValue = JSON.toJSON(fieldValue);
+                    }
+                }
                 if (valueWriter instanceof ObjectWriterAdapter) {
                     ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) valueWriter;
                     if (!objectWriterAdapter.getFieldWriters().isEmpty()) {
