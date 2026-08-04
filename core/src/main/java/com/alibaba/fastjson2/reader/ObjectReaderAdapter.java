@@ -242,16 +242,14 @@ public class ObjectReaderAdapter<T>
     }
 
     public Object autoType(JSONReader jsonReader, Class expectClass, long features) {
-        long typeHash = jsonReader.readTypeHashCode();
+        jsonReader.readTypeHashCode();
         JSONReader.Context context = jsonReader.getContext();
+        long featuresAll = this.features | features | context.getFeatures();
 
         ObjectReader autoTypeObjectReader = null;
-        if (jsonReader.isSupportAutoTypeOrHandler(features)) {
-            autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
-        }
-        if (autoTypeObjectReader == null) {
+        if (jsonReader.isSupportAutoTypeOrHandler(featuresAll)) {
             String typeName = jsonReader.getString();
-            autoTypeObjectReader = context.getObjectReaderAutoType(typeName, expectClass, this.features | features | context.getFeatures());
+            autoTypeObjectReader = context.getObjectReaderAutoType(typeName, expectClass, featuresAll);
 
             if (autoTypeObjectReader == null) {
                 if (expectClass == objectClass) {
@@ -260,6 +258,10 @@ public class ObjectReaderAdapter<T>
                     throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                 }
             }
+        }
+
+        if (autoTypeObjectReader == null) {
+            throw new JSONException(jsonReader.info("autoType not support"));
         }
 
         return autoTypeObjectReader.readObject(jsonReader, null, null, features);
@@ -536,16 +538,12 @@ public class ObjectReaderAdapter<T>
     }
 
     protected T autoType(JSONReader jsonReader) {
-        long typeHash = jsonReader.readTypeHashCode();
+        jsonReader.readTypeHashCode();
         JSONReader.Context context = jsonReader.getContext();
-        ObjectReader autoTypeObjectReader = autoType(context, typeHash);
+        String typeName = jsonReader.getString();
+        ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
         if (autoTypeObjectReader == null) {
-            String typeName = jsonReader.getString();
-            autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-
-            if (autoTypeObjectReader == null) {
-                throw new JSONException(jsonReader.info("autoType not support : " + typeName));
-            }
+            throw new JSONException(jsonReader.info("autoType not support : " + typeName));
         }
 
         return (T) autoTypeObjectReader.readJSONBObject(jsonReader, null, null, features);
@@ -584,16 +582,12 @@ public class ObjectReaderAdapter<T>
 
             long hash = jsonReader.readFieldNameHashCode();
             if (hash == typeKeyHashCode && i == 0) {
-                long typeHash = jsonReader.readValueHashCode();
+                jsonReader.readValueHashCode();
                 JSONReader.Context context = jsonReader.getContext();
-                ObjectReader autoTypeObjectReader = autoType(context, typeHash);
+                String typeName = jsonReader.getString();
+                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
                 if (autoTypeObjectReader == null) {
-                    String typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-
-                    if (autoTypeObjectReader == null) {
-                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
-                    }
+                    throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                 }
 
                 if (autoTypeObjectReader == this) {
@@ -646,7 +640,7 @@ public class ObjectReaderAdapter<T>
             return provider.getObjectReader(seeAlsoClass);
         }
 
-        return provider.getObjectReader(typeHash);
+        return null;
     }
 
     @Override
@@ -660,7 +654,7 @@ public class ObjectReaderAdapter<T>
             return context.getObjectReader(seeAlsoClass);
         }
 
-        return context.getObjectReaderAutoType(typeHash);
+        return null;
     }
 
     protected void initStringFieldAsEmpty(Object object) {
@@ -679,10 +673,12 @@ public class ObjectReaderAdapter<T>
         long features2 = features | this.features | JSONFactory.getDefaultReaderFeatures();
         if (typeKey instanceof String) {
             String typeName = (String) typeKey;
-            long typeHash = Fnv.hashCode64(typeName);
             ObjectReader<T> reader = null;
-            if ((features & JSONReader.Feature.SupportAutoType.mask) != 0 || this instanceof ObjectReaderSeeAlso) {
-                reader = autoType(provider, typeHash);
+            if (seeAlsoMapping != null && seeAlsoMapping.size() > 0) {
+                Class seeAlsoClass = seeAlsoMapping.get(Fnv.hashCode64(typeName));
+                if (seeAlsoClass != null) {
+                    reader = provider.getObjectReader(seeAlsoClass);
+                }
             }
 
             if (reader == null) {
