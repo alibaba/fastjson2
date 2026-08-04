@@ -232,6 +232,9 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(text, context)) {
             Object object = objectReader.readObject(reader, null, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
