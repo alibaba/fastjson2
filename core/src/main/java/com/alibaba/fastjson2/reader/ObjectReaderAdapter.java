@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -445,7 +446,23 @@ public class ObjectReaderAdapter<T>
 
         if (constructor != null) {
             try {
-                T object = (T) constructor.newInstance(new Object[parameterCount]);
+                T object;
+                if (parameterCount == 0) {
+                    object = (T) constructor.newInstance();
+                } else if (parameterCount == 1 && BeanUtils.getEnclosingInstanceParamType(constructor) != null) {
+                    Class<?> paramType = constructor.getParameterTypes()[0];
+                    Object dummy;
+                    try {
+                        dummy = JDKUtils.UNSAFE.allocateInstance(paramType);
+                    } catch (InstantiationException ignored) {
+                        // the enclosing class cannot be allocated (for example an abstract class),
+                        // pass null as before JDK 25
+                        dummy = null;
+                    }
+                    object = (T) constructor.newInstance(dummy);
+                } else {
+                    object = (T) constructor.newInstance(new Object[parameterCount]);
+                }
                 if (hasDefaultValue) {
                     initDefaultValue(object);
                 }
