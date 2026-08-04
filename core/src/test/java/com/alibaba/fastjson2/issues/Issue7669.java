@@ -101,4 +101,92 @@ public class Issue7669 {
         byte[] result = (byte[]) JSONB.parse(jsonbBytes);
         assertArrayEquals(value, result);
     }
+
+    // --- BC_ARRAY declared-length OOM path (same class as #7669, fixed by this PR) ---
+
+    // 0xA4 = BC_ARRAY, 0x48 = BC_INT32, 0x7FFFFFFF = Integer.MAX_VALUE
+    static final byte[] ARRAY_PAYLOAD_MAX_LEN = {
+            (byte) 0xA4,
+            (byte) 0x48,
+            (byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
+    };
+
+    // 0xA4 = BC_ARRAY, 0x48 = BC_INT32, 0xFFFFFFFF = -1
+    static final byte[] ARRAY_PAYLOAD_NEG_LEN = {
+            (byte) 0xA4,
+            (byte) 0x48,
+            (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
+    };
+
+    // 0x91 = BC_BINARY (routed through startArray() via typed array deserialization),
+    // 0x48 = BC_INT32, 0x7FFFFFFF = Integer.MAX_VALUE
+    static final byte[] BINARY_ARRAY_PAYLOAD_MAX_LEN = {
+            (byte) 0x91,
+            (byte) 0x48,
+            (byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
+    };
+
+    @Test
+    public void testArrayDeclaredLengthOOM_int() {
+        assertThrows(JSONException.class, () -> JSONB.parseObject(ARRAY_PAYLOAD_MAX_LEN, int[].class));
+    }
+
+    @Test
+    public void testArrayDeclaredLengthOOM_long() {
+        assertThrows(JSONException.class, () -> JSONB.parseObject(ARRAY_PAYLOAD_MAX_LEN, long[].class));
+    }
+
+    @Test
+    public void testArrayDeclaredLengthOOM_string() {
+        assertThrows(JSONException.class, () -> JSONB.parseObject(ARRAY_PAYLOAD_MAX_LEN, String[].class));
+    }
+
+    @Test
+    public void testArrayNegativeLength() {
+        assertThrows(JSONException.class, () -> JSONB.parseObject(ARRAY_PAYLOAD_NEG_LEN, int[].class));
+    }
+
+    @Test
+    public void testArrayDeclaredLengthOOM_binaryBranch() {
+        // The BC_BINARY branch of startArray() received the same checkArrayLen guard;
+        // a crafted payload must be rejected through this path too (parseObject typed
+        // array deserialization routes it through startArray()).
+        assertThrows(JSONException.class, () -> JSONB.parseObject(BINARY_ARRAY_PAYLOAD_MAX_LEN, int[].class));
+    }
+
+    @Test
+    public void testArrayValidPayloadStillWorks() {
+        // ARRAY_FIX_LEN = 15: arrays with <= 15 elements are encoded as BC_ARRAY_FIX
+        // and bypass startArray()'s checkLength entirely. Use 32 elements to force
+        // BC_ARRAY encoding so this test actually exercises the guarded path.
+        int[] value = new int[32];
+        for (int i = 0; i < value.length; i++) {
+            value[i] = i;
+        }
+        byte[] jsonbBytes = JSONB.toBytes(value);
+        int[] result = JSONB.parseObject(jsonbBytes, int[].class);
+        assertArrayEquals(value, result);
+    }
+
+    // --- R2-2 hardening: pin the position-relative bound (len > end - offset),
+    // not an absolute bound. The malformed BC_ARRAY below is NOT at the buffer
+    // end: an outer BC_ARRAY_FIX (0x95, 1 element) wraps an inner BC_ARRAY (0xA4)
+    // declaring 5 elements while only 1 byte (0xF0) remains. A guard that
+    // degenerates to `len > end` would let this slip through and later die with
+    // ArrayIndexOutOfBoundsException instead of JSONException.
+    // 0x95 = BC_ARRAY_FIX(1 elem), 0xA4 = BC_ARRAY, 0x48 = BC_INT32,
+    // 0x00000005 = declares 5 elements, 0xF0 = 1 trailing byte
+    static final byte[] NESTED_ARRAY_BAD_LEN = {
+            (byte) 0x95,
+            (byte) 0xA4,
+            (byte) 0x48,
+            0x00, 0x00, 0x00, 0x05,
+            (byte) 0xF0
+    };
+
+    @Test
+    public void testArrayDeclaredLengthNotAtBufferEnd() {
+        assertThrows(JSONException.class,
+                () -> JSONB.parseObject(NESTED_ARRAY_BAD_LEN, int[][].class));
+    }
 }
