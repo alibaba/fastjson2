@@ -150,6 +150,7 @@ public abstract class JSONReader
     protected int nameBegin;
 
     protected boolean nameEscape;
+    protected boolean typeNameIllegal;
     protected boolean valueEscape;
     protected boolean wasNull;
     protected boolean boolValue;
@@ -1619,6 +1620,22 @@ public abstract class JSONReader
      */
     public long readTypeHashCode() {
         return readValueHashCode();
+    }
+
+    /**
+     * Returns whether the type name scanned by the last {@link #readTypeHashCode()} call
+     * contains a character that cannot appear in a Java binary class name ({@code ':'} or
+     * {@code '!'}), making it illegal for autoType. Detecting this during the scan lets
+     * callers reject the type name without materializing and re-scanning it.
+     *
+     * <p>The result is conservative: it is only set when the scan saw the raw type name
+     * bytes or chars, so escaped or symbol-referenced names report false and are still
+     * validated by the downstream checks.
+     *
+     * @return true if the last scanned type name contains {@code ':'} or {@code '!'}
+     */
+    public final boolean isTypeNameIllegal() {
+        return typeNameIllegal;
     }
 
     /**
@@ -6798,6 +6815,11 @@ public abstract class JSONReader
      * @return An ObjectReader for the specified type, or null if not found
      */
     public ObjectReader getObjectReaderAutoType(long typeHash, Class expectClass, long features) {
+        if (typeNameIllegal
+                && context.autoTypeBeforeHandler == null
+                && context.provider.getAutoTypeBeforeHandler() == null) {
+            return null;
+        }
         return context.getObjectReaderAutoType(getString(), expectClass, context.features | features);
     }
 
