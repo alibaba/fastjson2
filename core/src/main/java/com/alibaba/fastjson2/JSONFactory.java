@@ -247,12 +247,14 @@ public final class JSONFactory {
         String property = System.getProperty(name);
         if (property != null) {
             property = property.trim();
-            if (property.isEmpty()) {
-                property = properties.getProperty(name);
-                if (property != null) {
-                    property = property.trim();
-                }
+        }
+        if (property == null || property.isEmpty()) {
+            property = properties.getProperty(name);
+            if (property != null) {
+                property = property.trim();
             }
+        }
+        if (property != null) {
             if (defaultValue) {
                 if ("false".equals(property)) {
                     propertyValue = false;
@@ -273,11 +275,11 @@ public final class JSONFactory {
         String property = System.getProperty(name);
         if (property != null) {
             property = property.trim();
-            if (property.isEmpty()) {
-                property = properties.getProperty(name);
-                if (property != null) {
-                    property = property.trim();
-                }
+        }
+        if (property == null || property.isEmpty()) {
+            property = properties.getProperty(name);
+            if (property != null) {
+                property = property.trim();
             }
         }
         try {
