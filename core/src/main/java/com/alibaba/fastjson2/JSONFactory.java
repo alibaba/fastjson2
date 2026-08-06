@@ -165,18 +165,7 @@ public final class JSONFactory {
     static {
         Properties properties = Conf.DEFAULT_PROPERTIES;
         {
-            String property = System.getProperty("fastjson2.creator");
-            if (property != null) {
-                property = property.trim();
-            }
-
-            if (property == null || property.isEmpty()) {
-                property = properties.getProperty("fastjson2.creator");
-                if (property != null) {
-                    property = property.trim();
-                }
-            }
-
+            String property = resolveProperty(properties, "fastjson2.creator");
             CREATOR = property == null ? "asm" : property;
         }
         {
@@ -241,18 +230,32 @@ public final class JSONFactory {
         PROPERTY_ACCESSOR_FACTORY = propertyAccessorFactory;
     }
 
-    private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {
-        boolean propertyValue = defaultValue;
-
+    /**
+     * Resolves a configuration value: the {@code -D} system property wins when set
+     * (after trimming), otherwise the {@code fastjson2.properties} entry is used,
+     * otherwise {@code null}. Shared by the {@code fastjson2.creator} initializer,
+     * {@link #getPropertyBool} and {@link #getPropertyInt} so the resolution order
+     * cannot drift between them.
+     */
+    private static String resolveProperty(Properties properties, String name) {
         String property = System.getProperty(name);
         if (property != null) {
             property = property.trim();
-            if (property.isEmpty()) {
-                property = properties.getProperty(name);
-                if (property != null) {
-                    property = property.trim();
-                }
+        }
+        if (property == null || property.isEmpty()) {
+            property = properties.getProperty(name);
+            if (property != null) {
+                property = property.trim();
             }
+        }
+        return property;
+    }
+
+    private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {
+        boolean propertyValue = defaultValue;
+
+        String property = resolveProperty(properties, name);
+        if (property != null) {
             if (defaultValue) {
                 if ("false".equals(property)) {
                     propertyValue = false;
@@ -270,20 +273,13 @@ public final class JSONFactory {
     private static int getPropertyInt(Properties properties, String name, int defaultValue) {
         int propertyValue = defaultValue;
 
-        String property = System.getProperty(name);
+        String property = resolveProperty(properties, name);
         if (property != null) {
-            property = property.trim();
-            if (property.isEmpty()) {
-                property = properties.getProperty(name);
-                if (property != null) {
-                    property = property.trim();
-                }
+            try {
+                propertyValue = Integer.parseInt(property);
+            } catch (NumberFormatException ignored) {
+                // ignore
             }
-        }
-        try {
-            propertyValue = Integer.parseInt(property);
-        } catch (NumberFormatException ignored) {
-            // ignore
         }
 
         return propertyValue;
