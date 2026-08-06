@@ -52,16 +52,12 @@ public final class ObjectReaderInterface<T>
 
             long hash = jsonReader.readFieldNameHashCode();
             if (hash == typeKeyHashCode && i == 0) {
-                long typeHash = jsonReader.readValueHashCode();
+                jsonReader.readValueHashCode();
                 JSONReader.Context context = jsonReader.getContext();
-                ObjectReader autoTypeObjectReader = autoType(context, typeHash);
+                String typeName = jsonReader.getString();
+                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
                 if (autoTypeObjectReader == null) {
-                    String typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-
-                    if (autoTypeObjectReader == null) {
-                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
-                    }
+                    throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                 }
 
                 if (autoTypeObjectReader == this) {
@@ -142,24 +138,16 @@ public final class ObjectReaderInterface<T>
             ) {
                 ObjectReader reader = null;
 
-                long typeHash = jsonReader.readTypeHashCode();
+                jsonReader.readTypeHashCode();
+                String typeName = jsonReader.getString();
                 if (autoTypeFilter != null) {
-                    Class<?> filterClass = autoTypeFilter.apply(typeHash, objectClass, features3);
-                    if (filterClass == null) {
-                        filterClass = autoTypeFilter.apply(jsonReader.getString(), objectClass, features3);
-                        if (filterClass != null) {
-                            reader = context.getObjectReader(filterClass);
-                        }
+                    Class<?> filterClass = autoTypeFilter.apply(typeName, objectClass, features3);
+                    if (filterClass != null) {
+                        reader = context.getObjectReader(filterClass);
                     }
                 }
 
                 if (reader == null) {
-                    reader = autoType(context, typeHash);
-                }
-
-                String typeName = null;
-                if (reader == null) {
-                    typeName = jsonReader.getString();
                     reader = context.getObjectReaderAutoType(
                             typeName, objectClass, features3
                     );

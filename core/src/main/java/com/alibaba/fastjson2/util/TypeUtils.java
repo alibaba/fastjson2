@@ -2827,8 +2827,44 @@ public class TypeUtils {
         return null;
     }
 
+    /**
+     * Tests whether a type name carries a character that cannot appear in a Java binary class name
+     * but is meaningful in a URL. A nested jar URL such as {@code jar:http://host/x.jar!/} is
+     * resolvable by some class loaders, so a type name carrying one must never reach one.
+     *
+     * <p>Every autoType entry point shares this predicate; validating in only some of them is the
+     * asymmetry that lets a type name reach a class loader through the unchecked path.
+     *
+     * <p>Internal, public only because the autoType entry points live in different packages.
+     *
+     * @param typeName the type name to test
+     * @return true if the type name must be rejected without being resolved
+     */
+    public static boolean hasIllegalTypeNameChars(String typeName) {
+        return typeName.indexOf(':') >= 0 || typeName.indexOf('!') >= 0;
+    }
+
+    /**
+     * Normalizes a type name the way the autoType accept-list rolling hash normalizes it, so that a
+     * nested class matches whether it is written with its binary name ({@code a.b.Outer$Inner}) or
+     * its canonical name ({@code a.b.Outer.Inner}). Following that existing rolling-hash rule means
+     * the two spellings are equivalent as accept entries.
+     *
+     * <p>Internal, public only because the autoType entry points live in different packages.
+     *
+     * @param typeName the type name to normalize
+     * @return the normalized type name
+     */
+    public static String normalizeAcceptName(String typeName) {
+        return typeName.indexOf('$') >= 0 ? typeName.replace('$', '.') : typeName;
+    }
+
     public static Class loadClass(String className) {
         if (className.length() >= 192) {
+            return null;
+        }
+
+        if (hasIllegalTypeNameChars(className)) {
             return null;
         }
 

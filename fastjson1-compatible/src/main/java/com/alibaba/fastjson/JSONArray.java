@@ -27,6 +27,8 @@ public class JSONArray
     static ObjectReader<JSONArray> arrayReader;
     static ObjectReader<JSONObject> objectReader;
 
+    private static final long serialVersionUID = 1L;
+
     private List list = new com.alibaba.fastjson2.JSONArray();
 
     protected transient Object relatedArray;
@@ -592,7 +594,8 @@ public class JSONArray
 
     @Override
     public Object get(int index) {
-        return adaptResult(list.get(index));
+        Object value = list.get(index);
+        return adaptResultLive(value);
     }
 
     /**

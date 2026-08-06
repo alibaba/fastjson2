@@ -580,6 +580,7 @@ final class JSONReaderJSONB
             }
             case BC_BIGINT: {
                 int len = readInt32Value();
+                checkBigintLen(len, offset, end);
                 byte[] buf = new byte[len];
                 System.arraycopy(bytes, offset, buf, 0, len);
                 offset += len;
@@ -694,6 +695,9 @@ final class JSONReaderJSONB
             }
             case BC_BINARY: {
                 int len = readLength();
+                if (len < 0 || len > end - offset) {
+                    throw new JSONException("BC_BINARY length out of range: " + len);
+                }
                 byte[] binary = Arrays.copyOfRange(this.bytes, offset, offset + len);
                 offset += len;
                 return binary;
@@ -750,15 +754,11 @@ final class JSONReaderJSONB
                 );
             }
             case BC_TYPED_ANY: {
-                long typeHash = readTypeHashCode();
+                readTypeHashCode();
 
                 if (context.autoTypeBeforeHandler != null) {
-                    Class<?> filterClass = context.autoTypeBeforeHandler.apply(typeHash, null, context.features);
-
-                    if (filterClass == null) {
-                        String typeName = getString();
-                        filterClass = context.autoTypeBeforeHandler.apply(typeName, null, context.features);
-                    }
+                    String typeName = getString();
+                    Class<?> filterClass = context.autoTypeBeforeHandler.apply(typeName, null, context.features);
 
                     if (filterClass != null) {
                         ObjectReader autoTypeObjectReader = context.getObjectReader(filterClass);
@@ -779,14 +779,10 @@ final class JSONReaderJSONB
                     throw new JSONException("autoType not support , offset " + offset + "/" + bytes.length);
                 }
 
-                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+                String typeName = getString();
+                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
                 if (autoTypeObjectReader == null) {
-                    String typeName = getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-
-                    if (autoTypeObjectReader == null) {
-                        throw new JSONException("autoType not support : " + typeName + ", offset " + offset + "/" + bytes.length);
-                    }
+                    throw new JSONException("autoType not support : " + typeName + ", offset " + offset + "/" + bytes.length);
                 }
                 return autoTypeObjectReader.readJSONBObject(this, null, null, 0);
             }
@@ -811,15 +807,11 @@ final class JSONReaderJSONB
                     if (supportAutoType && i == 0 && type >= BC_STR_ASCII_FIX_MIN) {
                         long hash = readFieldNameHashCode();
                         if (hash == ObjectReader.HASH_TYPE) {
-                            long typeHash = readValueHashCode();
-                            ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+                            readValueHashCode();
+                            String typeName = getString();
+                            ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
                             if (autoTypeObjectReader == null) {
-                                String typeName = getString();
-                                autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-
-                                if (autoTypeObjectReader == null) {
-                                    throw new JSONException("autoType not support : " + typeName + ", offset " + offset + "/" + bytes.length);
-                                }
+                                throw new JSONException("autoType not support : " + typeName + ", offset " + offset + "/" + bytes.length);
                             }
 
                             typeRedirect = true;
@@ -1258,15 +1250,12 @@ final class JSONReaderJSONB
 
         Context context = this.context;
         offset++;
-        final long typeHash = readTypeHashCode();
+        readTypeHashCode();
 
         ObjectReader autoTypeObjectReader = null;
         AutoTypeBeforeHandler autoTypeBeforeHandler = context.autoTypeBeforeHandler;
         if (autoTypeBeforeHandler != null) {
-            Class<?> objectClass = autoTypeBeforeHandler.apply(typeHash, Object.class, 0L);
-            if (objectClass == null) {
-                objectClass = autoTypeBeforeHandler.apply(getString(), Object.class, 0L);
-            }
+            Class<?> objectClass = autoTypeBeforeHandler.apply(getString(), Object.class, 0L);
             if (objectClass != null) {
                 autoTypeObjectReader = context.getObjectReader(objectClass);
             }
@@ -1281,23 +1270,6 @@ final class JSONReaderJSONB
                 }
                 autoTypeError();
             }
-            autoTypeObjectReader = context.provider.getObjectReader(typeHash);
-        }
-
-        if (autoTypeObjectReader != null) {
-            Class objectClass = autoTypeObjectReader.getObjectClass();
-            if (objectClass != null) {
-                ClassLoader classLoader = objectClass.getClassLoader();
-                if (classLoader != null) {
-                    ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-                    if (classLoader != tcl) {
-                        autoTypeObjectReader = getObjectReaderContext(autoTypeObjectReader, objectClass, tcl);
-                    }
-                }
-            }
-        }
-
-        if (autoTypeObjectReader == null) {
             autoTypeObjectReader = context.provider.getObjectReader(getString(), Object.class, features);
             if (autoTypeObjectReader == null) {
                 if ((features & Feature.ErrorOnNotSupportAutoType.mask) == 0) {
@@ -1331,7 +1303,7 @@ final class JSONReaderJSONB
 
             AutoTypeBeforeHandler autoTypeBeforeHandler = context.autoTypeBeforeHandler;
             if (autoTypeBeforeHandler != null) {
-                ObjectReader objectReader = checkAutoTypeWithHandler(expectClass, features, autoTypeBeforeHandler, typeHash);
+                ObjectReader objectReader = checkAutoTypeWithHandler(expectClass, features, autoTypeBeforeHandler);
                 if (objectReader != null) {
                     return objectReader;
                 }
@@ -1345,29 +1317,12 @@ final class JSONReaderJSONB
                 autoTypeError();
             }
 
-            autoTypeObjectReader = context.provider.getObjectReader(typeHash);
-
-            if (autoTypeObjectReader != null) {
-                Class objectClass = autoTypeObjectReader.getObjectClass();
-                if (objectClass != null) {
-                    ClassLoader classLoader = objectClass.getClassLoader();
-                    if (classLoader != null) {
-                        ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-                        if (classLoader != tcl) {
-                            autoTypeObjectReader = getObjectReaderContext(autoTypeObjectReader, objectClass, tcl);
-                        }
-                    }
-                }
-            }
-
+            autoTypeObjectReader = context.provider.getObjectReader(getString(), expectClass, features2);
             if (autoTypeObjectReader == null) {
-                autoTypeObjectReader = context.provider.getObjectReader(getString(), expectClass, features2);
-                if (autoTypeObjectReader == null) {
-                    if ((features2 & Feature.ErrorOnNotSupportAutoType.mask) == 0) {
-                        return null;
-                    }
-                    autoTypeError();
+                if ((features2 & Feature.ErrorOnNotSupportAutoType.mask) == 0) {
+                    return null;
                 }
+                autoTypeError();
             }
 
             this.type = bytes[offset];
@@ -1378,13 +1333,9 @@ final class JSONReaderJSONB
     ObjectReader checkAutoTypeWithHandler(
             Class expectClass,
             long features,
-            AutoTypeBeforeHandler autoTypeBeforeHandler,
-            long typeHash
+            AutoTypeBeforeHandler autoTypeBeforeHandler
     ) {
-        Class<?> objectClass = autoTypeBeforeHandler.apply(typeHash, expectClass, features);
-        if (objectClass == null) {
-            objectClass = autoTypeBeforeHandler.apply(getString(), expectClass, features);
-        }
+        Class<?> objectClass = autoTypeBeforeHandler.apply(getString(), expectClass, features);
         if (objectClass != null) {
             return context.getObjectReader(objectClass);
         }
@@ -3253,6 +3204,7 @@ final class JSONReaderJSONB
                 return Long.toString(int64Value);
             case BC_BIGINT: {
                 int len = readInt32Value();
+                checkBigintLen(len, offset, end);
                 byte[] bytes = new byte[len];
                 System.arraycopy(this.bytes, offset, bytes, 0, len);
                 offset += len;
@@ -3702,6 +3654,9 @@ final class JSONReaderJSONB
         }
 
         int len = readLength();
+        if (len < 0 || len > end - offset) {
+            throw new JSONException("BC_BINARY length out of range: " + len);
+        }
         byte[] bytes = new byte[len];
         System.arraycopy(this.bytes, offset, bytes, 0, len);
         offset += len;
@@ -4180,6 +4135,7 @@ final class JSONReaderJSONB
             }
             case BC_BIGINT: {
                 int len = readInt32Value();
+                checkBigintLen(len, offset, end);
                 byte[] bytes = new byte[len];
                 System.arraycopy(this.bytes, offset, bytes, 0, len);
                 offset += len;
@@ -4409,6 +4365,7 @@ final class JSONReaderJSONB
             );
         } else if (type == BC_BIGINT) {
             int len = readInt32Value();
+            checkBigintLen(len, offset, end);
             byte[] bytes = new byte[len];
             System.arraycopy(this.bytes, offset, bytes, 0, len);
             offset += len;
@@ -4471,6 +4428,9 @@ final class JSONReaderJSONB
             }
             case BC_BINARY: {
                 int len = readInt32Value();
+                if (len < 0 || len > end - offset) {
+                    throw new JSONException("BC_BINARY length out of range: " + len);
+                }
                 byte[] buf = new byte[len];
                 System.arraycopy(this.bytes, offset, buf, 0, len);
                 offset += len;
@@ -6288,6 +6248,12 @@ final class JSONReaderJSONB
             throw outOfBoundsCheckFromToIndex(off, end);
         }
         return off;
+    }
+
+    static void checkBigintLen(int len, int offset, int end) {
+        if (len < 0 || len > end - offset) {
+            throw new JSONException("BC_BIGINT length out of range: " + len + ", available: " + (end - offset));
+        }
     }
 
     static JSONException outOfBoundsCheckFromToIndex(int offset, int end) {

@@ -228,16 +228,21 @@ public class JDKUtils {
 
         MethodHandles.Lookup trustedLookup = null;
         if (!ANDROID) {
+            // MethodHandles.Lookup.IMPL_LOOKUP is read straight from memory, which bypasses class
+            // initialization. Calling MethodHandles.lookup() first forces MethodHandles.Lookup to be
+            // initialized, otherwise the field is still null and every trustedLookup() call degrades
+            // to a lookup without private access, breaking LambdaMetafactory. see issue #7691
+            MethodHandles.Lookup callerLookup = MethodHandles.lookup();
             try {
                 Class lookupClass = MethodHandles.Lookup.class;
                 Field implLookup = lookupClass.getDeclaredField("IMPL_LOOKUP");
                 long fieldOffset = UNSAFE.staticFieldOffset(implLookup);
-                trustedLookup = (MethodHandles.Lookup) UNSAFE.getObject(lookupClass, fieldOffset);
+                trustedLookup = (MethodHandles.Lookup) UNSAFE.getObject(UNSAFE.staticFieldBase(implLookup), fieldOffset);
             } catch (Throwable ignored) {
                 // ignored
             }
             if (trustedLookup == null) {
-                trustedLookup = MethodHandles.lookup();
+                trustedLookup = callerLookup;
             }
         }
         IMPL_LOOKUP = trustedLookup;
@@ -448,6 +453,19 @@ public class JDKUtils {
     public static boolean isSQLDataSourceOrRowSet(Class<?> type) {
         return (CLASS_SQL_DATASOURCE != null && CLASS_SQL_DATASOURCE.isAssignableFrom(type))
                 || (CLASS_SQL_ROW_SET != null && CLASS_SQL_ROW_SET.isAssignableFrom(type));
+    }
+
+    /**
+     * Tests whether a class is a well known deserialization gadget entry point, namely a
+     * {@link ClassLoader} subclass or a JDK SQL {@code DataSource}/{@code RowSet} implementation.
+     * Such types must not be resolved by matching an autoType whitelist prefix; only an accept
+     * entry naming the type in full is treated as an explicit opt-in.
+     *
+     * @param type the class to test
+     * @return true if the class must not be resolved through a whitelist prefix match
+     */
+    public static boolean isAutoTypeDenyClass(Class<?> type) {
+        return ClassLoader.class.isAssignableFrom(type) || isSQLDataSourceOrRowSet(type);
     }
 
     public static void setReflectErrorLast(Throwable error) {

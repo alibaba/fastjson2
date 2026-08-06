@@ -28,6 +28,21 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
     }
 
     /**
+     * LambdaMetafactory requires the caller Lookup to have private access, otherwise it rejects the
+     * call with {@code LambdaConversionException: Invalid caller}. When {@link #lookup(Class)} cannot
+     * produce a trusted lookup (for example {@code JDKUtils.trustedLookup} degraded to
+     * {@code IMPL_LOOKUP.in(declaringClass)}, which drops the PRIVATE bit), the lambda path can never
+     * succeed, so the reflection based accessors are used directly instead of throwing per property.
+     *
+     * @param declaringClass the class declaring the getter/setter
+     * @return true if lambda accessors can be created for the given class
+     */
+    private boolean lambdaSupported(Class<?> declaringClass) {
+        MethodHandles.Lookup lookup = lookup(declaringClass);
+        return lookup != null && (lookup.lookupModes() & MethodHandles.Lookup.PRIVATE) != 0;
+    }
+
+    /**
      * Creates a Supplier that can instantiate objects using the given constructor
      * via MethodHandle and LambdaMetafactory for better performance than reflection.
      * If the MethodHandle approach fails, it falls back to the parent class implementation.
@@ -267,51 +282,77 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
         }
         boolean lambda = declaringClass.getName().contains("$$Lambda");
 
-        if (!lambda && (setter == null || !isChainableSetter(setter))) {
-            if (propertyClass == boolean.class) {
-                return create(name, getBoolean(getter), setBoolean(setter));
-            }
-            if (JDKUtils.JVM_VERSION == 8) {
-                if (propertyClass == byte.class) {
-                    return create(name, getByte(getter), setByte(setter));
+        if (!lambda && (setter == null || !isChainableSetter(setter)) && lambdaSupported(declaringClass)) {
+            try {
+                PropertyAccessor accessor = createLambdaAccessor(
+                        name, propertyClass, propertyType, getter, setter, exceptionHandler);
+                if (accessor != null) {
+                    return accessor;
                 }
-                if (propertyClass == short.class) {
-                    return create(name, getShort(getter), setShort(setter));
-                }
-                if (propertyClass == char.class) {
-                    return create(name, getChar(getter), setChar(setter));
-                }
-            }
-            if (propertyClass == int.class) {
-                return create(name, getInt(getter), setInt(setter));
-            }
-            if (propertyClass == long.class) {
-                return create(name, getLong(getter), setLong(setter));
-            }
-            if (propertyClass == float.class) {
-                return create(name, getFloat(getter), setFloat(setter));
-            }
-            if (propertyClass == double.class) {
-                return create(name, getDouble(getter), setDouble(setter));
-            }
-            if (!propertyClass.isPrimitive()) {
-                if (propertyType == null) {
-                    if (getter != null) {
-                        propertyType = getter.getGenericReturnType();
-                    } else {
-                        Type[] parameterTypes = setter.getGenericParameterTypes();
-                        if (parameterTypes.length == 1) {
-                            propertyType = parameterTypes[0];
-                        } else if (parameterTypes.length == 2 && String.class.equals(parameterTypes[0])) {
-                            propertyType = parameterTypes[1];
-                        }
-                    }
-                }
-                return create(name, propertyClass, propertyType, getObject(getter), setObject(name, setter), exceptionHandler);
+            } catch (VirtualMachineError e) {
+                throw e;
+            } catch (Throwable ignored) {
+                // the lambda path is not usable for this property, fall back to reflection
             }
         }
 
         return super.create(name, propertyClass, propertyType, getter, setter, exceptionHandler);
+    }
+
+    /**
+     * Creates a LambdaMetafactory based accessor for the given property.
+     *
+     * @return the accessor, or null when the property type has no lambda based accessor
+     */
+    private PropertyAccessor createLambdaAccessor(
+            String name, Class<?> propertyClass,
+            Type propertyType,
+            Method getter,
+            Method setter,
+            BiFunction<PropertyAccessor, Throwable, RuntimeException> exceptionHandler
+    ) {
+        if (propertyClass == boolean.class) {
+            return create(name, getBoolean(getter), setBoolean(setter));
+        }
+        if (JDKUtils.JVM_VERSION == 8) {
+            if (propertyClass == byte.class) {
+                return create(name, getByte(getter), setByte(setter));
+            }
+            if (propertyClass == short.class) {
+                return create(name, getShort(getter), setShort(setter));
+            }
+            if (propertyClass == char.class) {
+                return create(name, getChar(getter), setChar(setter));
+            }
+        }
+        if (propertyClass == int.class) {
+            return create(name, getInt(getter), setInt(setter));
+        }
+        if (propertyClass == long.class) {
+            return create(name, getLong(getter), setLong(setter));
+        }
+        if (propertyClass == float.class) {
+            return create(name, getFloat(getter), setFloat(setter));
+        }
+        if (propertyClass == double.class) {
+            return create(name, getDouble(getter), setDouble(setter));
+        }
+        if (!propertyClass.isPrimitive()) {
+            if (propertyType == null) {
+                if (getter != null) {
+                    propertyType = getter.getGenericReturnType();
+                } else {
+                    Type[] parameterTypes = setter.getGenericParameterTypes();
+                    if (parameterTypes.length == 1) {
+                        propertyType = parameterTypes[0];
+                    } else if (parameterTypes.length == 2 && String.class.equals(parameterTypes[0])) {
+                        propertyType = parameterTypes[1];
+                    }
+                }
+            }
+            return create(name, propertyClass, propertyType, getObject(getter), setObject(name, setter), exceptionHandler);
+        }
+        return null;
     }
 
     /**
@@ -409,7 +450,8 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
         if (method == null) {
             return null;
         }
-        return o -> (byte) getInt(method).applyAsInt(o);
+        ToIntFunction<Object> fn = getInt(method);
+        return o -> (byte) fn.applyAsInt(o);
     }
 
     /**
@@ -423,7 +465,8 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
         if (method == null) {
             return null;
         }
-        return o -> (short) getInt(method).applyAsInt(o);
+        ToIntFunction<Object> fn = getInt(method);
+        return o -> (short) fn.applyAsInt(o);
     }
 
     /**
@@ -437,7 +480,8 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
         if (method == null) {
             return null;
         }
-        return o -> (char) getInt(method).applyAsInt(o);
+        ToIntFunction<Object> fn = getInt(method);
+        return o -> (char) fn.applyAsInt(o);
     }
 
     /**
@@ -497,8 +541,7 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
         if (method == null) {
             return null;
         }
-        Class<?> declaringClass = method.getDeclaringClass();
-        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        MethodHandles.Lookup lookup = lookup(method);
         try {
             MethodHandle handle = lookup.unreflect(method);
             return (Function<Object, Object>) LambdaMetafactory.metafactory(
@@ -518,21 +561,24 @@ public abstract class PropertyAccessorFactoryLambda extends PropertyAccessorFact
         if (method == null) {
             return null;
         }
-        return (o, v) -> setInt(method).accept(o, (int) v);
+        ObjIntConsumer<Object> fn = setInt(method);
+        return (o, v) -> fn.accept(o, (int) v);
     }
 
     public ObjCharConsumer<Object> setChar(Method method) {
         if (method == null) {
             return null;
         }
-        return (o, v) -> setInt(method).accept(o, (int) v);
+        ObjIntConsumer<Object> fn = setInt(method);
+        return (o, v) -> fn.accept(o, (int) v);
     }
 
     public ObjShortConsumer<Object> setShort(Method method) {
         if (method == null) {
             return null;
         }
-        return (o, v) -> setInt(method).accept(o, (int) v);
+        ObjIntConsumer<Object> fn = setInt(method);
+        return (o, v) -> fn.accept(o, (int) v);
     }
 
     public ObjIntConsumer<Object> setInt(Method method) {

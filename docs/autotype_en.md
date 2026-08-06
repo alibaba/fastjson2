@@ -8,6 +8,20 @@ FASTJSON supports the AutoType feature, which includes type information in the s
 *   **Supports `safeMode` configuration.** When `safeMode` is enabled, explicitly passing AutoType parameters will have no effect.
 *   **Filtered by a built-in blacklist when explicitly enabled.** This blacklist can intercept most common risks, but this mechanism cannot guarantee absolute security. Enabling AutoType should not be done in scenarios exposed to the public internet.
 
+### 2.1 Accept prefixes do not cover blacklisted types (since 2.0.63)
+`ClassLoader` subclasses and JDK SQL `DataSource`/`RowSet` implementations are common deserialization gadget entry points, and **registering an accept entry by prefix no longer allows them**. Only an accept entry naming the type in full counts as an explicit opt-in. This applies to `addAutoTypeAccept`, `-Dfastjson2.autoTypeAccept`, `JSONReader.autoTypeFilter`, and `ParserConfig.addAccept` in fastjson 1.x compatibility mode.
+
+```java
+// before 2.0.63: the accept prefix allowed DruidDataSource
+// since 2.0.63: rejected
+ParserConfig.getGlobalInstance().addAccept("com.alibaba.druid.pool.");
+
+// name the type in full where it is genuinely needed
+ParserConfig.getGlobalInstance().addAccept("com.alibaba.druid.pool.DruidDataSource");
+```
+
+Before this change, a type covered by an accept prefix was checked *less* strictly than one that was never registered at all: the same type name was stopped by the blacklist without the accept prefix, and loaded successfully with it.
+
 ## 3. How to Use the AutoType Feature
 
 ### 3.1 Including Type Information During Serialization

@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -36,20 +35,12 @@ public final class ObjectReaderImplObject
 
         if (typeKey instanceof String) {
             String typeName = (String) typeKey;
-            long typeHash = Fnv.hashCode64(typeName);
-            ObjectReader reader = null;
-            if ((features & JSONReader.Feature.SupportAutoType.mask) != 0) {
-                reader = autoType(provider, typeHash);
-            }
+            ObjectReader reader = provider.getObjectReader(
+                    typeName, getObjectClass(), features | getFeatures()
+            );
 
             if (reader == null) {
-                reader = provider.getObjectReader(
-                        typeName, getObjectClass(), features | getFeatures()
-                );
-
-                if (reader == null) {
-                    throw new JSONException("No suitable ObjectReader found for" + typeName);
-                }
+                throw new JSONException("No suitable ObjectReader found for" + typeName);
             }
 
             if (reader != this) {
@@ -79,48 +70,13 @@ public final class ObjectReaderImplObject
 
                 if (hash == HASH_TYPE) {
                     boolean supportAutoType = context.isEnabled(JSONReader.Feature.SupportAutoType);
+                    typeName = jsonReader.readString();
+                    ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
-                    ObjectReader autoTypeObjectReader;
-
-                    if (supportAutoType) {
-                        long typeHash = jsonReader.readTypeHashCode();
-                        autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
-
-                        if (autoTypeObjectReader != null) {
-                            Class objectClass = autoTypeObjectReader.getObjectClass();
-                            if (objectClass != null) {
-                                ClassLoader objectClassLoader = objectClass.getClassLoader();
-                                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-                                if (objectClassLoader != classLoader) {
-                                    Class contextClass = null;
-
-                                    typeName = jsonReader.getString();
-                                    try {
-                                        if (classLoader == null) {
-                                            classLoader = getClass().getClassLoader();
-                                        }
-                                        contextClass = classLoader.loadClass(typeName);
-                                    } catch (ClassNotFoundException ignored) {
-                                    }
-                                    //明确contextClass类型与objectClass不一致时才更改reader
-                                    if (contextClass != null && !objectClass.equals(contextClass)) {
-                                        autoTypeObjectReader = context.getObjectReader(contextClass);
-                                    }
-                                }
-                            }
-                        }
-
-                        if (autoTypeObjectReader == null) {
-                            typeName = jsonReader.getString();
-                            autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-                        }
-                    } else {
-                        typeName = jsonReader.readString();
-                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-
-                        if (autoTypeObjectReader == null && jsonReader.getContext().isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
-                            throw new JSONException(jsonReader.info("autoType not support : " + typeName));
-                        }
+                    if (!supportAutoType
+                            && autoTypeObjectReader == null
+                            && context.isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
+                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                     }
 
                     if (autoTypeObjectReader != null) {

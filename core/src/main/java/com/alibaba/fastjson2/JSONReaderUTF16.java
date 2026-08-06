@@ -3254,12 +3254,10 @@ final class JSONReaderUTF16
             char[] strBuf = this.strBuf;
             if (strBuf == null) {
                 strBuf = new char[stroff + 512];
-                this.strBuf = strBuf;
             } else if (stroff > strBuf.length) {
-                int newCapacity = newCapacity(stroff, strBuf.length);
-                strBuf = new char[newCapacity];
-                this.strBuf = strBuf;
+                strBuf = new char[newCapacity(stroff, strBuf.length)];
             }
+            this.strBuf = strBuf;
             System.arraycopy(chars, start, strBuf, 0, stroff);
 
             while (true) {
@@ -3272,6 +3270,7 @@ final class JSONReaderUTF16
 
                     if (stroff + 4 >= strBuf.length) {
                         strBuf = Arrays.copyOf(strBuf, newCapacity(stroff + 4, strBuf.length));
+                        this.strBuf = strBuf;
                     }
 
                     IOUtils.putLongLE(strBuf, stroff, v);
@@ -3300,6 +3299,7 @@ final class JSONReaderUTF16
                 }
                 if (stroff == strBuf.length) {
                     strBuf = Arrays.copyOf(strBuf, newCapacity(stroff + 1, strBuf.length));
+                    this.strBuf = strBuf;
                 }
                 strBuf[stroff++] = c;
                 offset++;
@@ -3990,6 +3990,9 @@ final class JSONReaderUTF16
         if (intOverflow) {
             int numStart = negative ? start : start - 1;
             int numDigits = scale > 0 ? offset - 2 - numStart : offset - 1 - numStart;
+            if (numDigits > MAX_NUMBER_DIGITS) {
+                throw new JSONException("Number literal too long: " + numDigits + " digits (max " + MAX_NUMBER_DIGITS + ")");
+            }
             if (numDigits > 38) {
                 valueType = JSON_TYPE_BIG_DEC;
             } else {

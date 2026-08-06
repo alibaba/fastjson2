@@ -91,6 +91,7 @@ public class JSONCompiledAnnotationProcessor
             StructInfo structInfo = structs.get(element.toString());
             java.util.List<AttributeInfo> attributeInfos = structInfo.getReaderAttributes();
             int fieldsSize = attributeInfos.size();
+            boolean record = structInfo.record;
             Class readSuperClass = getReadSuperClass(fieldsSize);
             Class writeSuperClass = getWriteSuperClass(fieldsSize);
 
@@ -134,18 +135,25 @@ public class JSONCompiledAnnotationProcessor
                         }
 
                         // generate constructor
-                        innerReadClass.defs = innerReadClass.defs.append(genReadConstructor(beanType, beanNew, attributeInfos, readSuperClass, generatedFields));
+                        innerReadClass.defs = innerReadClass.defs.append(genReadConstructor(beanType, beanNew, attributeInfos, readSuperClass, generatedFields, record));
 
                         // generate createInstance
-                        innerReadClass.defs = innerReadClass.defs.append(genCreateInstance(objectType, beanNew));
+                        innerReadClass.defs = innerReadClass.defs.append(
+                                record
+                                        ? genCreateRecordInstance(objectType, beanType, attributeInfos)
+                                        : genCreateInstance(objectType, beanNew));
 
                         // generate readObject
                         innerReadClass.defs = innerReadClass.defs.append(
-                                genReadObject(objectType, beanType, beanNew, attributeInfos, structInfo, false));
+                                record
+                                        ? genReadRecordObject(objectType, beanType, attributeInfos, structInfo, false)
+                                        : genReadObject(objectType, beanType, beanNew, attributeInfos, structInfo, false));
 
                         // generate readJSONBObject
                         innerReadClass.defs = innerReadClass.defs.append(
-                                genReadObject(objectType, beanType, beanNew, attributeInfos, structInfo, true));
+                                record
+                                        ? genReadRecordObject(objectType, beanType, attributeInfos, structInfo, true)
+                                        : genReadObject(objectType, beanType, beanNew, attributeInfos, structInfo, true));
 
                         // link with inner class
                         beanClassDecl.defs = beanClassDecl.defs.append(innerReadClass);
@@ -295,14 +303,17 @@ public class JSONCompiledAnnotationProcessor
             JCTree.JCNewClass beanNew,
             java.util.List<AttributeInfo> fields,
             Class superClass,
-            boolean generatedFields) {
-        JCTree.JCMemberReference lambda = constructorRef(beanType);
+            boolean generatedFields,
+            boolean record) {
+        JCTree.JCExpression creator = record ? defNull() : constructorRef(beanType);
         JCTree.JCExpression fieldReaderType = qualIdent(FieldReader.class.getName());
         ListBuffer<JCTree.JCMethodInvocation> fieldReaders = new ListBuffer<>();
         JCTree.JCExpression objectReadersType = qualIdent(ObjectReaders.class.getName());
         int fieldsSize = fields.size();
         for (int i = 0; i < fieldsSize; ++i) {
-            JCTree.JCMethodInvocation readerMethod = genFieldReader(beanType, fields.get(i), objectReadersType);
+            JCTree.JCMethodInvocation readerMethod = record
+                    ? genRecordFieldReader(beanType, fields.get(i))
+                    : genFieldReader(beanType, fields.get(i), objectReadersType);
             if (readerMethod != null) {
                 fieldReaders.append(readerMethod);
             }
@@ -316,7 +327,7 @@ public class JSONCompiledAnnotationProcessor
                         defNull(),
                         defNull(),
                         literal(features),
-                        lambda,
+                        creator,
                         defNull(),
                         fieldReadersArray
                 )
@@ -644,6 +655,72 @@ public class JSONCompiledAnnotationProcessor
         return readerMethod;
     }
 
+    private JCTree.JCMethodInvocation genRecordFieldReader(
+            JCTree.JCExpression beanType,
+            AttributeInfo attributeInfo
+    ) {
+        String fieldType = attributeInfo.type.toString();
+        String fieldClass = fieldType;
+        int genericStart = fieldClass.indexOf('<');
+        if (genericStart != -1) {
+            fieldClass = fieldClass.substring(0, genericStart);
+        }
+        JCTree.JCExpression fieldTypeRef = genTypeReference(fieldType);
+        JCTree.JCExpression fieldClassRef = field(getFieldValueType(fieldClass), names._class);
+        JCTree.JCFieldAccess beanClassRef = field(beanType, names._class);
+        return method(
+                field(qualIdent("com.alibaba.fastjson2.reader.ObjectReaderCreator"), "INSTANCE"),
+                "createFieldReaderParam",
+                beanClassRef,
+                beanClassRef,
+                literal(attributeInfo.name),
+                literal(0),
+                literal(0L),
+                defNull(),
+                fieldTypeRef,
+                fieldClassRef,
+                literal(attributeInfo.name),
+                beanClassRef,
+                defNull(),
+                defNull()
+        );
+    }
+
+    private JCTree.JCExpression genTypeReference(String type) {
+        int genericStart = type.indexOf('<');
+        if (genericStart == -1) {
+            return field(getFieldValueType(type), names._class);
+        }
+
+        String rawType = type.substring(0, genericStart);
+        String typeArguments = type.substring(genericStart + 1, type.length() - 1);
+        ListBuffer<JCTree.JCExpression> args = new ListBuffer<>();
+        args.append(field(getFieldValueType(rawType), names._class));
+        for (String argument : splitTypeArguments(typeArguments)) {
+            args.append(genTypeReference(argument.trim()));
+        }
+        return method(qualIdent("com.alibaba.fastjson2.TypeReference"), "parametricType", args.toList());
+    }
+
+    private java.util.List<String> splitTypeArguments(String typeArguments) {
+        java.util.List<String> result = new ArrayList<>();
+        int depth = 0;
+        int start = 0;
+        for (int i = 0; i < typeArguments.length(); i++) {
+            char ch = typeArguments.charAt(i);
+            if (ch == '<') {
+                depth++;
+            } else if (ch == '>') {
+                depth--;
+            } else if (ch == ',' && depth == 0) {
+                result.add(typeArguments.substring(start, i));
+                start = i + 1;
+            }
+        }
+        result.add(typeArguments.substring(start));
+        return result;
+    }
+
     private JCTree.JCMethodInvocation genFieldReaderList(
             JCTree.JCExpression objectReadersType,
             String fieldType,
@@ -769,6 +846,25 @@ public class JSONCompiledAnnotationProcessor
     private JCTree.JCMethodDecl genCreateInstance(JCTree.JCIdent objectType, JCTree.JCNewClass beanNew) {
         JCTree.JCVariableDecl featuresVar = defVar("features", TypeTag.LONG);
         return defMethod(Flags.PUBLIC, "createInstance", objectType, List.of(featuresVar), block(defReturn(beanNew)));
+    }
+
+    private JCTree.JCMethodDecl genCreateRecordInstance(
+            JCTree.JCIdent objectType,
+            JCTree.JCExpression beanType,
+            java.util.List<AttributeInfo> attributeInfos
+    ) {
+        JCTree.JCVariableDecl featuresVar = defVar("features", TypeTag.LONG);
+        ListBuffer<JCTree.JCExpression> args = new ListBuffer<>();
+        for (AttributeInfo attributeInfo : attributeInfos) {
+            args.append(defaultValue(attributeInfo.type.toString()));
+        }
+        return defMethod(
+                Flags.PUBLIC,
+                "createInstance",
+                objectType,
+                List.of(featuresVar),
+                block(defReturn(newClass(null, null, beanType, args.toList(), null)))
+        );
     }
 
     private JCTree.JCMethodDecl genReadObject(
@@ -963,6 +1059,191 @@ public class JSONCompiledAnnotationProcessor
                 List.of(jsonReaderVar, fieldTypeVar, fieldNameVar, featuresVar),
                 block(readObjectBody.toList())
         );
+    }
+
+    private JCTree.JCMethodDecl genReadRecordObject(
+            JCTree.JCIdent objectType,
+            JCTree.JCExpression beanType,
+            java.util.List<AttributeInfo> attributeInfos,
+            StructInfo structInfo,
+            boolean isJsonb
+    ) {
+        JCTree.JCVariableDecl jsonReaderVar = defVar("jsonReader", qualIdent(JSONReader.class.getName()));
+        JCTree.JCIdent jsonReaderIdent = ident(jsonReaderVar);
+        JCTree.JCVariableDecl fieldTypeVar = defVar("fieldType", qualIdent(Type.class.getName()));
+        JCTree.JCVariableDecl fieldNameVar = defVar("fieldName", objectType);
+        JCTree.JCVariableDecl featuresVar = defVar("features", TypeTag.LONG);
+
+        ListBuffer<JCTree.JCStatement> readObjectBody = new ListBuffer<>();
+        readObjectBody.append(defIf(method(jsonReaderIdent, "nextIfNull"), defReturn(defNull())));
+        readObjectBody.append(exec(method(jsonReaderIdent, "nextIfObjectStart")));
+
+        JCTree.JCVariableDecl features2Var = defVar(
+                Flags.PARAMETER,
+                "features2",
+                TypeTag.LONG,
+                bitOr(
+                        ident("features"),
+                        field(ident(names._this), "features")
+                )
+        );
+        readObjectBody.append(features2Var);
+
+        for (AttributeInfo attributeInfo : attributeInfos) {
+            readObjectBody.append(defVar(
+                    recordFieldVar(attributeInfo),
+                    getFieldValueType(attributeInfo.type.toString()),
+                    defaultValue(attributeInfo.type.toString())
+            ));
+        }
+
+        JCTree.JCLabeledStatement loopLabel = label("_while");
+        JCTree.JCWhileLoop loopHead = whileLoop(unary(JCTree.Tag.NOT, method(jsonReaderIdent, "nextIfObjectEnd")), null);
+        ListBuffer<JCTree.JCStatement> loopBody = new ListBuffer<>();
+
+        JCTree.JCFieldAccess readFieldNameHashCode = field(jsonReaderIdent, "readFieldNameHashCode");
+        JCTree.JCVariableDecl hashCode64Var = defVar("hashCode64", TypeTag.LONG, method(readFieldNameHashCode));
+        JCTree.JCExpression hashCode64 = ident(hashCode64Var);
+        loopBody.append(hashCode64Var);
+
+        for (int i = 0; i < attributeInfos.size(); ++i) {
+            AttributeInfo attributeInfo = attributeInfos.get(i);
+            loopBody.append(defIf(
+                    eq(hashCode64, attributeInfo.nameHashCode),
+                    block(genReadRecordFieldValue(
+                            attributeInfo,
+                            jsonReaderIdent,
+                            i,
+                            structInfo,
+                            loopLabel,
+                            beanType,
+                            isJsonb))
+            ));
+        }
+
+        loopBody.append(exec(method(jsonReaderIdent, "skipValue")));
+        loopHead.body = block(loopBody.toList());
+        loopLabel.body = loopHead;
+        readObjectBody.append(loopLabel);
+
+        if (!isJsonb) {
+            readObjectBody.append(exec(method(jsonReaderIdent, "nextIfComma")));
+        }
+
+        ListBuffer<JCTree.JCExpression> args = new ListBuffer<>();
+        for (AttributeInfo attributeInfo : attributeInfos) {
+            args.append(ident(recordFieldVar(attributeInfo)));
+        }
+        readObjectBody.append(defReturn(newClass(null, null, beanType, args.toList(), null)));
+
+        return defMethod(
+                Flags.PUBLIC,
+                isJsonb ? "readJSONBObject" : "readObject",
+                objectType,
+                List.of(jsonReaderVar, fieldTypeVar, fieldNameVar, featuresVar),
+                block(readObjectBody.toList())
+        );
+    }
+
+    private List<JCTree.JCStatement> genReadRecordFieldValue(
+            AttributeInfo attributeInfo,
+            JCTree.JCIdent jsonReaderIdent,
+            int i,
+            StructInfo structInfo,
+            JCTree.JCLabeledStatement loopLabel,
+            JCTree.JCExpression beanType,
+            boolean isJsonb) {
+        JCTree.JCExpression valueExpr = null;
+        ListBuffer<JCTree.JCStatement> stmts = new ListBuffer<>();
+        String type = attributeInfo.type.toString();
+
+        JCTree.JCFieldAccess fieldReaderField = field(ident(names._this), fieldReader(i));
+        String readDirectMethod = getReadDirectMethod(type);
+        if (readDirectMethod != null) {
+            valueExpr = method(jsonReaderIdent, readDirectMethod);
+        } else {
+            JCTree.JCExpression fieldValueType = getFieldValueType(type);
+            JCTree.JCVariableDecl fieldValueVar = defVar(recordValueVar(attributeInfo), fieldValueType);
+            stmts.append(fieldValueVar);
+
+            if (type.startsWith("java.util.List<")) {
+                valueExpr = genFieldValueList(
+                        type,
+                        attributeInfo,
+                        jsonReaderIdent,
+                        fieldValueVar,
+                        loopLabel,
+                        stmts,
+                        i,
+                        structInfo.referenceDetect && isReference(type),
+                        fieldReaderField,
+                        beanType,
+                        isJsonb);
+            } else if (type.startsWith("java.util.Map<java.lang.String,")) {
+                valueExpr = genFieldValueMap(
+                        type,
+                        attributeInfo,
+                        jsonReaderIdent,
+                        fieldValueVar,
+                        loopLabel,
+                        stmts,
+                        i,
+                        structInfo.referenceDetect && isReference(type),
+                        isJsonb);
+            }
+
+            if (valueExpr == null) {
+                JCTree.JCIdent objectReaderIdent = ident(fieldObjectReader(i));
+                JCTree.JCMethodInvocation getObjectReaderMethod = method(fieldReaderField, "getObjectReader", jsonReaderIdent);
+                JCTree.JCAssign objectReaderAssign = assign(objectReaderIdent, getObjectReaderMethod);
+                stmts.append(defIf(eq(objectReaderIdent, defNull()), block(exec(objectReaderAssign))));
+                JCTree.JCMethodInvocation objectMethod = method(
+                        field(ident(names._this), fieldObjectReader(i)),
+                        isJsonb ? "readJSONBObject" : "readObject",
+                        jsonReaderIdent,
+                        field(fieldReaderField, "fieldType"),
+                        literal(attributeInfo.name),
+                        literal(0L)
+                );
+                stmts.append(exec(assign(fieldValueVar, cast(fieldValueType, objectMethod))));
+                valueExpr = ident(fieldValueVar);
+            }
+        }
+
+        stmts.append(exec(assign(ident(recordFieldVar(attributeInfo)), valueExpr)));
+        stmts.append(defContinue(loopLabel));
+        return stmts.toList();
+    }
+
+    private String recordFieldVar(AttributeInfo attributeInfo) {
+        return "_" + attributeInfo.name;
+    }
+
+    private String recordValueVar(AttributeInfo attributeInfo) {
+        return recordFieldVar(attributeInfo) + "_value";
+    }
+
+    private JCTree.JCExpression defaultValue(String type) {
+        switch (type) {
+            case "boolean":
+                return literal(false);
+            case "byte":
+                return literal((byte) 0);
+            case "short":
+                return literal(TypeTag.SHORT, 0);
+            case "int":
+                return literal(0);
+            case "long":
+                return literal(0L);
+            case "char":
+                return literal(TypeTag.CHAR, 0);
+            case "float":
+                return literal(TypeTag.FLOAT, 0F);
+            case "double":
+                return literal(TypeTag.DOUBLE, 0D);
+            default:
+                return defNull();
+        }
     }
 
     private JCTree.JCMethodDecl genWrite(
@@ -2893,6 +3174,7 @@ public class JSONCompiledAnnotationProcessor
             if (referenceDetect) {
                 referenceDetect = isReference(itemType);
             }
+            JCTree.JCLabeledStatement itemLoopLabel = referenceDetect ? label("_list" + i) : null;
 
             JCTree.JCVariableDecl for_iVar;
             if ("i".equals(attributeInfo.name)) {
@@ -2938,7 +3220,7 @@ public class JSONCompiledAnnotationProcessor
                 );
                 isReferenceStmts.append(exec(addResolveTaskMethod));
                 isReferenceStmts.append(exec(method(fieldValueVar, "add", defNull())));
-                isReferenceStmts.append(defContinue(loopLabel));
+                isReferenceStmts.append(defContinue(itemLoopLabel));
                 whileStmts.append(defIf(method(jsonReaderIdent, "isReference"), block(isReferenceStmts.toList())));
                 whileStmts.append(listItemVar);
                 item = ident(listItemVar);
@@ -2947,17 +3229,35 @@ public class JSONCompiledAnnotationProcessor
             whileStmts.append(exec(method(fieldValueVar, "add", item)));
 
             ListBuffer<JCTree.JCStatement> condStmts = new ListBuffer<>();
-            if (referenceDetect) {
-                condStmts.append(forLoop(
+            JCTree.JCStatement itemLoop;
+            if (isJsonb) {
+                JCTree.JCVariableDecl itemCntVar = defVar(attributeInfo.name + "_item_cnt", TypeTag.INT, method(jsonReaderIdent, "startArray"));
+                itemLoop = forLoop(
+                        List.of(for_iVar, itemCntVar),
+                        lt(ident(for_iVar), ident(itemCntVar)),
+                        List.of(exec(unary(JCTree.Tag.PREINC, ident(for_iVar)))),
+                        block(whileStmts.toList()));
+            } else if (referenceDetect) {
+                itemLoop = forLoop(
                         List.of(for_iVar),
                         unary(JCTree.Tag.NOT, nextIfArrayEndMethod),
                         List.of(exec(unary(JCTree.Tag.PREINC, ident(for_iVar)))),
-                        block(whileStmts.toList())));
+                        block(whileStmts.toList()));
             } else {
-                condStmts.append(whileLoop(unary(JCTree.Tag.NOT, nextIfArrayEndMethod), block(whileStmts.toList())));
+                itemLoop = whileLoop(unary(JCTree.Tag.NOT, nextIfArrayEndMethod), block(whileStmts.toList()));
+            }
+            if (itemLoopLabel != null) {
+                itemLoopLabel.body = itemLoop;
+                condStmts.append(itemLoopLabel);
+            } else {
+                condStmts.append(itemLoop);
             }
 
-            stmts.append(defIf(nextIfArrayStartMethod, block(condStmts.toList())));
+            if (isJsonb) {
+                stmts.append(defIf(ne(fieldValueVar, defNull()), block(condStmts.toList())));
+            } else {
+                stmts.append(defIf(nextIfArrayStartMethod, block(condStmts.toList())));
+            }
             return ident(fieldValueVar.name);
         }
         return null;
@@ -3054,7 +3354,9 @@ public class JSONCompiledAnnotationProcessor
 
         elseStmts.append(whileLoop(unary(JCTree.Tag.NOT, nextIfObjectEndMethod), block(whileStmts.toList())));
 
-        elseStmts.append(exec(method(jsonReaderIdent, "nextIfComma")));
+        if (!isJsonb) {
+            elseStmts.append(exec(method(jsonReaderIdent, "nextIfComma")));
+        }
 
         stmts.append(defIf(nextIfNullMethod,
                 block(exec(assign(fieldValueVar, defNull()))),
@@ -3169,7 +3471,7 @@ public class JSONCompiledAnnotationProcessor
         if (type.contains("<")) {
             return collectionIdent(type);
         }
-        return qualIdent(type);
+        return identType(type);
     }
 
     private String findConverterName(StructInfo structInfo, String suffix) {

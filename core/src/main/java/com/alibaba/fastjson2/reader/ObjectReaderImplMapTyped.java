@@ -316,8 +316,9 @@ class ObjectReaderImplMapTyped
                         && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                         && name.equals(getTypeKey())
                 ) {
-                    long typeHashCode = jsonReader.readTypeHashCode();
-                    ObjectReader objectReaderAutoType = jsonReader.getObjectReaderAutoType(typeHashCode, mapType, features);
+                    jsonReader.readTypeHashCode();
+                    ObjectReader objectReaderAutoType = jsonReader.getContext()
+                            .getObjectReaderAutoType(jsonReader.getString(), mapType, features);
                     if (objectReaderAutoType != null) {
                         if (objectReaderAutoType instanceof ObjectReaderImplMap) {
                             if (!object.getClass().equals(((ObjectReaderImplMap) objectReaderAutoType).instanceType)) {
@@ -342,8 +343,9 @@ class ObjectReaderImplMapTyped
                 ) {
                     name = jsonReader.readFieldName();
                     if (name.equals(getTypeKey())) {
-                        long typeHashCode = jsonReader.readTypeHashCode();
-                        ObjectReader objectReaderAutoType = jsonReader.getObjectReaderAutoType(typeHashCode, mapType, features);
+                        jsonReader.readTypeHashCode();
+                        ObjectReader objectReaderAutoType = jsonReader.getContext()
+                                .getObjectReaderAutoType(jsonReader.getString(), mapType, features);
                         if (objectReaderAutoType != null) {
                             if (objectReaderAutoType instanceof ObjectReaderImplMap) {
                                 if (!object.getClass().equals(((ObjectReaderImplMap) objectReaderAutoType).instanceType)) {
@@ -368,8 +370,9 @@ class ObjectReaderImplMapTyped
                     if (index == 0
                             && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                             && name.equals(getTypeKey())) {
-                        long typeHashCode = jsonReader.readTypeHashCode();
-                        ObjectReader objectReaderAutoType = jsonReader.getObjectReaderAutoType(typeHashCode, mapType, features);
+                        jsonReader.readTypeHashCode();
+                        ObjectReader objectReaderAutoType = jsonReader.getContext()
+                                .getObjectReaderAutoType(jsonReader.getString(), mapType, features);
                         if (objectReaderAutoType != null) {
                             if (objectReaderAutoType instanceof ObjectReaderImplMap) {
                                 if (!object.getClass().equals(((ObjectReaderImplMap) objectReaderAutoType).instanceType)) {

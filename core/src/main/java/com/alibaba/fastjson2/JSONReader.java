@@ -54,6 +54,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.*;
 public abstract class JSONReader
         implements Closeable {
     static final int MAX_EXP = 2047;
+    static final int MAX_NUMBER_DIGITS = 10_000;
 
     static final byte
             JSON_TYPE_INT = 1,
@@ -5646,7 +5647,9 @@ public abstract class JSONReader
          *
          * @param hashCode The hash code of the type
          * @return An ObjectReader for the specified type hash code, or null if not found
+         * @deprecated a hash hit is not an AutoType authorization; resolve by type name instead
          */
+        @Deprecated
         public ObjectReader getObjectReaderAutoType(long hashCode) {
             return provider.getObjectReader(hashCode);
         }
@@ -6519,10 +6522,10 @@ public abstract class JSONReader
         DisableReferenceDetect(MASK_DISABLE_REFERENCE_DETECT),
 
         /**
-         * Feature that determines whether to unwrap single-element string arrays to scalar values.
-         * When enabled, JSON arrays containing a single string element will be
-         * unwrapped to just that string value rather than returning the array.
-         * For example, ["value"] would be returned as "value".
+         * Feature that disables unwrapping of single-element string arrays to scalar values.
+         * When enabled, JSON arrays containing a single string element will NOT be
+         * unwrapped, and will instead be returned as arrays.
+         * For example, ["value"] would be returned as ["value"] rather than "value".
          * @since 2.0.60
          */
         DisableStringArrayUnwrapping(1L << 34L);
@@ -6795,21 +6798,7 @@ public abstract class JSONReader
      * @return An ObjectReader for the specified type, or null if not found
      */
     public ObjectReader getObjectReaderAutoType(long typeHash, Class expectClass, long features) {
-        ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
-        if (autoTypeObjectReader != null) {
-            return autoTypeObjectReader;
-        }
-
-        String typeName = getString();
-        if (context.autoTypeBeforeHandler != null) {
-            Class<?> autoTypeClass = context.autoTypeBeforeHandler.apply(typeName, expectClass, features);
-            if (autoTypeClass != null) {
-                boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
-                return context.provider.getObjectReader(autoTypeClass, fieldBased);
-            }
-        }
-
-        return context.provider.getObjectReader(typeName, expectClass, context.features | features);
+        return context.getObjectReaderAutoType(getString(), expectClass, context.features | features);
     }
 
     protected final String readStringNotMatch() {

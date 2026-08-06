@@ -10,6 +10,8 @@ import kotlin.reflect.KParameter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 /**
  * @author kraity
@@ -27,6 +29,8 @@ public class KotlinUtils {
     private static volatile boolean kotlin_error;
     private static volatile Map<Class, String[]> kotlinIgnores;
     private static volatile boolean kotlinIgnores_error;
+    private static final Logger logger = Logger.getLogger("com.alibaba.fastjson2.util.KotlinUtils");
+    private static final Set<Class<?>> unresolvedParameterNamesWarned = ConcurrentHashMap.newKeySet();
 
     static {
         int state = 0;
@@ -52,6 +56,19 @@ public class KotlinUtils {
      * @param clazz the specified class for search
      */
     public static void getConstructor(Class<?> clazz, BeanInfo beanInfo) {
+        getConstructor(clazz, beanInfo, false);
+    }
+
+    /**
+     * Gets the target constructor and its
+     * parameter names of the specified {@code clazz}
+     *
+     * @param clazz the specified class for search
+     * @param warnUnresolvedParameterNames whether to log a warning when the
+     * constructor has parameters but their names could not be resolved,
+     * which makes deserialization silently fall back to default values
+     */
+    public static void getConstructor(Class<?> clazz, BeanInfo beanInfo, boolean warnUnresolvedParameterNames) {
         int creatorParams = 0;
         Constructor<?> creatorConstructor = null;
 
@@ -104,7 +121,34 @@ public class KotlinUtils {
             }
         }
 
+        if (warnUnresolvedParameterNames) {
+            warnParameterNamesUnresolved(clazz, STATE, creatorParams, beanInfo.createParameterNames);
+        }
+
         beanInfo.creatorConstructor = creatorConstructor;
+    }
+
+    /**
+     * Logs a warning, at most once per class, when a Kotlin class has constructor
+     * parameters whose names could not be resolved — either because kotlin-reflect
+     * is not on the classpath or because it failed at runtime. Without the names,
+     * deserialization silently loses field values.
+     *
+     * @return true if a warning was logged for this call
+     */
+    static boolean warnParameterNamesUnresolved(Class<?> clazz, int state, int creatorParams, String[] createParameterNames) {
+        if (creatorParams == 0 || createParameterNames != null) {
+            return false;
+        }
+        if (!unresolvedParameterNamesWarned.add(clazz)) {
+            return false;
+        }
+        String reason = state == 2
+                ? "kotlin-reflect failed to resolve them."
+                : "kotlin-reflect is not on the classpath. Add org.jetbrains.kotlin:kotlin-reflect to your dependencies.";
+        logger.warning("fastjson2: constructor parameter names of Kotlin class " + clazz.getName()
+                + " cannot be resolved, deserialization may silently lose field values: " + reason);
+        return true;
     }
 
     public static boolean isKotlin(Class clazz) {

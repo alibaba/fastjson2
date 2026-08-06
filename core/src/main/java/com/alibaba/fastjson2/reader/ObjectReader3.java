@@ -289,16 +289,12 @@ public class ObjectReader3<T>
             }
 
             if (i == 0 && hashCode == HASH_TYPE) {
-                long typeHash = jsonReader.readTypeHashCode();
+                jsonReader.readTypeHashCode();
                 JSONReader.Context context = jsonReader.getContext();
-                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+                String typeName = jsonReader.getString();
+                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
                 if (autoTypeObjectReader == null) {
-                    String typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
-
-                    if (autoTypeObjectReader == null) {
-                        continue;
-                    }
+                    continue;
                 }
 
                 if (autoTypeObjectReader != this) {
