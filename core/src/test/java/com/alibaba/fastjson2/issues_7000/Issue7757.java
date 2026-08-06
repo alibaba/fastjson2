@@ -34,13 +34,10 @@ public class Issue7757 {
         String name = "fastjson2.useJacksonAnnotation";
         String previous = System.clearProperty(name);
         try {
+            // System property absent: the properties file value is honored.
             Properties properties = new Properties();
-
-            // Default is true; the properties file opts out.
             properties.setProperty(name, "false");
             assertFalse(getPropertyBool(properties, name, true));
-
-            // Default is false; the properties file opts in.
             properties.setProperty(name, "true");
             assertTrue(getPropertyBool(properties, name, false));
 
@@ -48,9 +45,20 @@ public class Issue7757 {
             Properties empty = new Properties();
             assertTrue(getPropertyBool(empty, name, true));
             assertFalse(getPropertyBool(empty, name, false));
+
+            // A non-empty -D system property wins over the properties file.
+            properties.setProperty(name, "false");
+            System.setProperty(name, "true");
+            assertTrue(getPropertyBool(properties, name, false));
+
+            // An empty/blank -D system property still falls back to the file.
+            System.setProperty(name, " ");
+            assertFalse(getPropertyBool(properties, name, true));
         } finally {
             if (previous != null) {
                 System.setProperty(name, previous);
+            } else {
+                System.clearProperty(name);
             }
         }
     }
@@ -60,6 +68,7 @@ public class Issue7757 {
         String name = "fastjson2.writer.maxLevel";
         String previous = System.clearProperty(name);
         try {
+            // System property absent: the properties file value is honored.
             Properties properties = new Properties();
             properties.setProperty(name, "512");
             assertEquals(512, getPropertyInt(properties, name, 2048));
@@ -67,9 +76,19 @@ public class Issue7757 {
             // Absent from both -> default.
             Properties empty = new Properties();
             assertEquals(2048, getPropertyInt(empty, name, 2048));
+
+            // A non-empty -D system property wins over the properties file.
+            System.setProperty(name, "4096");
+            assertEquals(4096, getPropertyInt(properties, name, 2048));
+
+            // An empty/blank -D system property still falls back to the file.
+            System.setProperty(name, " ");
+            assertEquals(512, getPropertyInt(properties, name, 2048));
         } finally {
             if (previous != null) {
                 System.setProperty(name, previous);
+            } else {
+                System.clearProperty(name);
             }
         }
     }
