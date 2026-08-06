@@ -78,9 +78,6 @@ class FieldWriterFloat<T>
 
     protected final void writeFloatValue(JSONWriter jsonWriter, Float value, long features) {
         float floatValue = value;
-        if (floatValue == 0.0f && (features & Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
-            return;
-        }
 
         writeFieldName(jsonWriter);
 

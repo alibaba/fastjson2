@@ -119,9 +119,6 @@ class FieldWriterBool<T>
     @Override
     public final void writeBool(JSONWriter jsonWriter, boolean value) {
         long features = jsonWriter.getFeatures(this.features);
-        if (!value && (features & Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
-            return;
-        }
         if ((features & Feature.WriteNonStringValueAsString.mask) != 0) {
             writeFieldName(jsonWriter);
             jsonWriter.writeString(value ? "true" : "false");
