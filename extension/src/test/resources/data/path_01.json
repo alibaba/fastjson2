@@ -1,0 +1,34 @@
+{
+  "id": 1,
+  "StartTime": "2020-01-06 17:00:00",
+  "Duration": 450,
+  "tags": [
+    "summer-sale",
+    "sports"
+  ],
+  "user_agent": {
+    "agent": "Mozilla/5.0",
+    "platform": "Windows NT 6.1",
+    "resolution": "1024x4069"
+  },
+  "events": [
+    {
+      "EventId": 547,
+      "type": "login",
+      "Timestamp": "2020-01-06 17:00:10",
+      "EventProperties": {
+        "UserName": "John Doe",
+        "Successful": true
+      }
+    },
+    {
+      "EventId": 548,
+      "type": "add-to-cart",
+      "Timestamp": "2020-01-06 17:01:15",
+      "EventProperties": {
+        "ProductID": "xy123",
+        "items": 2
+      }
+    }
+  ]
+}

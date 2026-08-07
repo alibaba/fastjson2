@@ -1,0 +1,25 @@
+{
+    "$schema": "http://json-schema.org/draft/2019-09/schema#",
+    "title": "Person",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "id": {
+            "type": "integer"
+        },
+        "name": {
+            "type": "string"
+        },
+        "age": {
+            "type": "integer"
+        },
+        "amount": {
+            "type": "number"
+        }
+    },
+    "required": [
+        "id",
+        "age",
+        "amount"
+    ]
+}

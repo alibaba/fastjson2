@@ -1,0 +1,3 @@
+{"one":true,"three":["red","yellow",["blue","azure","cobalt","teal"],"orange"],"two":19.5,"four":"poop"}
+{"one":false,"three":["red","yellow",["citrus","blue","cobalt"],"black"],"two":129.5,"four":"stars"}
+{"one":false,"three":["pink",["citrus","blue"],"gold"],"two":222,"four":"fiat"}

@@ -1,0 +1,644 @@
+{
+  "tests": [
+    {
+      "name": "slice selector",
+      "selector": "$[1:3]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        1,
+        2
+      ]
+    },
+    {
+      "name": "slice selector with step",
+      "selector": "$[1:6:2]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        1,
+        3,
+        5
+      ]
+    },
+    {
+      "name": "slice selector with everything omitted, short form",
+      "selector": "$[:]",
+      "document": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "result": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "name": "slice selector with everything omitted, long form",
+      "selector": "$[::]",
+      "document": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "result": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "name": "slice selector with start omitted",
+      "selector": "$[:2]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "slice selector with start and end omitted",
+      "selector": "$[::2]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ]
+    },
+    {
+      "name": "negative step with default start and end",
+      "selector": "$[::-1]",
+      "document": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "result": [
+        3,
+        2,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "negative step with default start",
+      "selector": "$[:0:-1]",
+      "document": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "result": [
+        3,
+        2,
+        1
+      ]
+    },
+    {
+      "name": "negative step with default end",
+      "selector": "$[2::-1]",
+      "document": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "result": [
+        2,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "larger negative step",
+      "selector": "$[::-2]",
+      "document": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "result": [
+        3,
+        1
+      ]
+    },
+    {
+      "name": "negative range with default step",
+      "selector": "$[-1:-3]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": []
+    },
+    {
+      "name": "negative range with negative step",
+      "selector": "$[-1:-3:-1]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        9,
+        8
+      ]
+    },
+    {
+      "name": "negative range with larger negative step",
+      "selector": "$[-1:-6:-2]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        9,
+        7,
+        5
+      ]
+    },
+    {
+      "name": "larger negative range with larger negative step",
+      "selector": "$[-1:-7:-2]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        9,
+        7,
+        5
+      ]
+    },
+    {
+      "name": "negative from, positive to",
+      "selector": "$[-5:7]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        5,
+        6
+      ]
+    },
+    {
+      "name": "negative from",
+      "selector": "$[-2:]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        8,
+        9
+      ]
+    },
+    {
+      "name": "positive from, negative to",
+      "selector": "$[1:-1]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "name": "negative from, positive to, negative step",
+      "selector": "$[-1:1:-1]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        9,
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2
+      ]
+    },
+    {
+      "name": "positive from, negative to, negative step",
+      "selector": "$[7:-5:-1]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        7,
+        6
+      ]
+    },
+    {
+      "name": "too many colons",
+      "selector": "$[1:2:3:4]",
+      "invalid_selector": true
+    },
+    {
+      "name": "non-integer array index",
+      "selector": "$[1:2:a]",
+      "invalid_selector": true
+    },
+    {
+      "name": "zero step",
+      "selector": "$[1:2:0]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": []
+    },
+    {
+      "name": "empty range",
+      "selector": "$[2:2]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": []
+    },
+    {
+      "name": "slice selector with everything omitted with empty array",
+      "selector": "$[:]",
+      "document": [],
+      "result": []
+    },
+    {
+      "name": "negative step with empty array",
+      "selector": "$[::-1]",
+      "document": [],
+      "result": []
+    },
+    {
+      "name": "maximal range with positive step",
+      "selector": "$[0:10]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "name": "maximal range with negative step",
+      "selector": "$[9:0:-1]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        9,
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1
+      ]
+    },
+    {
+      "name": "excessively large to value",
+      "selector": "$[2:113667776004]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "name": "excessively small from value",
+      "selector": "$[-113667776004:1]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        0
+      ]
+    },
+    {
+      "name": "excessively large from value with negative step",
+      "selector": "$[113667776004:0:-1]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        9,
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1
+      ]
+    },
+    {
+      "name": "excessively small to value with negative step",
+      "selector": "$[3:-113667776004:-1]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        3,
+        2,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "excessively large step",
+      "selector": "$[1:10:113667776004]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        1
+      ]
+    },
+    {
+      "name": "excessively small step",
+      "selector": "$[-1:-10:-113667776004]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        9
+      ]
+    },
+    {
+      "name": "overflowing to value",
+      "selector": "$[2:231584178474632390847141970017375815706539969331281128078915168015826259279872]",
+      "invalid_selector": true
+    },
+    {
+      "name": "underflowing from value",
+      "selector": "$[-231584178474632390847141970017375815706539969331281128078915168015826259279872:1]",
+      "invalid_selector": true
+    },
+    {
+      "name": "overflowing from value with negative step",
+      "selector": "$[231584178474632390847141970017375815706539969331281128078915168015826259279872:0:-1]",
+      "invalid_selector": true
+    },
+    {
+      "name": "underflowing to value with negative step",
+      "selector": "$[3:-231584178474632390847141970017375815706539969331281128078915168015826259279872:-1]",
+      "invalid_selector": true
+    },
+    {
+      "name": "overflowing step",
+      "selector": "$[1:10:231584178474632390847141970017375815706539969331281128078915168015826259279872]",
+      "invalid_selector": true
+    },
+    {
+      "name": "underflowing step",
+      "selector": "$[-1:-10:-231584178474632390847141970017375815706539969331281128078915168015826259279872]",
+      "invalid_selector": true
+    }
+  ]
+}

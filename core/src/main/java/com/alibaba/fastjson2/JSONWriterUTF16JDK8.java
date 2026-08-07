@@ -1,0 +1,58 @@
+package com.alibaba.fastjson2;
+
+import com.alibaba.fastjson2.util.JDKUtils;
+
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+
+final class JSONWriterUTF16JDK8
+        extends JSONWriterUTF16 {
+    JSONWriterUTF16JDK8(Context ctx) {
+        super(ctx);
+    }
+
+    @Override
+    public void writeString(String str) {
+        if (str == null) {
+            if (isEnabled(Feature.NullAsDefaultValue.mask | Feature.WriteNullStringAsEmpty.mask)) {
+                writeString("");
+                return;
+            }
+
+            writeNull();
+            return;
+        }
+
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+        boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
+        char[] value = JDKUtils.getCharArray(str);
+        final int strlen = value.length;
+
+        boolean escape = false;
+        for (int i = 0; i < value.length; i++) {
+            char ch = value[i];
+            if (ch == quote || ch == '\\' || ch < ' '
+                    || (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')'))
+                    || (escapeNoneAscii && ch > 0x007F)
+            ) {
+                escape = true;
+                break;
+            }
+        }
+
+        if (!escape) {
+            // inline ensureCapacity(off + strlen + 2);
+            int minCapacity = off + strlen + 2;
+            if (minCapacity >= chars.length) {
+                grow0(minCapacity);
+            }
+
+            chars[off++] = quote;
+            System.arraycopy(value, 0, chars, off, value.length);
+            off += strlen;
+            chars[off++] = quote;
+            return;
+        }
+
+        writeStringEscape(str);
+    }
+}

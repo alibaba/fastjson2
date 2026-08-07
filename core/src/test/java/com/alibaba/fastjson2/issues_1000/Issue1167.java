@@ -1,0 +1,34 @@
+package com.alibaba.fastjson2.issues_1000;
+
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@Tag("regression")
+@Tag("compat-jackson")
+public class Issue1167 {
+    @Test
+    public void test() {
+        Bean bean = new Bean();
+        bean.id = 1001L;
+        assertEquals("{\"id\":\"1001\"}", JSON.toJSONString(bean));
+        assertEquals("{'id':'1001'}", JSON.toJSONString(bean, JSONWriter.Feature.UseSingleQuotes));
+    }
+
+    public static class Bean {
+        @JsonFormat(shape = JsonFormat.Shape.STRING)
+        private Long id;
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+    }
+}

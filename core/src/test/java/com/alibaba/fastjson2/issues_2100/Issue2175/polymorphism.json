@@ -1,0 +1,28 @@
+[
+    {
+        "@type": "[com.alibaba.fastjson2.issues_2100.Issue2175$TestER",
+        "@value": [
+            {
+                "name": "parent"
+            },
+            {
+                "@type": "com.alibaba.fastjson2.issues_2100.Issue2175$Children",
+                "age": 1,
+                "name": "child"
+            }
+        ]
+    },
+    {
+        "@type": "[com.alibaba.fastjson2.issues_2100.Issue2175$TestER",
+        "@value": [
+            {
+                "@type": "com.alibaba.fastjson2.issues_2100.Issue2175$Children",
+                "age": 1,
+                "name": "child"
+            },
+            {
+                "name": "parent"
+            }
+        ]
+    }
+]

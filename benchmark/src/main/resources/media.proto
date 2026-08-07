@@ -1,0 +1,43 @@
+// See README.txt for information and build instructions.
+syntax = "proto3";
+
+package com.alibaba.fastjson2.benchmark.protobuf;
+
+option java_package = "com.alibaba.fastjson2.benchmark.protobuf";
+option java_outer_classname = "MediaContentHolder";
+option optimize_for = SPEED;
+
+message Image {
+  string uri = 1;      //url to the thumbnail
+  string title = 2;    //used in the html ALT
+  int32 width = 3;     // of the image
+  int32 height = 4;    // of the image
+  enum Size {
+    SMALL = 0;
+    LARGE = 1;
+  }
+  Size size = 5;       // of the image (in relative terms, provided by cnbc for example)
+}
+
+message Media {
+  string uri = 1;      //uri to the video, may not be an actual URL
+  optional string title = 2;    //used in the html ALT
+  int32 width = 3;     // of the video
+  int32 height = 4;    // of the video
+  string format = 5;   //avi, jpg, youtube, cnbc, audio/mpeg formats ...
+  int64 duration = 6;  //time in miliseconds
+  int64 size = 7;      //file size
+  optional int32 bitrate = 8;   //video
+  repeated string person = 9;   //name of a person featured in the video
+  enum Player {
+    JAVA = 0;
+    FLASH = 1;
+  }
+  Player player = 10;   //in case of a player specific media
+  optional string copyright = 11;//media copyright
+}
+
+message MediaContent {
+  repeated Image image = 1;
+  Media media = 2;
+}

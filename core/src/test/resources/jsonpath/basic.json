@@ -1,0 +1,484 @@
+{
+  "tests": [
+    {
+      "name": "root",
+      "selector": "$",
+      "document": [
+        "first",
+        "second"
+      ],
+      "result": [
+        [
+          "first",
+          "second"
+        ]
+      ]
+    },
+    {
+      "name": "no leading whitespace",
+      "selector": " $",
+      "invalid_selector": true
+    },
+    {
+      "name": "no trailing whitespace",
+      "selector": "$ ",
+      "invalid_selector": true
+    },
+    {
+      "name": "name shorthand",
+      "selector": "$.a",
+      "document": {
+        "a": "A",
+        "b": "B"
+      },
+      "result": [
+        "A"
+      ]
+    },
+    {
+      "name": "name shorthand, extended unicode ☺",
+      "selector": "$.☺",
+      "document": {
+        "☺": "A",
+        "b": "B"
+      },
+      "result": [
+        "A"
+      ]
+    },
+    {
+      "name": "name shorthand, underscore",
+      "selector": "$._",
+      "document": {
+        "_": "A",
+        "_foo": "B"
+      },
+      "result": [
+        "A"
+      ]
+    },
+    {
+      "name": "name shorthand, symbol",
+      "selector": "$.&",
+      "invalid_selector": true
+    },
+    {
+      "name": "name shorthand, number",
+      "selector": "$.1",
+      "invalid_selector": true
+    },
+    {
+      "name": "name shorthand, absent data",
+      "selector": "$.c",
+      "document": {
+        "a": "A",
+        "b": "B"
+      },
+      "result": []
+    },
+    {
+      "name": "name shorthand, array data",
+      "selector": "$.a",
+      "document": [
+        "first",
+        "second"
+      ],
+      "result": []
+    },
+    {
+      "name": "wildcard shorthand, object data",
+      "selector": "$.*",
+      "document": {
+        "a": "A",
+        "b": "B"
+      },
+      "results": [[
+        "A",
+        "B"
+      ],[
+        "B",
+        "A"
+      ]]
+    },
+    {
+      "name": "wildcard shorthand, array data",
+      "selector": "$.*",
+      "document": [
+        "first",
+        "second"
+      ],
+      "result": [
+        "first",
+        "second"
+      ]
+    },
+    {
+      "name": "wildcard selector, array data",
+      "selector": "$[*]",
+      "document": [
+        "first",
+        "second"
+      ],
+      "result": [
+        "first",
+        "second"
+      ]
+    },
+    {
+      "name": "wildcard shorthand, then name shorthand",
+      "selector": "$.*.a",
+      "document": {
+        "x": {
+          "a": "Ax",
+          "b": "Bx"
+        },
+        "y": {
+          "a": "Ay",
+          "b": "By"
+        }
+      },
+      "results": [[
+        "Ax",
+        "Ay"
+      ],[
+        "Ay",
+        "Ax"
+      ]]
+    },
+    {
+      "name": "multiple selectors",
+      "selector": "$[0,2]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        0,
+        2
+      ]
+    },
+    {
+      "name": "multiple selectors, space instead of comma",
+      "selector": "$[0 2]",
+      "invalid_selector": true
+    },
+    {
+      "name": "multiple selectors, name and index, array data",
+      "selector": "$['a',1]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        1
+      ]
+    },
+    {
+      "name": "multiple selectors, name and index, object data",
+      "selector": "$['a',1]",
+      "document": {
+        "a": 1,
+        "b": 2
+      },
+      "result": [
+        1
+      ]
+    },
+    {
+      "name": "multiple selectors, index and slice",
+      "selector": "$[1,5:7]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        1,
+        5,
+        6
+      ]
+    },
+    {
+      "name": "multiple selectors, index and slice, overlapping",
+      "selector": "$[1,0:3]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        1,
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "name": "multiple selectors, duplicate index",
+      "selector": "$[1,1]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        1,
+        1
+      ]
+    },
+    {
+      "name": "multiple selectors, wildcard and index",
+      "selector": "$[*,1]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        1
+      ]
+    },
+    {
+      "name": "multiple selectors, wildcard and name",
+      "selector": "$[*,'a']",
+      "document": {
+        "a": "A",
+        "b": "B"
+      },
+      "results": [
+        [
+          "A",
+          "B",
+          "A"
+        ],
+        [
+          "B",
+          "A",
+          "A"
+        ]
+      ]
+    },
+    {
+      "name": "multiple selectors, wildcard and slice",
+      "selector": "$[*,0:2]",
+      "document": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "result": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "multiple selectors, multiple wildcards",
+      "selector": "$[*,*]",
+      "document": [
+        0,
+        1,
+        2
+      ],
+      "result": [
+        0,
+        1,
+        2,
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "name": "empty segment",
+      "selector": "$[]",
+      "invalid_selector": true
+    },
+    {
+      "name": "descendant segment, index",
+      "selector" : "$..[1]",
+      "document" : {"o": [0, 1, [2, 3]]},
+      "result": [
+        1,
+        3
+      ]
+    },
+    {
+      "name": "descendant segment, name shorthand",
+      "selector" : "$..a",
+      "document" : {"o": [{"a": "b"}, {"a":"c"}]},
+      "result": [
+        "b",
+        "c"
+      ]
+    },
+    {
+      "name": "descendant segment, wildcard shorthand, array data",
+      "selector" : "$..*",
+      "document" : [0, 1],
+      "result": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "descendant segment, wildcard selector, array data",
+      "selector" : "$..[*]",
+      "document" : [0, 1],
+      "result": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "descendant segment, wildcard selector, nested arrays",
+      "selector" : "$..[*]",
+      "document" : [[[1]],[2]],
+      "results": [
+        [[[1]],[2],[1],1,2],
+        [[[1]],[2],[1],2,1]
+      ]
+    },
+    {
+      "name": "descendant segment, wildcard selector, nested objects",
+      "selector" : "$..[*]",
+      "document" : {"a": {"c": {"e": 1}}, "b": {"d": 2}},
+      "results": [
+        [{"c": {"e": 1}}, {"d": 2}, {"e": 1}, 1, 2],
+        [{"c": {"e": 1}}, {"d": 2}, {"e": 1}, 2, 1],
+        [{"c": {"e": 1}}, {"d": 2}, 2, {"e": 1}, 1],
+        [{"d": 2}, {"c": {"e": 1}}, {"e": 1}, 1, 2],
+        [{"d": 2}, {"c": {"e": 1}}, {"e": 1}, 2, 1],
+        [{"d": 2}, {"c": {"e": 1}}, 2, {"e": 1}, 1]
+      ]
+    },
+    {
+      "name": "descendant segment, wildcard shorthand, object data",
+      "selector" : "$..*",
+      "document" : {"a": "b"},
+      "result": [
+        "b"
+      ]
+    },
+    {
+      "name": "descendant segment, wildcard shorthand, nested data",
+      "selector" : "$..*",
+      "document" : {
+        "o": [{"a": "b"}]
+      },
+      "result": [
+        [
+          {
+            "a" : "b"
+          }
+        ],
+        {
+          "a" : "b"
+        },
+        "b"
+      ]
+    },
+    {
+      "name": "descendant segment, multiple selectors",
+      "selector" : "$..['a','d']",
+      "document" : [{"a": "b", "d": "e"}, {"a":"c", "d": "f"}],
+      "result": [
+        "b",
+        "e",
+        "c",
+        "f"
+      ]
+    },
+    {
+      "name": "descendant segment, object traversal, multiple selectors",
+      "selector" : "$..['a','d']",
+      "document" : {"x": {"a": "b", "d": "e"}, "y": {"a":"c", "d": "f"}},
+      "results": [[
+        "b",
+        "e",
+        "c",
+        "f"
+      ],[
+        "c",
+        "f",
+        "b",
+        "e"
+      ]]
+    },
+    {
+      "name": "bald descendant segment",
+      "selector": "$..",
+      "invalid_selector": true
+    }
+  ]
+}

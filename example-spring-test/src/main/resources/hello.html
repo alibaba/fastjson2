@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        .container {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .input, .output {
+            height: 40%;
+            width: 50%;
+        }
+
+        .inputText, .ouputText {
+            height: 100%;
+            width: 100%;
+            background-color: antiquewhite;
+        }
+
+        textarea {
+            height: 80%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="output">
+        <div class="title">显示</div>
+        <textarea class="ouputText" id="outputText" disabled>
+        </textarea>
+    </div>
+    <div class="input">
+        <div class="title">输入</div>
+        <textarea class="inputText" id="inputText" onblur="doIt()">
+        </textarea>
+    </div>
+
+</div>
+<script>
+    const ws = new WebSocket("ws://localhost:8080/websocket/A")
+
+    function doIt() {
+        let value = document.getElementById("inputText").value;
+        ws.send(value)
+    }
+
+    ws.onmessage = function (evt) {
+        document.getElementById("outputText").value = document.getElementById("outputText").value + "\n" + evt.data;
+    };
+
+    ws.onclose = function () {
+        // 关闭 websocket
+        console.log("连接已关闭...");
+    };
+</script>
+</body>
+</html>

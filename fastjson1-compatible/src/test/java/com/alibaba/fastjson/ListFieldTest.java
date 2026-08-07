@@ -1,0 +1,43 @@
+package com.alibaba.fastjson;
+
+import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson.serializer.SerializeConfig;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class ListFieldTest {
+    @Test
+    public void test_codec_null() throws Exception {
+        V0 v = new V0();
+
+        SerializeConfig mapping = new SerializeConfig();
+        mapping.setAsmEnable(false);
+
+        String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue);
+        assertEquals("{\"value\":null}", text);
+
+        ParserConfig config = new ParserConfig();
+        config.setAutoTypeSupport(true);
+        config.setAsmEnable(false);
+
+        V0 v1 = JSON.parseObject(text, V0.class, config, JSON.DEFAULT_PARSER_FEATURE);
+
+        assertEquals(v1.getValue(), v.getValue());
+    }
+
+    public static class V0 {
+        private List<Object> value;
+
+        public List<Object> getValue() {
+            return value;
+        }
+
+        public void setValue(List<Object> value) {
+            this.value = value;
+        }
+    }
+}

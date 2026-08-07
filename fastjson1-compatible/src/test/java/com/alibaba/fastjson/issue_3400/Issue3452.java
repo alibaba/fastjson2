@@ -1,0 +1,30 @@
+package com.alibaba.fastjson.issue_3400;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.annotation.JSONField;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3452 {
+    @Test
+    public void test_for_issue() throws Exception {
+        String s = "{ \"componentKey\" : \"CMDB_UPDATE_SERVER\"}";
+        Step step = JSON.parseObject(s, Step.class);
+        assertEquals("CMDB_UPDATE_SERVER", step.getComponentKey());
+        System.out.println(step.getComponentKey());
+    }
+
+    private static class Step {
+        @JSONField(name = "component_key", alternateNames = "componentKey")
+        private String componentKey;
+
+        public String getComponentKey() {
+            return componentKey;
+        }
+
+        public void setComponentKey(String componentKey) {
+            this.componentKey = componentKey;
+        }
+    }
+}

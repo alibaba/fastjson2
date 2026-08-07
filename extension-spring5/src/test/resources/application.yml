@@ -1,0 +1,9 @@
+config:
+  deviceCodes:
+    - 'M'
+    - 'Q'
+  barkPushUrl: https://baidu.com
+  barkPushToken: token
+  location: 广东 深圳 南山区
+  storeNameWhiteList:
+    - '深圳湾'
