@@ -122,6 +122,7 @@ public abstract class FieldWriter<T>
 
         DecimalFormat decimalFormat = null;
         if (format != null
+                && !"string".equals(format)
                 && (fieldClass == float.class
                 || fieldClass == float[].class
                 || fieldClass == Float.class
