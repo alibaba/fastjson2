@@ -181,6 +181,12 @@ public class ObjectReaderProvider
 
     final ConcurrentMap<Type, ObjectReader> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectReader> cacheFieldBased = new ConcurrentHashMap<>();
+    final ClassValue<Object> createLock = new ClassValue<Object>() {
+        @Override
+        protected Object computeValue(Class<?> type) {
+            return new Object();
+        }
+    };
     final ConcurrentMap<Integer, ConcurrentHashMap<Long, ObjectReader>> tclHashCaches = new ConcurrentHashMap<>();
     final ConcurrentMap<Long, ObjectReader> hashCache = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
@@ -1213,8 +1219,20 @@ public class ObjectReaderProvider
         }
 
         if (objectReader == null) {
-            ObjectReaderCreator creator = getCreator();
-            objectReader = creator.createObjectReader(objectClass, objectType, fieldBased, this);
+            ConcurrentMap<Type, ObjectReader> targetCache = fieldBased ? cacheFieldBased : cache;
+            synchronized (createLock.get(objectClass)) {
+                objectReader = targetCache.get(objectType);
+                if (objectReader == null) {
+                    ObjectReaderCreator creator = getCreator();
+                    objectReader = creator.createObjectReader(objectClass, objectType, fieldBased, this);
+                    ObjectReader previous = targetCache.putIfAbsent(objectType, objectReader);
+                    if (previous != null) {
+                        objectReader = previous;
+                    }
+                }
+            }
+
+            return objectReader;
         }
 
         ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, objectReader);
