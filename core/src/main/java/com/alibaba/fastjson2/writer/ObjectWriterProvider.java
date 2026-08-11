@@ -66,6 +66,12 @@ public class ObjectWriterProvider
 
     final ConcurrentMap<Type, ObjectWriter> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectWriter> cacheFieldBased = new ConcurrentHashMap<>();
+    final ClassValue<Object> createLock = new ClassValue<Object>() {
+        @Override
+        protected Object computeValue(Class<?> type) {
+            return new Object();
+        }
+    };
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
     final ObjectWriterCreator creator;
     final List<ObjectWriterModule> modules = new ArrayList<>();
@@ -726,18 +732,21 @@ public class ObjectWriterProvider
         }
 
         if (objectWriter == null) {
-            ObjectWriterCreator creator = getCreator();
-            objectWriter = creator.createObjectWriter(
-                    objectClass,
-                    fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,
-                    this
-            );
-            ObjectWriter previous = fieldBased
-                    ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
-                    : cache.putIfAbsent(objectType, objectWriter);
-
-            if (previous != null) {
-                objectWriter = previous;
+            ConcurrentMap<Type, ObjectWriter> targetCache = fieldBased ? cacheFieldBased : cache;
+            synchronized (createLock.get(objectClass)) {
+                objectWriter = targetCache.get(objectType);
+                if (objectWriter == null) {
+                    ObjectWriterCreator creator = getCreator();
+                    objectWriter = creator.createObjectWriter(
+                            objectClass,
+                            fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,
+                            this
+                    );
+                    ObjectWriter previous = targetCache.putIfAbsent(objectType, objectWriter);
+                    if (previous != null) {
+                        objectWriter = previous;
+                    }
+                }
             }
         }
         return objectWriter;
