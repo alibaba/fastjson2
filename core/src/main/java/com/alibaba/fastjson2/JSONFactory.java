@@ -165,66 +165,23 @@ public final class JSONFactory {
     static {
         Properties properties = Conf.DEFAULT_PROPERTIES;
         {
-            String property = System.getProperty("fastjson2.creator");
-            if (property != null) {
-                property = property.trim();
-            }
-
-            if (property == null || property.isEmpty()) {
-                property = properties.getProperty("fastjson2.creator");
-                if (property != null) {
-                    property = property.trim();
-                }
-            }
-
+            String property = resolveProperty(properties, "fastjson2.creator");
             CREATOR = property == null ? "asm" : property;
         }
         {
-            boolean disableReferenceDetect0 = false,
-                    disableArrayMapping0 = false,
-                    disableJSONB0 = false,
-                    disableAutoType0 = false,
-                    disableSmartMatch0 = false;
-            String features = System.getProperty("fastjson2.features");
-            if (features == null) {
-                features = getProperty("fastjson2.features");
-            }
-            if (features != null) {
-                for (String feature : features.split(",")) {
-                    switch (feature) {
-                        case "disableReferenceDetect":
-                            disableReferenceDetect0 = true;
-                            break;
-                        case "disableArrayMapping":
-                            disableArrayMapping0 = true;
-                            break;
-                        case "disableJSONB":
-                            disableJSONB0 = true;
-                            break;
-                        case "disableAutoType":
-                            disableAutoType0 = true;
-                            break;
-                        case "disableSmartMatch":
-                            disableSmartMatch0 = true;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-
-            disableReferenceDetect = disableReferenceDetect0;
-            disableArrayMapping = disableArrayMapping0;
-            disableJSONB = disableJSONB0;
-            disableAutoType = disableAutoType0;
-            disableSmartMatch = disableSmartMatch0;
+            String features = resolveProperty(properties, "fastjson2.features");
+            disableReferenceDetect = featureEnabled(features, "disableReferenceDetect");
+            disableArrayMapping = featureEnabled(features, "disableArrayMapping");
+            disableJSONB = featureEnabled(features, "disableJSONB");
+            disableAutoType = featureEnabled(features, "disableAutoType");
+            disableSmartMatch = featureEnabled(features, "disableSmartMatch");
         }
 
         useJacksonAnnotation = getPropertyBool(properties, "fastjson2.useJacksonAnnotation", true);
         useGsonAnnotation = getPropertyBool(properties, "fastjson2.useGsonAnnotation", true);
         defaultWriterAlphabetic = getPropertyBool(properties, "fastjson2.writer.alphabetic", true);
         defaultSkipTransient = getPropertyBool(properties, "fastjson2.writer.skipTransient", true);
-        defaultMaxLevel = getPropertyInt(properties, "fastjson2.writer.maxLevel", 2048);
+        defaultMaxLevel = validMaxLevel(getPropertyInt(properties, "fastjson2.writer.maxLevel", 2048));
         PropertyAccessorFactory propertyAccessorFactory = null;
         if (JDKUtils.JVM_VERSION >= 11) {
             try {
@@ -241,26 +198,71 @@ public final class JSONFactory {
         PROPERTY_ACCESSOR_FACTORY = propertyAccessorFactory;
     }
 
-    private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {
-        boolean propertyValue = defaultValue;
-
+    /**
+     * Resolves a configuration value: the {@code -D} system property wins when set
+     * (after trimming), otherwise the {@code fastjson2.properties} entry is used,
+     * otherwise {@code null}. An empty or blank value, from either source, counts
+     * as unset and resolves to {@code null}, so an entry like {@code key=} behaves
+     * like an absent one. Shared by the {@code fastjson2.creator} and
+     * {@code fastjson2.features} initializers, {@link #getPropertyBool} and
+     * {@link #getPropertyInt} so the resolution order cannot drift between them.
+     */
+    private static String resolveProperty(Properties properties, String name) {
         String property = System.getProperty(name);
         if (property != null) {
             property = property.trim();
-            if (property.isEmpty()) {
-                property = properties.getProperty(name);
-                if (property != null) {
-                    property = property.trim();
-                }
+        }
+        if (property == null || property.isEmpty()) {
+            property = properties.getProperty(name);
+            if (property != null) {
+                property = property.trim();
             }
-            if (defaultValue) {
-                if ("false".equals(property)) {
-                    propertyValue = false;
-                }
+        }
+        return property == null || property.isEmpty() ? null : property;
+    }
+
+    /**
+     * Checks whether a comma-separated feature list (e.g. {@code fastjson2.features})
+     * names {@code feature}. Tokens are trimmed, so whitespace around the separator
+     * is tolerated; unknown tokens are ignored.
+     */
+    static boolean featureEnabled(String features, String feature) {
+        if (features == null || features.isEmpty()) {
+            return false;
+        }
+        for (String part : features.split(",")) {
+            if (part.trim().equals(feature)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Coerces a non-positive {@code fastjson2.writer.maxLevel} to the default
+     * {@code 2048}: {@link #setDefaultMaxLevel} rejects it as well, and a frozen
+     * non-positive level would make every serialization throw at the first
+     * {@code startObject}.
+     */
+    static int validMaxLevel(int maxLevel) {
+        if (maxLevel <= 0) {
+            System.err.println("fastjson2: invalid value for fastjson2.writer.maxLevel: " + maxLevel + ", using default 2048");
+            return 2048;
+        }
+        return maxLevel;
+    }
+
+    private static boolean getPropertyBool(Properties properties, String name, boolean defaultValue) {
+        boolean propertyValue = defaultValue;
+
+        String property = resolveProperty(properties, name);
+        if (property != null) {
+            if ("true".equals(property)) {
+                propertyValue = true;
+            } else if ("false".equals(property)) {
+                propertyValue = false;
             } else {
-                if ("true".equals(property)) {
-                    propertyValue = true;
-                }
+                System.err.println("fastjson2: invalid value for " + name + ": " + property + ", using default " + defaultValue);
             }
         }
 
@@ -270,20 +272,13 @@ public final class JSONFactory {
     private static int getPropertyInt(Properties properties, String name, int defaultValue) {
         int propertyValue = defaultValue;
 
-        String property = System.getProperty(name);
+        String property = resolveProperty(properties, name);
         if (property != null) {
-            property = property.trim();
-            if (property.isEmpty()) {
-                property = properties.getProperty(name);
-                if (property != null) {
-                    property = property.trim();
-                }
+            try {
+                propertyValue = Integer.parseInt(property);
+            } catch (NumberFormatException ignored) {
+                System.err.println("fastjson2: invalid value for " + name + ": " + property + ", using default " + defaultValue);
             }
-        }
-        try {
-            propertyValue = Integer.parseInt(property);
-        } catch (NumberFormatException ignored) {
-            // ignore
         }
 
         return propertyValue;
