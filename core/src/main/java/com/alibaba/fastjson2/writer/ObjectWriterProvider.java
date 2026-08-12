@@ -20,8 +20,10 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * ObjectWriterProvider is responsible for providing and managing ObjectWriter instances
@@ -57,6 +59,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ObjectWriterProvider
         implements ObjectCodecProvider {
+    static final long CREATE_LOCK_TIMEOUT_MILLIS = 1000;
     static final int TYPE_INT32_MASK = 1 << 1;
     static final int TYPE_INT64_MASK = 1 << 2;
     static final int TYPE_DECIMAL_MASK = 1 << 3;
@@ -66,12 +69,8 @@ public class ObjectWriterProvider
 
     final ConcurrentMap<Type, ObjectWriter> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectWriter> cacheFieldBased = new ConcurrentHashMap<>();
-    final ClassValue<Object> createLock = new ClassValue<Object>() {
-        @Override
-        protected Object computeValue(Class<?> type) {
-            return new Object();
-        }
-    };
+    final ConcurrentMap<Type, ReentrantLock> createLocks = new ConcurrentHashMap<>();
+    final ConcurrentMap<Type, ReentrantLock> createLocksFieldBased = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
     final ObjectWriterCreator creator;
     final List<ObjectWriterModule> modules = new ArrayList<>();
@@ -732,24 +731,42 @@ public class ObjectWriterProvider
         }
 
         if (objectWriter == null) {
-            ConcurrentMap<Type, ObjectWriter> targetCache = fieldBased ? cacheFieldBased : cache;
-            synchronized (createLock.get(objectClass)) {
-                objectWriter = targetCache.get(objectType);
-                if (objectWriter == null) {
-                    ObjectWriterCreator creator = getCreator();
-                    objectWriter = creator.createObjectWriter(
-                            objectClass,
-                            fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,
-                            this
-                    );
-                    ObjectWriter previous = targetCache.putIfAbsent(objectType, objectWriter);
-                    if (previous != null) {
-                        objectWriter = previous;
-                    }
-                }
-            }
+            return createObjectWriter(objectClass, objectType, fieldBased);
         }
         return objectWriter;
+    }
+
+    private ObjectWriter createObjectWriter(Class objectClass, Type objectType, boolean fieldBased) {
+        ConcurrentMap<Type, ObjectWriter> targetCache = fieldBased ? cacheFieldBased : cache;
+        ConcurrentMap<Type, ReentrantLock> targetLocks = fieldBased ? createLocksFieldBased : createLocks;
+        ReentrantLock createLock = targetLocks.computeIfAbsent(objectType, type -> new ReentrantLock());
+        boolean locked = false;
+        try {
+            try {
+                locked = createLock.tryLock(CREATE_LOCK_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            ObjectWriter objectWriter = targetCache.get(objectType);
+            if (objectWriter != null) {
+                return objectWriter;
+            }
+
+            ObjectWriterCreator creator = getCreator();
+            objectWriter = creator.createObjectWriter(
+                    objectClass,
+                    fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,
+                    this
+            );
+            ObjectWriter previous = targetCache.putIfAbsent(objectType, objectWriter);
+            return previous != null ? previous : objectWriter;
+        } finally {
+            if (locked) {
+                createLock.unlock();
+                targetLocks.remove(objectType, createLock);
+            }
+        }
     }
 
     static final int ENUM = 0x00004000;
