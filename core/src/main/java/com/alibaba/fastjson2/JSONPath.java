@@ -227,6 +227,26 @@ public abstract class JSONPath {
     }
 
     /**
+     * Checks if the specified path exists in JSON text.
+     * <p>
+     * Mirrors {@link #eval(String, String)} / {@link #extract(String, String)}: the first
+     * argument is parsed as JSON, not treated as a Java bean. Without this overload,
+     * {@code contains(jsonText, path)} resolves to {@link #contains(Object, String)} and
+     * incorrectly returns false for ordinary property paths such as {@code $.status}.
+     *
+     * @param json the JSON text to check
+     * @param path the JSONPath expression
+     * @return true if the path exists, false otherwise
+     */
+    public static boolean contains(String json, String path) {
+        if (json == null) {
+            return false;
+        }
+
+        return JSONPath.of(path).contains(JSON.parse(json));
+    }
+
+    /**
      * Sets a value in an object using the specified path
      *
      * @param rootObject the root object to modify
