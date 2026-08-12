@@ -33,4 +33,10 @@ public class Issue7771 {
         assertTrue(JSONPath.contains(object, "$.status"));
         assertFalse(JSONPath.contains(object, "$.missing"));
     }
+
+    @Test
+    public void containsOnJsonNullLiteralIsFalse() {
+        assertFalse(JSONPath.contains("null", "$.status"));
+        assertFalse(JSONPath.contains("null", "$"));
+    }
 }

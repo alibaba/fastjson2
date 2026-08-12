@@ -243,7 +243,7 @@ public abstract class JSONPath {
             return false;
         }
 
-        return JSONPath.of(path).contains(JSON.parse(json));
+        return contains(JSON.parse(json), path);
     }
 
     /**
