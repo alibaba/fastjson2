@@ -50,7 +50,12 @@ class FieldWriterDouble<T>
             if (decimalFormat != null) {
                 jsonWriter.writeDouble(doubleValue, decimalFormat);
             } else {
-                jsonWriter.writeDouble(doubleValue);
+                long features = this.features | jsonWriter.getFeatures();
+                if ((features & Feature.WriteNonStringValueAsString.mask) != 0) {
+                    jsonWriter.writeString(doubleValue);
+                } else {
+                    jsonWriter.writeDouble(doubleValue);
+                }
             }
         }
     }

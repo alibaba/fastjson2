@@ -459,15 +459,30 @@ public class ObjectWriterProvider
      * @return the ObjectWriter for the specified type
      */
     public ObjectWriter getObjectWriter(Type objectType, String format, Locale locale) {
+        // "string" (Jackson shape=STRING) and "millis" (shape=NUMBER) are sentinel
+        // formats from BeanUtils.processJacksonJsonFormat, not DecimalFormat
+        // patterns; quoting for "string" is driven by WriteNonStringValueAsString
+        // which callers merge into the item features
+        boolean sentinelFormat = FieldWriter.isSentinelFormat(format);
+
         if (objectType == Double.class) {
+            if (sentinelFormat) {
+                return ObjectWriterImplDouble.INSTANCE;
+            }
             return new ObjectWriterImplDouble(new DecimalFormat(format));
         }
 
         if (objectType == Float.class) {
+            if (sentinelFormat) {
+                return ObjectWriterImplFloat.INSTANCE;
+            }
             return new ObjectWriterImplFloat(new DecimalFormat(format));
         }
 
         if (objectType == BigDecimal.class) {
+            if (sentinelFormat) {
+                return ObjectWriterImplBigDecimal.INSTANCE;
+            }
             return new ObjectWriterImplBigDecimal(new DecimalFormat(format), null);
         }
 

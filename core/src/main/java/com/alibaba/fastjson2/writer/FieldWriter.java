@@ -87,6 +87,16 @@ public abstract class FieldWriter<T>
         this(name, ordinal, features, format, locale, label, fieldType, fieldClass, field, method, null);
     }
 
+    /**
+     * Returns whether the format is one of the sentinel values stored by
+     * {@link BeanUtils#processJacksonJsonFormat}: {@code "string"} for Jackson
+     * shape=STRING and {@code "millis"} for shape=NUMBER. They select a
+     * serialization mode and must never be parsed as a DecimalFormat pattern.
+     */
+    static boolean isSentinelFormat(String format) {
+        return BeanUtils.isSentinelFormat(format);
+    }
+
     FieldWriter(
             String name,
             int ordinal,
@@ -122,6 +132,7 @@ public abstract class FieldWriter<T>
 
         DecimalFormat decimalFormat = null;
         if (format != null
+                && !isSentinelFormat(format)
                 && (fieldClass == float.class
                 || fieldClass == float[].class
                 || fieldClass == Float.class
@@ -1048,7 +1059,7 @@ public abstract class FieldWriter<T>
             }
 
             if (BigDecimal.class == valueClass) {
-                if (format == null || format.isEmpty()) {
+                if (format == null || format.isEmpty() || isSentinelFormat(format)) {
                     return ObjectWriterImplBigDecimal.INSTANCE;
                 } else {
                     return new ObjectWriterImplBigDecimal(new DecimalFormat(format), null);
@@ -1056,7 +1067,7 @@ public abstract class FieldWriter<T>
             }
 
             if (BigDecimal[].class == valueClass) {
-                if (format == null || format.isEmpty()) {
+                if (format == null || format.isEmpty() || isSentinelFormat(format)) {
                     return new ObjectWriterArrayFinal(BigDecimal.class, null);
                 } else {
                     return new ObjectWriterArrayFinal(BigDecimal.class, new DecimalFormat(format));
