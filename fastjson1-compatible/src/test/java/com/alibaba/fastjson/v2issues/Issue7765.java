@@ -3,7 +3,11 @@ package com.alibaba.fastjson.v2issues;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.parser.DefaultJSONParser;
+import com.alibaba.fastjson.parser.JSONScanner;
+import com.alibaba.fastjson.support.hsf.HSFJSONUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -49,11 +53,14 @@ public class Issue7765 {
     }
 
     @Test
-    public void testGetJSONArrayFromArray() {
-        String json = "{\"items\":[{\"name\":\"alpha\"},{\"name\":\"beta\"}]}";
-        JSONArray items = JSON.parseObject(json).getJSONArray("items");
+    public void testGetJSONArrayFromEncodedStringCast() {
+        // reproduces issue #7765: elements from string reparse must be castable to fastjson1 JSONObject
+        String json = "{\"items\":\"[{\\\"name\\\":\\\"alpha\\\"},{\\\"name\\\":\\\"beta\\\"}]\"}";
+        Object[] elements = JSON.parseObject(json).getJSONArray("items").toArray();
 
-        assertEquals(JSONObject.class, items.toArray()[0].getClass());
+        JSONObject first = (JSONObject) elements[0];
+        assertEquals("alpha", first.getString("name"));
+        assertEquals(JSONObject.class, elements[1].getClass());
     }
 
     @Test
@@ -72,6 +79,49 @@ public class Issue7765 {
         Bean bean = array.getObject(0, Bean.class);
         assertEquals(JSONObject.class, bean.inner.getClass());
         assertEquals(JSONObject.class, bean.list.get(0).getClass());
+    }
+
+    @Test
+    public void testJSONPathReadNestedContainerType() {
+        Object data = JSONPath.read("{\"data\":{\"inner\":{\"name\":\"alpha\"}}}", "$.data", Object.class);
+        assertEquals(JSONObject.class, data.getClass());
+        assertEquals(JSONObject.class, ((JSONObject) data).get("inner").getClass());
+    }
+
+    @Test
+    public void testDefaultJSONParserNestedContainerType() {
+        Object parsed = new DefaultJSONParser("{\"inner\":{\"name\":\"alpha\"}}").parse();
+        assertEquals(JSONObject.class, parsed.getClass());
+        assertEquals(JSONObject.class, ((JSONObject) parsed).get("inner").getClass());
+    }
+
+    @Test
+    public void testJSONScannerNestedContainerType() {
+        Object parsed = new JSONScanner("{\"inner\":{\"name\":\"alpha\"}}").getReader().read(Object.class);
+        assertEquals(JSONObject.class, parsed.getClass());
+        assertEquals(JSONObject.class, ((JSONObject) parsed).get("inner").getClass());
+    }
+
+    @Test
+    public void testHSFJSONUtilsNestedContainerType() throws Exception {
+        String json = "{"
+                + "\"argsTypes\":[\"java.util.Map\"],"
+                + "\"argsObjs\":[{\"inner\":{\"name\":\"alpha\"}}]"
+                + "}";
+        Object[] args = HSFJSONUtils.parseInvocationArguments(
+                json,
+                types -> {
+                    try {
+                        return Issue7765.class.getMethod("acceptMap", Map.class);
+                    } catch (NoSuchMethodException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+        );
+        assertEquals(JSONObject.class, ((Map<?, ?>) args[0]).get("inner").getClass());
+    }
+
+    public static void acceptMap(Map map) {
     }
 
     public static class Bean {
