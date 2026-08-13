@@ -20,7 +20,6 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -59,7 +58,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ObjectWriterProvider
         implements ObjectCodecProvider {
-    static final long CREATE_LOCK_TIMEOUT_MILLIS = 1000;
     static final int TYPE_INT32_MASK = 1 << 1;
     static final int TYPE_INT64_MASK = 1 << 2;
     static final int TYPE_DECIMAL_MASK = 1 << 3;
@@ -69,8 +67,10 @@ public class ObjectWriterProvider
 
     final ConcurrentMap<Type, ObjectWriter> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectWriter> cacheFieldBased = new ConcurrentHashMap<>();
+    // Keep lock entries stable while a Type can be cached or retried after a failed creation.
     final ConcurrentMap<Type, ReentrantLock> createLocks = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ReentrantLock> createLocksFieldBased = new ConcurrentHashMap<>();
+    final ThreadLocal<Boolean> creating = new ThreadLocal<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
     final ObjectWriterCreator creator;
     final List<ObjectWriterModule> modules = new ArrayList<>();
@@ -659,6 +659,40 @@ public class ObjectWriterProvider
             }
         }
 
+        return getObjectWriterWithLock(objectType, objectClass, fieldBased);
+    }
+
+    private ObjectWriter getObjectWriterWithLock(Type objectType, Class objectClass, boolean fieldBased) {
+        ConcurrentMap<Type, ObjectWriter> targetCache = fieldBased ? cacheFieldBased : cache;
+        ConcurrentMap<Type, ReentrantLock> targetLocks = fieldBased ? createLocksFieldBased : createLocks;
+        ReentrantLock createLock = targetLocks.computeIfAbsent(objectType, type -> new ReentrantLock());
+        boolean outermost = creating.get() == null;
+
+        if (outermost) {
+            createLock.lock();
+            creating.set(Boolean.TRUE);
+        } else if (!createLock.tryLock()) {
+            // Do not wait while creating another type. Two creators can depend on each
+            // other from different threads, so waiting here could deadlock.
+            return resolveObjectWriter(objectType, objectClass, fieldBased);
+        }
+
+        try {
+            ObjectWriter objectWriter = targetCache.get(objectType);
+            return objectWriter != null
+                    ? objectWriter
+                    : resolveObjectWriter(objectType, objectClass, fieldBased);
+        } finally {
+            if (outermost) {
+                creating.remove();
+            }
+            createLock.unlock();
+        }
+    }
+
+    private ObjectWriter resolveObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
+        ObjectWriter objectWriter = null;
+        String className = objectClass.getName();
         boolean useModules = true;
         if (fieldBased) {
             if (Iterable.class.isAssignableFrom(objectClass)
@@ -738,35 +772,14 @@ public class ObjectWriterProvider
 
     private ObjectWriter createObjectWriter(Class objectClass, Type objectType, boolean fieldBased) {
         ConcurrentMap<Type, ObjectWriter> targetCache = fieldBased ? cacheFieldBased : cache;
-        ConcurrentMap<Type, ReentrantLock> targetLocks = fieldBased ? createLocksFieldBased : createLocks;
-        ReentrantLock createLock = targetLocks.computeIfAbsent(objectType, type -> new ReentrantLock());
-        boolean locked = false;
-        try {
-            try {
-                locked = createLock.tryLock(CREATE_LOCK_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-
-            ObjectWriter objectWriter = targetCache.get(objectType);
-            if (objectWriter != null) {
-                return objectWriter;
-            }
-
-            ObjectWriterCreator creator = getCreator();
-            objectWriter = creator.createObjectWriter(
-                    objectClass,
-                    fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,
-                    this
-            );
-            ObjectWriter previous = targetCache.putIfAbsent(objectType, objectWriter);
-            return previous != null ? previous : objectWriter;
-        } finally {
-            if (locked) {
-                createLock.unlock();
-                targetLocks.remove(objectType, createLock);
-            }
-        }
+        ObjectWriterCreator creator = getCreator();
+        ObjectWriter objectWriter = creator.createObjectWriter(
+                objectClass,
+                fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,
+                this
+        );
+        ObjectWriter previous = targetCache.putIfAbsent(objectType, objectWriter);
+        return previous != null ? previous : objectWriter;
     }
 
     static final int ENUM = 0x00004000;
@@ -862,6 +875,8 @@ public class ObjectWriterProvider
         mixInCache.clear();
         cache.clear();
         cacheFieldBased.clear();
+        createLocks.clear();
+        createLocksFieldBased.clear();
     }
 
     /**
@@ -873,6 +888,8 @@ public class ObjectWriterProvider
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
         cacheFieldBased.remove(objectClass);
+        createLocks.remove(objectClass);
+        createLocksFieldBased.remove(objectClass);
 
         BeanUtils.cleanupCache(objectClass);
     }
@@ -938,6 +955,14 @@ public class ObjectWriterProvider
 
         cacheFieldBased.entrySet().removeIf(
                 entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMap)
+        );
+
+        createLocks.keySet().removeIf(
+                type -> match(type, null, classLoader, checkedMap)
+        );
+
+        createLocksFieldBased.keySet().removeIf(
+                type -> match(type, null, classLoader, checkedMap)
         );
 
         BeanUtils.cleanupCache(classLoader);

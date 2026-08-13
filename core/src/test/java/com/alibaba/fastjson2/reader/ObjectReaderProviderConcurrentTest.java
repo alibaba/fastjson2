@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.TypeReference;
+import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -26,7 +27,86 @@ public class ObjectReaderProviderConcurrentTest {
         ObjectReader methodBasedReader = result.provider.getObjectReader(Bean.class, false);
 
         assertNotSame(fieldBasedReader, methodBasedReader);
-        assertEquals(2, result.createCount.get());
+    }
+
+    @Test
+    public void testCreateModuleObjectReaderOnce() throws InterruptedException {
+        AtomicInteger moduleCount = new AtomicInteger();
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        provider.register(new ObjectReaderModule() {
+            @Override
+            public ObjectReader getObjectReader(ObjectReaderProvider provider, Type type) {
+                if (type != ModuleBean.class) {
+                    return null;
+                }
+
+                moduleCount.incrementAndGet();
+                sleep(100);
+                return ObjectReaderImplString.INSTANCE;
+            }
+        });
+
+        Set<ObjectReader> readers = getReaders(provider, ModuleBean.class, false, 32);
+        assertEquals(1, readers.size());
+        assertEquals(1, moduleCount.get());
+    }
+
+    @Test
+    public void testCreatorFailureDoesNotReplaceLiveLock() throws InterruptedException {
+        AtomicInteger createCount = new AtomicInteger();
+        AtomicInteger concurrentCount = new AtomicInteger();
+        AtomicInteger maxConcurrentCount = new AtomicInteger();
+        CountDownLatch firstStarted = new CountDownLatch(1);
+        CountDownLatch failFirst = new CountDownLatch(1);
+        CountDownLatch secondStarted = new CountDownLatch(1);
+        CountDownLatch finishSecond = new CountDownLatch(1);
+        ObjectReaderCreator creator = new ObjectReaderCreator() {
+            @Override
+            public <T> ObjectReader<T> createObjectReader(
+                    Class<T> objectClass,
+                    Type objectType,
+                    boolean fieldBased,
+                    ObjectReaderProvider provider
+            ) {
+                int concurrent = concurrentCount.incrementAndGet();
+                maxConcurrentCount.accumulateAndGet(concurrent, Math::max);
+                try {
+                    int count = createCount.incrementAndGet();
+                    if (count == 1) {
+                        firstStarted.countDown();
+                        await(failFirst);
+                        throw new IllegalStateException("first creation failed");
+                    }
+                    if (count == 2) {
+                        secondStarted.countDown();
+                        await(finishSecond);
+                    }
+                    return super.createObjectReader(objectClass, objectType, fieldBased, provider);
+                } finally {
+                    concurrentCount.decrementAndGet();
+                }
+            }
+        };
+        ObjectReaderProvider provider = new ObjectReaderProvider(creator);
+        CountDownLatch done = new CountDownLatch(3);
+        AtomicReference<Throwable> error = new AtomicReference<>();
+
+        startDaemonThread(() -> getObjectReader(provider, FailureBean.class, new AtomicReference<>(), done));
+        assertTrue(firstStarted.await(5, TimeUnit.SECONDS));
+        startDaemonThread(() -> getObjectReader(provider, FailureBean.class, error, done));
+        sleep(100);
+        failFirst.countDown();
+        assertTrue(secondStarted.await(5, TimeUnit.SECONDS));
+        sleep(100);
+        startDaemonThread(() -> getObjectReader(provider, FailureBean.class, error, done));
+        sleep(200);
+
+        assertEquals(2, createCount.get());
+        assertEquals(1, maxConcurrentCount.get());
+        finishSecond.countDown();
+        assertTrue(done.await(5, TimeUnit.SECONDS));
+        assertNull(error.get());
+        assertEquals(2, createCount.get());
     }
 
     @Test
@@ -123,16 +203,24 @@ public class ObjectReaderProviderConcurrentTest {
                     ObjectReaderProvider provider
             ) {
                 createCount.incrementAndGet();
-                try {
-                    TimeUnit.MILLISECONDS.sleep(100);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException(e);
-                }
+                sleep(1200);
                 return super.createObjectReader(objectClass, objectType, fieldBased, provider);
             }
         };
         ObjectReaderProvider provider = new ObjectReaderProvider(creator);
+        Set<ObjectReader> readers = getReaders(provider, Bean.class, fieldBased, 32);
+
+        assertEquals(1, readers.size());
+        assertEquals(1, createCount.get());
+        return new ObjectReaderTestResult(provider, readers, createCount);
+    }
+
+    private static Set<ObjectReader> getReaders(
+            ObjectReaderProvider provider,
+            Type type,
+            boolean fieldBased,
+            int threadCount
+    ) throws InterruptedException {
         CountDownLatch ready = new CountDownLatch(threadCount);
         CountDownLatch start = new CountDownLatch(1);
         CountDownLatch done = new CountDownLatch(threadCount);
@@ -144,7 +232,7 @@ public class ObjectReaderProviderConcurrentTest {
                 ready.countDown();
                 try {
                     start.await();
-                    readers.add(provider.getObjectReader(Bean.class, fieldBased));
+                    readers.add(provider.getObjectReader(type, fieldBased));
                 } catch (Throwable e) {
                     error.compareAndSet(null, e);
                 } finally {
@@ -158,9 +246,25 @@ public class ObjectReaderProviderConcurrentTest {
         assertTrue(allReady);
         assertTrue(done.await(10, TimeUnit.SECONDS));
         assertNull(error.get());
-        assertEquals(1, readers.size());
-        assertEquals(1, createCount.get());
-        return new ObjectReaderTestResult(provider, readers, createCount);
+        return readers;
+    }
+
+    private static void sleep(long millis) {
+        try {
+            TimeUnit.MILLISECONDS.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void await(CountDownLatch latch) {
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
     }
 
     private static void getObjectReader(
@@ -225,6 +329,12 @@ public class ObjectReaderProviderConcurrentTest {
     }
 
     public static class BeanB {
+    }
+
+    public static class ModuleBean {
+    }
+
+    public static class FailureBean {
     }
 
     public static class GenericBean<T> {

@@ -20,7 +20,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -67,7 +66,6 @@ import static com.alibaba.fastjson2.util.TypeUtils.normalizeAcceptName;
  */
 public class ObjectReaderProvider
         implements ObjectCodecProvider {
-    static final long CREATE_LOCK_TIMEOUT_MILLIS = 1000;
     static final ClassLoader FASTJSON2_CLASS_LOADER = JSON.class.getClassLoader();
     public static final boolean SAFE_MODE;
     static final String[] DENYS;
@@ -184,8 +182,10 @@ public class ObjectReaderProvider
 
     final ConcurrentMap<Type, ObjectReader> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectReader> cacheFieldBased = new ConcurrentHashMap<>();
+    // Keep lock entries stable while a Type can be cached or retried after a failed creation.
     final ConcurrentMap<Type, ReentrantLock> createLocks = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ReentrantLock> createLocksFieldBased = new ConcurrentHashMap<>();
+    final ThreadLocal<Boolean> creating = new ThreadLocal<>();
     final ConcurrentMap<Integer, ConcurrentHashMap<Long, ObjectReader>> tclHashCaches = new ConcurrentHashMap<>();
     final ConcurrentMap<Long, ObjectReader> hashCache = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
@@ -540,6 +540,8 @@ public class ObjectReaderProvider
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
         cacheFieldBased.remove(objectClass);
+        createLocks.remove(objectClass);
+        createLocksFieldBased.remove(objectClass);
         for (ConcurrentHashMap<Long, ObjectReader> tlc : tclHashCaches.values()) {
             for (Iterator<Map.Entry<Long, ObjectReader>> it = tlc.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<Long, ObjectReader> entry = it.next();
@@ -561,6 +563,8 @@ public class ObjectReaderProvider
         mixInCache.clear();
         cache.clear();
         cacheFieldBased.clear();
+        createLocks.clear();
+        createLocksFieldBased.clear();
     }
 
     static boolean match(Type objectType, ObjectReader objectReader, ClassLoader classLoader) {
@@ -633,6 +637,14 @@ public class ObjectReaderProvider
 
         cacheFieldBased.entrySet().removeIf(
                 entry -> match(entry.getKey(), entry.getValue(), classLoader)
+        );
+
+        createLocks.keySet().removeIf(
+                type -> match(type, null, classLoader)
+        );
+
+        createLocksFieldBased.keySet().removeIf(
+                type -> match(type, null, classLoader)
         );
 
         int tclHash = System.identityHashCode(classLoader);
@@ -1141,6 +1153,34 @@ public class ObjectReaderProvider
     }
 
     private ObjectReader getObjectReaderInternal(Type objectType, boolean fieldBased) {
+        ConcurrentMap<Type, ObjectReader> targetCache = fieldBased ? cacheFieldBased : cache;
+        ConcurrentMap<Type, ReentrantLock> targetLocks = fieldBased ? createLocksFieldBased : createLocks;
+        ReentrantLock createLock = targetLocks.computeIfAbsent(objectType, type -> new ReentrantLock());
+        boolean outermost = creating.get() == null;
+
+        if (outermost) {
+            createLock.lock();
+            creating.set(Boolean.TRUE);
+        } else if (!createLock.tryLock()) {
+            // Do not wait while creating another type. Two creators can depend on each
+            // other from different threads, so waiting here could deadlock.
+            return resolveObjectReader(objectType, fieldBased);
+        }
+
+        try {
+            ObjectReader objectReader = targetCache.get(objectType);
+            return objectReader != null
+                    ? objectReader
+                    : resolveObjectReader(objectType, fieldBased);
+        } finally {
+            if (outermost) {
+                creating.remove();
+            }
+            createLock.unlock();
+        }
+    }
+
+    private ObjectReader resolveObjectReader(Type objectType, boolean fieldBased) {
         ObjectReader objectReader = null;
 
         for (ObjectReaderModule module : modules) {
@@ -1231,31 +1271,10 @@ public class ObjectReaderProvider
 
     private ObjectReader createObjectReader(Class<?> objectClass, Type objectType, boolean fieldBased) {
         ConcurrentMap<Type, ObjectReader> targetCache = fieldBased ? cacheFieldBased : cache;
-        ConcurrentMap<Type, ReentrantLock> targetLocks = fieldBased ? createLocksFieldBased : createLocks;
-        ReentrantLock createLock = targetLocks.computeIfAbsent(objectType, type -> new ReentrantLock());
-        boolean locked = false;
-        try {
-            try {
-                locked = createLock.tryLock(CREATE_LOCK_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-
-            ObjectReader objectReader = targetCache.get(objectType);
-            if (objectReader != null) {
-                return objectReader;
-            }
-
-            ObjectReaderCreator creator = getCreator();
-            objectReader = creator.createObjectReader(objectClass, objectType, fieldBased, this);
-            ObjectReader previous = targetCache.putIfAbsent(objectType, objectReader);
-            return previous != null ? previous : objectReader;
-        } finally {
-            if (locked) {
-                createLock.unlock();
-                targetLocks.remove(objectType, createLock);
-            }
-        }
+        ObjectReaderCreator creator = getCreator();
+        ObjectReader objectReader = creator.createObjectReader(objectClass, objectType, fieldBased, this);
+        ObjectReader previous = targetCache.putIfAbsent(objectType, objectReader);
+        return previous != null ? previous : objectReader;
     }
 
     private ObjectReader getPreviousObjectReader(boolean fieldBased, Type objectType, ObjectReader boundObjectReader) {

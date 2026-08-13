@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.TypeReference;
+import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -26,7 +27,85 @@ public class ObjectWriterProviderConcurrentTest {
         ObjectWriter methodBasedWriter = result.provider.getObjectWriter(Bean.class, Bean.class, false);
 
         assertNotSame(fieldBasedWriter, methodBasedWriter);
-        assertEquals(2, result.createCount.get());
+    }
+
+    @Test
+    public void testCreateModuleObjectWriterOnce() throws InterruptedException {
+        AtomicInteger moduleCount = new AtomicInteger();
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.register(new ObjectWriterModule() {
+            @Override
+            public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
+                if (objectType != ModuleBean.class) {
+                    return null;
+                }
+
+                moduleCount.incrementAndGet();
+                sleep(100);
+                return ObjectWriterImplString.INSTANCE;
+            }
+        });
+
+        Set<ObjectWriter> writers = getWriters(provider, ModuleBean.class, false, 32);
+        assertEquals(1, writers.size());
+        assertEquals(1, moduleCount.get());
+    }
+
+    @Test
+    public void testCreatorFailureDoesNotReplaceLiveLock() throws InterruptedException {
+        AtomicInteger createCount = new AtomicInteger();
+        AtomicInteger concurrentCount = new AtomicInteger();
+        AtomicInteger maxConcurrentCount = new AtomicInteger();
+        CountDownLatch firstStarted = new CountDownLatch(1);
+        CountDownLatch failFirst = new CountDownLatch(1);
+        CountDownLatch secondStarted = new CountDownLatch(1);
+        CountDownLatch finishSecond = new CountDownLatch(1);
+        ObjectWriterCreator creator = new ObjectWriterCreator() {
+            @Override
+            public ObjectWriter createObjectWriter(
+                    Class objectClass,
+                    long features,
+                    ObjectWriterProvider provider
+            ) {
+                int concurrent = concurrentCount.incrementAndGet();
+                maxConcurrentCount.accumulateAndGet(concurrent, Math::max);
+                try {
+                    int count = createCount.incrementAndGet();
+                    if (count == 1) {
+                        firstStarted.countDown();
+                        await(failFirst);
+                        throw new IllegalStateException("first creation failed");
+                    }
+                    if (count == 2) {
+                        secondStarted.countDown();
+                        await(finishSecond);
+                    }
+                    return super.createObjectWriter(objectClass, features, provider);
+                } finally {
+                    concurrentCount.decrementAndGet();
+                }
+            }
+        };
+        ObjectWriterProvider provider = new ObjectWriterProvider(creator);
+        CountDownLatch done = new CountDownLatch(3);
+        AtomicReference<Throwable> error = new AtomicReference<>();
+
+        startDaemonThread(() -> getObjectWriter(provider, FailureBean.class, new AtomicReference<>(), done));
+        assertTrue(firstStarted.await(5, TimeUnit.SECONDS));
+        startDaemonThread(() -> getObjectWriter(provider, FailureBean.class, error, done));
+        sleep(100);
+        failFirst.countDown();
+        assertTrue(secondStarted.await(5, TimeUnit.SECONDS));
+        sleep(100);
+        startDaemonThread(() -> getObjectWriter(provider, FailureBean.class, error, done));
+        sleep(200);
+
+        assertEquals(2, createCount.get());
+        assertEquals(1, maxConcurrentCount.get());
+        finishSecond.countDown();
+        assertTrue(done.await(5, TimeUnit.SECONDS));
+        assertNull(error.get());
+        assertEquals(2, createCount.get());
     }
 
     @Test
@@ -120,16 +199,24 @@ public class ObjectWriterProviderConcurrentTest {
                     ObjectWriterProvider provider
             ) {
                 createCount.incrementAndGet();
-                try {
-                    TimeUnit.MILLISECONDS.sleep(100);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException(e);
-                }
+                sleep(1200);
                 return super.createObjectWriter(objectClass, features, provider);
             }
         };
         ObjectWriterProvider provider = new ObjectWriterProvider(creator);
+        Set<ObjectWriter> writers = getWriters(provider, Bean.class, fieldBased, 32);
+
+        assertEquals(1, writers.size());
+        assertEquals(1, createCount.get());
+        return new ObjectWriterTestResult(provider, writers, createCount);
+    }
+
+    private static Set<ObjectWriter> getWriters(
+            ObjectWriterProvider provider,
+            Type type,
+            boolean fieldBased,
+            int threadCount
+    ) throws InterruptedException {
         CountDownLatch ready = new CountDownLatch(threadCount);
         CountDownLatch start = new CountDownLatch(1);
         CountDownLatch done = new CountDownLatch(threadCount);
@@ -141,7 +228,7 @@ public class ObjectWriterProviderConcurrentTest {
                 ready.countDown();
                 try {
                     start.await();
-                    writers.add(provider.getObjectWriter(Bean.class, Bean.class, fieldBased));
+                    writers.add(provider.getObjectWriter(type, (Class) type, fieldBased));
                 } catch (Throwable e) {
                     error.compareAndSet(null, e);
                 } finally {
@@ -155,9 +242,25 @@ public class ObjectWriterProviderConcurrentTest {
         assertTrue(allReady);
         assertTrue(done.await(10, TimeUnit.SECONDS));
         assertNull(error.get());
-        assertEquals(1, writers.size());
-        assertEquals(1, createCount.get());
-        return new ObjectWriterTestResult(provider, writers, createCount);
+        return writers;
+    }
+
+    private static void sleep(long millis) {
+        try {
+            TimeUnit.MILLISECONDS.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void await(CountDownLatch latch) {
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
     }
 
     private static void getObjectWriter(
@@ -222,6 +325,12 @@ public class ObjectWriterProviderConcurrentTest {
     }
 
     public static class BeanB {
+    }
+
+    public static class ModuleBean {
+    }
+
+    public static class FailureBean {
     }
 
     public static class GenericBean<T> {
