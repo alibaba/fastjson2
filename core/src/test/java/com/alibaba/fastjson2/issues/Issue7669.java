@@ -13,6 +13,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("regression")
 @Tag("jsonb")
@@ -236,20 +237,26 @@ public class Issue7669 {
     public void testUntypedArrayDeclaredLengthOOM_readAny() {
         // JSONB.parse with no target type dispatches to readAny(); its BC_ARRAY
         // branch reads the length via readLength() and pre-allocates
-        // new JSONArray(len) — now guarded by checkLength.
-        assertThrows(JSONException.class, () -> JSONB.parse(UNTYPED_ARRAY_MAX_LEN));
+        // new JSONArray(len) — now guarded by checkLength. Pin the guard's own
+        // message: without the guard a downstream "readAny overflow" JSONException
+        // would also satisfy a type-only assertion, letting the fix rot silently.
+        JSONException ex = assertThrows(JSONException.class, () -> JSONB.parse(UNTYPED_ARRAY_MAX_LEN));
+        assertTrue(ex.getMessage().contains("array length out of range"));
     }
 
     @Test
     public void testUntypedArrayDeclaredLengthOOM_readObject() {
         // A map whose value is an int[] (32 elems -> BC_ARRAY + BC_INT32 length).
-        // Corrupt the declared length, then parse as Object.class so readObject()
-        // takes the map-value BC_ARRAY branch (readLength).
+        // Corrupt the declared length, then parse via the untyped overload:
+        // JSONB.parseObject(bytes, Object.class) short-circuits through readAny()
+        // (the Object.class fast path) and would NOT exercise the readObject()
+        // map-value guard at JSONReaderJSONB.java:407 — the untyped overload does.
         Map<String, Object> m = new HashMap<>();
         m.put("k", new int[32]);
         byte[] bytes = JSONB.toBytes(m);
         corruptFirstArrayLength(bytes);
-        assertThrows(JSONException.class, () -> JSONB.parseObject(bytes, Object.class));
+        JSONException ex = assertThrows(JSONException.class, () -> JSONB.parseObject(bytes));
+        assertTrue(ex.getMessage().contains("array length out of range"));
     }
 
     @Test

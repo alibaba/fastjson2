@@ -404,7 +404,7 @@ final class JSONReaderJSONB
                         len = valueType - BC_ARRAY_FIX_MIN;
                     }
 
-                    checkLength(len, offset, end, "array length");
+                    checkArrayLen(len, offset, end);
 
                     if (len == 0) {
                         if ((features & Feature.UseNativeObject.mask) != 0) {
@@ -697,9 +697,7 @@ final class JSONReaderJSONB
             }
             case BC_BINARY: {
                 int len = readLength();
-                if (len < 0 || len > end - offset) {
-                    throw new JSONException("BC_BINARY length out of range: " + len);
-                }
+                checkLength(len, offset, end, "BC_BINARY length");
                 byte[] binary = Arrays.copyOfRange(this.bytes, offset, offset + len);
                 offset += len;
                 return binary;
@@ -929,7 +927,7 @@ final class JSONReaderJSONB
                             ? readLength()
                             : type - BC_ARRAY_FIX_MIN;
 
-                    checkLength(len, offset, end, "array length");
+                    checkArrayLen(len, offset, end);
 
                     if (len == 0) {
                         if ((context.features & Feature.UseNativeObject.mask) != 0) {
@@ -1102,7 +1100,7 @@ final class JSONReaderJSONB
                         ? readLength()
                         : valueType - BC_ARRAY_FIX_MIN;
 
-                checkLength(len, offset, end, "array length");
+                checkArrayLen(len, offset, end);
 
                 if (len == 0) {
                     if ((context.features & Feature.UseNativeObject.mask) != 0) {
@@ -1467,11 +1465,18 @@ final class JSONReaderJSONB
     // `label` identifies the context in the error message (e.g. "array length",
     // "BC_BIGINT length"). A declared length larger than the remaining buffer is
     // malformed input and must be rejected before any pre-allocation.
+    // Hot/cold split (AGENTS.md MaxInlineSize gate): keep the two comparisons
+    // small enough to inline on every BC_ARRAY header decode; the exception
+    // message StringBuilder chain lives in the cold throw helper.
     static void checkLength(int len, int offset, int end, String label) {
         if (len < 0 || len > end - offset) {
-            throw new JSONException(
-                    label + " out of range at offset " + offset + "/" + end + ": " + len + ", available: " + (end - offset));
+            throwLengthOutOfRange(len, offset, end, label);
         }
+    }
+
+    static void throwLengthOutOfRange(int len, int offset, int end, String label) {
+        throw new JSONException(
+                label + " out of range at offset " + offset + "/" + end + ": " + len + ", available: " + (end - offset));
     }
 
     public String error(byte type) {
@@ -3736,9 +3741,7 @@ final class JSONReaderJSONB
         }
 
         int len = readLength();
-        if (len < 0 || len > end - offset) {
-            throw new JSONException("BC_BINARY length out of range: " + len);
-        }
+        checkLength(len, offset, end, "BC_BINARY length");
         byte[] bytes = new byte[len];
         System.arraycopy(this.bytes, offset, bytes, 0, len);
         offset += len;
@@ -4510,9 +4513,7 @@ final class JSONReaderJSONB
             }
             case BC_BINARY: {
                 int len = readInt32Value();
-                if (len < 0 || len > end - offset) {
-                    throw new JSONException("BC_BINARY length out of range: " + len);
-                }
+                checkLength(len, offset, end, "BC_BINARY length");
                 byte[] buf = new byte[len];
                 System.arraycopy(this.bytes, offset, buf, 0, len);
                 offset += len;
