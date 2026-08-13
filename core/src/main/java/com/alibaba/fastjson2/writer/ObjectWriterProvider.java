@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.internal.CodecCreationCoordinator;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
@@ -22,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * ObjectWriterProvider is responsible for providing and managing ObjectWriter instances
@@ -67,13 +67,12 @@ public class ObjectWriterProvider
 
     final ConcurrentMap<Type, ObjectWriter> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectWriter> cacheFieldBased = new ConcurrentHashMap<>();
-    // Keep lock entries stable while a Type can be cached or retried after a failed creation.
-    final ConcurrentMap<Type, ReentrantLock> createLocks = new ConcurrentHashMap<>();
-    final ConcurrentMap<Type, ReentrantLock> createLocksFieldBased = new ConcurrentHashMap<>();
-    final ThreadLocal<Boolean> creating = new ThreadLocal<>();
+    final ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> createLocks = new ConcurrentHashMap<>();
+    final ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> createLocksFieldBased = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
     final ObjectWriterCreator creator;
     final List<ObjectWriterModule> modules = new ArrayList<>();
+
     PropertyNamingStrategy namingStrategy;
 
     boolean disableReferenceDetect = JSONFactory.isDisableReferenceDetect();
@@ -664,29 +663,27 @@ public class ObjectWriterProvider
 
     private ObjectWriter getObjectWriterWithLock(Type objectType, Class objectClass, boolean fieldBased) {
         ConcurrentMap<Type, ObjectWriter> targetCache = fieldBased ? cacheFieldBased : cache;
-        ConcurrentMap<Type, ReentrantLock> targetLocks = fieldBased ? createLocksFieldBased : createLocks;
-        ReentrantLock createLock = targetLocks.computeIfAbsent(objectType, type -> new ReentrantLock());
-        boolean outermost = creating.get() == null;
-
-        if (outermost) {
-            createLock.lock();
-            creating.set(Boolean.TRUE);
-        } else if (!createLock.tryLock()) {
-            // Do not wait while creating another type. Two creators can depend on each
-            // other from different threads, so waiting here could deadlock.
-            return resolveObjectWriter(objectType, objectClass, fieldBased);
-        }
-
-        try {
-            ObjectWriter objectWriter = targetCache.get(objectType);
-            return objectWriter != null
-                    ? objectWriter
-                    : resolveObjectWriter(objectType, objectClass, fieldBased);
-        } finally {
-            if (outermost) {
-                creating.remove();
+        ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> targetLocks =
+                fieldBased ? createLocksFieldBased : createLocks;
+        try (CodecCreationCoordinator.Scope scope = CodecCreationCoordinator.acquire(targetLocks, objectType)) {
+            if (scope.isCycleDetected()) {
+                ObjectWriter objectWriter = resolveObjectWriter(objectType, objectClass, fieldBased);
+                ObjectWriter previous = targetCache.putIfAbsent(objectType, objectWriter);
+                return previous != null ? previous : objectWriter;
             }
-            createLock.unlock();
+            ObjectWriter objectWriter = targetCache.get(objectType);
+            if (objectWriter != null) {
+                return objectWriter;
+            }
+            scope.throwIfFailed();
+            try {
+                objectWriter = resolveObjectWriter(objectType, objectClass, fieldBased);
+                ObjectWriter previous = targetCache.putIfAbsent(objectType, objectWriter);
+                return previous != null ? previous : objectWriter;
+            } catch (RuntimeException | Error error) {
+                scope.fail(error);
+                throw error;
+            }
         }
     }
 
@@ -875,8 +872,6 @@ public class ObjectWriterProvider
         mixInCache.clear();
         cache.clear();
         cacheFieldBased.clear();
-        createLocks.clear();
-        createLocksFieldBased.clear();
     }
 
     /**
@@ -888,8 +883,6 @@ public class ObjectWriterProvider
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
         cacheFieldBased.remove(objectClass);
-        createLocks.remove(objectClass);
-        createLocksFieldBased.remove(objectClass);
 
         BeanUtils.cleanupCache(objectClass);
     }
@@ -955,14 +948,6 @@ public class ObjectWriterProvider
 
         cacheFieldBased.entrySet().removeIf(
                 entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMap)
-        );
-
-        createLocks.keySet().removeIf(
-                type -> match(type, null, classLoader, checkedMap)
-        );
-
-        createLocksFieldBased.keySet().removeIf(
-                type -> match(type, null, classLoader, checkedMap)
         );
 
         BeanUtils.cleanupCache(classLoader);

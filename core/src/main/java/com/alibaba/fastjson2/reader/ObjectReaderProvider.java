@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.FieldBiConsumer;
 import com.alibaba.fastjson2.function.FieldConsumer;
+import com.alibaba.fastjson2.internal.CodecCreationCoordinator;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
@@ -21,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -182,10 +182,8 @@ public class ObjectReaderProvider
 
     final ConcurrentMap<Type, ObjectReader> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectReader> cacheFieldBased = new ConcurrentHashMap<>();
-    // Keep lock entries stable while a Type can be cached or retried after a failed creation.
-    final ConcurrentMap<Type, ReentrantLock> createLocks = new ConcurrentHashMap<>();
-    final ConcurrentMap<Type, ReentrantLock> createLocksFieldBased = new ConcurrentHashMap<>();
-    final ThreadLocal<Boolean> creating = new ThreadLocal<>();
+    final ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> createLocks = new ConcurrentHashMap<>();
+    final ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> createLocksFieldBased = new ConcurrentHashMap<>();
     final ConcurrentMap<Integer, ConcurrentHashMap<Long, ObjectReader>> tclHashCaches = new ConcurrentHashMap<>();
     final ConcurrentMap<Long, ObjectReader> hashCache = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
@@ -540,8 +538,6 @@ public class ObjectReaderProvider
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
         cacheFieldBased.remove(objectClass);
-        createLocks.remove(objectClass);
-        createLocksFieldBased.remove(objectClass);
         for (ConcurrentHashMap<Long, ObjectReader> tlc : tclHashCaches.values()) {
             for (Iterator<Map.Entry<Long, ObjectReader>> it = tlc.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<Long, ObjectReader> entry = it.next();
@@ -563,8 +559,6 @@ public class ObjectReaderProvider
         mixInCache.clear();
         cache.clear();
         cacheFieldBased.clear();
-        createLocks.clear();
-        createLocksFieldBased.clear();
     }
 
     static boolean match(Type objectType, ObjectReader objectReader, ClassLoader classLoader) {
@@ -637,14 +631,6 @@ public class ObjectReaderProvider
 
         cacheFieldBased.entrySet().removeIf(
                 entry -> match(entry.getKey(), entry.getValue(), classLoader)
-        );
-
-        createLocks.keySet().removeIf(
-                type -> match(type, null, classLoader)
-        );
-
-        createLocksFieldBased.keySet().removeIf(
-                type -> match(type, null, classLoader)
         );
 
         int tclHash = System.identityHashCode(classLoader);
@@ -1154,29 +1140,27 @@ public class ObjectReaderProvider
 
     private ObjectReader getObjectReaderInternal(Type objectType, boolean fieldBased) {
         ConcurrentMap<Type, ObjectReader> targetCache = fieldBased ? cacheFieldBased : cache;
-        ConcurrentMap<Type, ReentrantLock> targetLocks = fieldBased ? createLocksFieldBased : createLocks;
-        ReentrantLock createLock = targetLocks.computeIfAbsent(objectType, type -> new ReentrantLock());
-        boolean outermost = creating.get() == null;
-
-        if (outermost) {
-            createLock.lock();
-            creating.set(Boolean.TRUE);
-        } else if (!createLock.tryLock()) {
-            // Do not wait while creating another type. Two creators can depend on each
-            // other from different threads, so waiting here could deadlock.
-            return resolveObjectReader(objectType, fieldBased);
-        }
-
-        try {
-            ObjectReader objectReader = targetCache.get(objectType);
-            return objectReader != null
-                    ? objectReader
-                    : resolveObjectReader(objectType, fieldBased);
-        } finally {
-            if (outermost) {
-                creating.remove();
+        ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> targetLocks =
+                fieldBased ? createLocksFieldBased : createLocks;
+        try (CodecCreationCoordinator.Scope scope = CodecCreationCoordinator.acquire(targetLocks, objectType)) {
+            if (scope.isCycleDetected()) {
+                ObjectReader objectReader = resolveObjectReader(objectType, fieldBased);
+                ObjectReader previous = targetCache.putIfAbsent(objectType, objectReader);
+                return previous != null ? previous : objectReader;
             }
-            createLock.unlock();
+            ObjectReader objectReader = targetCache.get(objectType);
+            if (objectReader != null) {
+                return objectReader;
+            }
+            scope.throwIfFailed();
+            try {
+                objectReader = resolveObjectReader(objectType, fieldBased);
+                ObjectReader previous = targetCache.putIfAbsent(objectType, objectReader);
+                return previous != null ? previous : objectReader;
+            } catch (RuntimeException | Error error) {
+                scope.fail(error);
+                throw error;
+            }
         }
     }
 

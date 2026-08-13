@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -27,6 +28,7 @@ public class ObjectReaderProviderConcurrentTest {
         ObjectReader methodBasedReader = result.provider.getObjectReader(Bean.class, false);
 
         assertNotSame(fieldBasedReader, methodBasedReader);
+        assertNoCreateLocks(result.provider);
     }
 
     @Test
@@ -49,17 +51,27 @@ public class ObjectReaderProviderConcurrentTest {
         Set<ObjectReader> readers = getReaders(provider, ModuleBean.class, false, 32);
         assertEquals(1, readers.size());
         assertEquals(1, moduleCount.get());
+        assertNoCreateLocks(provider);
+    }
+
+    @Test
+    public void testSpecializedObjectReaderIsPublished() throws InterruptedException {
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        Type type = new TypeReference<ArrayList<ValueA>>() { }.getType();
+
+        Set<ObjectReader> readers = getReaders(provider, type, false, 32);
+
+        assertEquals(1, readers.size());
+        assertSame(readers.iterator().next(), provider.cache.get(type));
+        assertNoCreateLocks(provider);
     }
 
     @Test
     public void testCreatorFailureDoesNotReplaceLiveLock() throws InterruptedException {
         AtomicInteger createCount = new AtomicInteger();
-        AtomicInteger concurrentCount = new AtomicInteger();
-        AtomicInteger maxConcurrentCount = new AtomicInteger();
         CountDownLatch firstStarted = new CountDownLatch(1);
         CountDownLatch failFirst = new CountDownLatch(1);
-        CountDownLatch secondStarted = new CountDownLatch(1);
-        CountDownLatch finishSecond = new CountDownLatch(1);
+        IllegalStateException expectedError = new IllegalStateException("first creation failed");
         ObjectReaderCreator creator = new ObjectReaderCreator() {
             @Override
             public <T> ObjectReader<T> createObjectReader(
@@ -68,45 +80,73 @@ public class ObjectReaderProviderConcurrentTest {
                     boolean fieldBased,
                     ObjectReaderProvider provider
             ) {
-                int concurrent = concurrentCount.incrementAndGet();
-                maxConcurrentCount.accumulateAndGet(concurrent, Math::max);
-                try {
-                    int count = createCount.incrementAndGet();
-                    if (count == 1) {
-                        firstStarted.countDown();
-                        await(failFirst);
-                        throw new IllegalStateException("first creation failed");
-                    }
-                    if (count == 2) {
-                        secondStarted.countDown();
-                        await(finishSecond);
-                    }
-                    return super.createObjectReader(objectClass, objectType, fieldBased, provider);
-                } finally {
-                    concurrentCount.decrementAndGet();
+                if (createCount.incrementAndGet() == 1) {
+                    firstStarted.countDown();
+                    await(failFirst);
+                    throw expectedError;
                 }
+                return super.createObjectReader(objectClass, objectType, fieldBased, provider);
             }
         };
         ObjectReaderProvider provider = new ObjectReaderProvider(creator);
-        CountDownLatch done = new CountDownLatch(3);
-        AtomicReference<Throwable> error = new AtomicReference<>();
+        CountDownLatch done = new CountDownLatch(2);
+        AtomicReference<Throwable> firstError = new AtomicReference<>();
+        AtomicReference<Throwable> secondError = new AtomicReference<>();
 
-        startDaemonThread(() -> getObjectReader(provider, FailureBean.class, new AtomicReference<>(), done));
+        startDaemonThread(() -> getObjectReader(provider, FailureBean.class, firstError, done));
         assertTrue(firstStarted.await(5, TimeUnit.SECONDS));
-        startDaemonThread(() -> getObjectReader(provider, FailureBean.class, error, done));
-        sleep(100);
+        Thread second = startDaemonThread(() -> getObjectReader(provider, FailureBean.class, secondError, done));
+        awaitWaiting(second);
         failFirst.countDown();
-        assertTrue(secondStarted.await(5, TimeUnit.SECONDS));
-        sleep(100);
-        startDaemonThread(() -> getObjectReader(provider, FailureBean.class, error, done));
-        sleep(200);
+        assertTrue(done.await(5, TimeUnit.SECONDS));
 
+        assertSame(expectedError, firstError.get());
+        assertSame(expectedError, secondError.get());
+        assertEquals(1, createCount.get());
+        assertNotNull(provider.getObjectReader(FailureBean.class));
         assertEquals(2, createCount.get());
-        assertEquals(1, maxConcurrentCount.get());
-        finishSecond.countDown();
+        assertNoCreateLocks(provider);
+    }
+
+    @Test
+    public void testNestedCreationWaitsWhenThereIsNoCycle() throws InterruptedException {
+        AtomicInteger beanBCreateCount = new AtomicInteger();
+        CountDownLatch beanBStarted = new CountDownLatch(1);
+        CountDownLatch finishBeanB = new CountDownLatch(1);
+        ObjectReaderCreator creator = new ObjectReaderCreator() {
+            @Override
+            public <T> ObjectReader<T> createObjectReader(
+                    Class<T> objectClass,
+                    Type objectType,
+                    boolean fieldBased,
+                    ObjectReaderProvider provider
+            ) {
+                if (objectClass == BeanB.class) {
+                    beanBCreateCount.incrementAndGet();
+                    beanBStarted.countDown();
+                    await(finishBeanB);
+                } else if (objectClass == BeanA.class) {
+                    await(beanBStarted);
+                    provider.getObjectReader(BeanB.class);
+                }
+                return super.createObjectReader(objectClass, objectType, fieldBased, provider);
+            }
+        };
+        ObjectReaderProvider provider = new ObjectReaderProvider(creator);
+        AtomicReference<Throwable> error = new AtomicReference<>();
+        CountDownLatch done = new CountDownLatch(2);
+
+        startDaemonThread(() -> getObjectReader(provider, BeanB.class, error, done));
+        assertTrue(beanBStarted.await(5, TimeUnit.SECONDS));
+        Thread beanAThread = startDaemonThread(() -> getObjectReader(provider, BeanA.class, error, done));
+        awaitWaiting(beanAThread);
+
+        assertEquals(1, beanBCreateCount.get());
+        finishBeanB.countDown();
         assertTrue(done.await(5, TimeUnit.SECONDS));
         assertNull(error.get());
-        assertEquals(2, createCount.get());
+        assertEquals(1, beanBCreateCount.get());
+        assertNoCreateLocks(provider);
     }
 
     @Test
@@ -148,6 +188,7 @@ public class ObjectReaderProviderConcurrentTest {
 
         assertTrue(done.await(10, TimeUnit.SECONDS));
         assertNull(error.get());
+        assertNoCreateLocks(provider);
     }
 
     @Test
@@ -189,6 +230,7 @@ public class ObjectReaderProviderConcurrentTest {
         assertTrue(done.await(10, TimeUnit.SECONDS));
         assertNull(error.get());
         assertEquals(2, createCount.get());
+        assertNoCreateLocks(provider);
     }
 
     private ObjectReaderTestResult assertCreateObjectReaderOnce(boolean fieldBased) throws InterruptedException {
@@ -212,7 +254,13 @@ public class ObjectReaderProviderConcurrentTest {
 
         assertEquals(1, readers.size());
         assertEquals(1, createCount.get());
+        assertNoCreateLocks(provider);
         return new ObjectReaderTestResult(provider, readers, createCount);
+    }
+
+    private static void assertNoCreateLocks(ObjectReaderProvider provider) {
+        assertTrue(provider.createLocks.isEmpty());
+        assertTrue(provider.createLocksFieldBased.isEmpty());
     }
 
     private static Set<ObjectReader> getReaders(
@@ -282,10 +330,19 @@ public class ObjectReaderProviderConcurrentTest {
         }
     }
 
-    private static void startDaemonThread(Runnable task) {
+    private static void awaitWaiting(Thread thread) throws InterruptedException {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        while (thread.getState() != Thread.State.WAITING && System.nanoTime() < deadline) {
+            TimeUnit.MILLISECONDS.sleep(1);
+        }
+        assertEquals(Thread.State.WAITING, thread.getState());
+    }
+
+    private static Thread startDaemonThread(Runnable task) {
         Thread thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();
+        return thread;
     }
 
     static final class ObjectReaderTestResult {

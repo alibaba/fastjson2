@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -27,6 +28,7 @@ public class ObjectWriterProviderConcurrentTest {
         ObjectWriter methodBasedWriter = result.provider.getObjectWriter(Bean.class, Bean.class, false);
 
         assertNotSame(fieldBasedWriter, methodBasedWriter);
+        assertNoCreateLocks(result.provider);
     }
 
     @Test
@@ -49,17 +51,26 @@ public class ObjectWriterProviderConcurrentTest {
         Set<ObjectWriter> writers = getWriters(provider, ModuleBean.class, false, 32);
         assertEquals(1, writers.size());
         assertEquals(1, moduleCount.get());
+        assertNoCreateLocks(provider);
+    }
+
+    @Test
+    public void testSpecializedObjectWriterIsPublished() throws InterruptedException {
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+
+        Set<ObjectWriter> writers = getWriters(provider, ExtendedMap.class, false, 32);
+
+        assertEquals(1, writers.size());
+        assertSame(writers.iterator().next(), provider.cache.get(ExtendedMap.class));
+        assertNoCreateLocks(provider);
     }
 
     @Test
     public void testCreatorFailureDoesNotReplaceLiveLock() throws InterruptedException {
         AtomicInteger createCount = new AtomicInteger();
-        AtomicInteger concurrentCount = new AtomicInteger();
-        AtomicInteger maxConcurrentCount = new AtomicInteger();
         CountDownLatch firstStarted = new CountDownLatch(1);
         CountDownLatch failFirst = new CountDownLatch(1);
-        CountDownLatch secondStarted = new CountDownLatch(1);
-        CountDownLatch finishSecond = new CountDownLatch(1);
+        IllegalStateException expectedError = new IllegalStateException("first creation failed");
         ObjectWriterCreator creator = new ObjectWriterCreator() {
             @Override
             public ObjectWriter createObjectWriter(
@@ -67,45 +78,72 @@ public class ObjectWriterProviderConcurrentTest {
                     long features,
                     ObjectWriterProvider provider
             ) {
-                int concurrent = concurrentCount.incrementAndGet();
-                maxConcurrentCount.accumulateAndGet(concurrent, Math::max);
-                try {
-                    int count = createCount.incrementAndGet();
-                    if (count == 1) {
-                        firstStarted.countDown();
-                        await(failFirst);
-                        throw new IllegalStateException("first creation failed");
-                    }
-                    if (count == 2) {
-                        secondStarted.countDown();
-                        await(finishSecond);
-                    }
-                    return super.createObjectWriter(objectClass, features, provider);
-                } finally {
-                    concurrentCount.decrementAndGet();
+                if (createCount.incrementAndGet() == 1) {
+                    firstStarted.countDown();
+                    await(failFirst);
+                    throw expectedError;
                 }
+                return super.createObjectWriter(objectClass, features, provider);
             }
         };
         ObjectWriterProvider provider = new ObjectWriterProvider(creator);
-        CountDownLatch done = new CountDownLatch(3);
-        AtomicReference<Throwable> error = new AtomicReference<>();
+        CountDownLatch done = new CountDownLatch(2);
+        AtomicReference<Throwable> firstError = new AtomicReference<>();
+        AtomicReference<Throwable> secondError = new AtomicReference<>();
 
-        startDaemonThread(() -> getObjectWriter(provider, FailureBean.class, new AtomicReference<>(), done));
+        startDaemonThread(() -> getObjectWriter(provider, FailureBean.class, firstError, done));
         assertTrue(firstStarted.await(5, TimeUnit.SECONDS));
-        startDaemonThread(() -> getObjectWriter(provider, FailureBean.class, error, done));
-        sleep(100);
+        Thread second = startDaemonThread(() -> getObjectWriter(provider, FailureBean.class, secondError, done));
+        awaitWaiting(second);
         failFirst.countDown();
-        assertTrue(secondStarted.await(5, TimeUnit.SECONDS));
-        sleep(100);
-        startDaemonThread(() -> getObjectWriter(provider, FailureBean.class, error, done));
-        sleep(200);
+        assertTrue(done.await(5, TimeUnit.SECONDS));
 
+        assertSame(expectedError, firstError.get());
+        assertSame(expectedError, secondError.get());
+        assertEquals(1, createCount.get());
+        assertNotNull(provider.getObjectWriter(FailureBean.class));
         assertEquals(2, createCount.get());
-        assertEquals(1, maxConcurrentCount.get());
-        finishSecond.countDown();
+        assertNoCreateLocks(provider);
+    }
+
+    @Test
+    public void testNestedCreationWaitsWhenThereIsNoCycle() throws InterruptedException {
+        AtomicInteger beanBCreateCount = new AtomicInteger();
+        CountDownLatch beanBStarted = new CountDownLatch(1);
+        CountDownLatch finishBeanB = new CountDownLatch(1);
+        ObjectWriterCreator creator = new ObjectWriterCreator() {
+            @Override
+            public ObjectWriter createObjectWriter(
+                    Class objectClass,
+                    long features,
+                    ObjectWriterProvider provider
+            ) {
+                if (objectClass == BeanB.class) {
+                    beanBCreateCount.incrementAndGet();
+                    beanBStarted.countDown();
+                    await(finishBeanB);
+                } else if (objectClass == BeanA.class) {
+                    await(beanBStarted);
+                    provider.getObjectWriter(BeanB.class);
+                }
+                return super.createObjectWriter(objectClass, features, provider);
+            }
+        };
+        ObjectWriterProvider provider = new ObjectWriterProvider(creator);
+        AtomicReference<Throwable> error = new AtomicReference<>();
+        CountDownLatch done = new CountDownLatch(2);
+
+        startDaemonThread(() -> getObjectWriter(provider, BeanB.class, error, done));
+        assertTrue(beanBStarted.await(5, TimeUnit.SECONDS));
+        Thread beanAThread = startDaemonThread(() -> getObjectWriter(provider, BeanA.class, error, done));
+        awaitWaiting(beanAThread);
+
+        assertEquals(1, beanBCreateCount.get());
+        finishBeanB.countDown();
         assertTrue(done.await(5, TimeUnit.SECONDS));
         assertNull(error.get());
-        assertEquals(2, createCount.get());
+        assertEquals(1, beanBCreateCount.get());
+        assertNoCreateLocks(provider);
     }
 
     @Test
@@ -146,6 +184,7 @@ public class ObjectWriterProviderConcurrentTest {
 
         assertTrue(done.await(10, TimeUnit.SECONDS));
         assertNull(error.get());
+        assertNoCreateLocks(provider);
     }
 
     @Test
@@ -186,6 +225,7 @@ public class ObjectWriterProviderConcurrentTest {
         assertTrue(done.await(10, TimeUnit.SECONDS));
         assertNull(error.get());
         assertEquals(2, createCount.get());
+        assertNoCreateLocks(provider);
     }
 
     private ObjectWriterTestResult assertCreateObjectWriterOnce(boolean fieldBased) throws InterruptedException {
@@ -208,7 +248,13 @@ public class ObjectWriterProviderConcurrentTest {
 
         assertEquals(1, writers.size());
         assertEquals(1, createCount.get());
+        assertNoCreateLocks(provider);
         return new ObjectWriterTestResult(provider, writers, createCount);
+    }
+
+    private static void assertNoCreateLocks(ObjectWriterProvider provider) {
+        assertTrue(provider.createLocks.isEmpty());
+        assertTrue(provider.createLocksFieldBased.isEmpty());
     }
 
     private static Set<ObjectWriter> getWriters(
@@ -278,10 +324,19 @@ public class ObjectWriterProviderConcurrentTest {
         }
     }
 
-    private static void startDaemonThread(Runnable task) {
+    private static void awaitWaiting(Thread thread) throws InterruptedException {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        while (thread.getState() != Thread.State.WAITING && System.nanoTime() < deadline) {
+            TimeUnit.MILLISECONDS.sleep(1);
+        }
+        assertEquals(Thread.State.WAITING, thread.getState());
+    }
+
+    private static Thread startDaemonThread(Runnable task) {
         Thread thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();
+        return thread;
     }
 
     static final class ObjectWriterTestResult {
@@ -331,6 +386,11 @@ public class ObjectWriterProviderConcurrentTest {
     }
 
     public static class FailureBean {
+    }
+
+    public static class ExtendedMap extends HashMap<String, String> {
+        public ExtendedMap(String ignored) {
+        }
     }
 
     public static class GenericBean<T> {
