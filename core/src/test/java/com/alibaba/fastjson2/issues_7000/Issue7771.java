@@ -38,5 +38,30 @@ public class Issue7771 {
     public void containsOnJsonNullLiteralIsFalse() {
         assertFalse(JSONPath.contains("null", "$.status"));
         assertFalse(JSONPath.contains("null", "$"));
+        assertFalse(JSONPath.contains((String) null, "$.status"));
+        assertFalse(JSONPath.contains("", "$.status"));
+    }
+
+    @Test
+    public void containsOnRootPathMatchesEval() {
+        assertTrue(JSONPath.contains("{\"status\":200}", "$"));
+        assertTrue(JSONPath.contains("123", "$"));
+        assertTrue(JSONPath.contains("[1,2]", "$"));
+        assertEquals(JSON.parse("{\"status\":200}"), JSONPath.eval("{\"status\":200}", "$"));
+    }
+
+    @Test
+    public void containsOnArrayRoot() {
+        assertTrue(JSONPath.contains("[1,2,3]", "$[1]"));
+        assertFalse(JSONPath.contains("[1,2,3]", "$[5]"));
+        assertFalse(JSONPath.contains("[null]", "$.status"));
+        assertFalse(JSONPath.contains("[null,{\"status\":1}]", "$.status"));
+        assertTrue(JSONPath.contains("[{\"status\":1},null]", "$.status"));
+    }
+
+    @Test
+    public void containsOnRefCycleDoesNotOverflow() {
+        assertTrue(JSONPath.contains("{\"a\":{\"$ref\":\"$\"}}", "$..a"));
+        assertTrue(JSONPath.contains("{\"x\":{\"y\":{\"$ref\":\"$\"}}}", "$..x"));
     }
 }

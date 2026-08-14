@@ -111,6 +111,10 @@ final class JSONPathSingleName
 
     @Override
     public boolean contains(Object root) {
+        if (root == null) {
+            return false;
+        }
+
         if (root instanceof Map) {
             return ((Map) root).containsKey(name);
         }
