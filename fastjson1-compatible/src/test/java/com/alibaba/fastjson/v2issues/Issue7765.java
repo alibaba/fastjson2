@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONPath;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.parser.DefaultJSONParser;
 import com.alibaba.fastjson.parser.JSONScanner;
+import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.support.hsf.HSFJSONUtils;
 import org.junit.jupiter.api.Test;
 
@@ -91,6 +92,13 @@ public class Issue7765 {
     @Test
     public void testDefaultJSONParserNestedContainerType() {
         Object parsed = new DefaultJSONParser("{\"inner\":{\"name\":\"alpha\"}}").parse();
+        assertEquals(JSONObject.class, parsed.getClass());
+        assertEquals(JSONObject.class, ((JSONObject) parsed).get("inner").getClass());
+    }
+
+    @Test
+    public void testDefaultJSONParserWithConfigNestedContainerType() {
+        Object parsed = new DefaultJSONParser("{\"inner\":{\"name\":\"alpha\"}}", ParserConfig.global).parse();
         assertEquals(JSONObject.class, parsed.getClass());
         assertEquals(JSONObject.class, ((JSONObject) parsed).get("inner").getClass());
     }
