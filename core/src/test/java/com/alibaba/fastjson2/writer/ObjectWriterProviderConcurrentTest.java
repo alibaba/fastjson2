@@ -101,7 +101,23 @@ public class ObjectWriterProviderConcurrentTest {
         assertSame(expectedError, firstError.get());
         assertSame(expectedError, secondError.get());
         assertEquals(1, createCount.get());
-        assertNotNull(provider.getObjectWriter(FailureBean.class));
+
+        CountDownLatch retryDone = new CountDownLatch(1);
+        AtomicReference<ObjectWriter> retryWriter = new AtomicReference<>();
+        AtomicReference<Throwable> retryError = new AtomicReference<>();
+        startDaemonThread(() -> {
+            try {
+                retryWriter.set(provider.getObjectWriter(FailureBean.class));
+            } catch (Throwable e) {
+                retryError.set(e);
+            } finally {
+                retryDone.countDown();
+            }
+        });
+
+        assertTrue(retryDone.await(5, TimeUnit.SECONDS));
+        assertNull(retryError.get());
+        assertNotNull(retryWriter.get());
         assertEquals(2, createCount.get());
         assertNoCreateLocks(provider);
     }

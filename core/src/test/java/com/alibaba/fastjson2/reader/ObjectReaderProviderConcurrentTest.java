@@ -103,7 +103,23 @@ public class ObjectReaderProviderConcurrentTest {
         assertSame(expectedError, firstError.get());
         assertSame(expectedError, secondError.get());
         assertEquals(1, createCount.get());
-        assertNotNull(provider.getObjectReader(FailureBean.class));
+
+        CountDownLatch retryDone = new CountDownLatch(1);
+        AtomicReference<ObjectReader> retryReader = new AtomicReference<>();
+        AtomicReference<Throwable> retryError = new AtomicReference<>();
+        startDaemonThread(() -> {
+            try {
+                retryReader.set(provider.getObjectReader(FailureBean.class));
+            } catch (Throwable e) {
+                retryError.set(e);
+            } finally {
+                retryDone.countDown();
+            }
+        });
+
+        assertTrue(retryDone.await(5, TimeUnit.SECONDS));
+        assertNull(retryError.get());
+        assertNotNull(retryReader.get());
         assertEquals(2, createCount.get());
         assertNoCreateLocks(provider);
     }
