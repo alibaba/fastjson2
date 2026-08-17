@@ -4633,6 +4633,27 @@ public interface JSON {
     }
 
     /**
+     * Copies the properties of the specified source object into the given target object (in-place).
+     * No new instance is created; the target object is modified directly. Only fields with
+     * matching names between source and target are copied.
+     *
+     * @param object the source object whose properties will be copied
+     * @param targetObject the target object to receive the copied properties
+     * @param features the specified features are applied to serialization
+     * @param <T> the target type
+     * @return the target object after properties have been copied into it
+     * @since 2.0.65
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T copyTo(Object object, Object targetObject, JSONWriter.Feature... features) {
+        if (object == null || targetObject == null) {
+            return (T) targetObject;
+        }
+        ((JSONObject) toJSON(object, features)).copyTo(targetObject);
+        return (T) targetObject;
+    }
+
+    /**
      * Configure the Enum classes as a JavaBean
      *
      * @param enumClasses the enum classes to configure as JavaBeans
