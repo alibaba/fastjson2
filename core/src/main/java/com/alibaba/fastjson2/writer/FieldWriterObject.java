@@ -79,13 +79,7 @@ public class FieldWriterObject<T>
         if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
             return getObjectWriterVoid(jsonWriter, valueClass);
         } else {
-            boolean typeMatch = initValueClass == valueClass
-                    || (writeUsing && initValueClass.isAssignableFrom(valueClass))
-                    || (initValueClass == Map.class && initValueClass.isAssignableFrom(valueClass))
-                    || (initValueClass == List.class && initValueClass.isAssignableFrom(valueClass));
-            if (!typeMatch && initValueClass.isPrimitive()) {
-                typeMatch = typeMatch(initValueClass, valueClass);
-            }
+            boolean typeMatch = isTypeMatch(valueClass);
 
             if (typeMatch) {
                 ObjectWriter objectWriter;
@@ -99,6 +93,31 @@ public class FieldWriterObject<T>
                 return getObjectWriterTypeNotMatch(jsonWriter, valueClass);
             }
         }
+    }
+
+    /**
+     * Whether a value of {@code valueClass} is compatible with the writer cached for
+     * {@link #initValueClass}. Mirrors the typeMatch check performed on the write path so that
+     * {@link ObjectWriterAdapter#toJSONObject(Object)} keeps {@code toJSON} consistent with
+     * {@code toJSONString}. Notably this requires an exact class match (plus the writeUsing / Map /
+     * List / primitive-boxing exceptions), so a subclass value does NOT match and must be
+     * re-resolved by its actual class to avoid silently dropping the subclass fields.
+     * Returns {@code false} when {@link #initValueClass} is {@code null} (no value has been
+     * observed for this field yet, so nothing is cached to match against).
+     */
+    public boolean isTypeMatch(Class valueClass) {
+        final Class initValueClass = this.initValueClass;
+        if (initValueClass == null) {
+            return false;
+        }
+        boolean typeMatch = initValueClass == valueClass
+                || (writeUsing && initValueClass.isAssignableFrom(valueClass))
+                || (initValueClass == Map.class && initValueClass.isAssignableFrom(valueClass))
+                || (initValueClass == List.class && initValueClass.isAssignableFrom(valueClass));
+        if (!typeMatch && initValueClass.isPrimitive()) {
+            typeMatch = typeMatch(initValueClass, valueClass);
+        }
+        return typeMatch;
     }
 
     protected final ObjectWriter getObjectWriterVoid(JSONWriter jsonWriter, Class valueClass) {
