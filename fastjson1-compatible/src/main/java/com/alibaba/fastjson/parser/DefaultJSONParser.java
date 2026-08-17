@@ -1,5 +1,6 @@
 package com.alibaba.fastjson.parser;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
@@ -18,7 +19,7 @@ public class DefaultJSONParser
     private Object input;
 
     public DefaultJSONParser(String text) {
-        this(JSONReader.of(text), ParserConfig.global);
+        this(JSONReader.of(text, JSON.createReadContext()), ParserConfig.global);
         this.input = text;
     }
 
@@ -34,7 +35,7 @@ public class DefaultJSONParser
     }
 
     public DefaultJSONParser(String text, ParserConfig config) {
-        this(JSONReader.of(text), config);
+        this(JSONReader.of(text, JSON.createReadContext()), config);
     }
 
     public DefaultJSONParser(JSONReader reader, ParserConfig config) {
