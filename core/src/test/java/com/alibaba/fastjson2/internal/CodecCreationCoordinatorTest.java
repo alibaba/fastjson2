@@ -113,6 +113,27 @@ public class CodecCreationCoordinatorTest {
     }
 
     @Test
+    public void testSameThreadDependencyCycleDoesNotReenterLock() {
+        ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> locks = new ConcurrentHashMap<>();
+
+        try (CodecCreationCoordinator.Scope outer =
+                     CodecCreationCoordinator.acquire(locks, Bean.class)) {
+            assertFalse(outer.isCycleDetected());
+            CodecCreationCoordinator.LockEntry lockEntry = locks.get(Bean.class);
+            assertEquals(1, lockEntry.lock.getHoldCount());
+
+            try (CodecCreationCoordinator.Scope nested =
+                         CodecCreationCoordinator.acquire(locks, Bean.class)) {
+                assertTrue(nested.isCycleDetected());
+                assertTrue(nested.isLockFreeFallback());
+                assertEquals(1, lockEntry.lock.getHoldCount());
+            }
+        }
+
+        assertTrue(locks.isEmpty());
+    }
+
+    @Test
     public void testFailureDoesNotLeakAcrossLockGenerations() throws InterruptedException {
         ReleaseRaceMap locks = new ReleaseRaceMap();
         IllegalStateException expectedError = new IllegalStateException("first creation failed");
@@ -166,10 +187,10 @@ public class CodecCreationCoordinatorTest {
     }
 
     @Test
-    public void testExternalWaitUsesSingleRateLimitedFallback() throws InterruptedException {
+    public void testExternalWaitUsesSingleActiveFallback() throws InterruptedException {
         int threadCount = 8;
-        long waitNanos = TimeUnit.MILLISECONDS.toNanos(100);
-        long fallbackIntervalNanos = TimeUnit.SECONDS.toNanos(1);
+        long waitNanos = TimeUnit.MILLISECONDS.toNanos(50);
+        long fallbackIntervalNanos = TimeUnit.MILLISECONDS.toNanos(100);
         ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> locks = new ConcurrentHashMap<>();
         CodecCreationCoordinator.Scope first = CodecCreationCoordinator.acquire(
                 locks,
@@ -180,6 +201,7 @@ public class CodecCreationCoordinatorTest {
         CountDownLatch ready = new CountDownLatch(threadCount);
         CountDownLatch start = new CountDownLatch(1);
         CountDownLatch fallbackEntered = new CountDownLatch(1);
+        CountDownLatch continueFallback = new CountDownLatch(1);
         CountDownLatch done = new CountDownLatch(threadCount);
         AtomicInteger fallbacks = new AtomicInteger();
         AtomicReference<Throwable> error = new AtomicReference<>();
@@ -199,6 +221,7 @@ public class CodecCreationCoordinatorTest {
                             assertFalse(scope.isCycleDetected());
                             fallbacks.incrementAndGet();
                             fallbackEntered.countDown();
+                            assertTrue(continueFallback.await(5, TimeUnit.SECONDS));
                         }
                     }
                 } catch (Throwable e) {
@@ -209,14 +232,69 @@ public class CodecCreationCoordinatorTest {
             });
         }
 
-        assertTrue(ready.await(5, TimeUnit.SECONDS));
-        start.countDown();
-        assertTrue(fallbackEntered.await(5, TimeUnit.SECONDS));
-        first.close();
+        try {
+            assertTrue(ready.await(5, TimeUnit.SECONDS));
+            start.countDown();
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (locks.get(Bean.class).references.get() < threadCount + 1
+                    && System.nanoTime() < deadline) {
+                TimeUnit.MILLISECONDS.sleep(1);
+            }
+            assertEquals(threadCount + 1, locks.get(Bean.class).references.get());
+            assertTrue(fallbackEntered.await(5, TimeUnit.SECONDS));
+            TimeUnit.MILLISECONDS.sleep(350);
+            assertEquals(1, fallbacks.get());
+        } finally {
+            start.countDown();
+            first.close();
+            continueFallback.countDown();
+        }
 
         assertTrue(done.await(5, TimeUnit.SECONDS));
         assertNull(error.get());
         assertEquals(1, fallbacks.get());
+        assertTrue(locks.isEmpty());
+    }
+
+    @Test
+    public void testFallbackReservationIsReleasedWithScope() throws InterruptedException {
+        long waitNanos = TimeUnit.MILLISECONDS.toNanos(10);
+        ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> locks = new ConcurrentHashMap<>();
+        CodecCreationCoordinator.Scope first = CodecCreationCoordinator.acquire(
+                locks,
+                Bean.class,
+                waitNanos,
+                0
+        );
+        AtomicInteger fallbacks = new AtomicInteger();
+        AtomicReference<Throwable> error = new AtomicReference<>();
+
+        try {
+            for (int i = 0; i < 2; i++) {
+                CountDownLatch done = new CountDownLatch(1);
+                startDaemonThread(() -> {
+                    try (CodecCreationCoordinator.Scope scope = CodecCreationCoordinator.acquire(
+                            locks,
+                            Bean.class,
+                            waitNanos,
+                            0
+                    )) {
+                        assertTrue(scope.isLockFreeFallback());
+                        fallbacks.incrementAndGet();
+                    } catch (Throwable e) {
+                        error.compareAndSet(null, e);
+                    } finally {
+                        done.countDown();
+                    }
+                });
+                assertTrue(done.await(5, TimeUnit.SECONDS));
+                assertNull(error.get());
+            }
+        } finally {
+            first.close();
+        }
+
+        assertEquals(2, fallbacks.get());
         assertTrue(locks.isEmpty());
     }
 

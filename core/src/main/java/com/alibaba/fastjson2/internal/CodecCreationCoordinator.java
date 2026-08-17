@@ -4,6 +4,7 @@ import java.lang.reflect.Type;
 import java.util.IdentityHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -14,7 +15,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * same lock, and the entry can be removed without retaining the associated type.
  * A shared per-thread wait context detects dependency cycles across both providers.
  * Waits that cross external synchronization, such as class initialization, are
- * bounded; lock-free fallbacks are rate-limited per entry to avoid a creation burst.
+ * bounded; lock-free fallbacks are serialized and rate-limited per entry to avoid
+ * a creation burst.
  */
 public final class CodecCreationCoordinator {
     private static final long WAIT_NANOS = TimeUnit.SECONDS.toNanos(5);
@@ -27,6 +29,7 @@ public final class CodecCreationCoordinator {
     public static final class LockEntry {
         final ReentrantLock lock = new ReentrantLock();
         final AtomicInteger references = new AtomicInteger();
+        final AtomicBoolean fallbackActive = new AtomicBoolean();
         final AtomicLong nextFallbackNanos = new AtomicLong();
         volatile Context owner;
         volatile Throwable failure;
@@ -46,6 +49,7 @@ public final class CodecCreationCoordinator {
         private final boolean outermost;
         private final boolean locked;
         private final boolean cycleDetected;
+        private final boolean fallbackReserved;
         private boolean closed;
 
         private Scope(
@@ -54,7 +58,8 @@ public final class CodecCreationCoordinator {
                 LockEntry createLock,
                 boolean outermost,
                 boolean locked,
-                boolean cycleDetected
+                boolean cycleDetected,
+                boolean fallbackReserved
         ) {
             this.locks = locks;
             this.type = type;
@@ -62,6 +67,7 @@ public final class CodecCreationCoordinator {
             this.outermost = outermost;
             this.locked = locked;
             this.cycleDetected = cycleDetected;
+            this.fallbackReserved = fallbackReserved;
         }
 
         public boolean isCycleDetected() {
@@ -102,10 +108,19 @@ public final class CodecCreationCoordinator {
                 if (createLock.lock.getHoldCount() == 1) {
                     createLock.owner = null;
                 }
-                release(locks, type, createLock);
-                createLock.lock.unlock();
+                try {
+                    release(locks, type, createLock);
+                } finally {
+                    createLock.lock.unlock();
+                }
             } else {
-                release(locks, type, createLock);
+                try {
+                    release(locks, type, createLock);
+                } finally {
+                    if (fallbackReserved) {
+                        createLock.fallbackActive.set(false);
+                    }
+                }
             }
         }
     }
@@ -135,14 +150,18 @@ public final class CodecCreationCoordinator {
             CONTEXT.set(context);
         }
         boolean locked = false;
+        boolean fallbackReserved = false;
         try {
+            if (!outermost && createLock.owner == context) {
+                return new Scope(locks, type, createLock, false, false, true, false);
+            }
             if (createLock.lock.tryLock()) {
                 locked = true;
             } else {
                 context.waitingFor = createLock;
                 if (!outermost && hasDependencyCycle(createLock, context)) {
                     context.waitingFor = null;
-                    return new Scope(locks, type, createLock, false, false, true);
+                    return new Scope(locks, type, createLock, false, false, true, false);
                 }
                 try {
                     locked = lockOrReserveFallback(
@@ -154,14 +173,15 @@ public final class CodecCreationCoordinator {
                     context.waitingFor = null;
                 }
                 if (!locked) {
-                    return new Scope(locks, type, createLock, outermost, false, false);
+                    fallbackReserved = true;
+                    return new Scope(locks, type, createLock, outermost, false, false, true);
                 }
             }
 
             if (createLock.lock.getHoldCount() == 1) {
                 createLock.owner = context;
             }
-            return new Scope(locks, type, createLock, outermost, true, false);
+            return new Scope(locks, type, createLock, outermost, true, false, false);
         } catch (Throwable error) {
             if (context != null) {
                 context.waitingFor = null;
@@ -169,12 +189,18 @@ public final class CodecCreationCoordinator {
             if (outermost) {
                 CONTEXT.remove();
             }
+            if (fallbackReserved) {
+                createLock.fallbackActive.set(false);
+            }
             if (locked) {
                 if (createLock.lock.getHoldCount() == 1) {
                     createLock.owner = null;
                 }
-                release(locks, type, createLock);
-                createLock.lock.unlock();
+                try {
+                    release(locks, type, createLock);
+                } finally {
+                    createLock.lock.unlock();
+                }
             } else {
                 release(locks, type, createLock);
             }
@@ -225,10 +251,8 @@ public final class CodecCreationCoordinator {
                 long now = System.nanoTime();
                 long nextFallback = createLock.nextFallbackNanos.get();
                 if ((nextFallback == 0 || now - nextFallback >= 0)
-                        && createLock.nextFallbackNanos.compareAndSet(
-                                nextFallback,
-                                now + fallbackIntervalNanos
-                        )) {
+                        && createLock.fallbackActive.compareAndSet(false, true)) {
+                    createLock.nextFallbackNanos.set(now + fallbackIntervalNanos);
                     return false;
                 }
             }
