@@ -7684,6 +7684,10 @@ class JSONReaderUTF8
         offset = index + 1;
 
         ch = offset == end ? EOI : (char) bytes[offset++];
+        while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
         if (comma = ch == ',') {
             ch = offset == end ? EOI : bytes[offset++];
             while (ch <= ' ' && (1L << ch & SPACE) != 0) {
