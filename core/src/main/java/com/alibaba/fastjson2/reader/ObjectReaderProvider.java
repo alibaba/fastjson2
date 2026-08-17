@@ -1193,8 +1193,29 @@ public class ObjectReaderProvider
                         return rawClassReader;
                     }
                 }
-                if (typeArguments.length == 1 && ArrayList.class.isAssignableFrom(rawClass)) {
-                    return ObjectReaderImplList.of(objectType, rawClass, 0);
+                if (typeArguments.length == 1 && List.class.isAssignableFrom(rawClass)) {
+                    // Honor a custom deserializer declared on the List subclass — any ObjectReader
+                    // populated into beanInfo.deserializer by getBeanInfo (e.g. @JSONType(deserializer = ...))
+                    // — before the list fast-path. Otherwise the generic list reader is returned and the
+                    // user's deserializer directive is silently bypassed.
+                    BeanInfo beanInfo = new BeanInfo(this);
+                    getBeanInfo(beanInfo, rawClass);
+                    if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
+                        ObjectReader deserializerReader;
+                        try {
+                            Constructor<?> constructor = beanInfo.deserializer.getDeclaredConstructor();
+                            constructor.setAccessible(true);
+                            deserializerReader = (ObjectReader) constructor.newInstance();
+                        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+                                | InvocationTargetException e) {
+                            throw new JSONException("create deserializer error", e);
+                        }
+                        ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, deserializerReader);
+                        return previous != null ? previous : deserializerReader;
+                    }
+                    ObjectReader listReader = ObjectReaderImplList.of(objectType, rawClass, 0);
+                    ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, listReader);
+                    return previous != null ? previous : listReader;
                 }
 
                 if (typeArguments.length == 2 && Map.class.isAssignableFrom(rawClass)) {
