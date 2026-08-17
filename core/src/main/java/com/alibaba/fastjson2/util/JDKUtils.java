@@ -21,8 +21,11 @@ public class JDKUtils {
     public static final long ARRAY_CHAR_BASE_OFFSET;
 
     public static final int JVM_VERSION;
+    public static final String OS_ARCH;
     public static final Byte LATIN1 = 0;
+    public static final boolean AARCH64;
     public static final Byte UTF16 = 1;
+    public static final boolean AARCH64_JDK8;
 
     public static final Field FIELD_STRING_VALUE;
     public static final long FIELD_STRING_VALUE_OFFSET;
@@ -122,6 +125,10 @@ public class JDKUtils {
         GRAAL = graal;
         ANDROID_SDK_INT = android_sdk_int;
 
+        String osArch = System.getProperty("os.arch");
+        OS_ARCH = osArch;
+        AARCH64 = "aarch64".equals(osArch) || "arm64".equals(osArch);
+
         boolean hasJavaSql = true;
         Class dataSourceClass = null;
         Class rowSetClass = null;
@@ -145,6 +152,7 @@ public class JDKUtils {
         CLASS_TRANSIENT = transientClass;
 
         JVM_VERSION = jvmVersion;
+        AARCH64_JDK8 = AARCH64 && JVM_VERSION == 8 && !ANDROID && !GRAAL;
 
         if (JVM_VERSION == 8) {
             Field field = null;

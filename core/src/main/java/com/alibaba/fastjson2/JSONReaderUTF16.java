@@ -1115,6 +1115,10 @@ final class JSONReaderUTF16
 
     @Override
     public final long readFieldNameHashCode() {
+        if (AARCH64_JDK8) {
+            return readFieldNameHashCode0();
+        }
+
         final char[] chars = this.chars;
         int ch = this.ch;
         if (ch == '/') {
@@ -1181,6 +1185,10 @@ final class JSONReaderUTF16
 
     @Override
     public final long readFieldNameHashCode(int keySize, int min, int max) {
+        if (AARCH64_JDK8) {
+            return readFieldNameHashCode0();
+        }
+
         final char[] chars = this.chars;
         int ch = this.ch;
         if (ch == '/') {
@@ -1252,6 +1260,10 @@ final class JSONReaderUTF16
 
     @Override
     public long readFieldNameHashCodeE(int size0, int size1, int size3) {
+        if (AARCH64_JDK8) {
+            return readFieldNameHashCode0();
+        }
+
         final char[] chars = this.chars;
         int ch = this.ch;
         if (ch == '/') {
