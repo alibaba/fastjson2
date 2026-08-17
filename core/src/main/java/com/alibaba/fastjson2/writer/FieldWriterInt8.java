@@ -73,9 +73,6 @@ class FieldWriterInt8<T>
 
     protected final boolean writeInt8(JSONWriter jsonWriter, byte value) {
         long features = jsonWriter.getFeatures(this.features);
-        if (value == 0 && (features & Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
-            return false;
-        }
         boolean writeNonStringValueAsString = (features & Feature.WriteNonStringValueAsString.mask) != 0;
         writeFieldName(jsonWriter);
         if (writeNonStringValueAsString) {
