@@ -459,6 +459,19 @@ public class ObjectWriterProvider
      * @return the ObjectWriter for the specified type
      */
     public ObjectWriter getObjectWriter(Type objectType, String format, Locale locale) {
+        // "string" is a sentinel (e.g. @JsonFormat(shape = STRING)), not a DecimalFormat pattern
+        if ("string".equals(format)) {
+            if (objectType == Double.class) {
+                return ObjectWriterImplDouble.INSTANCE;
+            }
+            if (objectType == Float.class) {
+                return ObjectWriterImplFloat.INSTANCE;
+            }
+            if (objectType == BigDecimal.class) {
+                return ObjectWriterImplBigDecimal.INSTANCE;
+            }
+        }
+
         if (objectType == Double.class) {
             return new ObjectWriterImplDouble(new DecimalFormat(format));
         }
