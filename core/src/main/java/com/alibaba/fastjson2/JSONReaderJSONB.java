@@ -1317,7 +1317,10 @@ final class JSONReaderJSONB
                 autoTypeError();
             }
 
-            autoTypeObjectReader = context.provider.getObjectReader(getString(), expectClass, features2);
+            autoTypeObjectReader = typeNameIllegal
+                    && context.provider.getAutoTypeBeforeHandler() == null
+                    ? null
+                    : context.provider.getObjectReader(getString(), expectClass, features2);
             if (autoTypeObjectReader == null) {
                 if ((features2 & Feature.ErrorOnNotSupportAutoType.mask) == 0) {
                     return null;
@@ -1672,6 +1675,8 @@ final class JSONReaderJSONB
                 this.strBegin = strBegin;
                 this.strlen = typelen;
                 this.offset = offset;
+                this.typeNameIllegal = typelen < 192
+                        && IOUtils.containsTypeNameSpecialChar(bytes, strBegin, strBegin + typelen);
 
                 return hashCode;
             }
@@ -1680,6 +1685,7 @@ final class JSONReaderJSONB
     }
 
     public long readTypeHashCode0() {
+        typeNameIllegal = false;
         final byte[] bytes = this.bytes;
         byte strtype = this.strtype = bytes[offset];
         if (strtype == BC_SYMBOL) {
@@ -1788,6 +1794,17 @@ final class JSONReaderJSONB
             strBegin = offset;
         } else {
             throw readStringError();
+        }
+
+        // scan-time illegal type name detection; exact for single-byte encodings, since ':'
+        // and '!' never appear inside a multibyte UTF-8 sequence. UTF-16 variants, symbol
+        // references and names at or above the 192 limit stay conservative and are
+        // validated downstream
+        if (strlen < 192
+                && (strtype == BC_STR_UTF8
+                || strtype == BC_STR_ASCII
+                || (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII_FIX_MAX))) {
+            typeNameIllegal = IOUtils.containsTypeNameSpecialChar(bytes, strBegin, strBegin + strlen);
         }
 
         long hashCode;
