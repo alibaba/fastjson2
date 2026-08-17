@@ -168,7 +168,12 @@ public class ObjectReaderProviderConcurrentTest {
     @Test
     public void testNestedCreationDoesNotDeadlock() throws InterruptedException {
         CountDownLatch creating = new CountDownLatch(2);
+        CountDownLatch fallbackStarted = new CountDownLatch(1);
+        CountDownLatch continueFallback = new CountDownLatch(1);
         ThreadLocal<Boolean> nested = new ThreadLocal<>();
+        AtomicReference<Class<?>> fallbackType = new AtomicReference<>();
+        AtomicReference<ObjectReader> nestedReaderA = new AtomicReference<>();
+        AtomicReference<ObjectReader> nestedReaderB = new AtomicReference<>();
         ObjectReaderCreator creator = new ObjectReaderCreator() {
             @Override
             public <T> ObjectReader<T> createObjectReader(
@@ -184,26 +189,48 @@ public class ObjectReaderProviderConcurrentTest {
                         if (!creating.await(5, TimeUnit.SECONDS)) {
                             throw new IllegalStateException("object readers were not created concurrently");
                         }
-                        provider.getObjectReader(objectClass == BeanA.class ? BeanB.class : BeanA.class);
+                        Class<?> nestedType = objectClass == BeanA.class ? BeanB.class : BeanA.class;
+                        ObjectReader nestedReader = provider.getObjectReader(nestedType);
+                        if (nestedType == BeanA.class) {
+                            nestedReaderA.set(nestedReader);
+                        } else {
+                            nestedReaderB.set(nestedReader);
+                        }
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         throw new RuntimeException(e);
                     } finally {
                         nested.remove();
                     }
+                } else if ((objectClass == BeanA.class || objectClass == BeanB.class)
+                        && fallbackType.compareAndSet(null, objectClass)) {
+                    fallbackStarted.countDown();
+                    await(continueFallback);
                 }
                 return super.createObjectReader(objectClass, objectType, fieldBased, provider);
             }
         };
         ObjectReaderProvider provider = new ObjectReaderProvider(creator);
+        ObjectReader canonical = ObjectReaderImplString.INSTANCE;
         AtomicReference<Throwable> error = new AtomicReference<>();
+        AtomicReference<ObjectReader> readerA = new AtomicReference<>();
+        AtomicReference<ObjectReader> readerB = new AtomicReference<>();
         CountDownLatch done = new CountDownLatch(2);
 
-        startDaemonThread(() -> getObjectReader(provider, BeanA.class, error, done));
-        startDaemonThread(() -> getObjectReader(provider, BeanB.class, error, done));
+        startDaemonThread(() -> getObjectReader(provider, BeanA.class, readerA, error, done));
+        startDaemonThread(() -> getObjectReader(provider, BeanB.class, readerB, error, done));
 
+        assertTrue(fallbackStarted.await(5, TimeUnit.SECONDS));
+        assertNotNull(fallbackType.get());
+        provider.register(fallbackType.get(), canonical);
+        continueFallback.countDown();
         assertTrue(done.await(10, TimeUnit.SECONDS));
         assertNull(error.get());
+        assertSame(canonical, provider.getObjectReader(fallbackType.get()));
+        assertSame(provider.getObjectReader(BeanA.class), readerA.get());
+        assertSame(provider.getObjectReader(BeanB.class), readerB.get());
+        assertSame(provider.getObjectReader(BeanA.class), nestedReaderA.get());
+        assertSame(provider.getObjectReader(BeanB.class), nestedReaderB.get());
         assertNoCreateLocks(provider);
     }
 
@@ -337,8 +364,21 @@ public class ObjectReaderProviderConcurrentTest {
             AtomicReference<Throwable> error,
             CountDownLatch done
     ) {
+        getObjectReader(provider, type, null, error, done);
+    }
+
+    private static void getObjectReader(
+            ObjectReaderProvider provider,
+            Type type,
+            AtomicReference<ObjectReader> result,
+            AtomicReference<Throwable> error,
+            CountDownLatch done
+    ) {
         try {
-            provider.getObjectReader(type);
+            ObjectReader objectReader = provider.getObjectReader(type);
+            if (result != null) {
+                result.set(objectReader);
+            }
         } catch (Throwable e) {
             error.compareAndSet(null, e);
         } finally {
@@ -348,10 +388,15 @@ public class ObjectReaderProviderConcurrentTest {
 
     private static void awaitWaiting(Thread thread) throws InterruptedException {
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
-        while (thread.getState() != Thread.State.WAITING && System.nanoTime() < deadline) {
+        while (!isWaiting(thread) && System.nanoTime() < deadline) {
             TimeUnit.MILLISECONDS.sleep(1);
         }
-        assertEquals(Thread.State.WAITING, thread.getState());
+        assertTrue(isWaiting(thread));
+    }
+
+    private static boolean isWaiting(Thread thread) {
+        Thread.State state = thread.getState();
+        return state == Thread.State.WAITING || state == Thread.State.TIMED_WAITING;
     }
 
     private static Thread startDaemonThread(Runnable task) {

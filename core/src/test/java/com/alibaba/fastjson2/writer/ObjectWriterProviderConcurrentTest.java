@@ -165,7 +165,12 @@ public class ObjectWriterProviderConcurrentTest {
     @Test
     public void testNestedCreationDoesNotDeadlock() throws InterruptedException {
         CountDownLatch creating = new CountDownLatch(2);
+        CountDownLatch fallbackStarted = new CountDownLatch(1);
+        CountDownLatch continueFallback = new CountDownLatch(1);
         ThreadLocal<Boolean> nested = new ThreadLocal<>();
+        AtomicReference<Class<?>> fallbackType = new AtomicReference<>();
+        AtomicReference<ObjectWriter> nestedWriterA = new AtomicReference<>();
+        AtomicReference<ObjectWriter> nestedWriterB = new AtomicReference<>();
         ObjectWriterCreator creator = new ObjectWriterCreator() {
             @Override
             public ObjectWriter createObjectWriter(
@@ -180,26 +185,48 @@ public class ObjectWriterProviderConcurrentTest {
                         if (!creating.await(5, TimeUnit.SECONDS)) {
                             throw new IllegalStateException("object writers were not created concurrently");
                         }
-                        provider.getObjectWriter(objectClass == BeanA.class ? BeanB.class : BeanA.class);
+                        Class<?> nestedType = objectClass == BeanA.class ? BeanB.class : BeanA.class;
+                        ObjectWriter nestedWriter = provider.getObjectWriter(nestedType);
+                        if (nestedType == BeanA.class) {
+                            nestedWriterA.set(nestedWriter);
+                        } else {
+                            nestedWriterB.set(nestedWriter);
+                        }
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         throw new RuntimeException(e);
                     } finally {
                         nested.remove();
                     }
+                } else if ((objectClass == BeanA.class || objectClass == BeanB.class)
+                        && fallbackType.compareAndSet(null, objectClass)) {
+                    fallbackStarted.countDown();
+                    await(continueFallback);
                 }
                 return super.createObjectWriter(objectClass, features, provider);
             }
         };
         ObjectWriterProvider provider = new ObjectWriterProvider(creator);
+        ObjectWriter canonical = ObjectWriterImplString.INSTANCE;
         AtomicReference<Throwable> error = new AtomicReference<>();
+        AtomicReference<ObjectWriter> writerA = new AtomicReference<>();
+        AtomicReference<ObjectWriter> writerB = new AtomicReference<>();
         CountDownLatch done = new CountDownLatch(2);
 
-        startDaemonThread(() -> getObjectWriter(provider, BeanA.class, error, done));
-        startDaemonThread(() -> getObjectWriter(provider, BeanB.class, error, done));
+        startDaemonThread(() -> getObjectWriter(provider, BeanA.class, writerA, error, done));
+        startDaemonThread(() -> getObjectWriter(provider, BeanB.class, writerB, error, done));
 
+        assertTrue(fallbackStarted.await(5, TimeUnit.SECONDS));
+        assertNotNull(fallbackType.get());
+        provider.register(fallbackType.get(), canonical);
+        continueFallback.countDown();
         assertTrue(done.await(10, TimeUnit.SECONDS));
         assertNull(error.get());
+        assertSame(canonical, provider.getObjectWriter(fallbackType.get()));
+        assertSame(provider.getObjectWriter(BeanA.class), writerA.get());
+        assertSame(provider.getObjectWriter(BeanB.class), writerB.get());
+        assertSame(provider.getObjectWriter(BeanA.class), nestedWriterA.get());
+        assertSame(provider.getObjectWriter(BeanB.class), nestedWriterB.get());
         assertNoCreateLocks(provider);
     }
 
@@ -331,8 +358,21 @@ public class ObjectWriterProviderConcurrentTest {
             AtomicReference<Throwable> error,
             CountDownLatch done
     ) {
+        getObjectWriter(provider, type, null, error, done);
+    }
+
+    private static void getObjectWriter(
+            ObjectWriterProvider provider,
+            Type type,
+            AtomicReference<ObjectWriter> result,
+            AtomicReference<Throwable> error,
+            CountDownLatch done
+    ) {
         try {
-            provider.getObjectWriter(type);
+            ObjectWriter objectWriter = provider.getObjectWriter(type);
+            if (result != null) {
+                result.set(objectWriter);
+            }
         } catch (Throwable e) {
             error.compareAndSet(null, e);
         } finally {
@@ -342,10 +382,15 @@ public class ObjectWriterProviderConcurrentTest {
 
     private static void awaitWaiting(Thread thread) throws InterruptedException {
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
-        while (thread.getState() != Thread.State.WAITING && System.nanoTime() < deadline) {
+        while (!isWaiting(thread) && System.nanoTime() < deadline) {
             TimeUnit.MILLISECONDS.sleep(1);
         }
-        assertEquals(Thread.State.WAITING, thread.getState());
+        assertTrue(isWaiting(thread));
+    }
+
+    private static boolean isWaiting(Thread thread) {
+        Thread.State state = thread.getState();
+        return state == Thread.State.WAITING || state == Thread.State.TIMED_WAITING;
     }
 
     private static Thread startDaemonThread(Runnable task) {

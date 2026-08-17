@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ObjectCodecProviderConcurrentTest {
@@ -23,6 +24,8 @@ public class ObjectCodecProviderConcurrentTest {
         ThreadLocal<Boolean> nested = new ThreadLocal<>();
         AtomicReference<ObjectReaderProvider> readerProviderRef = new AtomicReference<>();
         AtomicReference<ObjectWriterProvider> writerProviderRef = new AtomicReference<>();
+        AtomicReference<ObjectReader> nestedReader = new AtomicReference<>();
+        AtomicReference<ObjectWriter> nestedWriter = new AtomicReference<>();
 
         ObjectReaderCreator readerCreator = new ObjectReaderCreator() {
             @Override
@@ -36,7 +39,7 @@ public class ObjectCodecProviderConcurrentTest {
                     nested.set(Boolean.TRUE);
                     try {
                         awaitConcurrentCreation(creating);
-                        writerProviderRef.get().getObjectWriter(WriterBean.class);
+                        nestedWriter.set(writerProviderRef.get().getObjectWriter(WriterBean.class));
                     } finally {
                         nested.remove();
                     }
@@ -55,7 +58,7 @@ public class ObjectCodecProviderConcurrentTest {
                     nested.set(Boolean.TRUE);
                     try {
                         awaitConcurrentCreation(creating);
-                        readerProviderRef.get().getObjectReader(ReaderBean.class);
+                        nestedReader.set(readerProviderRef.get().getObjectReader(ReaderBean.class));
                     } finally {
                         nested.remove();
                     }
@@ -70,10 +73,12 @@ public class ObjectCodecProviderConcurrentTest {
         writerProviderRef.set(writerProvider);
 
         AtomicReference<Throwable> error = new AtomicReference<>();
+        AtomicReference<ObjectReader> reader = new AtomicReference<>();
+        AtomicReference<ObjectWriter> writer = new AtomicReference<>();
         CountDownLatch done = new CountDownLatch(2);
         startDaemonThread(() -> {
             try {
-                readerProvider.getObjectReader(ReaderBean.class);
+                reader.set(readerProvider.getObjectReader(ReaderBean.class));
             } catch (Throwable e) {
                 error.compareAndSet(null, e);
             } finally {
@@ -82,7 +87,7 @@ public class ObjectCodecProviderConcurrentTest {
         });
         startDaemonThread(() -> {
             try {
-                writerProvider.getObjectWriter(WriterBean.class);
+                writer.set(writerProvider.getObjectWriter(WriterBean.class));
             } catch (Throwable e) {
                 error.compareAndSet(null, e);
             } finally {
@@ -92,6 +97,10 @@ public class ObjectCodecProviderConcurrentTest {
 
         assertTrue(done.await(10, TimeUnit.SECONDS));
         assertNull(error.get());
+        assertSame(readerProvider.getObjectReader(ReaderBean.class), reader.get());
+        assertSame(readerProvider.getObjectReader(ReaderBean.class), nestedReader.get());
+        assertSame(writerProvider.getObjectWriter(WriterBean.class), writer.get());
+        assertSame(writerProvider.getObjectWriter(WriterBean.class), nestedWriter.get());
     }
 
     private static void awaitConcurrentCreation(CountDownLatch creating) {

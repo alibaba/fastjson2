@@ -666,10 +666,9 @@ public class ObjectWriterProvider
         ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> targetLocks =
                 fieldBased ? createLocksFieldBased : createLocks;
         try (CodecCreationCoordinator.Scope scope = CodecCreationCoordinator.acquire(targetLocks, objectType)) {
-            if (scope.isCycleDetected()) {
+            if (scope.isLockFreeFallback()) {
                 ObjectWriter objectWriter = resolveObjectWriter(objectType, objectClass, fieldBased);
-                ObjectWriter previous = targetCache.putIfAbsent(objectType, objectWriter);
-                return previous != null ? previous : objectWriter;
+                return CodecCreationCoordinator.publish(targetCache, objectType, objectWriter);
             }
             ObjectWriter objectWriter = targetCache.get(objectType);
             if (objectWriter != null) {
@@ -678,8 +677,7 @@ public class ObjectWriterProvider
             scope.throwIfFailed();
             try {
                 objectWriter = resolveObjectWriter(objectType, objectClass, fieldBased);
-                ObjectWriter previous = targetCache.putIfAbsent(objectType, objectWriter);
-                return previous != null ? previous : objectWriter;
+                return CodecCreationCoordinator.publish(targetCache, objectType, objectWriter);
             } catch (RuntimeException | Error error) {
                 scope.fail(error);
                 throw error;
@@ -689,6 +687,7 @@ public class ObjectWriterProvider
 
     private ObjectWriter resolveObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
         ObjectWriter objectWriter = null;
+        ConcurrentMap<Type, ObjectWriter> targetCache = fieldBased ? cacheFieldBased : cache;
         String className = objectClass.getName();
         boolean useModules = true;
         if (fieldBased) {
@@ -703,14 +702,7 @@ public class ObjectWriterProvider
                 ObjectWriterModule module = modules.get(i);
                 objectWriter = module.getObjectWriter(objectType, objectClass);
                 if (objectWriter != null) {
-                    ObjectWriter previous = fieldBased
-                            ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
-                            : cache.putIfAbsent(objectType, objectWriter);
-
-                    if (previous != null) {
-                        objectWriter = previous;
-                    }
-                    return objectWriter;
+                    return CodecCreationCoordinator.publish(targetCache, objectType, objectWriter);
                 }
             }
         }
@@ -745,26 +737,16 @@ public class ObjectWriterProvider
         }
 
         if (objectWriter != null) {
-            ObjectWriter previous = fieldBased
-                    ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
-                    : cache.putIfAbsent(objectType, objectWriter);
-            if (previous != null) {
-                objectWriter = previous;
-            }
-            return objectWriter;
+            return CodecCreationCoordinator.publish(targetCache, objectType, objectWriter);
         }
 
-        if (objectWriter == null
-                && (!fieldBased)
+        if (!fieldBased
                 && Map.class.isAssignableFrom(objectClass)
                 && BeanUtils.isExtendedMap(objectClass)) {
             return ObjectWriterImplMap.of(objectClass);
         }
 
-        if (objectWriter == null) {
-            return createObjectWriter(objectClass, objectType, fieldBased);
-        }
-        return objectWriter;
+        return createObjectWriter(objectClass, objectType, fieldBased);
     }
 
     private ObjectWriter createObjectWriter(Class objectClass, Type objectType, boolean fieldBased) {
@@ -775,8 +757,7 @@ public class ObjectWriterProvider
                 fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,
                 this
         );
-        ObjectWriter previous = targetCache.putIfAbsent(objectType, objectWriter);
-        return previous != null ? previous : objectWriter;
+        return CodecCreationCoordinator.publish(targetCache, objectType, objectWriter);
     }
 
     static final int ENUM = 0x00004000;

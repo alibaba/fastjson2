@@ -1143,10 +1143,9 @@ public class ObjectReaderProvider
         ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> targetLocks =
                 fieldBased ? createLocksFieldBased : createLocks;
         try (CodecCreationCoordinator.Scope scope = CodecCreationCoordinator.acquire(targetLocks, objectType)) {
-            if (scope.isCycleDetected()) {
+            if (scope.isLockFreeFallback()) {
                 ObjectReader objectReader = resolveObjectReader(objectType, fieldBased);
-                ObjectReader previous = targetCache.putIfAbsent(objectType, objectReader);
-                return previous != null ? previous : objectReader;
+                return CodecCreationCoordinator.publish(targetCache, objectType, objectReader);
             }
             ObjectReader objectReader = targetCache.get(objectType);
             if (objectReader != null) {
@@ -1155,8 +1154,7 @@ public class ObjectReaderProvider
             scope.throwIfFailed();
             try {
                 objectReader = resolveObjectReader(objectType, fieldBased);
-                ObjectReader previous = targetCache.putIfAbsent(objectType, objectReader);
-                return previous != null ? previous : objectReader;
+                return CodecCreationCoordinator.publish(targetCache, objectType, objectReader);
             } catch (RuntimeException | Error error) {
                 scope.fail(error);
                 throw error;
@@ -1166,18 +1164,12 @@ public class ObjectReaderProvider
 
     private ObjectReader resolveObjectReader(Type objectType, boolean fieldBased) {
         ObjectReader objectReader = null;
+        ConcurrentMap<Type, ObjectReader> targetCache = fieldBased ? cacheFieldBased : cache;
 
         for (ObjectReaderModule module : modules) {
             objectReader = module.getObjectReader(this, objectType);
             if (objectReader != null) {
-                ObjectReader previous = fieldBased
-                        ? cacheFieldBased.putIfAbsent(objectType, objectReader)
-                        : cache.putIfAbsent(objectType, objectReader);
-
-                if (previous != null) {
-                    objectReader = previous;
-                }
-                return objectReader;
+                return CodecCreationCoordinator.publish(targetCache, objectType, objectReader);
             }
         }
 
@@ -1188,11 +1180,7 @@ public class ObjectReaderProvider
                 if (bound instanceof Class) {
                     ObjectReader boundObjectReader = getObjectReader(bound, fieldBased);
                     if (boundObjectReader != null) {
-                        ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, boundObjectReader);
-                        if (previous != null) {
-                            boundObjectReader = previous;
-                        }
-                        return boundObjectReader;
+                        return CodecCreationCoordinator.publish(targetCache, objectType, boundObjectReader);
                     }
                 }
             }
@@ -1215,11 +1203,7 @@ public class ObjectReaderProvider
                 if (typeArguments.length == 0 || !generic) {
                     ObjectReader rawClassReader = getObjectReader(rawClass, fieldBased);
                     if (rawClassReader != null) {
-                        ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, rawClassReader);
-                        if (previous != null) {
-                            rawClassReader = previous;
-                        }
-                        return rawClassReader;
+                        return CodecCreationCoordinator.publish(targetCache, objectType, rawClassReader);
                     }
                 }
                 if (typeArguments.length == 1 && ArrayList.class.isAssignableFrom(rawClass)) {
@@ -1245,26 +1229,14 @@ public class ObjectReaderProvider
             return createObjectReader(objectClass, objectType, fieldBased);
         }
 
-        ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, objectReader);
-        if (previous != null) {
-            objectReader = previous;
-        }
-
-        return objectReader;
+        return CodecCreationCoordinator.publish(targetCache, objectType, objectReader);
     }
 
     private ObjectReader createObjectReader(Class<?> objectClass, Type objectType, boolean fieldBased) {
         ConcurrentMap<Type, ObjectReader> targetCache = fieldBased ? cacheFieldBased : cache;
         ObjectReaderCreator creator = getCreator();
         ObjectReader objectReader = creator.createObjectReader(objectClass, objectType, fieldBased, this);
-        ObjectReader previous = targetCache.putIfAbsent(objectType, objectReader);
-        return previous != null ? previous : objectReader;
-    }
-
-    private ObjectReader getPreviousObjectReader(boolean fieldBased, Type objectType, ObjectReader boundObjectReader) {
-        return fieldBased
-                ? cacheFieldBased.putIfAbsent(objectType, boundObjectReader)
-                : cache.putIfAbsent(objectType, boundObjectReader);
+        return CodecCreationCoordinator.publish(targetCache, objectType, objectReader);
     }
 
     /**

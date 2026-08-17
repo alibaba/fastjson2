@@ -3,7 +3,9 @@ package com.alibaba.fastjson2.internal;
 import java.lang.reflect.Type;
 import java.util.IdentityHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -11,8 +13,12 @@ import java.util.concurrent.locks.ReentrantLock;
  * Lock entries are reference-counted so holders and queued callers always use the
  * same lock, and the entry can be removed without retaining the associated type.
  * A shared per-thread wait context detects dependency cycles across both providers.
+ * Waits that cross external synchronization, such as class initialization, are
+ * bounded; lock-free fallbacks are rate-limited per entry to avoid a creation burst.
  */
 public final class CodecCreationCoordinator {
+    private static final long WAIT_NANOS = TimeUnit.SECONDS.toNanos(5);
+    private static final long FALLBACK_INTERVAL_NANOS = WAIT_NANOS;
     private static final ThreadLocal<Context> CONTEXT = new ThreadLocal<>();
 
     private CodecCreationCoordinator() {
@@ -21,6 +27,7 @@ public final class CodecCreationCoordinator {
     public static final class LockEntry {
         final ReentrantLock lock = new ReentrantLock();
         final AtomicInteger references = new AtomicInteger();
+        final AtomicLong nextFallbackNanos = new AtomicLong();
         volatile Context owner;
         volatile Throwable failure;
 
@@ -38,6 +45,7 @@ public final class CodecCreationCoordinator {
         private final LockEntry createLock;
         private final boolean outermost;
         private final boolean locked;
+        private final boolean cycleDetected;
         private boolean closed;
 
         private Scope(
@@ -45,16 +53,22 @@ public final class CodecCreationCoordinator {
                 Type type,
                 LockEntry createLock,
                 boolean outermost,
-                boolean locked
+                boolean locked,
+                boolean cycleDetected
         ) {
             this.locks = locks;
             this.type = type;
             this.createLock = createLock;
             this.outermost = outermost;
             this.locked = locked;
+            this.cycleDetected = cycleDetected;
         }
 
         public boolean isCycleDetected() {
+            return cycleDetected;
+        }
+
+        public boolean isLockFreeFallback() {
             return !locked;
         }
 
@@ -88,13 +102,24 @@ public final class CodecCreationCoordinator {
                 if (createLock.lock.getHoldCount() == 1) {
                     createLock.owner = null;
                 }
+                release(locks, type, createLock);
                 createLock.lock.unlock();
+            } else {
+                release(locks, type, createLock);
             }
-            release(locks, type, createLock);
         }
     }
 
     public static Scope acquire(ConcurrentMap<Type, LockEntry> locks, Type type) {
+        return acquire(locks, type, WAIT_NANOS, FALLBACK_INTERVAL_NANOS);
+    }
+
+    static Scope acquire(
+            ConcurrentMap<Type, LockEntry> locks,
+            Type type,
+            long waitNanos,
+            long fallbackIntervalNanos
+    ) {
         LockEntry createLock = locks.compute(type, (key, lock) -> {
             if (lock == null) {
                 lock = new LockEntry();
@@ -105,33 +130,38 @@ public final class CodecCreationCoordinator {
 
         Context context = CONTEXT.get();
         boolean outermost = context == null;
+        if (outermost) {
+            context = new Context();
+            CONTEXT.set(context);
+        }
         boolean locked = false;
         try {
-            if (outermost) {
-                createLock.lock.lock();
-                locked = true;
-                context = new Context();
-                CONTEXT.set(context);
-            } else if (createLock.lock.tryLock()) {
+            if (createLock.lock.tryLock()) {
                 locked = true;
             } else {
                 context.waitingFor = createLock;
-                if (hasDependencyCycle(createLock, context)) {
+                if (!outermost && hasDependencyCycle(createLock, context)) {
                     context.waitingFor = null;
-                    return new Scope(locks, type, createLock, false, false);
+                    return new Scope(locks, type, createLock, false, false, true);
                 }
                 try {
-                    createLock.lock.lock();
-                    locked = true;
+                    locked = lockOrReserveFallback(
+                            createLock,
+                            waitNanos,
+                            fallbackIntervalNanos
+                    );
                 } finally {
                     context.waitingFor = null;
+                }
+                if (!locked) {
+                    return new Scope(locks, type, createLock, outermost, false, false);
                 }
             }
 
             if (createLock.lock.getHoldCount() == 1) {
                 createLock.owner = context;
             }
-            return new Scope(locks, type, createLock, outermost, true);
+            return new Scope(locks, type, createLock, outermost, true, false);
         } catch (Throwable error) {
             if (context != null) {
                 context.waitingFor = null;
@@ -143,18 +173,69 @@ public final class CodecCreationCoordinator {
                 if (createLock.lock.getHoldCount() == 1) {
                     createLock.owner = null;
                 }
+                release(locks, type, createLock);
                 createLock.lock.unlock();
+            } else {
+                release(locks, type, createLock);
             }
-            release(locks, type, createLock);
             throw error;
         }
     }
 
+    public static <T> T publish(ConcurrentMap<Type, T> cache, Type type, T value) {
+        T previous = cache.putIfAbsent(type, value);
+        return previous != null ? previous : value;
+    }
+
     private static void release(ConcurrentMap<Type, LockEntry> locks, Type type, LockEntry createLock) {
-        if (createLock.references.decrementAndGet() == 0) {
-            locks.computeIfPresent(type, (key, current) ->
-                    current == createLock && createLock.references.get() == 0 ? null : current
-            );
+        locks.compute(type, (key, current) -> {
+            boolean alive = createLock.references.decrementAndGet() > 0;
+            return current == createLock && !alive ? null : current;
+        });
+    }
+
+    private static boolean lockOrReserveFallback(
+            LockEntry createLock,
+            long waitNanos,
+            long fallbackIntervalNanos
+    ) {
+        boolean interrupted = false;
+        try {
+            for (;;) {
+                long deadline = System.nanoTime() + waitNanos;
+                for (;;) {
+                    long remaining = deadline - System.nanoTime();
+                    if (remaining <= 0) {
+                        break;
+                    }
+                    try {
+                        if (createLock.lock.tryLock(remaining, TimeUnit.NANOSECONDS)) {
+                            return true;
+                        }
+                        break;
+                    } catch (InterruptedException ignored) {
+                        interrupted = true;
+                    }
+                }
+
+                if (createLock.lock.tryLock()) {
+                    return true;
+                }
+
+                long now = System.nanoTime();
+                long nextFallback = createLock.nextFallbackNanos.get();
+                if ((nextFallback == 0 || now - nextFallback >= 0)
+                        && createLock.nextFallbackNanos.compareAndSet(
+                                nextFallback,
+                                now + fallbackIntervalNanos
+                        )) {
+                    return false;
+                }
+            }
+        } finally {
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
