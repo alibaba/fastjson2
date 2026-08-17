@@ -246,9 +246,6 @@ public abstract class JSONPath {
         }
 
         Object parsed = JSON.parse(json, JSONReader.Feature.DisableReferenceDetect);
-        if ("$".equals(path)) {
-            return parsed != null;
-        }
         return contains(parsed, path);
     }
 
@@ -1557,7 +1554,7 @@ public abstract class JSONPath {
 
         @Override
         public boolean contains(Object object) {
-            return false;
+            return object != null;
         }
 
         @Override
