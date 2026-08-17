@@ -597,4 +597,4 @@ FASTJSON 2 提供兼容模式（直接替换）和新 API 模式两种升级方�
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=alibaba/fastjson2&type=Date)](https://star-history.com/#alibaba/fastjson2)
+[![Star History Chart](https://star-history.dera.page/svg?repos=alibaba/fastjson2&type=Date)](https://star-history.dera.page/#alibaba/fastjson2)

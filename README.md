@@ -596,4 +596,4 @@ We welcome contributions of all kinds - bug reports, feature requests, documenta
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=alibaba/fastjson2&type=Date)](https://star-history.com/#alibaba/fastjson2)
+[![Star History Chart](https://star-history.dera.page/svg?repos=alibaba/fastjson2&type=Date)](https://star-history.dera.page/#alibaba/fastjson2)
