@@ -3284,7 +3284,10 @@ final class JSONReaderUTF16
 
                 char c = chars[offset];
                 if (c == '\\') {
-                    c = chars[++offset];
+                    if (++offset == end) {
+                        throw error("invalid escape character EOI");
+                    }
+                    c = chars[offset];
                     if (c == 'u') {
                         c = (char) hexDigit4(chars, offset + 1, end);
                         offset += 4;
