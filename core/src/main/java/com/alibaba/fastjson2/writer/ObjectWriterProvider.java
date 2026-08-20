@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.internal.CodecCreationCoordinator;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
@@ -66,9 +67,12 @@ public class ObjectWriterProvider
 
     final ConcurrentMap<Type, ObjectWriter> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectWriter> cacheFieldBased = new ConcurrentHashMap<>();
+    final ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> createLocks = new ConcurrentHashMap<>();
+    final ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> createLocksFieldBased = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
     final ObjectWriterCreator creator;
     final List<ObjectWriterModule> modules = new ArrayList<>();
+
     PropertyNamingStrategy namingStrategy;
 
     boolean disableReferenceDetect = JSONFactory.isDisableReferenceDetect();
@@ -654,6 +658,41 @@ public class ObjectWriterProvider
             }
         }
 
+        return getObjectWriterWithLock(objectType, objectClass, fieldBased);
+    }
+
+    private ObjectWriter getObjectWriterWithLock(Type objectType, Class objectClass, boolean fieldBased) {
+        ConcurrentMap<Type, ObjectWriter> targetCache = fieldBased ? cacheFieldBased : cache;
+        ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> targetLocks =
+                fieldBased ? createLocksFieldBased : createLocks;
+        try (CodecCreationCoordinator.Scope scope = CodecCreationCoordinator.acquire(targetLocks, objectType)) {
+            if (scope.isLockFreeFallback()) {
+                ObjectWriter objectWriter = targetCache.get(objectType);
+                if (objectWriter != null) {
+                    return objectWriter;
+                }
+                objectWriter = resolveObjectWriter(objectType, objectClass, fieldBased);
+                return CodecCreationCoordinator.publish(targetCache, objectType, objectWriter);
+            }
+            ObjectWriter objectWriter = targetCache.get(objectType);
+            if (objectWriter != null) {
+                return objectWriter;
+            }
+            scope.throwIfFailed();
+            try {
+                objectWriter = resolveObjectWriter(objectType, objectClass, fieldBased);
+                return CodecCreationCoordinator.publish(targetCache, objectType, objectWriter);
+            } catch (RuntimeException | Error error) {
+                scope.fail(error);
+                throw error;
+            }
+        }
+    }
+
+    private ObjectWriter resolveObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
+        ObjectWriter objectWriter = null;
+        ConcurrentMap<Type, ObjectWriter> targetCache = fieldBased ? cacheFieldBased : cache;
+        String className = objectClass.getName();
         boolean useModules = true;
         if (fieldBased) {
             if (Iterable.class.isAssignableFrom(objectClass)
@@ -667,14 +706,7 @@ public class ObjectWriterProvider
                 ObjectWriterModule module = modules.get(i);
                 objectWriter = module.getObjectWriter(objectType, objectClass);
                 if (objectWriter != null) {
-                    ObjectWriter previous = fieldBased
-                            ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
-                            : cache.putIfAbsent(objectType, objectWriter);
-
-                    if (previous != null) {
-                        objectWriter = previous;
-                    }
-                    return objectWriter;
+                    return CodecCreationCoordinator.publish(targetCache, objectType, objectWriter);
                 }
             }
         }
@@ -709,38 +741,27 @@ public class ObjectWriterProvider
         }
 
         if (objectWriter != null) {
-            ObjectWriter previous = fieldBased
-                    ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
-                    : cache.putIfAbsent(objectType, objectWriter);
-            if (previous != null) {
-                objectWriter = previous;
-            }
-            return objectWriter;
+            return CodecCreationCoordinator.publish(targetCache, objectType, objectWriter);
         }
 
-        if (objectWriter == null
-                && (!fieldBased)
+        if (!fieldBased
                 && Map.class.isAssignableFrom(objectClass)
                 && BeanUtils.isExtendedMap(objectClass)) {
             return ObjectWriterImplMap.of(objectClass);
         }
 
-        if (objectWriter == null) {
-            ObjectWriterCreator creator = getCreator();
-            objectWriter = creator.createObjectWriter(
-                    objectClass,
-                    fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,
-                    this
-            );
-            ObjectWriter previous = fieldBased
-                    ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
-                    : cache.putIfAbsent(objectType, objectWriter);
+        return createObjectWriter(objectClass, objectType, fieldBased);
+    }
 
-            if (previous != null) {
-                objectWriter = previous;
-            }
-        }
-        return objectWriter;
+    private ObjectWriter createObjectWriter(Class objectClass, Type objectType, boolean fieldBased) {
+        ConcurrentMap<Type, ObjectWriter> targetCache = fieldBased ? cacheFieldBased : cache;
+        ObjectWriterCreator creator = getCreator();
+        ObjectWriter objectWriter = creator.createObjectWriter(
+                objectClass,
+                fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,
+                this
+        );
+        return CodecCreationCoordinator.publish(targetCache, objectType, objectWriter);
     }
 
     static final int ENUM = 0x00004000;
