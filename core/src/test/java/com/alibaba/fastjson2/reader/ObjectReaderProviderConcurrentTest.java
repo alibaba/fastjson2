@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.TypeReference;
+import com.alibaba.fastjson2.internal.CodecCreationCoordinator;
+import com.alibaba.fastjson2.internal.CodecCreationCoordinatorTestSupport;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import org.junit.jupiter.api.Test;
 
@@ -57,11 +59,13 @@ public class ObjectReaderProviderConcurrentTest {
     @Test
     public void testSpecializedObjectReaderIsPublished() throws InterruptedException {
         ObjectReaderProvider provider = new ObjectReaderProvider();
+        provider.modules.clear();
         Type type = new TypeReference<ArrayList<ValueA>>() { }.getType();
 
         Set<ObjectReader> readers = getReaders(provider, type, false, 32);
 
         assertEquals(1, readers.size());
+        assertTrue(readers.iterator().next() instanceof ObjectReaderImplList);
         assertSame(readers.iterator().next(), provider.cache.get(type));
         assertNoCreateLocks(provider);
     }
@@ -118,6 +122,89 @@ public class ObjectReaderProviderConcurrentTest {
         });
 
         assertTrue(retryDone.await(5, TimeUnit.SECONDS));
+        assertNull(retryError.get());
+        assertNotNull(retryReader.get());
+        assertEquals(2, createCount.get());
+        assertNoCreateLocks(provider);
+    }
+
+    @Test
+    public void testCreatorFailureDoesNotLeakWhileFallbackRetainsLockEntry() throws InterruptedException {
+        long waitNanos = TimeUnit.MILLISECONDS.toNanos(10);
+        AtomicInteger createCount = new AtomicInteger();
+        CountDownLatch firstStarted = new CountDownLatch(1);
+        CountDownLatch failFirst = new CountDownLatch(1);
+        IllegalStateException expectedError = new IllegalStateException("first creation failed");
+        ObjectReaderCreator creator = new ObjectReaderCreator() {
+            @Override
+            public <T> ObjectReader<T> createObjectReader(
+                    Class<T> objectClass,
+                    Type objectType,
+                    boolean fieldBased,
+                    ObjectReaderProvider provider
+            ) {
+                if (createCount.incrementAndGet() == 1) {
+                    firstStarted.countDown();
+                    await(failFirst);
+                    throw expectedError;
+                }
+                return super.createObjectReader(objectClass, objectType, fieldBased, provider);
+            }
+        };
+        ObjectReaderProvider provider = new ObjectReaderProvider(creator);
+        CountDownLatch firstDone = new CountDownLatch(1);
+        AtomicReference<Throwable> firstError = new AtomicReference<>();
+        startDaemonThread(() -> getObjectReader(provider, FailureBean.class, firstError, firstDone));
+        assertTrue(firstStarted.await(5, TimeUnit.SECONDS));
+
+        CountDownLatch fallbackEntered = new CountDownLatch(1);
+        CountDownLatch releaseFallback = new CountDownLatch(1);
+        CountDownLatch fallbackDone = new CountDownLatch(1);
+        AtomicReference<Throwable> fallbackError = new AtomicReference<>();
+        startDaemonThread(() -> {
+            try (CodecCreationCoordinator.Scope fallback =
+                         CodecCreationCoordinatorTestSupport.acquire(
+                                 provider.createLocks,
+                                 FailureBean.class,
+                                 waitNanos,
+                                 0
+                         )) {
+                assertTrue(fallback.isLockFreeFallback());
+                fallbackEntered.countDown();
+                await(releaseFallback);
+            } catch (Throwable error) {
+                fallbackError.set(error);
+            } finally {
+                fallbackDone.countDown();
+            }
+        });
+
+        AtomicReference<ObjectReader> retryReader = new AtomicReference<>();
+        AtomicReference<Throwable> retryError = new AtomicReference<>();
+        CountDownLatch retryDone = new CountDownLatch(1);
+        try {
+            assertTrue(fallbackEntered.await(5, TimeUnit.SECONDS));
+            failFirst.countDown();
+            assertTrue(firstDone.await(5, TimeUnit.SECONDS));
+
+            startDaemonThread(() -> {
+                try {
+                    retryReader.set(provider.getObjectReader(FailureBean.class));
+                } catch (Throwable error) {
+                    retryError.set(error);
+                } finally {
+                    retryDone.countDown();
+                }
+            });
+            assertTrue(retryDone.await(5, TimeUnit.SECONDS));
+        } finally {
+            failFirst.countDown();
+            releaseFallback.countDown();
+        }
+
+        assertTrue(fallbackDone.await(5, TimeUnit.SECONDS));
+        assertSame(expectedError, firstError.get());
+        assertNull(fallbackError.get());
         assertNull(retryError.get());
         assertNotNull(retryReader.get());
         assertEquals(2, createCount.get());
@@ -202,9 +289,10 @@ public class ObjectReaderProviderConcurrentTest {
                     } finally {
                         nested.remove();
                     }
-                } else if ((objectClass == BeanA.class || objectClass == BeanB.class)
-                        && fallbackType.compareAndSet(null, objectClass)) {
-                    fallbackStarted.countDown();
+                } else if (objectClass == BeanA.class || objectClass == BeanB.class) {
+                    if (fallbackType.compareAndSet(null, objectClass)) {
+                        fallbackStarted.countDown();
+                    }
                     await(continueFallback);
                 }
                 return super.createObjectReader(objectClass, objectType, fieldBased, provider);
@@ -220,10 +308,13 @@ public class ObjectReaderProviderConcurrentTest {
         startDaemonThread(() -> getObjectReader(provider, BeanA.class, readerA, error, done));
         startDaemonThread(() -> getObjectReader(provider, BeanB.class, readerB, error, done));
 
-        assertTrue(fallbackStarted.await(5, TimeUnit.SECONDS));
-        assertNotNull(fallbackType.get());
-        provider.register(fallbackType.get(), canonical);
-        continueFallback.countDown();
+        try {
+            assertTrue(fallbackStarted.await(5, TimeUnit.SECONDS));
+            assertNotNull(fallbackType.get());
+            provider.register(fallbackType.get(), canonical);
+        } finally {
+            continueFallback.countDown();
+        }
         assertTrue(done.await(10, TimeUnit.SECONDS));
         assertNull(error.get());
         assertSame(canonical, provider.getObjectReader(fallbackType.get()));

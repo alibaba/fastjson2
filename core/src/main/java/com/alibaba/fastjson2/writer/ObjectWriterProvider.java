@@ -667,7 +667,11 @@ public class ObjectWriterProvider
                 fieldBased ? createLocksFieldBased : createLocks;
         try (CodecCreationCoordinator.Scope scope = CodecCreationCoordinator.acquire(targetLocks, objectType)) {
             if (scope.isLockFreeFallback()) {
-                ObjectWriter objectWriter = resolveObjectWriter(objectType, objectClass, fieldBased);
+                ObjectWriter objectWriter = targetCache.get(objectType);
+                if (objectWriter != null) {
+                    return objectWriter;
+                }
+                objectWriter = resolveObjectWriter(objectType, objectClass, fieldBased);
                 return CodecCreationCoordinator.publish(targetCache, objectType, objectWriter);
             }
             ObjectWriter objectWriter = targetCache.get(objectType);

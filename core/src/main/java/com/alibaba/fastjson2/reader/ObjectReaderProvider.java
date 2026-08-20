@@ -1144,7 +1144,11 @@ public class ObjectReaderProvider
                 fieldBased ? createLocksFieldBased : createLocks;
         try (CodecCreationCoordinator.Scope scope = CodecCreationCoordinator.acquire(targetLocks, objectType)) {
             if (scope.isLockFreeFallback()) {
-                ObjectReader objectReader = resolveObjectReader(objectType, fieldBased);
+                ObjectReader objectReader = targetCache.get(objectType);
+                if (objectReader != null) {
+                    return objectReader;
+                }
+                objectReader = resolveObjectReader(objectType, fieldBased);
                 return CodecCreationCoordinator.publish(targetCache, objectType, objectReader);
             }
             ObjectReader objectReader = targetCache.get(objectType);

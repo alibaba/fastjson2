@@ -231,6 +231,65 @@ public class CodecCreationCoordinatorTest {
     }
 
     @Test
+    public void testFailureDoesNotLeakWhileFallbackRetainsLockEntry() throws InterruptedException {
+        long waitNanos = TimeUnit.MILLISECONDS.toNanos(10);
+        ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> locks = new ConcurrentHashMap<>();
+        IllegalStateException expectedError = new IllegalStateException("first creation failed");
+        CodecCreationCoordinator.Scope owner = CodecCreationCoordinator.acquire(
+                locks,
+                Bean.class,
+                waitNanos,
+                0
+        );
+        CountDownLatch fallbackEntered = new CountDownLatch(1);
+        CountDownLatch releaseFallback = new CountDownLatch(1);
+        CountDownLatch fallbackDone = new CountDownLatch(1);
+        AtomicReference<Throwable> fallbackError = new AtomicReference<>();
+
+        startDaemonThread(() -> {
+            try (CodecCreationCoordinator.Scope fallback = CodecCreationCoordinator.acquire(
+                    locks,
+                    Bean.class,
+                    waitNanos,
+                    0
+            )) {
+                assertTrue(fallback.isLockFreeFallback());
+                fallbackEntered.countDown();
+                await(releaseFallback);
+            } catch (Throwable error) {
+                fallbackError.set(error);
+            } finally {
+                fallbackDone.countDown();
+            }
+        });
+
+        AtomicInteger retryCreateCount = new AtomicInteger();
+        try {
+            assertTrue(fallbackEntered.await(5, TimeUnit.SECONDS));
+            owner.fail(expectedError);
+            owner.close();
+
+            try (CodecCreationCoordinator.Scope retry = CodecCreationCoordinator.acquire(
+                    locks,
+                    Bean.class,
+                    waitNanos,
+                    0
+            )) {
+                retry.throwIfFailed();
+                retryCreateCount.incrementAndGet();
+            }
+        } finally {
+            owner.close();
+            releaseFallback.countDown();
+        }
+
+        assertTrue(fallbackDone.await(5, TimeUnit.SECONDS));
+        assertNull(fallbackError.get());
+        assertEquals(1, retryCreateCount.get());
+        assertTrue(locks.isEmpty());
+    }
+
+    @Test
     public void testExternalWaitUsesSingleActiveFallback() throws InterruptedException {
         int threadCount = 8;
         long waitNanos = TimeUnit.MILLISECONDS.toNanos(50);
@@ -339,6 +398,67 @@ public class CodecCreationCoordinatorTest {
         }
 
         assertEquals(2, fallbacks.get());
+        assertTrue(locks.isEmpty());
+    }
+
+    @Test
+    public void testFallbackReservationRemainsRateLimitedAfterScopeClose() throws InterruptedException {
+        long waitNanos = TimeUnit.MILLISECONDS.toNanos(10);
+        long fallbackIntervalNanos = TimeUnit.SECONDS.toNanos(30);
+        ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> locks = new ConcurrentHashMap<>();
+        CodecCreationCoordinator.Scope first = CodecCreationCoordinator.acquire(
+                locks,
+                Bean.class,
+                waitNanos,
+                fallbackIntervalNanos
+        );
+        CountDownLatch firstFallbackDone = new CountDownLatch(1);
+        AtomicReference<Throwable> error = new AtomicReference<>();
+
+        startDaemonThread(() -> {
+            try (CodecCreationCoordinator.Scope fallback = CodecCreationCoordinator.acquire(
+                    locks,
+                    Bean.class,
+                    waitNanos,
+                    fallbackIntervalNanos
+            )) {
+                assertTrue(fallback.isLockFreeFallback());
+            } catch (Throwable throwable) {
+                error.compareAndSet(null, throwable);
+            } finally {
+                firstFallbackDone.countDown();
+            }
+        });
+
+        assertTrue(firstFallbackDone.await(5, TimeUnit.SECONDS));
+        assertNull(error.get());
+
+        CountDownLatch secondDone = new CountDownLatch(1);
+        AtomicReference<Boolean> secondWasFallback = new AtomicReference<>();
+        startDaemonThread(() -> {
+            try (CodecCreationCoordinator.Scope scope = CodecCreationCoordinator.acquire(
+                    locks,
+                    Bean.class,
+                    waitNanos,
+                    fallbackIntervalNanos
+            )) {
+                secondWasFallback.set(scope.isLockFreeFallback());
+            } catch (Throwable throwable) {
+                error.compareAndSet(null, throwable);
+            } finally {
+                secondDone.countDown();
+            }
+        });
+
+        try {
+            assertFalse(secondDone.await(100, TimeUnit.MILLISECONDS));
+        } finally {
+            first.close();
+        }
+
+        assertTrue(secondDone.await(5, TimeUnit.SECONDS));
+        assertNull(error.get());
+        assertEquals(Boolean.FALSE, secondWasFallback.get());
         assertTrue(locks.isEmpty());
     }
 
@@ -594,7 +714,6 @@ public class CodecCreationCoordinatorTest {
             extends ConcurrentHashMap<Type, CodecCreationCoordinator.LockEntry> {
         final CountDownLatch releaseLinearized = new CountDownLatch(1);
         final CountDownLatch freshComputeStarted = new CountDownLatch(1);
-        final CountDownLatch freshComputed = new CountDownLatch(1);
         final CountDownLatch continueRelease = new CountDownLatch(1);
         volatile Thread releaseThread;
         volatile boolean coordinateRelease;
@@ -617,24 +736,7 @@ public class CodecCreationCoordinatorTest {
             if (coordinateRelease) {
                 freshComputeStarted.countDown();
             }
-            CodecCreationCoordinator.LockEntry result = super.compute(key, remappingFunction);
-            if (coordinateRelease) {
-                freshComputed.countDown();
-            }
-            return result;
-        }
-
-        @Override
-        public CodecCreationCoordinator.LockEntry computeIfPresent(
-                Type key,
-                BiFunction<? super Type, ? super CodecCreationCoordinator.LockEntry,
-                        ? extends CodecCreationCoordinator.LockEntry> remappingFunction
-        ) {
-            if (coordinateRelease && Thread.currentThread() == releaseThread) {
-                releaseLinearized.countDown();
-                await(freshComputed);
-            }
-            return super.computeIfPresent(key, remappingFunction);
+            return super.compute(key, remappingFunction);
         }
     }
 }

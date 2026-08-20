@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.TypeReference;
+import com.alibaba.fastjson2.internal.CodecCreationCoordinator;
+import com.alibaba.fastjson2.internal.CodecCreationCoordinatorTestSupport;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import org.junit.jupiter.api.Test;
 
@@ -123,6 +125,88 @@ public class ObjectWriterProviderConcurrentTest {
     }
 
     @Test
+    public void testCreatorFailureDoesNotLeakWhileFallbackRetainsLockEntry() throws InterruptedException {
+        long waitNanos = TimeUnit.MILLISECONDS.toNanos(10);
+        AtomicInteger createCount = new AtomicInteger();
+        CountDownLatch firstStarted = new CountDownLatch(1);
+        CountDownLatch failFirst = new CountDownLatch(1);
+        IllegalStateException expectedError = new IllegalStateException("first creation failed");
+        ObjectWriterCreator creator = new ObjectWriterCreator() {
+            @Override
+            public ObjectWriter createObjectWriter(
+                    Class objectClass,
+                    long features,
+                    ObjectWriterProvider provider
+            ) {
+                if (createCount.incrementAndGet() == 1) {
+                    firstStarted.countDown();
+                    await(failFirst);
+                    throw expectedError;
+                }
+                return super.createObjectWriter(objectClass, features, provider);
+            }
+        };
+        ObjectWriterProvider provider = new ObjectWriterProvider(creator);
+        CountDownLatch firstDone = new CountDownLatch(1);
+        AtomicReference<Throwable> firstError = new AtomicReference<>();
+        startDaemonThread(() -> getObjectWriter(provider, FailureBean.class, firstError, firstDone));
+        assertTrue(firstStarted.await(5, TimeUnit.SECONDS));
+
+        CountDownLatch fallbackEntered = new CountDownLatch(1);
+        CountDownLatch releaseFallback = new CountDownLatch(1);
+        CountDownLatch fallbackDone = new CountDownLatch(1);
+        AtomicReference<Throwable> fallbackError = new AtomicReference<>();
+        startDaemonThread(() -> {
+            try (CodecCreationCoordinator.Scope fallback =
+                         CodecCreationCoordinatorTestSupport.acquire(
+                                 provider.createLocks,
+                                 FailureBean.class,
+                                 waitNanos,
+                                 0
+                         )) {
+                assertTrue(fallback.isLockFreeFallback());
+                fallbackEntered.countDown();
+                await(releaseFallback);
+            } catch (Throwable error) {
+                fallbackError.set(error);
+            } finally {
+                fallbackDone.countDown();
+            }
+        });
+
+        AtomicReference<ObjectWriter> retryWriter = new AtomicReference<>();
+        AtomicReference<Throwable> retryError = new AtomicReference<>();
+        CountDownLatch retryDone = new CountDownLatch(1);
+        try {
+            assertTrue(fallbackEntered.await(5, TimeUnit.SECONDS));
+            failFirst.countDown();
+            assertTrue(firstDone.await(5, TimeUnit.SECONDS));
+
+            startDaemonThread(() -> {
+                try {
+                    retryWriter.set(provider.getObjectWriter(FailureBean.class));
+                } catch (Throwable error) {
+                    retryError.set(error);
+                } finally {
+                    retryDone.countDown();
+                }
+            });
+            assertTrue(retryDone.await(5, TimeUnit.SECONDS));
+        } finally {
+            failFirst.countDown();
+            releaseFallback.countDown();
+        }
+
+        assertTrue(fallbackDone.await(5, TimeUnit.SECONDS));
+        assertSame(expectedError, firstError.get());
+        assertNull(fallbackError.get());
+        assertNull(retryError.get());
+        assertNotNull(retryWriter.get());
+        assertEquals(2, createCount.get());
+        assertNoCreateLocks(provider);
+    }
+
+    @Test
     public void testNestedCreationWaitsWhenThereIsNoCycle() throws InterruptedException {
         AtomicInteger beanBCreateCount = new AtomicInteger();
         CountDownLatch beanBStarted = new CountDownLatch(1);
@@ -198,9 +282,10 @@ public class ObjectWriterProviderConcurrentTest {
                     } finally {
                         nested.remove();
                     }
-                } else if ((objectClass == BeanA.class || objectClass == BeanB.class)
-                        && fallbackType.compareAndSet(null, objectClass)) {
-                    fallbackStarted.countDown();
+                } else if (objectClass == BeanA.class || objectClass == BeanB.class) {
+                    if (fallbackType.compareAndSet(null, objectClass)) {
+                        fallbackStarted.countDown();
+                    }
                     await(continueFallback);
                 }
                 return super.createObjectWriter(objectClass, features, provider);
@@ -216,10 +301,13 @@ public class ObjectWriterProviderConcurrentTest {
         startDaemonThread(() -> getObjectWriter(provider, BeanA.class, writerA, error, done));
         startDaemonThread(() -> getObjectWriter(provider, BeanB.class, writerB, error, done));
 
-        assertTrue(fallbackStarted.await(5, TimeUnit.SECONDS));
-        assertNotNull(fallbackType.get());
-        provider.register(fallbackType.get(), canonical);
-        continueFallback.countDown();
+        try {
+            assertTrue(fallbackStarted.await(5, TimeUnit.SECONDS));
+            assertNotNull(fallbackType.get());
+            provider.register(fallbackType.get(), canonical);
+        } finally {
+            continueFallback.countDown();
+        }
         assertTrue(done.await(10, TimeUnit.SECONDS));
         assertNull(error.get());
         assertSame(canonical, provider.getObjectWriter(fallbackType.get()));
@@ -516,7 +604,14 @@ public class ObjectWriterProviderConcurrentTest {
     }
 
     public static class ExtendedMap extends HashMap<String, String> {
+        private final String name;
+
         public ExtendedMap(String ignored) {
+            this.name = ignored;
+        }
+
+        public String getName() {
+            return name;
         }
     }
 

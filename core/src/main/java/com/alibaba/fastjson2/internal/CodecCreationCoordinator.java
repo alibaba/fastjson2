@@ -27,13 +27,21 @@ public final class CodecCreationCoordinator {
     private CodecCreationCoordinator() {
     }
 
+    static final class FailureRecord {
+        final Throwable error;
+
+        FailureRecord(Throwable error) {
+            this.error = error;
+        }
+    }
+
     public static final class LockEntry {
         final ReentrantLock lock = new ReentrantLock();
         final AtomicInteger references = new AtomicInteger();
         final AtomicReference<Context> fallbackOwner = new AtomicReference<>();
         final AtomicLong nextFallbackNanos = new AtomicLong();
         volatile Context owner;
-        volatile Throwable failure;
+        volatile FailureRecord failure;
 
         private LockEntry() {
         }
@@ -51,6 +59,7 @@ public final class CodecCreationCoordinator {
         private final boolean locked;
         private final boolean cycleDetected;
         private final Context fallbackOwner;
+        private final FailureRecord observedFailure;
         private boolean closed;
 
         private Scope(
@@ -60,7 +69,8 @@ public final class CodecCreationCoordinator {
                 boolean outermost,
                 boolean locked,
                 boolean cycleDetected,
-                Context fallbackOwner
+                Context fallbackOwner,
+                FailureRecord observedFailure
         ) {
             this.locks = locks;
             this.type = type;
@@ -69,6 +79,7 @@ public final class CodecCreationCoordinator {
             this.locked = locked;
             this.cycleDetected = cycleDetected;
             this.fallbackOwner = fallbackOwner;
+            this.observedFailure = observedFailure;
         }
 
         public boolean isCycleDetected() {
@@ -80,18 +91,23 @@ public final class CodecCreationCoordinator {
         }
 
         public void throwIfFailed() {
-            Throwable failure = createLock.failure;
-            if (failure instanceof RuntimeException) {
-                throw (RuntimeException) failure;
+            FailureRecord current = createLock.failure;
+            if (current == null || current == observedFailure) {
+                return;
             }
-            if (failure instanceof Error) {
-                throw (Error) failure;
+
+            Throwable error = current.error;
+            if (error instanceof RuntimeException) {
+                throw (RuntimeException) error;
+            }
+            if (error instanceof Error) {
+                throw (Error) error;
             }
         }
 
         public void fail(Throwable failure) {
             if (locked) {
-                createLock.failure = failure;
+                createLock.failure = new FailureRecord(failure);
             }
         }
 
@@ -143,6 +159,7 @@ public final class CodecCreationCoordinator {
             lock.references.incrementAndGet();
             return lock;
         });
+        FailureRecord observedFailure = createLock.failure;
 
         Context context = CONTEXT.get();
         boolean outermost = context == null;
@@ -155,7 +172,7 @@ public final class CodecCreationCoordinator {
         try {
             if (!outermost
                     && (createLock.owner == context || createLock.fallbackOwner.get() == context)) {
-                return new Scope(locks, type, createLock, false, false, true, null);
+                return new Scope(locks, type, createLock, false, false, true, null, observedFailure);
             }
             if (createLock.lock.tryLock()) {
                 locked = true;
@@ -163,7 +180,7 @@ public final class CodecCreationCoordinator {
                 context.waitingFor = createLock;
                 if (!outermost && hasDependencyCycle(createLock, context)) {
                     context.waitingFor = null;
-                    return new Scope(locks, type, createLock, false, false, true, null);
+                    return new Scope(locks, type, createLock, false, false, true, null, observedFailure);
                 }
                 try {
                     locked = lockOrReserveFallback(
@@ -177,14 +194,23 @@ public final class CodecCreationCoordinator {
                 }
                 if (!locked) {
                     fallbackOwner = context;
-                    return new Scope(locks, type, createLock, outermost, false, false, fallbackOwner);
+                    return new Scope(
+                            locks,
+                            type,
+                            createLock,
+                            outermost,
+                            false,
+                            false,
+                            fallbackOwner,
+                            observedFailure
+                    );
                 }
             }
 
             if (createLock.lock.getHoldCount() == 1) {
                 createLock.owner = context;
             }
-            return new Scope(locks, type, createLock, outermost, true, false, null);
+            return new Scope(locks, type, createLock, outermost, true, false, null, observedFailure);
         } catch (Throwable error) {
             if (context != null) {
                 context.waitingFor = null;
