@@ -73,6 +73,50 @@ public class CodecCreationCoordinatorTest {
     }
 
     @Test
+    public void testDependencyCycleAcrossLockMapsIsDetected() throws InterruptedException {
+        long waitNanos = TimeUnit.SECONDS.toNanos(2);
+        ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> readerLocks = new ConcurrentHashMap<>();
+        ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> writerLocks = new ConcurrentHashMap<>();
+        CountDownLatch outerLocksAcquired = new CountDownLatch(2);
+        CountDownLatch done = new CountDownLatch(2);
+        AtomicInteger cycles = new AtomicInteger();
+        AtomicInteger timedFallbacks = new AtomicInteger();
+        AtomicReference<Throwable> error = new AtomicReference<>();
+
+        startCrossMapCycleThread(
+                readerLocks,
+                BeanA.class,
+                writerLocks,
+                BeanB.class,
+                waitNanos,
+                outerLocksAcquired,
+                done,
+                cycles,
+                timedFallbacks,
+                error
+        );
+        startCrossMapCycleThread(
+                writerLocks,
+                BeanB.class,
+                readerLocks,
+                BeanA.class,
+                waitNanos,
+                outerLocksAcquired,
+                done,
+                cycles,
+                timedFallbacks,
+                error
+        );
+
+        assertTrue(done.await(5, TimeUnit.SECONDS));
+        assertNull(error.get());
+        assertTrue(cycles.get() >= 1);
+        assertEquals(0, timedFallbacks.get());
+        assertTrue(readerLocks.isEmpty());
+        assertTrue(writerLocks.isEmpty());
+    }
+
+    @Test
     public void testScopeCloseIsIdempotent() {
         ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> locks = new ConcurrentHashMap<>();
         CodecCreationCoordinator.Scope scope = CodecCreationCoordinator.acquire(locks, Bean.class);
@@ -298,6 +342,145 @@ public class CodecCreationCoordinatorTest {
         assertTrue(locks.isEmpty());
     }
 
+    @Test
+    public void testFallbackOwnerSameThreadReentryIsCycle() throws InterruptedException {
+        long waitNanos = TimeUnit.MILLISECONDS.toNanos(10);
+        ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> locks = new ConcurrentHashMap<>();
+        CodecCreationCoordinator.Scope first = CodecCreationCoordinator.acquire(
+                locks,
+                Bean.class,
+                waitNanos,
+                0
+        );
+        CountDownLatch fallbackEntered = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(1);
+        AtomicReference<Throwable> error = new AtomicReference<>();
+        AtomicReference<Boolean> cycleDetected = new AtomicReference<>();
+
+        startDaemonThread(() -> {
+            try (CodecCreationCoordinator.Scope fallback = CodecCreationCoordinator.acquire(
+                    locks,
+                    Bean.class,
+                    waitNanos,
+                    0
+            )) {
+                assertTrue(fallback.isLockFreeFallback());
+                assertFalse(fallback.isCycleDetected());
+                fallbackEntered.countDown();
+                try (CodecCreationCoordinator.Scope nested = CodecCreationCoordinator.acquire(
+                        locks,
+                        Bean.class,
+                        waitNanos,
+                        0
+                )) {
+                    cycleDetected.set(nested.isCycleDetected());
+                }
+            } catch (Throwable e) {
+                error.compareAndSet(null, e);
+            } finally {
+                done.countDown();
+            }
+        });
+
+        boolean fallbackSeen;
+        boolean completedWhileFirstHeld;
+        try {
+            fallbackSeen = fallbackEntered.await(5, TimeUnit.SECONDS);
+            completedWhileFirstHeld = fallbackSeen
+                    && done.await(2, TimeUnit.SECONDS);
+        } finally {
+            first.close();
+        }
+
+        assertTrue(done.await(5, TimeUnit.SECONDS));
+        assertTrue(fallbackSeen);
+        assertTrue(completedWhileFirstHeld);
+        assertNull(error.get());
+        assertEquals(Boolean.TRUE, cycleDetected.get());
+        assertTrue(locks.isEmpty());
+    }
+
+    @Test
+    public void testDependencyCycleThroughFallbackOwnerIsDetected() throws InterruptedException {
+        long waitNanos = TimeUnit.MILLISECONDS.toNanos(10);
+        ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> locks = new ConcurrentHashMap<>();
+        CodecCreationCoordinator.Scope first = CodecCreationCoordinator.acquire(
+                locks,
+                BeanA.class,
+                waitNanos,
+                0
+        );
+        CountDownLatch secondLockAcquired = new CountDownLatch(1);
+        CountDownLatch checkCycle = new CountDownLatch(1);
+        CountDownLatch fallbackEntered = new CountDownLatch(1);
+        CountDownLatch fallbackDone = new CountDownLatch(1);
+        CountDownLatch secondDone = new CountDownLatch(1);
+        AtomicReference<Boolean> cycleDetected = new AtomicReference<>();
+        AtomicReference<Throwable> error = new AtomicReference<>();
+
+        startDaemonThread(() -> {
+            try (CodecCreationCoordinator.Scope second =
+                         CodecCreationCoordinator.acquire(locks, BeanB.class)) {
+                secondLockAcquired.countDown();
+                await(checkCycle);
+                try (CodecCreationCoordinator.Scope nested = CodecCreationCoordinator.acquire(
+                        locks,
+                        BeanA.class,
+                        waitNanos,
+                        0
+                )) {
+                    cycleDetected.set(nested.isCycleDetected());
+                }
+            } catch (Throwable e) {
+                error.compareAndSet(null, e);
+            } finally {
+                secondDone.countDown();
+            }
+        });
+
+        Thread fallbackThread = startDaemonThread(() -> {
+            try {
+                assertTrue(secondLockAcquired.await(5, TimeUnit.SECONDS));
+                try (CodecCreationCoordinator.Scope fallback = CodecCreationCoordinator.acquire(
+                        locks,
+                        BeanA.class,
+                        waitNanos,
+                        0
+                )) {
+                    assertTrue(fallback.isLockFreeFallback());
+                    assertFalse(fallback.isCycleDetected());
+                    fallbackEntered.countDown();
+                    try (CodecCreationCoordinator.Scope ignored =
+                                 CodecCreationCoordinator.acquire(locks, BeanB.class)) {
+                        // The second lock owner must detect the cycle through this fallback owner.
+                    }
+                }
+            } catch (Throwable e) {
+                error.compareAndSet(null, e);
+            } finally {
+                fallbackDone.countDown();
+            }
+        });
+
+        boolean completedWhileFirstHeld;
+        try {
+            assertTrue(fallbackEntered.await(5, TimeUnit.SECONDS));
+            awaitWaiting(fallbackThread);
+            checkCycle.countDown();
+            completedWhileFirstHeld = secondDone.await(2, TimeUnit.SECONDS);
+        } finally {
+            checkCycle.countDown();
+            first.close();
+        }
+
+        assertTrue(secondDone.await(5, TimeUnit.SECONDS));
+        assertTrue(fallbackDone.await(5, TimeUnit.SECONDS));
+        assertTrue(completedWhileFirstHeld);
+        assertNull(error.get());
+        assertEquals(Boolean.TRUE, cycleDetected.get());
+        assertTrue(locks.isEmpty());
+    }
+
     private static void startCycleThread(
             ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> locks,
             Type first,
@@ -317,6 +500,45 @@ public class CodecCreationCoordinatorTest {
                 try (CodecCreationCoordinator.Scope inner = CodecCreationCoordinator.acquire(locks, second)) {
                     if (inner.isCycleDetected()) {
                         cycles.incrementAndGet();
+                    }
+                }
+            } catch (Throwable e) {
+                error.compareAndSet(null, e);
+            } finally {
+                done.countDown();
+            }
+        });
+    }
+
+    private static void startCrossMapCycleThread(
+            ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> firstLocks,
+            Type first,
+            ConcurrentMap<Type, CodecCreationCoordinator.LockEntry> secondLocks,
+            Type second,
+            long waitNanos,
+            CountDownLatch outerLocksAcquired,
+            CountDownLatch done,
+            AtomicInteger cycles,
+            AtomicInteger timedFallbacks,
+            AtomicReference<Throwable> error
+    ) {
+        startDaemonThread(() -> {
+            try (CodecCreationCoordinator.Scope outer = CodecCreationCoordinator.acquire(firstLocks, first)) {
+                assertFalse(outer.isCycleDetected());
+                outerLocksAcquired.countDown();
+                if (!outerLocksAcquired.await(5, TimeUnit.SECONDS)) {
+                    throw new IllegalStateException("outer creation locks were not acquired concurrently");
+                }
+                try (CodecCreationCoordinator.Scope inner = CodecCreationCoordinator.acquire(
+                        secondLocks,
+                        second,
+                        waitNanos,
+                        0
+                )) {
+                    if (inner.isCycleDetected()) {
+                        cycles.incrementAndGet();
+                    } else if (inner.isLockFreeFallback()) {
+                        timedFallbacks.incrementAndGet();
                     }
                 }
             } catch (Throwable e) {

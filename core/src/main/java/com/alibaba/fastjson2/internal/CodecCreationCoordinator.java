@@ -1,12 +1,13 @@
 package com.alibaba.fastjson2.internal;
 
 import java.lang.reflect.Type;
+import java.util.ArrayDeque;
 import java.util.IdentityHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -29,7 +30,7 @@ public final class CodecCreationCoordinator {
     public static final class LockEntry {
         final ReentrantLock lock = new ReentrantLock();
         final AtomicInteger references = new AtomicInteger();
-        final AtomicBoolean fallbackActive = new AtomicBoolean();
+        final AtomicReference<Context> fallbackOwner = new AtomicReference<>();
         final AtomicLong nextFallbackNanos = new AtomicLong();
         volatile Context owner;
         volatile Throwable failure;
@@ -49,7 +50,7 @@ public final class CodecCreationCoordinator {
         private final boolean outermost;
         private final boolean locked;
         private final boolean cycleDetected;
-        private final boolean fallbackReserved;
+        private final Context fallbackOwner;
         private boolean closed;
 
         private Scope(
@@ -59,7 +60,7 @@ public final class CodecCreationCoordinator {
                 boolean outermost,
                 boolean locked,
                 boolean cycleDetected,
-                boolean fallbackReserved
+                Context fallbackOwner
         ) {
             this.locks = locks;
             this.type = type;
@@ -67,7 +68,7 @@ public final class CodecCreationCoordinator {
             this.outermost = outermost;
             this.locked = locked;
             this.cycleDetected = cycleDetected;
-            this.fallbackReserved = fallbackReserved;
+            this.fallbackOwner = fallbackOwner;
         }
 
         public boolean isCycleDetected() {
@@ -117,8 +118,8 @@ public final class CodecCreationCoordinator {
                 try {
                     release(locks, type, createLock);
                 } finally {
-                    if (fallbackReserved) {
-                        createLock.fallbackActive.set(false);
+                    if (fallbackOwner != null) {
+                        createLock.fallbackOwner.compareAndSet(fallbackOwner, null);
                     }
                 }
             }
@@ -150,10 +151,11 @@ public final class CodecCreationCoordinator {
             CONTEXT.set(context);
         }
         boolean locked = false;
-        boolean fallbackReserved = false;
+        Context fallbackOwner = null;
         try {
-            if (!outermost && createLock.owner == context) {
-                return new Scope(locks, type, createLock, false, false, true, false);
+            if (!outermost
+                    && (createLock.owner == context || createLock.fallbackOwner.get() == context)) {
+                return new Scope(locks, type, createLock, false, false, true, null);
             }
             if (createLock.lock.tryLock()) {
                 locked = true;
@@ -161,27 +163,28 @@ public final class CodecCreationCoordinator {
                 context.waitingFor = createLock;
                 if (!outermost && hasDependencyCycle(createLock, context)) {
                     context.waitingFor = null;
-                    return new Scope(locks, type, createLock, false, false, true, false);
+                    return new Scope(locks, type, createLock, false, false, true, null);
                 }
                 try {
                     locked = lockOrReserveFallback(
                             createLock,
                             waitNanos,
-                            fallbackIntervalNanos
+                            fallbackIntervalNanos,
+                            context
                     );
                 } finally {
                     context.waitingFor = null;
                 }
                 if (!locked) {
-                    fallbackReserved = true;
-                    return new Scope(locks, type, createLock, outermost, false, false, true);
+                    fallbackOwner = context;
+                    return new Scope(locks, type, createLock, outermost, false, false, fallbackOwner);
                 }
             }
 
             if (createLock.lock.getHoldCount() == 1) {
                 createLock.owner = context;
             }
-            return new Scope(locks, type, createLock, outermost, true, false, false);
+            return new Scope(locks, type, createLock, outermost, true, false, null);
         } catch (Throwable error) {
             if (context != null) {
                 context.waitingFor = null;
@@ -189,8 +192,8 @@ public final class CodecCreationCoordinator {
             if (outermost) {
                 CONTEXT.remove();
             }
-            if (fallbackReserved) {
-                createLock.fallbackActive.set(false);
+            if (fallbackOwner != null) {
+                createLock.fallbackOwner.compareAndSet(fallbackOwner, null);
             }
             if (locked) {
                 if (createLock.lock.getHoldCount() == 1) {
@@ -223,7 +226,8 @@ public final class CodecCreationCoordinator {
     private static boolean lockOrReserveFallback(
             LockEntry createLock,
             long waitNanos,
-            long fallbackIntervalNanos
+            long fallbackIntervalNanos,
+            Context context
     ) {
         boolean interrupted = false;
         try {
@@ -251,7 +255,7 @@ public final class CodecCreationCoordinator {
                 long now = System.nanoTime();
                 long nextFallback = createLock.nextFallbackNanos.get();
                 if ((nextFallback == 0 || now - nextFallback >= 0)
-                        && createLock.fallbackActive.compareAndSet(false, true)) {
+                        && createLock.fallbackOwner.compareAndSet(null, context)) {
                     createLock.nextFallbackNanos.set(now + fallbackIntervalNanos);
                     return false;
                 }
@@ -265,14 +269,32 @@ public final class CodecCreationCoordinator {
 
     private static boolean hasDependencyCycle(LockEntry createLock, Context current) {
         IdentityHashMap<Context, Boolean> checked = new IdentityHashMap<>();
-        Context owner = createLock.owner;
-        while (owner != null && checked.put(owner, Boolean.TRUE) == null) {
+        ArrayDeque<Context> pending = new ArrayDeque<>();
+        addOwners(createLock, pending);
+        while (!pending.isEmpty()) {
+            Context owner = pending.removeLast();
             if (owner == current) {
                 return true;
             }
+            if (checked.put(owner, Boolean.TRUE) != null) {
+                continue;
+            }
             LockEntry waitingFor = owner.waitingFor;
-            owner = waitingFor == null ? null : waitingFor.owner;
+            if (waitingFor != null) {
+                addOwners(waitingFor, pending);
+            }
         }
         return false;
+    }
+
+    private static void addOwners(LockEntry createLock, ArrayDeque<Context> pending) {
+        Context owner = createLock.owner;
+        if (owner != null) {
+            pending.addLast(owner);
+        }
+        Context fallbackOwner = createLock.fallbackOwner.get();
+        if (fallbackOwner != null && fallbackOwner != owner) {
+            pending.addLast(fallbackOwner);
+        }
     }
 }

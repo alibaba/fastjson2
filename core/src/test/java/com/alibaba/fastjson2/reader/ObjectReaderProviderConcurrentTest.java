@@ -235,6 +235,73 @@ public class ObjectReaderProviderConcurrentTest {
     }
 
     @Test
+    public void testFallbackOwnerSameTypeReentryDoesNotDeadlock() throws InterruptedException {
+        AtomicInteger createCount = new AtomicInteger();
+        CountDownLatch firstStarted = new CountDownLatch(1);
+        CountDownLatch releaseFirst = new CountDownLatch(1);
+        CountDownLatch fallbackStarted = new CountDownLatch(1);
+        ThreadLocal<Boolean> nested = new ThreadLocal<>();
+        AtomicReference<ObjectReader> nestedReader = new AtomicReference<>();
+        ObjectReaderCreator creator = new ObjectReaderCreator() {
+            @Override
+            public <T> ObjectReader<T> createObjectReader(
+                    Class<T> objectClass,
+                    Type objectType,
+                    boolean fieldBased,
+                    ObjectReaderProvider provider
+            ) {
+                if (objectClass == Bean.class) {
+                    int count = createCount.incrementAndGet();
+                    if (count == 1) {
+                        firstStarted.countDown();
+                        await(releaseFirst);
+                    } else if (nested.get() == null) {
+                        nested.set(Boolean.TRUE);
+                        try {
+                            fallbackStarted.countDown();
+                            nestedReader.set(provider.getObjectReader(Bean.class));
+                        } finally {
+                            nested.remove();
+                        }
+                    }
+                }
+                return super.createObjectReader(objectClass, objectType, fieldBased, provider);
+            }
+        };
+        ObjectReaderProvider provider = new ObjectReaderProvider(creator);
+        AtomicReference<ObjectReader> firstReader = new AtomicReference<>();
+        AtomicReference<ObjectReader> fallbackReader = new AtomicReference<>();
+        AtomicReference<Throwable> error = new AtomicReference<>();
+        CountDownLatch firstDone = new CountDownLatch(1);
+        CountDownLatch fallbackDone = new CountDownLatch(1);
+
+        startDaemonThread(() -> getObjectReader(provider, Bean.class, firstReader, error, firstDone));
+        boolean fallbackEntered;
+        boolean completedWhileFirstHeld;
+        try {
+            assertTrue(firstStarted.await(5, TimeUnit.SECONDS));
+            startDaemonThread(() -> getObjectReader(provider, Bean.class, fallbackReader, error, fallbackDone));
+            fallbackEntered = fallbackStarted.await(10, TimeUnit.SECONDS);
+            completedWhileFirstHeld = fallbackEntered
+                    && fallbackDone.await(5, TimeUnit.SECONDS);
+        } finally {
+            releaseFirst.countDown();
+        }
+
+        assertTrue(firstDone.await(5, TimeUnit.SECONDS));
+        assertTrue(fallbackDone.await(5, TimeUnit.SECONDS));
+        assertTrue(fallbackEntered);
+        assertTrue(completedWhileFirstHeld);
+        assertNull(error.get());
+        assertEquals(3, createCount.get());
+        ObjectReader canonical = provider.getObjectReader(Bean.class);
+        assertSame(canonical, firstReader.get());
+        assertSame(canonical, fallbackReader.get());
+        assertSame(canonical, nestedReader.get());
+        assertNoCreateLocks(provider);
+    }
+
+    @Test
     public void testParameterizedTypesCreateConcurrently() throws InterruptedException {
         CountDownLatch creating = new CountDownLatch(2);
         AtomicInteger createCount = new AtomicInteger();

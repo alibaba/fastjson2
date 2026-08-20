@@ -95,7 +95,8 @@ public class ObjectCodecProviderConcurrentTest {
             }
         });
 
-        assertTrue(done.await(10, TimeUnit.SECONDS));
+        assertTrue(creating.await(5, TimeUnit.SECONDS));
+        assertTrue(done.await(4, TimeUnit.SECONDS));
         assertNull(error.get());
         assertSame(readerProvider.getObjectReader(ReaderBean.class), reader.get());
         assertSame(readerProvider.getObjectReader(ReaderBean.class), nestedReader.get());

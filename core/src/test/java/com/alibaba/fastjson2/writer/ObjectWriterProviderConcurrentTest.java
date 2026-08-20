@@ -231,6 +231,72 @@ public class ObjectWriterProviderConcurrentTest {
     }
 
     @Test
+    public void testFallbackOwnerSameTypeReentryDoesNotDeadlock() throws InterruptedException {
+        AtomicInteger createCount = new AtomicInteger();
+        CountDownLatch firstStarted = new CountDownLatch(1);
+        CountDownLatch releaseFirst = new CountDownLatch(1);
+        CountDownLatch fallbackStarted = new CountDownLatch(1);
+        ThreadLocal<Boolean> nested = new ThreadLocal<>();
+        AtomicReference<ObjectWriter> nestedWriter = new AtomicReference<>();
+        ObjectWriterCreator creator = new ObjectWriterCreator() {
+            @Override
+            public ObjectWriter createObjectWriter(
+                    Class objectClass,
+                    long features,
+                    ObjectWriterProvider provider
+            ) {
+                if (objectClass == Bean.class) {
+                    int count = createCount.incrementAndGet();
+                    if (count == 1) {
+                        firstStarted.countDown();
+                        await(releaseFirst);
+                    } else if (nested.get() == null) {
+                        nested.set(Boolean.TRUE);
+                        try {
+                            fallbackStarted.countDown();
+                            nestedWriter.set(provider.getObjectWriter(Bean.class));
+                        } finally {
+                            nested.remove();
+                        }
+                    }
+                }
+                return super.createObjectWriter(objectClass, features, provider);
+            }
+        };
+        ObjectWriterProvider provider = new ObjectWriterProvider(creator);
+        AtomicReference<ObjectWriter> firstWriter = new AtomicReference<>();
+        AtomicReference<ObjectWriter> fallbackWriter = new AtomicReference<>();
+        AtomicReference<Throwable> error = new AtomicReference<>();
+        CountDownLatch firstDone = new CountDownLatch(1);
+        CountDownLatch fallbackDone = new CountDownLatch(1);
+
+        startDaemonThread(() -> getObjectWriter(provider, Bean.class, firstWriter, error, firstDone));
+        boolean fallbackEntered;
+        boolean completedWhileFirstHeld;
+        try {
+            assertTrue(firstStarted.await(5, TimeUnit.SECONDS));
+            startDaemonThread(() -> getObjectWriter(provider, Bean.class, fallbackWriter, error, fallbackDone));
+            fallbackEntered = fallbackStarted.await(10, TimeUnit.SECONDS);
+            completedWhileFirstHeld = fallbackEntered
+                    && fallbackDone.await(5, TimeUnit.SECONDS);
+        } finally {
+            releaseFirst.countDown();
+        }
+
+        assertTrue(firstDone.await(5, TimeUnit.SECONDS));
+        assertTrue(fallbackDone.await(5, TimeUnit.SECONDS));
+        assertTrue(fallbackEntered);
+        assertTrue(completedWhileFirstHeld);
+        assertNull(error.get());
+        assertEquals(3, createCount.get());
+        ObjectWriter canonical = provider.getObjectWriter(Bean.class);
+        assertSame(canonical, firstWriter.get());
+        assertSame(canonical, fallbackWriter.get());
+        assertSame(canonical, nestedWriter.get());
+        assertNoCreateLocks(provider);
+    }
+
+    @Test
     public void testParameterizedTypesCreateConcurrently() throws InterruptedException {
         CountDownLatch creating = new CountDownLatch(2);
         AtomicInteger createCount = new AtomicInteger();
