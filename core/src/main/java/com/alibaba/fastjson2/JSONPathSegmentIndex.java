@@ -200,6 +200,53 @@ final class JSONPathSegmentIndex
     }
 
     @Override
+    public boolean contains(JSONPath.Context context) {
+        Object object = context.parent == null
+                ? context.root
+                : context.parent.value;
+        if (object == null) {
+            return false;
+        }
+        if (object instanceof List) {
+            int size = ((List<?>) object).size();
+            int i = index >= 0 ? index : size + index;
+            return i >= 0 && i < size;
+        }
+        if (object instanceof Object[]) {
+            int size = ((Object[]) object).length;
+            int i = index >= 0 ? index : size + index;
+            return i >= 0 && i < size;
+        }
+        Class<?> objectClass = object.getClass();
+        if (objectClass.isArray()) {
+            int size = Array.getLength(object);
+            int i = index >= 0 ? index : size + index;
+            return i >= 0 && i < size;
+        }
+        if (object instanceof Collection) {
+            int size = ((Collection<?>) object).size();
+            int i = index >= 0 ? index : size + index;
+            return i >= 0 && i < size;
+        }
+        if (object instanceof JSONPath.Sequence) {
+            for (Object item : ((JSONPath.Sequence) object).values) {
+                context.value = item;
+                JSONPath.Context itemContext = new JSONPath.Context(
+                        context.path, context, context.current, context.next, context.readerFeatures);
+                if (contains(itemContext)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (object instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) object;
+            return map.containsKey(index) || map.containsKey(Integer.toString(index));
+        }
+        return index == 0;
+    }
+
+    @Override
     public void set(JSONPath.Context context, Object value) {
         Object object = context.parent == null
                 ? context.root

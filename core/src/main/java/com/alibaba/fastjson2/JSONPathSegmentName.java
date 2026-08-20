@@ -98,9 +98,10 @@ class JSONPathSegmentName
                 }
 
                 if (item instanceof Map) {
-                    if (((Map<?, ?>) item).get(name) != null) {
+                    if (((Map<?, ?>) item).containsKey(name)) {
                         return true;
                     }
+                    continue;
                 }
 
                 ObjectWriter<?> objectWriter = context.path
@@ -126,9 +127,10 @@ class JSONPathSegmentName
                 }
 
                 if (item instanceof Map) {
-                    if (((Map<?, ?>) item).get(name) != null) {
+                    if (((Map<?, ?>) item).containsKey(name)) {
                         return true;
                     }
+                    continue;
                 }
 
                 ObjectWriter<?> objectWriter = context.path
@@ -154,9 +156,10 @@ class JSONPathSegmentName
                 }
 
                 if (item instanceof Map) {
-                    if (((Map) item).get(name) != null) {
+                    if (((Map) item).containsKey(name)) {
                         return true;
                     }
+                    continue;
                 }
 
                 ObjectWriter<?> objectWriter = context.path

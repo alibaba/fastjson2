@@ -34,6 +34,17 @@ abstract class JSONPathSegment {
         return context.value != null;
     }
 
+    static boolean hasMatch(Object value) {
+        if (value instanceof Collection) {
+            return !((Collection<?>) value).isEmpty();
+        }
+        if (value instanceof JSONPath.Sequence) {
+            List<?> values = ((JSONPath.Sequence) value).values;
+            return values != null && !values.isEmpty();
+        }
+        return value != null;
+    }
+
     public boolean remove(JSONPath.Context context) {
         throw new JSONException("UnsupportedOperation " + getClass());
     }
@@ -266,6 +277,12 @@ abstract class JSONPathSegment {
             }
 
             throw new JSONException("TODO");
+        }
+
+        @Override
+        public boolean contains(JSONPath.Context context) {
+            eval(context);
+            return hasMatch(context.value);
         }
 
         @Override
@@ -562,6 +579,12 @@ abstract class JSONPathSegment {
         }
 
         @Override
+        public boolean contains(JSONPath.Context context) {
+            eval(context);
+            return hasMatch(context.value);
+        }
+
+        @Override
         public void accept(JSONReader jsonReader, JSONPath.Context context) {
             if (context.parent != null
                     && context.parent.current instanceof CycleNameSegment
@@ -777,6 +800,24 @@ abstract class JSONPathSegment {
                 array.add(fieldValue);
             }
             context.value = array;
+        }
+
+        @Override
+        public boolean contains(JSONPath.Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+            if (object instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) object;
+                for (String name : names) {
+                    if (map.containsKey(name)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            eval(context);
+            return hasMatch(context.value);
         }
 
         @Override
@@ -1055,6 +1096,12 @@ abstract class JSONPathSegment {
             }
             context.value = array;
             context.eval = true;
+        }
+
+        @Override
+        public boolean contains(JSONPath.Context context) {
+            eval(context);
+            return hasMatch(context.value);
         }
 
         @Override
@@ -1388,6 +1435,22 @@ abstract class JSONPathSegment {
             }
 
             context.eval = true;
+        }
+
+        @Override
+        public boolean contains(JSONPath.Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+            List values = new JSONArray();
+            Consumer action;
+            if (shouldRecursive()) {
+                action = new MapRecursive(context, values, 0);
+            } else {
+                action = new MapLoop(context, values);
+            }
+            action.accept(object);
+            return !values.isEmpty();
         }
 
         @Override

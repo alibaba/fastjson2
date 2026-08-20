@@ -50,6 +50,9 @@ class JSONPathTypedMulti
     @Override
     public boolean contains(Object object) {
         for (JSONPath jsonPath : paths) {
+            if (jsonPath instanceof RootPath) {
+                continue;
+            }
             if (jsonPath.contains(object)) {
                 return true;
             }
