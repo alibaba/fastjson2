@@ -244,7 +244,7 @@ public class ObjectWriterCreatorASM
                 BeanUtils.getters(objectClass, mixIn, beanInfo.kotlin, method -> {
                     fieldInfo.init();
                     fieldInfo.features |= writerFieldFeatures;
-                    fieldInfo.format = beanInfo.format;
+                    fieldInfo.format = BeanUtils.inheritBeanFormat(beanInfo.format, method.getReturnType());
 
                     provider.getFieldInfo(beanInfo, fieldInfo, objectClass, method);
                     if (fieldInfo.ignore) {
@@ -1479,6 +1479,62 @@ public class ObjectWriterCreatorASM
         final int BYTES = mwc.var("bytes");
         final int FEATURES = mwc.var2(CONTEXT_FEATURES);
 
+        /*
+         * WriteNonStringValueAsString set at writer level is not visible when this
+         * method is generated (only bean and field features are); delegate to the
+         * reflective loop, which writes each field with the merged features
+         *
+         * if ((jsonWriter.getFeatures() & WriteNonStringValueAsString.mask) != 0) {
+         *     super.writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
+         *     return;
+         * }
+         *
+         * Field-level WriteNonStringValueAsString (set for Jackson shape=STRING in
+         * the FieldWriter constructor) is visible here; the direct-write path below
+         * drops per-field features, so when any field carries it the whole method
+         * is the delegate
+         */
+        boolean fieldWriteAsString = false;
+        for (FieldWriter fieldWriter : fieldWriters) {
+            if ((fieldWriter.features & WriteNonStringValueAsString.mask) != 0) {
+                fieldWriteAsString = true;
+                break;
+            }
+        }
+
+        if (fieldWriteAsString) {
+            mw.aload(THIS);
+            mw.aload(JSON_WRITER);
+            mw.aload(OBJECT);
+            mw.aload(FIELD_NAME);
+            mw.aload(FIELD_TYPE);
+            mw.lload(FIELD_FEATURES);
+            mw.invokespecial(TYPE_OBJECT_WRITER_ADAPTER, "writeArrayMappingJSONB", METHOD_DESC_WRITE);
+            mw.return_();
+            mw.visitMaxs(mwc.maxVariant + 1, mwc.maxVariant + 1);
+            return;
+        }
+
+        Label skipSuper_ = new Label();
+        mw.aload(JSON_WRITER);
+        mw.invokevirtual(TYPE_JSON_WRITER, "getFeatures", "()J");
+        mw.visitLdcInsn(WriteNonStringValueAsString.mask);
+        mw.land();
+        mw.lconst_0();
+        mw.lcmp();
+        mw.ifeq(skipSuper_);
+
+        mw.aload(THIS);
+        mw.aload(JSON_WRITER);
+        mw.aload(OBJECT);
+        mw.aload(FIELD_NAME);
+        mw.aload(FIELD_TYPE);
+        mw.lload(FIELD_FEATURES);
+        mw.invokespecial(TYPE_OBJECT_WRITER_ADAPTER, "writeArrayMappingJSONB", METHOD_DESC_WRITE);
+        mw.return_();
+
+        mw.visitLabel(skipSuper_);
+
         if ((features & FieldInfo.DISABLE_AUTO_TYPE) == 0) {
             Label notWriteType = new Label();
             isWriteTypeInfo(objectFeatures, mw, OBJECT, FIELD_TYPE, FIELD_FEATURES, notWriteType);
@@ -2229,13 +2285,14 @@ public class ObjectWriterCreatorASM
                     mw.invokevirtual(TYPE_JSON_WRITER, "writeDecimal", "(Ljava/math/BigDecimal;JLjava/text/DecimalFormat;)V");
                 }
             } else {
+                boolean writeAsString = (fieldWriter.features & WriteNonStringValueAsString.mask) != 0;
                 mw.aload(FIELD_VALUE);
                 if (fieldClass == Double.class) {
                     mw.invokevirtual("java/lang/Double", "doubleValue", "()D");
-                    mw.invokevirtual(TYPE_JSON_WRITER, "writeDouble", "(D)V");
+                    mw.invokevirtual(TYPE_JSON_WRITER, writeAsString ? "writeString" : "writeDouble", "(D)V");
                 } else if (fieldClass == Float.class) {
                     mw.invokevirtual("java/lang/Float", "floatValue", "()F");
-                    mw.invokevirtual(TYPE_JSON_WRITER, "writeFloat", "(F)V");
+                    mw.invokevirtual(TYPE_JSON_WRITER, writeAsString ? "writeString" : "writeFloat", "(F)V");
                 } else {
                     long features = fieldWriter.features;
                     mw.visitLdcInsn(features);

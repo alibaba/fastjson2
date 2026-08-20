@@ -376,7 +376,7 @@ public class ObjectWriterBaseModule
                         break;
                     case "com.fasterxml.jackson.annotation.JsonFormat":
                         if (useJacksonAnnotation) {
-                            processJacksonJsonFormat(fieldInfo, annotation);
+                            processJacksonJsonFormat(fieldInfo, annotation, field.getType());
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonInclude":
@@ -838,7 +838,7 @@ public class ObjectWriterBaseModule
 
             fieldInfo.isPrivate = false;
             Annotation[] annotations = getAnnotations(method);
-            processAnnotations(fieldInfo, annotations);
+            processAnnotations(fieldInfo, annotations, method.getReturnType());
 
             if (!objectClass.getName().startsWith("java.lang") && !BeanUtils.isRecord(objectClass)) {
                 Field methodField = getField(objectClass, method);
@@ -859,7 +859,7 @@ public class ObjectWriterBaseModule
                                 = beanInfo.creatorConstructor.getParameterAnnotations();
                         if (i < creatorConsParamAnnotations.length) {
                             Annotation[] parameterAnnotations = creatorConsParamAnnotations[i];
-                            processAnnotations(fieldInfo, parameterAnnotations);
+                            processAnnotations(fieldInfo, parameterAnnotations, beanInfo.creatorConstructor.getParameterTypes()[i]);
                             break;
                         }
                     }
@@ -867,7 +867,7 @@ public class ObjectWriterBaseModule
             }
         }
 
-        private void processAnnotations(FieldInfo fieldInfo, Annotation[] annotations) {
+        private void processAnnotations(FieldInfo fieldInfo, Annotation[] annotations, Class<?> fieldClass) {
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
                 JSONField jsonField = findAnnotation(annotation, JSONField.class);
@@ -913,7 +913,7 @@ public class ObjectWriterBaseModule
                     }
                     case "com.fasterxml.jackson.annotation.JsonFormat":
                         if (useJacksonAnnotation) {
-                            processJacksonJsonFormat(fieldInfo, annotation);
+                            processJacksonJsonFormat(fieldInfo, annotation, fieldClass);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonValue":
