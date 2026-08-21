@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.TypeReference;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +42,7 @@ public class RefTest8 {
         riskInfo2.itemMap = new HashMap<>();
         riskInfo2.itemMap.put(item2.itemId, item2);
 
-        List<RiskInfo> list = List.of(riskInfo1, riskInfo2);
+        List<RiskInfo> list = Arrays.asList(riskInfo1, riskInfo2);
 
         String json = JSON.toJSONString(list, JSONWriter.Feature.ReferenceDetection);
         assertEquals(
@@ -53,7 +55,7 @@ public class RefTest8 {
         });
         Item item1Parsed = list2.get(0).itemMap.get(1L);
         Item item2Parsed = list2.get(1).itemMap.get(2L);
-        assertEquals(Map.of("1", 1L), item1Parsed.reversePriceMap);
+        assertEquals(Collections.singletonMap("1", 1L), item1Parsed.reversePriceMap);
         assertSame(item1Parsed.reversePriceMap, item2Parsed.reversePriceMap);
     }
 
