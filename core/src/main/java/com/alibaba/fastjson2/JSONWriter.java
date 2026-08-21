@@ -299,6 +299,10 @@ public abstract class JSONWriter
      * @return the previous path as a string, or null if no previous path exists
      */
     public final String setPath0(FieldWriter fieldWriter, Object object) {
+        if (ObjectWriterProvider.isNotReferenceDetect(object.getClass())) {
+            return null;
+        }
+
         this.path = this.path == Path.ROOT
                 ? fieldWriter.getRootParentPath()
                 : fieldWriter.getPath(path);
@@ -376,7 +380,7 @@ public abstract class JSONWriter
      * @return the previous path as a string, or null if no previous path exists
      */
     public final String setPath0(int index, Object object) {
-        if (path == null) {
+        if (path == null || ObjectWriterProvider.isNotReferenceDetect(object.getClass())) {
             return null;
         }
         this.path = index == 0
@@ -424,8 +428,7 @@ public abstract class JSONWriter
     public final void popPath0(Object object) {
         if (this.path == null
                 || (context.features & MASK_REFERENCE_DETECTION) == 0
-                || object == Collections.EMPTY_LIST
-                || object == Collections.EMPTY_SET
+                || ObjectWriterProvider.isNotReferenceDetect(object.getClass())
         ) {
             return;
         }
