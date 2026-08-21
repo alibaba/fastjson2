@@ -914,12 +914,12 @@ public class JSONObject
 
             if (value instanceof Float) {
                 float floatValue = (Float) value;
-                return toBigDecimal(floatValue);
+                return BigDecimal.valueOf(floatValue);
             }
 
             if (value instanceof Double) {
                 double doubleValue = (Double) value;
-                return toBigDecimal(doubleValue);
+                return BigDecimal.valueOf(doubleValue);
             }
 
             long longValue = ((Number) value).longValue();
