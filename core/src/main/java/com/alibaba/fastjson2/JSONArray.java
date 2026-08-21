@@ -748,7 +748,7 @@ public class JSONArray
 
             if (value instanceof Float) {
                 float floatValue = (Float) value;
-                return BigDecimal.valueOf(floatValue);
+                return new BigDecimal(Float.toString(floatValue));
             }
 
             if (value instanceof Double) {
