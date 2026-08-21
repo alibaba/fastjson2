@@ -1069,6 +1069,34 @@ public class JSONReaderTest {
     }
 
     @Test
+    public void readMap_jsonb_stringKey() {
+        Map<String, String> src = new LinkedHashMap<>();
+        src.put("a", "1");
+        src.put("b", "2");
+        byte[] bytes = JSONB.toBytes(src);
+
+        JSONReader jsonReader = JSONReader.ofJSONB(bytes);
+        Map map = new HashMap();
+        jsonReader.read(map, String.class, String.class, 0L);
+        assertEquals("1", map.get("a"));
+        assertEquals("2", map.get("b"));
+    }
+
+    @Test
+    public void readMap_jsonb_nonStringKey() {
+        Map<Long, String> src = new LinkedHashMap<>();
+        src.put(123L, "456");
+        src.put(234L, "567");
+        byte[] bytes = JSONB.toBytes(src);
+
+        JSONReader jsonReader = JSONReader.ofJSONB(bytes);
+        Map map = new HashMap();
+        jsonReader.read(map, Long.class, String.class, 0L);
+        assertEquals("456", map.get(123L));
+        assertEquals("567", map.get(234L));
+    }
+
+    @Test
     public void readArray() {
         String str = "[\"123\",\"456\"]";
         JSONReader jsonReader = JSONReader.of(JSONFactory.createReadContext(), str.getBytes());
