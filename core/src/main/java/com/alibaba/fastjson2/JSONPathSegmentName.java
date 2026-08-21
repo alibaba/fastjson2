@@ -202,6 +202,7 @@ class JSONPathSegmentName
             if (value == null) {
                 boolean isNum = IOUtils.isNumber(this.name);
                 Long longValue = null;
+                Integer intValue = null;
 
                 for (Object o : map.entrySet()) {
                     Map.Entry entry = (Map.Entry) o;
@@ -214,6 +215,14 @@ class JSONPathSegmentName
                             longValue = Long.parseLong(this.name);
                         }
                         if (entryKey.equals(longValue)) {
+                            value = entry.getValue();
+                            break;
+                        }
+                    } else if (entryKey instanceof Integer) {
+                        if (intValue == null && isNum) {
+                            intValue = Integer.parseInt(this.name);
+                        }
+                        if (entryKey.equals(intValue)) {
                             value = entry.getValue();
                             break;
                         }
