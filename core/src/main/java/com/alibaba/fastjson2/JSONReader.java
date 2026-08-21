@@ -3628,7 +3628,7 @@ public abstract class JSONReader
         long contextFeatures = features | context.getFeatures();
 
         for (int i = 0; ; ++i) {
-            if (ch == '/') {
+            if (!jsonb && ch == '/') {
                 skipComment();
             }
 
@@ -3636,7 +3636,7 @@ public abstract class JSONReader
                 break;
             }
 
-            if (i != 0 && !comma) {
+            if (!jsonb && i != 0 && !comma) {
                 throw new JSONException(info());
             }
 
@@ -3646,7 +3646,9 @@ public abstract class JSONReader
                 name = readFieldName();
             } else {
                 name = keyReader.readObject(this, null, null, 0L);
-                nextIfMatch(':');
+                if (!jsonb) {
+                    nextIfMatch(':');
+                }
             }
 
             Object value = valueReader.readObject(this, null, null, 0L);
@@ -3676,7 +3678,9 @@ public abstract class JSONReader
             }
         }
 
-        nextIfComma();
+        if (!jsonb) {
+            nextIfComma();
+        }
     }
 
     public <T> T read(Class<T> type) {
