@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("regression")
@@ -44,5 +45,26 @@ public class Issue3449 {
 
         assertEquals("1.0D", JSON.toJSONString(1D, JSONWriter.Feature.WriteClassName));
         assertEquals("1.0F", JSON.toJSONString(1F, JSONWriter.Feature.WriteClassName));
+    }
+
+    @Test
+    public void testWriteClassNameInObjectGraph() {
+        Bean bean = new Bean();
+        bean.d = Double.NaN;
+        bean.f = Float.POSITIVE_INFINITY;
+        bean.finite = 1.5D;
+
+        String json = JSON.toJSONString(bean, JSONWriter.Feature.WriteClassName);
+        assertEquals(
+                "{\"@type\":\"com.alibaba.fastjson2.issues_3400.Issue3449$Bean\",\"d\":null,\"f\":null,\"finite\":1.5D}",
+                json
+        );
+        assertDoesNotThrow(() -> JSON.parse(json));
+    }
+
+    public static class Bean {
+        public Object d;
+        public Object f;
+        public Object finite;
     }
 }
