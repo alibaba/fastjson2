@@ -3350,7 +3350,7 @@ final class JSONReaderUTF16
     }
 
     private void checkEscapeEnd(int offset) {
-        if (offset > end) {
+        if (offset >= end) {
             throw error("invalid escape character EOI");
         }
     }
