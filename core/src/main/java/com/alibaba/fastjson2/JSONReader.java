@@ -3868,6 +3868,37 @@ public abstract class JSONReader
         return boolValue;
     }
 
+    protected final boolean getBooleanValue() {
+        return (context.features & Feature.NonZeroNumberCastToBooleanAsTrue.mask) != 0
+                ? isNonZeroNumber()
+                : isOneNumber();
+    }
+
+    private boolean isNonZeroNumber() {
+        return mag0 != 0 || mag1 != 0 || mag2 != 0 || mag3 != 0;
+    }
+
+    private boolean isOneNumber() {
+        if (valueType == JSON_TYPE_INT) {
+            return isOneInt();
+        }
+
+        return isOneDecimal();
+    }
+
+    private boolean isOneInt() {
+        return mag0 == 0
+                && mag1 == 0
+                && mag2 == 0
+                && mag3 == 1;
+    }
+
+    private boolean isOneDecimal() {
+        return getBigDecimal()
+                .abs()
+                .compareTo(BigDecimal.ONE) == 0;
+    }
+
     /**
      * Reads a boolean value from JSON data as a primitive boolean.
      *
