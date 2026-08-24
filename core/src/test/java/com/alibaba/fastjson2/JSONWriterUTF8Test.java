@@ -489,6 +489,14 @@ public class JSONWriterUTF8Test {
     }
 
     @Test
+    public void testWriteEmptyDoubleArrayCapacity() {
+        JSONWriterUTF8 writer = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        writer.bytes = new byte[1];
+        writer.writeDouble(new double[0]);
+        assertEquals("[]", writer.toString());
+    }
+
+    @Test
     public void test_writeRaw() {
         {
             JSONWriter writer = JSONWriter.ofUTF8();
