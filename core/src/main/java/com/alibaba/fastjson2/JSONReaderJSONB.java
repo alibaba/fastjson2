@@ -215,7 +215,10 @@ final class JSONReaderJSONB
         return type;
     }
 
-    private static int getIntByte(byte[] bytes, int offset, int type) {
+    private int getIntByte(byte[] bytes, int offset, int type) {
+        if (offset >= end) {
+            throw outOfBoundsCheckFromToIndex(offset, end);
+        }
         return ((type - BC_INT32_BYTE_ZERO) << 8) + (bytes[offset] & 0xFF);
     }
 
@@ -223,7 +226,10 @@ final class JSONReaderJSONB
         return ((type - BC_INT32_SHORT_ZERO) << 16) + (getShortBE(bytes, offset) & 0xFFFF);
     }
 
-    private static int getLongByte(byte[] bytes, int offset, int type) {
+    private int getLongByte(byte[] bytes, int offset, int type) {
+        if (offset >= end) {
+            throw outOfBoundsCheckFromToIndex(offset, end);
+        }
         return ((type - BC_INT64_BYTE_ZERO) << 8) + (bytes[offset] & 0xFF);
     }
 
