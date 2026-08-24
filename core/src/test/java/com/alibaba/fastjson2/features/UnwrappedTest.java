@@ -2,18 +2,77 @@ package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Tag("features")
 public class UnwrappedTest {
+    @Test
+    public void nullWritableMapField() {
+        String json = "{\"name\":\"My bean\",\"attr1\":1,\"attr2\":2147483648}";
+        assertNullWritableMap(JSON.parseObject(json, NullUnwrappedFieldBean.class));
+
+        Map<String, Object> source = new LinkedHashMap<>();
+        source.put("name", "My bean");
+        source.put("attr1", 1L);
+        source.put("attr2", 2147483648L);
+        assertNullWritableMap(JSONB.parseObject(
+                JSONB.toBytes(source),
+                NullUnwrappedFieldBean.class
+        ));
+    }
+
+    @Test
+    public void nullWritableConcreteMapField() {
+        NullUnwrappedTreeMapBean bean = JSON.parseObject(
+                "{\"name\":\"My bean\",\"attr1\":1}",
+                NullUnwrappedTreeMapBean.class
+        );
+        assertNotNull(bean.properties);
+        assertEquals(TreeMap.class, bean.properties.getClass());
+        assertEquals(1L, bean.properties.get("attr1"));
+    }
+
+    @Test
+    public void nullWritableMapFieldJSONPath() {
+        NullUnwrappedFieldBean bean = new NullUnwrappedFieldBean();
+        JSONPath.set(bean, "$.attr1", 1L);
+        assertNotNull(bean.properties);
+        assertEquals(1L, bean.properties.get("attr1"));
+    }
+
+    private static void assertNullWritableMap(NullUnwrappedFieldBean bean) {
+        assertEquals("My bean", bean.name);
+        assertNotNull(bean.properties);
+        assertEquals(1L, bean.properties.get("attr1"));
+        assertEquals(2147483648L, bean.properties.get("attr2"));
+    }
+
+    public static class NullUnwrappedFieldBean {
+        public String name;
+
+        @JSONField(unwrapped = true)
+        public Map<String, Long> properties;
+    }
+
+    public static class NullUnwrappedTreeMapBean {
+        public String name;
+
+        @JSONField(unwrapped = true)
+        public TreeMap<String, Long> properties;
+    }
+
     @Test
     public void test() {
         ExtendableBean bean = new ExtendableBean();

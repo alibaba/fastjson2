@@ -95,13 +95,20 @@ class FieldReaderMapReadOnly<T>
 
         ObjectReader itemObjectReader = getItemObjectReader(jsonReader);
         Object value = itemObjectReader.readObject(jsonReader, getItemType(), fieldName, 0);
-        getReadOnlyMap(object)
-                .put(name, value);
+        Map map = getOrCreateMap(object, jsonReader.getContext());
+        if (map != null) {
+            map.put(name, value);
+        }
     }
 
     public void acceptExtra(Object object, String name, Object value) {
-        getReadOnlyMap(object)
-                .put(name, value);
+        Map map = getReadOnlyMap(object);
+        if (map == null && propertyAccessor.supportSet()) {
+            map = getOrCreateMap(object, JSONFactory.createReadContext());
+        }
+        if (map != null) {
+            map.put(name, value);
+        }
     }
 
     @Override
@@ -161,6 +168,15 @@ class FieldReaderMapReadOnly<T>
             map = (Map) propertyAccessor.getObject(object);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error");
+        }
+        return map;
+    }
+
+    private Map getOrCreateMap(Object object, JSONReader.Context context) {
+        Map map = getReadOnlyMap(object);
+        if (map == null && propertyAccessor.supportSet()) {
+            map = (Map) getObjectReader(context).createInstance(features);
+            propertyAccessor.setObject(object, map);
         }
         return map;
     }
