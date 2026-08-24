@@ -33,6 +33,40 @@ public class LocaleTest {
         assertEquals(vo.locale, v2.locale);
     }
 
+    @Test
+    public void test_script() {
+        VO vo = new VO();
+        vo.locale = Locale.forLanguageTag("zh-Hant-HK");
+
+        String str = JSON.toJSONString(vo);
+        assertEquals("{\"locale\":\"zh_HK_#Hant\"}", str);
+
+        VO v2 = JSON.parseObject(str, VO.class);
+        assertEquals(vo.locale, v2.locale);
+    }
+
+    @Test
+    public void test_script_jsonb() {
+        VO vo = new VO();
+        vo.locale = Locale.forLanguageTag("ja-Jpan-JP-u-ca-japanese");
+
+        byte[] jsonbBytes = JSONB.toBytes(vo);
+        VO v2 = JSONB.parseObject(jsonbBytes, VO.class);
+        assertEquals(vo.locale, v2.locale);
+    }
+
+    @Test
+    public void test_extension() {
+        Locale locale = Locale.forLanguageTag("en-US-u-ca-japanese");
+        assertEquals(locale, JSON.parseObject(JSON.toJSONString(locale), Locale.class));
+    }
+
+    @Test
+    public void test_root() {
+        assertEquals("\"\"", JSON.toJSONString(Locale.ROOT));
+        assertEquals(Locale.ROOT, JSON.parseObject("\"\"", Locale.class));
+    }
+
     public static class VO {
         public Locale locale;
     }
