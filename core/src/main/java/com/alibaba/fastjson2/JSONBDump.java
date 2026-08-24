@@ -275,6 +275,7 @@ final class JSONBDump {
                         );
                         break;
                     case BC_INT32:
+                        offset--;
                         unscaledValue = BigInteger.valueOf(
                                 readInt32Value()
                         );
@@ -295,12 +296,14 @@ final class JSONBDump {
                             unscaledValue = BigInteger.valueOf(((type - BC_INT32_SHORT_ZERO) << 16)
                                     + ((bytes[offset++] & 0xFF) << 8)
                                     + (bytes[offset++] & 0xFF));
-                        } else {
+                        } else if (type == BC_BIGINT) {
                             int len = readInt32Value();
                             byte[] bytes = new byte[len];
                             System.arraycopy(this.bytes, offset, bytes, 0, len);
                             offset += len;
                             unscaledValue = new BigInteger(bytes);
+                        } else {
+                            throw new JSONException("decimal unscaled value not support " + typeName((byte) type));
                         }
                         break;
                 }
