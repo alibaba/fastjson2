@@ -4343,12 +4343,28 @@ public abstract class JSONReader
         switch (valueType) {
             case JSON_TYPE_INT:
             case JSON_TYPE_INT64: {
+                long features = context.features;
+                if (negative
+                        && mag0 == 0
+                        && mag1 == 0
+                        && mag2 == 0
+                        && mag3 == Integer.MIN_VALUE) {
+                    if ((features & Feature.UseBigIntegerForInts.mask) != 0) {
+                        return BigInteger.valueOf(Integer.MIN_VALUE);
+                    }
+                    if (valueType == JSON_TYPE_INT64
+                            || (features & Feature.UseLongForInts.mask) != 0) {
+                        return (long) Integer.MIN_VALUE;
+                    }
+                    return Integer.MIN_VALUE;
+                }
+
                 if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     int intValue;
                     if (negative) {
                         if (mag3 < 0) {
                             long longValue = -(mag3 & 0xFFFFFFFFL);
-                            if ((context.features & Feature.UseBigIntegerForInts.mask) != 0) {
+                            if ((features & Feature.UseBigIntegerForInts.mask) != 0) {
                                 return BigInteger.valueOf(longValue);
                             }
                             return longValue;
@@ -4357,7 +4373,7 @@ public abstract class JSONReader
                     } else {
                         if (mag3 < 0) {
                             long longValue = mag3 & 0xFFFFFFFFL;
-                            if ((context.features & Feature.UseBigIntegerForInts.mask) != 0) {
+                            if ((features & Feature.UseBigIntegerForInts.mask) != 0) {
                                 return BigInteger.valueOf(longValue);
                             }
                             return longValue;
@@ -4365,11 +4381,11 @@ public abstract class JSONReader
                         intValue = mag3;
                     }
 
-                    if ((context.features & Feature.UseBigIntegerForInts.mask) != 0) {
+                    if ((features & Feature.UseBigIntegerForInts.mask) != 0) {
                         return BigInteger.valueOf(intValue);
                     }
 
-                    if ((context.features & Feature.UseLongForInts.mask) != 0) {
+                    if ((features & Feature.UseLongForInts.mask) != 0) {
                         return (long) intValue;
                     }
 
@@ -4378,6 +4394,18 @@ public abstract class JSONReader
                     }
                     return intValue;
                 }
+
+                if (negative
+                        && mag0 == 0
+                        && mag1 == 0
+                        && mag2 == Integer.MIN_VALUE
+                        && mag3 == 0) {
+                    if ((features & Feature.UseBigIntegerForInts.mask) != 0) {
+                        return BigInteger.valueOf(Long.MIN_VALUE);
+                    }
+                    return Long.MIN_VALUE;
+                }
+
                 int[] mag;
                 if (mag0 == 0) {
                     if (mag1 == 0) {
@@ -4387,7 +4415,7 @@ public abstract class JSONReader
                         if (v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + (v3);
                             long longValue = negative ? -v23 : v23;
-                            if ((context.features & Feature.UseBigIntegerForInts.mask) != 0) {
+                            if ((features & Feature.UseBigIntegerForInts.mask) != 0) {
                                 return BigInteger.valueOf(longValue);
                             }
                             return longValue;
@@ -4402,7 +4430,7 @@ public abstract class JSONReader
 
                 int signum = negative ? -1 : 1;
                 BigInteger integer = BIG_INTEGER_CREATOR.apply(signum, mag);
-                if ((context.features & Feature.UseLongForInts.mask) != 0) {
+                if ((features & Feature.UseLongForInts.mask) != 0) {
                     return integer.longValue();
                 }
                 return integer;
