@@ -436,10 +436,8 @@ public final class ObjectWriterImplMap
             } else {
                 if (key instanceof Integer) {
                     jsonWriter.writeName((Integer) key);
-                    strKey = key.toString();
                 } else if (key instanceof Long) {
                     jsonWriter.writeName((Long) key);
-                    strKey = key.toString();
                 } else {
                     jsonWriter.writeNameAny(key);
                 }
@@ -584,11 +582,16 @@ public final class ObjectWriterImplMap
                 }
             }
 
-            boolean valueRefDetect = refDetect && strKey != null && !isPrimitiveOrEnum;
+            boolean valueRefDetect = refDetect && !isPrimitiveOrEnum
+                    && (strKey != null || key instanceof Integer || key instanceof Long);
             if (valueRefDetect) {
                 if (value == object) {
                     jsonWriter.writeReference("..");
                     continue;
+                }
+
+                if (strKey == null) {
+                    strKey = key.toString();
                 }
 
                 String refPath = jsonWriter.setPath(strKey, value);
