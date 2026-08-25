@@ -180,6 +180,42 @@ public class RefTest8 {
     }
 
     @Test
+    public void test_rootMap_integerKey_directShare() {
+        Item shared = new Item();
+        shared.itemId = 400L;
+
+        Map<Integer, Item> map = new LinkedHashMap<>();
+        map.put(1, shared);
+        map.put(2, shared);
+
+        String json = JSON.toJSONString(map, JSONWriter.Feature.ReferenceDetection);
+        assertEquals("{1:{\"itemId\":400},2:{\"$ref\":\"$.1\"}}", json);
+
+        Map<Integer, Item> parsed = JSON.parseObject(json, new TypeReference<Map<Integer, Item>>() {
+        });
+        assertNotNull(parsed.get(2));
+        assertSame(parsed.get(1), parsed.get(2));
+    }
+
+    @Test
+    public void test_rootMap_longKey_directShare() {
+        Item shared = new Item();
+        shared.itemId = 401L;
+
+        Map<Long, Item> map = new LinkedHashMap<>();
+        map.put(1L, shared);
+        map.put(2L, shared);
+
+        String json = JSON.toJSONString(map, JSONWriter.Feature.ReferenceDetection);
+        assertEquals("{1:{\"itemId\":401},2:{\"$ref\":\"$.1\"}}", json);
+
+        Map<Long, Item> parsed = JSON.parseObject(json, new TypeReference<Map<Long, Item>>() {
+        });
+        assertNotNull(parsed.get(2L));
+        assertSame(parsed.get(1L), parsed.get(2L));
+    }
+
+    @Test
     public void test_jsonpath_numericKeyOutOfIntRange() {
         Map<Object, Object> nested = new LinkedHashMap<>();
         nested.put(1, "int-value");
@@ -188,7 +224,9 @@ public class RefTest8 {
         root.put("nested", nested);
 
         assertEquals("long-match", JSONPath.eval(root, "$.nested.2147483648"));
+        assertEquals("long-match", JSONPath.eval(nested, "$.2147483648"));
         assertNull(JSONPath.eval(root, "$.nested.99999999999999999999"));
+        assertNull(JSONPath.eval(nested, "$.99999999999999999999"));
     }
 
     public static class RiskInfo {
