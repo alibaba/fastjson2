@@ -1115,6 +1115,7 @@ final class JSONReaderUTF16
 
     @Override
     public final long readFieldNameHashCode() {
+        // JDK 8 HotSpot C2 on aarch64 can miscompile the UNSAFE.getLong SWAR scan.
         if (AARCH64_JDK8) {
             return readFieldNameHashCode0();
         }
@@ -1185,6 +1186,7 @@ final class JSONReaderUTF16
 
     @Override
     public final long readFieldNameHashCode(int keySize, int min, int max) {
+        // JDK 8 HotSpot C2 on aarch64 can miscompile the UNSAFE.getLong SWAR scan.
         if (AARCH64_JDK8) {
             return readFieldNameHashCode0();
         }
@@ -1260,6 +1262,7 @@ final class JSONReaderUTF16
 
     @Override
     public long readFieldNameHashCodeE(int size0, int size1, int size3) {
+        // JDK 8 HotSpot C2 on aarch64 can miscompile the UNSAFE.getLong SWAR scan.
         if (AARCH64_JDK8) {
             return readFieldNameHashCode0();
         }
@@ -1382,7 +1385,7 @@ final class JSONReaderUTF16
             if (c0 == quote) {
                 nameValue = 0;
             } else if (c1 == quote && c0 != 0 && c0 != '\\' && c0 <= 0xFF) {
-                nameValue = (byte) c0;
+                nameValue = c0;
                 this.nameLength = 1;
                 this.nameEnd = offset + 1;
                 offset += 2;
@@ -1390,7 +1393,7 @@ final class JSONReaderUTF16
                     && c0 != '\\' && c1 != '\\'
                     && c0 <= 0xFF && c1 <= 0xFF
             ) {
-                nameValue = (((byte) c1) << 8)
+                nameValue = (c1 << 8)
                         + c0;
                 this.nameLength = 2;
                 this.nameEnd = offset + 2;
@@ -1399,7 +1402,7 @@ final class JSONReaderUTF16
                     && c0 != '\\' && c1 != '\\' && c2 != '\\'
                     && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF) {
                 nameValue
-                        = (((byte) c2) << 16)
+                        = (c2 << 16)
                         + (c1 << 8)
                         + c0;
                 this.nameLength = 3;
@@ -1410,7 +1413,7 @@ final class JSONReaderUTF16
                     && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF
             ) {
                 nameValue
-                        = (((byte) c3) << 24)
+                        = (((long) c3) << 24)
                         + (c2 << 16)
                         + (c1 << 8)
                         + c0;
@@ -1422,7 +1425,7 @@ final class JSONReaderUTF16
                     && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF
             ) {
                 nameValue
-                        = (((long) ((byte) c4)) << 32)
+                        = (((long) c4) << 32)
                         + (((long) c3) << 24)
                         + (((long) c2) << 16)
                         + (((long) c1) << 8)
@@ -1435,7 +1438,7 @@ final class JSONReaderUTF16
                     && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF
             ) {
                 nameValue
-                        = (((long) ((byte) c5)) << 40)
+                        = (((long) c5) << 40)
                         + (((long) c4) << 32)
                         + (((long) c3) << 24)
                         + (((long) c2) << 16)
@@ -1449,7 +1452,7 @@ final class JSONReaderUTF16
                     && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF && c6 <= 0xFF
             ) {
                 nameValue
-                        = (((long) ((byte) c6)) << 48)
+                        = (((long) c6) << 48)
                         + (((long) c5) << 40)
                         + (((long) c4) << 32)
                         + (((long) c3) << 24)
@@ -1464,7 +1467,7 @@ final class JSONReaderUTF16
                     && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF && c6 <= 0xFF && c7 <= 0xFF
             ) {
                 nameValue
-                        = (((long) ((byte) c7)) << 56)
+                        = (((long) c7) << 56)
                         + (((long) c6) << 48)
                         + (((long) c5) << 40)
                         + (((long) c4) << 32)
@@ -1524,28 +1527,28 @@ final class JSONReaderUTF16
 
                 switch (i) {
                     case 0:
-                        nameValue = (byte) c;
+                        nameValue = c;
                         break;
                     case 1:
-                        nameValue = (((byte) c) << 8) + (nameValue & 0xFFL);
+                        nameValue = ((long) c << 8) + (nameValue & 0xFFL);
                         break;
                     case 2:
-                        nameValue = (((byte) c) << 16) + (nameValue & 0xFFFFL);
+                        nameValue = ((long) c << 16) + (nameValue & 0xFFFFL);
                         break;
                     case 3:
-                        nameValue = (((byte) c) << 24) + (nameValue & 0xFFFFFFL);
+                        nameValue = ((long) c << 24) + (nameValue & 0xFFFFFFL);
                         break;
                     case 4:
-                        nameValue = (((long) (byte) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                        nameValue = ((long) c << 32) + (nameValue & 0xFFFFFFFFL);
                         break;
                     case 5:
-                        nameValue = (((long) (byte) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                        nameValue = ((long) c << 40L) + (nameValue & 0xFFFFFFFFFFL);
                         break;
                     case 6:
-                        nameValue = (((long) (byte) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                        nameValue = ((long) c << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
                         break;
                     case 7:
-                        nameValue = (((long) (byte) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                        nameValue = ((long) c << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
                         break;
                     default:
                         break;

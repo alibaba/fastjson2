@@ -2,8 +2,12 @@ package com.alibaba.fastjson2.issues_7000;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -41,6 +45,27 @@ public class Issue7732 {
         assertEquals(2, route.id);
         assertEquals("sipRoute_1", route.routeCode);
         assertEquals("\u4fe1\u4ee4\u8def\u75311", route.routeName);
+    }
+
+    @Test
+    public void testLatin1FieldName() throws Exception {
+        for (int length = 1; length <= 8; length++) {
+            StringBuilder fieldNameBuilder = new StringBuilder(length);
+            for (int i = 0; i < length; i++) {
+                fieldNameBuilder.append((char) (0x80 + i));
+            }
+            String fieldName = fieldNameBuilder.toString();
+            JSONReader reader = JSONReader.of("{\"" + fieldName + "\":\"v\"}");
+            assertTrue(reader.nextIfObjectStart());
+            Method readFieldNameHashCode0 = reader.getClass().getDeclaredMethod("readFieldNameHashCode0");
+            readFieldNameHashCode0.setAccessible(true);
+            assertEquals(Fnv.hashCode64(fieldName), ((Number) readFieldNameHashCode0.invoke(reader)).longValue());
+            assertEquals(fieldName, reader.getFieldName());
+        }
+
+        String fieldName = "\u00bc\u00bd\u00be";
+        JSONObject object = JSON.parseObject("{\"" + fieldName + "\":\"v\"}");
+        assertEquals("v", object.getString(fieldName));
     }
 
     public static class LoginUser {

@@ -90,8 +90,10 @@ public class JDKUtils {
         }
 
         int jvmVersion = -1, android_sdk_int = -1;
+        String osArch = null;
         boolean openj9 = false, android = false, graal = false;
         try {
+            osArch = System.getProperty("os.arch");
             String jvmName = System.getProperty("java.vm.name");
             if (jvmName != null) {
                 openj9 = jvmName.contains("OpenJ9");
@@ -125,7 +127,6 @@ public class JDKUtils {
         GRAAL = graal;
         ANDROID_SDK_INT = android_sdk_int;
 
-        String osArch = System.getProperty("os.arch");
         OS_ARCH = osArch;
         AARCH64 = "aarch64".equals(osArch) || "arm64".equals(osArch);
 
@@ -152,7 +153,10 @@ public class JDKUtils {
         CLASS_TRANSIENT = transientClass;
 
         JVM_VERSION = jvmVersion;
-        AARCH64_JDK8 = AARCH64 && JVM_VERSION == 8 && !ANDROID && !GRAAL;
+        // JDK 8 HotSpot C2 on aarch64 can miscompile the UNSAFE.getLong SWAR
+        // field-name scan. Keep the safe char[] path for #7732/#3763 until
+        // affected JDK 8 builds are no longer supported.
+        AARCH64_JDK8 = AARCH64 && JVM_VERSION == 8 && !ANDROID && !GRAAL && !OPENJ9;
 
         if (JVM_VERSION == 8) {
             Field field = null;
