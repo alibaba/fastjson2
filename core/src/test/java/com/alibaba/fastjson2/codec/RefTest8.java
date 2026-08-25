@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TypeReference;
 import org.junit.jupiter.api.Tag;
@@ -9,10 +10,15 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
@@ -117,6 +123,74 @@ public class RefTest8 {
         );
     }
 
+    @Test
+    public void test_sortedMap_longKey_directShare() {
+        Item shared = new Item();
+        shared.itemId = 300L;
+
+        SortedBean bean = new SortedBean();
+        bean.map1 = new TreeMap<>();
+        bean.map1.put(1L, shared);
+        bean.map2 = new TreeMap<>();
+        bean.map2.put(2L, shared);
+
+        String json = JSON.toJSONString(bean, JSONWriter.Feature.ReferenceDetection);
+        assertEquals(
+                "{\"map1\":{1:{\"itemId\":300}},\"map2\":{2:{\"$ref\":\"$.map1.1\"}}}",
+                json
+        );
+
+        SortedBean bean2 = JSON.parseObject(json, SortedBean.class);
+        assertNotNull(bean2.map2.get(2L));
+        assertSame(bean2.map1.get(1L), bean2.map2.get(2L));
+    }
+
+    @Test
+    public void test_sortedMap_integerKey_directShare() {
+        Item shared = new Item();
+        shared.itemId = 301L;
+
+        SortedBeanInt bean = new SortedBeanInt();
+        bean.map1 = new TreeMap<>();
+        bean.map1.put(1, shared);
+        bean.map2 = new TreeMap<>();
+        bean.map2.put(2, shared);
+
+        String json = JSON.toJSONString(bean, JSONWriter.Feature.ReferenceDetection);
+        assertEquals(
+                "{\"map1\":{1:{\"itemId\":301}},\"map2\":{2:{\"$ref\":\"$.map1.1\"}}}",
+                json
+        );
+
+        SortedBeanInt bean2 = JSON.parseObject(json, SortedBeanInt.class);
+        assertNotNull(bean2.map2.get(2));
+        assertSame(bean2.map1.get(1), bean2.map2.get(2));
+    }
+
+    @Test
+    public void test_jsonpath_exactStringKeyMappedToNull_notShadowed() {
+        Map<Object, Object> nested = new LinkedHashMap<>();
+        nested.put("1", null);
+        nested.put(1, "integer-value");
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("nested", nested);
+
+        assertNull(JSONPath.eval(root, "$.nested.1"));
+        assertNull(JSONPath.eval(nested, "$.1"));
+    }
+
+    @Test
+    public void test_jsonpath_numericKeyOutOfIntRange() {
+        Map<Object, Object> nested = new LinkedHashMap<>();
+        nested.put(1, "int-value");
+        nested.put(2147483648L, "long-match");
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("nested", nested);
+
+        assertEquals("long-match", JSONPath.eval(root, "$.nested.2147483648"));
+        assertNull(JSONPath.eval(root, "$.nested.99999999999999999999"));
+    }
+
     public static class RiskInfo {
         public Map<Long, Item> itemMap;
     }
@@ -134,5 +208,15 @@ public class RefTest8 {
     public static class BeanInt {
         public Map<Integer, Item> map1;
         public Map<Integer, Item> map2;
+    }
+
+    public static class SortedBean {
+        public SortedMap<Long, Item> map1;
+        public SortedMap<Long, Item> map2;
+    }
+
+    public static class SortedBeanInt {
+        public SortedMap<Integer, Item> map1;
+        public SortedMap<Integer, Item> map2;
     }
 }
