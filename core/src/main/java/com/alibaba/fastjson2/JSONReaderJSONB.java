@@ -457,12 +457,12 @@ final class JSONReaderJSONB
                 } else if (isInt32Byte(valueType)) {
                     value = getIntByte(bytes, offset + 1, valueType);
                     offset += 2;
-                } else if (isInt32Short(valueType) && offset + 1 < end) {
+                } else if (isInt32Short(valueType) && offset + 2 < end) {
                     int int32Value = getInt3(bytes, offset + 1, valueType);
                     offset += 3;
                     value = int32Value;
-                } else if (valueType == BC_INT32 && offset + 3 < end) {
-                    int int32Value = getIntBE(bytes, offset + 1);
+                } else if (valueType == BC_INT32) {
+                    int int32Value = getIntBE(bytes, check3(offset + 1, end));
                     offset += 5;
                     value = int32Value;
                 } else {
@@ -1643,7 +1643,7 @@ final class JSONReaderJSONB
                 offset++;
                 typelen = type;
             } else {
-                typelen = ((type - BC_INT32_BYTE_ZERO) << 8) + (bytes[offset + 1] & 0xFF);
+                typelen = getIntByte(bytes, offset + 1, type);
                 offset += 2;
             }
 
@@ -1735,8 +1735,7 @@ final class JSONReaderJSONB
                 typeIndex = strtype;
             } else if (strtype <= BC_INT32_BYTE_MAX) {
                 offset++;
-                typeIndex = ((strtype - BC_INT32_BYTE_ZERO) << 8)
-                        + (bytes[offset++] & 0xFF);
+                typeIndex = getIntByte(bytes, offset++, strtype);
             } else {
                 typeIndex = readInt32Value();
             }

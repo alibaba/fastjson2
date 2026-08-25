@@ -49,6 +49,19 @@ public class JSONBCompactNumberBoundsTest {
     }
 
     @Test
+    public void truncatedCompactTypeMetadata() {
+        byte[] typeNameLength = {
+                BC_TYPED_ANY, BC_STR_ASCII, (byte) (BC_INT32_BYTE_ZERO + 1)
+        };
+        assertThrows(JSONException.class, () -> JSONB.parse(typeNameLength));
+        assertMalformedSlice(typeNameLength);
+
+        byte[] typeIndex = {BC_INT32_BYTE_ZERO};
+        assertMalformed(typeIndex, JSONReader::readTypeHashCode);
+        assertMalformedSlice(typeIndex, JSONReader::readTypeHashCode);
+    }
+
+    @Test
     public void truncatedCompactValuesInContainers() {
         assertThrows(JSONException.class, () -> JSONB.parse(new byte[]{
                 (byte) (BC_ARRAY_FIX_MIN + 1), BC_INT32_BYTE_ZERO
@@ -56,6 +69,23 @@ public class JSONBCompactNumberBoundsTest {
         assertThrows(JSONException.class, () -> JSONB.parse(new byte[]{
                 BC_OBJECT, BC_STR_ASCII_FIX_1, 'a', BC_INT32_BYTE_ZERO
         }));
+
+        byte[] int32Short = {
+                BC_OBJECT, BC_STR_ASCII_FIX_1, 'a', BC_INT32_SHORT_ZERO, 0
+        };
+        assertThrows(JSONException.class, () -> JSONB.parseObject(int32Short));
+
+        byte[] int32 = {
+                BC_OBJECT, BC_STR_ASCII_FIX_1, 'a', BC_INT32, 0, 0, 0
+        };
+        assertThrows(JSONException.class, () -> JSONB.parseObject(int32));
+
+        assertMalformedSlice(new byte[]{
+                BC_OBJECT, BC_STR_ASCII_FIX_1, 'a', BC_INT32_SHORT_ZERO, 0
+        });
+        assertMalformedSlice(new byte[]{
+                BC_OBJECT, BC_STR_ASCII_FIX_1, 'a', BC_INT32, 0, 0, 0
+        });
     }
 
     @Test
@@ -69,6 +99,13 @@ public class JSONBCompactNumberBoundsTest {
         for (Number value : values) {
             assertEquals(value, JSONB.parse(JSONB.toBytes(value)));
         }
+
+        assertEquals(1, JSONB.parseObject(new byte[]{
+                BC_OBJECT, BC_STR_ASCII_FIX_1, 'a', BC_INT32_SHORT_ZERO, 0, 1, BC_OBJECT_END
+        }).get("a"));
+        assertEquals(1, JSONB.parseObject(new byte[]{
+                BC_OBJECT, BC_STR_ASCII_FIX_1, 'a', BC_INT32, 0, 0, 0, 1, BC_OBJECT_END
+        }).get("a"));
     }
 
     private static void assertMalformedAcrossNumberReaders(byte[] bytes) {
@@ -96,8 +133,15 @@ public class JSONBCompactNumberBoundsTest {
     }
 
     private static void assertMalformedSlice(byte[] bytes) {
-        byte[] backing = {bytes[0], 1};
-        JSONReader reader = JSONReader.ofJSONB(backing, 0, 1);
-        assertThrows(JSONException.class, reader::readAny);
+        assertMalformedSlice(bytes, JSONReader::readAny);
+    }
+
+    private static void assertMalformedSlice(byte[] bytes, Function<JSONReader, ?> action) {
+        byte[] backing = new byte[bytes.length + 2];
+        System.arraycopy(bytes, 0, backing, 0, bytes.length);
+        backing[bytes.length] = 1;
+        backing[bytes.length + 1] = BC_OBJECT_END;
+        JSONReader reader = JSONReader.ofJSONB(backing, 0, bytes.length);
+        assertThrows(JSONException.class, () -> action.apply(reader));
     }
 }
