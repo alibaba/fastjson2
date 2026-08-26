@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.reader.ValueConsumer;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -1094,6 +1095,22 @@ public class JSONReaderTest {
         jsonReader.read(map, Long.class, String.class, 0L);
         assertEquals("456", map.get(123L));
         assertEquals("567", map.get(234L));
+    }
+
+    @Test
+    public void readMap_jsonb_parameterizedValueType() {
+        Map<Long, Map<String, Integer>> src = new LinkedHashMap<>();
+        src.put(123L, Collections.singletonMap("a", 1));
+        src.put(234L, Collections.singletonMap("b", 2));
+        byte[] bytes = JSONB.toBytes(src);
+
+        Type valueType = new ParameterizedTypeImpl(new Type[]{String.class, Integer.class}, null, Map.class);
+
+        JSONReader jsonReader = JSONReader.ofJSONB(bytes);
+        Map map = new HashMap();
+        jsonReader.read(map, Long.class, valueType, 0L);
+        assertEquals(Collections.singletonMap("a", 1), map.get(123L));
+        assertEquals(Collections.singletonMap("b", 2), map.get(234L));
     }
 
     @Test

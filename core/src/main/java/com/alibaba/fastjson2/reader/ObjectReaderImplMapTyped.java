@@ -266,6 +266,10 @@ class ObjectReaderImplMapTyped
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.jsonb) {
+            return readJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
         int index = 0;
         if (!jsonReader.nextIfObjectStart()) {
             if (jsonReader.isTypeRedirect()) {
