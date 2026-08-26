@@ -962,8 +962,7 @@ final class JSONReaderASCII
                 }
 
                 while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-                    offset++;
-                    c = bytes[offset];
+                    c = offset + 1 >= end ? EOI : bytes[++offset];
                 }
                 if (c != ':') {
                     throw syntaxError(offset, ch);
@@ -978,8 +977,7 @@ final class JSONReaderASCII
                 c = bytes[offset];
 
                 while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-                    offset++;
-                    c = bytes[offset];
+                    c = offset + 1 >= end ? EOI : bytes[++offset];
                 }
 
                 this.offset = offset + 1;
