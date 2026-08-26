@@ -1114,6 +1114,20 @@ public class JSONReaderTest {
     }
 
     @Test
+    public void readMap_jsonb_nullKey_autoType() {
+        Map<Long, String> src = new HashMap<>();
+        src.put(null, "456");
+        byte[] bytes = JSONB.toBytes(src,
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName);
+
+        JSONReader jsonReader = JSONReader.ofJSONB(bytes);
+        Map map = new HashMap();
+        jsonReader.read(map, Long.class, String.class, JSONReader.Feature.SupportAutoType.mask);
+        assertEquals("456", map.get(null));
+    }
+
+    @Test
     public void readArray() {
         String str = "[\"123\",\"456\"]";
         JSONReader jsonReader = JSONReader.of(JSONFactory.createReadContext(), str.getBytes());

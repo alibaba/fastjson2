@@ -3658,7 +3658,7 @@ public abstract class JSONReader
             }
 
             if ((contextFeatures & Feature.SupportAutoType.mask) != 0
-                    && name.equals("@type")
+                    && "@type".equals(name)
                     && object.getClass().getName().equals(value)
             ) {
                 continue;
