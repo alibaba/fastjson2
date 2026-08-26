@@ -1339,8 +1339,19 @@ public abstract class JSONReader
     }
 
     static char char2(int c1, int c2) {
-        return (char) (DIGITS2[c1] * 0x10
-                + DIGITS2[c2]);
+        return (char) (digit2(c1) * 0x10
+                + digit2(c2));
+    }
+
+    /**
+     * Hex value of a {@code \x} escape digit. {@link JSONFactory#DIGITS2} only covers
+     * {@code 0}..{@code 'f'}; any character outside the table is not a hex digit either,
+     * so it gets the same value the table already gives to in-range non-hex characters
+     * (0) rather than indexing out of bounds. Characters {@code >= 0x80} arrive as
+     * negative {@code int}s in the byte-based readers, so this also guards the low side.
+     */
+    private static int digit2(int c) {
+        return c >= 0 && c < DIGITS2.length ? DIGITS2[c] : 0;
     }
 
     /**
