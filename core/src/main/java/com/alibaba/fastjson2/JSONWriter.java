@@ -291,15 +291,21 @@ public abstract class JSONWriter
     }
 
     /**
-     * Sets the path for the specified object using the provided field writer without reference detection.
-     * This method is used for reference detection during serialization.
+     * Sets the path for the specified object using the provided field writer, without checking the
+     * {@link Feature#ReferenceDetection} feature flag - callers (typically the ASM-generated writers)
+     * are expected to have checked it already.
+     * <p>
+     * The class-level exclusion of {@link ObjectWriterProvider#isNotReferenceDetect(Class)} is still
+     * enforced here, and a null object is ignored, so that this method stays symmetric with
+     * {@link #popPath0(Object)}: whatever is not pushed here is not popped there.
      *
      * @param fieldWriter the field writer to use for path generation
      * @param object the object to set the path for
-     * @return the previous path as a string, or null if no previous path exists
+     * @return the previous path as a string, or null if no previous path exists, the object is null,
+     * or the object's class is excluded from reference detection
      */
     public final String setPath0(FieldWriter fieldWriter, Object object) {
-        if (ObjectWriterProvider.isNotReferenceDetect(object.getClass())) {
+        if (object == null || ObjectWriterProvider.isNotReferenceDetect(object.getClass())) {
             return null;
         }
 
@@ -372,15 +378,20 @@ public abstract class JSONWriter
     }
 
     /**
-     * Sets the path for the specified object at the given index without reference detection.
-     * This method is used for reference detection during serialization of array elements.
+     * Sets the path for the specified object at the given index, without checking the
+     * {@link Feature#ReferenceDetection} feature flag - callers are expected to have checked it already.
+     * <p>
+     * The class-level exclusion of {@link ObjectWriterProvider#isNotReferenceDetect(Class)} is still
+     * enforced here, and a null object is ignored, so that this method stays symmetric with
+     * {@link #popPath0(Object)}: whatever is not pushed here is not popped there.
      *
      * @param index the index to set the path for
      * @param object the object to set the path for
-     * @return the previous path as a string, or null if no previous path exists
+     * @return the previous path as a string, or null if no previous path exists, the object is null,
+     * or the object's class is excluded from reference detection
      */
     public final String setPath0(int index, Object object) {
-        if (path == null || ObjectWriterProvider.isNotReferenceDetect(object.getClass())) {
+        if (path == null || object == null || ObjectWriterProvider.isNotReferenceDetect(object.getClass())) {
             return null;
         }
         this.path = index == 0
@@ -420,14 +431,21 @@ public abstract class JSONWriter
     }
 
     /**
-     * Removes the path for the specified object without reference detection.
-     * This method is used to clean up path information during serialization.
+     * Removes the path for the specified object, without checking the
+     * {@link Feature#ReferenceDetection} feature flag on the caller's behalf beyond the writer-level
+     * feature mask.
+     * <p>
+     * It applies exactly the same exclusions as {@link #setPath0(FieldWriter, Object)} /
+     * {@link #setPath0(int, Object)} - a null object and any class rejected by
+     * {@link ObjectWriterProvider#isNotReferenceDetect(Class)} are ignored - so a value that was never
+     * pushed is never popped.
      *
      * @param object the object to remove the path for
      */
     public final void popPath0(Object object) {
         if (this.path == null
                 || (context.features & MASK_REFERENCE_DETECTION) == 0
+                || object == null
                 || ObjectWriterProvider.isNotReferenceDetect(object.getClass())
         ) {
             return;
