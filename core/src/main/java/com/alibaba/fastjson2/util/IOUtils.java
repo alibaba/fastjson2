@@ -1200,6 +1200,9 @@ public class IOUtils {
     }
 
     private static int writeInt4(byte[] buf, int off, int v) {
+        if (JDKUtils.AARCH64_JDK8) {
+            return writeIntNSafe(buf, off, v, 4);
+        }
         int v1 = (int) (v * 1374389535L >> 37); // v / 100;
         int v0 = v - v1 * 100;
         int v2 = PACKED_DIGITS[v1 & 0x7f] | (PACKED_DIGITS[v0 & 0x7f] << 16);
@@ -1211,6 +1214,9 @@ public class IOUtils {
     }
 
     private static int writeInt4(char[] buf, int off, int v) {
+        if (JDKUtils.AARCH64_JDK8) {
+            return writeIntNSafe(buf, off, v, 4);
+        }
         int v1 = (int) (v * 1374389535L >> 37); // v / 100;
         putLongUnaligned(buf, off, mergeInt64(v - v1 * 100, v1));
         return off + 4;
@@ -1225,18 +1231,27 @@ public class IOUtils {
     }
 
     private static int writeInt3(byte[] buf, int off, int val) {
+        if (JDKUtils.AARCH64_JDK8) {
+            return writeInt3Safe(buf, off, val);
+        }
         int v = DIGITS_K_32[val & 0x3ff];
         UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + off, v >> ((((byte) v) + 1) << 3));
         return off + 3 - (byte) v;
     }
 
     private static int writeInt3(char[] buf, int off, int val) {
+        if (JDKUtils.AARCH64_JDK8) {
+            return writeInt3Safe(buf, off, val);
+        }
         long v = DIGITS_K_64[val & 0x3ff];
         UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1), v >> ((((short) v) + 1) << 4));
         return off + 3 - (byte) v;
     }
 
     private static int writeInt8(byte[] buf, int off, int v1, int v2) {
+        if (JDKUtils.AARCH64_JDK8) {
+            return writeInt8Safe(buf, off, v1, v2);
+        }
         int r1 = (int) (v1 * 1374389535L >> 37); // v1 / 100;
         int r2 = (int) (v2 * 1374389535L >> 37); // v2 / 100;
         long v = (PACKED_DIGITS[r1 & 0x7f])
@@ -1251,6 +1266,9 @@ public class IOUtils {
     }
 
     private static int writeInt8(char[] buf, int off, int v1, int v2) {
+        if (JDKUtils.AARCH64_JDK8) {
+            return writeInt8Safe(buf, off, v1, v2);
+        }
         int r1 = (int) (v1 * 1374389535L >> 37); // v1 / 100;
         long x1 = (PACKED_DIGITS_UTF16[r1 & 0x7f])
                 | ((long) PACKED_DIGITS_UTF16[(v1 - r1 * 100) & 0x7f] << 32);
@@ -1264,6 +1282,50 @@ public class IOUtils {
         UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1), x1);
         UNSAFE.putLong(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1) + 8, x2);
         return off + 8;
+    }
+
+    static int writeInt3Safe(byte[] buf, int off, int value) {
+        int length = value < 100 ? (value < 10 ? 1 : 2) : 3;
+        for (int i = length; i > 0; i--) {
+            buf[off + i - 1] = (byte) ('0' + value % 10);
+            value /= 10;
+        }
+        return off + length;
+    }
+
+    static int writeInt3Safe(char[] buf, int off, int value) {
+        int length = value < 100 ? (value < 10 ? 1 : 2) : 3;
+        for (int i = length; i > 0; i--) {
+            buf[off + i - 1] = (char) ('0' + value % 10);
+            value /= 10;
+        }
+        return off + length;
+    }
+
+    static int writeIntNSafe(byte[] buf, int off, int value, int digits) {
+        for (int i = digits; i > 0; i--) {
+            buf[off + i - 1] = (byte) ('0' + value % 10);
+            value /= 10;
+        }
+        return off + digits;
+    }
+
+    static int writeIntNSafe(char[] buf, int off, int value, int digits) {
+        for (int i = digits; i > 0; i--) {
+            buf[off + i - 1] = (char) ('0' + value % 10);
+            value /= 10;
+        }
+        return off + digits;
+    }
+
+    static int writeInt8Safe(byte[] buf, int off, int high, int low) {
+        off = writeIntNSafe(buf, off, high, 4);
+        return writeIntNSafe(buf, off, low, 4);
+    }
+
+    static int writeInt8Safe(char[] buf, int off, int high, int low) {
+        off = writeIntNSafe(buf, off, high, 4);
+        return writeIntNSafe(buf, off, low, 4);
     }
 
     /**
