@@ -26,7 +26,7 @@ public class FloatToDecimalTest {
         byte[] bytes = new byte[15];
         for (int i = 0; i < floats.length; i++) {
             float f = floats[i];
-            int size = DoubleToDecimal.toString(f, bytes, 0, false);
+            int size = DoubleToDecimal.toString(f, bytes, 0, false, false);
             String str = new String(bytes, 0, size);
             assertEquals(Float.toString(f), str);
         }
@@ -38,7 +38,7 @@ public class FloatToDecimalTest {
             float f = floats[i];
             byte[] bytes = new byte[16];
             bytes[0] = '[';
-            int size = DoubleToDecimal.toString(f, bytes, 1, false);
+            int size = DoubleToDecimal.toString(f, bytes, 1, false, false);
             String str = new String(bytes, 1, size);
             assertEquals(Float.toString(f), str);
         }
@@ -50,7 +50,7 @@ public class FloatToDecimalTest {
             float f = floats[i];
             char[] bytes = new char[16];
             bytes[0] = '[';
-            int size = DoubleToDecimal.toString(f, bytes, 1, false);
+            int size = DoubleToDecimal.toString(f, bytes, 1, false, false);
             String str = new String(bytes, 1, size);
             assertEquals(Float.toString(f), str);
         }
