@@ -1938,6 +1938,12 @@ public class IOUtils {
      * @return true if the position contains "alse", false otherwise
      */
     public static boolean isALSE(char[] buf, int pos) {
+        if (AARCH64_JDK8) {
+            return buf[pos] == 'a'
+                    && buf[pos + 1] == 'l'
+                    && buf[pos + 2] == 's'
+                    && buf[pos + 3] == 'e';
+        }
         return getLongUnaligned(buf, pos) == ALSE_64;
     }
 
@@ -1950,6 +1956,9 @@ public class IOUtils {
      * @return true if the position does not contain "alse", false otherwise
      */
     public static boolean notALSE(char[] buf, int pos) {
+        if (AARCH64_JDK8) {
+            return !isALSE(buf, pos);
+        }
         return getLongUnaligned(buf, pos) != ALSE_64;
     }
 
