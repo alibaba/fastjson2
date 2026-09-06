@@ -122,7 +122,7 @@ public class Issue7857 {
             bytes[off++] = BC_BIGINT_LONG;
             bytes[off++] = 1;
         }
-        assertRejected(bytes, "level too large : 2048", true, "3000 nested levels");
+        assertRejected(bytes, "level too large : 512", true, "3000 nested levels");
     }
 
     @Test

@@ -27,6 +27,10 @@ final class JSONReaderJSONB
         extends JSONReader {
     static final long BASE = UNSAFE.arrayBaseOffset(byte[].class);
 
+    // decimal nesting is capped well below context.maxLevel so the bound fires before
+    // StackOverflowError even on small JVM stacks (~3 frames per nesting level)
+    static final int MAX_DECIMAL_LEVEL = 512;
+
     static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
     static Charset GB18030;
 
@@ -3502,7 +3506,7 @@ final class JSONReaderJSONB
                 && type != BC_INT32 && type != BC_DECIMAL && type != BC_TRUE && type != BC_FALSE) {
             throw new JSONException("scale overflow : " + type);
         }
-        if (level >= context.maxLevel) {
+        if (level >= MAX_DECIMAL_LEVEL) {
             throw new JSONException("level too large : " + level);
         }
         level++;
@@ -3514,7 +3518,7 @@ final class JSONReaderJSONB
     }
 
     private BigInteger readDecimalUnscaled(int scale) {
-        if (level >= context.maxLevel) {
+        if (level >= MAX_DECIMAL_LEVEL) {
             throw new JSONException("level too large : " + level);
         }
         long scaleAbs = scale < 0 ? -(long) scale : scale;
