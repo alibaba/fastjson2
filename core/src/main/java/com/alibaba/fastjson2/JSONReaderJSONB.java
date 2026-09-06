@@ -89,6 +89,7 @@ final class JSONReaderJSONB
     int strlen;
     byte strtype;
     int strBegin;
+    long decimalScaleSum;
 
     byte[] valueBytes;
     char[] charBuf;
@@ -679,7 +680,8 @@ final class JSONReaderJSONB
             }
             case BC_DECIMAL: {
                 int scale = readDecimalScale();
-                BigInteger unscaledValue = readBigInteger();
+                BigInteger unscaledValue = readDecimalUnscaled(scale);
+                checkDecimalScaleSum(scale);
                 BigDecimal decimal;
                 if (scale == 0) {
                     decimal = new BigDecimal(unscaledValue);
@@ -3212,7 +3214,8 @@ final class JSONReaderJSONB
             }
             case BC_DECIMAL: {
                 int scale = readDecimalScale();
-                BigInteger unscaledValue = readBigInteger();
+                BigInteger unscaledValue = readDecimalUnscaled(scale);
+                checkDecimalScaleSum(scale);
                 BigDecimal decimal;
                 if (scale == 0) {
                     decimal = new BigDecimal(unscaledValue);
@@ -3437,7 +3440,8 @@ final class JSONReaderJSONB
                 return int64Value;
             case BC_DECIMAL: {
                 int scale = readDecimalScale();
-                BigInteger unscaledValue = readBigInteger();
+                BigInteger unscaledValue = readDecimalUnscaled(scale);
+                checkDecimalScaleSum(scale);
                 BigDecimal decimal;
                 if (scale == 0) {
                     decimal = new BigDecimal(unscaledValue);
@@ -3493,11 +3497,41 @@ final class JSONReaderJSONB
     }
 
     private int readDecimalScale() {
-        int scale = readInt32Value();
-        if (scale < -defaultDecimalMaxScale || scale > defaultDecimalMaxScale) {
+        byte type = bytes[offset];
+        if (!isInt32Num(type) && !isInt32Byte(type) && !isInt32Short(type)
+                && type != BC_INT32 && type != BC_DECIMAL && type != BC_TRUE && type != BC_FALSE) {
+            throw new JSONException("scale overflow : " + type);
+        }
+        if (level >= context.maxLevel) {
+            throw new JSONException("level too large : " + level);
+        }
+        level++;
+        try {
+            return readInt32Value();
+        } finally {
+            level--;
+        }
+    }
+
+    private BigInteger readDecimalUnscaled(int scale) {
+        if (level >= context.maxLevel) {
+            throw new JSONException("level too large : " + level);
+        }
+        long scaleAbs = scale < 0 ? -(long) scale : scale;
+        level++;
+        decimalScaleSum += scaleAbs;
+        try {
+            return readBigInteger();
+        } finally {
+            level--;
+            decimalScaleSum -= scaleAbs;
+        }
+    }
+
+    private void checkDecimalScaleSum(int scale) {
+        if ((scale < 0 ? -(long) scale : scale) + decimalScaleSum > defaultDecimalMaxScale) {
             throw new JSONException("scale overflow : " + scale);
         }
-        return scale;
     }
 
     @Override
@@ -3620,7 +3654,8 @@ final class JSONReaderJSONB
             }
             case BC_DECIMAL: {
                 int scale = readDecimalScale();
-                BigInteger unscaledValue = readBigInteger();
+                BigInteger unscaledValue = readDecimalUnscaled(scale);
+                checkDecimalScaleSum(scale);
                 BigDecimal decimal;
                 if (scale == 0) {
                     decimal = new BigDecimal(unscaledValue);
@@ -3858,14 +3893,15 @@ final class JSONReaderJSONB
             }
             case BC_DECIMAL: {
                 int scale = readDecimalScale();
-                BigInteger unscaledValue = readBigInteger();
+                BigInteger unscaledValue = readDecimalUnscaled(scale);
+                checkDecimalScaleSum(scale);
                 BigDecimal decimal;
                 if (scale == 0) {
                     decimal = new BigDecimal(unscaledValue);
                 } else {
                     decimal = new BigDecimal(unscaledValue, scale);
                 }
-                return decimal.intValue();
+                return decimal.floatValue();
             }
             case BC_FALSE:
 //            case FLOAT_NUM_0:
@@ -4010,14 +4046,15 @@ final class JSONReaderJSONB
             }
             case BC_DECIMAL: {
                 int scale = readDecimalScale();
-                BigInteger unscaledValue = readBigInteger();
+                BigInteger unscaledValue = readDecimalUnscaled(scale);
+                checkDecimalScaleSum(scale);
                 BigDecimal decimal;
                 if (scale == 0) {
                     decimal = new BigDecimal(unscaledValue);
                 } else {
                     decimal = new BigDecimal(unscaledValue, scale);
                 }
-                return decimal.intValue();
+                return decimal.doubleValue();
             }
             case BC_FALSE:
 //            case FLOAT_NUM_0:
@@ -4170,7 +4207,8 @@ final class JSONReaderJSONB
                 return (double) readInt64Value();
             case BC_DECIMAL: {
                 int scale = readDecimalScale();
-                BigInteger unscaledValue = readBigInteger();
+                BigInteger unscaledValue = readDecimalUnscaled(scale);
+                checkDecimalScaleSum(scale);
                 if (scale == 0) {
                     return new BigDecimal(unscaledValue);
                 } else {
@@ -4186,13 +4224,13 @@ final class JSONReaderJSONB
                 int strlen = readInt32Value();
                 String str = new String(bytes, offset, strlen, ISO_8859_1);
                 offset += strlen;
-                return toBigDecimal(str);
+                return checkDecimalScale(toBigDecimal(str));
             }
             case BC_STR_UTF8: {
                 int strlen = readInt32Value();
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
                 offset += strlen;
-                return toBigDecimal(str);
+                return checkDecimalScale(toBigDecimal(str));
             }
             case BC_TYPED_ANY: {
                 String typeName = readString();
@@ -4203,7 +4241,7 @@ final class JSONReaderJSONB
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
                     String str = readFixedAsciiString(strlen);
                     offset += strlen;
-                    return toBigDecimal(str);
+                    return checkDecimalScale(toBigDecimal(str));
                 }
                 break;
         }
@@ -4220,17 +4258,21 @@ final class JSONReaderJSONB
             if (bytes[offset] == BC_BIGINT_LONG) {
                 offset++;
                 long unscaledLongValue = readInt64Value();
+                checkDecimalScaleSum(scale);
                 decimal = BigDecimal.valueOf(unscaledLongValue, scale);
             } else if (bytes[offset] == BC_INT32) {
-                decimal = BigDecimal.valueOf(getIntBE(bytes, check3(offset + 1, end)), scale);
+                int unscaledIntValue = getIntBE(bytes, check3(offset + 1, end));
                 offset += 5;
+                checkDecimalScaleSum(scale);
+                decimal = BigDecimal.valueOf(unscaledIntValue, scale);
             } else if (bytes[offset] == BC_INT64) {
-                decimal = BigDecimal.valueOf(
-                        IOUtils.getLongBE(bytes, check7(offset + 1, end)),
-                        scale);
+                long unscaledLongValue = IOUtils.getLongBE(bytes, check7(offset + 1, end));
                 offset += 9;
+                checkDecimalScaleSum(scale);
+                decimal = BigDecimal.valueOf(unscaledLongValue, scale);
             } else {
-                BigInteger unscaledValue = readBigInteger();
+                BigInteger unscaledValue = readDecimalUnscaled(scale);
+                checkDecimalScaleSum(scale);
                 decimal = scale == 0
                         ? new BigDecimal(unscaledValue)
                         : new BigDecimal(unscaledValue, scale);
@@ -4304,19 +4346,19 @@ final class JSONReaderJSONB
                 int strlen = readInt32Value();
                 String str = new String(bytes, offset, strlen, ISO_8859_1);
                 offset += strlen;
-                return toBigDecimal(str);
+                return checkDecimalScale(toBigDecimal(str));
             }
             case BC_STR_UTF16LE: {
                 int strlen = readInt32Value();
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
                 offset += strlen;
-                return toBigDecimal(str);
+                return checkDecimalScale(toBigDecimal(str));
             }
             case BC_STR_UTF8: {
                 int strlen = readInt32Value();
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
                 offset += strlen;
-                return toBigDecimal(str);
+                return checkDecimalScale(toBigDecimal(str));
             }
             default:
                 if (isInt32Num(type)) {
@@ -4356,7 +4398,7 @@ final class JSONReaderJSONB
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
                     String str = readFixedAsciiString(strlen);
                     offset += strlen;
-                    return toBigDecimal(str);
+                    return checkDecimalScale(toBigDecimal(str));
                 }
                 break;
         }
@@ -4446,7 +4488,8 @@ final class JSONReaderJSONB
             }
             case BC_DECIMAL: {
                 int scale = readDecimalScale();
-                BigInteger unscaledValue = readBigInteger();
+                BigInteger unscaledValue = readDecimalUnscaled(scale);
+                checkDecimalScaleSum(scale);
                 BigDecimal decimal;
                 if (scale == 0) {
                     decimal = new BigDecimal(unscaledValue);
@@ -4466,7 +4509,7 @@ final class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str);
                 } else {
-                    return toBigDecimal(str).toBigInteger();
+                    return checkDecimalScale(toBigDecimal(str)).toBigInteger();
                 }
             }
             case BC_STR_UTF8: {
@@ -4476,7 +4519,7 @@ final class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str);
                 } else {
-                    return toBigDecimal(str).toBigInteger();
+                    return checkDecimalScale(toBigDecimal(str)).toBigInteger();
                 }
             }
             case BC_STR_UTF16LE: {
@@ -4486,7 +4529,7 @@ final class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str);
                 } else {
-                    return toBigDecimal(str).toBigInteger();
+                    return checkDecimalScale(toBigDecimal(str)).toBigInteger();
                 }
             }
             default:
