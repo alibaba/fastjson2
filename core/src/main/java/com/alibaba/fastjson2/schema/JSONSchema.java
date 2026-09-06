@@ -452,7 +452,11 @@ public abstract class JSONSchema {
                         if (ref.startsWith("#/definitions/")) {
                             final int PREFIX_LEN = 14; // "#/definitions/".length();
                             String refName = ref.substring(PREFIX_LEN);
-                            return definitions.get(refName);
+                            JSONSchema refSchema = definitions.get(refName);
+                            if (refSchema == null && definitions.containsKey(refName)) {
+                                refSchema = new UnresolvedReference(refName, definitions);
+                            }
+                            return refSchema;
                         }
                     }
 
@@ -463,7 +467,7 @@ public abstract class JSONSchema {
                             refName = URLDecoder.decode(refName);
                             JSONSchema refSchema = defs.get(refName);
                             if (refSchema == null) {
-                                refSchema = new UnresolvedReference(refName);
+                                refSchema = new UnresolvedReference(refName, defs);
                             }
                             return refSchema;
                         }

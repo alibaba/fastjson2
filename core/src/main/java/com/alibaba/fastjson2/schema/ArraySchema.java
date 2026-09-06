@@ -34,6 +34,8 @@ public final class ArraySchema
     final OneOf oneOf;
     final boolean encoded;
 
+    transient List<UnresolvedReference.ResolveTask> resolveTasks;
+
     public ArraySchema(JSONObject input, JSONSchema root) {
         super(input);
 
@@ -44,6 +46,9 @@ public final class ArraySchema
 
         JSONObject definitions = input.getJSONObject("definitions");
         if (definitions != null) {
+            for (String name : definitions.keySet()) {
+                this.definitions.put(name, null);
+            }
             for (Map.Entry<String, Object> entry : definitions.entrySet()) {
                 String entryKey = entry.getKey();
                 JSONObject entryValue = (JSONObject) entry.getValue();
@@ -87,6 +92,11 @@ public final class ArraySchema
         } else {
             additionalItemsSupport = true;
             this.itemSchema = JSONSchema.of((JSONObject) items, root != null ? root : this);
+            if (itemSchema instanceof UnresolvedReference) {
+                JSONSchema resolveRoot = root == null ? this : root;
+                resolveRoot.addResolveTask(
+                        new UnresolvedReference.ArrayResolveTask(this, -1, (UnresolvedReference) itemSchema));
+            }
         }
 
         if (additionalItems instanceof JSONObject) {
@@ -123,6 +133,11 @@ public final class ArraySchema
                 }
 
                 this.prefixItems[i] = schema;
+                if (schema instanceof UnresolvedReference) {
+                    JSONSchema resolveRoot = root == null ? this : root;
+                    resolveRoot.addResolveTask(
+                            new UnresolvedReference.ArrayResolveTask(this, i, (UnresolvedReference) schema));
+                }
             }
         }
 
@@ -135,6 +150,21 @@ public final class ArraySchema
         allOf = allOf(input, null);
         anyOf = anyOf(input, null);
         oneOf = oneOf(input, null);
+
+        if (resolveTasks != null) {
+            for (UnresolvedReference.ResolveTask resolveTask : resolveTasks) {
+                resolveTask.resolve();
+            }
+            resolveTasks = null;
+        }
+    }
+
+    @Override
+    void addResolveTask(UnresolvedReference.ResolveTask task) {
+        if (resolveTasks == null) {
+            resolveTasks = new ArrayList<>();
+        }
+        resolveTasks.add(task);
     }
 
     @Override

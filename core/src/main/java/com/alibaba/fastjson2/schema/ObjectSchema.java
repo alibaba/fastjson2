@@ -58,6 +58,9 @@ public final class ObjectSchema
 
         JSONObject definitions = input.getJSONObject("definitions");
         if (definitions != null) {
+            for (String name : definitions.keySet()) {
+                this.definitions.put(name, null);
+            }
             for (Map.Entry<String, Object> entry : definitions.entrySet()) {
                 String entryKey = entry.getKey();
                 JSONObject entryValue = (JSONObject) entry.getValue();
@@ -73,11 +76,6 @@ public final class ObjectSchema
                 JSONObject entryValue = (JSONObject) entry.getValue();
                 JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
                 this.defs.put(entryKey, schema);
-            }
-            if (resolveTasks != null) {
-                for (UnresolvedReference.ResolveTask resolveTask : resolveTasks) {
-                    resolveTask.resolve(this);
-                }
             }
         }
 
@@ -96,9 +94,8 @@ public final class ObjectSchema
                 }
                 this.properties.put(entryKey, schema);
                 if (schema instanceof UnresolvedReference) {
-                    String refName = ((UnresolvedReference) schema).refName;
                     UnresolvedReference.PropertyResolveTask task
-                            = new UnresolvedReference.PropertyResolveTask(this.properties, entryKey, refName);
+                            = new UnresolvedReference.PropertyResolveTask(this.properties, entryKey, (UnresolvedReference) schema);
                     JSONSchema resolveRoot = root == null ? this : root;
                     resolveRoot.addResolveTask(task);
                 }
@@ -211,6 +208,13 @@ public final class ObjectSchema
         allOf = allOf(input, null);
         anyOf = anyOf(input, null);
         oneOf = oneOf(input, null);
+
+        if (resolveTasks != null) {
+            for (UnresolvedReference.ResolveTask resolveTask : resolveTasks) {
+                resolveTask.resolve();
+            }
+            resolveTasks = null;
+        }
     }
 
     @Override

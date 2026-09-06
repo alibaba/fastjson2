@@ -5,9 +5,12 @@ import java.util.Map;
 public class UnresolvedReference
         extends JSONSchema {
     final String refName;
-    UnresolvedReference(String refName) {
+    final Map<String, JSONSchema> schemas;
+
+    UnresolvedReference(String refName, Map<String, JSONSchema> schemas) {
         super(null, null);
         this.refName = refName;
+        this.schemas = schemas;
     }
 
     @Override
@@ -21,37 +24,59 @@ public class UnresolvedReference
     }
 
     abstract static class ResolveTask {
-        abstract void resolve(JSONSchema root);
+        final UnresolvedReference reference;
+
+        ResolveTask(UnresolvedReference reference) {
+            this.reference = reference;
+        }
+
+        JSONSchema getResolvedSchema() {
+            return reference.schemas.get(reference.refName);
+        }
+
+        abstract void resolve();
     }
 
     static class PropertyResolveTask
             extends ResolveTask {
         final Map<String, JSONSchema> properties;
         final String entryKey;
-        final String refName;
 
-        PropertyResolveTask(Map<String, JSONSchema> properties, String entryKey, String refName) {
+        PropertyResolveTask(Map<String, JSONSchema> properties, String entryKey, UnresolvedReference reference) {
+            super(reference);
             this.properties = properties;
             this.entryKey = entryKey;
-            this.refName = refName;
         }
 
         @Override
-        void resolve(JSONSchema root) {
-            Map<String, JSONSchema> defs = null;
-            if (root instanceof ObjectSchema) {
-                defs = ((ObjectSchema) root).defs;
-            } else if (root instanceof ArraySchema) {
-                defs = ((ArraySchema) root).defs;
-            }
-
-            if (defs == null) {
-                return;
-            }
-
-            JSONSchema refSchema = defs.get(refName);
+        void resolve() {
+            JSONSchema refSchema = getResolvedSchema();
             if (refSchema != null) {
                 properties.put(entryKey, refSchema);
+            }
+        }
+    }
+
+    static class ArrayResolveTask
+            extends ResolveTask {
+        final ArraySchema arraySchema;
+        final int itemIndex;
+
+        ArrayResolveTask(ArraySchema arraySchema, int itemIndex, UnresolvedReference reference) {
+            super(reference);
+            this.arraySchema = arraySchema;
+            this.itemIndex = itemIndex;
+        }
+
+        @Override
+        void resolve() {
+            JSONSchema refSchema = getResolvedSchema();
+            if (refSchema != null) {
+                if (itemIndex == -1) {
+                    arraySchema.itemSchema = refSchema;
+                } else {
+                    arraySchema.prefixItems[itemIndex] = refSchema;
+                }
             }
         }
     }
