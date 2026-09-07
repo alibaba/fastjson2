@@ -3504,7 +3504,12 @@ final class JSONReaderJSONB
         byte type = bytes[offset];
         if (!isInt32Num(type) && !isInt32Byte(type) && !isInt32Short(type)
                 && type != BC_INT32 && type != BC_DECIMAL && type != BC_TRUE && type != BC_FALSE) {
-            throw new JSONException("scale overflow : " + type);
+            int scaleOffset = offset;
+            // skip the scale field without decoding it (no expensive BigDecimal construction),
+            // then consume the unscaled value so the record stays aligned for NullOnError readers
+            skipValue();
+            readBigInteger();
+            throw new JSONException("decimal scale not support " + typeName(type) + ", offset " + scaleOffset);
         }
         if (level >= MAX_DECIMAL_LEVEL) {
             throw new JSONException("level too large : " + level);
@@ -3533,8 +3538,11 @@ final class JSONReaderJSONB
     }
 
     private void checkDecimalScaleSum(int scale) {
-        if ((scale < 0 ? -(long) scale : scale) + decimalScaleSum > defaultDecimalMaxScale) {
-            throw new JSONException("scale overflow : " + scale);
+        long scaleAbs = scale < 0 ? -(long) scale : scale;
+        if (scaleAbs + decimalScaleSum > defaultDecimalMaxScale) {
+            throw new JSONException(scaleAbs > defaultDecimalMaxScale
+                    ? "scale overflow : " + scale
+                    : "composed scale overflow : " + scale);
         }
     }
 

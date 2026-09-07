@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -70,7 +71,7 @@ public class Issue7857 {
         System.arraycopy(strScale, 0, p1, 1, strScale.length);
         p1[p1.length - 2] = BC_BIGINT_LONG;
         p1[p1.length - 1] = 1;
-        assertRejected(p1, "scale overflow : 82", true, "string-encoded scale field");
+        assertRejected(p1, "decimal scale not support STR_ASCII 82, offset 1", true, "string-encoded scale field");
 
         // scale field encoded as BC_INT64((1L << 32) + 2048): declares 4294969344 but the
         // (int) cast narrows it to 2048
@@ -83,7 +84,7 @@ public class Issue7857 {
         }
         p2[10] = BC_BIGINT_LONG;
         p2[11] = 1;
-        assertRejected(p2, "scale overflow : -66", true, "int64-encoded scale field");
+        assertRejected(p2, "decimal scale not support INT64 -66, offset 1", true, "int64-encoded scale field");
     }
 
     @Test
@@ -104,7 +105,7 @@ public class Issue7857 {
         }
         bytes[off++] = BC_BIGINT_LONG;
         bytes[off] = 1;
-        assertRejected(bytes, "scale overflow : -2048", true, "400 nested levels of scale -2048");
+        assertRejected(bytes, "composed scale overflow : -2048", true, "400 nested levels of scale -2048");
     }
 
     @Test
@@ -179,6 +180,107 @@ public class Issue7857 {
         NullOnErrorBean bean = JSONB.parseObject(bytes, NullOnErrorBean.class);
         assertNull(bean.amount);
         assertEquals("n", bean.name);
+    }
+
+    @Test
+    public void nullOnErrorNeighbourFieldExoticScaleEncoding() {
+        // same neighbour-field contract for the type-whitelist rejection: the exotic scale
+        // field is skipped without decoding, the unscaled value is consumed, and the throw
+        // fires only with the record fully consumed
+        byte[] amount = decimal(JSONB.toBytes("1.0e-3000"), new byte[]{BC_BIGINT_LONG, 1});
+        byte[] bytes = new byte[1 + 7 + amount.length + 5 + 2 + 1];
+        int off = 0;
+        bytes[off++] = BC_OBJECT;
+        bytes[off++] = (byte) (BC_STR_ASCII_FIX_MIN + 6);
+        off = putAscii(bytes, off, "amount");
+        System.arraycopy(amount, 0, bytes, off, amount.length);
+        off += amount.length;
+        bytes[off++] = (byte) (BC_STR_ASCII_FIX_MIN + 4);
+        off = putAscii(bytes, off, "name");
+        bytes[off++] = (byte) (BC_STR_ASCII_FIX_MIN + 1);
+        bytes[off++] = 'n';
+        bytes[off] = BC_OBJECT_END;
+        NullOnErrorBean bean = JSONB.parseObject(bytes, NullOnErrorBean.class);
+        assertNull(bean.amount);
+        assertEquals("n", bean.name);
+    }
+
+    @Test
+    public void nullStringDecimal() {
+        // TypeUtils.toBigDecimal returns null for empty and "null" strings; the scale guard
+        // must preserve that contract, not NPE or convert it to a JSONException
+        for (String str : new String[]{"", "null"}) {
+            byte[] bytes = JSONB.toBytes(str);
+            assertNull(JSONB.parseObject(bytes, BigDecimal.class));
+            try (JSONReader reader = JSONReader.ofJSONB(bytes)) {
+                assertNull(reader.readBigDecimal());
+            }
+            try (JSONReader reader = JSONReader.ofJSONB(bytes)) {
+                assertNull(reader.readNumber());
+            }
+        }
+        assertEquals("", JSONB.parse(JSONB.toBytes(""))); // plain string read unaffected
+    }
+
+    @Test
+    public void siblingDecimalsRestore() {
+        // 600 sibling decimals, each individually in-bound: only state leaking across siblings
+        // (a dropped level or decimalScaleSum restore) would trip the depth or cumulative guards
+        int count = 600;
+        byte[] scaleBytes = JSONB.toBytes(100);
+        byte[] lengthBytes = JSONB.toBytes(count);
+        byte[] bytes = new byte[1 + lengthBytes.length + count * (1 + scaleBytes.length + 1)];
+        int off = 0;
+        bytes[off++] = BC_ARRAY;
+        System.arraycopy(lengthBytes, 0, bytes, off, lengthBytes.length);
+        off += lengthBytes.length;
+        for (int i = 0; i < count; i++) {
+            bytes[off++] = BC_DECIMAL;
+            System.arraycopy(scaleBytes, 0, bytes, off, scaleBytes.length);
+            off += scaleBytes.length;
+            bytes[off++] = 1;
+        }
+        List<Object> list = (List<Object>) JSONB.parse(bytes);
+        assertEquals(count, list.size());
+        BigDecimal expected = new BigDecimal(BigInteger.ONE, 100);
+        assertEquals(expected, list.get(0));
+        assertEquals(expected, list.get(count - 1));
+    }
+
+    @Test
+    public void stringDecimalScaleCharsets() {
+        for (byte strType : new byte[]{BC_STR_ASCII, BC_STR_UTF8, BC_STR_UTF16LE}) {
+            Charset charset = strType == BC_STR_ASCII
+                    ? StandardCharsets.ISO_8859_1
+                    : strType == BC_STR_UTF8
+                            ? StandardCharsets.UTF_8
+                            : StandardCharsets.UTF_16LE;
+            byte[] bytes = strRecord(strType, "1.0e2000000".getBytes(charset));
+            try (JSONReader reader = JSONReader.ofJSONB(bytes)) {
+                assertThrows(JSONException.class, reader::readBigDecimal);
+            }
+            try (JSONReader reader = JSONReader.ofJSONB(bytes)) {
+                assertThrows(JSONException.class, reader::readBigInteger);
+            }
+            if (strType != BC_STR_UTF16LE) { // readNumber has no UTF16LE arm
+                try (JSONReader reader = JSONReader.ofJSONB(bytes)) {
+                    assertThrows(JSONException.class, reader::readNumber);
+                }
+            }
+
+            byte[] valid = strRecord(strType, "1.5".getBytes(charset));
+            try (JSONReader reader = JSONReader.ofJSONB(valid)) {
+                assertEquals(new BigDecimal("1.5"), reader.readBigDecimal());
+            }
+        }
+    }
+
+    private static byte[] strRecord(byte strType, byte[] str) {
+        byte[] bytes = new byte[str.length + 2];
+        bytes[0] = strType;
+        bytes[1] = (byte) str.length;
+        System.arraycopy(str, 0, bytes, 2, str.length);
+        return bytes;
     }
 
     @Test

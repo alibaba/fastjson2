@@ -107,6 +107,9 @@ public final class JSONFactory {
     }
 
     static BigDecimal checkDecimalScale(BigDecimal decimal) {
+        if (decimal == null) {
+            return null;
+        }
         checkDecimalScale(decimal.scale());
         return decimal;
     }
