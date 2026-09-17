@@ -89,10 +89,10 @@ public class Issue7857 {
 
     @Test
     public void nestedComposedScaleOverflow() {
-        // 400 nested BC_DECIMAL levels, each with an in-bound scale of -2048: the per-level
-        // bound never fires, but the magnitude multiplies by 10^2048 per level, so the
-        // cumulative budget rejects it
-        int depth = 400;
+        // 200 nested BC_DECIMAL levels (below the depth cap), each with an in-bound scale of
+        // -2048: the per-level bound never fires, but the magnitude multiplies by 10^2048 per
+        // level, so the cumulative budget rejects it. 199 x 2048 + 2048 = 409600.
+        int depth = 200;
         byte[] bytes = new byte[depth * 6 + 2];
         int off = 0;
         for (int i = 0; i < depth; i++) {
@@ -105,14 +105,65 @@ public class Issue7857 {
         }
         bytes[off++] = BC_BIGINT_LONG;
         bytes[off] = 1;
-        assertRejected(bytes, "composed scale overflow : -2048", true, "400 nested levels of scale -2048");
+        // skipValue never adds the outermost scale to decimalScaleSum, so its cumulative
+        // total is one level lower than the value-returning operations
+        assertRejected(bytes, "composed scale overflow : -2048, total 409600",
+                "composed scale overflow : -2048, total 407552", true,
+                "200 nested levels of scale -2048");
+    }
+
+    @Test
+    public void composedScaleOverflowAttribution() {
+        // the in-bound inner scale -11 is not the offender; the message must carry the total,
+        // which includes the pending outer 3000 (3000 + 11 = 3011)
+        byte[] inner = decimal(JSONB.toBytes(-11), int8(-15));
+        byte[] payload = decimal(JSONB.toBytes(3000), inner);
+        JSONException error = assertThrows(JSONException.class, () -> JSONB.parse(payload));
+        assertEquals("composed scale overflow : -11, total 3011", error.getMessage());
     }
 
     @Test
     public void nestingDepthOverflow() {
         // 3000 nested BC_DECIMAL records whose scale fields nest down to a single int32 scale;
         // every scale is 0, so only the depth bound rejects this before StackOverflowError
-        int depth = 3000;
+        assertRejected(nestingPayload(3000), "level too large : 256", true, "3000 nested levels");
+    }
+
+    @Test
+    public void nestingDepthOverflowSmallStack() throws Exception {
+        // the depth bound must fire before StackOverflowError even on a 256 KB thread stack
+        final byte[] bytes = nestingPayload(3000);
+        final Throwable[] error = new Throwable[1];
+        Thread probe = new Thread(null, () -> {
+            try {
+                JSONB.parse(bytes);
+            } catch (Throwable e) {
+                error[0] = e;
+            }
+        }, "issue7857-probe", 256 * 1024);
+        probe.start();
+        probe.join();
+        assertInstanceOf(JSONException.class, error[0]);
+        assertEquals("level too large : 256", error[0].getMessage());
+    }
+
+    @Test
+    public void textDecimalScaleOverflow() {
+        // the text-side guard shares JSONFactory.checkDecimalScale after dedup; pin it here.
+        // the BIG_DEC branch requires magnitude overflow, hence the 40-digit integer part
+        char[] zeros = new char[2048];
+        Arrays.fill(zeros, '0');
+        char[] digits = new char[40];
+        Arrays.fill(digits, '1');
+        String text = new String(digits) + "." + new String(zeros) + "1";
+        JSONException error = assertThrows(JSONException.class, () -> JSONReader.of(text).readNumber());
+        assertEquals("scale overflow : 2049", error.getMessage());
+        error = assertThrows(JSONException.class,
+                () -> JSONReader.of(text.getBytes(StandardCharsets.UTF_8)).readNumber());
+        assertEquals("scale overflow : 2049", error.getMessage());
+    }
+
+    private static byte[] nestingPayload(int depth) {
         byte[] bytes = new byte[depth * 3 + 1];
         int off = 0;
         for (int i = 0; i < depth; i++) {
@@ -123,7 +174,7 @@ public class Issue7857 {
             bytes[off++] = BC_BIGINT_LONG;
             bytes[off++] = 1;
         }
-        assertRejected(bytes, "level too large : 512", true, "3000 nested levels");
+        return bytes;
     }
 
     @Test
@@ -188,6 +239,31 @@ public class Issue7857 {
         // field is skipped without decoding, the unscaled value is consumed, and the throw
         // fires only with the record fully consumed
         byte[] amount = decimal(JSONB.toBytes("1.0e-3000"), new byte[]{BC_BIGINT_LONG, 1});
+        byte[] bytes = new byte[1 + 7 + amount.length + 5 + 2 + 1];
+        int off = 0;
+        bytes[off++] = BC_OBJECT;
+        bytes[off++] = (byte) (BC_STR_ASCII_FIX_MIN + 6);
+        off = putAscii(bytes, off, "amount");
+        System.arraycopy(amount, 0, bytes, off, amount.length);
+        off += amount.length;
+        bytes[off++] = (byte) (BC_STR_ASCII_FIX_MIN + 4);
+        off = putAscii(bytes, off, "name");
+        bytes[off++] = (byte) (BC_STR_ASCII_FIX_MIN + 1);
+        bytes[off++] = 'n';
+        bytes[off] = BC_OBJECT_END;
+        NullOnErrorBean bean = JSONB.parseObject(bytes, NullOnErrorBean.class);
+        assertNull(bean.amount);
+        assertEquals("n", bean.name);
+    }
+
+    @Test
+    public void nullOnErrorNestedScaleField() {
+        // the outer record's scale field is itself a BC_DECIMAL whose inner magnitude guard
+        // fires; the rejection must still consume the outer unscaled value so the NullOnError
+        // field reader resumes at the record boundary and trailing bytes cannot be re-read as
+        // a forged entry
+        byte[] inner = decimal(JSONB.toBytes(3000), new byte[]{BC_BIGINT_LONG, 1});
+        byte[] amount = decimal(inner, new byte[]{BC_BIGINT_LONG, 7});
         byte[] bytes = new byte[1 + 7 + amount.length + 5 + 2 + 1];
         int off = 0;
         bytes[off++] = BC_OBJECT;
@@ -363,6 +439,15 @@ public class Issue7857 {
             String expectedMessage,
             boolean skipRejects,
             String description) {
+        assertRejected(bytes, expectedMessage, expectedMessage, skipRejects, description);
+    }
+
+    private static void assertRejected(
+            byte[] bytes,
+            String expectedMessage,
+            String skipMessage,
+            boolean skipRejects,
+            String description) {
         JSONException parseError = assertThrows(JSONException.class, () -> JSONB.parse(bytes), description);
         assertEquals(expectedMessage, parseError.getMessage(), description);
         for (int i = 0; i < OPERATIONS.size(); i++) {
@@ -377,7 +462,7 @@ public class Issue7857 {
             if (skipRejects) {
                 JSONException error = assertThrows(
                         JSONException.class, reader::skipValue, description + " / skipValue");
-                assertEquals(expectedMessage, error.getMessage(), description + " / skipValue");
+                assertEquals(skipMessage, error.getMessage(), description + " / skipValue");
             } else {
                 reader.skipValue();
                 assertEquals(bytes.length, reader.getOffset(), description + " / skipValue");

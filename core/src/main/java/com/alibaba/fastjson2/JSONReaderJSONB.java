@@ -27,9 +27,9 @@ final class JSONReaderJSONB
         extends JSONReader {
     static final long BASE = UNSAFE.arrayBaseOffset(byte[].class);
 
-    // decimal nesting is capped well below context.maxLevel so the bound fires before
-    // StackOverflowError even on small JVM stacks (~3 frames per nesting level)
-    static final int MAX_DECIMAL_LEVEL = 512;
+    // decimal nesting is capped so the guard fires inside small thread stacks; JSONB object/array
+    // nesting does not increment level — this bounds decimal scale/unscaled recursion only
+    static final int MAX_DECIMAL_LEVEL = 256;
 
     static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
     static Charset GB18030;
@@ -3517,6 +3517,15 @@ final class JSONReaderJSONB
         level++;
         try {
             return readInt32Value();
+        } catch (JSONException e) {
+            // a guard fired inside a nested scale field; consume this record's unscaled
+            // value so NullOnError readers resume at the record boundary
+            try {
+                readBigInteger();
+            } catch (JSONException ignored) {
+                // the resync read hit the same hostile bytes; the original error is the cause
+            }
+            throw e;
         } finally {
             level--;
         }
@@ -3542,7 +3551,7 @@ final class JSONReaderJSONB
         if (scaleAbs + decimalScaleSum > defaultDecimalMaxScale) {
             throw new JSONException(scaleAbs > defaultDecimalMaxScale
                     ? "scale overflow : " + scale
-                    : "composed scale overflow : " + scale);
+                    : "composed scale overflow : " + scale + ", total " + (decimalScaleSum + scaleAbs));
         }
     }
 
