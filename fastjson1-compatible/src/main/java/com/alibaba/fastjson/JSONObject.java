@@ -1036,7 +1036,9 @@ public class JSONObject
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <T> T toJavaObjectIgnoreUnknown(JSONObject map, Class<T> clazz) {
+    // package-private so the fallback can be unit-tested directly (see Issue7782); it is the
+    // backport of fastjson 1.x "silently ignore unknown keys" behaviour.
+    static <T> T toJavaObjectIgnoreUnknown(JSONObject map, Class<T> clazz) {
         try {
             T instance = clazz.getDeclaredConstructor().newInstance();
             BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
