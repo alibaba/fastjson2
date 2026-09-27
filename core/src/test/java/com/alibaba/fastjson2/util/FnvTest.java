@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Random;
 
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
@@ -70,6 +71,41 @@ public class FnvTest {
             String str = new String(chars);
             byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
             System.out.println(((int) c0) + "\t" + Arrays.toString(bytes));
+        }
+    }
+
+    @Test
+    public void testHashCode64ByteArrayShortTail() {
+        // when a short name starts less than 8 bytes before the end of the array,
+        // the fast path must not read past the end of the array, and the result
+        // must be identical to the case where 8 readable bytes are available
+        Random rnd = new Random(42);
+        for (int len = 1; len <= 8; ++len) {
+            for (int trial = 0; trial < 200; ++trial) {
+                byte[] name = new byte[len];
+                for (int i = 0; i < len; ++i) {
+                    name[i] = (byte) ('a' + rnd.nextInt(26));
+                }
+                if (trial == 0) {
+                    Arrays.fill(name, (byte) 0); // nameValue == 0 falls back to the fnv loop
+                }
+
+                // only 2 spare bytes after offset -> fewer than 8 readable, name ends at the array end
+                byte[] tight = new byte[len + 2];
+                System.arraycopy(name, 0, tight, 2, len);
+                // 8 spare bytes after offset -> original fast path
+                byte[] padded = new byte[len + 10];
+                System.arraycopy(name, 0, padded, 2, len);
+
+                assertEquals(
+                        Fnv.hashCode64(padded, 2, len, true),
+                        Fnv.hashCode64(tight, 2, len, true)
+                );
+                assertEquals(
+                        hashCode64(name),
+                        Fnv.hashCode64(tight, 2, len, true)
+                );
+            }
         }
     }
 
