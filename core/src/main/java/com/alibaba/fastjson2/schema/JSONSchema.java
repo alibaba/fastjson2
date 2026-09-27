@@ -9,14 +9,18 @@ import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.reader.ObjectReaderBean;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,6 +36,7 @@ public abstract class JSONSchema {
     final String title;
     final String description;
     final String customErrorMessage;
+    transient List<UnresolvedReference.ResolveTask> resolveTasks;
 
     static final JSONReader.Context CONTEXT = JSONFactory.createReadContext();
 
@@ -47,7 +52,45 @@ public abstract class JSONSchema {
         this.customErrorMessage = null;
     }
 
-    void addResolveTask(UnresolvedReference.ResolveTask task){
+    final void addResolveTask(UnresolvedReference.ResolveTask task) {
+        if (resolveTasks == null) {
+            resolveTasks = new ArrayList<>();
+        }
+        resolveTasks.add(task);
+    }
+
+    protected final void runResolveTasks() {
+        if (resolveTasks != null) {
+            for (UnresolvedReference.ResolveTask task : resolveTasks) {
+                task.resolve();
+            }
+            // Release construction-only references and prevent repeated resolution.
+            resolveTasks = null;
+        }
+    }
+
+    static void prepareDefinitions(JSONObject input, Map<String, JSONSchema> schemas) {
+        if (input != null) {
+            // Null marks a declared forward target; absent keys are invalid references.
+            for (String name : input.keySet()) {
+                schemas.put(name, null);
+            }
+        }
+    }
+
+    static JSONSchema localReference(String name, Map<String, JSONSchema> schemas) {
+        try {
+            // URI fragments keep literal '+'; decode the pointer escapes only once.
+            name = URLDecoder.decode(name.replace("+", "%2B"), StandardCharsets.UTF_8.name())
+                    .replace("~1", "/").replace("~0", "~");
+        } catch (UnsupportedEncodingException e) {
+            throw new JSONException("schema error, invalid reference : " + name, e);
+        }
+        if (!schemas.containsKey(name)) {
+            throw new JSONException("schema error, unresolved reference : " + name);
+        }
+        JSONSchema schema = schemas.get(name);
+        return schema == null ? new UnresolvedReference(name, schemas) : schema;
     }
 
     public static JSONSchema of(JSONObject input, Class objectClass) {
@@ -452,11 +495,7 @@ public abstract class JSONSchema {
                         if (ref.startsWith("#/definitions/")) {
                             final int PREFIX_LEN = 14; // "#/definitions/".length();
                             String refName = ref.substring(PREFIX_LEN);
-                            JSONSchema refSchema = definitions.get(refName);
-                            if (refSchema == null && definitions.containsKey(refName)) {
-                                refSchema = new UnresolvedReference(refName, definitions);
-                            }
-                            return refSchema;
+                            return localReference(refName, definitions);
                         }
                     }
 
@@ -464,12 +503,7 @@ public abstract class JSONSchema {
                         if (ref.startsWith("#/$defs/")) {
                             final int PREFIX_LEN = 8; // "#/$defs/".length();
                             String refName = ref.substring(PREFIX_LEN);
-                            refName = URLDecoder.decode(refName);
-                            JSONSchema refSchema = defs.get(refName);
-                            if (refSchema == null) {
-                                refSchema = new UnresolvedReference(refName, defs);
-                            }
-                            return refSchema;
+                            return localReference(refName, defs);
                         }
                     }
 
