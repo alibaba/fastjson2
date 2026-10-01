@@ -2863,7 +2863,7 @@ public class DateUtilsTest {
     @Test
     public void parseDate22() {
         String str = "04/03/2023 12:13:14 AM";
-        LocalDateTime ldt = LocalDateTime.of(2023, 4, 3, 12, 13, 14);
+        LocalDateTime ldt = LocalDateTime.of(2023, 4, 3, 0, 13, 14);
         long millis = ldt.atZone(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli();
         assertEquals(millis, DateUtils.parseMillis(str, DateUtils.DEFAULT_ZONE_ID));
     }

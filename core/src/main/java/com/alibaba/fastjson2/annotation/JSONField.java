@@ -36,13 +36,19 @@ public @interface JSONField {
 
     /**
      * Whether the field is serialized
-     * during serialization, default {@code ture}
+     * during serialization, default {@code true}.
+     * <details><summary>中文</summary>
+     * 是否序列化此字段，默认为 {@code true}。
+     * </details>
      */
     boolean serialize() default true;
 
     /**
      * Whether the field is deserialized
-     * during deserialization, default {@code ture}
+     * during deserialization, default {@code true}.
+     * <details><summary>中文</summary>
+     * 是否反序列化此字段，默认为 {@code true}。
+     * </details>
      */
     boolean deserialize() default true;
 

@@ -129,7 +129,9 @@ public class Cast {
         } else if (value instanceof String) {
             return toByteValue((String) value);
         } else if (value instanceof Number) {
-            return toByteValue(((Number) value).doubleValue());
+            // A double intermediate loses low bits of large integer values.
+            // <details><summary>中文</summary>先转换为 double 会丢失大整数的低位。</details>
+            return ((Number) value).byteValue();
         } else if (value == null) {
             return 0;
         }
@@ -264,7 +266,9 @@ public class Cast {
      * @return the converted char value
      */
     private static char toCharEx(Object value) {
-        if (value instanceof Short) {
+        if (value instanceof Byte) {
+            return toCharValue(((Byte) value).byteValue());
+        } else if (value instanceof Short) {
             return toCharValue(((Short) value).shortValue());
         } else if (value instanceof Integer) {
             return toCharValue(((Integer) value).intValue());
@@ -275,7 +279,7 @@ public class Cast {
         } else if (value instanceof Double) {
             return toCharValue(((Double) value).doubleValue());
         } else if (value instanceof Boolean) {
-            return (Boolean) value ? (char) 1 : (char) 0;
+            return toCharValue(((Boolean) value).booleanValue());
         } else if (value instanceof String) {
             return toCharValue((String) value);
         } else if (value instanceof BigInteger) {
@@ -1077,7 +1081,7 @@ public class Cast {
         } else if (value instanceof Number) {
             return ((Number) value).doubleValue() != 0;
         } else if (value instanceof Character) {
-            return (Character) value != 0;
+            return toBooleanValue(((Character) value).charValue());
         }
         else if (value instanceof String) {
             return toBooleanValue((String) value);

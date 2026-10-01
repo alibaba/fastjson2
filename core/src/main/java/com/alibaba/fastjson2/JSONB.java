@@ -1091,7 +1091,24 @@ public interface JSONB {
             if (bytes.length < length) {
                 bytes = new byte[length];
             }
-            int read = in.read(bytes, 0, length);
+            // A stream may return fewer bytes than requested without reaching EOF.
+            // <details><summary>中文</summary>流未结束时，单次读取也可能少于请求的字节数。</details>
+            int read = 0;
+            while (read < length) {
+                int count = in.read(bytes, read, length - read);
+                if (count < 0) {
+                    break;
+                }
+                if (count == 0) {
+                    int value = in.read();
+                    if (value < 0) {
+                        break;
+                    }
+                    bytes[read++] = (byte) value;
+                } else {
+                    read += count;
+                }
+            }
             if (read != length) {
                 throw new IllegalArgumentException("deserialize failed. expected read length: " + length + " but actual read: " + read);
             }
@@ -1119,25 +1136,7 @@ public interface JSONB {
             Type objectType,
             JSONReader.Feature... features
     ) throws IOException {
-        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
-        final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
-        byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
-        if (bytes == null) {
-            bytes = new byte[8192];
-        }
-        try {
-            if (bytes.length < length) {
-                bytes = new byte[length];
-            }
-            int read = in.read(bytes, 0, length);
-            if (read != length) {
-                throw new IllegalArgumentException("deserialize failed. expected read length: " + length + " but actual read: " + read);
-            }
-
-            return parseObject(bytes, 0, length, objectType, features);
-        } finally {
-            BYTES_UPDATER.lazySet(cacheItem, bytes);
-        }
+        return parseObject(in, length, objectType, JSONFactory.createReadContext(features));
     }
 
     /**
@@ -1749,6 +1748,7 @@ public interface JSONB {
      * @return the JSONB bytes representation
      */
     static byte[] toBytes(Object object, JSONWriter.Context context, SymbolTable symbolTable, JSONWriter.Feature... features) {
+        context.config(features);
         try (JSONWriterJSONB writer = new JSONWriterJSONB(context, symbolTable)) {
             if (object == null) {
                 writer.writeNull();
@@ -2143,7 +2143,7 @@ public interface JSONB {
      * @return true if the value can be represented as an int32 byte value, false otherwise
      */
     static boolean isInt32ByteValue(int i) {
-        return ((i + 2048) & ~0xFFF) != 0;
+        return ((i + 2048) & ~0xFFF) == 0;
     }
 
     /**
@@ -2320,7 +2320,6 @@ public interface JSONB {
                 bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0
                         ? BC_NULL
                         : BC_DOUBLE_NUM_0;
-                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : BC_DOUBLE_NUM_0;
                 return off + 1;
             }
             return IO.writeDouble(bytes, off, value);
@@ -2542,6 +2541,9 @@ public interface JSONB {
             int symbol = -1;
             if (symbolTable != null) {
                 symbol = symbolTable.getOrdinalByHashCode(hash);
+                if (symbol != -1) {
+                    return writeInt32(bytes, off, -symbol);
+                }
                 if (symbol == -1 && jsonWriterJSONB.symbols != null) {
                     symbol = jsonWriterJSONB.symbols.get(hash);
                 }
@@ -2840,7 +2842,7 @@ public interface JSONB {
          */
         static int stringCapacity(String str) {
             if (str == null) {
-                return 0;
+                return 1;
             }
 
             int strlen = str.length();

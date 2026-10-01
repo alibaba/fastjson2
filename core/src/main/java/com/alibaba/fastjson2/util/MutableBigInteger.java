@@ -314,7 +314,10 @@ final class MutableBigInteger {
         if (limit == index) {
             return 0;
         }
-        return ((q[limit - 2] & LONG_MASK) << 32) + (q[limit - 1] & LONG_MASK);
+        // A quotient smaller than 2^32 may occupy only one allocated word.
+        // <details><summary>中文</summary>小于 2^32 的商可能仅分配一个字。</details>
+        return limit == 1 ? q[0] & LONG_MASK
+                : ((q[limit - 2] & LONG_MASK) << 32) + (q[limit - 1] & LONG_MASK);
     }
 
     private static boolean equals(int[] magic_a, int[] magic_b) {

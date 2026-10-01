@@ -344,7 +344,13 @@ public class JSONBSizeTest {
             assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
             assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
             assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
-            assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
+            if (Float.isNaN(val) || Float.isInfinite(val)) {
+                Assertions.assertThrows(NumberFormatException.class, () -> JSONB.parseObject(bytes, BigDecimal.class));
+            } else {
+                BigDecimal expected = bytes[0] == JSONB.Constants.BC_FLOAT
+                        ? new BigDecimal(Float.toString(val)) : BigDecimal.valueOf((long) val);
+                assertEquals(expected, JSONB.parseObject(bytes, BigDecimal.class));
+            }
 
             assertEquals(Float.toString(val), JSONB.parseObject(bytes, String.class));
         }
@@ -489,7 +495,11 @@ public class JSONBSizeTest {
             assertEquals(Float.valueOf((float) val), JSONB.parseObject(bytes, Float.class));
             assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
             assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
-            assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
+            if (Double.isNaN(val) || Double.isInfinite(val)) {
+                Assertions.assertThrows(NumberFormatException.class, () -> JSONB.parseObject(bytes, BigDecimal.class));
+            } else {
+                assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
+            }
 
             assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
         }

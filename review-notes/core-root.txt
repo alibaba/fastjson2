@@ -1,0 +1,56 @@
+Root package review ledger. COMPLETE means full source inspected, including delegated reader/writer reviews recorded in adjacent ledgers.
+Regression baseline: initial seven CoreReviewRegressionTest tests failed on original root implementation.
+Focused batch: 46 tests passed. Initial full core run: 8047 tests, 2 compatibility failures; corrected null-prefix handling without changing existing assertions.
+
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSON.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONArray.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONB.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONBDump.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONException.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONFactory.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONLargeObjectException.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONObject.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPath.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathCompilerReflect.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathCompilerReflectASM.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathFilter.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathFunction.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathMulti.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathParser.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathSegment.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathSegmentIndex.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathSegmentName.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathSingle.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathSingleIndex.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathSingleName.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathSingleNameDecimal.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathSingleNameInteger.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathSingleNameLong.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathSingleNameString.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathTwoSegment.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathTyped.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathTypedMulti.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathTypedMultiIndexes.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathTypedMultiNames.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathTypedMultiNamesPrefixIndex1.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathTypedMultiNamesPrefixName1.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPathTypedMultiNamesPrefixName2.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONPObject.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONReader.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONReaderASCII.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONReaderJSONB.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONReaderUTF16.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONReaderUTF8.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONSchemaValidException.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONValidator.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONValidException.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONWriter.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONWriterJSONB.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONWriterUTF16.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONWriterUTF16JDK8.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONWriterUTF16JDK8UF.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONWriterUTF16JDK9UF.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/JSONWriterUTF8.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/PropertyNamingStrategy.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/SymbolTable.java
+COMPLETE core/src/main/java/com/alibaba/fastjson2/TypeReference.java

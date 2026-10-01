@@ -125,7 +125,7 @@ final class CSVReaderUTF8<T>
         byte[] buf = new byte[SIZE_512K];
         int end = 0;
         while (end < buf.length) {
-            int cnt = input.read(buf, off, buf.length - off);
+            int cnt = input.read(buf, end, buf.length - end);
             if (cnt == -1) {
                 inputEnd = true;
                 break;
@@ -518,7 +518,9 @@ final class CSVReaderUTF8<T>
                         }
                     } else {
                         byte[] bytes = new byte[valueSize - escapeCount];
-                        int valueEnd = valueStart + valueSize;
+                        // The content starts after the opening quote; exclude the closing quote.
+                        // <details><summary>中文</summary>内容从起始引号之后开始，不包含结束引号。</details>
+                        int valueEnd = valueStart + valueSize + 1;
                         for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
                             byte c = buf[j];
                             bytes[k++] = c;
@@ -598,7 +600,7 @@ final class CSVReaderUTF8<T>
                     }
                 } else {
                     byte[] bytes = new byte[valueSize - escapeCount];
-                    int valueEnd = lineEnd;
+                    int valueEnd = valueStart + valueSize + 1;
                     for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
                         byte c = buf[j];
                         bytes[k++] = c;
@@ -901,7 +903,7 @@ final class CSVReaderUTF8<T>
                         columnStart = valueStart + 1;
                     } else {
                         byte[] bytes = new byte[valueSize - escapeCount];
-                        int valueEnd = valueStart + valueSize;
+                        int valueEnd = valueStart + valueSize + 1;
                         for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
                             byte c = buf[j];
                             bytes[k++] = c;
@@ -938,7 +940,7 @@ final class CSVReaderUTF8<T>
                     columnStart = valueStart + 1;
                 } else {
                     byte[] bytes = new byte[valueSize - escapeCount];
-                    int valueEnd = lineEnd;
+                    int valueEnd = valueStart + valueSize + 1;
                     for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
                         byte c = buf[j];
                         bytes[k++] = c;

@@ -68,7 +68,7 @@ public class ObjectReaderImplValue<I, T>
         }
 
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         T object;

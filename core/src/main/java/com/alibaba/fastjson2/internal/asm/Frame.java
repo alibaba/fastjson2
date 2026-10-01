@@ -381,10 +381,10 @@ class Frame {
                         if (offset == 0) {
                             switch (buffer) {
                                 case "[Lcom/alibaba/fastjson2/writer/FieldWriter;":
-                                    internalName = "com/alibaba/fastjson2/reader/FieldReader";
+                                    internalName = "com/alibaba/fastjson2/writer/FieldWriter";
                                     break;
                                 case "[Lcom/alibaba/fastjson2/reader/FieldReader;":
-                                    internalName = "Lcom/alibaba/fastjson2/reader/FieldReader";
+                                    internalName = "com/alibaba/fastjson2/reader/FieldReader";
                                     break;
                                 default:
                                     break;

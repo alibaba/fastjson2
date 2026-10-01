@@ -192,10 +192,11 @@ public class ByteVector {
     }
 
     /**
-     * Puts an UTF8 string into this byte vector. The byte vector is automatically enlarged if
+     * Puts a string in class-file modified UTF-8 into this byte vector. The byte vector is automatically enlarged if
      * necessary.
+     * <details><summary>中文</summary>按类文件使用的修改版 UTF-8 编码写入字符串，并按需扩容。</details>
      *
-     * @param stringValue a String whose UTF8 encoded length must be less than 65536.
+     * @param stringValue a String whose modified UTF-8 encoded length must be less than 65536.
      */
     // DontCheck(AbbreviationAsWordInName): can't be renamed (for backward binary compatibility).
     public void putUTF8(final String stringValue) {

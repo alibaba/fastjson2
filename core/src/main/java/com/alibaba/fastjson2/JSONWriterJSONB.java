@@ -369,6 +369,9 @@ final class JSONWriterJSONB
         if (ascii) {
             int off = this.off;
             byte[] bytes = this.bytes;
+            if (off + len + 6 > bytes.length) {
+                bytes = grow(off + len + 6);
+            }
             if (len <= STR_ASCII_FIX_LEN) {
                 bytes[off++] = (byte) (len + BC_STR_ASCII_FIX_MIN);
             } else {
@@ -538,6 +541,11 @@ final class JSONWriterJSONB
         int symbol = -1;
         if (symbolTable != null) {
             symbol = symbolTable.getOrdinalByHashCode(hash);
+            if (symbol != -1) {
+                this.off = off - 1;
+                writeTypeNameSymbol(symbol);
+                return;
+            }
             if (symbol == -1 && symbols != null) {
                 symbol = symbols.get(hash);
             }
@@ -551,8 +559,8 @@ final class JSONWriterJSONB
             }
             symbols.put(hash, symbol = symbolIndex++);
         } else {
-            if (off == bytes.length) {
-                bytes = grow(off + 1);
+            if (off + 5 > bytes.length) {
+                bytes = grow(off + 5);
             }
 
             this.off = JSONB.IO.writeInt32(bytes, off, symbol);
@@ -602,7 +610,7 @@ final class JSONWriterJSONB
 
         byte[] bytes = this.bytes;
         int off = this.off;
-        int minCapacity = off + 2 + typeName.length;
+        int minCapacity = off + 6 + typeName.length;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
@@ -903,7 +911,7 @@ final class JSONWriterJSONB
         int size = value.length;
 
         int off = this.off;
-        int minCapacity = off + size * 9 + 5;
+        int minCapacity = off + size * 9 + 6;
         byte[] bytes = this.bytes;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
@@ -931,7 +939,7 @@ final class JSONWriterJSONB
         int size = values.size();
 
         int off = this.off;
-        int minCapacity = off + size * 9 + 5;
+        int minCapacity = off + size * 9 + 6;
         byte[] bytes = this.bytes;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
@@ -969,7 +977,7 @@ final class JSONWriterJSONB
     public void writeFloat(float[] values) {
         int off = this.off;
         byte[] bytes = this.bytes;
-        int minCapacity = off + (values == null ? 1 : (5 + values.length * 5));
+        int minCapacity = off + (values == null ? 1 : (6 + values.length * 5));
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
@@ -990,7 +998,7 @@ final class JSONWriterJSONB
     public void writeDouble(double[] values) {
         int off = this.off;
         byte[] bytes = this.bytes;
-        int minCapacity = off + (values == null ? 1 : (5 + values.length * 9));
+        int minCapacity = off + (values == null ? 1 : (6 + values.length * 9));
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
@@ -1146,7 +1154,7 @@ final class JSONWriterJSONB
         int size = values.size();
 
         int off = this.off;
-        int minCapacity = off + size * 5 + 5;
+        int minCapacity = off + size * 5 + 6;
         byte[] bytes = this.bytes;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
@@ -1395,7 +1403,7 @@ final class JSONWriterJSONB
         }
 
         byte[] valueBytes = value.toByteArray();
-        int minCapacity = off + 5 + valueBytes.length;
+        int minCapacity = off + 6 + valueBytes.length;
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }
@@ -1493,7 +1501,7 @@ final class JSONWriterJSONB
     public void writeBool(boolean[] values) {
         int off = this.off;
         byte[] bytes = this.bytes;
-        int minCapacity = off + (values == null ? 1 : (5 + values.length));
+        int minCapacity = off + (values == null ? 1 : (6 + values.length));
         if (minCapacity > bytes.length) {
             bytes = grow(minCapacity);
         }

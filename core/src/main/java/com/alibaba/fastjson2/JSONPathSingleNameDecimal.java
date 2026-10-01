@@ -25,7 +25,7 @@ final class JSONPathSingleNameDecimal
                     }
 
                     boolean match = nameHashCode == this.nameHashCode;
-                    if (!match && (!jsonReader.isObject()) && !jsonReader.isArray()) {
+                    if (!match) {
                         jsonReader.skipValue();
                         continue;
                     }

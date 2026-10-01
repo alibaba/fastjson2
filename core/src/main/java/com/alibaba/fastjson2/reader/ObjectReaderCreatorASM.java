@@ -155,7 +155,12 @@ public class ObjectReaderCreatorASM
     }
 
     /**
-     * Build a sorted map from hashCode32 to list of hashCode64 values, and return sorted hashCode32 keys.
+     * Groups 64-bit hashes by their folded 32-bit hash and returns sorted switch keys.
+     * <details><summary>中文</summary>按折叠后的 32 位哈希分组 64 位哈希，并返回排序后的 switch 键。</details>
+     *
+     * @param hashCodes the original field-name hashes
+     * @param outMap the destination for collision groups
+     * @return the destination keys in ascending order
      */
     private static int[] buildHashCode32Map(long[] hashCodes, Map<Integer, List<Long>> outMap) {
         for (long hashCode64 : hashCodes) {
@@ -411,7 +416,10 @@ public class ObjectReaderCreatorASM
 
         if (match) {
             for (FieldReader fieldReader : paramFieldReaders) {
-                if (fieldReader.getInitReader() != null) {
+                // NullOnError emits an instance field assignment, but constructor arguments have no instance yet.
+                // <details><summary>中文</summary>NullOnError 会生成实例字段赋值，但解析构造参数时尚未创建实例。</details>
+                if (fieldReader.getInitReader() != null
+                        || (fieldReader.features & JSONReader.Feature.NullOnError.mask) != 0) {
                     match = false;
                     break;
                 }
@@ -531,7 +539,9 @@ public class ObjectReaderCreatorASM
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
-        if (objectClass == null && defaultCreator != null && buildFunction == null) {
+        // Root wrapping and schema validation are implemented by the adapter, not generated readers.
+        // <details><summary>中文</summary>根名称包装和模式校验由适配器实现，生成的读取器不实现这些行为。</details>
+        if (objectClass == null && defaultCreator != null && buildFunction == null && rootName == null && schema == null) {
             boolean allFunction = true;
             for (int i = 0; i < fieldReaders.length; i++) {
                 FieldReader fieldReader = fieldReaders[i];
@@ -543,6 +553,8 @@ public class ObjectReaderCreatorASM
 
             if (allFunction) {
                 BeanInfo beanInfo = new BeanInfo(JSONFactory.getDefaultObjectReaderProvider());
+                beanInfo.readerFeatures = features;
+                beanInfo.typeKey = typeKey;
                 return jitObjectReader(
                         objectClass,
                         objectClass,
@@ -1251,7 +1263,7 @@ public class ObjectReaderCreatorASM
                 // if (hashCode64 == <nameHashCode>) {
                 FieldReader fieldReader = fieldReaderArray[i];
 
-                long hashCode64 = Fnv.hashCode64(fieldReader.fieldName);
+                long hashCode64 = fieldReader.fieldNameHash;
                 mw.lload(HASH_CODE64);
                 mw.visitLdcInsn(hashCode64);
                 mw.lcmp();
@@ -1291,7 +1303,7 @@ public class ObjectReaderCreatorASM
                 // if (hashCode64 == <nameHashCode>) {
                 FieldReader fieldReader = fieldReaderArray[i];
 
-                long hashCode64 = Fnv.hashCode64(fieldReader.fieldName);
+                long hashCode64 = fieldReader.fieldNameHashLCase;
                 mw.lload(HASH_CODE64);
                 mw.visitLdcInsn(hashCode64);
                 mw.lcmp();
@@ -3529,7 +3541,11 @@ public class ObjectReaderCreatorASM
                     methodDesc = "(" + DESC_FIELD_CLASS + ")" + ASMUtils.desc(returnType);
                 }
                 mw.invokevirtual(context.objectType, methodName, methodDesc);
-                if (returnType != void.class) {
+                if (returnType == long.class || returnType == double.class) {
+                    // Wide primitive return values occupy two operand-stack slots.
+                    // <details><summary>中文</summary>宽原始类型返回值占用两个操作数栈槽。</details>
+                    mw.pop2();
+                } else if (returnType != void.class) {
                     mw.pop();
                 }
             }

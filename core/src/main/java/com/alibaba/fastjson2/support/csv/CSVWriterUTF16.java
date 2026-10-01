@@ -84,36 +84,24 @@ final class CSVWriterUTF16
     }
 
     public void writeString(final String str) {
-        if (str == null || str.isEmpty()) {
+        if (str == null) {
             return;
         }
 
         final int len = str.length();
         int escapeCount = 0;
-        boolean comma = false;
-
-        if (str.charAt(0) == '"') {
-            for (int i = 0; i < len; i++) {
-                char ch = str.charAt(i);
-                if (ch == '"') {
-                    escapeCount++;
-                }
-            }
-        } else {
-            for (int i = 0; i < len; i++) {
-                char ch = str.charAt(i);
-                if (ch == ',') {
-                    comma = true;
-                } else if (ch == '"' || ch == '\n' || ch == '\r') {
-                    escapeCount++;
-                }
-            }
-            if (!comma) {
-                escapeCount = 0;
+        boolean quote = alwaysQuoteStrings;
+        for (int i = 0; i < len; i++) {
+            char ch = str.charAt(i);
+            if (ch == '"') {
+                escapeCount++;
+                quote = true;
+            } else if (ch == ',' || ch == '\n' || ch == '\r') {
+                quote = true;
             }
         }
 
-        if (escapeCount == 0 && !comma) {
+        if (!quote) {
             if (len + off >= chars.length) {
                 flush();
                 if (len > chars.length) {
@@ -146,6 +134,9 @@ final class CSVWriterUTF16
                 chars[off++] = ch;
             }
             if (off >= max) {
+                // Publish the local position before flushing a field that spans buffers.
+                // <details><summary>中文</summary>跨缓冲区字段刷新前须保存局部写入位置。</details>
+                this.off = off;
                 flush();
                 off = this.off;
             }
@@ -181,7 +172,7 @@ final class CSVWriterUTF16
     }
 
     public void writeString(byte[] utf8) {
-        if (utf8 == null || utf8.length == 0) {
+        if (utf8 == null) {
             return;
         }
 
@@ -194,13 +185,7 @@ final class CSVWriterUTF16
             return;
         }
 
-        String str = value.toString();
-        int strlen = str.length();
-
-        checkCapacity(24);
-
-        str.getChars(0, strlen, chars, off);
-        off += strlen;
+        writeRaw(value.toString());
     }
 
     public void writeDecimal(long unscaledVal, int scale) {
@@ -246,7 +231,7 @@ final class CSVWriterUTF16
         // "yyyy-MM-dd HH:mm:ss"
         int off = this.off;
         char[] chars = this.chars;
-        if (off + 19 > chars.length) {
+        if (off + 35 > chars.length) {
             flush();
             off = 0;
         }
@@ -260,6 +245,14 @@ final class CSVWriterUTF16
             return;
         }
         checkCapacity(str.length());
+        if (str.length() > chars.length) {
+            try {
+                out.write(str);
+            } catch (IOException e) {
+                throw new JSONException("write csv error", e);
+            }
+            return;
+        }
 
         str.getChars(0, str.length(), this.chars, off);
         off += str.length();

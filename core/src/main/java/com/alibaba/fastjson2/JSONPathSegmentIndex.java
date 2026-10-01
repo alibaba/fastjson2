@@ -549,6 +549,11 @@ final class JSONPathSegmentIndex
 
     @Override
     public String toString() {
+        // Negating MIN_VALUE overflows and would undersize the buffer used by getChars.
+        // <details><summary>中文</summary>最小整数取负会溢出，导致 getChars 使用的缓冲区过小。</details>
+        if (index == Integer.MIN_VALUE) {
+            return "[-2147483648]";
+        }
         int size = (index < 0) ? IOUtils.stringSize(-index) + 1 : IOUtils.stringSize(index);
         byte[] bytes = new byte[size + 2];
         bytes[0] = '[';

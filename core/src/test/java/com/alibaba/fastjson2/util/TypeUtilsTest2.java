@@ -281,7 +281,9 @@ public class TypeUtilsTest2 {
                 "+1A",
                 ".",
                 ".12.",
-                ".12A."
+                ".12A.",
+                ".123E",
+                ".123e"
         };
         for (String string : strings) {
             assertFalse(TypeUtils.isNumber(string));
@@ -305,8 +307,6 @@ public class TypeUtilsTest2 {
                 "+123.",
                 "-123.",
                 ".123",
-                ".123E",
-                ".123e",
         };
         for (String string : trues) {
             assertTrue(TypeUtils.isNumber(string));

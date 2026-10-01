@@ -33,10 +33,16 @@ public class MixinAPITest {
         JSON.addMixInAnnotations(BaseClass.class, MixIn1.class);
         Assert.assertEquals("{\"apple\":1,\"banana\":2}", JSON.toJSONString(base));
         Assert.assertTrue(MixIn1.class == JSON.getMixInAnnotations(BaseClass.class));
+        Assert.assertEquals(1, JSON.parseObject("{\"apple\":1,\"banana\":2}", BaseClass.class).a);
 
         JSON.clearMixInAnnotations();
         Assert.assertTrue(null == JSON.getMixInAnnotations(BaseClass.class));
+        Assert.assertEquals("{\"a\":1,\"b\":2}", JSON.toJSONString(base));
+        Assert.assertEquals(1, JSON.parseObject("{\"a\":1,\"b\":2}", BaseClass.class).a);
 
+        JSON.addMixInAnnotations(BaseClass.class, MixIn1.class);
+        Assert.assertEquals("{\"apple\":1,\"banana\":2}", JSON.toJSONString(base));
         JSON.removeMixInAnnotations(BaseClass.class);
+        Assert.assertEquals("{\"a\":1,\"b\":2}", JSON.toJSONString(base));
     }
 }

@@ -42,7 +42,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.*;
  * <pre>
  * String json = "{\"name\":\"John\", \"age\":30}";
  * try (JSONReader reader = JSONReader.of(json)) {
- *     JSONObject obj = reader.readObject();
+ *     JSONObject obj = reader.readJSONObject();
  *     String name = (String) obj.get("name");
  *     Integer age = (Integer) obj.get("age");
  * }
@@ -173,11 +173,6 @@ public abstract class JSONReader
 
     protected byte[] doubleChars;
 
-    /**
-     * Gets the current character being processed by the reader.
-     *
-     * @return The current character
-     */
     /**
      * Gets the current character being processed by the reader.
      *
@@ -417,15 +412,6 @@ public abstract class JSONReader
      * @return true if the value matches the 5-character pattern, false otherwise
      * @since 2.0.51
      */
-    /**
-     * Checks if the next value matches a 5-character pattern.
-     * This method is used for optimized value matching in JSONB format.
-     *
-     * @param c4 the fourth character to match
-     * @param c5 the fifth character to match
-     * @return true if the value matches the 5-character pattern, false otherwise
-     * @since 2.0.51
-     */
     public boolean nextIfValue4Match5(byte c4, byte c5) {
         return false;
     }
@@ -440,14 +426,6 @@ public abstract class JSONReader
      */
     public abstract boolean nextIfName4Match6(int name1);
 
-    /**
-     * Checks if the next value matches a 6-character pattern.
-     * This method is used for optimized value matching in JSONB format.
-     *
-     * @param name1 the first 4 bytes of the name to match
-     * @return true if the value matches the 6-character pattern, false otherwise
-     * @since 2.0.51
-     */
     /**
      * Checks if the next value matches a 6-character pattern.
      * This method is used for optimized value matching in JSONB format.
@@ -478,14 +456,6 @@ public abstract class JSONReader
      * @return true if the value matches the 7-character pattern, false otherwise
      * @since 2.0.51
      */
-    /**
-     * Checks if the next value matches a 7-character pattern.
-     * This method is used for optimized value matching in JSONB format.
-     *
-     * @param name1 the first 4 bytes of the name to match
-     * @return true if the value matches the 7-character pattern, false otherwise
-     * @since 2.0.51
-     */
     public boolean nextIfValue4Match7(int name1) {
         return false;
     }
@@ -501,15 +471,6 @@ public abstract class JSONReader
      */
     public abstract boolean nextIfName4Match8(int name1, byte c8);
 
-    /**
-     * Checks if the next value matches an 8-character pattern.
-     * This method is used for optimized value matching in JSONB format.
-     *
-     * @param name1 the first 4 bytes of the name to match
-     * @param c8 the eighth character to match
-     * @return true if the value matches the 8-character pattern, false otherwise
-     * @since 2.0.51
-     */
     /**
      * Checks if the next value matches an 8-character pattern.
      * This method is used for optimized value matching in JSONB format.
@@ -543,16 +504,6 @@ public abstract class JSONReader
      * @return true if the value matches the 9-character pattern, false otherwise
      * @since 2.0.51
      */
-    /**
-     * Checks if the next value matches a 9-character pattern.
-     * This method is used for optimized value matching in JSONB format.
-     *
-     * @param name1 the first 4 bytes of the name to match
-     * @param c8 the eighth character to match
-     * @param c9 the ninth character to match
-     * @return true if the value matches the 9-character pattern, false otherwise
-     * @since 2.0.51
-     */
     public boolean nextIfValue4Match9(int name1, byte c8, byte c9) {
         return false;
     }
@@ -575,14 +526,6 @@ public abstract class JSONReader
      * @return true if the value matches the 10-character pattern, false otherwise
      * @since 2.0.51
      */
-    /**
-     * Checks if the next value matches a 10-character pattern.
-     * This method is used for optimized value matching in JSONB format.
-     *
-     * @param name1 the first 8 bytes of the name to match
-     * @return true if the value matches the 10-character pattern, false otherwise
-     * @since 2.0.51
-     */
     public boolean nextIfValue4Match10(long name1) {
         return false;
     }
@@ -597,14 +540,6 @@ public abstract class JSONReader
      */
     public abstract boolean nextIfName4Match11(long name1);
 
-    /**
-     * Checks if the next value matches an 11-character pattern.
-     * This method is used for optimized value matching in JSONB format.
-     *
-     * @param name1 the first 8 bytes of the name to match
-     * @return true if the value matches the 11-character pattern, false otherwise
-     * @since 2.0.51
-     */
     /**
      * Checks if the next value matches an 11-character pattern.
      * This method is used for optimized value matching in JSONB format.
@@ -648,28 +583,10 @@ public abstract class JSONReader
      * @return true if the field name matches the 14-character pattern, false otherwise
      * @since 2.0.51
      */
-    /**
-     * Checks if the next field name matches a 14-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
-     *
-     * @param name1 the first 8 bytes of the name to match
-     * @param name2 the last 4 bytes of the name to match
-     * @return true if the field name matches the 14-character pattern, false otherwise
-     * @since 2.0.51
-     */
     public boolean nextIfName4Match14(long name1, int name2) {
         return false;
     }
 
-    /**
-     * Checks if the next field name matches a 15-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
-     *
-     * @param name1 the first 8 bytes of the name to match
-     * @param name2 the last 4 bytes of the name to match
-     * @return true if the field name matches the 15-character pattern, false otherwise
-     * @since 2.0.51
-     */
     /**
      * Checks if the next field name matches a 15-character pattern.
      * This method is used for optimized field name matching in JSONB format.
@@ -726,15 +643,6 @@ public abstract class JSONReader
      * @return true if the field name matches the 19-character pattern, false otherwise
      * @since 2.0.51
      */
-    /**
-     * Checks if the next field name matches a 19-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
-     *
-     * @param name1 the first 8 bytes of the name to match
-     * @param name2 the last 8 bytes of the name to match
-     * @return true if the field name matches the 19-character pattern, false otherwise
-     * @since 2.0.51
-     */
     public boolean nextIfName4Match19(long name1, long name2) {
         return false;
     }
@@ -751,16 +659,6 @@ public abstract class JSONReader
      */
     public abstract boolean nextIfName4Match20(long name1, long name2, byte name3);
 
-    /**
-     * Checks if the next field name matches a 21-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
-     *
-     * @param name1 the first 8 bytes of the name to match
-     * @param name2 the middle 8 bytes of the name to match
-     * @param name3 the last 4 bytes of the name to match
-     * @return true if the field name matches the 21-character pattern, false otherwise
-     * @since 2.0.51
-     */
     /**
      * Checks if the next field name matches a 21-character pattern.
      * This method is used for optimized field name matching in JSONB format.
@@ -1465,11 +1363,6 @@ public abstract class JSONReader
      *
      * @return true if the current character is '[', false otherwise
      */
-    /**
-     * Checks if the current character represents the start of a JSON array.
-     *
-     * @return true if the current character is '[', false otherwise
-     */
     public boolean isArray() {
         return this.ch == '[';
     }
@@ -1938,7 +1831,7 @@ public abstract class JSONReader
             case JSON_TYPE_INT8:
             case JSON_TYPE_INT16:
             case JSON_TYPE_INT:
-                if (mag1 == 0 && mag2 == 0) {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0) {
                     if (negative) {
                         if (mag3 == Integer.MIN_VALUE) {
                             return mag3;
@@ -2024,7 +1917,7 @@ public abstract class JSONReader
             case JSON_TYPE_INT8:
             case JSON_TYPE_INT16:
             case JSON_TYPE_INT:
-                if (mag1 == 0 && mag2 == 0) {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0) {
                     if (negative) {
                         if (mag3 == Integer.MIN_VALUE) {
                             return mag3;
@@ -2070,7 +1963,11 @@ public abstract class JSONReader
                 return toLong((Map) complex);
             }
             case JSON_TYPE_ARRAY: {
-                return toInt((List) complex);
+                Number value = toNumber((List) complex);
+                if (value != null) {
+                    return value.longValue();
+                }
+                throw error("parseLong error, value : " + complex);
             }
             case JSON_TYPE_BIG_DEC:
                 try {
@@ -2091,10 +1988,11 @@ public abstract class JSONReader
             case JSON_TYPE_INT8:
             case JSON_TYPE_INT16:
             case JSON_TYPE_INT:
-                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                if ((mag0 | mag1 | mag2) == 0 && mag3 >= 0) {
                     return negative ? -mag3 : mag3;
                 }
-                return getNumber().doubleValue();
+                // Fall through to the full-magnitude conversion for integers outside the fast range.
+                // <details><summary>中文</summary>超出快速范围的整数继续使用完整精度转换。</details>
             case JSON_TYPE_DEC:
             case JSON_TYPE_INT64:
             case JSON_TYPE_FLOAT:
@@ -2381,6 +2279,9 @@ public abstract class JSONReader
     public LocalDateTime readLocalDateTime() {
         if (isInt()) {
             long millis = readInt64Value();
+            if (context.formatUnixTime) {
+                millis *= 1000L;
+            }
             Instant instant = Instant.ofEpochMilli(millis);
             ZonedDateTime zdt = instant.atZone(context.getZoneId());
             return zdt.toLocalDateTime();
@@ -2399,7 +2300,11 @@ public abstract class JSONReader
                 || context.formatyyyyMMddhhmmssT19
                 || context.formatyyyyMMdd8
                 || context.formatISO8601) {
-            int len = getStringLength();
+            // The raw prefix includes the quote; recognize both native byte orders before fixed-width date parsing.
+            // <details><summary>中文</summary>原始前缀包含引号；在定长日期解析前识别两种字节序的 .NET 日期前缀。</details>
+            int prefix = getRawInt();
+            boolean dotnetDate = (prefix & 0xFFFFFF00) == 0x61442F00 || (prefix & 0x00FFFFFF) == 0x002F4461;
+            int len = dotnetDate ? 0 : getStringLength();
             LocalDate localDate;
             switch (len) {
                 case 8:
@@ -2509,7 +2414,7 @@ public abstract class JSONReader
             String dotnetDateStr = str.substring(6, str.length() - 2);
             int i = dotnetDateStr.indexOf('+');
             if (i == -1) {
-                i = dotnetDateStr.indexOf('-');
+                i = dotnetDateStr.indexOf('-', 1);
             }
             if (i != -1) {
                 dotnetDateStr = dotnetDateStr.substring(0, i);
@@ -2678,6 +2583,9 @@ public abstract class JSONReader
     public Date readDate() {
         if (isInt()) {
             long millis = readInt64Value();
+            if (context.formatUnixTime) {
+                millis *= 1000L;
+            }
             return new Date(millis);
         }
 
@@ -2849,7 +2757,11 @@ public abstract class JSONReader
                 || context.formatyyyyMMddhhmmssT19
                 || context.formatyyyyMMdd8
                 || context.formatISO8601) {
-            int len = getStringLength();
+            // The raw prefix includes the quote; recognize both native byte orders before fixed-width date parsing.
+            // <details><summary>中文</summary>原始前缀包含引号；在定长日期解析前识别两种字节序的 .NET 日期前缀。</details>
+            int prefix = getRawInt();
+            boolean dotnetDate = (prefix & 0xFFFFFF00) == 0x61442F00 || (prefix & 0x00FFFFFF) == 0x002F4461;
+            int len = dotnetDate ? 0 : getStringLength();
             LocalDateTime ldt = null;
             LocalDate localDate;
             switch (len) {
@@ -3007,7 +2919,7 @@ public abstract class JSONReader
             String dotnetDateStr = str.substring(6, str.length() - 2);
             int i = dotnetDateStr.indexOf('+');
             if (i == -1) {
-                i = dotnetDateStr.indexOf('-');
+                i = dotnetDateStr.indexOf('-', 1);
             }
             if (i != -1) {
                 dotnetDateStr = dotnetDateStr.substring(0, i);
@@ -3118,13 +3030,11 @@ public abstract class JSONReader
      *
      * @return The decoded byte array
      */
-    /**
-     * Reads a Base64 encoded string from JSON data and decodes it to bytes.
-     *
-     * @return The decoded byte array
-     */
     public byte[] readBase64() {
         String str = readString();
+        if (str == null) {
+            return null;
+        }
         if (str != null) {
             String prefix = "data:image/";
             int p0, p1;
@@ -3224,7 +3134,7 @@ public abstract class JSONReader
         String str = readString();
         if (str == null || str.isEmpty()) {
             wasNull = true;
-            return '\0';
+            return null;
         }
         return str.charAt(0);
     }
@@ -4231,6 +4141,9 @@ public abstract class JSONReader
         if (number instanceof BigInteger) {
             return (BigInteger) number;
         }
+        if (number instanceof BigDecimal) {
+            return ((BigDecimal) number).toBigInteger();
+        }
         return BigInteger.valueOf(number.longValue());
     }
 
@@ -4241,7 +4154,7 @@ public abstract class JSONReader
 
         switch (valueType) {
             case JSON_TYPE_INT: {
-                if (mag1 == 0 && mag2 == 0 && mag3 >= 0) {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
                     return BigDecimal.valueOf(negative ? -mag3 : mag3);
                 }
                 int[] mag;
@@ -4300,9 +4213,9 @@ public abstract class JSONReader
                 }
 
                 if (exponent != 0) {
-                    String doubleStr = decimal.toPlainString() + "E" + exponent;
-                    double doubleValue = Double.parseDouble(doubleStr);
-                    return toBigDecimal(doubleValue);
+                    // Apply the exponent in decimal arithmetic to retain all significant digits.
+                    // <details><summary>中文</summary>使用十进制运算应用指数，保留全部有效数字。</details>
+                    return decimal.scaleByPowerOfTen(exponent);
                 }
 
                 return decimal;
@@ -4572,7 +4485,7 @@ public abstract class JSONReader
     protected final long toLong(Map map) {
         Object val = map.get("val");
         if (val instanceof Number) {
-            return ((Number) val).intValue();
+            return ((Number) val).longValue();
         }
         throw error("parseLong error, value : " + map);
     }
@@ -5794,6 +5707,11 @@ public abstract class JSONReader
          * @param format The date format pattern to set
          */
         public void setDateFormat(String format) {
+            formatyyyyMMddhhmmss19 = false;
+            formatyyyyMMddhhmmssT19 = false;
+            formatyyyyMMdd8 = false;
+            yyyyMMddhhmm16 = false;
+            formatComplex = false;
             if (format != null) {
                 if (format.isEmpty()) {
                     format = null;
@@ -5834,6 +5752,8 @@ public abstract class JSONReader
                         break;
                     case "yyyy-MM-dd HH:mm":
                         yyyyMMddhhmm16 = true;
+                        hasDay = true;
+                        hasHour = true;
                         break;
                     default:
                         hasDay = format.indexOf('d') != -1;
@@ -5958,6 +5878,9 @@ public abstract class JSONReader
          * @param locale The Locale to set
          */
         public void setLocale(Locale locale) {
+            if (!Objects.equals(this.locale, locale)) {
+                dateFormatter = null;
+            }
             this.locale = locale;
         }
 
@@ -6118,14 +6041,15 @@ public abstract class JSONReader
      * <p>Example usage:
      * <pre>
      * // Enable FieldBased feature for this reader only
-     * try (JSONReader reader = JSONReader.of(json, JSONReader.Feature.FieldBased)) {
+     * try (JSONReader reader = JSONReader.of(json, JSONFactory.createReadContext(JSONReader.Feature.FieldBased))) {
      *     MyObject obj = reader.read(MyObject.class);
      * }
      *
      * // Enable multiple features
      * try (JSONReader reader = JSONReader.of(json,
+     *         JSONFactory.createReadContext(
      *         JSONReader.Feature.FieldBased,
-     *         JSONReader.Feature.TrimString)) {
+     *         JSONReader.Feature.TrimString))) {
      *     MyObject obj = reader.read(MyObject.class);
      * }
      *
@@ -6360,8 +6284,9 @@ public abstract class JSONReader
         Base64StringAsByteArray(1 << 19),
 
         /**
-         * Feature that determines whether to ignore checking for resource cleanup.
-         * When enabled, the deserializer will not perform checks to ensure proper resource cleanup.
+         * Skips the check that the complete text input has been consumed after parsing a value.
+         * This permits trailing content; it does not change resource cleanup.
+         * <details><summary>中文</summary>跳过解析后的输入结束检查，允许尾随内容，不影响资源释放。</details>
          *
          * <p>By default, this feature is disabled.</p>
          *

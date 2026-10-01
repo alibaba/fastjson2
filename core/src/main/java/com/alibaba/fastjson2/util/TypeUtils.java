@@ -332,7 +332,10 @@ public class TypeUtils {
                 int expVal = 0;
                 int reallyBig = Integer.MAX_VALUE / 10;
                 boolean expOverflow = false;
-                switch (in[++i]) {
+                if (++i == end) {
+                    break parseNumber;
+                }
+                switch (in[i]) {
                     case '-':
                         expSign = -1;
                     case '+':
@@ -364,7 +367,7 @@ public class TypeUtils {
                 }
             }
 
-            if (i < end && (i != end - 1)) {
+            if (i < end && (i != end - 1 || (in[i] != 'f' && in[i] != 'F' && in[i] != 'd' && in[i] != 'D'))) {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
@@ -465,7 +468,10 @@ public class TypeUtils {
                 int expVal = 0;
                 int reallyBig = Integer.MAX_VALUE / 10;
                 boolean expOverflow = false;
-                switch (in[++i]) {
+                if (++i == end) {
+                    break parseNumber;
+                }
+                switch (in[i]) {
                     case '-':
                         expSign = -1;
                     case '+':
@@ -498,7 +504,7 @@ public class TypeUtils {
                 }
             }
 
-            if (i < end && (i != end - 1)) {
+            if (i < end && (i != end - 1 || (in[i] != 'f' && in[i] != 'F' && in[i] != 'd' && in[i] != 'D'))) {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
@@ -599,7 +605,10 @@ public class TypeUtils {
                 int expVal = 0;
                 int reallyBig = Integer.MAX_VALUE / 10;
                 boolean expOverflow = false;
-                switch (in[++i]) {
+                if (++i == end) {
+                    break parseNumber;
+                }
+                switch (in[i]) {
                     case '-':
                         expSign = -1;
                     case '+':
@@ -632,7 +641,7 @@ public class TypeUtils {
                 }
             }
 
-            if (i < end && (i != end - 1)) {
+            if (i < end && (i != end - 1 || (in[i] != 'f' && in[i] != 'F' && in[i] != 'd' && in[i] != 'D'))) {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
@@ -733,7 +742,10 @@ public class TypeUtils {
                 int expVal = 0;
                 int reallyBig = Integer.MAX_VALUE / 10;
                 boolean expOverflow = false;
-                switch (in[++i]) {
+                if (++i == end) {
+                    break parseNumber;
+                }
+                switch (in[i]) {
                     case '-':
                         expSign = -1;
                     case '+':
@@ -765,7 +777,7 @@ public class TypeUtils {
                 }
             }
 
-            if (i < end && (i != end - 1)) {
+            if (i < end && (i != end - 1 || (in[i] != 'f' && in[i] != 'F' && in[i] != 'd' && in[i] != 'D'))) {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
@@ -1986,14 +1998,15 @@ public class TypeUtils {
     }
 
     /**
-     * decimal is integer, check has non-zero small
+     * Tests whether a decimal has no fractional part, including values with negative scale.
+     * <details><summary>中文</summary>判断十进制数是否没有小数部分，包括负标度的数值。</details>
      *
      * @param decimal the BigDecimal value to check
      * @return true if the decimal is an integer, false otherwise
      */
     public static boolean isInteger(BigDecimal decimal) {
         int scale = decimal.scale();
-        if (scale == 0) {
+        if (scale <= 0) {
             return true;
         }
 
@@ -2001,6 +2014,9 @@ public class TypeUtils {
         if (precision < 20) {
             if (FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
                 long intCompact = UNSAFE.getLong(decimal, FIELD_DECIMAL_INT_COMPACT_OFFSET);
+                if (intCompact == Long.MIN_VALUE) {
+                    return decimal.stripTrailingZeros().scale() <= 0;
+                }
                 switch (scale) {
                     case 1:
                         return intCompact % 10 == 0;
@@ -2026,7 +2042,7 @@ public class TypeUtils {
             }
         }
 
-        return decimal.stripTrailingZeros().scale() == 0;
+        return decimal.stripTrailingZeros().scale() <= 0;
     }
 
     public static BigInteger toBigInteger(Object value) {
@@ -2283,7 +2299,7 @@ public class TypeUtils {
                 }
             }
             int scale = 0;
-            if (unscaleValue >= 0 && dot <= 1) {
+            if (unscaleValue >= 0 && dot <= 1 && len > dot + (negative ? 1 : 0)) {
                 if (negative) {
                     unscaleValue = -unscaleValue;
                 }
@@ -2336,7 +2352,7 @@ public class TypeUtils {
                 }
             }
             int scale = 0;
-            if (unscaleValue >= 0 && dot <= 1) {
+            if (unscaleValue >= 0 && dot <= 1 && len > dot + (negative ? 1 : 0)) {
                 if (negative) {
                     unscaleValue = -unscaleValue;
                 }
@@ -2462,7 +2478,7 @@ public class TypeUtils {
         }
 
         if (value instanceof Number) {
-            return (byte) ((Number) value).shortValue();
+            return ((Number) value).shortValue();
         }
 
         if (value instanceof String) {
@@ -3297,294 +3313,119 @@ public class TypeUtils {
         if (str == null || str.isEmpty()) {
             return false;
         }
-        char ch = str.charAt(0);
-        int offset;
-        boolean sign = ch == '-' || ch == '+';
-        if (sign) {
-            if (str.length() == 1) {
-                return false;
-            }
-            ch = str.charAt(1);
-            offset = 1;
-        } else {
-            if (ch == '.') {
-                if (str.length() == 1) {
-                    return false;
-                }
-
-                offset = 1;
-            } else {
-                offset = 0;
-            }
-        }
-
+        int i = 0;
         int end = str.length();
-        boolean dot = ch == '.';
-        boolean space = false;
-        boolean num = false;
-        if (!dot && (ch >= '0' && ch <= '9')) {
-            num = true;
-            do {
-                if (offset < end) {
-                    ch = str.charAt(offset++);
-                } else {
-                    return true;
-                }
-            } while (!space && ch >= '0' && ch <= '9');
+        if (str.charAt(i) == '-' || str.charAt(i) == '+') {
+            i++;
         }
-
-        boolean small = false;
-        if (ch == '.') {
-            small = true;
-            if (offset < end) {
-                ch = str.charAt(offset++);
-            } else {
-                return true;
-            }
-
-            if (ch >= '0' && ch <= '9') {
-                do {
-                    if (offset < end) {
-                        ch = str.charAt(offset++);
-                    } else {
-                        return true;
-                    }
-                } while (!space && ch >= '0' && ch <= '9');
+        int digits = 0;
+        while (i < end && str.charAt(i) >= '0' && str.charAt(i) <= '9') {
+            i++;
+            digits++;
+        }
+        if (i < end && str.charAt(i) == '.') {
+            i++;
+            while (i < end && str.charAt(i) >= '0' && str.charAt(i) <= '9') {
+                i++;
+                digits++;
             }
         }
-
-        if (!num && !small) {
+        if (digits == 0) {
             return false;
         }
-
-        if (ch == 'e' || ch == 'E') {
-            if (offset == end) {
-                return true;
+        if (i < end && (str.charAt(i) == 'e' || str.charAt(i) == 'E')) {
+            i++;
+            if (i < end && (str.charAt(i) == '-' || str.charAt(i) == '+')) {
+                i++;
             }
-
-            ch = str.charAt(offset++);
-
-            boolean eSign = false;
-            if (ch == '+' || ch == '-') {
-                eSign = true;
-                if (offset < end) {
-                    ch = str.charAt(offset++);
-                } else {
-                    return false;
-                }
+            int exponentStart = i;
+            while (i < end && str.charAt(i) >= '0' && str.charAt(i) <= '9') {
+                i++;
             }
-
-            if (ch >= '0' && ch <= '9') {
-                do {
-                    if (offset < end) {
-                        ch = str.charAt(offset++);
-                    } else {
-                        return true;
-                    }
-                } while (ch >= '0' && ch <= '9');
-            } else if (eSign) {
+            if (i == exponentStart) {
                 return false;
             }
         }
-
-        return false;
+        return i == end;
     }
-
     public static boolean isNumber(byte[] str, int off, int len) {
         if (str == null || len == 0) {
             return false;
         }
-
-        char ch = (char) str[off];
-        int offset;
-        boolean sign = ch == '-' || ch == '+';
-        if (sign) {
-            if (len == 1) {
-                return false;
-            }
-            ch = (char) str[off + 1];
-            offset = off + 1;
-        } else {
-            if (ch == '.') {
-                if (len == 1) {
-                    return false;
-                }
-
-                offset = off + 1;
-            } else {
-                offset = off;
-            }
-        }
-
+        int i = off;
         int end = off + len;
-        boolean dot = ch == '.';
-        boolean num = false;
-        if (!dot && (ch >= '0' && ch <= '9')) {
-            num = true;
-            do {
-                if (offset < end) {
-                    ch = (char) str[offset++];
-                } else {
-                    return true;
-                }
-            } while (ch >= '0' && ch <= '9');
+        if (str[i] == '-' || str[i] == '+') {
+            i++;
         }
-
-        boolean small = false;
-        if (ch == '.') {
-            small = true;
-            if (offset < end) {
-                ch = (char) str[offset++];
-            } else {
-                return true;
-            }
-
-            if (ch >= '0' && ch <= '9') {
-                do {
-                    if (offset < end) {
-                        ch = (char) str[offset++];
-                    } else {
-                        return true;
-                    }
-                } while (ch >= '0' && ch <= '9');
+        int digits = 0;
+        while (i < end && str[i] >= '0' && str[i] <= '9') {
+            i++;
+            digits++;
+        }
+        if (i < end && str[i] == '.') {
+            i++;
+            while (i < end && str[i] >= '0' && str[i] <= '9') {
+                i++;
+                digits++;
             }
         }
-
-        if (!num && !small) {
+        if (digits == 0) {
             return false;
         }
-
-        if (ch == 'e' || ch == 'E') {
-            if (offset == end) {
-                return true;
+        if (i < end && (str[i] == 'e' || str[i] == 'E')) {
+            i++;
+            if (i < end && (str[i] == '-' || str[i] == '+')) {
+                i++;
             }
-
-            ch = (char) str[offset++];
-
-            boolean eSign = false;
-            if (ch == '+' || ch == '-') {
-                eSign = true;
-                if (offset < end) {
-                    ch = (char) str[offset++];
-                } else {
-                    return false;
-                }
+            int exponentStart = i;
+            while (i < end && str[i] >= '0' && str[i] <= '9') {
+                i++;
             }
-
-            if (ch >= '0' && ch <= '9') {
-                do {
-                    if (offset < end) {
-                        ch = (char) str[offset++];
-                    } else {
-                        return true;
-                    }
-                } while (ch >= '0' && ch <= '9');
-            } else if (eSign) {
+            if (i == exponentStart) {
                 return false;
             }
         }
-
-        return false;
+        return i == end;
     }
-
     public static boolean isNumber(char[] str, int off, int len) {
         if (str == null || len == 0) {
             return false;
         }
-
-        char ch = str[off];
-        int offset;
-        boolean sign = ch == '-' || ch == '+';
-        if (sign) {
-            if (len == 1) {
-                return false;
-            }
-            ch = str[off + 1];
-            offset = off + 1;
-        } else {
-            if (ch == '.') {
-                if (len == 1) {
-                    return false;
-                }
-
-                offset = off + 1;
-            } else {
-                offset = off;
-            }
-        }
-
+        int i = off;
         int end = off + len;
-        boolean dot = ch == '.';
-        boolean space = false;
-        boolean num = false;
-        if (!dot && (ch >= '0' && ch <= '9')) {
-            num = true;
-            do {
-                if (offset < end) {
-                    ch = str[offset++];
-                } else {
-                    return true;
-                }
-            } while (!space && ch >= '0' && ch <= '9');
+        if (str[i] == '-' || str[i] == '+') {
+            i++;
         }
-
-        boolean small = false;
-        if (ch == '.') {
-            small = true;
-            if (offset < end) {
-                ch = str[offset++];
-            } else {
-                return true;
-            }
-
-            if (ch >= '0' && ch <= '9') {
-                do {
-                    if (offset < end) {
-                        ch = str[offset++];
-                    } else {
-                        return true;
-                    }
-                } while (!space && ch >= '0' && ch <= '9');
+        int digits = 0;
+        while (i < end && str[i] >= '0' && str[i] <= '9') {
+            i++;
+            digits++;
+        }
+        if (i < end && str[i] == '.') {
+            i++;
+            while (i < end && str[i] >= '0' && str[i] <= '9') {
+                i++;
+                digits++;
             }
         }
-
-        if (!num && !small) {
+        if (digits == 0) {
             return false;
         }
-
-        if (ch == 'e' || ch == 'E') {
-            if (offset == end) {
-                return true;
+        if (i < end && (str[i] == 'e' || str[i] == 'E')) {
+            i++;
+            if (i < end && (str[i] == '-' || str[i] == '+')) {
+                i++;
             }
-
-            ch = str[offset++];
-
-            boolean eSign = false;
-            if (ch == '+' || ch == '-') {
-                eSign = true;
-                if (offset < end) {
-                    ch = str[offset++];
-                } else {
-                    return false;
-                }
+            int exponentStart = i;
+            while (i < end && str[i] >= '0' && str[i] <= '9') {
+                i++;
             }
-
-            if (ch >= '0' && ch <= '9') {
-                do {
-                    if (offset < end) {
-                        ch = str[offset++];
-                    } else {
-                        return true;
-                    }
-                } while (ch >= '0' && ch <= '9');
-            } else if (eSign) {
+            if (i == exponentStart) {
                 return false;
             }
         }
-
-        return false;
+        return i == end;
     }
-
     public static boolean isUUID(String str) {
         if (str == null) {
             return false;
@@ -3634,7 +3475,7 @@ public class TypeUtils {
         int strlen = str.length();
         {
             final int len = strlen - off;
-            if (len < 7 || len > 25) {
+            if (len < 7 || len > 15 || str.charAt(strlen - 1) == '.') {
                 return false;
             }
         }
@@ -3700,99 +3541,55 @@ public class TypeUtils {
     }
 
     public static boolean validateIPv6(String str) {
-        if (str == null) {
+        if (str == null || str.length() < 2 || str.length() > 45) {
             return false;
         }
-
-        final int len = str.length();
-        if (len < 2 || len > 39) {
-            return false;
+        int length = str.length();
+        int index = 0;
+        int groups = 0;
+        boolean compressed = false;
+        if (str.charAt(0) == ':') {
+            if (str.charAt(1) != ':') {
+                return false;
+            }
+            compressed = true;
+            index = 2;
         }
-
-        int start = 0;
-        int colonCount = 0;
-        for (int i = 0; i < len; i++) {
-            char ch = str.charAt(i);
-            if (ch == '.') {
-                boolean ipV4 = validateIPv4(str, start);
-                if (!ipV4) {
+        while (index < length) {
+            int start = index;
+            while (index < length && str.charAt(index) != ':') {
+                char ch = str.charAt(index);
+                if (ch == '.') {
+                    if (!validateIPv4(str, start)) {
+                        return false;
+                    }
+                    groups += 2;
+                    return compressed ? groups < 8 : groups == 8;
+                }
+                if (!(ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'f' || ch >= 'A' && ch <= 'F')) {
                     return false;
                 }
+                index++;
+            }
+            if (index == start || index - start > 4 || ++groups > 8) {
+                return false;
+            }
+            if (index == length) {
                 break;
             }
-            if (ch == ':' || i == len - 1) {
-                int end = ch == ':' ? i : i + 1;
-                int n = end - start;
-
-                char c0, c1, c2, c3;
-                switch (n) {
-                    case 0:
-                        break;
-                    case 1:
-                        c0 = str.charAt(end - 1);
-                        if (!(c0 >= '0' && c0 <= '9' || (c0 >= 'A' && c0 <= 'F') || (c0 >= 'a' && c0 <= 'f'))) {
-                            return false;
-                        }
-                        break;
-                    case 2:
-                        c0 = str.charAt(end - 2);
-                        c1 = str.charAt(end - 1);
-
-                        if (!(c0 >= '0' && c0 <= '9' || (c0 >= 'A' && c0 <= 'F') || (c0 >= 'a' && c0 <= 'f'))) {
-                            return false;
-                        }
-                        if (!(c1 >= '0' && c1 <= '9' || (c1 >= 'A' && c1 <= 'F') || (c1 >= 'a' && c1 <= 'f'))) {
-                            return false;
-                        }
-                        break;
-                    case 3:
-                        c0 = str.charAt(end - 3);
-                        c1 = str.charAt(end - 2);
-                        c2 = str.charAt(end - 1);
-
-                        if (!(c0 >= '0' && c0 <= '9' || (c0 >= 'A' && c0 <= 'F') || (c0 >= 'a' && c0 <= 'f'))) {
-                            return false;
-                        }
-                        if (!(c1 >= '0' && c1 <= '9' || (c1 >= 'A' && c1 <= 'F') || (c1 >= 'a' && c1 <= 'f'))) {
-                            return false;
-                        }
-                        if (!(c2 >= '0' && c2 <= '9' || (c2 >= 'A' && c2 <= 'F') || (c2 >= 'a' && c2 <= 'f'))) {
-                            return false;
-                        }
-                        break;
-                    case 4:
-                        c0 = str.charAt(end - 4);
-                        c1 = str.charAt(end - 3);
-                        c2 = str.charAt(end - 2);
-                        c3 = str.charAt(end - 1);
-
-                        if (!(c0 >= '0' && c0 <= '9' || (c0 >= 'A' && c0 <= 'F') || (c0 >= 'a' && c0 <= 'f'))) {
-                            return false;
-                        }
-                        if (!(c1 >= '0' && c1 <= '9' || (c1 >= 'A' && c1 <= 'F') || (c1 >= 'a' && c1 <= 'f'))) {
-                            return false;
-                        }
-                        if (!(c2 >= '0' && c2 <= '9' || (c2 >= 'A' && c2 <= 'F') || (c2 >= 'a' && c2 <= 'f'))) {
-                            return false;
-                        }
-                        if (!(c3 >= '0' && c3 <= '9' || (c3 >= 'A' && c3 <= 'F') || (c3 >= 'a' && c3 <= 'f'))) {
-                            return false;
-                        }
-                        break;
-                    default:
-                        return false;
+            if (++index == length) {
+                return false;
+            }
+            if (str.charAt(index) == ':') {
+                if (compressed) {
+                    return false;
                 }
-
-                if (ch == ':') {
-                    colonCount++;
-                    start = i + 1;
-                }
+                compressed = true;
+                index++;
             }
         }
-
-        return colonCount > 0 && colonCount < 8;
+        return compressed ? groups < 8 : groups == 8;
     }
-
     private static final int P_D = 53; // Double.PRECISION
     private static final int Q_MIN_D = -1074; //(Double.MIN_EXPONENT - (P_D - 1));
     private static final int Q_MAX_D = 971; // (Double.MAX_EXPONENT - (P_D - 1));

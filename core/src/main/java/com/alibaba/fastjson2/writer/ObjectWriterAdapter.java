@@ -618,7 +618,7 @@ public class ObjectWriterAdapter<T>
             Object fieldValue = fieldWriter.getFieldValue(object);
             String format = fieldWriter.format;
             Class fieldClass = fieldWriter.fieldClass;
-            if (format != null) {
+            if (format != null && fieldValue != null) {
                 if (fieldClass == Date.class) {
                     if ("millis".equals(format)) {
                         fieldValue = ((Date) fieldValue).getTime();
@@ -634,6 +634,9 @@ public class ObjectWriterAdapter<T>
 
             long fieldFeatures = fieldWriter.features;
             if ((fieldFeatures & FieldInfo.UNWRAPPED_MASK) != 0) {
+                if (fieldValue == null) {
+                    continue;
+                }
                 if (fieldValue instanceof Map) {
                     jsonObject.putAll((Map) fieldValue);
                     continue;

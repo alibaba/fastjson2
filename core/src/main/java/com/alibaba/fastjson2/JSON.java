@@ -967,12 +967,12 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns
+     * Parses the json string as {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
-     * @param clazz the specified class of {@link T}
-     * @return {@link T} or {@code null}
+     * @param clazz the specified class of {@code T}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1001,14 +1001,14 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns {@code null}
+     * Parses the json string as {@code T}. Returns {@code null}
      * if received {@link String} is {@code null} or empty or its content is null.
      *
      * @param text the specified string to be parsed
-     * @param clazz the specified class of {@link T}
+     * @param clazz the specified class of {@code T}
      * @param filter the specified filter is applied to parsing
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1043,15 +1043,15 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns {@code null}
+     * Parses the json string as {@code T}. Returns {@code null}
      * if received {@link String} is {@code null} or empty or its content is null.
      *
      * @param text the specified string to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param format the specified date format
      * @param filters the specified filters is applied to parsing
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1094,12 +1094,12 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns
+     * Parses the json string as {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
-     * @param type the specified actual type of {@link T}
-     * @return {@link T} or {@code null}
+     * @param type the specified actual type of {@code T}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1128,13 +1128,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns {@code null}
+     * Parses the json string as {@code T}. Returns {@code null}
      * if received {@link String} is {@code null} or empty or its content is null.
      *
      * @param text the specified string to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param context the specified custom context
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      * @since 2.0.52
      */
@@ -1159,12 +1159,12 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns
+     * Parses the json string as {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
-     * @param type the specified actual type of {@link T}
-     * @return {@link T} or {@code null}
+     * @param type the specified actual type of {@code T}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      * @since 2.0.34
      */
@@ -1189,12 +1189,12 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns
+     * Parses the json string as {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
      * @param types the specified actual parameter types
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      * @see MultiType
      * @see JSON#parseObject(String, Type)
@@ -1204,13 +1204,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns
+     * Parses the json string as {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
      * @param typeReference the specified actual type
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1237,14 +1237,14 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns
+     * Parses the json string as {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
      * @param typeReference the specified actual type
      * @param filter the specified filter is applied to parsing
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1276,13 +1276,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns
+     * Parses the json string as {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
-     * @param clazz the specified class of {@link T}
+     * @param clazz the specified class of {@code T}
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1308,15 +1308,15 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns {@code null}
+     * Parses the json string as {@code T}. Returns {@code null}
      * if received {@link String} is {@code null} or empty or length is 0.
      *
      * @param text the specified string to be parsed
      * @param offset the starting index of string
      * @param length the specified length of string
-     * @param clazz the specified class of {@link T}
+     * @param clazz the specified class of {@code T}
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1342,13 +1342,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns
+     * Parses the json string as {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
-     * @param clazz the specified class of {@link T}
+     * @param clazz the specified class of {@code T}
      * @param context the specified custom context
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      * @throws NullPointerException If received context is null
      */
@@ -1374,14 +1374,14 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns
+     * Parses the json string as {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
-     * @param clazz the specified class of {@link T}
+     * @param clazz the specified class of {@code T}
      * @param format the specified date format
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1411,13 +1411,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns
+     * Parses the json string as {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
      * @param type the specified actual type
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1442,14 +1442,14 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns
+     * Parses the json string as {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
      * @param type the specified actual type
      * @param filter the specified filter is applied to parsing
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1474,14 +1474,14 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns
+     * Parses the json string as {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
      * @param type the specified actual type
      * @param format the specified date format
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1509,7 +1509,7 @@ public interface JSON {
     }
 
     /**
-     * Parses the json char array as {@link T}. Returns {@code null}
+     * Parses the json char array as {@code T}. Returns {@code null}
      * if received char array is {@code null} or empty or length is 0.
      *
      * @param chars the specified char array to be parsed
@@ -1517,7 +1517,7 @@ public interface JSON {
      * @param offset the starting index of array
      * @param length the specified length of array
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      * @since 2.0.13
      */
@@ -1543,12 +1543,12 @@ public interface JSON {
     }
 
     /**
-     * Parses the json char array as {@link T}. Returns
+     * Parses the json char array as {@code T}. Returns
      * {@code null} if received char array is {@code null} or empty.
      *
      * @param chars the specified char array to be parsed
-     * @param clazz the specified class of {@link T}
-     * @return {@link T} or {@code null}
+     * @param clazz the specified class of {@code T}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1573,7 +1573,7 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns {@code null}
+     * Parses the json byte array as {@code T}. Returns {@code null}
      * if received byte array is {@code null} or empty or length is 0.
      *
      * @param bytes the specified UTF8 text to be parsed
@@ -1581,7 +1581,7 @@ public interface JSON {
      * @param length the specified length of array
      * @param type the specified actual type
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      * @since 2.0.13
      */
@@ -1607,12 +1607,12 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns
+     * Parses the json byte array as {@code T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
      * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual type of {@link T}
-     * @return {@link T} or {@code null}
+     * @param type the specified actual type of {@code T}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1637,12 +1637,12 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns
+     * Parses the json byte array as {@code T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
      * @param bytes the specified UTF8 text to be parsed
-     * @param clazz the specified class of {@link T}
-     * @return {@link T} or {@code null}
+     * @param clazz the specified class of {@code T}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1671,14 +1671,14 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns
+     * Parses the json byte array as {@code T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
      * @param bytes the specified UTF8 text to be parsed
-     * @param clazz the specified class of {@link T}
+     * @param clazz the specified class of {@code T}
      * @param filter the specified filter is applied to parsing
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1709,13 +1709,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns
+     * Parses the json byte array as {@code T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
      * @param bytes the specified UTF8 text to be parsed
-     * @param clazz the specified class of {@link T}
+     * @param clazz the specified class of {@code T}
      * @param context the specified custom context
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      * @throws NullPointerException If received context is null
      */
@@ -1745,7 +1745,7 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns
+     * Parses the json byte array as {@code T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
      * @param bytes the specified UTF8 text to be parsed
@@ -1753,7 +1753,7 @@ public interface JSON {
      * @param format the specified date format
      * @param filters the specified filters is applied to parsing
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     static <T> T parseObject(
@@ -1779,13 +1779,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@link T}. Returns
+     * Parses the json string as {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param bytes the specified UTF8 text to be parsed
      * @param type the specified actual type
      * @param context the specified custom context
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      * @throws NullPointerException If received context is null
      */
@@ -1811,13 +1811,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns
+     * Parses the json byte array as {@code T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
      * @param bytes the specified UTF8 text to be parsed
-     * @param clazz the specified class of {@link T}
+     * @param clazz the specified class of {@code T}
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1842,13 +1842,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns
+     * Parses the json byte array as {@code T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
      * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1873,13 +1873,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns
+     * Parses the json byte array as {@code T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
      * @param chars the specified chars
-     * @param objectClass the specified actual type of {@link T}
+     * @param objectClass the specified actual type of {@code T}
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1904,13 +1904,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns
+     * Parses the json byte array as {@code T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
      * @param chars the specified chars
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1935,14 +1935,14 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns
+     * Parses the json byte array as {@code T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
      * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param filter the specified filter is applied to parsing
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -1967,14 +1967,14 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns
+     * Parses the json byte array as {@code T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
      * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param format the specified date format
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -2002,12 +2002,12 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte buffer as a {@link T}. Returns
+     * Parses the json byte buffer as a {@code T}. Returns
      * {@code null} if received {@link ByteBuffer} is {@code null}.
      *
      * @param buffer the specified buffer to be parsed
-     * @param objectClass the specified class of {@link T}
-     * @return {@link T} or {@code null}
+     * @param objectClass the specified class of {@code T}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -2032,13 +2032,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json reader as a {@link T}. Returns {@code null}
+     * Parses the json reader as a {@code T}. Returns {@code null}
      * if received {@link Reader} is {@code null} or its content is null.
      *
      * @param input the specified reader to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -2067,13 +2067,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link T}. Returns {@code null}
+     * Parses the json stream as a {@code T}. Returns {@code null}
      * if received {@link InputStream} is {@code null} or its content is null.
      *
      * @param input the specified stream to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -2103,13 +2103,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link T}. Returns {@code null}
+     * Parses the json stream as a {@code T}. Returns {@code null}
      * if received {@link InputStream} is {@code null} or its content is null.
      *
      * @param input the specified stream to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param context the specified custom context
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -2138,13 +2138,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link T}. Returns {@code null}
+     * Parses the json stream as a {@code T}. Returns {@code null}
      * if received {@link InputStream} is {@code null} or its content is null.
      *
      * @param input the specified stream to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param context the specified custom context
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -2173,13 +2173,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream of the url as {@link T}.
+     * Parses the json stream of the url as {@code T}.
      * Returns {@code null} if received {@link URL} is {@code null}.
      *
      * @param url the specified url to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If an I/O error or parsing error occurs
      * @see URL#openStream()
      * @see JSON#parseObject(InputStream, Type, JSONReader.Feature...)
@@ -2198,13 +2198,13 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream of the url as {@link T}.
+     * Parses the json stream of the url as {@code T}.
      * Returns {@code null} if received {@link URL} is {@code null}.
      *
      * @param url the specified url to be parsed
-     * @param objectClass the specified class of {@link T}
+     * @param objectClass the specified class of {@code T}
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If an I/O error or parsing error occurs
      * @see URL#openStream()
      * @see JSON#parseObject(InputStream, Type, JSONReader.Feature...)
@@ -2224,12 +2224,12 @@ public interface JSON {
 
     /**
      * Parses the json stream of the url as a {@link JSONObject} and call the function
-     * to convert it to {@link T}. Returns {@code null} if received {@link URL} is {@code null}.
+     * to convert it to {@code T}. Returns {@code null} if received {@link URL} is {@code null}.
      *
      * @param url the specified url to be parsed
      * @param function the specified converter
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If an I/O error or parsing error occurs
      * @see URL#openStream()
      * @see JSON#parseObject(InputStream, JSONReader.Feature...)
@@ -2252,14 +2252,14 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link T}. Returns {@code null}
+     * Parses the json stream as a {@code T}. Returns {@code null}
      * if received {@link InputStream} is {@code null} or its content is null.
      *
      * @param input the specified stream to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param format the specified date format
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -2287,14 +2287,14 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link T}. Returns {@code null}
+     * Parses the json stream as a {@code T}. Returns {@code null}
      * if received {@link InputStream} is {@code null} or its content is null.
      *
      * @param input the specified stream to be parsed
      * @param charset the specified charset of the stream
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param features the specified features is applied to parsing
-     * @return {@link T} or {@code null}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -2319,15 +2319,15 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns {@code null}
+     * Parses the json byte array as {@code T}. Returns {@code null}
      * if received byte array is {@code null} or empty or length is 0.
      *
      * @param bytes the specified UTF8 text to be parsed
      * @param offset the starting index of array
      * @param length the specified length of array
      * @param charset the specified charset of the stream
-     * @param type the specified actual type of {@link T}
-     * @return {@link T} or {@code null}
+     * @param type the specified actual type of {@code T}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -2351,15 +2351,15 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns {@code null}
+     * Parses the json byte array as {@code T}. Returns {@code null}
      * if received byte array is {@code null} or empty or length is 0.
      *
      * @param bytes the specified UTF8 text to be parsed
      * @param offset the starting index of array
      * @param length the specified length of array
      * @param charset the specified charset of the stream
-     * @param type the specified actual type of {@link T}
-     * @return {@link T} or {@code null}
+     * @param type the specified actual type of {@code T}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -2383,15 +2383,15 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@link T}. Returns {@code null}
+     * Parses the json byte array as {@code T}. Returns {@code null}
      * if received byte array is {@code null} or empty or length is 0.
      *
      * @param bytes the specified UTF8 text to be parsed
      * @param offset the starting index of array
      * @param length the specified length of array
      * @param charset the specified charset of the stream
-     * @param type the specified actual class of {@link T}
-     * @return {@link T} or {@code null}
+     * @param type the specified actual class of {@code T}
+     * @return {@code T} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
@@ -2424,10 +2424,12 @@ public interface JSON {
 
     /**
      * Parses the json stream through the specified delimiter as
-     * {@link T} objects and call the specified consumer to consume it
+     * {@code T} objects and call the specified consumer to consume it
+     * The final nonempty record is consumed even without a trailing delimiter.
+     * <details><summary>中文</summary>最后一条非空记录即使没有分隔符也会被消费。</details>
      *
      * @param input the specified stream to be parsed
-     * @param type the specified actual class of {@link T}
+     * @param type the specified actual class of {@code T}
      * @param consumer the specified consumer is called multiple times
      * @param features the specified features is applied to parsing
      * @throws JSONException If an I/O error or parsing error occurs
@@ -2440,11 +2442,13 @@ public interface JSON {
 
     /**
      * Parses the json stream through the specified delimiter as
-     * {@link T} objects and call the specified consumer to consume it
+     * {@code T} objects and call the specified consumer to consume it
+     * The final nonempty record is consumed even without a trailing delimiter.
+     * <details><summary>中文</summary>最后一条非空记录即使没有分隔符也会被消费。</details>
      *
      * @param input the specified stream to be parsed
      * @param charset the specified charset of the stream
-     * @param type the specified actual class of {@link T}
+     * @param type the specified actual class of {@code T}
      * @param delimiter the specified delimiter for the stream
      * @param consumer the specified consumer is called multiple times
      * @param features the specified features is applied to parsing
@@ -2476,16 +2480,16 @@ public interface JSON {
         try {
             while (true) {
                 int n = input.read(bytes, offset, bytes.length - offset);
-                if (n == -1) {
-                    break;
-                }
-
                 int k = offset;
-                offset += n;
+                if (n != -1) {
+                    offset += n;
+                }
                 boolean dispose = false;
 
-                for (; k < offset; ++k) {
-                    if (bytes[k] == delimiter) {
+                // At EOF, the end of the buffer also terminates the final record.
+                // <details><summary>中文</summary>流结束时，缓冲区末尾也作为最后一条记录的结束位置。</details>
+                for (; k <= offset; ++k) {
+                    if (k == offset ? n == -1 && start < offset : bytes[k] == delimiter) {
                         end = k;
 
                         JSONReader jsonReader = JSONReader.of(bytes, start, end - start, charset, context);
@@ -2509,6 +2513,9 @@ public interface JSON {
                     }
                 }
 
+                if (n == -1) {
+                    break;
+                }
                 if (offset == bytes.length) {
                     if (dispose) {
                         int len = bytes.length - start;
@@ -2529,10 +2536,12 @@ public interface JSON {
 
     /**
      * Parses the json reader through the specified delimiter as
-     * {@link T} objects and call the specified consumer to consume it
+     * {@code T} objects and call the specified consumer to consume it
+     * The final nonempty record is consumed even without a trailing delimiter.
+     * <details><summary>中文</summary>最后一条非空记录即使没有分隔符也会被消费。</details>
      *
      * @param input the specified reader to be parsed
-     * @param type the specified actual class of {@link T}
+     * @param type the specified actual class of {@code T}
      * @param delimiter the specified delimiter for the stream
      * @param consumer the specified consumer is called multiple times
      * @throws JSONException If an I/O error or parsing error occurs
@@ -2555,16 +2564,14 @@ public interface JSON {
         try {
             while (true) {
                 int n = input.read(chars, offset, chars.length - offset);
-                if (n == -1) {
-                    break;
-                }
-
                 int k = offset;
-                offset += n;
+                if (n != -1) {
+                    offset += n;
+                }
                 boolean dispose = false;
 
-                for (; k < offset; ++k) {
-                    if (chars[k] == delimiter) {
+                for (; k <= offset; ++k) {
+                    if (k == offset ? n == -1 && start < offset : chars[k] == delimiter) {
                         end = k;
 
                         JSONReader jsonReader = JSONReader.of(chars, start, end - start, context);
@@ -2572,14 +2579,22 @@ public interface JSON {
                             objectReader = context.getObjectReader(type);
                         }
 
-                        consumer.accept(
-                                objectReader.readObject(jsonReader, type, null, 0)
-                        );
+                        T object = objectReader.readObject(jsonReader, type, null, 0);
+                        if (jsonReader.resolveTasks != null) {
+                            jsonReader.handleResolveTasks(object);
+                        }
+                        if (jsonReader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                            throw new JSONException(jsonReader.info("input not end"));
+                        }
+                        consumer.accept(object);
                         start = end + 1;
                         dispose = true;
                     }
                 }
 
+                if (n == -1) {
+                    break;
+                }
                 if (offset == chars.length) {
                     if (dispose) {
                         int len = chars.length - start;
@@ -2869,11 +2884,11 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a list of {@link T}. Returns
+     * Parses the json string as a list of {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param features the specified features is applied to parsing
      * @return {@link List} or {@code null}
      * @throws JSONException If a parsing error occurs
@@ -2898,11 +2913,11 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a list of {@link T}. Returns
+     * Parses the json string as a list of {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @return {@link List} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
@@ -2926,11 +2941,11 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a list of {@link T}. Returns
+     * Parses the json string as a list of {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
-     * @param type the specified actual class of {@link T}
+     * @param type the specified actual class of {@code T}
      * @return {@link List} or {@code null}
      * @throws JSONException If a parsing error occurs
      */
@@ -2954,7 +2969,7 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a list of {@link T}. Returns
+     * Parses the json string as a list of {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
@@ -2982,11 +2997,11 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a list of {@link T}. Returns
+     * Parses the json string as a list of {@code T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
      * @param text the specified string to be parsed
-     * @param type the specified actual class of {@link T}
+     * @param type the specified actual class of {@code T}
      * @param features the specified features is applied to parsing
      * @return {@link List} or {@code null}
      * @throws JSONException If a parsing error occurs
@@ -3011,11 +3026,11 @@ public interface JSON {
     }
 
     /**
-     * Parses the json char array as a list of {@link T}. Returns
+     * Parses the json char array as a list of {@code T}. Returns
      * {@code null} if received char array is {@code null} or empty.
      *
      * @param chars the specified char array to be parsed
-     * @param type the specified actual class of {@link T}
+     * @param type the specified actual class of {@code T}
      * @param features the specified features is applied to parsing
      * @return {@link List} or {@code null}
      * @throws JSONException If a parsing error occurs
@@ -3040,7 +3055,7 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a list of {@link T}. Returns {@code null}
+     * Parses the json string as a list of {@code T}. Returns {@code null}
      * if received {@link String} is {@code null} or empty or its content is null.
      *
      * @param text the specified string to be parsed
@@ -3079,11 +3094,11 @@ public interface JSON {
     }
 
     /**
-     * Parses the json reader as a list of {@link T}. Returns
+     * Parses the json reader as a list of {@code T}. Returns
      * {@code null} if received {@link Reader} is {@code null} or empty.
      *
      * @param input the specified reader to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param features the specified features is applied to parsing
      * @return {@link List} or {@code null}
      * @throws JSONException If a parsing error occurs
@@ -3108,11 +3123,11 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a list of {@link T}. Returns
+     * Parses the json byte array as a list of {@code T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
      * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual type of {@link T}
+     * @param type the specified actual type of {@code T}
      * @param features the specified features is applied to parsing
      * @return {@link List} or {@code null}
      * @throws JSONException If a parsing error occurs
@@ -3137,11 +3152,11 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a list of {@link T}. Returns
+     * Parses the json byte array as a list of {@code T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
      * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual class of {@link T}
+     * @param type the specified actual class of {@code T}
      * @param features the specified features is applied to parsing
      * @return {@link List} or {@code null}
      * @throws JSONException If a parsing error occurs
@@ -3166,14 +3181,14 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a list of {@link T}. Returns {@code null}
+     * Parses the json byte array as a list of {@code T}. Returns {@code null}
      * if received byte array is {@code null} or empty or the specified length is 0.
      *
      * @param bytes the specified UTF8 text to be parsed
      * @param offset the starting index of array
      * @param length the specified length of array
      * @param charset the specified charset of the stream
-     * @param type the specified actual class of {@link T}
+     * @param type the specified actual class of {@code T}
      * @param features the specified features is applied to parsing
      * @return {@link List} or {@code null}
      * @throws JSONException If a parsing error occurs
@@ -3475,7 +3490,7 @@ public interface JSON {
                     ObjectWriter<?> objectWriter = provider.getObjectWriter(
                             valueClass,
                             valueClass,
-                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                            (context.features & JSONWriter.Feature.FieldBased.mask) != 0
                     );
                     objectWriter.write(writer, object, null, null, 0);
                 }
@@ -3510,7 +3525,7 @@ public interface JSON {
                     ObjectWriter<?> objectWriter = provider.getObjectWriter(
                             valueClass,
                             valueClass,
-                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                            (context.features & JSONWriter.Feature.FieldBased.mask) != 0
                     );
                     objectWriter.write(writer, object, null, null, 0);
                 }
@@ -4457,7 +4472,7 @@ public interface JSON {
     }
 
     /**
-     * Builds a new {@link T} using the properties of the specified object
+     * Builds a new {@code T} using the properties of the specified object
      *
      * @param <T> the type of the object to copy
      * @param object the specified object will be copied

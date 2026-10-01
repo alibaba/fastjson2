@@ -31,6 +31,8 @@ public class JSONScanner
 
     public JSONScanner(String str, int features) {
         this.reader = JSONReader.of(str, JSON.createReadContext(features));
+        this.str = str;
+        this.orderedField = (features & Feature.OrderedField.mask) != 0;
     }
 
     public Calendar getCalendar() {
@@ -167,6 +169,8 @@ public class JSONScanner
                 break;
             case UseBigDecimal:
                 return !reader.isEnabled(JSONReader.Feature.UseDoubleForDecimals);
+            case OrderedField:
+                return orderedField;
             default:
                 break;
         }

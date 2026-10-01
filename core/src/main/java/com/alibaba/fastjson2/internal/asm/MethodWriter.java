@@ -453,6 +453,10 @@ public final class MethodWriter {
         visitInsn(Opcodes.POP);
     }
 
+    public void pop2() {
+        visitInsn(Opcodes.POP2);
+    }
+
     public void visitVarInsn(final int opcode, final int var) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.

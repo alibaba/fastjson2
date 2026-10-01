@@ -155,15 +155,17 @@ public class FastJsonHttpMessageConverter
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             HttpHeaders headers = outputMessage.getHeaders();
 
+            // Opening the response body can commit headers, so buffer raw JSON until its length is set.
+            // <details><summary>中文</summary>获取响应流可能提交响应头，因此先缓冲原始 JSON 并设置长度。</details>
             int contentLength;
             if (object instanceof String && com.alibaba.fastjson2.JSON.isValidObject((String) object)) {
                 byte[] strBytes = ((String) object).getBytes(fastJsonConfig.getCharset());
                 contentLength = strBytes.length;
-                outputMessage.getBody().write(strBytes, 0, strBytes.length);
+                baos.write(strBytes, 0, strBytes.length);
             } else if (object instanceof byte[] && com.alibaba.fastjson2.JSON.isValid((byte[]) object)) {
                 byte[] strBytes = (byte[]) object;
                 contentLength = strBytes.length;
-                outputMessage.getBody().write(strBytes, 0, strBytes.length);
+                baos.write(strBytes, 0, strBytes.length);
             } else {
                 if (object instanceof JSONPObject) {
                     headers.setContentType(APPLICATION_JAVASCRIPT);

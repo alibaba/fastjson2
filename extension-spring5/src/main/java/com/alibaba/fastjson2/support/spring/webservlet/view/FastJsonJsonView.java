@@ -131,7 +131,8 @@ public class FastJsonJsonView
      * to {@code true}, the response is buffered in order to determine the
      * content length and set the 'Content-Length' header of the response.
      * <p>
-     * The default setting is {@code false}.
+     * The default setting is {@code true}.
+     * <details><summary>中文</summary>默认启用 Content-Length 响应头。</details>
      */
     public void setUpdateContentLength(boolean updateContentLength) {
         this.config.setWriteContentLength(updateContentLength);
@@ -159,6 +160,9 @@ public class FastJsonJsonView
         }
         // This is a high frequency operation and is worth optimizing separately.
         if (expectSize == 1 && extractValueFromSingleKeyModel) {
+            if (renderedKeys != null && !model.containsKey(renderedKeys.iterator().next())) {
+                return Collections.emptyMap();
+            }
             Object value = renderedKeys != null
                     ? model.get(renderedKeys.iterator().next())
                     : model.values().iterator().next();

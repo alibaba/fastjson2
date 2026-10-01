@@ -978,10 +978,12 @@ public class JSONObject
     }
 
     /**
-     * Returns the {@link BigInteger} of the associated keys in this {@link JSONObject}.
+     * Returns the associated value as an {@link Instant}. Numeric values are epoch
+     * milliseconds; numeric zero and null values return null.
+     * <details><summary>中文</summary>将值转换为 Instant；数值表示纪元毫秒，数值零和 null 返回 null。</details>
      *
      * @param key the key whose associated value is to be returned
-     * @return {@link BigInteger} or null
+     * @return the converted instant, or null
      */
     public Instant getInstant(String key) {
         Object value = super.get(key);
@@ -2154,25 +2156,16 @@ public class JSONObject
         if ((kvArrayLength & 1) == 1) {
             throw new JSONException("The length of kvArray cannot be odd");
         }
-        boolean valueMaybeNull = false;
         for (int i = 0; i < kvArrayLength; i++) {
             Object keyObj = kvArray[i++];
             if (!(keyObj instanceof String)) {
                 throw new JSONException("The value corresponding to the even bit index of kvArray is key, which cannot be null and must be of type string");
             }
             String key = (String) keyObj;
-            if (valueMaybeNull) {
-                if (jsonObject.containsKey(key)) {
-                    throw new JSONException("The value corresponding to the even bit index of kvArray is key and cannot be duplicated");
-                }
-                jsonObject.put(key, kvArray[i]);
-            } else {
-                Object old = jsonObject.put(key, kvArray[i]);
-                if (old != null) {
-                    throw new JSONException("The value corresponding to the even bit index of kvArray is key and cannot be duplicated");
-                }
-                valueMaybeNull = kvArray[i] == null;
+            if (jsonObject.containsKey(key)) {
+                throw new JSONException("The value corresponding to the even bit index of kvArray is key and cannot be duplicated");
             }
+            jsonObject.put(key, kvArray[i]);
         }
         return jsonObject;
     }

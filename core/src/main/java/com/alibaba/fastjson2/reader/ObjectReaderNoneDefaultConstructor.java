@@ -195,6 +195,9 @@ public class ObjectReaderNoneDefaultConstructor<T>
         if (setterFieldReaders != null) {
             for (int i = 0; i < setterFieldReaders.length; i++) {
                 FieldReader fieldReader = setterFieldReaders[i];
+                if (!args.containsKey(fieldReader.fieldNameHash)) {
+                    continue;
+                }
                 Object fieldValue = args.get(fieldReader.fieldNameHash);
                 fieldReader.accept(object, fieldValue);
             }

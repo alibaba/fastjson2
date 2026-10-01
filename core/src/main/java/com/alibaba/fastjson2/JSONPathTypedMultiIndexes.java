@@ -136,7 +136,10 @@ final class JSONPathTypedMultiIndexes
                 throw new JSONException(jsonReader.info("illegal input, expect '[', but " + jsonReader.current()));
             }
 
-            while (!jsonReader.nextIfObjectEnd()) {
+            while (true) {
+                if (jsonReader.nextIfObjectEnd()) {
+                    return new Object[indexes.length];
+                }
                 long nameHashCode = jsonReader.readFieldNameHashCode();
                 boolean match = nameHashCode == prefixNameHash;
                 if (!match) {
@@ -153,10 +156,19 @@ final class JSONPathTypedMultiIndexes
         } else if (prefix instanceof JSONPathSingleIndex) {
             int index = ((JSONPathSingleIndex) prefix).index;
             int max = jsonReader.startArray();
+            if (jsonReader.jsonb && index >= max) {
+                return new Object[indexes.length];
+            }
             for (int i = 0; i < index && i < max; i++) {
+                if (!jsonReader.jsonb && jsonReader.nextIfArrayEnd()) {
+                    return new Object[indexes.length];
+                }
                 jsonReader.skipValue();
             }
 
+            if (!jsonReader.jsonb && jsonReader.nextIfArrayEnd()) {
+                return new Object[indexes.length];
+            }
             if (jsonReader.nextIfNull()) {
                 return null;
             }
@@ -184,6 +196,11 @@ final class JSONPathTypedMultiIndexes
                 continue;
             }
 
+            if (duplicate) {
+                readDuplicateValues(jsonReader, i, array);
+                continue;
+            }
+
             Type type = types[index];
             Object value;
             try {
@@ -195,24 +212,24 @@ final class JSONPathTypedMultiIndexes
                 value = null;
             }
             array[index] = value;
+        }
+        return array;
+    }
 
-            if (!duplicate) {
-                continue;
-            }
-
-            for (int j = index + 1; j < indexes.length; j++) {
-                if (indexes[j] == i) {
-                    Type typeJ = types[j];
-                    Object valueJ;
-                    if (typeJ == type) {
-                        valueJ = value;
-                    } else {
-                        valueJ = TypeUtils.cast(value, typeJ);
+    private void readDuplicateValues(JSONReader jsonReader, int index, Object[] array) {
+        // Convert each path from the original value, before any lossy conversion or ignored error.
+        // <details><summary>中文</summary>各路径均从原值转换，避免精度损失或忽略的错误影响其他路径。</details>
+        Object value = jsonReader.readAny();
+        for (int j = 0; j < indexes.length; j++) {
+            if (indexes[j] == index) {
+                try {
+                    array[j] = TypeUtils.cast(value, types[j]);
+                } catch (Exception e) {
+                    if (!ignoreError(j)) {
+                        throw e;
                     }
-                    array[j] = valueJ;
                 }
             }
         }
-        return array;
     }
 }

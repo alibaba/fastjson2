@@ -81,7 +81,8 @@ final class ObjectReaderImplCharValueArray
 
         if (jsonReader.isString()) {
             String str = jsonReader.readString();
-            return str.toCharArray();
+            char[] chars = str.toCharArray();
+            return builder == null ? chars : builder.apply(chars);
         }
 
         int entryCnt = jsonReader.startArray();

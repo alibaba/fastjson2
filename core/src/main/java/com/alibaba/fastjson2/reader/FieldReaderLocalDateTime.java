@@ -48,7 +48,7 @@ public final class FieldReaderLocalDateTime<T>
     }
 
     public boolean supportAcceptType(Class valueClass) {
-        return fieldClass == Instant.class || fieldClass == Long.class;
+        return valueClass == Instant.class || valueClass == Long.class;
     }
 
     @Override

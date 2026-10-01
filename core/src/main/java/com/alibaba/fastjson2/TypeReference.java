@@ -20,8 +20,12 @@ import java.util.Map;
  * Forces clients to create a subclass of this class which enables retrieval the type
  * information even at runtime.</p>
  *
- * <p>This syntax cannot be used to create type literals that have wildcard
- * parameters, such as {@code Class<T>} or {@code List<? extends CharSequence>}.</p>
+ * <p>Wildcard arguments such as {@code List<? extends CharSequence>} are retained.
+ * A type variable such as {@code T} remains unresolved unless actual type arguments
+ * are supplied to the corresponding constructor.</p>
+ * <details><summary>中文</summary>
+ * 通配符类型参数会被保留；类型变量不会自动解析为运行时类型，可以通过构造方法提供实际类型参数。
+ * </details>
  *
  * <p>For example, to create a type literal for {@code List<String>}, you can
  * create an empty anonymous inner class:</p>
@@ -142,7 +146,7 @@ public abstract class TypeReference<T> {
      * See {@link JSON#parseObject(byte[], Type)} for details
      *
      * <pre>{@code
-     * String utf8Bytes = "{\"id\":1,\"name\":\"kraity\"}".getBytes(StandardCharsets.UTF_8);
+     * byte[] utf8Bytes = "{\"id\":1,\"name\":\"kraity\"}".getBytes(StandardCharsets.UTF_8);
      * User user = new TypeReference<User>(){}.parseObject(utf8Bytes);
      * }</pre>
      *
@@ -173,7 +177,7 @@ public abstract class TypeReference<T> {
      * See {@link JSON#parseArray(byte[], Type, JSONReader.Feature...)} for details
      *
      * <pre>{@code
-     * String utf8Bytes = "[{\"id\":1,\"name\":\"kraity\"}]".getBytes(StandardCharsets.UTF_8);
+     * byte[] utf8Bytes = "[{\"id\":1,\"name\":\"kraity\"}]".getBytes(StandardCharsets.UTF_8);
      * List<User> users = new TypeReference<User>(){}.parseArray(utf8Bytes);
      * }</pre>
      *

@@ -70,7 +70,8 @@ public final class Type {
 
     static final Type[] TYPES_0 = new Type[] {TYPE_CLASS, TYPE_STRING, TYPE_STRING, LONG_TYPE, TYPE_LIST};
     static final Type[] TYPES_1 = new Type[] {TYPE_JSON_WRITER, TYPE_OBJECT, TYPE_OBJECT, TYPE_TYPE, LONG_TYPE};
-    static final Type[] TYPES_2 = new Type[] {TYPE_CLASS, TYPE_SUPPLIER, TYPE_JSON_READER};
+    static final Type[] TYPES_2 = new Type[] {TYPE_CLASS, TYPE_SUPPLIER,
+            new Type(ARRAY, "[Lcom/alibaba/fastjson2/reader/FieldReader;", 0, 43)};
     static final Type[] TYPES_3 = new Type[] {LONG_TYPE};
     static final Type[] TYPES_4 = new Type[] {TYPE_JSON_READER, TYPE_TYPE, TYPE_OBJECT, LONG_TYPE};
 

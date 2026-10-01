@@ -2084,7 +2084,7 @@ public class JSONCompiledAnnotationProcessor
         notZeroStmts.append(exec(mwc.jsonWriterMethod("writeNumberNull")));
 
         ListBuffer<JCTree.JCStatement> nullStmts = new ListBuffer<>();
-        JCTree.JCExpression writeAsStringBinary = literal(BrowserCompatible.mask | WriteBooleanAsNumber.mask | WriteNullStringAsEmpty.mask);
+        JCTree.JCExpression writeAsStringBinary = literal(WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask);
         nullStmts.append(defIf(ne(bitAnd(mwc.contextFeatures, writeAsStringBinary), 0), block(notZeroStmts.toList())));
 
         ListBuffer<JCTree.JCStatement> notNullStmts = new ListBuffer<>();
@@ -2109,7 +2109,7 @@ public class JSONCompiledAnnotationProcessor
         notZeroStmts.append(exec(mwc.jsonWriterMethod("writeNumberNull")));
 
         ListBuffer<JCTree.JCStatement> nullStmts = new ListBuffer<>();
-        JCTree.JCExpression writeAsStringBinary = literal(BrowserCompatible.mask | WriteBooleanAsNumber.mask | WriteNullStringAsEmpty.mask);
+        JCTree.JCExpression writeAsStringBinary = literal(WriteNulls.mask | NullAsDefaultValue.mask | WriteNullNumberAsZero.mask);
         nullStmts.append(defIf(ne(bitAnd(mwc.contextFeatures, writeAsStringBinary), 0), block(notZeroStmts.toList())));
 
         ListBuffer<JCTree.JCStatement> notNullStmts = new ListBuffer<>();
@@ -3541,7 +3541,7 @@ public class JSONCompiledAnnotationProcessor
                     defVar(
                             "writeNulls",
                             TypeTag.BOOLEAN,
-                            ternary(this.notWriteDefaultValue, isEnable(contextFeatures, WriteNulls, NullAsDefaultValue), false)
+                            and(not(this.notWriteDefaultValue), isEnable(contextFeatures, WriteNulls, NullAsDefaultValue))
                     )
             );
         }

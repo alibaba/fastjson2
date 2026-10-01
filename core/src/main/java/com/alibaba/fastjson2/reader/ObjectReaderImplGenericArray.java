@@ -45,6 +45,9 @@ class ObjectReaderImplGenericArray
         }
 
         int entryCnt = jsonReader.startArray();
+        if (entryCnt == -1) {
+            return null;
+        }
 
         if (entryCnt > 0 && itemObjectReader == null) {
             itemObjectReader = jsonReader

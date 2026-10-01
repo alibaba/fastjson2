@@ -1004,8 +1004,9 @@ class JSONPathParser {
                     String[] containsValues = null;
                     if (p0 == 0) {
                         if (strVal.charAt(strVal.length() - 1) == '%') {
-                            containsValues = new String[items.length - 1];
-                            System.arraycopy(items, 1, containsValues, 0, containsValues.length);
+                            if (items.length > 1) {
+                                containsValues = Arrays.copyOfRange(items, 1, items.length);
+                            }
                         } else {
                             endsWithValue = items[items.length - 1];
                             if (items.length > 2) {
@@ -1014,10 +1015,9 @@ class JSONPathParser {
                             }
                         }
                     } else if (strVal.charAt(strVal.length() - 1) == '%') {
-                        if (items.length == 1) {
-                            startsWithValue = items[0];
-                        } else {
-                            containsValues = items;
+                        startsWithValue = items[0];
+                        if (items.length > 1) {
+                            containsValues = Arrays.copyOfRange(items, 1, items.length);
                         }
                     } else {
                         if (items.length == 1) {
@@ -1074,7 +1074,11 @@ class JSONPathParser {
             case 'n':
                 boolean nextNull = jsonReader.nextIfNull();
                 if (nextNull) {
-                    segment = new JSONPathFilter.NameIsNull(fieldName, hashCode, fieldName2, hashCode2, function);
+                    if (operator != JSONPathFilter.Operator.EQ && operator != JSONPathFilter.Operator.NE) {
+                        throw new JSONException(jsonReader.info("unsupported null comparison"));
+                    }
+                    segment = new JSONPathFilter.NameIsNull(fieldName, hashCode, fieldName2, hashCode2, function,
+                            operator == JSONPathFilter.Operator.NE);
                     break;
                 }
                 throw new JSONException(jsonReader.info("jsonpath syntax error"));
@@ -1086,7 +1090,7 @@ class JSONPathParser {
                 String fieldName1 = jsonReader.readFieldNameUnquote();
                 long fieldName1Hash = Fnv.hashCode64(fieldName1);
 
-                segment = new JSONPathFilter.NameName(fieldName, hashCode, fieldName1, fieldName1Hash);
+                segment = new JSONPathFilter.NameName(fieldName, hashCode, fieldName1, fieldName1Hash, operator);
                 break;
             default:
                 throw new JSONException(jsonReader.info("jsonpath syntax error"));

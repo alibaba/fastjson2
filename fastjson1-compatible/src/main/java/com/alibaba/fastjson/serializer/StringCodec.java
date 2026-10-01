@@ -16,6 +16,9 @@ public class StringCodec
     public <T> T deserialze(DefaultJSONParser parser, Type clazz, Object fieldName) {
         JSONReader reader = parser.getRawReader();
         String str = reader.readString();
+        if (str == null) {
+            return null;
+        }
 
         if (clazz == StringBuffer.class) {
             return (T) new StringBuffer(str);

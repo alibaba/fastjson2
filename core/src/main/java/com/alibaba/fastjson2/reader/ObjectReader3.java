@@ -204,11 +204,11 @@ public class ObjectReader3<T>
                     continue;
                 }
                 long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
-                if (nameHashCodeLCase == hashCode0) {
+                if (nameHashCodeLCase == hashCode0LCase) {
                     fieldReader0.readFieldValue(jsonReader, object);
-                } else if (nameHashCodeLCase == hashCode1) {
+                } else if (nameHashCodeLCase == hashCode1LCase) {
                     fieldReader1.readFieldValue(jsonReader, object);
-                } else if (nameHashCodeLCase == hashCode2) {
+                } else if (nameHashCodeLCase == hashCode2LCase) {
                     fieldReader2.readFieldValue(jsonReader, object);
                 } else {
                     processExtra(jsonReader, object);

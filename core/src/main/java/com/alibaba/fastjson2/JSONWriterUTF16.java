@@ -791,11 +791,12 @@ class JSONWriterUTF16
     @Override
     public final void writeString(char[] str, int offset, int len, boolean quoted) {
         boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
         final char quote = this.quote;
         int off = this.off;
         int minCapacity = quoted ? off + 2 : off;
-        if (escapeNoneAscii) {
+        if (escapeNoneAscii || browserSecure) {
             minCapacity += len * 6;
         } else {
             minCapacity += len * 2;
@@ -856,8 +857,24 @@ class JSONWriterUTF16
                 case 29:
                 case 30:
                 case 31:
+                    // Unicode escapes need six characters; also reserve space for the remaining slice.
+                    // <details><summary>中文</summary>Unicode 转义需要六个字符，同时为剩余切片预留空间。</details>
+                    if (off + 6 + (offset + len - i - 1) * 2 + (quoted ? 1 : 0) > chars.length) {
+                        chars = grow(off + 6 + (offset + len - i - 1) * 6 + (quoted ? 1 : 0));
+                    }
                     StringUtils.writeU4Hex2(chars, off, ch);
                     off += 6;
+                    break;
+                case '<':
+                case '>':
+                case '(':
+                case ')':
+                    if (browserSecure) {
+                        StringUtils.writeU4HexU(chars, off, ch);
+                        off += 6;
+                    } else {
+                        chars[off++] = ch;
+                    }
                     break;
                 default:
                     if (escapeNoneAscii && ch > 0x007F) {
@@ -1119,7 +1136,7 @@ class JSONWriterUTF16
         }
 
         final int off = this.off;
-        buf[off] = '"';
+        buf[off] = quote;
         putLong(buf, off + 1, (int) (msb >> 56), (int) (msb >> 48));
         putLong(buf, off + 5, (int) (msb >> 40), (int) (msb >> 32));
         buf[off + 9] = '-';
@@ -1132,7 +1149,7 @@ class JSONWriterUTF16
         putLong(buf, off + 25, ((int) (lsb >> 40)), (int) (lsb >> 32));
         putLong(buf, off + 29, ((int) lsb) >> 24, ((int) lsb) >> 16);
         putLong(buf, off + 33, ((int) lsb) >> 8, (int) lsb);
-        buf[off + 37] = '"';
+        buf[off + 37] = quote;
         this.off += 38;
     }
 
@@ -1713,6 +1730,9 @@ class JSONWriterUTF16
             startObject = false;
         } else {
             chars[off++] = ',';
+            if (pretty != PRETTY_NON && level > 0) {
+                off = indent(chars, off);
+            }
         }
         System.arraycopy(name, coff, chars, off, len);
         this.off = off + len;
@@ -1805,7 +1825,7 @@ class JSONWriterUTF16
         boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
-        int minCapacity = off + value.length * 5 + 2;
+        int minCapacity = off + value.length * (writeAsString ? 7 : 5) + 2;
         char[] chars = this.chars;
         if (minCapacity > chars.length) {
             chars = grow(minCapacity);
@@ -1835,7 +1855,7 @@ class JSONWriterUTF16
         boolean writeAsString = (context.features & WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
-        int minCapacity = off + 7;
+        int minCapacity = off + 8;
         char[] chars = this.chars;
         if (minCapacity > chars.length) {
             chars = grow(minCapacity);
@@ -2204,7 +2224,7 @@ class JSONWriterUTF16
         boolean writeSpecialAsString = (context.features & WriteFloatSpecialAsString.mask) != 0;
 
         int off = this.off;
-        int minCapacity = off + values.length * 27 + 1;
+        int minCapacity = off + values.length * 27 + 2;
         char[] chars = this.chars;
         if (minCapacity > chars.length) {
             chars = grow(minCapacity);
@@ -2351,7 +2371,7 @@ class JSONWriterUTF16
         }
 
         int off = this.off;
-        int minCapacity = off + 25 + zonelen;
+        int minCapacity = off + 31 + zonelen;
         char[] chars = this.chars;
         if (minCapacity > chars.length) {
             chars = grow(minCapacity);
@@ -2389,7 +2409,7 @@ class JSONWriterUTF16
                 chars[off++] = 'Z';
             } else {
                 int offsetAbs = Math.abs(offset);
-                chars[off] = offset >= 0 ? '+' : '-';
+                chars[off] = offsetSeconds >= 0 ? '+' : '-';
                 writeDigitPair(chars, off + 1, offsetAbs);
                 chars[off + 3] = ':';
                 int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
@@ -2429,7 +2449,7 @@ class JSONWriterUTF16
     @Override
     public final void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
         int off = this.off;
-        int minCapacity = off + 13;
+        int minCapacity = off + 18;
         char[] chars = this.chars;
         if (minCapacity > chars.length) {
             chars = grow(minCapacity);
@@ -2527,7 +2547,7 @@ class JSONWriterUTF16
         }
 
         int off = this.off;
-        int minCapacity = off + 45;
+        int minCapacity = off + 46;
         char[] chars = this.chars;
         if (minCapacity > chars.length) {
             chars = grow(minCapacity);
@@ -2869,9 +2889,9 @@ class JSONWriterUTF16
 
     @Override
     public final void writeString(boolean value) {
-        chars[off++] = quote;
+        writeQuote();
         writeBool(value);
-        chars[off++] = quote;
+        writeQuote();
     }
 
     @Override
@@ -2986,8 +3006,8 @@ class JSONWriterUTF16
             return;
         }
 
-        boolean special = (context.features & EscapeNoneAscii.mask) != 0;
-        for (int i = coff; i < len; ++i) {
+        boolean special = (context.features & (EscapeNoneAscii.mask | BrowserSecure.mask)) != 0;
+        for (int i = coff, end = coff + len; i < end; ++i) {
             char ch = str[i];
             if (ch == '\\' || ch == quote || ch < ' ') {
                 special = true;

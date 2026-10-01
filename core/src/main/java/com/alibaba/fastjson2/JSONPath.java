@@ -906,13 +906,20 @@ public abstract class JSONPath {
     /**
      * Creates a multi-path JSONPath
      *
+     * <details><summary>中文</summary>
+     * 创建按路径顺序返回对象数组的 JSONPath；缺失的值返回 null，未指定的路径特性默认为零。
+     * 提取共享数组索引前缀的路径时，如果该前缀明确为 null，则整体返回 null。
+     * </details>
+     *
      * @param paths the JSONPath expressions
      * @param types the types of the results
      * @param formats the formats to apply
-     * @param pathFeatures the path features
+     * @param pathFeatures per-path feature masks; missing entries use no path features
      * @param zoneId the zone ID
      * @param features the reader features to apply
-     * @return the created JSONPath
+     * @return a JSONPath producing an {@code Object[]} in the same order as {@code paths},
+     *         with null entries for missing values; extraction of paths sharing an array-index
+     *         prefix returns null when that prefix is explicitly null
      * @since 2.0.20
      */
     public static JSONPath of(
@@ -1104,7 +1111,8 @@ public abstract class JSONPath {
                     if (first0 instanceof JSONPathSegmentName) {
                         JSONPathSegmentName name = (JSONPathSegmentName) first0;
                         prefix = new JSONPathSingleName("$." + name.name, name);
-                    } else if (first0 instanceof JSONPathSegmentIndex) {
+                    } else if (first0 instanceof JSONPathSegmentIndex
+                            && ((JSONPathSegmentIndex) first0).index >= 0) {
                         JSONPathSegmentIndex index = (JSONPathSegmentIndex) first0;
                         prefix = new JSONPathSingleIndex("$[" + index.index + "]", index);
                     }
@@ -1218,33 +1226,31 @@ public abstract class JSONPath {
                         break;
                     }
                 }
-                if (sameType) {
-                    List<JSONPathSegment> prefixSegments = firstMulti.segments.subList(0, lastIndex - 1);
-                    String prefixPath = null;
-                    int dotIndex = firstMulti.path.lastIndexOf('.');
-                    if (dotIndex != -1) {
-                        prefixPath = firstMulti.path.substring(0, dotIndex - 1);
-                    }
-                    if (prefixPath != null) {
-                        JSONPathMulti prefix = new JSONPathMulti(prefixPath, prefixSegments);
-                        if (lastSegment instanceof JSONPathSegmentIndex) {
-                            JSONPath[] indexPaths = new JSONPath[paths.length];
-                            for (int i = 0; i < jsonPaths.length; i++) {
-                                JSONPathMulti path = (JSONPathMulti) jsonPaths[i];
-                                JSONPathSegmentIndex lastSegmentIndex = (JSONPathSegmentIndex) path.segments.get(lastIndex);
-                                indexPaths[i] = new JSONPathSingleIndex(lastSegmentIndex.toString(), lastSegmentIndex);
-                            }
-                            return new JSONPathTypedMultiIndexes(
-                                    jsonPaths,
-                                    prefix,
-                                    indexPaths,
-                                    types,
-                                    formats,
-                                    pathFeatures,
-                                    zoneId,
-                                    featuresValue
-                            );
+                if (sameType && lastSegment instanceof JSONPathSegmentIndex) {
+                    JSONPath[] indexPaths = new JSONPath[paths.length];
+                    boolean positiveIndexes = true;
+                    for (int i = 0; i < jsonPaths.length; i++) {
+                        JSONPathMulti path = (JSONPathMulti) jsonPaths[i];
+                        JSONPathSegmentIndex lastSegmentIndex = (JSONPathSegmentIndex) path.segments.get(lastIndex);
+                        if (lastSegmentIndex.index < 0) {
+                            positiveIndexes = false;
+                            break;
                         }
+                        indexPaths[i] = new JSONPathSingleIndex(lastSegmentIndex.toString(), lastSegmentIndex);
+                    }
+                    if (positiveIndexes) {
+                        // Preserve every parent segment, including bracket-notation paths.
+                        // <details><summary>中文</summary>保留完整父路径的所有片段，包括方括号路径。</details>
+                        return new JSONPathTypedMultiIndexes(
+                                jsonPaths,
+                                firstMulti.getParent(),
+                                indexPaths,
+                                types,
+                                formats,
+                                pathFeatures,
+                                zoneId,
+                                featuresValue
+                        );
                     }
                 }
             }

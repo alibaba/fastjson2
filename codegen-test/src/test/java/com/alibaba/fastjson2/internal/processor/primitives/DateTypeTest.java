@@ -2,34 +2,20 @@ package com.alibaba.fastjson2.internal.processor.primitives;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
-
-import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateTypeTest {
-    private TimeZone timeZone;
-    @Before
-    public void setUp() {
-        timeZone = TimeZone.getDefault();
-        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
-    }
-
-    @After
-    public void tearDown() {
-        TimeZone.setDefault(timeZone);
-    }
-
     @Test
     public void test() {
         Bean bean = new Bean();
         bean.v01 = new java.util.Date();
         bean.v02 = java.util.Calendar.getInstance();
         bean.v03 = new java.sql.Date(1687104000000L);
-        bean.v04 = new java.sql.Time(9729000L);
+        // SQL time carries a local clock value; a fixed UTC epoch can fall on the previous local day.
+        // <details><summary>中文</summary>SQL time 表示本地时刻，固定 UTC 时间戳可能落在本地的前一天。</details>
+        bean.v04 = java.sql.Time.valueOf("10:42:09");
         bean.v05 = new java.sql.Timestamp(System.currentTimeMillis());
         bean.v06 = java.time.LocalDate.now();
         bean.v07 = java.time.LocalTime.of(19, 38, 12);

@@ -22,8 +22,9 @@ import java.util.concurrent.ConcurrentMap;
  * <pre>
  * TypeReference&lt;List&lt;String&gt;&gt; list = new TypeReference&lt;List&lt;String&gt;&gt;() {};
  * </pre>
- * This syntax cannot be used to create type literals that have wildcard
- * parameters, such as {@code Class<?>} or {@code List<? extends CharSequence>}.
+ * Wildcard type arguments, such as {@code List<? extends CharSequence>}, are
+ * retained in the captured type.
+ * <details><summary>中文</summary>捕获的类型保留通配符类型参数，例如 {@code List<? extends CharSequence>}。</details>
  */
 public class TypeReference<T> {
     static ConcurrentMap<Type, Type> classTypeCache

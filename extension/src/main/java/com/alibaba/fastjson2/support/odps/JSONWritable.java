@@ -35,6 +35,9 @@ public class JSONWritable
     @Override
     public void readFields(DataInput in) throws IOException {
         int newLength = WritableUtils.readVInt(in);
+        if (newLength < 0) {
+            throw new IOException("negative length: " + newLength);
+        }
         setCapacity(newLength, false);
         in.readFully(bytes, 0, newLength);
         length = newLength;
@@ -44,14 +47,20 @@ public class JSONWritable
         if (bytes == null || bytes.length < len) {
             byte[] newBytes = new byte[len];
             if (bytes != null && keepData) {
-                System.arraycopy(bytes, 0, newBytes, 0, length);
+                System.arraycopy(bytes, off, newBytes, 0, length);
             }
             bytes = newBytes;
+        } else if (keepData && off != 0) {
+            System.arraycopy(bytes, off, bytes, 0, length);
         }
+        // Extraction can borrow a slice; subsequent writes always start at zero.
+        // <details><summary>中文</summary>提取结果可能引用数组切片，后续写入统一从零开始。</details>
+        off = 0;
     }
 
     public void set(String string) {
         this.bytes = string.getBytes(StandardCharsets.UTF_8);
+        this.off = 0;
         this.length = bytes.length;
     }
 

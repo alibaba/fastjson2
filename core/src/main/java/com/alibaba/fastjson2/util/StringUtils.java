@@ -22,6 +22,7 @@ public class StringUtils {
 
     public static int writeLatin1Escaped(byte[] bytes, int off, byte[] values, byte quote, long features) {
         final boolean browserSecure = (features & MASK_BROWSER_SECURE) != 0;
+        final boolean escapeNoneAscii = (features & MASK_ESCAPE_NONE_ASCII) != 0;
         bytes[off++] = quote;
         for (int i = 0; i < values.length; i++) {
             byte ch = values[i];
@@ -82,6 +83,11 @@ public class StringUtils {
                         bytes[off + 1] = quote;
                         off += 2;
                     } else if (ch < 0) {
+                        if (escapeNoneAscii) {
+                            writeU4HexU(bytes, off, ch & 0xFF);
+                            off += 6;
+                            break;
+                        }
                         // latin
                         int c = ch & 0xFF;
                         bytes[off] = (byte) (0xc0 | (c >> 6));
@@ -248,14 +254,14 @@ public class StringUtils {
                         break;
                 }
             } else {
-                if (c < 0x800) {
+                if (escapeNoneAscii) {
+                    writeU4HexU(bytes, off, c);
+                    off += 6;
+                } else if (c < 0x800) {
                     // 2 bytes, 11 bits
                     bytes[off] = (byte) (0xc0 | (c >> 6));
                     bytes[off + 1] = (byte) (0x80 | (c & 0x3f));
                     off += 2;
-                } else if (escapeNoneAscii) {
-                    writeU4HexU(bytes, off, c);
-                    off += 6;
                 } else if (c >= '\uD800' && c < ('\uDFFF' + 1)) { //Character.isSurrogate(c) but 1.7
                     final int uc;
                     if (c < '\uDBFF' + 1) { // Character.isHighSurrogate(c)

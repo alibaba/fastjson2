@@ -1,0 +1,32 @@
+Source review and validation record
+
+Scope: all 860 Java files under every module's src/main/java directory, including 468 in core. Four agents divided the source by package/module, inspected complete source, implemented confirmed fixes, and cross-reviewed high-risk changes. Every source path is recorded in the adjacent coverage ledgers.
+
+Coverage limits: the very large benchmark_25 embedded JSON literal was reviewed as fixture data rather than character-by-character JSON content. Generated numeric tables and all 1,099 active domain suffix entries received structural checks; numeric multiplier constants were not independently mathematically proved, and the suffix snapshot was not compared to today's IANA registry. Source inspection and passing tests do not prove absence of defects. Unconfirmed follow-up candidates are distinguished in the detailed ledgers.
+
+Changes include numeric precision and overflow, text/JSONB cursor and encoding behavior, buffer capacities, date/time formats, JSONPath filtering/reference handling, generated readers/writers, schema validation, CSV/stream boundaries, provider cache isolation, and framework/compatibility conversions. Public Javadocs and examples were corrected where contracts differed from implementation. Complex fixes have English explanations followed by collapsed Chinese text; parameter checks have no unnecessary commentary.
+
+Regression tests exercise normal and boundary cases, UTF8/UTF16/JSONB parity where applicable, generated and reflective paths, provider isolation, partial/zero-length stream reads, and object identity/reference resolution.
+
+Validation completed successfully:
+- JDK 25 active Maven reactor: 17 projects succeeded; 9,853 tests, zero failures/errors/skipped test cases. Core contributes 8,208 tests. Arrow's two allocation/conversion tests executed with java.nio module access enabled.
+  Command: mvn -B -fae "-DargLine=--add-opens=java.base/java.nio=ALL-UNNAMED" test
+  Log: core/target/review-reactor-pass.log
+- JDK 21 codegen: 12 tests; codegen-test: 67 tests (63 conventionally named plus four tests in numbered classes), all passed. The enable-codegen profile and explicit test selections cover all runnable test source classes in these modules; additional selected core tests also passed.
+  Logs: core/target/review-codegen-final.log and core/target/review-codegen-numbered.log
+- JDK 21 benchmark regressions: DecimalUtilsRegressionTest and CartItemPublicationRegressionTest both passed with maven.test.skip=false.
+  Log: core/target/review-extra-modules.log
+- Final mvn -B validate passed across the active reactor.
+  Log: core/target/review-validate-pass.log
+- Core API documentation regenerated from scratch with the gen-javadoc profile and doclint enabled; passed.
+  Command: mvn -B -pl core -Pgen-javadoc javadoc:javadoc
+  Log: core/target/review-javadoc-pass.log
+- git diff --check passed. Eighty new regression-test source files were added, with further regression coverage in existing files.
+
+Validation limits: Maven-configured skipped modules/test phases retain their existing settings (including benchmark/example defaults). Benchmark fixes were tested explicitly as described above. Android and the disabled JAX-RS Jakarta module were inspected but not built. No JDK 8 runtime test was performed; production compilation targets Java 8 where configured by the project. Generated numeric constants and external TLD currency have the inspection limits stated above.
+
+Existing test assertions were corrected where they encoded the confirmed defect: array slice end exclusivity; 12 AM versus noon; Unix seconds versus Date milliseconds; incomplete numeric exponents; lossless floating-point-to-BigDecimal conversion; and OrderedField with a zero feature mask. The codegen SQL-time fixture now uses a local clock value and avoids global timezone mutation. Compatibility regressions discovered by the full suite were fixed rather than masking their assertions.
+
+Performance: see performance.txt for measured method bytecode lengths and limitations. No throughput benchmark was run. A material tradeoff is decoded String allocation for Unicode JSONB hashing; ordinary Latin1 paths retain allocation-free hashing. Existing parser methods above the documented inlining thresholds are identified explicitly.
+
+No commits or publishing operations were performed. Existing user .factorypath files were preserved.

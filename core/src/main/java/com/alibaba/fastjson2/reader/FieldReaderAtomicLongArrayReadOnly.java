@@ -44,7 +44,7 @@ final class FieldReaderAtomicLongArrayReadOnly<T>
             } else {
                 List values = (List) value;
                 for (int i = 0; i < values.size(); i++) {
-                    int itemValue = TypeUtils.toIntValue(values.get(i));
+                    long itemValue = TypeUtils.toLongValue(values.get(i));
                     atomic.set(i, itemValue);
                 }
             }
@@ -61,7 +61,7 @@ final class FieldReaderAtomicLongArrayReadOnly<T>
 
         AtomicLongArray atomic;
         try {
-            atomic = (AtomicLongArray) method.invoke(object);
+            atomic = (AtomicLongArray) propertyAccessor.getObject(object);
         } catch (Exception e) {
             throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }

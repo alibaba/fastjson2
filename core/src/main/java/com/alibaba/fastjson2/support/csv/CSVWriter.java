@@ -25,6 +25,7 @@ import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 public abstract class CSVWriter
         implements Closeable, Flushable {
     private long features;
+    final boolean alwaysQuoteStrings;
 
     final ZoneId zoneId;
 
@@ -34,6 +35,7 @@ public abstract class CSVWriter
         for (Feature feature : features) {
             this.features |= feature.mask;
         }
+        this.alwaysQuoteStrings = (this.features & Feature.AlwaysQuoteStrings.mask) != 0;
 
         this.zoneId = zoneId;
     }
@@ -95,10 +97,6 @@ public abstract class CSVWriter
             long millis = instant.toEpochMilli();
             writeDate(millis);
             return;
-        }
-
-        if ((features & Feature.AlwaysQuoteStrings.mask) != 0) {
-            writeQuote();
         }
 
         LocalDateTime ldt = instant.atZone(zoneId).toLocalDateTime();

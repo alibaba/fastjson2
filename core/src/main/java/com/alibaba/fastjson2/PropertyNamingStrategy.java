@@ -62,10 +62,9 @@ public enum PropertyNamingStrategy {
      */
     UpperCamelCaseWithDashes,
     /**
-     * Using this naming policy with FASTJSON will ensure that the first "letter" of the Java field name is capitalized when serialized to its JSON form and the words will be separated by a dash (-).
-     * Here are a few examples of the form "Java Field Name" ---&gt; "JSON Field Name":
-     * someFieldName ---&gt; Some-Field-Name
-     * _someFieldName ---&gt; _Some-Field-Name
+     * Capitalizes each word and separates words with a dot (.).
+     * For example, {@code someFieldName} becomes {@code Some.Field.Name}.
+     * <details><summary>中文</summary>各单词首字母大写，单词之间用点号分隔。</details>
      * @since 2.0.7
      */
     UpperCamelCaseWithDots,

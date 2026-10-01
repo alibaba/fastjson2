@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.MultiType;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -33,7 +34,7 @@ final class ObjectArrayReaderMultiType
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.jsonb) {
-            return readJSONBObject(jsonReader, fieldType, fieldName, 0);
+            return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (jsonReader.nextIfNullOrEmptyString()) {
@@ -45,6 +46,9 @@ final class ObjectArrayReaderMultiType
             for (int i = 0; ; ++i) {
                 if (jsonReader.nextIfArrayEnd()) {
                     break;
+                }
+                if (i >= types.length) {
+                    throw new JSONException(jsonReader.info("too many array elements"));
                 }
 
                 Object value;
@@ -70,7 +74,7 @@ final class ObjectArrayReaderMultiType
             return values;
         }
 
-        throw new JSONException(jsonReader.info("TODO"));
+        throw new JSONException(jsonReader.info("expected array"));
     }
 
     @Override
@@ -78,6 +82,9 @@ final class ObjectArrayReaderMultiType
         int entryCnt = jsonReader.startArray();
         if (entryCnt == -1) {
             return null;
+        }
+        if (entryCnt > types.length) {
+            throw new JSONException(jsonReader.info("too many array elements"));
         }
 
         Object[] values = new Object[types.length];
@@ -104,6 +111,9 @@ final class ObjectArrayReaderMultiType
 
     @Override
     public Object createInstance(Collection collection, long features) {
-        return new Object[types.length];
+        if (collection != null && collection.size() > types.length) {
+            throw new JSONException("too many array elements");
+        }
+        return TypeUtils.cast(collection, types);
     }
 }

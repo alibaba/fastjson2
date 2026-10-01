@@ -49,27 +49,27 @@ public class ParameterizedTypeImpl
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ParameterizedType)) {
             return false;
         }
 
-        ParameterizedTypeImpl that = (ParameterizedTypeImpl) o;
+        ParameterizedType that = (ParameterizedType) o;
 
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        if (!Arrays.equals(actualTypeArguments, that.actualTypeArguments)) {
+        if (!Arrays.equals(actualTypeArguments, that.getActualTypeArguments())) {
             return false;
         }
-        if (!Objects.equals(ownerType, that.ownerType)) {
+        if (!Objects.equals(ownerType, that.getOwnerType())) {
             return false;
         }
-        return Objects.equals(rawType, that.rawType);
+        return Objects.equals(rawType, that.getRawType());
     }
 
     @Override
     public int hashCode() {
-        int result = actualTypeArguments != null ? Arrays.hashCode(actualTypeArguments) : 0;
-        result = 31 * result + (ownerType != null ? ownerType.hashCode() : 0);
-        result = 31 * result + (rawType != null ? rawType.hashCode() : 0);
-        return result;
+        // Match the reflection implementation so equal types share cache entries.
+        // <details><summary>中文</summary>与反射实现保持一致，使相等类型共享缓存项。</details>
+        return Arrays.hashCode(actualTypeArguments)
+                ^ Objects.hashCode(ownerType)
+                ^ Objects.hashCode(rawType);
     }
 }

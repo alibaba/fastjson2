@@ -59,6 +59,7 @@ class JSONReaderUTF8
         INPUT_CODES = table;
 
         byte[] table2 = table.clone();
+        table2['"'] = INPUT_CODE_ASCII_NORMAL;
         table2['\''] = INPUT_CODE_ASCII_ESCAPE;
         INPUT_CODES_SINGLE_QUOTE = table2;
     }
@@ -2905,7 +2906,7 @@ class JSONReaderUTF8
                     continue;
                 }
 
-                if (ch == '"') {
+                if (ch == quote) {
                     this.nameLength = i;
                     this.nameEnd = offset;
                     offset++;
@@ -3265,8 +3266,6 @@ class JSONReaderUTF8
                         ch = char1(ch);
                         break;
                 }
-            } else if (ch == '"') {
-                break;
             }
             chars[i++] = (char) ch;
             offset++;
@@ -4210,7 +4209,7 @@ class JSONReaderUTF8
                             c = char1(c);
                             break;
                     }
-                } else if (c == '"') {
+                } else if (c == quote) {
                     break;
                 }
 
@@ -4293,16 +4292,16 @@ class JSONReaderUTF8
             }
         }
 
-        int b = bytes[++offset];
+        int b = ++offset == end ? EOI : bytes[offset];
         while (b <= ' ' && ((1L << b) & SPACE) != 0) {
-            b = bytes[++offset];
+            b = ++offset == end ? EOI : bytes[offset];
         }
 
         if (comma = (b == ',')) {
-            this.offset = offset + 1;
+            this.offset = offset == end ? end : offset + 1;
             next();
         } else {
-            this.offset = offset + 1;
+            this.offset = offset == end ? end : offset + 1;
             this.ch = (char) b;
         }
     }
@@ -4388,7 +4387,7 @@ class JSONReaderUTF8
                     }
                     chars[i] = (char) c;
                     offset++;
-                } else if (c == '"') {
+                } else if (c == quote) {
                     break;
                 } else {
                     if (c >= 0) {
@@ -4462,13 +4461,13 @@ class JSONReaderUTF8
             str = new String(bytes, this.offset, offset - this.offset, UTF_8);
         }
 
-        int ch = bytes[++offset];
+        int ch = ++offset == end ? EOI : bytes[offset];
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = bytes[++offset];
+            ch = ++offset == end ? EOI : bytes[offset];
         }
 
         this.comma = ch == ',';
-        this.offset = offset + 1;
+        this.offset = offset == end ? end : offset + 1;
         if (ch == ',') {
             next();
         } else {
@@ -4998,7 +4997,7 @@ class JSONReaderUTF8
         int offset = nameBegin, end = this.end;
         int length = nameEnd - offset;
         if (!nameEscape) {
-            if (ANDROID) {
+            if (ANDROID && nameAscii) {
                 return getLatin1String(offset, length);
             }
             return new String(bytes, offset, length,
@@ -5006,9 +5005,15 @@ class JSONReaderUTF8
             );
         }
 
+        if (this instanceof JSONReaderASCII) {
+            // This reader stores Latin-1 bytes, so escaped values must use its own decoder.
+            // <details><summary>中文</summary>该读取器保存 Latin-1 字节，转义值必须使用其专用解码器。</details>
+            return stringValue = getFieldName();
+        }
+
         char[] chars = new char[nameLength];
 
-        for (int i = 0; ; ++i) {
+        for (int i = 0; offset < nameEnd; ++i) {
             int c = bytes[offset];
             if (c < 0) {
                 switch ((c & 0xFF) >> 4) {
@@ -5089,8 +5094,6 @@ class JSONReaderUTF8
                         c = char1(c);
                         break;
                 }
-            } else if (c == '"') {
-                break;
             }
             chars[i] = (char) c;
             offset++;
@@ -5258,6 +5261,7 @@ class JSONReaderUTF8
                 strBuf[i] = (char) bytes[start + i];
             }
 
+            boolean closed = false;
             LOOP:
             while (offset < end) {
                 while (offset < upperBound) {
@@ -5278,6 +5282,9 @@ class JSONReaderUTF8
                     stroff += 8;
                 }
 
+                if (offset == end) {
+                    break;
+                }
                 if (stroff == strBuf.length) {
                     strBuf = ensureCapacity(strBuf, stroff + 1);
                 }
@@ -5290,6 +5297,7 @@ class JSONReaderUTF8
                         break;
                     case INPUT_CODE_ASCII_ESCAPE:
                         if (c == quote) {
+                            closed = true;
                             break LOOP;
                         } else {
                             c = bytes[offset++];
@@ -5330,6 +5338,9 @@ class JSONReaderUTF8
                 stroff++;
             }
 
+            if (!closed) {
+                throw error("unclosed string");
+            }
             str = new String(strBuf, 0, stroff);
             CHARS_UPDATER.lazySet(cacheItem, strBuf);
         }
@@ -6409,7 +6420,7 @@ class JSONReaderUTF8
             return null;
         }
 
-        offset += 11;
+        offset += 12;
         next();
         if (comma = (ch == ',')) {
             next();
@@ -7511,6 +7522,7 @@ class JSONReaderUTF8
     }
 
     public final boolean readBoolValue() {
+        wasNull = false;
         boolean val = false;
         int end = this.end;
         final byte[] bytes = this.bytes;
@@ -7651,6 +7663,13 @@ class JSONReaderUTF8
     }
 
     public final byte[] readBase64() {
+        if (ch == 'n') {
+            readNull();
+            return null;
+        }
+        if (ch != '"' && ch != '\'') {
+            throw error("base64 only supports string input");
+        }
         byte[] bytes = this.bytes;
         int offset = this.offset, end = this.end;
         int ch = this.ch;
@@ -7660,7 +7679,7 @@ class JSONReaderUTF8
         }
 
         int slashIndex = indexOfSlash(this, bytes, offset, end);
-        if (slashIndex != -1) {
+        if (slashIndex != -1 && slashIndex < index) {
             throw error("invalid base64 string");
         }
 
@@ -7670,7 +7689,7 @@ class JSONReaderUTF8
             int p0, p1;
             String base64 = "base64";
             if (regionMatches(bytes, offset, prefix)
-                    && (p0 = IOUtils.indexOfChar(bytes, ';', prefix.length() + 1, index)) != -1
+                    && (p0 = IOUtils.indexOfChar(bytes, ';', offset + prefix.length() + 1, index)) != -1
                     && (p1 = IOUtils.indexOfChar(bytes, ',', p0 + 1, index)) != -1 && IOUtils.regionMatches(bytes, p0 + 1, base64)) {
                 offset = p1 + 1;
             }
@@ -7684,6 +7703,9 @@ class JSONReaderUTF8
         offset = index + 1;
 
         ch = offset == end ? EOI : (char) bytes[offset++];
+        while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
         if (comma = ch == ',') {
             ch = offset == end ? EOI : bytes[offset++];
             while (ch <= ' ' && (1L << ch & SPACE) != 0) {

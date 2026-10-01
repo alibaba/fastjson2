@@ -267,9 +267,13 @@ public class FieldWriterObject<T>
         JSONWriter.Context context = jsonWriter.context;
         long oldFeatures = context.getFeatures();
         context.setFeatures(this.features | oldFeatures);
-        boolean result = writeInternal(jsonWriter, object);
-        context.setFeatures(oldFeatures);
-        return result;
+        try {
+            return writeInternal(jsonWriter, object);
+        } finally {
+            // Field-specific features must not leak when a getter or nested writer fails.
+            // <details><summary>中文</summary>获取属性或嵌套写入失败时，字段特性不得泄漏。</details>
+            context.setFeatures(oldFeatures);
+        }
     }
 
     private boolean writeInternal(JSONWriter jsonWriter, T object) {

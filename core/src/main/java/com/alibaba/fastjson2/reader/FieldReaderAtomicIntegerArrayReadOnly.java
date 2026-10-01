@@ -61,7 +61,7 @@ final class FieldReaderAtomicIntegerArrayReadOnly<T>
 
         AtomicIntegerArray atomic;
         try {
-            atomic = (AtomicIntegerArray) method.invoke(object);
+            atomic = (AtomicIntegerArray) propertyAccessor.getObject(object);
         } catch (Exception e) {
             throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }

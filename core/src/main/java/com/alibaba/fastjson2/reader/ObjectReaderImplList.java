@@ -686,10 +686,16 @@ public final class ObjectReaderImplList
                 if (jsonReader.isReference()) {
                     String reference = jsonReader.readReference();
                     if ("..".equals(reference)) {
-                        item = this;
+                        item = list;
                     } else {
                         jsonReader.addResolveTask(list, i, JSONPath.of(reference));
-                        continue;
+                        if (list instanceof List) {
+                            // Reserve the index so later elements do not shift into the unresolved slot.
+                            // <details><summary>中文</summary>保留索引位置，避免后续元素占用未解析引用的槽位。</details>
+                            item = null;
+                        } else {
+                            continue;
+                        }
                     }
                 } else {
                     item = itemObjectReader.readObject(jsonReader, itemType, i, 0);

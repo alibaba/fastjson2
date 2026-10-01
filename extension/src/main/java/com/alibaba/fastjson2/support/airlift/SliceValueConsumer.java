@@ -25,7 +25,9 @@ public class SliceValueConsumer
 
     @Override
     public void accept(int value) {
-        int size = (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);
+        // MIN_VALUE cannot be negated when sizing the destination buffer.
+        // <details><summary>中文</summary>计算缓冲区大小时，最小整数取反会溢出。</details>
+        int size = value == Integer.MIN_VALUE ? 11 : (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);
         byte[] bytes = new byte[size];
         IOUtils.getChars(value, bytes.length, bytes);
         slice = Slices.wrappedBuffer(bytes);
@@ -41,7 +43,7 @@ public class SliceValueConsumer
 
     @Override
     public void accept(long value) {
-        int size = (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);
+        int size = value == Long.MIN_VALUE ? 20 : (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);
         byte[] bytes = new byte[size];
         IOUtils.getChars(value, bytes.length, bytes);
         slice = Slices.wrappedBuffer(bytes);
@@ -55,20 +57,12 @@ public class SliceValueConsumer
         }
 
         if (val instanceof Long) {
-            long value = val.longValue();
-            int size = (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);
-            byte[] bytes = new byte[size];
-            IOUtils.getChars(value, bytes.length, bytes);
-            slice = Slices.wrappedBuffer(bytes);
+            accept(val.longValue());
             return;
         }
 
         if (val instanceof Integer || val instanceof Short || val instanceof Byte) {
-            int value = val.intValue();
-            int size = (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);
-            byte[] bytes = new byte[size];
-            IOUtils.getChars(value, bytes.length, bytes);
-            slice = Slices.wrappedBuffer(bytes);
+            accept(val.intValue());
             return;
         }
 

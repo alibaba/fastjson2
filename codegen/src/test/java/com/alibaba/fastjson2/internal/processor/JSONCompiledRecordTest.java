@@ -139,6 +139,25 @@ public class JSONCompiledRecordTest {
         }
     }
 
+    @Test
+    public void nullFieldsRespectWriterFeatures() throws Exception {
+        try (CompiledClass compiled = compile("NullableValues",
+                "import com.alibaba.fastjson2.annotation.JSONCompiled;",
+                "@JSONCompiled",
+                "public record NullableValues(Float single, Double decimal, int[] values) {}"
+        )) {
+            Object bean = compiled.clazz.getConstructors()[0].newInstance(null, null, null);
+            assertEquals("{}", JSON.toJSONString(bean));
+            assertEquals("{\"single\":null,\"decimal\":null,\"values\":null}",
+                    JSON.toJSONString(bean, JSONWriter.Feature.WriteNulls));
+            assertEquals("{\"single\":0,\"decimal\":0,\"values\":[]}",
+                    JSON.toJSONString(bean, JSONWriter.Feature.NullAsDefaultValue));
+            assertEquals("{\"single\":0,\"decimal\":0}",
+                    JSON.toJSONString(bean, JSONWriter.Feature.WriteNullNumberAsZero));
+            assertEquals("{}", JSON.toJSONString(bean, JSONWriter.Feature.BrowserCompatible));
+        }
+    }
+
     private CompiledClass compile(String className, String... sourceLines) throws Exception {
         assumeTrue(isJdk17OrLater());
 

@@ -312,7 +312,7 @@ public abstract class BeanUtils {
                 fields = list.toArray(new Field[list.size()]);
             }
 
-            fieldCache.putIfAbsent(objectClass, fields);
+            declaredFieldCache.putIfAbsent(objectClass, fields);
         }
 
         for (Field field : fields) {
@@ -1325,10 +1325,9 @@ public abstract class BeanUtils {
             case "UpperCase": {
                 char[] chars = new char[methodNameLength - prefixLength];
                 methodName.getChars(prefixLength, methodNameLength, chars, 0);
-                char c0 = chars[0];
                 for (int i = 0; i < chars.length; i++) {
                     char ch = chars[i];
-                    if (ch >= 'a' && c0 <= 'z') {
+                    if (ch >= 'a' && ch <= 'z') {
                         chars[i] = (char) (ch - 32);
                     }
                 }
@@ -1716,13 +1715,18 @@ public abstract class BeanUtils {
         }
     }
 
+    private static char[] namingBuffer(int length) {
+        // Each input character can require a separator as well as the character itself.
+        // <details><summary>中文</summary>每个输入字符最多需要一个分隔符和字符本身。</details>
+        int capacity = Math.max(128, length * 2);
+        char[] buf = TypeUtils.CHARS_UPDATER.getAndSet(TypeUtils.CACHE, null);
+        return buf == null || buf.length < capacity ? new char[capacity] : buf;
+    }
+
     static String snakeCase(String methodName, int prefixLength) {
         final int methodNameLength = methodName.length();
 
-        char[] buf = TypeUtils.CHARS_UPDATER.getAndSet(TypeUtils.CACHE, null);
-        if (buf == null) {
-            buf = new char[128];
-        }
+        char[] buf = namingBuffer(methodNameLength - prefixLength);
         try {
             int off = 0;
             for (int i = prefixLength; i < methodNameLength; ++i) {
@@ -1744,10 +1748,7 @@ public abstract class BeanUtils {
     static String upperCamelWith(String methodName, int prefixLength, char separator) {
         final int methodNameLength = methodName.length();
 
-        char[] buf = TypeUtils.CHARS_UPDATER.getAndSet(TypeUtils.CACHE, null);
-        if (buf == null) {
-            buf = new char[128];
-        }
+        char[] buf = namingBuffer(methodNameLength - prefixLength);
         try {
             int off = 0;
             for (int i = prefixLength; i < methodNameLength; ++i) {
@@ -1792,10 +1793,7 @@ public abstract class BeanUtils {
     static String underScores(String methodName, int prefixLength, boolean upper) {
         final int methodNameLength = methodName.length();
 
-        char[] buf = TypeUtils.CHARS_UPDATER.getAndSet(TypeUtils.CACHE, null);
-        if (buf == null) {
-            buf = new char[128];
-        }
+        char[] buf = namingBuffer(methodNameLength - prefixLength);
         try {
             int off = 0;
             for (int i = prefixLength; i < methodNameLength; ++i) {
@@ -1829,10 +1827,7 @@ public abstract class BeanUtils {
     static String dashes(String methodName, int prefixLength, boolean upper) {
         final int methodNameLength = methodName.length();
 
-        char[] buf = TypeUtils.CHARS_UPDATER.getAndSet(TypeUtils.CACHE, null);
-        if (buf == null) {
-            buf = new char[128];
-        }
+        char[] buf = namingBuffer(methodNameLength - prefixLength);
         try {
             int off = 0;
             for (int i = prefixLength; i < methodNameLength; ++i) {
@@ -1866,10 +1861,7 @@ public abstract class BeanUtils {
     static String dots(String methodName, int prefixLength, boolean upper) {
         final int methodNameLength = methodName.length();
 
-        char[] buf = TypeUtils.CHARS_UPDATER.getAndSet(TypeUtils.CACHE, null);
-        if (buf == null) {
-            buf = new char[128];
-        }
+        char[] buf = namingBuffer(methodNameLength - prefixLength);
         try {
             int off = 0;
             for (int i = prefixLength; i < methodNameLength; ++i) {
@@ -2690,7 +2682,7 @@ public abstract class BeanUtils {
                 fields = list.toArray(new Field[list.size()]);
             }
 
-            fieldCache.putIfAbsent(objectClass, fields);
+            declaredFieldCache.putIfAbsent(objectClass, fields);
         }
 
         Field this0 = null;
@@ -3053,7 +3045,7 @@ public abstract class BeanUtils {
                 if ("enabled".equals(name)) {
                     boolean value = (Boolean) result;
                     if (value) {
-                        fieldInfo.features = FieldInfo.UNWRAPPED_MASK;
+                        fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
                     }
                 }
             } catch (Throwable ignored) {

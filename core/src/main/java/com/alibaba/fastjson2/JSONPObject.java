@@ -14,7 +14,7 @@ import java.util.List;
  * <pre>{@code
  * // Create a JSONP object
  * JSONPObject jsonp = new JSONPObject("callback");
- * jsonp.addParameter(new JSONObject().fluentPut("id", 1).fluentPut("name", "test"));
+ * jsonp.addParameter(JSONObject.of("id", 1, "name", "test"));
  *
  * // Serialize to JSONP string
  * String jsonpString = jsonp.toString(); // "callback({\"id\":1,\"name\":\"test\"})"
@@ -70,7 +70,9 @@ public class JSONPObject {
     }
 
     /**
-     * Gets the parameters list of this JSONP object
+     * Gets the mutable parameters list of this JSONP object.
+     * Changes to this list affect subsequent serialization.
+     * <details><summary>中文</summary>返回可修改的参数列表；修改会影响后续序列化结果。</details>
      *
      * @return the parameters list
      */

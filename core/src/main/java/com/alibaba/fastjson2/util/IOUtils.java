@@ -159,10 +159,11 @@ public class IOUtils {
     }
 
     /**
-     * Calculates the string size (number of digits) needed to represent an integer value.
+     * Calculates the number of decimal digits in a nonnegative integer value.
      * This method is used to determine the buffer size needed for number formatting.
+     * <details><summary>中文</summary>计算非负整数的十进制位数，不包含符号。</details>
      *
-     * @param x the integer value to calculate the string size for
+     * @param x the nonnegative integer value; negative values are not supported
      * @return the number of digits needed to represent the integer value
      */
     public static int stringSize(int x) {
@@ -174,10 +175,11 @@ public class IOUtils {
     }
 
     /**
-     * Calculates the string size (number of digits) needed to represent a long value.
+     * Calculates the number of decimal digits in a nonnegative long value.
      * This method is used to determine the buffer size needed for number formatting.
+     * <details><summary>中文</summary>计算非负长整数的十进制位数，不包含符号。</details>
      *
-     * @param x the long value to calculate the string size for
+     * @param x the nonnegative long value; negative values are not supported
      * @return the number of digits needed to represent the long value
      */
     public static int stringSize(long x) {
@@ -195,9 +197,10 @@ public class IOUtils {
      * Converts an integer to its character representation and writes it to a byte array.
      * This method handles negative numbers and optimizes digit conversion by processing
      * two digits at a time when possible.
+     * <details><summary>中文</summary>从指定结束位置向前写入，调用方须确保缓冲区空间足够。</details>
      *
      * @param i the integer value to convert
-     * @param index the starting index in the buffer where to write the characters
+     * @param index the exclusive end index; sufficient space must exist before this index
      * @param buf the byte array buffer to write the characters to
      */
     public static void getChars(int i, int index, byte[] buf) {
@@ -235,9 +238,10 @@ public class IOUtils {
      * Converts an integer to its character representation and writes it to a character array.
      * This method handles negative numbers and optimizes digit conversion by processing
      * two digits at a time when possible.
+     * <details><summary>中文</summary>从指定结束位置向前写入，调用方须确保缓冲区空间足够。</details>
      *
      * @param i the integer value to convert
-     * @param index the starting index in the buffer where to write the characters
+     * @param index the exclusive end index; sufficient space must exist before this index
      * @param buf the character array buffer to write the characters to
      */
     public static void getChars(int i, int index, char[] buf) {
@@ -277,9 +281,10 @@ public class IOUtils {
      * This method handles negative numbers and optimizes digit conversion by processing
      * two digits at a time when possible, switching to int-based processing when the value
      * fits in an integer.
+     * <details><summary>中文</summary>从指定结束位置向前写入，调用方须确保缓冲区空间足够。</details>
      *
      * @param i the long integer value to convert
-     * @param index the starting index in the buffer where to write the characters
+     * @param index the exclusive end index; sufficient space must exist before this index
      * @param buf the byte array buffer to write the characters to
      */
     public static void getChars(long i, int index, byte[] buf) {
@@ -328,9 +333,10 @@ public class IOUtils {
      * This method handles negative numbers and optimizes digit conversion by processing
      * two digits at a time when possible, switching to int-based processing when the value
      * fits in an integer.
+     * <details><summary>中文</summary>从指定结束位置向前写入，调用方须确保缓冲区空间足够。</details>
      *
      * @param i the long integer value to convert
-     * @param index the starting index in the buffer where to write the characters
+     * @param index the exclusive end index; sufficient space must exist before this index
      * @param buf the character array buffer to write the characters to
      */
     public static void getChars(long i, int index, char[] buf) {
@@ -738,10 +744,7 @@ public class IOUtils {
                     }
                     continue;
                 }
-                dst[dp] = (byte) b0;
-                dst[dp + 1] = 0;
-                dp += 2;
-                break;
+                return -1;
             } else if ((b0 >> 4) == -2) {
                 // 3 bytes, 16 bits: 1110xxxx 10xxxxxx 10xxxxxx
                 if (off + 1 < sl) {
@@ -2235,7 +2238,7 @@ public class IOUtils {
      * @return true if both characters represent valid digits (0-9), false otherwise
      */
     public static boolean isDigit2(char[] buf, int off) {
-        int x = UNSAFE.getShort(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
+        int x = UNSAFE.getInt(buf, ARRAY_CHAR_BASE_OFFSET + ((long) off << 1));
         if (BIG_ENDIAN) {
             x = Integer.reverseBytes(x);
         }

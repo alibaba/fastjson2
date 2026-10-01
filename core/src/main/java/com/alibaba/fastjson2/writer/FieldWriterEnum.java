@@ -252,7 +252,7 @@ class FieldWriterEnum
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeString(e.toString());
+        jsonWriter.writeString((features & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0 ? e.toString() : e.name());
     }
 
     private void writeEnumUsingOrdinal(JSONWriter jsonWriter, int ordinal) {

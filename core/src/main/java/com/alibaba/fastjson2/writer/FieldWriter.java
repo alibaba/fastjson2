@@ -152,8 +152,12 @@ public abstract class FieldWriter<T>
 
         int nameLength = name.length();
         int utflen = nameLength + 3;
+        boolean escapeName = false;
         for (int i = 0; i < nameLength; ++i) {
             char c = name.charAt(i);
+            if (c < 0x20 || c == '"' || c == '\\' || Character.isSurrogate(c)) {
+                escapeName = true;
+            }
             if ((c >= 0x0001) && (c <= 0x007F)) {
                 // skip
             } else if (c > 0x07FF) {
@@ -182,14 +186,22 @@ public abstract class FieldWriter<T>
         }
         bytes[off++] = '"';
         bytes[off] = ':';
-        nameWithColonUTF8 = bytes;
 
         char[] chars = new char[nameLength + 3];
         chars[0] = '"';
         name.getChars(0, name.length(), chars, 1);
         chars[chars.length - 2] = '"';
         chars[chars.length - 1] = ':';
-        nameWithColonUTF16 = chars;
+        if (escapeName) {
+            // Cached raw names must use the same escaping and surrogate handling as JSON strings.
+            // <details><summary>中文</summary>缓存字段名必须使用与 JSON 字符串相同的转义及代理字符处理。</details>
+            String quotedName = JSON.toJSONString(name) + ':';
+            nameWithColonUTF8 = quotedName.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            nameWithColonUTF16 = quotedName.toCharArray();
+        } else {
+            nameWithColonUTF8 = bytes;
+            nameWithColonUTF16 = chars;
+        }
 
         propertyAccessor = createPropertyAccessor(name, fieldType, fieldClass, field, method, function);
         if (function instanceof Function) {
@@ -484,7 +496,7 @@ public abstract class FieldWriter<T>
             }
             if (otherMember instanceof Field) {
                 otherField = ((Field) otherMember).getAnnotation(JSONField.class);
-            } else if (thisMember instanceof Method) {
+            } else if (otherMember instanceof Method) {
                 otherField = ((Method) otherMember).getAnnotation(JSONField.class);
             }
 
@@ -609,7 +621,7 @@ public abstract class FieldWriter<T>
             GZIPOutputStream gzipOut = null;
             try {
                 ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-                if (value.length < 512) {
+                if (value.length > 0 && value.length < 512) {
                     gzipOut = new GZIPOutputStream(byteOut, value.length);
                 } else {
                     gzipOut = new GZIPOutputStream(byteOut);

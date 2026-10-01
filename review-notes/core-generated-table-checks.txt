@@ -1,0 +1,10 @@
+ED.e5datas: rows=1127, malformed=0
+ED.e2datas: rows=972, malformed=0
+ED5.ed5datas: rows=343, malformed=0
+EF.e5fdatas: rows=173, malformed=0
+EF.e2fdatas: rows=105, malformed=0
+INFRASTRUCTURE_TLDS: entries=1, sort/duplicate violations=0
+GENERIC_TLDS: entries=808, sort/duplicate violations=0
+COUNTRY_CODE_TLDS: entries=290 (excluding two commented retired entries), sort/duplicate violations=0
+ED/EF all decimal exponent entries checked against floor(binary exponent * log10(2)): 0 mismatches.
+All 1099 DomainValidator TLD entries: lowercase DNS/punycode label syntax and maximum 63-character length verified; 0 violations. Current IANA membership was not checked.

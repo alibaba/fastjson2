@@ -74,16 +74,18 @@ public class ObjectReaderProvider
     static Consumer<Class> DEFAULT_AUTO_TYPE_HANDLER;
     static boolean DEFAULT_AUTO_TYPE_HANDLER_INIT_ERROR;
 
-    static ObjectReaderCachePair readerCache;
+    private volatile ObjectReaderCachePair readerCache;
 
     private static final class ObjectReaderCachePair {
         final long hashCode;
         final ObjectReader reader;
+        final ClassLoader classLoader;
         volatile int missCount;
 
-        public ObjectReaderCachePair(long hashCode, ObjectReader reader) {
+        public ObjectReaderCachePair(long hashCode, ObjectReader reader, ClassLoader classLoader) {
             this.hashCode = hashCode;
             this.reader = reader;
+            this.classLoader = classLoader;
         }
     }
 
@@ -267,6 +269,7 @@ public class ObjectReaderProvider
         }
 
         hashCache.putIfAbsent(hashCode, objectReader);
+        readerCache = null;
     }
 
     /**
@@ -332,10 +335,23 @@ public class ObjectReaderProvider
     }
 
     /**
-     * Clears all mixin mappings.
+     * Clears all mixin mappings and cached readers for their target classes.
+     * <details><summary>中文</summary>清除全部混入映射及其目标类的读取器缓存。</details>
      */
     public void cleanupMixIn() {
+        Set<Class> targets = new HashSet<>(mixInCache.keySet());
         mixInCache.clear();
+        for (Class target : targets) {
+            cache.remove(target);
+            cacheFieldBased.remove(target);
+        }
+        // Type-name lookups must not recover readers built with the removed annotations.
+        // <details><summary>中文</summary>按类型名查找时也不能复用仍包含已移除注解的读取器。</details>
+        readerCache = null;
+        hashCache.values().removeIf(reader -> targets.contains(reader.getObjectClass()));
+        for (ConcurrentHashMap<Long, ObjectReader> entries : tclHashCaches.values()) {
+            entries.values().removeIf(reader -> targets.contains(reader.getObjectClass()));
+        }
     }
 
     /**
@@ -532,6 +548,7 @@ public class ObjectReaderProvider
      * @param objectClass the class for which to clean up cached ObjectReaders
      */
     public void cleanup(Class objectClass) {
+        readerCache = null;
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
         cacheFieldBased.remove(objectClass);
@@ -553,6 +570,7 @@ public class ObjectReaderProvider
      * @since 2.0.53
      */
     public void clear() {
+        readerCache = null;
         mixInCache.clear();
         cache.clear();
         cacheFieldBased.clear();
@@ -618,6 +636,7 @@ public class ObjectReaderProvider
      * @param classLoader the ClassLoader for which to clean up cached ObjectReaders
      */
     public void cleanup(ClassLoader classLoader) {
+        readerCache = null;
         mixInCache.entrySet().removeIf(
                 entry -> entry.getKey().getClassLoader() == classLoader
         );
@@ -743,9 +762,12 @@ public class ObjectReaderProvider
      * @return the ObjectReader associated with the hash code, or null if not found
      */
     public ObjectReader getObjectReader(long hashCode) {
+        ClassLoader tcl = Thread.currentThread().getContextClassLoader();
         ObjectReaderCachePair pair = readerCache;
         if (pair != null) {
-            if (pair.hashCode == hashCode) {
+            // The fast cache must preserve provider and context-classloader isolation.
+            // <details><summary>中文</summary>快速缓存必须保持提供者与上下文类加载器的隔离。</details>
+            if (pair.hashCode == hashCode && pair.classLoader == tcl) {
                 return pair.reader;
             } else {
                 if (pair.missCount++ > 16) {
@@ -756,7 +778,6 @@ public class ObjectReaderProvider
 
         Long hashCodeObj = hashCode;
         ObjectReader objectReader = null;
-        ClassLoader tcl = Thread.currentThread().getContextClassLoader();
         if (tcl != null && tcl != FASTJSON2_CLASS_LOADER) {
             int tclHash = System.identityHashCode(tcl);
             ConcurrentHashMap<Long, ObjectReader> tclHashCache = tclHashCaches.get(tclHash);
@@ -770,7 +791,7 @@ public class ObjectReaderProvider
         }
 
         if (objectReader != null && readerCache == null) {
-            readerCache = new ObjectReaderCachePair(hashCode, objectReader);
+            readerCache = new ObjectReaderCachePair(hashCode, objectReader, tcl);
         }
 
         return objectReader;

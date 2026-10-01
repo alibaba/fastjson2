@@ -165,6 +165,8 @@ public class ObjectWriterProvider
      * Registers a mixin mapping between a target class and a mixin source class.
      * Mixin allows modifying the serialization behavior of a class by applying
      * annotations from another class.
+     * Cached method-based and field-based writers for the target are invalidated.
+     * <details><summary>中文</summary>为目标类设置混入注解，并清除该类基于方法及字段的写入器缓存。</details>
      *
      * @param target the target class to which the mixin will be applied
      * @param mixinSource the source class from which annotations will be copied, or null to remove the mixin
@@ -176,12 +178,18 @@ public class ObjectWriterProvider
             mixInCache.put(target, mixinSource);
         }
         cache.remove(target);
+        cacheFieldBased.remove(target);
     }
 
     /**
-     * Clears all mixin mappings.
+     * Clears all mixin mappings and cached writers for their target classes.
+     * <details><summary>中文</summary>清除全部混入映射及其目标类的写入器缓存。</details>
      */
     public void cleanupMixIn() {
+        for (Class target : mixInCache.keySet()) {
+            cache.remove(target);
+            cacheFieldBased.remove(target);
+        }
         mixInCache.clear();
     }
 
@@ -472,27 +480,27 @@ public class ObjectWriterProvider
         }
 
         if (objectType == LocalDate.class) {
-            return ObjectWriterImplLocalDate.of(format, null);
+            return ObjectWriterImplLocalDate.of(format, locale);
         }
 
         if (objectType == LocalDateTime.class) {
-            return new ObjectWriterImplLocalDateTime(format, null);
+            return new ObjectWriterImplLocalDateTime(format, locale);
         }
 
         if (objectType == LocalTime.class) {
-            return new ObjectWriterImplLocalTime(format, null);
+            return new ObjectWriterImplLocalTime(format, locale);
         }
 
         if (objectType == Date.class) {
-            return new ObjectWriterImplDate(format, null);
+            return new ObjectWriterImplDate(format, locale);
         }
 
         if (objectType == OffsetDateTime.class) {
-            return ObjectWriterImplOffsetDateTime.of(format, null);
+            return ObjectWriterImplOffsetDateTime.of(format, locale);
         }
 
         if (objectType == ZonedDateTime.class) {
-            return new ObjectWriterImplZonedDateTime(format, null);
+            return new ObjectWriterImplZonedDateTime(format, locale);
         }
 
         return getObjectWriter(objectType);

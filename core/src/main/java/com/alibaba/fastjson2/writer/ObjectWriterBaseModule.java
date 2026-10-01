@@ -832,8 +832,8 @@ public class ObjectWriterBaseModule
                 Class[] interfaces = objectClass.getInterfaces();
                 for (Class anInterface : interfaces) {
                     Method interfaceMethod = BeanUtils.getMethod(anInterface, method);
-                    if (superclass != null && interfaceMethod != null) {
-                        getFieldInfo(beanInfo, fieldInfo, superclass, interfaceMethod);
+                    if (interfaceMethod != null) {
+                        getFieldInfo(beanInfo, fieldInfo, anInterface, interfaceMethod);
                     }
                 }
             }
@@ -1151,13 +1151,15 @@ public class ObjectWriterBaseModule
                         o -> {
                             ByteBuffer buffer = (ByteBuffer) o;
                             if (buffer.hasArray()) {
-                                return buffer.array();
+                                byte[] array = buffer.array();
+                                int start = buffer.arrayOffset() + buffer.position();
+                                int end = buffer.arrayOffset() + buffer.limit();
+                                return start == 0 && end == array.length ? array : Arrays.copyOfRange(array, start, end);
                             }
-                            // For DirectByteBuffer or read-only buffers that don't have a backing array
-                            int position = buffer.position();
+                            // Serialize only the remaining region without changing the source buffer state.
+                            // <details><summary>中文</summary>仅序列化剩余区间，且不改变源缓冲区状态。</details>
                             byte[] bytes = new byte[buffer.remaining()];
-                            buffer.get(bytes);
-                            buffer.position(position); // restore position
+                            buffer.duplicate().get(bytes);
                             return bytes;
                         }
                 );
@@ -1577,7 +1579,7 @@ public class ObjectWriterBaseModule
 
             if (Field.class == clazz) {
                 return new ObjectWriterAdapter<>(
-                        Method.class,
+                        Field.class,
                         null,
                         null,
                         0,

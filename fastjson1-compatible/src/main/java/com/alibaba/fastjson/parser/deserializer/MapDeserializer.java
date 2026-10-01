@@ -15,7 +15,7 @@ public class MapDeserializer
 
     @Override
     public <T> T deserialze(DefaultJSONParser parser, Type type, Object fieldName) {
-        return (T) parser.getRawReader().read(Map.class);
+        return (T) parser.getRawReader().read(type == null ? Map.class : type);
     }
 
     public static Map parseMap(

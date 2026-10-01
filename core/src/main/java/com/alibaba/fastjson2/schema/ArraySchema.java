@@ -193,7 +193,6 @@ public final class ArraySchema
             return new ValidateResult(false, "additional items not match, max size %s, but %s", prefixItems.length, size);
         }
 
-        final boolean isCollection = value instanceof Collection;
         Set<Object> uniqueItemsSet = null;
         int containsCount = 0;
         for (int index = 0; index < size; index++) {
@@ -242,16 +241,12 @@ public final class ArraySchema
             }
         }
 
-        if (!isCollection || this.contains != null) {
+        if (this.contains != null) {
             if (minContains >= 0 && containsCount < minContains) {
                 return new ValidateResult(false, "minContains not match, expect %s, but %s", minContains, containsCount);
             }
 
-            if (isCollection) { // Collection 和 数组 的部分校验规则不一样
-                if (containsCount == 0 && minContains != 0) {
-                    return CONTAINS_NOT_MATCH;
-                }
-            } else if (this.contains != null && containsCount == 0) {
+            if (containsCount == 0 && minContains != 0) {
                 return CONTAINS_NOT_MATCH;
             }
 
@@ -290,11 +285,11 @@ public final class ArraySchema
         object.put("type", "array");
 
         if (maxLength != -1) {
-            object.put("maxLength", maxLength);
+            object.put("maxItems", maxLength);
         }
 
         if (minLength != -1) {
-            object.put("minLength", minLength);
+            object.put("minItems", minLength);
         }
 
         if (itemSchema != null) {
@@ -310,7 +305,7 @@ public final class ArraySchema
         }
 
         if (additionalItem != null) {
-            object.put("additionalItem", additionalItem);
+            object.put("additionalItems", additionalItem);
         }
 
         if (contains != null) {

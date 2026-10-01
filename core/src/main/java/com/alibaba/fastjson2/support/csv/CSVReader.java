@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.stream.StreamReader;
-import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -189,7 +188,9 @@ public abstract class CSVReader<T>
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == 0) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    return new CSVReaderUTF8(bytes, 0, bytes.length, types);
+                    CSVReaderUTF8 reader = new CSVReaderUTF8(bytes, 0, bytes.length, types);
+                    reader.charset = StandardCharsets.ISO_8859_1;
+                    return reader;
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -243,9 +244,8 @@ public abstract class CSVReader<T>
                 || charset == StandardCharsets.UTF_16LE
                 || charset == StandardCharsets.UTF_16BE
         ) {
-            char[] chars = new char[len];
-            int size = IOUtils.decodeUTF8(utf8Bytes, off, len, chars);
-            return new CSVReaderUTF16(chars, 0, size, objectClass);
+            char[] chars = new String(utf8Bytes, off, len, charset).toCharArray();
+            return new CSVReaderUTF16(chars, 0, chars.length, objectClass);
         }
 
         return new CSVReaderUTF8(utf8Bytes, off, len, charset, objectClass);
@@ -639,8 +639,8 @@ public abstract class CSVReader<T>
                 lineSize = 0;
 
                 lineTerminated = i + 1 == length;
-            } else if (ch == '\r' || (features & Feature.IgnoreEmptyLine.mask) == 0) {
-                if (lineSize > 0) {
+            } else if (ch == '\r') {
+                if (lineSize > 0 || (features & Feature.IgnoreEmptyLine.mask) == 0) {
                     rowCount++;
                 }
                 lineTerminated = true;

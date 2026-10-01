@@ -203,19 +203,21 @@ public class ArrowUtils {
         setDecimal(vector, row, chars, 0, chars.length);
     }
 
+    /**
+     * Stores a string as UTF-8; null and empty strings produce a null vector entry.
+     * <details><summary>中文</summary>以 UTF-8 存储字符串；null 和空字符串生成空值。</details>
+     *
+     * @param vector destination vector
+     * @param row destination row
+     * @param str string to store
+     */
     public static void setString(VarCharVector vector, int row, String str) {
         if (str == null || str.length() == 0) {
             vector.setNull(row);
             return;
         }
 
-        byte[] bytes;
-        if (STRING_CODER != null && STRING_VALUE != null && STRING_CODER.applyAsInt(str) == 0) {
-            bytes = JDKUtils.STRING_VALUE.apply(str);
-        } else {
-            bytes = str.getBytes(StandardCharsets.UTF_8);
-        }
-
+        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
         vector.set(row, bytes);
     }
 

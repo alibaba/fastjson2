@@ -20,7 +20,9 @@ import java.util.TreeSet;
 public final class SymbolTable {
     private final String[] names;
     private final long hashCode64;
-    private final short[] mapping;
+    // Keep full indexes for tables with more than 32,768 names.
+    // <details><summary>中文</summary>保留完整索引，支持超过 32,768 个名称的符号表。</details>
+    private final int[] mapping;
 
     private final long[] hashCodes;
     private final long[] hashCodesOrigin;
@@ -53,7 +55,10 @@ public final class SymbolTable {
      * Create a symbol table from string names.
      *
      * <p>The names will be sorted and deduplicated. Each name is assigned a unique ordinal
-     * starting from 1. The ordinal 0 is reserved and means "not found".
+     * starting from 1. Lookup methods return -1 when a name is not found.
+     * <details><summary>中文</summary>
+     * 名称按排序去重后从 1 开始编号；查找不存在的名称时返回 -1。
+     * </details>
      *
      * @param input names to be added to the symbol table
      */
@@ -78,11 +83,11 @@ public final class SymbolTable {
         this.hashCodes = Arrays.copyOf(hashCodes, hashCodes.length);
         Arrays.sort(this.hashCodes);
 
-        mapping = new short[this.hashCodes.length];
+        mapping = new int[this.hashCodes.length];
         for (int i = 0; i < hashCodes.length; i++) {
             long hashCode = hashCodes[i];
             int index = Arrays.binarySearch(this.hashCodes, hashCode);
-            mapping[index] = (short) i;
+            mapping[index] = i;
         }
 
         long hashCode64 = Fnv.MAGIC_HASH_CODE;

@@ -79,9 +79,8 @@ public final class IntegerSchema
                 || valueClass == AtomicInteger.class
                 || valueClass == AtomicLong.class
         ) {
-            boolean isInt64 = true;
-            if (valueClass == BigInteger.class) {
-                isInt64 = isInt64((BigInteger) value);
+            if (valueClass == BigInteger.class && !isInt64((BigInteger) value)) {
+                return validateBigInteger((BigInteger) value);
             }
 
             long longValue = ((Number) value).longValue();
@@ -105,7 +104,7 @@ public final class IntegerSchema
             }
 
             if (constValue != null) {
-                if (this.constValue != longValue || !isInt64) {
+                if (this.constValue != longValue) {
                     return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
                 }
             }
@@ -117,18 +116,7 @@ public final class IntegerSchema
             BigDecimal decimal = (BigDecimal) value;
             boolean integer = TypeUtils.isInteger(decimal);
             if (integer) {
-                BigInteger unscaleValue = decimal.toBigInteger();
-                if (constValue != null) {
-                    boolean equals = false;
-                    if (isInt64(unscaleValue)) {
-                        equals = this.constValue == unscaleValue.longValue();
-                    }
-                    if (!equals) {
-                        return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
-                    }
-                }
-
-                return SUCCESS;
+                return validateInternal(decimal.toBigInteger());
             }
 
             if (constValue != null) {
@@ -165,6 +153,30 @@ public final class IntegerSchema
         }
 
         return typed ? new ValidateResult(false, "expect type %s, but %s", Type.Integer, valueClass) : SUCCESS;
+    }
+
+    private ValidateResult validateBigInteger(BigInteger value) {
+        // Preserve arbitrary precision before checking constraints; longValue() can wrap.
+        // <details><summary>中文</summary>检查约束前保留任意精度；longValue() 可能溢出。</details>
+        if (minimum != Long.MIN_VALUE) {
+            int comparison = value.compareTo(BigInteger.valueOf(minimum));
+            if (exclusiveMinimum ? comparison <= 0 : comparison < 0) {
+                return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect > %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+            }
+        }
+        if (maximum != Long.MIN_VALUE) {
+            int comparison = value.compareTo(BigInteger.valueOf(maximum));
+            if (exclusiveMaximum ? comparison >= 0 : comparison > 0) {
+                return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect < %s, but %s" : "maximum not match, expect <= %s, but %s", maximum, value);
+            }
+        }
+        if (multipleOf != 0 && value.remainder(BigInteger.valueOf(multipleOf)).signum() != 0) {
+            return new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, value);
+        }
+        if (constValue != null) {
+            return new ValidateResult(false, "const not match, expect %s, but %s", constValue, value);
+        }
+        return SUCCESS;
     }
 
     @Override

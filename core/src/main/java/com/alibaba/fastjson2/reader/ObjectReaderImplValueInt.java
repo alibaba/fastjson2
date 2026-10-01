@@ -38,7 +38,7 @@ public class ObjectReaderImplValueInt<T>
         int value = jsonReader.readInt32Value();
 
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         T object;

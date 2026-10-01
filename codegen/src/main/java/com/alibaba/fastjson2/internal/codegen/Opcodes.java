@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.internal.codegen;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 
 import static com.alibaba.fastjson2.internal.codegen.ClassWriter.getTypeName;
@@ -443,9 +444,7 @@ public class Opcodes {
             }
 
             if (value instanceof String) {
-                buf.append('"');
-                buf.append(((String) value).replace("\"", "\\\""));
-                buf.append('"');
+                buf.append(JSON.toJSONString(value));
                 return;
             }
 
@@ -466,9 +465,7 @@ public class Opcodes {
             }
 
             if (value instanceof Character) {
-                buf.append('\'')
-                        .append(((Character) value).charValue())
-                        .append('\'');
+                buf.append("(char) ").append((int) ((Character) value).charValue());
                 return;
             }
 
@@ -548,7 +545,11 @@ public class Opcodes {
             boolean prefix = "!".equals(op);
             if (prefix) {
                 buf.append(op);
+                // Negation applies to the entire operand, including binary expressions.
+                // <details><summary>中文</summary>逻辑取反作用于整个操作数，包括二元表达式。</details>
+                buf.append('(');
                 left.toString(mw, buf, indent);
+                buf.append(')');
             } else {
                 left.toString(mw, buf, indent);
                 buf.append(op);

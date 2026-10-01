@@ -54,7 +54,7 @@ final class ObjectReaderImplOffsetTime
             return null;
         }
 
-        if (format == null) {
+        if (format == null || formatISO8601) {
             return jsonReader.readOffsetTime();
         }
 

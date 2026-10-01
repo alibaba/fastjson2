@@ -63,6 +63,14 @@ public class JSONArray
     /**
      * Replaces the element at the specified position with the specified element
      *
+     * <p>Negative indexes count from the end; an index before the beginning prepends
+     * the element. Nonnegative indexes can extend the array with nulls when the index
+     * is less than {@code size() + 4096}; larger indexes leave the array unchanged.</p>
+     * <details><summary>中文</summary>
+     * 负索引从末尾计数，超出左侧边界时在开头插入。非负索引小于 size() + 4096 时可用 null 扩展数组，
+     * 更大的索引不会修改数组。
+     * </details>
+     *
      * <pre>{@code
      *    JSONArray array = new JSONArray();
      *    array.add(-1); // [-1]
@@ -76,7 +84,7 @@ public class JSONArray
      *
      * @param index index of the element to replace
      * @param element element to be stored at the specified position
-     * @return the element previously at the specified position
+     * @return the previous element, or null if an element was inserted or the array was unchanged
      * @since 2.0.3
      */
     @Override
@@ -1089,7 +1097,8 @@ public class JSONArray
     }
 
     /**
-     * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
+     * Serialize Java Object to JSON {@link String} with specified {@link JSONWriter.Feature}s enabled
+     * <details><summary>中文</summary>使用指定的写入特性将对象序列化为 JSON 字符串。</details>
      *
      * @param object Java Object to be serialized into JSON {@link String}
      * @param features features to be enabled in serialization
@@ -1353,8 +1362,7 @@ public class JSONArray
             return objectReader.createInstance((Collection) value, featuresValue);
         }
 
-        Class clazz = TypeUtils.getMapping(type);
-        if (clazz.isInstance(value)) {
+        if (type instanceof Class && ((Class<?>) type).isInstance(value)) {
             return (T) value;
         }
 
@@ -1362,7 +1370,9 @@ public class JSONArray
         JSONReader jsonReader = JSONReader.of(json);
         jsonReader.context.config(features);
 
-        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
+        // Preserve type arguments when converting a bean through its JSON representation.
+        // <details><summary>中文</summary>通过 JSON 表示转换 Java 对象时保留泛型参数。</details>
+        ObjectReader objectReader = provider.getObjectReader(type, fieldBased);
         return (T) objectReader.readObject(jsonReader, null, null, 0);
     }
 

@@ -85,7 +85,11 @@ class DomainValidator {
         if (ascii) { // skip possibly expensive processing
             return input;
         }
-        return IDN.toASCII(input);
+        try {
+            return IDN.toASCII(input);
+        } catch (IllegalArgumentException ignored) {
+            return input;
+        }
     }
 
     // ---------------------------------------------

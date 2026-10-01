@@ -78,8 +78,16 @@ public final class Fnv {
         if (!ascii) {
             return hashCode64UTF8(bytes, offset, len);
         }
-        if (len > 0 && len <= 8) {
-            long nameValue = IOUtils.getLongLE(bytes, offset) & (0xFFFFFFFFFFFFFFFFL >>> ((8 - len) << 3));
+        if (len > 0 && len <= 8 && bytes[offset] != 0) {
+            long nameValue;
+            if (offset <= bytes.length - 8) {
+                nameValue = IOUtils.getLongLE(bytes, offset) & (0xFFFFFFFFFFFFFFFFL >>> ((8 - len) << 3));
+            } else {
+                nameValue = 0;
+                for (int i = len - 1; i >= 0; --i) {
+                    nameValue = (nameValue << 8) | (bytes[offset + i] & 0xFFL);
+                }
+            }
             if (nameValue != 0) {
                 return nameValue;
             }
@@ -87,7 +95,7 @@ public final class Fnv {
 
         long hashCode = MAGIC_HASH_CODE;
         for (int i = 0; i < len; ++i) {
-            byte ch = bytes[offset + i];
+            int ch = bytes[offset + i] & 0xFF;
             hashCode ^= ch;
             hashCode *= MAGIC_PRIME;
         }

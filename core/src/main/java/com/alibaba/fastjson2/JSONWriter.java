@@ -44,8 +44,9 @@ import static com.alibaba.fastjson2.util.TypeUtils.isJavaScriptSupport;
  *
  * // Writing to a stream
  * try (ByteArrayOutputStream out = new ByteArrayOutputStream();
- *      JSONWriter writer = JSONWriter.of(out, StandardCharsets.UTF_8)) {
+ *      JSONWriter writer = JSONWriter.ofUTF8()) {
  *     writer.writeAny(object);
+ *     writer.flushTo(out);
  *     byte[] jsonBytes = out.toByteArray();
  * }
  *
@@ -1990,7 +1991,8 @@ public abstract class JSONWriter
     /**
      * Writes a Float object.
      * If the value is null, a null value is written according to the NullAsDefaultValue feature.
-     * Otherwise, the value is written as a double.
+     * Otherwise, the value is written with float precision.
+     * <details><summary>中文</summary>非空值按 float 精度输出，避免转换为 double 后引入额外小数位。</details>
      *
      * @param value the Float object to write, can be null
      */
@@ -1998,7 +2000,7 @@ public abstract class JSONWriter
         if (value == null) {
             writeNumberNull();
         } else {
-            writeDouble(value);
+            writeFloat(value.floatValue());
         }
     }
 
@@ -2443,14 +2445,27 @@ public abstract class JSONWriter
 
         try {
             char[] chars = new char[2048];
+            int pending = 0;
             for (; ; ) {
-                int len = reader.read(chars, 0, chars.length);
+                int len = reader.read(chars, pending, chars.length - pending);
                 if (len < 0) {
+                    if (pending != 0) {
+                        writeString(chars, 0, pending, false);
+                    }
                     break;
                 }
 
                 if (len > 0) {
+                    len += pending;
+                    // Keep a trailing high surrogate until its matching character is read.
+                    // <details><summary>中文</summary>保留块末尾的高代理项，直到读入其配对字符。</details>
+                    pending = Character.isHighSurrogate(chars[len - 1]) ? 1 : 0;
+                    char last = chars[len - 1];
+                    len -= pending;
                     writeString(chars, 0, len, false);
+                    if (pending != 0) {
+                        chars[0] = last;
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -3084,7 +3099,7 @@ public abstract class JSONWriter
      * Writes a reference to a previously serialized object.
      * This is used for handling circular references and avoiding infinite loops during serialization.
      *
-     * @param path the JSON Pointer path to the referenced object
+     * @param path the JSONPath expression identifying the referenced object
      */
     public abstract void writeReference(String path);
 
@@ -3200,7 +3215,6 @@ public abstract class JSONWriter
      * <p>Once created, a Context can be configured further:</p>
      * <pre>
      * context.setZoneId(ZoneId.of("UTC"));
-     * context.setLocale(Locale.US);
      * context.setMaxLevel(1000);
      * context.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
      * </pre>
@@ -3622,11 +3636,19 @@ public abstract class JSONWriter
         }
 
         /**
-         * Sets the date format pattern for this context.
+         * Sets the date format pattern, or clears formatting when null or empty.
+         * <details><summary>中文</summary>设置日期格式；null 或空字符串会清除已有格式设置。</details>
          *
          * @param dateFormat the date format pattern to set
          */
         public void setDateFormat(String dateFormat) {
+            if (dateFormat == null || dateFormat.isEmpty()) {
+                this.dateFormat = null;
+                dateFormatter = null;
+                dateFormatMillis = dateFormatISO8601 = dateFormatUnixTime = false;
+                formatHasDay = formatHasHour = formatyyyyMMddhhmmss19 = false;
+                return;
+            }
             if (dateFormat == null || !dateFormat.equals(this.dateFormat)) {
                 dateFormatter = null;
             }
@@ -4082,7 +4104,8 @@ public abstract class JSONWriter
 
         /**
          * Feature that determines whether to write the root class name during serialization.
-         * When enabled, the class name of the root object will be included in the output JSON.
+         * When enabled, the class name of the root object is omitted from the output JSON.
+         * <details><summary>中文</summary>启用后，输出中不包含根对象的类名。</details>
          *
          * <p>By default, this feature is disabled.</p>
          *
@@ -4417,7 +4440,8 @@ public abstract class JSONWriter
          * JSON formatting support using 2 spaces for indentation.
          * When enabled, pretty-printed JSON will use 2 spaces for each indentation level.
          *
-         * <p>This feature requires {@link PrettyFormat} to also be enabled.</p>
+         * <p>This feature enables pretty formatting without requiring {@link #PrettyFormat}.</p>
+         * <details><summary>中文</summary>该特性独立启用美化输出，无需额外启用 PrettyFormat。</details>
          *
          * @since 2.0.54
          */
@@ -4427,7 +4451,8 @@ public abstract class JSONWriter
          * JSON formatting support using 4 spaces for indentation.
          * When enabled, pretty-printed JSON will use 4 spaces for each indentation level.
          *
-         * <p>This feature requires {@link PrettyFormat} to also be enabled.</p>
+         * <p>This feature enables pretty formatting without requiring {@link #PrettyFormat}.</p>
+         * <details><summary>中文</summary>该特性独立启用美化输出，无需额外启用 PrettyFormat。</details>
          *
          * @since 2.0.54
          */
@@ -4469,16 +4494,16 @@ public abstract class JSONWriter
     }
 
     /**
-     * Path represents a JSON pointer path used for reference detection during serialization.
+     * Path represents a JSONPath expression used for reference detection during serialization.
      * It tracks the location of objects within a JSON structure to detect circular references
      * and avoid infinite loops during serialization.
      *
      * <p>The Path class is used internally by JSONWriter to manage object references and
-     * generate JSON Pointer strings as defined in RFC 6901. Paths are hierarchical,
+     * generate JSONPath strings beginning with {@code $}. Paths are hierarchical,
      * with each Path instance containing a reference to its parent Path, forming a tree
      * structure that mirrors the JSON structure being serialized.</p>
      *
-     * <p>Path instances are immutable once created and are used in reference detection
+     * <p>Path segments are immutable; full strings and child paths are cached lazily. They are used in reference detection
      * to determine if an object has already been serialized at another location in the
      * JSON structure.</p>
      *
@@ -4592,7 +4617,8 @@ public abstract class JSONWriter
         }
 
         /**
-         * Returns a string representation of this Path in JSON Pointer format.
+         * Returns a string representation of this Path in JSONPath syntax.
+         * <details><summary>中文</summary>返回使用 JSONPath 语法表示的路径。</details>
          *
          * @return a string representation of this Path
          */
@@ -4683,7 +4709,7 @@ public abstract class JSONWriter
                                     off += 2;
                                     break;
                                 default:
-                                    if ((ch >= 0x0001) && (ch <= 0x007F)) {
+                                    if (ch <= 0x007F) {
                                         if (off == buf.length) {
                                             int newCapacity = buf.length + (buf.length >> 1);
                                             buf = Arrays.copyOf(buf, newCapacity);
@@ -4691,6 +4717,9 @@ public abstract class JSONWriter
                                         buf[off++] = (byte) ch;
                                     } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
                                         ascii = false;
+                                        if (off + 4 > buf.length) {
+                                            buf = Arrays.copyOf(buf, buf.length + (buf.length >> 1));
+                                        }
                                         final int uc;
                                         if (ch < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
                                             if (name.length() - j < 2) {
@@ -4797,7 +4826,7 @@ public abstract class JSONWriter
                                     off += 2;
                                     break;
                                 default:
-                                    if ((ch >= 0x0001) && (ch <= 0x007F)) {
+                                    if (ch <= 0x007F) {
                                         if (off == buf.length) {
                                             int newCapacity = buf.length + (buf.length >> 1);
                                             buf = Arrays.copyOf(buf, newCapacity);
@@ -4805,6 +4834,9 @@ public abstract class JSONWriter
                                         buf[off++] = (byte) ch;
                                     } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
                                         ascii = false;
+                                        if (off + 4 > buf.length) {
+                                            buf = Arrays.copyOf(buf, buf.length + (buf.length >> 1));
+                                        }
                                         final int uc;
                                         if (ch < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
                                             if (name.length() - j < 2) {

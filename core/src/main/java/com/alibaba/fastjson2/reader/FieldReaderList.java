@@ -50,8 +50,9 @@ public class FieldReaderList<T, V>
         this.fieldClassHash = fieldClass == null ? 0 : Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));
         this.listCreator = listCreator;
         this.itemObjectReader = itemObjectReader;
+        this.itemReader = itemObjectReader;
 
-        if (format != null) {
+        if (itemObjectReader == null && format != null) {
             if (itemType == Date.class) {
                 itemReader = new ObjectReaderImplDate(format, locale);
             }

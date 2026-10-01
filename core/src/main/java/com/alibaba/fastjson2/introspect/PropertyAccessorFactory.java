@@ -2864,7 +2864,7 @@ public class PropertyAccessorFactory {
             Type returnType = getter.getGenericReturnType();
             if (propertyType == null) {
                 propertyType = returnType;
-            } else if (!propertyType.equals(propertyType)) {
+            } else if (!propertyType.equals(returnType)) {
                 throw new JSONException("create PropertyAccessor error, propertyType not match");
             }
         }
