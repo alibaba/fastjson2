@@ -34,72 +34,44 @@ import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
 import static com.alibaba.fastjson2.JSONReader.Feature.UseNativeObject;
 
 /**
- * This is the main entry point for using fastjson2 API.
- * It provides a set of static methods for JSON processing,
- * including parsing and serialization of various data types.
+ * Entry point for parsing JSON text, serializing Java values, and configuring default codecs.
+ * Use {@link JSONB} for the binary JSONB format.
  *
- * <p>Example usage:
- * <pre>
- * // 1. Parse JSON string to Object
- * String jsonString = "{\"id\":1,\"name\":\"John\",\"age\":30}";
- * User user = JSON.parseObject(jsonString, User.class);
+ * <p>{@code parse} reads an untyped value, including strings, numbers, booleans and null.
+ * {@code parseObject} overloads with a target type convert the value to that type;
+ * {@code parseArray} overloads with an element type produce a typed list.
+ * Byte input and output use UTF-8 unless an overload accepts a charset.
+ * Offsets and lengths count bytes for byte arrays and UTF-16 code units for strings
+ * and character arrays.</p>
  *
- * // 2. Serialize Object to JSON string
- * User user = new User(1L, "John", 30, new Date(), Arrays.asList("reading", "swimming"));
- * String jsonString = JSON.toJSONString(user);
+ * <p>Feature arguments enable options in addition to the defaults. An overload accepting
+ * a context uses that context's provider and settings. Single-value parsing normally
+ * checks for trailing input; {@link JSONReader.Feature#IgnoreCheckClose} disables that check.
+ * Validation methods use fastjson2's accepted syntax, including supported extensions;
+ * they are not strict RFC-only validators.</p>
  *
- * // 3. Parse JSON string to JSONObject
- * JSONObject jsonObject = JSON.parseObject(jsonString);
+ * <details><summary>中文</summary>
+ * 提供 JSON 文本解析、Java 值序列化和默认编解码器配置；二进制格式请使用 JSONB。
+ * parse 支持对象、数组和标量；带目标类型的方法执行类型转换。未指定字符集时字节输入输出使用 UTF-8。
+ * 字节数组偏移按字节计数，字符串和字符数组按 UTF-16 代码单元计数。
+ * 特性参数在默认配置上启用选项；验证方法遵循 fastjson2 支持的语法，并非严格的 RFC 校验器。
+ * </details>
  *
- * // 4. Parse JSON string to JSONArray
- * String jsonArrayString = "[{\"id\":1,\"name\":\"John\"},{\"id\":2,\"name\":\"Jane\"}]";
- * JSONArray jsonArray = JSON.parseArray(jsonArrayString);
+ * <p>Examples include a consumer overload for newline-delimited records.</p>
+ * <details><summary>中文</summary>示例包含按行读取 JSON 记录的消费器重载。</details>
+ * <pre>{@code
+ * JSONObject object = JSON.parseObject("{\"name\":\"John\",\"age\":30}");
+ * String pretty = JSON.toJSONString(object, JSONWriter.Feature.PrettyFormat);
+ * byte[] utf8 = JSON.toJSONBytes(object);
  *
- * // 5. Parse JSON string to List
- * List&lt;User&gt; userList = JSON.parseArray(jsonArrayString, User.class);
+ * List<Integer> numbers = JSON.parseArray("[1,2,3]", Integer.class);
+ * Map<String, List<Integer>> groups = JSON.parseObject(
+ *         "{\"items\":[1,2]}", new TypeReference<Map<String, List<Integer>>>() {});
  *
- * // 6. Parse JSON with features
- * User user = JSON.parseObject(jsonString, User.class, JSONReader.Feature.FieldBased);
- *
- * // 7. Serialize with features
- * String jsonString = JSON.toJSONString(user, JSONWriter.Feature.PrettyFormat);
- *
- * // 8. Parse from byte array
- * byte[] bytes = jsonString.getBytes(StandardCharsets.UTF_8);
- * User user = JSON.parseObject(bytes, User.class);
- *
- * // 9. Serialize to byte array
- * byte[] bytes = JSON.toJSONBytes(user);
- *
- * // 10. Validate JSON string
- * boolean valid = JSON.isValid(jsonString);
- * </pre>
- *
- * <p>For more advanced usage:
- * <pre>
- * // 1. Working with generic types
- * String jsonString = "{\"users\":[{\"id\":1,\"name\":\"John\"}]}";
- * TypeReference&lt;Map&lt;String, List&lt;User&gt;&gt;&gt; typeReference = new TypeReference&lt;Map&lt;String, List&lt;User&gt;&gt;&gt;() {};
- * Map&lt;String, List&lt;User&gt;&gt; map = JSON.parseObject(jsonString, typeReference);
- *
- * // 2. Working with filters
- * SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
- * filter.getExcludes().add("id");
- * String jsonString = JSON.toJSONString(user, filter);
- *
- * // 3. Working with date format
- * String jsonString = JSON.toJSONString(user, "yyyy-MM-dd HH:mm:ss");
- *
- * // 4. Working with custom context
- * JSONReader.Context readerContext = JSONFactory.createReadContext();
- * readerContext.setDateFormat("yyyy-MM-dd");
- * User user = JSON.parseObject(jsonString, User.class, readerContext);
- *
- * // 5. Streaming parsing
- * try (InputStream inputStream = new FileInputStream("data.json")) {
- *     JSON.parseObject(inputStream, User.class, System.out::println);
+ * try (InputStream input = new java.io.ByteArrayInputStream(utf8)) {
+ *     JSON.<JSONObject>parseObject(input, JSONObject.class, System.out::println);
  * }
- * </pre>
+ * }</pre>
  *
  * @since 2.0.0
  */
@@ -111,12 +83,19 @@ public interface JSON {
     String VERSION = "2.0.64";
 
     /**
-     * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received {@link String} is {@code null} or empty.
+     * Parses one JSON value from the string.
+     * The result may be an object, array, string, number, boolean or null.
+     * Object and array representations depend on the reader context and features.
      *
-     * @param text the specified text to be parsed
-     * @return either {@link JSONArray} or {@link JSONObject} or null
-     * @throws JSONException If a parsing error occurs
+     * <p>Returns null for a null input or an empty input.</p>
+     *
+     * <details><summary>中文</summary>
+     * 解析一个 JSON 值，支持对象、数组及标量；容器类型由读取上下文和特性决定。
+     * </details>
+     *
+     * @param text the JSON text
+     * @return the parsed Java value, or null
+     * @throws JSONException if a parsing error occurs
      */
     static Object parse(String text) {
         if (text == null || text.isEmpty()) {
@@ -157,13 +136,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received {@link String} is {@code null} or empty.
+     * Parses one JSON value from the string.
+     * The result may be an object, array, string, number, boolean or null.
+     * Object and array representations depend on the reader context and features.
      *
-     * @param text the specified text to be parsed
-     * @param features the specified features is applied to parsing
-     * @return either {@link JSONArray} or {@link JSONObject} or null
-     * @throws JSONException If a parsing error occurs
+     * <p>Returns null for a null input or an empty input.</p>
+     *
+     * <details><summary>中文</summary>
+     * 解析一个 JSON 值，支持对象、数组及标量；容器类型由读取上下文和特性决定。
+     * </details>
+     *
+     * @param text the JSON text
+     * @param features reader features to enable in addition to the defaults
+     * @return the parsed Java value, or null
+     * @throws JSONException if a parsing error occurs
      */
     static Object parse(String text, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
@@ -185,15 +171,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received {@link String} is {@code null} or empty or length is 0.
+     * Parses one JSON value from the string slice.
+     * The result may be an object, array, string, number, boolean or null.
+     * Object and array representations depend on the reader context and features.
      *
-     * @param text the specified text to be parsed
-     * @param offset the starting index of string
-     * @param length the specified length of string
-     * @param features the specified features is applied to parsing
-     * @return either {@link JSONArray} or {@link JSONObject} or null
-     * @throws JSONException If a parsing error occurs
+     * <p>Returns null for a null input or an empty input, or when length is zero.</p>
+     *
+     * <details><summary>中文</summary>
+     * 解析一个 JSON 值，支持对象、数组及标量；容器类型由读取上下文和特性决定。
+     * </details>
+     *
+     * @param text the JSON text
+     * @param offset the zero-based offset in UTF-16 code units
+     * @param length the number of UTF-16 code units to read, not the end index
+     * @param features reader features to enable in addition to the defaults
+     * @return the parsed Java value, or null
+     * @throws JSONException if a parsing error occurs
      */
     static Object parse(String text, int offset, int length, JSONReader.Feature... features) {
         if (text == null || text.isEmpty() || length == 0) {
@@ -214,14 +207,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received {@link String} is {@code null} or empty.
+     * Parses one JSON value from the string.
+     * The result may be an object, array, string, number, boolean or null.
+     * Object and array representations depend on the reader context and features.
      *
-     * @param text the specified text to be parsed
-     * @param context the specified custom context
-     * @return either {@link JSONArray} or {@link JSONObject} or null
-     * @throws JSONException If a parsing error occurs
-     * @throws NullPointerException If received context is null
+     * <p>Returns null for a null input or an empty input.</p>
+     *
+     * <details><summary>中文</summary>
+     * 解析一个 JSON 值，支持对象、数组及标量；容器类型由读取上下文和特性决定。
+     * </details>
+     *
+     * @param text the JSON text
+     * @param context the reader provider and parsing settings, not null
+     * @return the parsed Java value, or null
+     * @throws JSONException if a parsing error occurs
+     * @throws NullPointerException if received context is null
      */
     static Object parse(String text, JSONReader.Context context) {
         if (text == null || text.isEmpty()) {
@@ -240,13 +240,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received byte array is {@code null} or empty.
+     * Parses one JSON value from the byte array.
+     * The result may be an object, array, string, number, boolean or null.
+     * Object and array representations depend on the reader context and features.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param features the specified features is applied to parsing
-     * @return either {@link JSONArray} or {@link JSONObject} or null
-     * @throws JSONException If a parsing error occurs
+     * <p>Returns null for a null input or an empty input.</p>
+     *
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 解析一个 JSON 值，支持对象、数组及标量；容器类型由读取上下文和特性决定。
+     * </details>
+     *
+     * @param bytes the UTF-8 JSON text
+     * @param features reader features to enable in addition to the defaults
+     * @return the parsed Java value, or null
+     * @throws JSONException if a parsing error occurs
      */
     static Object parse(byte[] bytes, JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0) {
@@ -267,13 +276,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received byte array is {@code null} or empty.
+     * Parses one JSON value from the byte array.
+     * The result may be an object, array, string, number, boolean or null.
+     * Object and array representations depend on the reader context and features.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param context the specified custom context
-     * @return either {@link JSONArray} or {@link JSONObject} or null
-     * @throws JSONException If a parsing error occurs
+     * <p>Returns null for a null input or an empty input.</p>
+     *
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 解析一个 JSON 值，支持对象、数组及标量；容器类型由读取上下文和特性决定。
+     * </details>
+     *
+     * @param bytes the UTF-8 JSON text
+     * @param context the reader provider and parsing settings, not null
+     * @return the parsed Java value, or null
+     * @throws JSONException if a parsing error occurs
      * @since 2.0.51
      */
     static Object parse(byte[] bytes, JSONReader.Context context) {
@@ -293,13 +311,25 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received byte array is {@code null} or empty.
+     * Parses one JSON value from the byte array slice.
+     * The result may be an object, array, string, number, boolean or null.
+     * Object and array representations depend on the reader context and features.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param context the specified custom context
-     * @return either {@link JSONArray} or {@link JSONObject} or null
-     * @throws JSONException If a parsing error occurs
+     * <p>Returns null for a null input or an empty input.</p>
+     *
+     * <p>The selected bytes are decoded with the supplied charset; they must contain JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 解析一个 JSON 值，支持对象、数组及标量；容器类型由读取上下文和特性决定。
+     * </details>
+     *
+     * @param bytes the encoded JSON text
+     * @param offset the zero-based offset in bytes
+     * @param length the number of bytes to read, not the end index
+     * @param charset the input charset: UTF-8, UTF-16, US-ASCII or ISO-8859-1; not null
+     * @param context the reader provider and parsing settings, not null
+     * @return the parsed Java value, or null
+     * @throws JSONException if a parsing error occurs
      * @since 2.0.51
      */
     static Object parse(byte[] bytes, int offset, int length, Charset charset, JSONReader.Context context) {
@@ -319,13 +349,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json char array as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received char array is {@code null} or empty.
+     * Parses one JSON value from the character array.
+     * The result may be an object, array, string, number, boolean or null.
+     * Object and array representations depend on the reader context and features.
      *
-     * @param chars the specified char array to be parsed
-     * @param features the specified features is applied to parsing
-     * @return either {@link JSONArray} or {@link JSONObject} or null
-     * @throws JSONException If a parsing error occurs
+     * <p>Returns null for a null input or an empty input.</p>
+     *
+     * <details><summary>中文</summary>
+     * 解析一个 JSON 值，支持对象、数组及标量；容器类型由读取上下文和特性决定。
+     * </details>
+     *
+     * @param chars the JSON text as UTF-16 code units
+     * @param features reader features to enable in addition to the defaults
+     * @return the parsed Java value, or null
+     * @throws JSONException if a parsing error occurs
      */
     static Object parse(char[] chars, JSONReader.Feature... features) {
         if (chars == null || chars.length == 0) {
@@ -346,13 +383,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json char array as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received char array is {@code null} or empty.
+     * Parses one JSON value from the character array.
+     * The result may be an object, array, string, number, boolean or null.
+     * Object and array representations depend on the reader context and features.
      *
-     * @param chars the specified char array to be parsed
-     * @param context the specified custom context
-     * @return either {@link JSONArray} or {@link JSONObject} or null
-     * @throws JSONException If a parsing error occurs
+     * <p>Returns null for a null input or an empty input.</p>
+     *
+     * <details><summary>中文</summary>
+     * 解析一个 JSON 值，支持对象、数组及标量；容器类型由读取上下文和特性决定。
+     * </details>
+     *
+     * @param chars the JSON text as UTF-16 code units
+     * @param context the reader provider and parsing settings, not null
+     * @return the parsed Java value, or null
+     * @throws JSONException if a parsing error occurs
      * @since 2.0.51
      */
     static Object parse(char[] chars, JSONReader.Context context) {
@@ -372,14 +416,24 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received {@link InputStream} is {@code null} or empty.
+     * Parses one JSON value from the input.
+     * The result may be an object, array, string, number, boolean or null.
+     * Object and array representations depend on the reader context and features.
      *
-     * @param in the specified stream to be parsed
-     * @param features the specified features is applied to parsing
-     * @return either {@link JSONArray} or {@link JSONObject} or null
-     * @throws JSONException If a parsing error occurs
-     * @throws NullPointerException If received context is null
+     * <p>Returns null for a null input.</p>
+     *
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <p>Input bytes are decoded as UTF-8.</p>
+     *
+     * <details><summary>中文</summary>
+     * 解析一个 JSON 值，支持对象、数组及标量；容器类型由读取上下文和特性决定。
+     * </details>
+     *
+     * @param in the input stream to parse, or null
+     * @param features reader features to enable in addition to the defaults
+     * @return the parsed Java value, or null
+     * @throws JSONException if a parsing error occurs
      * @since 2.0.61
      */
     static Object parse(InputStream in, JSONReader.Feature... features) {
@@ -387,14 +441,25 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received {@link InputStream} is {@code null} or empty.
+     * Parses one JSON value from the input.
+     * The result may be an object, array, string, number, boolean or null.
+     * Object and array representations depend on the reader context and features.
      *
-     * @param in the specified stream to be parsed
-     * @param context the specified custom context
-     * @return either {@link JSONArray} or {@link JSONObject} or null
-     * @throws JSONException If a parsing error occurs
-     * @throws NullPointerException If received context is null
+     * <p>Returns null for a null input.</p>
+     *
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <p>Input bytes are decoded as UTF-8.</p>
+     *
+     * <details><summary>中文</summary>
+     * 解析一个 JSON 值，支持对象、数组及标量；容器类型由读取上下文和特性决定。
+     * </details>
+     *
+     * @param in the input stream to parse, or null
+     * @param context the reader provider and parsing settings, not null
+     * @return the parsed Java value, or null
+     * @throws JSONException if a parsing error occurs
+     * @throws NullPointerException if received context is null
      * @since 2.0.47
      */
     static Object parse(InputStream in, JSONReader.Context context) {
@@ -413,14 +478,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received {@link InputStream} is {@code null} or empty.
+     * Parses one JSON value from the input.
+     * The result may be an object, array, string, number, boolean or null.
+     * Object and array representations depend on the reader context and features.
      *
-     * @param in the specified stream to be parsed
-     * @param charset the specified charset of the stream
-     * @return either {@link JSONArray} or {@link JSONObject} or null
-     * @throws JSONException If a parsing error occurs
-     * @throws NullPointerException If received context is null
+     * <p>Returns null for a null input.</p>
+     *
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 解析一个 JSON 值，支持对象、数组及标量；容器类型由读取上下文和特性决定。
+     * </details>
+     *
+     * @param in the input stream to parse, or null
+     * @param charset the charset used to decode the input; null selects UTF-8
+     * @return the parsed Java value, or null
+     * @throws JSONException if a parsing error occurs
      * @since 2.0.61
      */
     static Object parse(InputStream in, Charset charset) {
@@ -428,15 +501,24 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link JSONArray} or {@link JSONObject}.
-     * Returns {@code null} if received {@link InputStream} is {@code null} or empty.
+     * Parses one JSON value from the input.
+     * The result may be an object, array, string, number, boolean or null.
+     * Object and array representations depend on the reader context and features.
      *
-     * @param in the specified stream to be parsed
-     * @param charset the specified charset of the stream
-     * @param context the specified custom context
-     * @return either {@link JSONArray} or {@link JSONObject} or null
-     * @throws JSONException If a parsing error occurs
-     * @throws NullPointerException If received context is null
+     * <p>Returns null for a null input.</p>
+     *
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 解析一个 JSON 值，支持对象、数组及标量；容器类型由读取上下文和特性决定。
+     * </details>
+     *
+     * @param in the input stream to parse, or null
+     * @param charset the charset used to decode the input; null selects UTF-8
+     * @param context the reader provider and parsing settings, not null
+     * @return the parsed Java value, or null
+     * @throws JSONException if a parsing error occurs
+     * @throws NullPointerException if received context is null
      * @since 2.0.61
      */
     static Object parse(InputStream in, Charset charset, JSONReader.Context context) {
@@ -455,12 +537,17 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a {@link JSONObject}. Returns {@code null}
-     * if received {@link String} is {@code null} or empty or its content is null.
+     * Parses JSON from the string input into {@link JSONObject}.
+     * Returns null for null input or an empty input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param text the specified string to be parsed
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param text the JSON text
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONObject parseObject(String text) {
         if (text == null || text.isEmpty()) {
@@ -485,13 +572,18 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a {@link JSONObject}. Returns {@code null}
-     * if received {@link String} is {@code null} or empty or its content is null.
+     * Parses JSON from the string input into {@link JSONObject}.
+     * Returns null for null input or an empty input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param text the specified string to be parsed
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param text the JSON text
+     * @param features reader features to enable in addition to the defaults
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONObject parseObject(String text, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
@@ -517,15 +609,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a {@link JSONObject}. Returns {@code null} if received
-     * {@link String} is {@code null} or empty or length is 0 or its content is null.
+     * Parses JSON from the string input slice into {@link JSONObject}.
+     * Returns null for null input or an empty input, or when length is zero.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param text the specified text to be parsed
-     * @param offset the starting index of string
-     * @param length the specified length of string
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param text the JSON text
+     * @param offset the zero-based offset in UTF-16 code units
+     * @param length the number of UTF-16 code units to read, not the end index
+     * @param features reader features to enable in addition to the defaults
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONObject parseObject(String text, int offset, int length, JSONReader.Feature... features) {
         if (text == null || text.isEmpty() || length == 0) {
@@ -550,16 +647,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a {@link JSONObject}. Returns {@code null} if received
-     * {@link String} is {@code null} or empty or length is 0 or its content is null.
+     * Parses JSON from the string input slice into {@link JSONObject}.
+     * Returns null for null input or an empty input, or when length is zero.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param text the specified text to be parsed
-     * @param offset the starting index of string
-     * @param length the specified length of string
-     * @param context the specified custom context
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param text the JSON text
+     * @param offset the zero-based offset in UTF-16 code units
+     * @param length the number of UTF-16 code units to read, not the end index
+     * @param context the reader provider and parsing settings, not null
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
-     * @throws NullPointerException If received context is null
+     * @throws JSONException if a parsing error occurs
+     * @throws NullPointerException if received context is null
      * @since 2.0.30
      */
     static JSONObject parseObject(String text, int offset, int length, JSONReader.Context context) {
@@ -584,14 +686,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a {@link JSONObject}. Returns {@code null} if
-     * received {@link String} is {@code null} or empty or its content is null.
+     * Parses JSON from the string input into {@link JSONObject}.
+     * Returns null for null input or an empty input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param text the specified string to be parsed
-     * @param context the specified custom context
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param text the JSON text
+     * @param context the reader provider and parsing settings, not null
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
-     * @throws NullPointerException If received context is null
+     * @throws JSONException if a parsing error occurs
+     * @throws NullPointerException if received context is null
      */
     static JSONObject parseObject(String text, JSONReader.Context context) {
         if (text == null || text.isEmpty()) {
@@ -615,13 +722,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json reader as a {@link JSONObject}. Returns {@code null}
-     * if received {@link Reader} is {@code null} or its content is null.
+     * Parses JSON from the input into {@link JSONObject}.
+     * Returns null for null input, including an input with no value after whitespace.
      *
-     * @param input the specified reader to be parsed
-     * @param features the specified features is applied to parsing
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param input the input to parse, or null
+     * @param features reader features to enable in addition to the defaults
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONObject parseObject(Reader input, JSONReader.Feature... features) {
         if (input == null) {
@@ -647,13 +760,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link JSONObject}. Returns {@code null} if
-     * received {@link InputStream} is {@code null} or closed or its content is null.
+     * Parses JSON from the input into {@link JSONObject}.
+     * Returns null for null input, including an input with no value after whitespace.
      *
-     * @param input the specified stream to be parsed
-     * @param features the specified features is applied to parsing
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <p>Input bytes are decoded as UTF-8.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param input the input to parse, or null
+     * @param features reader features to enable in addition to the defaults
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONObject parseObject(InputStream input, JSONReader.Feature... features) {
         if (input == null) {
@@ -679,12 +800,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a {@link JSONObject}. Returns {@code null}
-     * if received byte array is {@code null} or empty or its content is null.
+     * Parses JSON from the encoded byte input into {@link JSONObject}.
+     * Returns null for null input or an empty input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param bytes the specified UTF8 text to be parsed
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param bytes the UTF-8 JSON text
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONObject parseObject(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
@@ -710,12 +838,17 @@ public interface JSON {
     }
 
     /**
-     * Parses the json char array as a {@link JSONObject}. Returns {@code null}
-     * if received char array is {@code null} or empty or its content is null.
+     * Parses JSON from the character input into {@link JSONObject}.
+     * Returns null for null input or an empty input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param chars the specified char array to be parsed
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param chars the JSON text as UTF-16 code units
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONObject parseObject(char[] chars) {
         if (chars == null || chars.length == 0) {
@@ -741,13 +874,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link JSONObject}. Returns {@code null}
-     * if received {@link InputStream} is {@code null} or its content is null.
+     * Parses JSON from the input into {@link JSONObject}.
+     * Returns null for null input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param in the specified stream to be parsed
-     * @param charset the specified charset of the stream
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param in the input stream to parse, or null
+     * @param charset the charset used to decode the input; null selects UTF-8
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONObject parseObject(InputStream in, Charset charset) {
         if (in == null) {
@@ -773,14 +913,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link JSONObject}. Returns {@code null} if
-     * received {@link InputStream} is {@code null} or closed or its content is null.
+     * Parses JSON from the input into {@link JSONObject}.
+     * Returns null for null input, including an input with no value after whitespace.
      *
-     * @param input the specified stream to be parsed
-     * @param charset the specified charset of the stream
-     * @param context the specified custom context
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param input the input to parse, or null
+     * @param charset the charset used to decode the input; null selects UTF-8
+     * @param context the reader provider and parsing settings, not null
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      *
      * @since 2.0.47
      */
@@ -807,12 +953,18 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream of the url as a {@link JSONObject}.
-     * Returns {@code null} if received {@link URL} is {@code null}.
+     * Parses JSON from the URL into {@link JSONObject}.
+     * Returns null for null input.
      *
-     * @param url the specified url to be parsed
+     * <p>Opens the URL as UTF-8 JSON and closes the opened stream after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param url the URL to open, or null
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If an I/O error or parsing error occurs
+     * @throws JSONException if an I/O error or parsing error occurs
      * @see URL#openStream()
      * @see JSON#parseObject(InputStream, Charset)
      */
@@ -829,13 +981,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a {@link JSONObject}. Returns {@code null}
-     * if received byte array is {@code null} or empty or its content is null.
+     * Parses JSON from the encoded byte input into {@link JSONObject}.
+     * Returns null for null input or an empty input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param features the specified features is applied to parsing
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param bytes the UTF-8 JSON text
+     * @param features reader features to enable in addition to the defaults
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONObject parseObject(byte[] bytes, JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0) {
@@ -860,15 +1019,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a {@link JSONObject}. Returns {@code null} if
-     * received byte array is {@code null} or empty or length is 0 or its content is null.
+     * Parses JSON from the encoded byte input slice into {@link JSONObject}.
+     * Returns null for null input or an empty input, or when length is zero.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param offset the starting index of array
-     * @param length the specified length of array
-     * @param features the specified features is applied to parsing
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param bytes the UTF-8 JSON text
+     * @param offset the zero-based offset in bytes
+     * @param length the number of bytes to read, not the end index
+     * @param features reader features to enable in addition to the defaults
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONObject parseObject(byte[] bytes, int offset, int length, JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0 || length == 0) {
@@ -893,15 +1059,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json chars array as a {@link JSONObject}. Returns {@code null} if
-     * received chars array is {@code null} or empty or length is 0 or its content is null.
+     * Parses JSON from the character input slice into {@link JSONObject}.
+     * Returns null for null input or an empty input, or when length is zero.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param chars the specified chars array to be parsed
-     * @param offset the starting index of array
-     * @param length the specified length of array
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param chars the JSON text as UTF-16 code units
+     * @param offset the zero-based offset in UTF-16 code units
+     * @param length the number of UTF-16 code units to read, not the end index
+     * @param features reader features to enable in addition to the defaults
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONObject parseObject(char[] chars, int offset, int length, JSONReader.Feature... features) {
         if (chars == null || chars.length == 0 || length == 0) {
@@ -926,16 +1097,23 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a {@link JSONObject}. Returns {@code null} if
-     * received byte array is {@code null} or empty or length is 0 or its content is null.
+     * Parses JSON from the encoded byte input slice into {@link JSONObject}.
+     * Returns null for null input or an empty input, or when length is zero.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param offset the starting index of array
-     * @param length the specified length of array
-     * @param charset the specified charset of the stream
-     * @param features the specified features is applied to parsing
+     * <p>The selected bytes are decoded with the supplied charset; they must contain JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param bytes the encoded JSON text
+     * @param offset the zero-based offset in bytes
+     * @param length the number of bytes to read, not the end index
+     * @param charset the input charset: UTF-8, UTF-16, US-ASCII or ISO-8859-1; not null
+     * @param features reader features to enable in addition to the defaults
      * @return {@link JSONObject} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      * @see JSON#parseObject(byte[], int, int, JSONReader.Feature...)
      */
     static JSONObject parseObject(
@@ -967,13 +1145,18 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param clazz the specified class of {@code T}
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param clazz the target class
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz) {
@@ -1001,15 +1184,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns {@code null}
-     * if received {@link String} is {@code null} or empty or its content is null.
+     * Parses JSON from the string input into the requested Java type.
+     * Returns null for null input or an empty input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param text the specified string to be parsed
-     * @param clazz the specified class of {@code T}
-     * @param filter the specified filter is applied to parsing
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param clazz the target class
+     * @param filter the filter to apply while reading
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(
@@ -1043,16 +1232,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns {@code null}
-     * if received {@link String} is {@code null} or empty or its content is null.
+     * Parses JSON from the string input into the requested Java type.
+     * Returns null for null input or an empty input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param text the specified string to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param format the specified date format
-     * @param filters the specified filters is applied to parsing
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param type the target type, including any generic arguments
+     * @param format the date/time pattern or supported format name, such as {@code millis}, {@code unixtime} or {@code iso8601}
+     * @param filters filters to apply while reading
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(
@@ -1094,13 +1289,18 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param type the specified actual type of {@code T}
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param type the target type, including any generic arguments
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type) {
@@ -1128,14 +1328,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns {@code null}
-     * if received {@link String} is {@code null} or empty or its content is null.
+     * Parses JSON from the string input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param context the specified custom context
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param type the target type, including any generic arguments
+     * @param context the reader provider and parsing settings, not null
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      * @since 2.0.52
      */
     @SuppressWarnings("unchecked")
@@ -1159,13 +1364,18 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses a JSON object into a map whose value types are configured by key.
+     * Returns null for a null or empty input string.
      *
-     * @param text the specified string to be parsed
-     * @param type the specified actual type of {@code T}
+     * <details><summary>中文</summary>
+     * 解析 JSON 对象为按键配置值类型的 Map；空输入返回 null。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param type the map type and per-key value types
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      * @since 2.0.34
      */
     static <T extends Map<String, Object>> T parseObject(String text, MapMultiValueType<T> type) {
@@ -1189,13 +1399,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses a JSON array into an {@code Object[]} using one target type per position.
+     * Returns null for a null or empty string. The inferred {@code T} must be compatible
+     * with {@code Object[]}; use {@link #parseArray(String, Type...)} for a list result.
      *
-     * @param text the specified string to be parsed
-     * @param types the specified actual parameter types
+     * <details><summary>中文</summary>
+     * 按位置指定类型解析 JSON 数组，返回 Object[]；空输入返回 null。泛型结果必须与 Object[] 兼容；需要 List 时使用 parseArray。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param types the target type for each array position, in order
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      * @see MultiType
      * @see JSON#parseObject(String, Type)
      */
@@ -1204,14 +1420,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param typeReference the specified actual type
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param typeReference the captured target type, including generic arguments
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, TypeReference<T> typeReference, JSONReader.Feature... features) {
@@ -1237,15 +1458,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param typeReference the specified actual type
-     * @param filter the specified filter is applied to parsing
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param typeReference the captured target type, including generic arguments
+     * @param filter the filter to apply while reading
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(
@@ -1276,14 +1502,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param clazz the specified class of {@code T}
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param clazz the target class
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz, JSONReader.Feature... features) {
@@ -1308,16 +1539,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns {@code null}
-     * if received {@link String} is {@code null} or empty or length is 0.
+     * Parses JSON from the string input slice into the requested Java type.
+     * Returns null for null input or an empty input, or when length is zero.
      *
-     * @param text the specified string to be parsed
-     * @param offset the starting index of string
-     * @param length the specified length of string
-     * @param clazz the specified class of {@code T}
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param offset the zero-based offset in UTF-16 code units
+     * @param length the number of UTF-16 code units to read, not the end index
+     * @param clazz the target class
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, int offset, int length, Class<T> clazz, JSONReader.Feature... features) {
@@ -1342,15 +1578,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param clazz the specified class of {@code T}
-     * @param context the specified custom context
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param clazz the target class
+     * @param context the reader provider and parsing settings, not null
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
-     * @throws NullPointerException If received context is null
+     * @throws JSONException if a parsing error occurs
+     * @throws NullPointerException if received context is null
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz, JSONReader.Context context) {
@@ -1374,15 +1615,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param clazz the specified class of {@code T}
-     * @param format the specified date format
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param clazz the target class
+     * @param format the date/time pattern or supported format name, such as {@code millis}, {@code unixtime} or {@code iso8601}
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz, String format, JSONReader.Feature... features) {
@@ -1411,14 +1657,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param type the specified actual type
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param type the target type, including any generic arguments
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type, JSONReader.Feature... features) {
@@ -1442,15 +1693,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param type the specified actual type
-     * @param filter the specified filter is applied to parsing
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param type the target type, including any generic arguments
+     * @param filter the filter to apply while reading
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type, Filter filter, JSONReader.Feature... features) {
@@ -1474,15 +1730,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param type the specified actual type
-     * @param format the specified date format
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param type the target type, including any generic arguments
+     * @param format the date/time pattern or supported format name, such as {@code millis}, {@code unixtime} or {@code iso8601}
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type, String format, JSONReader.Feature... features) {
@@ -1509,16 +1770,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json char array as {@code T}. Returns {@code null}
-     * if received char array is {@code null} or empty or length is 0.
+     * Parses JSON from the character input slice into the requested Java type.
+     * Returns null for null input or an empty input, or when length is zero.
      *
-     * @param chars the specified char array to be parsed
-     * @param type the specified actual type
-     * @param offset the starting index of array
-     * @param length the specified length of array
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param chars the JSON text as UTF-16 code units
+     * @param offset the zero-based offset in UTF-16 code units
+     * @param length the number of UTF-16 code units to read, not the end index
+     * @param type the target type, including any generic arguments
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      * @since 2.0.13
      */
     @SuppressWarnings("unchecked")
@@ -1543,13 +1809,18 @@ public interface JSON {
     }
 
     /**
-     * Parses the json char array as {@code T}. Returns
-     * {@code null} if received char array is {@code null} or empty.
+     * Parses JSON from the character input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param chars the specified char array to be parsed
-     * @param clazz the specified class of {@code T}
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param chars the JSON text as UTF-16 code units
+     * @param clazz the target class
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(char[] chars, Class<T> clazz) {
@@ -1573,16 +1844,23 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns {@code null}
-     * if received byte array is {@code null} or empty or length is 0.
+     * Parses JSON from the encoded byte input slice into the requested Java type.
+     * Returns null for null input or an empty input, or when length is zero.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param offset the starting index of array
-     * @param length the specified length of array
-     * @param type the specified actual type
-     * @param features the specified features is applied to parsing
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the UTF-8 JSON text
+     * @param offset the zero-based offset in bytes
+     * @param length the number of bytes to read, not the end index
+     * @param type the target type, including any generic arguments
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      * @since 2.0.13
      */
     @SuppressWarnings("unchecked")
@@ -1607,13 +1885,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns
-     * {@code null} if received byte array is {@code null} or empty.
+     * Parses JSON from the encoded byte input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual type of {@code T}
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the UTF-8 JSON text
+     * @param type the target type, including any generic arguments
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type) {
@@ -1637,13 +1922,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns
-     * {@code null} if received byte array is {@code null} or empty.
+     * Parses JSON from the encoded byte input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param clazz the specified class of {@code T}
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the UTF-8 JSON text
+     * @param clazz the target class
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Class<T> clazz) {
@@ -1671,15 +1963,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns
-     * {@code null} if received byte array is {@code null} or empty.
+     * Parses JSON from the encoded byte input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param clazz the specified class of {@code T}
-     * @param filter the specified filter is applied to parsing
-     * @param features the specified features is applied to parsing
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the UTF-8 JSON text
+     * @param clazz the target class
+     * @param filter the filter to apply while reading
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(
@@ -1709,15 +2008,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns
-     * {@code null} if received byte array is {@code null} or empty.
+     * Parses JSON from the encoded byte input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param clazz the specified class of {@code T}
-     * @param context the specified custom context
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the UTF-8 JSON text
+     * @param clazz the target class
+     * @param context the reader provider and parsing settings, not null
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
-     * @throws NullPointerException If received context is null
+     * @throws JSONException if a parsing error occurs
+     * @throws NullPointerException if received context is null
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(
@@ -1745,16 +2051,23 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns
-     * {@code null} if received byte array is {@code null} or empty.
+     * Parses JSON from the encoded byte input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual type
-     * @param format the specified date format
-     * @param filters the specified filters is applied to parsing
-     * @param features the specified features is applied to parsing
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the UTF-8 JSON text
+     * @param type the target type, including any generic arguments
+     * @param format the date/time pattern or supported format name, such as {@code millis}, {@code unixtime} or {@code iso8601}
+     * @param filters filters to apply while reading
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static <T> T parseObject(
             byte[] bytes,
@@ -1779,15 +2092,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the encoded byte input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual type
-     * @param context the specified custom context
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the UTF-8 JSON text
+     * @param type the target type, including any generic arguments
+     * @param context the reader provider and parsing settings, not null
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
-     * @throws NullPointerException If received context is null
+     * @throws JSONException if a parsing error occurs
+     * @throws NullPointerException if received context is null
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type, JSONReader.Context context) {
@@ -1811,14 +2131,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns
-     * {@code null} if received byte array is {@code null} or empty.
+     * Parses JSON from the encoded byte input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param clazz the specified class of {@code T}
-     * @param features the specified features is applied to parsing
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the UTF-8 JSON text
+     * @param clazz the target class
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Class<T> clazz, JSONReader.Feature... features) {
@@ -1842,14 +2169,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns
-     * {@code null} if received byte array is {@code null} or empty.
+     * Parses JSON from the encoded byte input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param features the specified features is applied to parsing
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the UTF-8 JSON text
+     * @param type the target type, including any generic arguments
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type, JSONReader.Feature... features) {
@@ -1873,14 +2207,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns
-     * {@code null} if received byte array is {@code null} or empty.
+     * Parses JSON from the character input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param chars the specified chars
-     * @param objectClass the specified actual type of {@code T}
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param chars the JSON text as UTF-16 code units
+     * @param objectClass the target class
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(char[] chars, Class<T> objectClass, JSONReader.Feature... features) {
@@ -1904,14 +2243,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns
-     * {@code null} if received byte array is {@code null} or empty.
+     * Parses JSON from the character input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param chars the specified chars
-     * @param type the specified actual type of {@code T}
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param chars the JSON text as UTF-16 code units
+     * @param type the target type, including any generic arguments
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(char[] chars, Type type, JSONReader.Feature... features) {
@@ -1935,15 +2279,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns
-     * {@code null} if received byte array is {@code null} or empty.
+     * Parses JSON from the encoded byte input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param filter the specified filter is applied to parsing
-     * @param features the specified features is applied to parsing
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the UTF-8 JSON text
+     * @param type the target type, including any generic arguments
+     * @param filter the filter to apply while reading
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type, Filter filter, JSONReader.Feature... features) {
@@ -1967,15 +2318,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns
-     * {@code null} if received byte array is {@code null} or empty.
+     * Parses JSON from the encoded byte input into the requested Java type.
+     * Returns null for null input or an empty input.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param format the specified date format
-     * @param features the specified features is applied to parsing
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the UTF-8 JSON text
+     * @param type the target type, including any generic arguments
+     * @param format the date/time pattern or supported format name, such as {@code millis}, {@code unixtime} or {@code iso8601}
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type, String format, JSONReader.Feature... features) {
@@ -2002,13 +2360,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte buffer as a {@code T}. Returns
-     * {@code null} if received {@link ByteBuffer} is {@code null}.
+     * Parses JSON from the byte buffer into the requested Java type.
+     * Returns null for null input.
      *
-     * @param buffer the specified buffer to be parsed
-     * @param objectClass the specified class of {@code T}
+     * <p>The buffer must contain UTF-8 JSON text.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param buffer the buffer containing UTF-8 JSON text
+     * @param objectClass the target class
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(ByteBuffer buffer, Class<T> objectClass) {
@@ -2032,14 +2397,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json reader as a {@code T}. Returns {@code null}
-     * if received {@link Reader} is {@code null} or its content is null.
+     * Parses JSON from the input into the requested Java type.
+     * Returns null for null input, including an input with no value after whitespace.
      *
-     * @param input the specified reader to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param features the specified features is applied to parsing
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param input the input to parse, or null
+     * @param type the target type, including any generic arguments
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(Reader input, Type type, JSONReader.Feature... features) {
@@ -2067,14 +2439,23 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@code T}. Returns {@code null}
-     * if received {@link InputStream} is {@code null} or its content is null.
+     * Parses JSON from the input into the requested Java type.
+     * Returns null for null input, including an input with no value after whitespace.
      *
-     * @param input the specified stream to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param features the specified features is applied to parsing
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <p>Input bytes are decoded as UTF-8.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param input the input to parse, or null
+     * @param type the target type, including any generic arguments
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Type type, JSONReader.Feature... features) {
@@ -2103,14 +2484,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@code T}. Returns {@code null}
-     * if received {@link InputStream} is {@code null} or its content is null.
+     * Parses JSON from the input into the requested Java type.
+     * Returns null for null input, including an input with no value after whitespace.
      *
-     * @param input the specified stream to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param context the specified custom context
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param input the input to parse, or null
+     * @param charset the charset used to decode the input; null selects UTF-8
+     * @param type the target type, including any generic arguments
+     * @param context the reader provider and parsing settings, not null
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Charset charset, Type type, JSONReader.Context context) {
@@ -2138,14 +2527,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@code T}. Returns {@code null}
-     * if received {@link InputStream} is {@code null} or its content is null.
+     * Parses JSON from the input into the requested Java type.
+     * Returns null for null input, including an input with no value after whitespace.
      *
-     * @param input the specified stream to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param context the specified custom context
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param input the input to parse, or null
+     * @param charset the charset used to decode the input; null selects UTF-8
+     * @param type the target type, including any generic arguments
+     * @param context the reader provider and parsing settings, not null
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Charset charset, Class<T> type, JSONReader.Context context) {
@@ -2173,14 +2570,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream of the url as {@code T}.
-     * Returns {@code null} if received {@link URL} is {@code null}.
+     * Parses JSON from the URL into the requested Java type.
+     * Returns null for null input.
      *
-     * @param url the specified url to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param features the specified features is applied to parsing
+     * <p>Opens the URL as UTF-8 JSON and closes the opened stream after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param url the URL to open, or null
+     * @param type the target type, including any generic arguments
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If an I/O error or parsing error occurs
+     * @throws JSONException if an I/O error or parsing error occurs
      * @see URL#openStream()
      * @see JSON#parseObject(InputStream, Type, JSONReader.Feature...)
      * @since 2.0.4
@@ -2198,14 +2602,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream of the url as {@code T}.
-     * Returns {@code null} if received {@link URL} is {@code null}.
+     * Parses JSON from the URL into the requested Java type.
+     * Returns null for null input.
      *
-     * @param url the specified url to be parsed
-     * @param objectClass the specified class of {@code T}
-     * @param features the specified features is applied to parsing
+     * <p>Opens the URL as UTF-8 JSON and closes the opened stream after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param url the URL to open, or null
+     * @param objectClass the target class
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If an I/O error or parsing error occurs
+     * @throws JSONException if an I/O error or parsing error occurs
      * @see URL#openStream()
      * @see JSON#parseObject(InputStream, Type, JSONReader.Feature...)
      * @since 2.0.9
@@ -2223,14 +2634,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream of the url as a {@link JSONObject} and call the function
+     * Parses the JSON stream of the url as a {@link JSONObject} and calls the function
      * to convert it to {@code T}. Returns {@code null} if received {@link URL} is {@code null}.
      *
-     * @param url the specified url to be parsed
+     * <p>Opens the URL as UTF-8 JSON and closes the opened stream after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param url the URL to open, or null
      * @param function the specified converter
-     * @param features the specified features is applied to parsing
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If an I/O error or parsing error occurs
+     * @throws JSONException if an I/O error or parsing error occurs
      * @see URL#openStream()
      * @see JSON#parseObject(InputStream, JSONReader.Feature...)
      * @since 2.0.4
@@ -2252,15 +2670,24 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@code T}. Returns {@code null}
-     * if received {@link InputStream} is {@code null} or its content is null.
+     * Parses JSON from the input into the requested Java type.
+     * Returns null for null input.
      *
-     * @param input the specified stream to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param format the specified date format
-     * @param features the specified features is applied to parsing
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <p>Input bytes are decoded as UTF-8.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param input the input to parse, or null
+     * @param type the target type, including any generic arguments
+     * @param format the date/time pattern or supported format name, such as {@code millis}, {@code unixtime} or {@code iso8601}
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Type type, String format, JSONReader.Feature... features) {
@@ -2287,15 +2714,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@code T}. Returns {@code null}
-     * if received {@link InputStream} is {@code null} or its content is null.
+     * Parses JSON from the input into the requested Java type.
+     * Returns null for null input.
      *
-     * @param input the specified stream to be parsed
-     * @param charset the specified charset of the stream
-     * @param type the specified actual type of {@code T}
-     * @param features the specified features is applied to parsing
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param input the input to parse, or null
+     * @param charset the charset used to decode the input; null selects UTF-8
+     * @param type the target type, including any generic arguments
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Charset charset, Type type, JSONReader.Feature... features) {
@@ -2319,16 +2753,23 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns {@code null}
-     * if received byte array is {@code null} or empty or length is 0.
+     * Parses JSON from the encoded byte input slice into the requested Java type.
+     * Returns null for null input or an empty input, or when length is zero.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param offset the starting index of array
-     * @param length the specified length of array
-     * @param charset the specified charset of the stream
-     * @param type the specified actual type of {@code T}
+     * <p>The selected bytes are decoded with the supplied charset; they must contain JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the encoded JSON text
+     * @param offset the zero-based offset in bytes
+     * @param length the number of bytes to read, not the end index
+     * @param charset the input charset: UTF-8, UTF-16, US-ASCII or ISO-8859-1; not null
+     * @param type the target type, including any generic arguments
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, int offset, int length, Charset charset, Type type) {
@@ -2351,16 +2792,23 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns {@code null}
-     * if received byte array is {@code null} or empty or length is 0.
+     * Parses JSON from the encoded byte input slice into the requested Java type.
+     * Returns null for null input or an empty input, or when length is zero.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param offset the starting index of array
-     * @param length the specified length of array
-     * @param charset the specified charset of the stream
-     * @param type the specified actual type of {@code T}
+     * <p>The selected bytes are decoded with the supplied charset; they must contain JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the encoded JSON text
+     * @param offset the zero-based offset in bytes
+     * @param length the number of bytes to read, not the end index
+     * @param charset the input charset: UTF-8, UTF-16, US-ASCII or ISO-8859-1; not null
+     * @param type the target type, including any generic arguments
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, int offset, int length, Charset charset, Class<T> type) {
@@ -2383,16 +2831,24 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as {@code T}. Returns {@code null}
-     * if received byte array is {@code null} or empty or length is 0.
+     * Parses JSON from the encoded byte input slice into the requested Java type.
+     * Returns null for null input or an empty input, or when length is zero.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param offset the starting index of array
-     * @param length the specified length of array
-     * @param charset the specified charset of the stream
-     * @param type the specified actual class of {@code T}
+     * <p>The selected bytes are decoded with the supplied charset; they must contain JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the result type
+     * @param bytes the encoded JSON text
+     * @param offset the zero-based offset in bytes
+     * @param length the number of bytes to read, not the end index
+     * @param charset the input charset: UTF-8, UTF-16, US-ASCII or ISO-8859-1; not null
+     * @param type the target type, including any generic arguments
+     * @param features reader features to enable in addition to the defaults
      * @return {@code T} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(
@@ -2423,17 +2879,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream through the specified delimiter as
-     * {@code T} objects and call the specified consumer to consume it
-     * The final nonempty record is consumed even without a trailing delimiter.
-     * <details><summary>中文</summary>最后一条非空记录即使没有分隔符也会被消费。</details>
+     * Parses newline-delimited UTF-8 JSON records and passes each converted value to the consumer.
+     * The final nonempty record is delivered even without a trailing delimiter.
+     * Records are split before JSON parsing, so the delimiter must not occur inside a record.
+     * The input remains open; consumer exceptions propagate to the caller.
      *
-     * @param input the specified stream to be parsed
-     * @param type the specified actual class of {@code T}
-     * @param consumer the specified consumer is called multiple times
-     * @param features the specified features is applied to parsing
-     * @throws JSONException If an I/O error or parsing error occurs
-     * @throws NullPointerException If the specified stream is null
+     * <details><summary>中文</summary>
+     * 按分隔符逐条解析并调用消费器；最后一条非空记录无需结尾分隔符。分隔符不可出现在记录内部。输入保持打开，消费器异常向调用方传播。
+     * </details>
+     *
+     * @param <T> the record type
+     * @param input the input to consume without closing, not null
+     * @param type the target type, including any generic arguments
+     * @param consumer the callback invoked synchronously for each parsed record
+     * @param features reader features to enable in addition to the defaults
+     * @throws JSONException if an I/O error or parsing error occurs
+     * @throws NullPointerException if the specified stream is null
      * @since 2.0.2
      */
     static <T> void parseObject(InputStream input, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
@@ -2441,19 +2902,27 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream through the specified delimiter as
-     * {@code T} objects and call the specified consumer to consume it
-     * The final nonempty record is consumed even without a trailing delimiter.
-     * <details><summary>中文</summary>最后一条非空记录即使没有分隔符也会被消费。</details>
+     * Parses delimiter-separated JSON records and passes each converted value to the consumer.
+     * The final nonempty record is delivered even without a trailing delimiter.
+     * Records are split before JSON parsing, so the delimiter must not occur inside a record.
+     * The input remains open; consumer exceptions propagate to the caller.
      *
-     * @param input the specified stream to be parsed
-     * @param charset the specified charset of the stream
-     * @param type the specified actual class of {@code T}
-     * @param delimiter the specified delimiter for the stream
-     * @param consumer the specified consumer is called multiple times
-     * @param features the specified features is applied to parsing
-     * @throws JSONException If an I/O error or parsing error occurs
-     * @throws NullPointerException If the specified stream is null
+     * <p>The delimiter is matched against individual bytes; use a positive ASCII delimiter
+     * and an encoding in which it occupies one byte. For character-based framing, use the Reader overload.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按分隔符逐条解析并调用消费器；最后一条非空记录无需结尾分隔符。分隔符不可出现在记录内部。输入保持打开，消费器异常向调用方传播。
+     * </details>
+     *
+     * @param <T> the record type
+     * @param input the input to consume without closing, not null
+     * @param charset the input charset: UTF-8, UTF-16, US-ASCII or ISO-8859-1; not null
+     * @param delimiter the single-byte record separator
+     * @param type the target type, including any generic arguments
+     * @param consumer the callback invoked synchronously for each parsed record
+     * @param features reader features to enable in addition to the defaults
+     * @throws JSONException if an I/O error or parsing error occurs
+     * @throws NullPointerException if the specified stream is null
      * @since 2.0.2
      */
     @SuppressWarnings("unchecked")
@@ -2535,17 +3004,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json reader through the specified delimiter as
-     * {@code T} objects and call the specified consumer to consume it
-     * The final nonempty record is consumed even without a trailing delimiter.
-     * <details><summary>中文</summary>最后一条非空记录即使没有分隔符也会被消费。</details>
+     * Parses delimiter-separated JSON records and passes each converted value to the consumer.
+     * The final nonempty record is delivered even without a trailing delimiter.
+     * Records are split before JSON parsing, so the delimiter must not occur inside a record.
+     * The input remains open; consumer exceptions propagate to the caller.
      *
-     * @param input the specified reader to be parsed
-     * @param type the specified actual class of {@code T}
-     * @param delimiter the specified delimiter for the stream
-     * @param consumer the specified consumer is called multiple times
-     * @throws JSONException If an I/O error or parsing error occurs
-     * @throws NullPointerException If the specified reader is null
+     * <details><summary>中文</summary>
+     * 按分隔符逐条解析并调用消费器；最后一条非空记录无需结尾分隔符。分隔符不可出现在记录内部。输入保持打开，消费器异常向调用方传播。
+     * </details>
+     *
+     * @param <T> the record type
+     * @param input the input to consume without closing, not null
+     * @param delimiter the character separating JSON records
+     * @param type the target type, including any generic arguments
+     * @param consumer the callback invoked synchronously for each parsed record
+     * @throws JSONException if an I/O error or parsing error occurs
+     * @throws NullPointerException if the specified reader is null
      * @since 2.0.2
      */
     @SuppressWarnings("unchecked")
@@ -2614,12 +3088,17 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a {@link JSONArray}. Returns {@code null} if
-     * received {@link String} is {@code null} or empty or its content is null.
+     * Parses JSON from the string input into {@link JSONArray}.
+     * Returns null for null input or an empty input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param text the specified string to be parsed
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param text the JSON text
      * @return {@link JSONArray} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONArray parseArray(String text) {
         if (text == null || text.isEmpty()) {
@@ -2644,12 +3123,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a {@link JSONArray}. Returns {@code null}
-     * if received byte array is {@code null} or empty or its content is null.
+     * Parses JSON from the encoded byte input into {@link JSONArray}.
+     * Returns null for null input or an empty input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param bytes the specified UTF8 text to be parsed
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param bytes the UTF-8 JSON text
      * @return {@link JSONArray} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONArray parseArray(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
@@ -2674,14 +3160,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a {@link JSONArray}. Returns {@code null}
-     * if received byte array is {@code null} or empty or length is 0 or its content is null.
+     * Parses JSON from the encoded byte input slice into {@link JSONArray}.
+     * Returns null for null input or an empty input, or when length is zero.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param bytes the specified byte array to be parsed
-     * @param offset the starting index of array
-     * @param length the specified length of array
-     * @param charset the specified charset of the stream
-     * @throws JSONException If a parsing error occurs
+     * <p>The selected bytes are decoded with the supplied charset; they must contain JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param bytes the encoded JSON text
+     * @param offset the zero-based offset in bytes
+     * @param length the number of bytes to read, not the end index
+     * @param charset the input charset: UTF-8, UTF-16, US-ASCII or ISO-8859-1; not null
+     * @throws JSONException if a parsing error occurs
      * @since 2.0.13
      */
     static JSONArray parseArray(byte[] bytes, int offset, int length, Charset charset) {
@@ -2707,12 +3200,17 @@ public interface JSON {
     }
 
     /**
-     * Parses the json char array as a {@link JSONArray}. Returns {@code null}
-     * if received byte array is {@code null} or empty or its content is null.
+     * Parses JSON from the character input into {@link JSONArray}.
+     * Returns null for null input or an empty input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param chars the specified char array to be parsed
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param chars the JSON text as UTF-16 code units
      * @return {@link JSONArray} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONArray parseArray(char[] chars) {
         if (chars == null || chars.length == 0) {
@@ -2737,13 +3235,18 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a {@link JSONArray}. Returns {@code null}
-     * if received {@link String} is {@code null} or empty or its content is null.
+     * Parses JSON from the string input into {@link JSONArray}.
+     * Returns null for null input or an empty input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param text the specified string to be parsed
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param text the JSON text
+     * @param features reader features to enable in addition to the defaults
      * @return {@link JSONArray} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static JSONArray parseArray(String text, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
@@ -2768,13 +3271,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream of the url as a {@link JSONArray}.
-     * Returns {@code null} if received {@link URL} is {@code null}.
+     * Parses JSON from the URL into {@link JSONArray}.
+     * Returns null for null input.
      *
-     * @param url the specified url to be parsed
-     * @param features the specified features is applied to parsing
+     * <p>Opens the URL as UTF-8 JSON and closes the opened stream after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param url the URL to open, or null
+     * @param features reader features to enable in addition to the defaults
      * @return {@link JSONArray} or {@code null}
-     * @throws JSONException If an I/O error or parsing error occurs
+     * @throws JSONException if an I/O error or parsing error occurs
      * @see URL#openStream()
      * @see JSON#parseArray(InputStream, JSONReader.Feature...)
      */
@@ -2791,13 +3300,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json reader as a {@link JSONArray}. Returns {@code null}
-     * if received {@link Reader} is {@code null} or its content is null.
+     * Parses JSON from the input into {@link JSONArray}.
+     * Returns null for null input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param input the specified reader to be parsed
-     * @param features the specified features is applied to parsing
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param input the input to parse, or null
+     * @param features reader features to enable in addition to the defaults
      * @return {@link JSONArray} or {@code null}
-     * @throws JSONException If an I/O error or parsing error occurs
+     * @throws JSONException if an I/O error or parsing error occurs
      */
     static JSONArray parseArray(Reader input, JSONReader.Feature... features) {
         if (input == null) {
@@ -2822,13 +3338,22 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link JSONArray}. Returns {@code null}
-     * if received {@link InputStream} is {@code null} or its content is null.
+     * Parses JSON from the input into {@link JSONArray}.
+     * Returns null for null input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param in the specified stream to be parsed
-     * @param features the specified features is applied to parsing
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <p>Input bytes are decoded as UTF-8.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param in the input stream to parse, or null
+     * @param features reader features to enable in addition to the defaults
      * @return {@link JSONArray} or {@code null}
-     * @throws JSONException If an I/O error or parsing error occurs
+     * @throws JSONException if an I/O error or parsing error occurs
      */
     static JSONArray parseArray(InputStream in, JSONReader.Feature... features) {
         if (in == null) {
@@ -2853,14 +3378,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json stream as a {@link JSONArray}. Returns {@code null}
-     * if received {@link InputStream} is {@code null} or its content is null.
+     * Parses JSON from the input into {@link JSONArray}.
+     * Returns null for null input.
+     * The JSON literal {@code null} also returns null.
      *
-     * @param in the specified stream to be parsed
-     * @param charset the specified charset of the stream
-     * @param context the specified custom context
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param in the input stream to parse, or null
+     * @param charset the charset used to decode the input; null selects UTF-8
+     * @param context the reader provider and parsing settings, not null
      * @return {@link JSONArray} or {@code null}
-     * @throws JSONException If an I/O error or parsing error occurs
+     * @throws JSONException if an I/O error or parsing error occurs
      */
     static JSONArray parseArray(InputStream in, Charset charset, JSONReader.Context context) {
         if (in == null) {
@@ -2884,14 +3416,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a list of {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into a list of the requested element type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the list element type
+     * @param text the JSON text
+     * @param type the type of every list element
+     * @param features reader features to enable in addition to the defaults
      * @return {@link List} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(String text, Type type, JSONReader.Feature... features) {
@@ -2913,13 +3450,18 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a list of {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into a list of the requested element type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param type the specified actual type of {@code T}
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the list element type
+     * @param text the JSON text
+     * @param type the type of every list element
      * @return {@link List} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(String text, Type type) {
@@ -2941,13 +3483,18 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a list of {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into a list of the requested element type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param type the specified actual class of {@code T}
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the list element type
+     * @param text the JSON text
+     * @param type the type of every list element
      * @return {@link List} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(String text, Class<T> type) {
@@ -2969,13 +3516,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a list of {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses a JSON array into a list using one target type per array position.
+     * The type array describes positions, not type arguments of a single element type.
+     * Returns null for a null or empty input string.
      *
-     * @param text the specified string to be parsed
-     * @param types the specified actual parameter type
+     * <details><summary>中文</summary>
+     * 按数组位置逐项使用指定类型解析为列表；类型数组描述各位置的类型，并非单个元素类型的泛型参数。空输入返回 null。
+     * </details>
+     *
+     * @param <T> the list element type
+     * @param text the JSON text
+     * @param types the target type for each array position, in order
      * @return {@link List} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(String text, Type... types) {
@@ -2997,14 +3550,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a list of {@code T}. Returns
-     * {@code null} if received {@link String} is {@code null} or empty.
+     * Parses JSON from the string input into a list of the requested element type.
+     * Returns null for null input or an empty input.
      *
-     * @param text the specified string to be parsed
-     * @param type the specified actual class of {@code T}
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the list element type
+     * @param text the JSON text
+     * @param type the type of every list element
+     * @param features reader features to enable in addition to the defaults
      * @return {@link List} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(String text, Class<T> type, JSONReader.Feature... features) {
@@ -3026,14 +3584,19 @@ public interface JSON {
     }
 
     /**
-     * Parses the json char array as a list of {@code T}. Returns
-     * {@code null} if received char array is {@code null} or empty.
+     * Parses JSON from the character input into a list of the requested element type.
+     * Returns null for null input or an empty input.
      *
-     * @param chars the specified char array to be parsed
-     * @param type the specified actual class of {@code T}
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the list element type
+     * @param chars the JSON text as UTF-16 code units
+     * @param type the type of every list element
+     * @param features reader features to enable in addition to the defaults
      * @return {@link List} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(char[] chars, Class<T> type, JSONReader.Feature... features) {
@@ -3055,14 +3618,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the json string as a list of {@code T}. Returns {@code null}
-     * if received {@link String} is {@code null} or empty or its content is null.
+     * Parses a JSON array into a list using one target type per array position.
+     * The type array describes positions, not type arguments of a single element type.
+     * Returns null for a null or empty input string.
      *
-     * @param text the specified string to be parsed
-     * @param types the specified actual parameter type
-     * @param features the specified features is applied to parsing
+     * <details><summary>中文</summary>
+     * 按数组位置逐项使用指定类型解析为列表；类型数组描述各位置的类型，并非单个元素类型的泛型参数。空输入返回 null。
+     * </details>
+     *
+     * @param <T> the list element type
+     * @param text the JSON text
+     * @param types the target type for each array position, in order
+     * @param features reader features to enable in addition to the defaults
      * @return {@link List} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     static <T> List<T> parseArray(String text, Type[] types, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
@@ -3094,14 +3663,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json reader as a list of {@code T}. Returns
-     * {@code null} if received {@link Reader} is {@code null} or empty.
+     * Parses JSON from the input into a list of the requested element type.
+     * Returns null for null input.
      *
-     * @param input the specified reader to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param features the specified features is applied to parsing
+     * <p>The JSON reader created by this method closes the supplied input after parsing.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the list element type
+     * @param input the input to parse, or null
+     * @param type the type of every list element
+     * @param features reader features to enable in addition to the defaults
      * @return {@link List} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(Reader input, Type type, JSONReader.Feature... features) {
@@ -3123,14 +3699,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a list of {@code T}. Returns
-     * {@code null} if received byte array is {@code null} or empty.
+     * Parses JSON from the encoded byte input into a list of the requested element type.
+     * Returns null for null input or an empty input.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual type of {@code T}
-     * @param features the specified features is applied to parsing
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the list element type
+     * @param bytes the UTF-8 JSON text
+     * @param type the type of every list element
+     * @param features reader features to enable in addition to the defaults
      * @return {@link List} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(byte[] bytes, Type type, JSONReader.Feature... features) {
@@ -3152,14 +3735,21 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a list of {@code T}. Returns
-     * {@code null} if received byte array is {@code null} or empty.
+     * Parses JSON from the encoded byte input into a list of the requested element type.
+     * Returns null for null input or an empty input.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param type the specified actual class of {@code T}
-     * @param features the specified features is applied to parsing
+     * <p>The bytes must contain UTF-8 JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the list element type
+     * @param bytes the UTF-8 JSON text
+     * @param type the type of every list element
+     * @param features reader features to enable in addition to the defaults
      * @return {@link List} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(byte[] bytes, Class<T> type, JSONReader.Feature... features) {
@@ -3181,17 +3771,24 @@ public interface JSON {
     }
 
     /**
-     * Parses the json byte array as a list of {@code T}. Returns {@code null}
-     * if received byte array is {@code null} or empty or the specified length is 0.
+     * Parses JSON from the encoded byte input slice into a list of the requested element type.
+     * Returns null for null input or an empty input, or when length is zero.
      *
-     * @param bytes the specified UTF8 text to be parsed
-     * @param offset the starting index of array
-     * @param length the specified length of array
-     * @param charset the specified charset of the stream
-     * @param type the specified actual class of {@code T}
-     * @param features the specified features is applied to parsing
+     * <p>The selected bytes are decoded with the supplied charset; they must contain JSON text, not JSONB.</p>
+     *
+     * <details><summary>中文</summary>
+     * 按指定目标类型和读取配置解析 JSON；输入形式、字符集及空值行为见本方法说明。
+     * </details>
+     *
+     * @param <T> the list element type
+     * @param bytes the encoded JSON text
+     * @param offset the zero-based offset in bytes
+     * @param length the number of bytes to read, not the end index
+     * @param charset the input charset: UTF-8, UTF-16, US-ASCII or ISO-8859-1; not null
+     * @param type the type of every list element
+     * @param features reader features to enable in addition to the defaults
      * @return {@link List} or {@code null}
-     * @throws JSONException If a parsing error occurs
+     * @throws JSONException if a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(
@@ -3220,11 +3817,16 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json string
+     * Serializes a Java value to a JSON string.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @return {@link String} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 字符串；null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @return the JSON text, never null
+     * @throws JSONException if a serialization error occurs
      */
     static String toJSONString(Object object) {
         final ObjectWriterProvider provider = defaultObjectWriterProvider;
@@ -3255,12 +3857,17 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json string
+     * Serializes a Java value to a JSON string.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @param context the specified custom context
-     * @return {@link String} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 字符串；null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @param context the writer provider and serialization settings, not null
+     * @return the JSON text, never null
+     * @throws JSONException if a serialization error occurs
      */
     static String toJSONString(Object object, JSONWriter.Context context) {
         if (context == null) {
@@ -3285,12 +3892,17 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json string
+     * Serializes a Java value to a JSON string.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @param features the specified features is applied to serialization
-     * @return {@link String} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 字符串；null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @param features writer features to enable in addition to the defaults
+     * @return the JSON text, never null
+     * @throws JSONException if a serialization error occurs
      */
     static String toJSONString(Object object, JSONWriter.Feature... features) {
         JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
@@ -3311,13 +3923,18 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json string
+     * Serializes a Java value to a JSON string.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @param filter the specified filter is applied to serialization
-     * @param features the specified features is applied to serialization
-     * @return {@link String} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 字符串；null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @param filter the filter to apply while writing
+     * @param features writer features to enable in addition to the defaults
+     * @return the JSON text, never null
+     * @throws JSONException if a serialization error occurs
      */
     static String toJSONString(Object object, Filter filter, JSONWriter.Feature... features) {
         JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
@@ -3340,13 +3957,18 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json string
+     * Serializes a Java value to a JSON string.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @param filters the specified filters is applied to serialization
-     * @param features the specified features is applied to serialization
-     * @return {@link String} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 字符串；null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @param filters filters to apply while writing
+     * @param features writer features to enable in addition to the defaults
+     * @return the JSON text, never null
+     * @throws JSONException if a serialization error occurs
      */
     static String toJSONString(Object object, Filter[] filters, JSONWriter.Feature... features) {
         final JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
@@ -3370,13 +3992,18 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json string
+     * Serializes a Java value to a JSON string.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @param format the specified date format
-     * @param features the specified features is applied to serialization
-     * @return {@link String} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 字符串；null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @param format the date/time pattern or supported format name, such as {@code millis}, {@code unixtime} or {@code iso8601}
+     * @param features writer features to enable in addition to the defaults
+     * @return the JSON text, never null
+     * @throws JSONException if a serialization error occurs
      */
     static String toJSONString(Object object, String format, JSONWriter.Feature... features) {
         final JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
@@ -3399,14 +4026,19 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json string
+     * Serializes a Java value to a JSON string.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @param format the specified date format
-     * @param filters the specified filters is applied to serialization
-     * @param features the specified features is applied to serialization
-     * @return {@link String} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 字符串；null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @param format the date/time pattern or supported format name, such as {@code millis}, {@code unixtime} or {@code iso8601}
+     * @param filters filters to apply while writing
+     * @param features writer features to enable in addition to the defaults
+     * @return the JSON text, never null
+     * @throws JSONException if a serialization error occurs
      */
     static String toJSONString(Object object, String format, Filter[] filters, JSONWriter.Feature... features) {
         final JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
@@ -3432,11 +4064,16 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json byte array
+     * Serializes a Java value to UTF-8 JSON bytes.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @return {@code byte[]} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 文本字节；未指定字符集时使用 UTF-8，null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @return the encoded JSON text, never null
+     * @throws JSONException if a serialization error occurs
      */
     static byte[] toJSONBytes(Object object) {
         final ObjectWriterProvider provider = defaultObjectWriterProvider;
@@ -3465,12 +4102,18 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json byte array
+     * Serializes a Java value to JSON bytes in the requested charset.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @param charset the specified charset of the bytes
-     * @return {@code byte[]} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 文本字节；未指定字符集时使用 UTF-8，null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @param charset the output charset, not null
+     * @param features writer features to enable in addition to the defaults
+     * @return the encoded JSON text, never null
+     * @throws JSONException if a serialization error occurs
      * @since 2.0.47
      */
     static byte[] toJSONBytes(Object object, Charset charset, JSONWriter.Feature... features) {
@@ -3500,13 +4143,18 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json byte array
+     * Serializes a Java value to JSON bytes in the requested charset.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @param charset the specified charset of the bytes
-     * @param context the specified custom context
-     * @return {@code byte[]} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 文本字节；未指定字符集时使用 UTF-8，null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @param charset the output charset, not null
+     * @param context the writer provider and serialization settings, not null
+     * @return the encoded JSON text, never null
+     * @throws JSONException if a serialization error occurs
      * @since 2.0.47
      */
     static byte[] toJSONBytes(Object object, Charset charset, JSONWriter.Context context) {
@@ -3535,13 +4183,18 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json byte array
+     * Serializes a Java value to UTF-8 JSON bytes.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @param format the specified date format
-     * @param features the specified features is applied to serialization
-     * @return {@code byte[]} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 文本字节；未指定字符集时使用 UTF-8，null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @param format the date/time pattern or supported format name, such as {@code millis}, {@code unixtime} or {@code iso8601}
+     * @param features writer features to enable in addition to the defaults
+     * @return the encoded JSON text, never null
+     * @throws JSONException if a serialization error occurs
      */
     static byte[] toJSONBytes(Object object, String format, JSONWriter.Feature... features) {
         final JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
@@ -3565,12 +4218,17 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json byte array
+     * Serializes a Java value to UTF-8 JSON bytes.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @param filters the specified filters is applied to serialization
-     * @return {@code byte[]} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 文本字节；未指定字符集时使用 UTF-8，null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @param filters filters to apply while writing
+     * @return the encoded JSON text, never null
+     * @throws JSONException if a serialization error occurs
      */
     static byte[] toJSONBytes(Object object, Filter... filters) {
         final JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider);
@@ -3594,12 +4252,17 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json byte array
+     * Serializes a Java value to UTF-8 JSON bytes.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @param features the specified features is applied to serialization
-     * @return {@code byte[]} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 文本字节；未指定字符集时使用 UTF-8，null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @param features writer features to enable in addition to the defaults
+     * @return the encoded JSON text, never null
+     * @throws JSONException if a serialization error occurs
      */
     static byte[] toJSONBytes(Object object, JSONWriter.Feature... features) {
         final JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
@@ -3619,13 +4282,18 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json byte array
+     * Serializes a Java value to UTF-8 JSON bytes.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @param filters the specified filters is applied to serialization
-     * @param features the specified features is applied to serialization
-     * @return {@code byte[]} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 文本字节；未指定字符集时使用 UTF-8，null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @param filters filters to apply while writing
+     * @param features writer features to enable in addition to the defaults
+     * @return the encoded JSON text, never null
+     * @throws JSONException if a serialization error occurs
      */
     static byte[] toJSONBytes(Object object, Filter[] filters, JSONWriter.Feature... features) {
         final JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
@@ -3649,14 +4317,19 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json byte array
+     * Serializes a Java value to UTF-8 JSON bytes.
+     * A null value is serialized as the JSON literal {@code null}.
      *
-     * @param object the specified object will be serialized
-     * @param format the specified date format
-     * @param filters the specified filters is applied to serialization
-     * @param features the specified features is applied to serialization
-     * @return {@code byte[]} that is not null
-     * @throws JSONException If a serialization error occurs
+     * <details><summary>中文</summary>
+     * 将 Java 值序列化为 JSON 文本字节；未指定字符集时使用 UTF-8，null 值输出为 JSON null 文本。
+     * </details>
+     *
+     * @param object the Java value to serialize, possibly null
+     * @param format the date/time pattern or supported format name, such as {@code millis}, {@code unixtime} or {@code iso8601}
+     * @param filters filters to apply while writing
+     * @param features writer features to enable in addition to the defaults
+     * @return the encoded JSON text, never null
+     * @throws JSONException if a serialization error occurs
      */
     static byte[] toJSONBytes(Object object, String format, Filter[] filters, JSONWriter.Feature... features) {
         final JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
@@ -3683,12 +4356,17 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json byte array and write it to {@link OutputStream}
+     * Serializes a value as UTF-8 JSON and writes it to the output stream.
+     * The stream is neither flushed nor closed by this method. A null value is written as {@code null}.
      *
-     * @param out the specified output stream to be written
-     * @param object the specified object will be serialized
-     * @return the length of byte stream
-     * @throws JSONException If an I/O error or serialization error occurs
+     * <details><summary>中文</summary>
+     * 将值序列化为 UTF-8 JSON 并写入输出流；不刷新或关闭输出流。null 值写为 JSON null。
+     * </details>
+     *
+     * @param out the destination stream, not null
+     * @param object the Java value to serialize, possibly null
+     * @return the number of bytes written by this call
+     * @throws JSONException if an I/O error or serialization error occurs
      */
     static int writeTo(OutputStream out, Object object) {
         final JSONWriter.Context context = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider);
@@ -3712,13 +4390,18 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json byte array and write it to {@link OutputStream}
+     * Serializes a value as UTF-8 JSON and writes it to the output stream.
+     * The stream is neither flushed nor closed by this method. A null value is written as {@code null}.
      *
-     * @param out the specified output stream to be written
-     * @param object the specified object will be serialized
-     * @param context the specified custom context
-     * @return the length of byte stream
-     * @throws JSONException If an I/O error or serialization error occurs
+     * <details><summary>中文</summary>
+     * 将值序列化为 UTF-8 JSON 并写入输出流；不刷新或关闭输出流。null 值写为 JSON null。
+     * </details>
+     *
+     * @param out the destination stream, not null
+     * @param object the Java value to serialize, possibly null
+     * @param context the writer provider and serialization settings, not null
+     * @return the number of bytes written by this call
+     * @throws JSONException if an I/O error or serialization error occurs
      * @since 2.0.51
      */
     static int writeTo(OutputStream out, Object object, JSONWriter.Context context) {
@@ -3741,13 +4424,18 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json byte array and write it to {@link OutputStream}
+     * Serializes a value as UTF-8 JSON and writes it to the output stream.
+     * The stream is neither flushed nor closed by this method. A null value is written as {@code null}.
      *
-     * @param out the specified output stream to be written
-     * @param object the specified object will be serialized
-     * @param features the specified features is applied to serialization
-     * @return the length of byte stream
-     * @throws JSONException If an I/O error or serialization error occurs
+     * <details><summary>中文</summary>
+     * 将值序列化为 UTF-8 JSON 并写入输出流；不刷新或关闭输出流。null 值写为 JSON null。
+     * </details>
+     *
+     * @param out the destination stream, not null
+     * @param object the Java value to serialize, possibly null
+     * @param features writer features to enable in addition to the defaults
+     * @return the number of bytes written by this call
+     * @throws JSONException if an I/O error or serialization error occurs
      * @since 2.0.2
      */
     static int writeTo(OutputStream out, Object object, JSONWriter.Feature... features) {
@@ -3771,14 +4459,19 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json byte array and write it to {@link OutputStream}
+     * Serializes a value as UTF-8 JSON and writes it to the output stream.
+     * The stream is neither flushed nor closed by this method. A null value is written as {@code null}.
      *
-     * @param out the specified output stream to be written
-     * @param object the specified object will be serialized
-     * @param filters the specified filters is applied to serialization
-     * @param features the specified features is applied to serialization
-     * @return the length of byte stream
-     * @throws JSONException If an I/O error or serialization error occurs
+     * <details><summary>中文</summary>
+     * 将值序列化为 UTF-8 JSON 并写入输出流；不刷新或关闭输出流。null 值写为 JSON null。
+     * </details>
+     *
+     * @param out the destination stream, not null
+     * @param object the Java value to serialize, possibly null
+     * @param filters filters to apply while writing
+     * @param features writer features to enable in addition to the defaults
+     * @return the number of bytes written by this call
+     * @throws JSONException if an I/O error or serialization error occurs
      * @since 2.0.2
      */
     static int writeTo(OutputStream out, Object object, Filter[] filters, JSONWriter.Feature... features) {
@@ -3806,15 +4499,20 @@ public interface JSON {
     }
 
     /**
-     * Serializes the specified object to the json byte array and write it to {@link OutputStream}
+     * Serializes a value as UTF-8 JSON and writes it to the output stream.
+     * The stream is neither flushed nor closed by this method. A null value is written as {@code null}.
      *
-     * @param out the specified output stream to be written
-     * @param object the specified object will be serialized
-     * @param format the specified date format
-     * @param filters the specified filters is applied to serialization
-     * @param features the specified features is applied to serialization
-     * @return the length of byte stream
-     * @throws JSONException If an I/O error or serialization error occurs
+     * <details><summary>中文</summary>
+     * 将值序列化为 UTF-8 JSON 并写入输出流；不刷新或关闭输出流。null 值写为 JSON null。
+     * </details>
+     *
+     * @param out the destination stream, not null
+     * @param object the Java value to serialize, possibly null
+     * @param format the date/time pattern or supported format name, such as {@code millis}, {@code unixtime} or {@code iso8601}
+     * @param filters filters to apply while writing
+     * @param features writer features to enable in addition to the defaults
+     * @return the number of bytes written by this call
+     * @throws JSONException if an I/O error or serialization error occurs
      * @since 2.0.2
      */
     static int writeTo(
@@ -3851,10 +4549,16 @@ public interface JSON {
     }
 
     /**
-     * Verify that the json string is legal json text
+     * Tests whether the string contains exactly one JSON value.
+     * Uses fastjson2's accepted syntax rather than enforcing only strict RFC JSON.
+     * Null or empty input, and trailing content return false.
      *
-     * @param text the specified string will be validated
-     * @return {@code true} or {@code false}
+     * <details><summary>中文</summary>
+     * 检查输入是否包含一个完整的指定类型 JSON 值；采用 fastjson2 支持的语法，空输入、根类型不符或尾随内容返回 false。
+     * </details>
+     *
+     * @param text the JSON text
+     * @return true if one complete JSON value is accepted, otherwise false
      * @since 2.0.2
      */
     static boolean isValid(String text) {
@@ -3871,11 +4575,17 @@ public interface JSON {
     }
 
     /**
-     * Verify that the json string is legal json text
+     * Tests whether the string contains exactly one JSON value.
+     * Uses fastjson2's accepted syntax rather than enforcing only strict RFC JSON.
+     * Null or empty input, and trailing content return false.
      *
-     * @param text the specified string will be validated
-     * @param features the specified features is applied to parsing
-     * @return {@code true} or {@code false}
+     * <details><summary>中文</summary>
+     * 检查输入是否包含一个完整的指定类型 JSON 值；采用 fastjson2 支持的语法，空输入、根类型不符或尾随内容返回 false。
+     * </details>
+     *
+     * @param text the JSON text
+     * @param features reader features to enable in addition to the defaults
+     * @return true if one complete JSON value is accepted, otherwise false
      * @since 2.0.2
      */
     static boolean isValid(String text, JSONReader.Feature... features) {
@@ -3892,10 +4602,16 @@ public interface JSON {
     }
 
     /**
-     * Verify that the json char array is legal json text
+     * Tests whether the character array contains exactly one JSON value.
+     * Uses fastjson2's accepted syntax rather than enforcing only strict RFC JSON.
+     * Null or empty input, and trailing content return false.
      *
-     * @param chars the specified array will be validated
-     * @return {@code true} or {@code false}
+     * <details><summary>中文</summary>
+     * 检查输入是否包含一个完整的指定类型 JSON 值；采用 fastjson2 支持的语法，空输入、根类型不符或尾随内容返回 false。
+     * </details>
+     *
+     * @param chars the JSON text as UTF-16 code units
+     * @return true if one complete JSON value is accepted, otherwise false
      * @since 2.0.2
      */
     static boolean isValid(char[] chars) {
@@ -3912,10 +4628,16 @@ public interface JSON {
     }
 
     /**
-     * Verify that the json string is a legal JsonObject
+     * Tests whether the string contains exactly one JSON object.
+     * Uses fastjson2's accepted syntax rather than enforcing only strict RFC JSON.
+     * Null or empty input, a wrong root kind, and trailing content return false.
      *
-     * @param text the specified string will be validated
-     * @return {@code true} or {@code false}
+     * <details><summary>中文</summary>
+     * 检查输入是否包含一个完整的指定类型 JSON 值；采用 fastjson2 支持的语法，空输入、根类型不符或尾随内容返回 false。
+     * </details>
+     *
+     * @param text the JSON text
+     * @return true if one complete JSON object is accepted, otherwise false
      * @since 2.0.2
      */
     static boolean isValidObject(String text) {
@@ -3935,10 +4657,16 @@ public interface JSON {
     }
 
     /**
-     * Verify that the json byte array is a legal JsonObject
+     * Tests whether the byte array contains exactly one JSON object.
+     * Uses fastjson2's accepted syntax rather than enforcing only strict RFC JSON.
+     * Null or empty input, a wrong root kind, and trailing content return false.
      *
-     * @param bytes the specified array will be validated
-     * @return {@code true} or {@code false}
+     * <details><summary>中文</summary>
+     * 检查输入是否包含一个完整的指定类型 JSON 值；采用 fastjson2 支持的语法，空输入、根类型不符或尾随内容返回 false。
+     * </details>
+     *
+     * @param bytes the UTF-8 JSON text
+     * @return true if one complete JSON object is accepted, otherwise false
      * @since 2.0.2
      */
     static boolean isValidObject(byte[] bytes) {
@@ -3958,10 +4686,16 @@ public interface JSON {
     }
 
     /**
-     * Verify the {@link String} is JSON Array
+     * Tests whether the string contains exactly one JSON array.
+     * Uses fastjson2's accepted syntax rather than enforcing only strict RFC JSON.
+     * Null or empty input, a wrong root kind, and trailing content return false.
      *
-     * @param text the {@link String} to validate
-     * @return {@code true} or {@code false}
+     * <details><summary>中文</summary>
+     * 检查输入是否包含一个完整的指定类型 JSON 值；采用 fastjson2 支持的语法，空输入、根类型不符或尾随内容返回 false。
+     * </details>
+     *
+     * @param text the JSON text
+     * @return true if one complete JSON array is accepted, otherwise false
      * @since 2.0.2
      */
     static boolean isValidArray(String text) {
@@ -3981,10 +4715,16 @@ public interface JSON {
     }
 
     /**
-     * Verify that the json byte array is legal json text
+     * Tests whether the byte array contains exactly one JSON value.
+     * Uses fastjson2's accepted syntax rather than enforcing only strict RFC JSON.
+     * Null or empty input, and trailing content return false.
      *
-     * @param bytes the specified array will be validated
-     * @return {@code true} or {@code false}
+     * <details><summary>中文</summary>
+     * 检查输入是否包含一个完整的指定类型 JSON 值；采用 fastjson2 支持的语法，空输入、根类型不符或尾随内容返回 false。
+     * </details>
+     *
+     * @param bytes the UTF-8 JSON text
+     * @return true if one complete JSON value is accepted, otherwise false
      * @since 2.0.2
      */
     static boolean isValid(byte[] bytes) {
@@ -4001,11 +4741,17 @@ public interface JSON {
     }
 
     /**
-     * Verify that the json byte array is legal json text
+     * Tests whether the byte array contains exactly one JSON value.
+     * Uses fastjson2's accepted syntax rather than enforcing only strict RFC JSON.
+     * Null or empty input, and trailing content return false.
      *
-     * @param bytes the specified array will be validated
-     * @param charset the specified charset of the bytes
-     * @return {@code true} or {@code false}
+     * <details><summary>中文</summary>
+     * 检查输入是否包含一个完整的指定类型 JSON 值；采用 fastjson2 支持的语法，空输入、根类型不符或尾随内容返回 false。
+     * </details>
+     *
+     * @param bytes the encoded JSON text
+     * @param charset the input charset: UTF-8, UTF-16, US-ASCII or ISO-8859-1; not null
+     * @return true if one complete JSON value is accepted, otherwise false
      * @since 2.0.2
      */
     static boolean isValid(byte[] bytes, Charset charset) {
@@ -4017,10 +4763,16 @@ public interface JSON {
     }
 
     /**
-     * Verify that the json byte array is a legal JsonArray
+     * Tests whether the byte array contains exactly one JSON array.
+     * Uses fastjson2's accepted syntax rather than enforcing only strict RFC JSON.
+     * Null or empty input, a wrong root kind, and trailing content return false.
      *
-     * @param bytes the specified array will be validated
-     * @return {@code true} or {@code false}
+     * <details><summary>中文</summary>
+     * 检查输入是否包含一个完整的指定类型 JSON 值；采用 fastjson2 支持的语法，空输入、根类型不符或尾随内容返回 false。
+     * </details>
+     *
+     * @param bytes the UTF-8 JSON text
+     * @return true if one complete JSON array is accepted, otherwise false
      */
     static boolean isValidArray(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
@@ -4039,13 +4791,19 @@ public interface JSON {
     }
 
     /**
-     * Verify that the json byte array is legal json text
+     * Tests whether the byte array slice contains exactly one JSON value.
+     * Uses fastjson2's accepted syntax rather than enforcing only strict RFC JSON.
+     * Null or empty input, and trailing content return false.
      *
-     * @param bytes the specified array will be validated
-     * @param offset the starting index of array
-     * @param length the specified length of array
-     * @param charset the specified charset of the bytes
-     * @return {@code true} or {@code false}
+     * <details><summary>中文</summary>
+     * 检查输入是否包含一个完整的指定类型 JSON 值；采用 fastjson2 支持的语法，空输入、根类型不符或尾随内容返回 false。
+     * </details>
+     *
+     * @param bytes the encoded JSON text
+     * @param offset the zero-based offset in bytes
+     * @param length the number of bytes to read, not the end index
+     * @param charset the input charset: UTF-8, UTF-16, US-ASCII or ISO-8859-1; not null
+     * @return true if one complete JSON value is accepted, otherwise false
      */
     static boolean isValid(byte[] bytes, int offset, int length, Charset charset) {
         if (bytes == null || bytes.length == 0 || length == 0) {
@@ -4061,23 +4819,33 @@ public interface JSON {
     }
 
     /**
-     * Converts the specified object to a {@link JSONArray} or
-     * {@link JSONObject}. Returns {@code null} if received object is {@code null}
+     * Converts a Java value to its JSON representation.
+     * Existing {@link JSONObject} and {@link JSONArray} instances are returned unchanged.
+     * Other results may be containers, scalar values or null; this is not a deep-copy operation.
+     *
+     * <details><summary>中文</summary>
+     * 将 Java 值转换为 JSON 表示，结果可为容器、标量或 null。已有 JSONObject 和 JSONArray 原样返回；此方法不保证深复制。
+     * </details>
      *
      * @param object the specified object to be converted
-     * @return {@link JSONArray} or {@link JSONObject} or {@code null}
+     * @return the JSON representation, or null for a null input
      */
     static Object toJSON(Object object) {
         return toJSON(object, (JSONWriter.Feature[]) null);
     }
 
     /**
-     * Converts the specified object to a {@link JSONArray} or
-     * {@link JSONObject}. Returns {@code null} if received object is {@code null}
+     * Converts a Java value to its JSON representation.
+     * Existing {@link JSONObject} and {@link JSONArray} instances are returned unchanged.
+     * Other results may be containers, scalar values or null; this is not a deep-copy operation.
+     *
+     * <details><summary>中文</summary>
+     * 将 Java 值转换为 JSON 表示，结果可为容器、标量或 null。已有 JSONObject 和 JSONArray 原样返回；此方法不保证深复制。
+     * </details>
      *
      * @param object the specified object to be converted
-     * @param features the specified features is applied to serialization
-     * @return {@link JSONArray} or {@link JSONObject} or {@code null}
+     * @param features writer features to enable in addition to the defaults
+     * @return the JSON representation, or null for a null input
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static Object toJSON(Object object, JSONWriter.Feature... features) {
@@ -4113,8 +4881,12 @@ public interface JSON {
     /**
      * Converts the specified object to an object of the specified goal type
      *
+     * <details><summary>中文</summary>
+     * 将值转换为目标类型；输入为 null 时返回 null。
+     * </details>
+     *
      * @param <T> the target type
-     * @param clazz the specified goal class
+     * @param clazz the target class
      * @param object the specified object to be converted
      * @return the converted object of type T, or null if the input object is null
      * @since 2.0.4
@@ -4134,9 +4906,13 @@ public interface JSON {
     /**
      * Converts the specified object to an object of the specified goal type
      *
+     * <details><summary>中文</summary>
+     * 将值转换为目标类型；输入为 null 时返回 null。
+     * </details>
+     *
      * @param <T> the target type
      * @param object the specified object to be converted
-     * @param clazz the specified goal class
+     * @param clazz the target class
      * @return the converted object of type T, or null if the input object is null
      * @deprecated since 2.0.4, please use {@link #to(Class, Object)}
      */
@@ -4145,7 +4921,13 @@ public interface JSON {
     }
 
     /**
-     * Mixes in the properties of the mixinSource class into the target class
+     * Associates mixin annotations with a target class in the default reader and writer providers.
+     * This changes serialization/deserialization metadata; it does not copy Java fields or methods.
+     * Passing null as the mixin source removes the association.
+     *
+     * <details><summary>中文</summary>
+     * 在默认读写器提供者中关联目标类的混入注解，仅影响序列化元数据，不复制 Java 成员。混入来源为 null 时移除关联。
+     * </details>
      *
      * @param target the target class to mix into
      * @param mixinSource the source class to mix from
@@ -4157,10 +4939,17 @@ public interface JSON {
     }
 
     /**
-     * Register an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     * Registers an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     *
+     * <p>Uses the method-based cache. Use the boolean overload to register a field-based codec.</p>
+     *
+     * <details><summary>中文</summary>
+     * 在默认提供者中注册编解码配置，返回值表示先前缓存项或注册结果。
+     * 使用基于方法的缓存；需要字段缓存时使用带 boolean 的重载。
+     * </details>
      *
      * @param type the type to register an ObjectReader for
-     * @param objectReader the ObjectReader to register
+     * @param objectReader the reader to register, or null to remove the cached reader
      * @return the previously registered ObjectReader, or null if there was none
      * @see JSONFactory#getDefaultObjectReaderProvider()
      * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(Type, ObjectReader)
@@ -4171,14 +4960,18 @@ public interface JSON {
     }
 
     /**
-     * Register an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     * Registers an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     *
+     * <details><summary>中文</summary>
+     * 在默认提供者中注册编解码配置，返回值表示先前缓存项或注册结果。
+     * </details>
      *
      * @param type the type to register an ObjectReader for
-     * @param objectReader the ObjectReader to register
-     * @param fieldBased whether to use field-based reading
+     * @param objectReader the reader to register, or null to remove the cached reader
+     * @param fieldBased whether to use the field-based cache rather than the method-based cache
      * @return the previously registered ObjectReader, or null if there was none
      * @see JSONFactory#getDefaultObjectReaderProvider()
-     * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(Type, ObjectReader)
+     * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(Type, ObjectReader, boolean)
      * @since 2.0.38
      */
     static ObjectReader<?> register(Type type, ObjectReader<?> objectReader, boolean fieldBased) {
@@ -4186,7 +4979,14 @@ public interface JSON {
     }
 
     /**
-     * Register if absent an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     * Registers, if absent, an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     *
+     * <p>Uses the method-based cache. Use the boolean overload to register a field-based codec.</p>
+     *
+     * <details><summary>中文</summary>
+     * 在默认提供者中注册编解码配置，返回值表示先前缓存项或注册结果。
+     * 使用基于方法的缓存；需要字段缓存时使用带 boolean 的重载。
+     * </details>
      *
      * @param type the type to register an ObjectReader for
      * @param objectReader the ObjectReader to register
@@ -4200,14 +5000,18 @@ public interface JSON {
     }
 
     /**
-     * Register if absent an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     * Registers, if absent, an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     *
+     * <details><summary>中文</summary>
+     * 在默认提供者中注册编解码配置，返回值表示先前缓存项或注册结果。
+     * </details>
      *
      * @param type the type to register an ObjectReader for
      * @param objectReader the ObjectReader to register
-     * @param fieldBased whether to use field-based reading
+     * @param fieldBased whether to use the field-based cache rather than the method-based cache
      * @return the previously registered ObjectReader, or null if there was none
      * @see JSONFactory#getDefaultObjectReaderProvider()
-     * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#registerIfAbsent(Type, ObjectReader)
+     * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#registerIfAbsent(Type, ObjectReader, boolean)
      * @since 2.0.38
      */
     static ObjectReader<?> registerIfAbsent(Type type, ObjectReader<?> objectReader, boolean fieldBased) {
@@ -4215,10 +5019,14 @@ public interface JSON {
     }
 
     /**
-     * Register an {@link ObjectReaderModule} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     * Registers an {@link ObjectReaderModule} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     *
+     * <details><summary>中文</summary>
+     * 在默认提供者中注册编解码配置，返回值表示先前缓存项或注册结果。
+     * </details>
      *
      * @param objectReaderModule the ObjectReaderModule to register
-     * @return true if the module was registered successfully, false otherwise
+     * @return true if registered, or false if the same module instance was already registered
      * @see JSONFactory#getDefaultObjectReaderProvider()
      * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(ObjectReaderModule)
      * @since 2.0.2
@@ -4229,9 +5037,14 @@ public interface JSON {
     }
 
     /**
-     * Register a see-also sub type
+     * Adds a subtype to its superclass reader when that reader supports see-also subtypes.
+     *
+     * <details><summary>中文</summary>
+     * 当父类读入器支持 see-also 子类型时，为其添加子类型；其他读入器不受影响。
+     * </details>
      *
      * @param subTypeClass the sub type class to register
+     * @throws JSONException if the subtype has no superclass
      * @since 2.0.2
      */
     static void registerSeeAlsoSubType(Class subTypeClass) {
@@ -4239,10 +5052,15 @@ public interface JSON {
     }
 
     /**
-     * Register a see-also sub type with a specific class name
+     * Adds a subtype to its superclass reader when that reader supports see-also subtypes.
+     *
+     * <details><summary>中文</summary>
+     * 当父类读入器支持 see-also 子类型时，为其添加子类型；其他读入器不受影响。
+     * </details>
      *
      * @param subTypeClass the sub type class to register
      * @param subTypeClassName the class name for the sub type
+     * @throws JSONException if the subtype has no superclass
      * @since 2.0.2
      */
     static void registerSeeAlsoSubType(Class subTypeClass, String subTypeClassName) {
@@ -4251,10 +5069,14 @@ public interface JSON {
     }
 
     /**
-     * Register an {@link ObjectWriterModule} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     * Registers an {@link ObjectWriterModule} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     *
+     * <details><summary>中文</summary>
+     * 在默认提供者中注册编解码配置，返回值表示先前缓存项或注册结果。
+     * </details>
      *
      * @param objectWriterModule the ObjectWriterModule to register
-     * @return true if the module was registered successfully, false otherwise
+     * @return true if registered, or false if the same module instance was already registered
      * @see JSONFactory#getDefaultObjectWriterProvider()
      * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(ObjectWriterModule)
      * @since 2.0.2
@@ -4264,10 +5086,18 @@ public interface JSON {
     }
 
     /**
-     * Register an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     * Registers an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     *
+     * <p>Selects the field-based or method-based cache using the current global
+     * {@link JSONWriter.Feature#FieldBased} default. Use the boolean overload to select it explicitly.</p>
+     *
+     * <details><summary>中文</summary>
+     * 在默认提供者中注册编解码配置，返回值表示先前缓存项或注册结果。
+     * 按当前全局 FieldBased 特性选择字段或方法缓存；带 boolean 的重载可显式选择。
+     * </details>
      *
      * @param type the type to register an ObjectWriter for
-     * @param objectWriter the ObjectWriter to register
+     * @param objectWriter the writer to register, or null to remove the cached writer
      * @return the previously registered ObjectWriter, or null if there was none
      * @see JSONFactory#getDefaultObjectWriterProvider()
      * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
@@ -4278,14 +5108,18 @@ public interface JSON {
     }
 
     /**
-     * Register an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     * Registers an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     *
+     * <details><summary>中文</summary>
+     * 在默认提供者中注册编解码配置，返回值表示先前缓存项或注册结果。
+     * </details>
      *
      * @param type the type to register an ObjectWriter for
-     * @param objectWriter the ObjectWriter to register
-     * @param fieldBased whether to use field-based writing
+     * @param objectWriter the writer to register, or null to remove the cached writer
+     * @param fieldBased whether to use the field-based cache rather than the method-based cache
      * @return the previously registered ObjectWriter, or null if there was none
      * @see JSONFactory#getDefaultObjectWriterProvider()
-     * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
+     * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter, boolean)
      * @since 2.0.38
      */
     static ObjectWriter<?> register(Type type, ObjectWriter<?> objectWriter, boolean fieldBased) {
@@ -4293,7 +5127,14 @@ public interface JSON {
     }
 
     /**
-     * Register if absent an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     * Registers, if absent, an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     *
+     * <p>Uses the method-based cache. Use the boolean overload to register a field-based codec.</p>
+     *
+     * <details><summary>中文</summary>
+     * 在默认提供者中注册编解码配置，返回值表示先前缓存项或注册结果。
+     * 使用基于方法的缓存；需要字段缓存时使用带 boolean 的重载。
+     * </details>
      *
      * @param type the type to register an ObjectWriter for
      * @param objectWriter the ObjectWriter to register
@@ -4307,14 +5148,18 @@ public interface JSON {
     }
 
     /**
-     * Register if absent an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     * Registers, if absent, an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     *
+     * <details><summary>中文</summary>
+     * 在默认提供者中注册编解码配置，返回值表示先前缓存项或注册结果。
+     * </details>
      *
      * @param type the type to register an ObjectWriter for
      * @param objectWriter the ObjectWriter to register
-     * @param fieldBased whether to use field-based writing
+     * @param fieldBased whether to use the field-based cache rather than the method-based cache
      * @return the previously registered ObjectWriter, or null if there was none
      * @see JSONFactory#getDefaultObjectWriterProvider()
-     * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#registerIfAbsent(Type, ObjectWriter)
+     * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#registerIfAbsent(Type, ObjectWriter, boolean)
      * @since 2.0.6
      */
     static ObjectWriter<?> registerIfAbsent(Type type, ObjectWriter<?> objectWriter, boolean fieldBased) {
@@ -4322,7 +5167,12 @@ public interface JSON {
     }
 
     /**
-     * Register ObjectWriterFilter
+     * Installs a supported serialization filter on the default writer for a class.
+     * Filters that do not implement a supported writer-filter interface are ignored.
+     *
+     * <details><summary>中文</summary>
+     * 为类的默认写入器设置受支持的序列化过滤器；不支持的过滤器类型不生效。
+     * </details>
      *
      * @param type the class type to register filter for
      * @param filter the filter to apply to the specified type
@@ -4351,7 +5201,14 @@ public interface JSON {
     /**
      * Enable the specified features in default reader
      *
+     * <p>Changes the global defaults used by subsequently created contexts. Existing contexts retain their settings.</p>
+     *
+     * <details><summary>中文</summary>
+     * 设置或查询默认配置；修改默认值不会追溯更新已有上下文。
+     * </details>
+     *
      * @param features the specified features to be used
+     * @throws JSONException if enabling {@link JSONReader.Feature#SupportAutoType} globally
      * @since 2.0.6
      */
     static void config(JSONReader.Feature... features) {
@@ -4368,8 +5225,15 @@ public interface JSON {
     /**
      * Enable or disable the specified features in default reader
      *
+     * <p>Changes the global defaults used by subsequently created contexts. Existing contexts retain their settings.</p>
+     *
+     * <details><summary>中文</summary>
+     * 设置或查询默认配置；修改默认值不会追溯更新已有上下文。
+     * </details>
+     *
      * @param feature the specified feature to be used
      * @param state enable this feature if and only if {@code state} is {@code true}, disable otherwise
+     * @throws JSONException if enabling {@link JSONReader.Feature#SupportAutoType} globally
      * @since 2.0.6
      */
     static void config(JSONReader.Feature feature, boolean state) {
@@ -4387,7 +5251,12 @@ public interface JSON {
     /**
      * Check if the default reader enables the specified feature
      *
+     * <details><summary>中文</summary>
+     * 设置或查询默认配置；修改默认值不会追溯更新已有上下文。
+     * </details>
+     *
      * @param feature the specified feature
+     * @return true if the feature is enabled in the global defaults
      * @since 2.0.6
      */
     static boolean isEnabled(JSONReader.Feature feature) {
@@ -4396,6 +5265,12 @@ public interface JSON {
 
     /**
      * Config default reader dateFormat
+     *
+     * <p>Changes the global defaults used by subsequently created contexts. Existing contexts retain their settings.</p>
+     *
+     * <details><summary>中文</summary>
+     * 设置或查询默认配置；修改默认值不会追溯更新已有上下文。
+     * </details>
      *
      * @param dateFormat the date format to use for reading
      * @since 2.0.30
@@ -4407,6 +5282,12 @@ public interface JSON {
     /**
      * Config default writer dateFormat
      *
+     * <p>Changes the global defaults used by subsequently created contexts. Existing contexts retain their settings.</p>
+     *
+     * <details><summary>中文</summary>
+     * 设置或查询默认配置；修改默认值不会追溯更新已有上下文。
+     * </details>
+     *
      * @param dateFormat the date format to use for writing
      * @since 2.0.30
      */
@@ -4416,6 +5297,12 @@ public interface JSON {
 
     /**
      * Config default reader zoneId
+     *
+     * <p>Changes the global defaults used by subsequently created contexts. Existing contexts retain their settings.</p>
+     *
+     * <details><summary>中文</summary>
+     * 设置或查询默认配置；修改默认值不会追溯更新已有上下文。
+     * </details>
      *
      * @param zoneId the zone ID to use for reading
      * @since 2.0.36
@@ -4427,6 +5314,12 @@ public interface JSON {
     /**
      * Config default writer zoneId
      *
+     * <p>Changes the global defaults used by subsequently created contexts. Existing contexts retain their settings.</p>
+     *
+     * <details><summary>中文</summary>
+     * 设置或查询默认配置；修改默认值不会追溯更新已有上下文。
+     * </details>
+     *
      * @param zoneId the zone ID to use for writing
      * @since 2.0.36
      */
@@ -4436,6 +5329,12 @@ public interface JSON {
 
     /**
      * Enable the specified features in default writer
+     *
+     * <p>Changes the global defaults used by subsequently created contexts. Existing contexts retain their settings.</p>
+     *
+     * <details><summary>中文</summary>
+     * 设置或查询默认配置；修改默认值不会追溯更新已有上下文。
+     * </details>
      *
      * @param features the specified features to be used
      * @since 2.0.6
@@ -4448,6 +5347,12 @@ public interface JSON {
 
     /**
      * Enable or disable the specified features in default writer
+     *
+     * <p>Changes the global defaults used by subsequently created contexts. Existing contexts retain their settings.</p>
+     *
+     * <details><summary>中文</summary>
+     * 设置或查询默认配置；修改默认值不会追溯更新已有上下文。
+     * </details>
      *
      * @param feature the specified feature to be used
      * @param state enable this feature if and only if {@code state} is {@code true}, disable otherwise
@@ -4464,7 +5369,12 @@ public interface JSON {
     /**
      * Check if the default writer enables the specified feature
      *
+     * <details><summary>中文</summary>
+     * 设置或查询默认配置；修改默认值不会追溯更新已有上下文。
+     * </details>
+     *
      * @param feature the specified feature
+     * @return true if the feature is enabled in the global defaults
      * @since 2.0.6
      */
     static boolean isEnabled(JSONWriter.Feature feature) {
@@ -4472,12 +5382,19 @@ public interface JSON {
     }
 
     /**
-     * Builds a new {@code T} using the properties of the specified object
+     * Copies a value using the registered readers and writers.
+     * Values recognized as primitive-like or enums are returned unchanged. Other values
+     * are copied through bean properties or a JSONB round trip; this does not guarantee
+     * a new instance for every nested value or preservation of all object identities.
+     *
+     * <details><summary>中文</summary>
+     * 通过已注册的读写器复制值；基础值和枚举可直接返回原值。其他值通过属性复制或 JSONB 转换，不保证每个嵌套值均创建新实例或保留全部对象身份。
+     * </details>
      *
      * @param <T> the type of the object to copy
      * @param object the specified object will be copied
      * @param features the specified features is applied to serialization
-     * @return a new instance of T with the same properties as the input object, or null if the input is null
+     * @return the copied value, the original primitive-like/enum value, or null for a null input
      * @since 2.0.12
      */
     static <T> T copy(T object, JSONWriter.Feature... features) {
@@ -4553,11 +5470,17 @@ public interface JSON {
     }
 
     /**
-     * Builds a new instance of targetClass using the properties of the specified object
+     * Creates a target instance using the source properties and registered codecs.
+     * Matching properties are converted as required. Compatible property values may be
+     * assigned directly, so mutable nested values can be shared with the source.
+     *
+     * <details><summary>中文</summary>
+     * 使用源属性和已注册编解码器创建目标实例；匹配属性按需转换。兼容的属性值可直接赋值，因此可变嵌套值可能与源对象共享。
+     * </details>
      *
      * @param <T> the target type
      * @param object the specified object will be copied
-     * @param targetClass the specified target class
+     * @param targetClass the class of the copy to create
      * @param features the specified features is applied to serialization
      * @return a new instance of targetClass with properties copied from the input object, or null if the input is null
      * @since 2.0.16
@@ -4649,6 +5572,10 @@ public interface JSON {
 
     /**
      * Configure the Enum classes as a JavaBean
+     *
+     * <details><summary>中文</summary>
+     * 设置或查询默认配置；修改默认值不会追溯更新已有上下文。
+     * </details>
      *
      * @param enumClasses the enum classes to configure as JavaBeans
      * @since 2.0.55

@@ -292,8 +292,9 @@ public abstract class JSONWriter
     }
 
     /**
-     * Sets the path for the specified object using the provided field writer without reference detection.
-     * This method is used for reference detection during serialization.
+     * Registers a field path without first checking whether reference detection is enabled
+     * or the object is eligible. Callers must perform those checks before using this low-level method.
+     * <details><summary>中文</summary>登记字段路径，但不预先检查引用检测是否启用或对象是否适用；调用方须先完成这些检查。</details>
      *
      * @param fieldWriter the field writer to use for path generation
      * @param object the object to set the path for
@@ -369,8 +370,9 @@ public abstract class JSONWriter
     }
 
     /**
-     * Sets the path for the specified object at the given index without reference detection.
-     * This method is used for reference detection during serialization of array elements.
+     * Registers an indexed path without first checking whether the object is eligible for
+     * reference detection. Returns null without registering anything if no current path exists.
+     * <details><summary>中文</summary>登记数组索引路径，但不检查对象是否适用于引用检测；当前路径不存在时返回 null，且不登记对象。</details>
      *
      * @param index the index to set the path for
      * @param object the object to set the path for
@@ -403,8 +405,9 @@ public abstract class JSONWriter
     }
 
     /**
-     * Removes the path for the specified object.
-     * This method is used to clean up path information during serialization.
+     * Restores the parent path after serializing a reference-detectable object.
+     * The object's recorded reference remains available for later references.
+     * <details><summary>中文</summary>序列化可检测引用的对象后恢复父路径；保留对象的引用记录供后续使用。</details>
      *
      * @param object the object to remove the path for
      */
@@ -417,8 +420,9 @@ public abstract class JSONWriter
     }
 
     /**
-     * Removes the path for the specified object without reference detection.
-     * This method is used to clean up path information during serialization.
+     * Restores the parent path without the object-type eligibility check performed by
+     * {@link #popPath(Object)}. This method still checks the reference-detection feature.
+     * <details><summary>中文</summary>跳过 popPath 的对象类型检查并恢复父路径，但仍检查引用检测特性是否启用。</details>
      *
      * @param object the object to remove the path for
      */
@@ -529,7 +533,9 @@ public abstract class JSONWriter
     }
 
     /**
-     * If ReferenceDetection has been set, returns the path of the current object, otherwise returns null
+     * Returns the current serialization path, or null if no path has been established.
+     * Calling {@link #setRootObject(Object)} establishes a path even without reference detection.
+     * <details><summary>中文</summary>返回当前序列化路径；尚未建立路径时返回 null。setRootObject 即使未启用引用检测也会建立根路径。</details>
      * @since 2.0.51
      * @return the path of the current object
      */
@@ -1271,9 +1277,9 @@ public abstract class JSONWriter
     }
 
     /**
-     * Writes a character without any escaping or formatting.
-     * This method is used for low-level output operations where no JSON
-     * formatting or escaping should be applied.
+     * Writes a character as a JSON string value, including the quoting and escaping
+     * required by the output format. Use {@link #writeRaw(char)} for unescaped text output.
+     * <details><summary>中文</summary>将字符写为 JSON 字符串值，并按输出格式添加引号及转义；原始文本输出请使用 writeRaw。</details>
      *
      * @param ch the character to write
      */
@@ -1614,12 +1620,11 @@ public abstract class JSONWriter
     public abstract void startArray();
 
     /**
-     * Starts writing a JSON array with a specified initial capacity.
-     * This method writes the opening bracket '[' and prepares the writer
-     * for writing array elements. The size parameter is used for optimization
-     * in some implementations.
+     * Writes a length-prefixed JSONB array header. The caller must write exactly
+     * {@code size} elements. Text writers do not support this overload; use {@link #startArray()}.
+     * <details><summary>中文</summary>写入带元素数量的 JSONB 数组头；调用方必须写入指定数量的元素。文本写入器应使用无参数 startArray。</details>
      *
-     * @param size the expected number of elements in the array
+     * @param size the number of elements in the array
      * @throws JSONException if the operation is not supported by this implementation
      */
     public void startArray(int size) {
@@ -1925,7 +1930,9 @@ public abstract class JSONWriter
     /**
      * Writes a float value with the specified decimal format.
      * If the format is null or JSONB mode is enabled, this method delegates to writeFloat(float).
-     * NaN and infinite values are written as null.
+     * For formatted text, NaN and infinite values are written as null unless
+     * {@link Feature#WriteFloatSpecialAsString} is enabled.
+     * <details><summary>中文</summary>格式化文本中的 NaN 和无穷值默认写为 null；启用 WriteFloatSpecialAsString 时写为字符串。</details>
      *
      * @param value the float value to write
      * @param format the decimal format to use, or null to use default formatting
@@ -1953,7 +1960,9 @@ public abstract class JSONWriter
     /**
      * Writes a float array with the specified decimal format.
      * If the format is null or JSONB mode is enabled, this method delegates to writeFloat(float[]).
-     * NaN and infinite values are written as null.
+     * For formatted text, NaN and infinite values are written as null unless
+     * {@link Feature#WriteFloatSpecialAsString} is enabled.
+     * <details><summary>中文</summary>格式化文本中的 NaN 和无穷值默认写为 null；启用 WriteFloatSpecialAsString 时写为字符串。</details>
      *
      * @param value the float array to write, can be null
      * @param format the decimal format to use, or null to use default formatting
@@ -2013,7 +2022,9 @@ public abstract class JSONWriter
     /**
      * Writes a double value with the specified decimal format.
      * If the format is null or JSONB mode is enabled, this method delegates to writeDouble(double).
-     * NaN and infinite values are written as null.
+     * For formatted text, NaN and infinite values are written as null unless
+     * {@link Feature#WriteFloatSpecialAsString} is enabled.
+     * <details><summary>中文</summary>格式化文本中的 NaN 和无穷值默认写为 null；启用 WriteFloatSpecialAsString 时写为字符串。</details>
      *
      * @param value the double value to write
      * @param format the decimal format to use, or null to use default formatting
@@ -2238,7 +2249,7 @@ public abstract class JSONWriter
      * The serialization format depends on the context features:
      * <ul>
      *   <li>If {@link Feature#NullAsDefaultValue} is enabled, 0.0 is written</li>
-     *   <li>If {@link Feature#WriteNullNumberAsZero} is enabled, zero is written</li>
+     *   <li>If {@link Feature#WriteNullNumberAsZero} is enabled, 0.0 is written</li>
      *   <li>Otherwise, a null value is written</li>
      * </ul>
      */
@@ -2251,7 +2262,7 @@ public abstract class JSONWriter
      * The serialization format depends on the provided features:
      * <ul>
      *   <li>If {@link Feature#NullAsDefaultValue} is enabled, 0.0 is written</li>
-     *   <li>If {@link Feature#WriteNullNumberAsZero} is enabled, zero is written</li>
+     *   <li>If {@link Feature#WriteNullNumberAsZero} is enabled, 0.0 is written</li>
      *   <li>Otherwise, a null value is written</li>
      * </ul>
      *
@@ -2436,6 +2447,8 @@ public abstract class JSONWriter
      * Writes a string from a Reader.
      * This method reads characters from the provided Reader and writes them as a JSON string,
      * properly escaping any special characters as needed.
+     * The input reader is consumed to end of input and is not closed. This overload requires a text writer.
+     * <details><summary>中文</summary>读取到输入结束并进行 JSON 字符串转义；不关闭输入 Reader。该重载仅适用于文本写入器。</details>
      *
      * @param reader the Reader to read characters from
      * @throws JSONException if an I/O error occurs while reading from the Reader
@@ -3062,6 +3075,9 @@ public abstract class JSONWriter
      * Writes any object using the appropriate writer based on its runtime type.
      * This method dynamically determines the correct serialization approach based
      * on the actual type of the object provided.
+     * When using reference detection for a root value, first call {@link #setRootObject(Object)}.
+     * This method writes one value; it does not insert separators between successive calls.
+     * <details><summary>中文</summary>根对象需要引用检测时，应先调用 setRootObject。每次调用写入一个值，多次调用之间不会自动添加分隔符。</details>
      *
      * @param value the object to write, can be null
      */
@@ -3108,37 +3124,47 @@ public abstract class JSONWriter
      * This method should be called when finished with the writer to ensure
      * proper cleanup of resources.
      *
-     * @throws RuntimeException if an I/O error occurs
+     * <p>Closing releases reusable buffers; it does not flush output to a destination.
+     * Obtain the output or call a {@code flushTo} overload before closing.</p>
+     * <details><summary>中文</summary>关闭会释放可复用缓冲区，不会自动输出到目标；应在关闭前获取结果或调用 flushTo。</details>
      */
     @Override
     public abstract void close();
 
     /**
-     * Gets the current size of the output buffer.
+     * Gets the number of occupied units in the output buffer: bytes for UTF-8/JSONB writers,
+     * and UTF-16 code units for character-buffer writers.
+     * <details><summary>中文</summary>返回缓冲区已使用的单位数：UTF-8/JSONB 为字节数，字符缓冲区写入器为 UTF-16 代码单元数。</details>
      *
-     * @return the size of the output buffer in bytes
+     * @return the number of occupied buffer units
      */
     public abstract int size();
 
     /**
-     * Gets the content of the output buffer as a byte array.
+     * Copies the current output to a byte array. Text output is encoded as UTF-8;
+     * JSONB output retains its binary representation. The writer's buffer is not cleared.
+     * <details><summary>中文</summary>复制当前输出为字节数组；文本使用 UTF-8，JSONB 保持二进制格式，不清空写入器缓冲区。</details>
      *
      * @return the content as a byte array
      */
     public abstract byte[] getBytes();
 
     /**
-     * Gets the content of the output buffer as a byte array using the specified charset.
+     * Copies buffered text using the specified non-null charset, without clearing the buffer.
+     * JSONB does not support transcoding; use {@link #getBytes()} for binary output.
+     * <details><summary>中文</summary>按非 null 字符集复制缓冲文本，不清空缓冲区；JSONB 不支持字符集转换，二进制输出请使用无参数 getBytes。</details>
      *
-     * @param charset the charset to use for encoding
+     * @param charset the non-null charset to use for encoding
      * @return the content as a byte array
+     * @throws JSONException if called on a JSONB writer, which does not support charset conversion
      */
     public abstract byte[] getBytes(Charset charset);
 
     /**
      * Flushes the content of this JSONWriter to the specified Writer.
-     * This method converts the current content to a string and writes it to the provided Writer,
-     * then resets the internal buffer offset to zero.
+     * Writes the buffered text and resets the buffer offset after a successful write.
+     * It neither flushes nor closes the destination. For binary JSONB output, use an OutputStream overload.
+     * <details><summary>中文</summary>输出缓冲文本，成功后重置缓冲区位置；不刷新或关闭目标。JSONB 二进制输出应使用 OutputStream 重载。</details>
      *
      * @param to the Writer to flush content to
      * @throws JSONException if an I/O error occurs while writing to the Writer
@@ -3155,8 +3181,9 @@ public abstract class JSONWriter
 
     /**
      * Flushes the content of this JSONWriter to the specified OutputStream.
-     * This method writes the current content directly to the provided OutputStream
-     * without converting to a string first.
+     * Text is encoded as UTF-8; JSONB is written as binary data. A successful write clears
+     * the output buffer. The destination is neither flushed nor closed.
+     * <details><summary>中文</summary>文本按 UTF-8 编码，JSONB 按二进制输出；成功后清空缓冲区，不刷新或关闭目标流。</details>
      *
      * @param to the OutputStream to flush content to
      * @return the number of bytes written
@@ -3166,8 +3193,12 @@ public abstract class JSONWriter
 
     /**
      * Flushes the content of this JSONWriter to the specified OutputStream using the specified charset.
-     * This method writes the current content directly to the provided OutputStream
-     * using the specified charset for encoding.
+     * Encodes buffered text with the specified charset and clears the buffer after success.
+     * The destination is neither flushed nor closed. JSONB writers do not support this overload.
+     * Pass an explicit charset for portability: UTF-8 writers accept null as UTF-8,
+     * but character-buffer writers require a non-null charset.
+     * <details><summary>中文</summary>按指定字符集输出文本，成功后清空缓冲区；不刷新或关闭目标流，JSONB 不支持此重载。</details>
+     * <details><summary>中文</summary>为兼容不同实现，请显式指定字符集；UTF-8 写入器将 null 视为 UTF-8，但字符缓冲区写入器要求非 null。</details>
      *
      * @param out the OutputStream to flush content to
      * @param charset the charset to use for encoding
@@ -5056,7 +5087,9 @@ public abstract class JSONWriter
 
     /**
      * Gets the current offset in the internal buffer.
-     * The offset represents the position where the next character will be written.
+     * The offset is measured in bytes for UTF-8/JSONB writers and UTF-16 code units
+     * for character-buffer writers.
+     * <details><summary>中文</summary>偏移量单位取决于写入器：UTF-8/JSONB 使用字节，字符缓冲区使用 UTF-16 代码单元。</details>
      *
      * @return the current offset
      */
@@ -5067,6 +5100,8 @@ public abstract class JSONWriter
     /**
      * Sets the offset in the internal buffer.
      * This method allows direct manipulation of the buffer position.
+     * It does not validate the offset, grow the buffer, or update nesting and reference state.
+     * <details><summary>中文</summary>该方法不验证偏移量、不扩容，也不更新嵌套或引用状态。</details>
      *
      * @param offset the offset to set
      */

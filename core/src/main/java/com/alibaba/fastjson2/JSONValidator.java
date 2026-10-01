@@ -82,7 +82,11 @@ public class JSONValidator {
     }
 
     /**
-     * Creates a new JSONValidator for the specified JSONReader.
+     * Creates a validator that uses the supplied reader at its current position.
+     * Validation consumes input and closes this reader, including when validation fails.
+     * <details><summary>中文</summary>
+     * 使用指定读取器的当前位置进行校验；校验会消耗输入并关闭读取器，校验失败时也会关闭。
+     * </details>
      *
      * @param jsonReader the JSONReader containing JSON content
      * @return a new JSONValidator instance
@@ -92,10 +96,13 @@ public class JSONValidator {
     }
 
     /**
-     * Validates the JSON content and returns true if it is valid JSON.
+     * Checks whether the reader can skip one value and then reaches the end of its input.
      *
-     * <p>This method parses the JSON content to check its validity. The result is cached,
-     * so subsequent calls will return the same result without re-parsing.</p>
+     * <p>Accepted syntax follows the reader's configuration. The reader is closed after
+     * this attempt. The result is cached, so subsequent calls do not consume more input.</p>
+     * <details><summary>中文</summary>
+     * 按读取器配置检查一个值后是否到达输入末尾；检查后关闭读取器，并缓存结果，后续调用不再读取输入。
+     * </details>
      *
      * @return true if the content is valid JSON, false otherwise
      */
@@ -126,12 +133,17 @@ public class JSONValidator {
     }
 
     /**
-     * Returns the type of the JSON content.
+     * Returns the type of the first value successfully skipped during validation.
      *
      * <p>If the type has not yet been determined, this method will call {@link #validate()}
      * to parse the content and determine its type.</p>
+     * <p>A non-null type does not imply successful validation: trailing content can cause
+     * {@link #validate()} to return false after the first value's type has been determined.</p>
+     * <details><summary>中文</summary>
+     * 返回校验时成功跳过的首个值的类型；必要时触发校验。尾部存在其他内容时，校验失败但仍可能返回类型。
+     * </details>
      *
-     * @return the Type of the JSON content (Object, Array, or Value)
+     * @return Object, Array, or Value, or null if validation failed before determining a type
      */
     public Type getType() {
         if (type == null) {

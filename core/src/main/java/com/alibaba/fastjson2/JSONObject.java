@@ -42,14 +42,20 @@ public class JSONObject
             | NotWriteDefaultValue.mask;
 
     /**
-     * default
+     * Creates an empty, mutable JSON object in insertion order.
+     * <details><summary>中文</summary>创建按插入顺序排列且可修改的空 JSON 对象。</details>
+     *
+
      */
     public JSONObject() {
         super();
     }
 
     /**
-     * @param initialCapacity the initial capacity = (number of elements to store / load factor) + 1
+     * <p>Capacity and load-factor arguments have the same meaning as in {@link LinkedHashMap}.</p>
+     * <details><summary>中文</summary>容量和负载因子参数的含义与 LinkedHashMap 相同。</details>
+     *
+     * @param initialCapacity the initial hash-table capacity
      * @throws IllegalArgumentException If the initial capacity is negative
      */
     public JSONObject(int initialCapacity) {
@@ -57,9 +63,12 @@ public class JSONObject
     }
 
     /**
-     * @param initialCapacity the initial capacity = (number of elements to store / load factor) + 1
+     * <p>Capacity and load-factor arguments have the same meaning as in {@link LinkedHashMap}.</p>
+     * <details><summary>中文</summary>容量和负载因子参数的含义与 LinkedHashMap 相同。</details>
+     *
+     * @param initialCapacity the initial hash-table capacity
      * @param loadFactor the load factor
-     * @throws IllegalArgumentException If the initial capacity is negative or the load factor is negative
+     * @throws IllegalArgumentException If the initial capacity is negative or the load factor is nonpositive or NaN
      * @since 2.0.2
      */
     public JSONObject(int initialCapacity, float loadFactor) {
@@ -67,10 +76,13 @@ public class JSONObject
     }
 
     /**
-     * @param initialCapacity the initial capacity = (number of elements to store / load factor) + 1
+     * <p>Capacity and load-factor arguments have the same meaning as in {@link LinkedHashMap}.</p>
+     * <details><summary>中文</summary>容量和负载因子参数的含义与 LinkedHashMap 相同。</details>
+     *
+     * @param initialCapacity the initial hash-table capacity
      * @param loadFactor the load factor
      * @param accessOrder the ordering mode - true for access-order, false for insertion-order
-     * @throws IllegalArgumentException If the initial capacity is negative or the load factor is negative
+     * @throws IllegalArgumentException If the initial capacity is negative or the load factor is nonpositive or NaN
      * @since 2.0.2
      */
     public JSONObject(int initialCapacity, float loadFactor, boolean accessOrder) {
@@ -78,6 +90,9 @@ public class JSONObject
     }
 
     /**
+     * <p>Copies the mappings in iteration order. Keys and values are shared; nested values are not cloned.</p>
+     * <details><summary>中文</summary>按迭代顺序复制映射，键和值仍共享，不克隆嵌套值。</details>
+     *
      * @param map the map whose mappings are to be placed in this map
      * @throws NullPointerException If the specified map is null
      */
@@ -98,7 +113,12 @@ public class JSONObject
     /**
      * Returns the Object of the associated keys in this {@link JSONObject}.
      *
+     * <p>For Number, Character, Boolean and UUID keys, a nonnull value under the string form of the key
+     * takes precedence. If that lookup returns null, the original key is tried.</p>
+     * <details><summary>中文</summary>对于 Number、Character、Boolean 和 UUID 键，优先返回字符串键对应的非 null 值，否则再查找原键。</details>
+     *
      * @param key the key whose associated value is to be returned
+     * @return the associated value, or null if absent or mapped to null
      * @since 2.0.2
      */
     @Override
@@ -117,6 +137,14 @@ public class JSONObject
         return super.get(key);
     }
 
+    /**
+     * Evaluates a JSONPath against this object.
+     * <details><summary>中文</summary>以当前对象为根节点计算 JSONPath。</details>
+     *
+     * @param jsonPath the JSONPath expression
+     * @return the selected value, or the result defined by the expression
+     * @throws JSONException if the expression is invalid
+     */
     public Object getByPath(String jsonPath) {
         JSONPath path = JSONPath.of(jsonPath);
         if (path instanceof JSONPathSingleName) {
@@ -138,6 +166,10 @@ public class JSONObject
     /**
      * Returns true if this map contains a mapping for the specified key
      *
+     * <p>Number, Character, Boolean and UUID keys match either the original key or its string form.
+     * A mapping with a null value still counts as present.</p>
+     * <details><summary>中文</summary>Number、Character、Boolean 和 UUID 键匹配原键或其字符串形式；值为 null 的映射也视为存在。</details>
+     *
      * @param key the key whose presence in this map is to be tested
      */
     @Override
@@ -154,16 +186,23 @@ public class JSONObject
     }
 
     /**
+     * <p>A present null mapping returns null, not the default.</p>
+     * <details><summary>中文</summary>已存在且值为 null 的映射返回 null，不使用默认值。</details>
+     *
      * @param key the key whose associated value is to be returned
-     * @param defaultValue the default mapping of the key
+     * @param defaultValue the value returned when no matching key exists
      */
     public Object getOrDefault(String key, Object defaultValue) {
         return super.getOrDefault(key, defaultValue);
     }
 
     /**
+     * <p>A present null mapping returns null, not the default. Number, Character, Boolean and UUID keys
+     * are looked up only by their string form in this overload.</p>
+     * <details><summary>中文</summary>已存在且值为 null 的映射返回 null，不使用默认值。此重载对 Number、Character、Boolean 和 UUID 键只查找其字符串形式。</details>
+     *
      * @param key the key whose associated value is to be returned
-     * @param defaultValue the default mapping of the key
+     * @param defaultValue the value returned when no matching key exists
      * @since 2.0.2
      */
     @Override
@@ -199,6 +238,11 @@ public class JSONObject
     /**
      * Iterates over the JSONArray elements associated with the given key.
      *
+     * <p>Uses {@link #getJSONArray(String)} and {@link JSONArray#getJSONObject(int)} for conversion,
+     * so stored containers may be replaced. No action is performed if the array conversion returns null;
+     * a null element is passed to the action as null.</p>
+     * <details><summary>中文</summary>通过 getJSONArray 和 getJSONObject 转换，可能替换存储的容器；数组转换结果为 null 时不执行操作，null 元素会作为 null 传给回调。</details>
+     *
      * @param key the key whose associated JSONArray is to be iterated
      * @param action the action to be performed for each JSONObject element
      */
@@ -216,6 +260,12 @@ public class JSONObject
 
     /**
      * Returns the {@link JSONArray} of the associated keys in this {@link JSONObject}.
+     *
+     * <p>Collections and Java arrays are copied into a JSONArray and replace the mapping. Existing
+     * JSONArrays are returned directly; JSONObject values and nonempty strings not starting with {@code [}
+     * become singleton arrays without changing the mapping. Other strings are parsed as JSON arrays.
+     * Missing/null values, empty strings, case-insensitive {@code "null"} and unsupported values return null.</p>
+     * <details><summary>中文</summary>集合和 Java 数组转换后替换映射；已有 JSONArray 直接返回，JSONObject 和非 [ 开头的非空字符串包装为单元素数组且不修改映射。其他字符串按数组解析；缺失、空值及不支持类型返回 null。</details>
      *
      * @param key the key whose associated value is to be returned
      * @return {@link JSONArray} or null
@@ -301,6 +351,11 @@ public class JSONObject
     /**
      * Returns the {@link JSONObject} of the associated keys in this {@link JSONObject}.
      *
+     * <p>Maps and supported beans are converted and replace the mapping. JSON object strings are parsed
+     * without changing the mapping. Existing JSONObject values are returned directly. Missing/null values,
+     * empty strings, case-insensitive {@code "null"} and unsupported values return null.</p>
+     * <details><summary>中文</summary>Map 和支持的 Bean 转换后替换映射；字符串解析不修改映射。已有 JSONObject 直接返回；缺失、空值及不支持的类型返回 null。</details>
+     *
      * @param key the key whose associated value is to be returned
      * @return {@link JSONObject} or null
      */
@@ -347,8 +402,12 @@ public class JSONObject
     /**
      * Returns the {@link String} of the associated keys in this {@link JSONObject}.
      *
+     * <p>Strings are returned unchanged. Scalar values use their text representation, dates use the default
+     * time zone, and other values are serialized as JSON.</p>
+     * <details><summary>中文</summary>字符串保持不变；标量转换为文本，日期使用默认时区，其他值序列化为 JSON。</details>
+     *
      * @param key the key whose associated value is to be returned
-     * @return {@link String} or null
+     * @return the converted string, or null for a missing or null mapping
      */
     public String getString(String key) {
         return getString(key, null);
@@ -357,9 +416,13 @@ public class JSONObject
     /**
      * Returns the {@link String} of the associated keys in this {@link JSONObject}.
      *
+     * <p>Strings are returned unchanged. Scalar values use their text representation, dates use the default
+     * time zone, and other values are serialized as JSON.</p>
+     * <details><summary>中文</summary>字符串保持不变；标量转换为文本，日期使用默认时区，其他值序列化为 JSON。</details>
+     *
      * @param key the key whose associated value is to be returned
-     * @param defaultValue the default mapping of the key
-     * @return {@link String} or null
+     * @param defaultValue the value returned for a missing or null mapping
+     * @return the converted string, or defaultValue for a missing or null mapping
      */
     public String getString(String key, String defaultValue) {
         Object value = super.get(key);
@@ -391,6 +454,10 @@ public class JSONObject
 
     /**
      * Returns the {@link Double} of the associated keys in this {@link JSONObject}.
+     *
+     * <p>Converts Number values using the target numeric type. String values are trimmed; empty strings
+     * and case-insensitive {@code "null"} return null. Numeric conversion may lose precision or narrow.</p>
+     * <details><summary>中文</summary>Number 按目标数值类型转换，可能损失精度或缩窄；字符串先去除首尾空白，空字符串或忽略大小写的 null 字符串返回 null。</details>
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Double} or null
@@ -428,6 +495,10 @@ public class JSONObject
     /**
      * Returns a double value of the associated keys in this {@link JSONObject}.
      *
+     * <p>Missing/null values, empty strings and case-insensitive {@code "null"} return zero.
+     * Numeric conversions may narrow or truncate according to the target primitive type.</p>
+     * <details><summary>中文</summary>缺失、null、空字符串及忽略大小写的 null 字符串返回零；数值可能按目标基本类型缩窄或截断。</details>
+     *
      * @param key the key whose associated value is to be returned
      * @return double
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable double
@@ -440,6 +511,10 @@ public class JSONObject
 
     /**
      * Returns the {@link Float} of the associated keys in this {@link JSONObject}.
+     *
+     * <p>Converts Number values using the target numeric type. String values are trimmed; empty strings
+     * and case-insensitive {@code "null"} return null. Numeric conversion may lose precision or narrow.</p>
+     * <details><summary>中文</summary>Number 按目标数值类型转换，可能损失精度或缩窄；字符串先去除首尾空白，空字符串或忽略大小写的 null 字符串返回 null。</details>
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Float} or null
@@ -477,6 +552,10 @@ public class JSONObject
     /**
      * Returns a float value of the associated keys in this {@link JSONObject}.
      *
+     * <p>Missing/null values, empty strings and case-insensitive {@code "null"} return zero.
+     * Numeric conversions may narrow or truncate according to the target primitive type.</p>
+     * <details><summary>中文</summary>缺失、null、空字符串及忽略大小写的 null 字符串返回零；数值可能按目标基本类型缩窄或截断。</details>
+     *
      * @param key the key whose associated value is to be returned
      * @return float
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable float
@@ -489,6 +568,10 @@ public class JSONObject
 
     /**
      * Returns the {@link Long} of the associated keys in this {@link JSONObject}.
+     *
+     * <p>Converts Number values using the target numeric type. String values are trimmed; empty strings
+     * and case-insensitive {@code "null"} return null. Numeric conversion may lose precision or narrow.</p>
+     * <details><summary>中文</summary>Number 按目标数值类型转换，可能损失精度或缩窄；字符串先去除首尾空白，空字符串或忽略大小写的 null 字符串返回 null。</details>
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Long} or null
@@ -534,6 +617,10 @@ public class JSONObject
     /**
      * Returns a long value of the associated keys in this {@link JSONObject}.
      *
+     * <p>Missing/null values, empty strings and case-insensitive {@code "null"} return zero.
+     * Numeric conversions may narrow or truncate according to the target primitive type.</p>
+     * <details><summary>中文</summary>缺失、null、空字符串及忽略大小写的 null 字符串返回零；数值可能按目标基本类型缩窄或截断。</details>
+     *
      * @param key the key whose associated value is to be returned
      * @return long
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable long
@@ -545,6 +632,10 @@ public class JSONObject
 
     /**
      * Returns a long value of the associated keys in this {@link JSONObject}.
+     *
+     * <p>The default is used for missing/null values, empty strings and case-insensitive {@code "null"}.
+     * Invalid numeric text still throws; the default does not suppress conversion errors.</p>
+     * <details><summary>中文</summary>缺失、null、空字符串和忽略大小写的 null 字符串使用默认值；非法数字文本仍抛出异常，默认值不屏蔽转换错误。</details>
      *
      * @param key the key whose associated value is to be returned
      * @param defaultValue the default mapping of the key
@@ -582,6 +673,10 @@ public class JSONObject
 
     /**
      * Returns the {@link Integer} of the associated keys in this {@link JSONObject}.
+     *
+     * <p>Converts Number values using the target numeric type. String values are trimmed; empty strings
+     * and case-insensitive {@code "null"} return null. Numeric conversion may lose precision or narrow.</p>
+     * <details><summary>中文</summary>Number 按目标数值类型转换，可能损失精度或缩窄；字符串先去除首尾空白，空字符串或忽略大小写的 null 字符串返回 null。</details>
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Integer} or null
@@ -627,6 +722,10 @@ public class JSONObject
     /**
      * Returns an int value of the associated keys in this {@link JSONObject}.
      *
+     * <p>Missing/null values, empty strings and case-insensitive {@code "null"} return zero.
+     * Numeric conversions may narrow or truncate according to the target primitive type.</p>
+     * <details><summary>中文</summary>缺失、null、空字符串及忽略大小写的 null 字符串返回零；数值可能按目标基本类型缩窄或截断。</details>
+     *
      * @param key the key whose associated value is to be returned
      * @return int
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable int
@@ -638,6 +737,10 @@ public class JSONObject
 
     /**
      * Returns an int value of the associated keys in this {@link JSONObject}.
+     *
+     * <p>The default is used for missing/null values, empty strings and case-insensitive {@code "null"}.
+     * Invalid numeric text still throws; the default does not suppress conversion errors.</p>
+     * <details><summary>中文</summary>缺失、null、空字符串和忽略大小写的 null 字符串使用默认值；非法数字文本仍抛出异常，默认值不屏蔽转换错误。</details>
      *
      * @param key the key whose associated value is to be returned
      * @param defaultValue the default mapping of the key
@@ -676,6 +779,10 @@ public class JSONObject
     /**
      * Returns the {@link Short} of the associated keys in this {@link JSONObject}.
      *
+     * <p>Converts Number values using the target numeric type. String values are trimmed; empty strings
+     * and case-insensitive {@code "null"} return null. Numeric conversion may lose precision or narrow.</p>
+     * <details><summary>中文</summary>Number 按目标数值类型转换，可能损失精度或缩窄；字符串先去除首尾空白，空字符串或忽略大小写的 null 字符串返回 null。</details>
+     *
      * @param key the key whose associated value is to be returned
      * @return {@link Short} or null
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable short
@@ -712,6 +819,10 @@ public class JSONObject
     /**
      * Returns a short value of the associated keys in this {@link JSONObject}.
      *
+     * <p>Missing/null values, empty strings and case-insensitive {@code "null"} return zero.
+     * Numeric conversions may narrow or truncate according to the target primitive type.</p>
+     * <details><summary>中文</summary>缺失、null、空字符串及忽略大小写的 null 字符串返回零；数值可能按目标基本类型缩窄或截断。</details>
+     *
      * @param key the key whose associated value is to be returned
      * @return short
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable short
@@ -724,6 +835,10 @@ public class JSONObject
 
     /**
      * Returns the {@link Byte} of the associated keys in this {@link JSONObject}.
+     *
+     * <p>Converts Number values using the target numeric type. String values are trimmed; empty strings
+     * and case-insensitive {@code "null"} return null. Numeric conversion may lose precision or narrow.</p>
+     * <details><summary>中文</summary>Number 按目标数值类型转换，可能损失精度或缩窄；字符串先去除首尾空白，空字符串或忽略大小写的 null 字符串返回 null。</details>
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Byte} or null
@@ -757,6 +872,10 @@ public class JSONObject
     /**
      * Returns a byte value of the associated keys in this {@link JSONObject}.
      *
+     * <p>Missing/null values, empty strings and case-insensitive {@code "null"} return zero.
+     * Numeric conversions may narrow or truncate according to the target primitive type.</p>
+     * <details><summary>中文</summary>缺失、null、空字符串及忽略大小写的 null 字符串返回零；数值可能按目标基本类型缩窄或截断。</details>
+     *
      * @param key the key whose associated value is to be returned
      * @return byte
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable byte
@@ -767,6 +886,15 @@ public class JSONObject
         return value == null ? 0 : value;
     }
 
+    /**
+     * Returns a stored byte array directly, or decodes a String with the basic Base64 decoder.
+     * <details><summary>中文</summary>已有字节数组直接返回；字符串使用基本 Base64 解码器解码。</details>
+     *
+     * @param key the key to look up
+     * @return the shared byte array, decoded bytes, or null for a missing or null mapping
+     * @throws IllegalArgumentException if a String is not valid Base64
+     * @throws JSONException if the value has an unsupported type
+     */
     public byte[] getBytes(String key) {
         Object value = get(key);
 
@@ -785,6 +913,10 @@ public class JSONObject
 
     /**
      * Returns the {@link Boolean} of the associated keys in this {@link JSONObject}.
+     *
+     * <p>Numbers are true only when {@link Number#intValue()} equals 1. Strings are true only for
+     * case-insensitive {@code "true"} or {@code "1"}; empty strings and {@code "null"} return null.</p>
+     * <details><summary>中文</summary>数值仅在 intValue() 为 1 时为 true；字符串仅 true（忽略大小写）或 1 为 true，空字符串和 null 字符串返回 null。</details>
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Boolean} or null
@@ -821,6 +953,9 @@ public class JSONObject
     /**
      * Returns a boolean value of the associated key in this object.
      *
+     * <p>Uses {@link #getBoolean(String)} and returns false when that conversion returns null.</p>
+     * <details><summary>中文</summary>使用 getBoolean 转换，其结果为 null 时返回 false。</details>
+     *
      * @param key the key whose associated value is to be returned
      * @return boolean
      * @throws JSONException Unsupported type conversion to boolean value
@@ -832,6 +967,10 @@ public class JSONObject
 
     /**
      * Returns a boolean value of the associated key in this object.
+     *
+     * <p>The default is used whenever {@link #getBoolean(String)} returns null, including missing values
+     * and empty or case-insensitive {@code "null"} strings. Other unrecognized strings return false.</p>
+     * <details><summary>中文</summary>getBoolean 返回 null 时使用默认值，包括缺失、空字符串和 null 字符串；其他无法识别的字符串返回 false。</details>
      *
      * @param key the key whose associated value is to be returned
      * @param defaultValue the default mapping of the key
@@ -1008,7 +1147,12 @@ public class JSONObject
     }
 
     /**
+     * Returns the value converted to {@link LocalDate}. An existing instance is returned directly.
+     * Missing or null mappings return null.
+     * <details><summary>中文</summary>将值转换为 LocalDate，已有实例直接返回。缺失或 null 映射返回 null。</details>
      *
+     * @param key the key to look up
+     * @return the converted value, or null
      * @since 2.0.57
      */
     public LocalDate getLocalDate(String key) {
@@ -1016,7 +1160,13 @@ public class JSONObject
     }
 
     /**
+     * Returns the value converted to {@link LocalDate}. An existing instance is returned directly.
+     * The default applies only to missing or null mappings; conversion failures are not replaced by the default.
+     * <details><summary>中文</summary>将值转换为 LocalDate，已有实例直接返回。仅缺失或 null 映射使用默认值，转换失败不会被默认值替代。</details>
      *
+     * @param key the key to look up
+     * @param defaultValue the value for a missing or null mapping
+     * @return the converted value, or defaultValue for a missing or null mapping
      * @since 2.0.57
      */
     public LocalDate getLocalDate(String key, LocalDate defaultValue) {
@@ -1031,7 +1181,12 @@ public class JSONObject
     }
 
     /**
+     * Returns the value converted to {@link LocalTime}. An existing instance is returned directly.
+     * Missing or null mappings return null.
+     * <details><summary>中文</summary>将值转换为 LocalTime，已有实例直接返回。缺失或 null 映射返回 null。</details>
      *
+     * @param key the key to look up
+     * @return the converted value, or null
      * @since 2.0.57
      */
     public LocalTime getLocalTime(String key) {
@@ -1039,7 +1194,13 @@ public class JSONObject
     }
 
     /**
+     * Returns the value converted to {@link LocalTime}. An existing instance is returned directly.
+     * The default applies only to missing or null mappings; conversion failures are not replaced by the default.
+     * <details><summary>中文</summary>将值转换为 LocalTime，已有实例直接返回。仅缺失或 null 映射使用默认值，转换失败不会被默认值替代。</details>
      *
+     * @param key the key to look up
+     * @param defaultValue the value for a missing or null mapping
+     * @return the converted value, or defaultValue for a missing or null mapping
      * @since 2.0.57
      */
     public LocalTime getLocalTime(String key, LocalTime defaultValue) {
@@ -1054,7 +1215,12 @@ public class JSONObject
     }
 
     /**
+     * Returns the value converted to {@link OffsetTime}. An existing instance is returned directly.
+     * Missing or null mappings return null.
+     * <details><summary>中文</summary>将值转换为 OffsetTime，已有实例直接返回。缺失或 null 映射返回 null。</details>
      *
+     * @param key the key to look up
+     * @return the converted value, or null
      * @since 2.0.57
      */
     public OffsetTime getOffsetTime(String key) {
@@ -1062,7 +1228,13 @@ public class JSONObject
     }
 
     /**
+     * Returns the value converted to {@link OffsetTime}. An existing instance is returned directly.
+     * The default applies only to missing or null mappings; conversion failures are not replaced by the default.
+     * <details><summary>中文</summary>将值转换为 OffsetTime，已有实例直接返回。仅缺失或 null 映射使用默认值，转换失败不会被默认值替代。</details>
      *
+     * @param key the key to look up
+     * @param defaultValue the value for a missing or null mapping
+     * @return the converted value, or defaultValue for a missing or null mapping
      * @since 2.0.57
      */
     public OffsetTime getOffsetTime(String key, OffsetTime defaultValue) {
@@ -1077,7 +1249,12 @@ public class JSONObject
     }
 
     /**
+     * Returns the value converted to {@link LocalDateTime}. An existing instance is returned directly.
+     * Missing or null mappings return null.
+     * <details><summary>中文</summary>将值转换为 LocalDateTime，已有实例直接返回。缺失或 null 映射返回 null。</details>
      *
+     * @param key the key to look up
+     * @return the converted value, or null
      * @since 2.0.57
      */
     public LocalDateTime getLocalDateTime(String key) {
@@ -1085,7 +1262,13 @@ public class JSONObject
     }
 
     /**
+     * Returns the value converted to {@link LocalDateTime}. An existing instance is returned directly.
+     * The default applies only to missing or null mappings; conversion failures are not replaced by the default.
+     * <details><summary>中文</summary>将值转换为 LocalDateTime，已有实例直接返回。仅缺失或 null 映射使用默认值，转换失败不会被默认值替代。</details>
      *
+     * @param key the key to look up
+     * @param defaultValue the value for a missing or null mapping
+     * @return the converted value, or defaultValue for a missing or null mapping
      * @since 2.0.57
      */
     public LocalDateTime getLocalDateTime(String key, LocalDateTime defaultValue) {
@@ -1100,7 +1283,12 @@ public class JSONObject
     }
 
     /**
+     * Returns the value converted to {@link OffsetDateTime}. An existing instance is returned directly.
+     * Missing or null mappings return null.
+     * <details><summary>中文</summary>将值转换为 OffsetDateTime，已有实例直接返回。缺失或 null 映射返回 null。</details>
      *
+     * @param key the key to look up
+     * @return the converted value, or null
      * @since 2.0.57
      */
     public OffsetDateTime getOffsetDateTime(String key) {
@@ -1108,7 +1296,13 @@ public class JSONObject
     }
 
     /**
+     * Returns the value converted to {@link OffsetDateTime}. An existing instance is returned directly.
+     * The default applies only to missing or null mappings; conversion failures are not replaced by the default.
+     * <details><summary>中文</summary>将值转换为 OffsetDateTime，已有实例直接返回。仅缺失或 null 映射使用默认值，转换失败不会被默认值替代。</details>
      *
+     * @param key the key to look up
+     * @param defaultValue the value for a missing or null mapping
+     * @return the converted value, or defaultValue for a missing or null mapping
      * @since 2.0.57
      */
     public OffsetDateTime getOffsetDateTime(String key, OffsetDateTime defaultValue) {
@@ -1123,7 +1317,12 @@ public class JSONObject
     }
 
     /**
+     * Returns the value converted to {@link ZonedDateTime}. An existing instance is returned directly.
+     * Missing or null mappings return null.
+     * <details><summary>中文</summary>将值转换为 ZonedDateTime，已有实例直接返回。缺失或 null 映射返回 null。</details>
      *
+     * @param key the key to look up
+     * @return the converted value, or null
      * @since 2.0.57
      */
     public ZonedDateTime getZonedDateTime(String key) {
@@ -1131,7 +1330,13 @@ public class JSONObject
     }
 
     /**
+     * Returns the value converted to {@link ZonedDateTime}. An existing instance is returned directly.
+     * The default applies only to missing or null mappings; conversion failures are not replaced by the default.
+     * <details><summary>中文</summary>将值转换为 ZonedDateTime，已有实例直接返回。仅缺失或 null 映射使用默认值，转换失败不会被默认值替代。</details>
      *
+     * @param key the key to look up
+     * @param defaultValue the value for a missing or null mapping
+     * @return the converted value, or defaultValue for a missing or null mapping
      * @since 2.0.57
      */
     public ZonedDateTime getZonedDateTime(String key, ZonedDateTime defaultValue) {
@@ -1184,10 +1389,14 @@ public class JSONObject
     }
 
     /**
-     * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
+     * Serialize Java Object to JSON {@link String} with specified {@link JSONWriter.Feature}s enabled
+     *
+     * <p>A null input is serialized as the JSON text {@code "null"}.</p>
+     * <details><summary>中文</summary>null 输入序列化为 JSON 文本 null。</details>
      *
      * @param object Java Object to be serialized into JSON {@link String}
      * @param features features to be enabled in serialization
+     * @return the serialized JSON text
      * @since 2.0.6
      */
     public static String toJSONString(Object object, JSONWriter.Feature... features) {
@@ -1209,6 +1418,13 @@ public class JSONObject
     }
 
     /**
+     * Applies the supplied function directly to this object.
+     * <details><summary>中文</summary>直接对当前对象调用传入函数。</details>
+     *
+     * @param <T> the result type
+     * @param function the conversion function
+     * @return the function result
+     * @throws NullPointerException if function is null
      * @since 2.0.4
      */
     public <T> T to(Function<JSONObject, T> function) {
@@ -1223,8 +1439,13 @@ public class JSONObject
      * Map<String, User> users = obj.to(new TypeReference<HashMap<String, User>>(){}.getType());
      * }</pre>
      *
+     * <p>Uses the registered object reader for conversion. A String target produces JSON text.</p>
+     * <details><summary>中文</summary>通过注册的读取器转换；String 目标类型得到 JSON 文本。</details>
+     *
+     * @param <T> the result type
      * @param type specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
+     * @return the converted value
      * @since 2.0.4
      */
     @SuppressWarnings("unchecked")
@@ -1255,8 +1476,13 @@ public class JSONObject
      * Map<String, User> users = obj.to(new TypeReference<HashMap<String, User>>(){});
      * }</pre>
      *
+     * <p>Uses the registered object reader for conversion. A String target produces JSON text.</p>
+     * <details><summary>中文</summary>通过注册的读取器转换；String 目标类型得到 JSON 文本。</details>
+     *
+     * @param <T> the result type
      * @param typeReference specify the {@link TypeReference} to be converted
      * @param features features to be enabled in parsing
+     * @return the converted value
      * @since 2.0.7
      */
     public <T> T to(TypeReference<T> typeReference, JSONReader.Feature... features) {
@@ -1271,8 +1497,14 @@ public class JSONObject
      * User user = obj.to(User.class);
      * }</pre>
      *
+     * <p>Uses the registered object reader for conversion. A String target produces JSON text.
+     * Void targets return null.</p>
+     * <details><summary>中文</summary>通过注册的读取器转换；String 目标类型得到 JSON 文本。Void 目标类型返回 null。</details>
+     *
+     * @param <T> the result type
      * @param clazz specify the {@code Class<T>} to be converted
      * @param features features to be enabled in parsing
+     * @return the converted value
      * @since 2.0.4
      */
     @SuppressWarnings("unchecked")
@@ -1297,6 +1529,15 @@ public class JSONObject
         return objectReader.createInstance(this, featuresValue);
     }
 
+    /**
+     * Populates an existing target object from this object through its registered reader.
+     * The target is mutated; values are converted using the requested reader features.
+     * <details><summary>中文</summary>通过注册的读取器将当前对象的值写入已有目标对象；目标会被修改，并按读取特性进行值转换。</details>
+     *
+     * @param object the existing target object, not null
+     * @param features reader features used for conversion
+     * @throws NullPointerException if object is null
+     */
     public void copyTo(Object object, JSONReader.Feature... features) {
         long featuresValue = JSONFactory.defaultReaderFeatures | JSONReader.Feature.of(features);
         boolean fieldBased = JSONReader.Feature.FieldBased.isEnabled(featuresValue);
@@ -1343,8 +1584,13 @@ public class JSONObject
      * <p>
      * {@code User user = jsonObject.getObject("user", User.class);}
      *
+     * <p>Converts the associated value without replacing the mapping. Missing or null mappings return null.</p>
+     * <details><summary>中文</summary>转换对应值但不替换映射；缺失或 null 映射返回 null。</details>
+     *
+     * @param <T> the result type
      * @param key the key whose associated value is to be returned
      * @param type specify the {@link Class} to be converted
+     * @param features reader features used for conversion
      * @return {@code <T>} or null
      * @throws JSONException If no suitable conversion method is found
      */
@@ -1428,6 +1674,10 @@ public class JSONObject
      * <p>
      * {@code User user = jsonObject.getObject("user", User.class);}
      *
+     * <p>Converts the associated value without replacing the mapping. Missing or null mappings return null.</p>
+     * <details><summary>中文</summary>转换对应值但不替换映射；缺失或 null 映射返回 null。</details>
+     *
+     * @param <T> the result type
      * @param key the key whose associated value is to be returned
      * @param type specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
@@ -1510,6 +1760,14 @@ public class JSONObject
     }
 
     /**
+     * Converts the mapping using {@link #getJSONObject(String)}, then invokes the creator for a nonnull result.
+     * The preliminary conversion may replace the mapping.
+     * <details><summary>中文</summary>先通过 getJSONObject 转换映射，结果非 null 时调用创建函数；转换过程可能替换映射。</details>
+     *
+     * @param <T> the result type
+     * @param key the key to look up
+     * @param creator the function applied to the converted JSONObject
+     * @return the function result, or null if conversion returns null
      * @since 2.0.4
      */
     public <T> T getObject(String key, Function<JSONObject, T> creator) {
@@ -1709,10 +1967,12 @@ public class JSONObject
     }
 
     /**
-     * Creates and puts a new JSONArray with the specified name.
+     * Creates a new JSONArray, stores it under the name, and returns that new child.
+     * Any previous mapping is replaced.
+     * <details><summary>中文</summary>创建新的 JSONArray，存入指定键并返回新建的子容器；替换已有映射。</details>
      *
-     * @param name the name for the new JSONArray
-     * @return the created JSONArray
+     * @param name the key for the new child
+     * @return the newly created child, which is also stored in this object
      */
     public JSONArray putArray(String name) {
         JSONArray array = new JSONArray();
@@ -1721,10 +1981,12 @@ public class JSONObject
     }
 
     /**
-     * Creates and puts a new JSONObject with the specified name.
+     * Creates a new JSONObject, stores it under the name, and returns that new child.
+     * Any previous mapping is replaced.
+     * <details><summary>中文</summary>创建新的 JSONObject，存入指定键并返回新建的子容器；替换已有映射。</details>
      *
-     * @param name the name for the new JSONObject
-     * @return the created JSONObject
+     * @param name the key for the new child
+     * @return the newly created child, which is also stored in this object
      */
     public JSONObject putObject(String name) {
         JSONObject object = new JSONObject();
@@ -1894,6 +2156,9 @@ public class JSONObject
     /**
      * Applies a value filter to this JSONObject.
      *
+     * <p>Mutates values in this object and nested maps/iterables traversed by the filter.</p>
+     * <details><summary>中文</summary>原地修改当前对象以及遍历到的嵌套 Map 和可迭代容器中的值。</details>
+     *
      * @param valueFilter the value filter to apply
      * @since 2.0.3
      */
@@ -1904,6 +2169,10 @@ public class JSONObject
     /**
      * Applies a name filter to this JSONObject.
      *
+     * <p>Renames keys in this object and nested maps/iterables in place. A replacement name that already
+     * exists can overwrite its previous mapping.</p>
+     * <details><summary>中文</summary>原地修改当前对象及遍历到的嵌套 Map 和可迭代容器中的键名；新键名已存在时可能覆盖原映射。</details>
+     *
      * @param nameFilter the name filter to apply
      * @since 2.0.3
      */
@@ -1912,7 +2181,11 @@ public class JSONObject
     }
 
     /**
-     * @see JSONObject#JSONObject(Map)
+     * Returns a mutable, insertion-ordered shallow copy. Nested keys and values are shared with this object.
+     * <details><summary>中文</summary>返回可修改且按插入顺序排列的浅复制，嵌套键和值与当前对象共享。</details>
+     *
+     * @return a new JSONObject containing the same mappings
+     * @see #JSONObject(Map)
      */
     @Override
     public JSONObject clone() {
@@ -2171,43 +2444,84 @@ public class JSONObject
     }
 
     /**
-     * See {@link JSON#parseObject} for details
+     * Parses JSON text into the requested type. Null or empty input returns null.
+     * <details><summary>中文</summary>将 JSON 文本解析为指定类型；null 或空输入返回 null。</details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param objectClass the target type
+     * @return the parsed value, or null
+     * @see JSON#parseObject(String, Class)
      */
     public static <T> T parseObject(String text, Class<T> objectClass) {
         return JSON.parseObject(text, objectClass);
     }
 
     /**
-     * See {@link JSON#parseObject} for details
+     * Parses JSON text into the requested type. Null or empty input returns null.
+     * <details><summary>中文</summary>将 JSON 文本解析为指定类型；null 或空输入返回 null。</details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param objectClass the target type
+     * @param features reader features enabled for parsing
+     * @return the parsed value, or null
+     * @see JSON#parseObject(String, Class, JSONReader.Feature...)
      */
     public static <T> T parseObject(String text, Class<T> objectClass, JSONReader.Feature... features) {
         return JSON.parseObject(text, objectClass, features);
     }
 
     /**
-     * See {@link JSON#parseObject} for details
+     * Parses JSON text into the requested type. Null or empty input returns null.
+     * <details><summary>中文</summary>将 JSON 文本解析为指定类型；null 或空输入返回 null。</details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param objectType the target type
+     * @param features reader features enabled for parsing
+     * @return the parsed value, or null
+     * @see JSON#parseObject(String, Type, JSONReader.Feature...)
      */
     public static <T> T parseObject(String text, Type objectType, JSONReader.Feature... features) {
         return JSON.parseObject(text, objectType, features);
     }
 
     /**
-     * See {@link JSON#parseObject} for details
+     * Parses JSON text into the requested type. Null or empty input returns null.
+     * <details><summary>中文</summary>将 JSON 文本解析为指定类型；null 或空输入返回 null。</details>
+     *
+     * @param <T> the result type
+     * @param text the JSON text
+     * @param typeReference the target type, including generic arguments
+     * @param features reader features enabled for parsing
+     * @return the parsed value, or null
+     * @see JSON#parseObject(String, TypeReference, JSONReader.Feature...)
      */
     public static <T> T parseObject(String text, TypeReference<T> typeReference, JSONReader.Feature... features) {
         return JSON.parseObject(text, typeReference, features);
     }
 
     /**
-     * See {@link JSON#parseObject} for details
+     * Parses JSON object text. Null or empty input and the JSON null literal return null.
+     * <details><summary>中文</summary>解析 JSON 对象文本；null、空输入或 JSON null 字面量返回 null。</details>
+     *
+     * @param text the JSON object text
+     * @return the parsed JSONObject, or null
+     * @see JSON#parseObject(String)
      */
     public static JSONObject parseObject(String text) {
         return JSON.parseObject(text);
     }
 
     /**
-     * See {@link JSON#parse} for details
+     * Parses JSON object text with the requested reader features. This is an alias for
+     * {@link JSON#parseObject(String, JSONReader.Feature...)}.
+     * <details><summary>中文</summary>按指定读取特性解析 JSON 对象文本，是 JSON.parseObject 对应重载的别名。</details>
      *
+     * @param text the JSON object text
+     * @param features reader features enabled for parsing
+     * @return the parsed JSONObject, or null for null, empty, or JSON null input
      * @since 2.0.13
      */
     public static JSONObject parse(String text, JSONReader.Feature... features) {
@@ -2215,19 +2529,40 @@ public class JSONObject
     }
 
     /**
-     * See {@link JSON#toJSON} for details
+     * Converts a Java value through {@link JSON#toJSON(Object, JSONWriter.Feature...)} and requires an object result.
+     * An existing JSONObject may be returned unchanged; this method is not a deep-copy operation.
+     * <details><summary>中文</summary>通过 JSON.toJSON 转换并要求结果为 JSONObject；已有 JSONObject 可能直接返回，并非深复制操作。</details>
+     *
+     * @param obj the value to convert, or null
+     * @return the resulting JSONObject, or null for a null input
+     * @throws ClassCastException if conversion produces a non-object value
      */
     public static JSONObject from(Object obj) {
         return (JSONObject) JSON.toJSON(obj);
     }
 
     /**
-     * See {@link JSON#toJSON} for details
+     * Converts a Java value through {@link JSON#toJSON(Object, JSONWriter.Feature...)} and requires an object result.
+     * An existing JSONObject may be returned unchanged; this method is not a deep-copy operation.
+     * <details><summary>中文</summary>通过 JSON.toJSON 转换并要求结果为 JSONObject；已有 JSONObject 可能直接返回，并非深复制操作。</details>
+     *
+     * @param obj the value to convert, or null
+     * @param writeFeatures serialization features used during conversion
+     * @return the resulting JSONObject, or null for a null input
+     * @throws ClassCastException if conversion produces a non-object value
      */
     public static JSONObject from(Object obj, JSONWriter.Feature... writeFeatures) {
         return (JSONObject) JSON.toJSON(obj, writeFeatures);
     }
 
+    /**
+     * Tests whether the value stored under the exact key is a JSONArray or a Java array,
+     * including a primitive array. Other Collection implementations do not match.
+     * <details><summary>中文</summary>检查精确键对应的值是否为 JSONArray 或 Java 数组（含基本类型数组）；其他 Collection 不匹配。</details>
+     *
+     * @param key the exact map key; no string-key conversion is performed
+     * @return true for a JSONArray or Java array, otherwise false
+     */
     public boolean isArray(Object key) {
         Object object = super.get(key);
         return object instanceof JSONArray || object != null && object.getClass().isArray();

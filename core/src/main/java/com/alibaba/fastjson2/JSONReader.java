@@ -192,9 +192,9 @@ public abstract class JSONReader
     }
 
     /**
-     * Gets the type of the current JSON value.
-     * This method returns a byte value representing the type of the current JSON value
-     * being processed by the reader.
+     * Gets the binary type marker at the current JSONB position.
+     * Text readers return {@link Byte#MIN_VALUE}; this is not a format-independent value classification.
+     * <details><summary>中文</summary>返回当前位置的 JSONB 类型标记；文本读取器返回 Byte.MIN_VALUE，不能将其当作跨格式的值类型分类。</details>
      *
      * @return The type of the current JSON value, or -128 if not applicable
      * @since 2.0.51
@@ -318,14 +318,18 @@ public abstract class JSONReader
     }
 
     /**
-     * Gets the raw integer value from the current position in the JSON data.
+     * Gets a packed four-byte input prefix for optimized matching without consuming it.
+     * This does not parse a JSON integer; use {@link #readInt32Value()} for that purpose.
+     * <details><summary>中文</summary>返回用于快速匹配的四字节输入前缀，不推进位置；读取 JSON 整数应使用 readInt32Value。</details>
      *
      * @return The raw integer value
      */
     public abstract int getRawInt();
 
     /**
-     * Gets the raw long value from the current position in the JSON data.
+     * Gets a packed eight-byte input prefix for optimized matching without consuming it.
+     * This does not parse a JSON integer; use {@link #readInt64Value()} for that purpose.
+     * <details><summary>中文</summary>返回用于快速匹配的八字节输入前缀，不推进位置；读取 JSON 长整数应使用 readInt64Value。</details>
      *
      * @return The raw long value
      */
@@ -333,7 +337,9 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 2-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
      * @return true if the field name matches the 2-character pattern, false otherwise
      * @since 2.0.51
@@ -342,7 +348,9 @@ public abstract class JSONReader
 
     /**
      * Checks if the next value matches a 2-character pattern.
-     * This method is used for optimized value matching in JSONB format.
+     * Low-level generated-reader helper used after the caller verifies the packed input prefix.
+     * A successful match consumes the remaining value; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用，调用前须验证打包的输入前缀；匹配成功后消费剩余值，不支持的实现返回 false。</details>
      *
      * @return true if the value matches the 2-character pattern, false otherwise
      * @since 2.0.51
@@ -353,7 +361,9 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 3-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
      * @return true if the field name matches the 3-character pattern, false otherwise
      * @since 2.0.51
@@ -362,7 +372,9 @@ public abstract class JSONReader
 
     /**
      * Checks if the next value matches a 3-character pattern.
-     * This method is used for optimized value matching in JSONB format.
+     * Low-level generated-reader helper used after the caller verifies the packed input prefix.
+     * A successful match consumes the remaining value; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用，调用前须验证打包的输入前缀；匹配成功后消费剩余值，不支持的实现返回 false。</details>
      *
      * @return true if the value matches the 3-character pattern, false otherwise
      * @since 2.0.51
@@ -373,7 +385,9 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 4-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
      * @param c4 the fourth character to match
      * @return true if the field name matches the 4-character pattern, false otherwise
@@ -383,7 +397,9 @@ public abstract class JSONReader
 
     /**
      * Checks if the next value matches a 4-character pattern.
-     * This method is used for optimized value matching in JSONB format.
+     * Low-level generated-reader helper used after the caller verifies the packed input prefix.
+     * A successful match consumes the remaining value; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用，调用前须验证打包的输入前缀；匹配成功后消费剩余值，不支持的实现返回 false。</details>
      *
      * @param c4 the fourth character to match
      * @return true if the value matches the 4-character pattern, false otherwise
@@ -395,9 +411,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 5-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 4 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 5-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -405,7 +423,9 @@ public abstract class JSONReader
 
     /**
      * Checks if the next value matches a 5-character pattern.
-     * This method is used for optimized value matching in JSONB format.
+     * Low-level generated-reader helper used after the caller verifies the packed input prefix.
+     * A successful match consumes the remaining value; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用，调用前须验证打包的输入前缀；匹配成功后消费剩余值，不支持的实现返回 false。</details>
      *
      * @param c4 the fourth character to match
      * @param c5 the fifth character to match
@@ -418,9 +438,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 6-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 4 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 6-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -428,9 +450,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next value matches a 6-character pattern.
-     * This method is used for optimized value matching in JSONB format.
+     * Low-level generated-reader helper used after the caller verifies the packed input prefix.
+     * A successful match consumes the remaining value; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用，调用前须验证打包的输入前缀；匹配成功后消费剩余值，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 4 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the value matches the 6-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -440,9 +464,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 7-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 4 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 7-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -450,9 +476,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next value matches a 7-character pattern.
-     * This method is used for optimized value matching in JSONB format.
+     * Low-level generated-reader helper used after the caller verifies the packed input prefix.
+     * A successful match consumes the remaining value; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用，调用前须验证打包的输入前缀；匹配成功后消费剩余值，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 4 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the value matches the 7-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -462,9 +490,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches an 8-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 4 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param c8 the eighth character to match
      * @return true if the field name matches the 8-character pattern, false otherwise
      * @since 2.0.51
@@ -473,9 +503,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next value matches an 8-character pattern.
-     * This method is used for optimized value matching in JSONB format.
+     * Low-level generated-reader helper used after the caller verifies the packed input prefix.
+     * A successful match consumes the remaining value; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用，调用前须验证打包的输入前缀；匹配成功后消费剩余值，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 4 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param c8 the eighth character to match
      * @return true if the value matches the 8-character pattern, false otherwise
      * @since 2.0.51
@@ -486,9 +518,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 9-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 9-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -496,9 +530,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next value matches a 9-character pattern.
-     * This method is used for optimized value matching in JSONB format.
+     * Low-level generated-reader helper used after the caller verifies the packed input prefix.
+     * A successful match consumes the remaining value; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用，调用前须验证打包的输入前缀；匹配成功后消费剩余值，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 4 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param c8 the eighth character to match
      * @param c9 the ninth character to match
      * @return true if the value matches the 9-character pattern, false otherwise
@@ -510,9 +546,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 10-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 10-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -520,9 +558,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next value matches a 10-character pattern.
-     * This method is used for optimized value matching in JSONB format.
+     * Low-level generated-reader helper used after the caller verifies the packed input prefix.
+     * A successful match consumes the remaining value; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用，调用前须验证打包的输入前缀；匹配成功后消费剩余值，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the value matches the 10-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -532,9 +572,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches an 11-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 11-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -542,9 +584,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next value matches an 11-character pattern.
-     * This method is used for optimized value matching in JSONB format.
+     * Low-level generated-reader helper used after the caller verifies the packed input prefix.
+     * A successful match consumes the remaining value; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用，调用前须验证打包的输入前缀；匹配成功后消费剩余值，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the value matches the 11-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -554,10 +598,12 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 12-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
-     * @param name2 the last 4 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
+     * @param name2 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 12-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -565,10 +611,12 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 13-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
-     * @param name2 the last 4 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
+     * @param name2 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 13-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -576,10 +624,12 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 14-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
-     * @param name2 the last 4 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
+     * @param name2 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 14-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -589,10 +639,12 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 15-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
-     * @param name2 the last 4 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
+     * @param name2 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 15-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -602,9 +654,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 16-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 4 bytes of the name to match
      * @param name3 the last byte of the name to match
      * @return true if the field name matches the 16-character pattern, false otherwise
@@ -614,10 +668,12 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 17-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
-     * @param name2 the last 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
+     * @param name2 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 17-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -625,10 +681,12 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches an 18-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
-     * @param name2 the last 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
+     * @param name2 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 18-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -636,10 +694,12 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 19-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
-     * @param name2 the last 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
+     * @param name2 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 19-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -649,9 +709,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 20-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the last byte of the name to match
      * @return true if the field name matches the 20-character pattern, false otherwise
@@ -661,11 +723,13 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 21-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
-     * @param name3 the last 4 bytes of the name to match
+     * @param name3 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 21-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -675,11 +739,13 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 22-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
-     * @param name3 the last 4 bytes of the name to match
+     * @param name3 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 22-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -687,11 +753,13 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 23-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
-     * @param name3 the last 4 bytes of the name to match
+     * @param name3 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 23-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -699,9 +767,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 24-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second to last 4 bytes of the name to match
      * @param name4 the last byte of the name to match
@@ -712,11 +782,13 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 25-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
-     * @param name3 the last 8 bytes of the name to match
+     * @param name3 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 25-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -724,11 +796,13 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 26-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
-     * @param name3 the last 8 bytes of the name to match
+     * @param name3 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 26-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -736,11 +810,13 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 27-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
-     * @param name3 the last 8 bytes of the name to match
+     * @param name3 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 27-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -748,9 +824,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 28-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second to last 8 bytes of the name to match
      * @param c28 the last byte of the name to match
@@ -761,12 +839,14 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 29-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second to last 8 bytes of the name to match
-     * @param name4 the last 4 bytes of the name to match
+     * @param name4 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 29-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -774,12 +854,14 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 30-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second to last 8 bytes of the name to match
-     * @param name4 the last 4 bytes of the name to match
+     * @param name4 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 30-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -787,12 +869,14 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 31-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second to last 8 bytes of the name to match
-     * @param name4 the last 4 bytes of the name to match
+     * @param name4 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 31-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -800,9 +884,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 32-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second to last 8 bytes of the name to match
      * @param name4 the second to last 4 bytes of the name to match
@@ -814,12 +900,14 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 33-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second middle 8 bytes of the name to match
-     * @param name4 the last 8 bytes of the name to match
+     * @param name4 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 33-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -827,12 +915,14 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 34-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second middle 8 bytes of the name to match
-     * @param name4 the last 8 bytes of the name to match
+     * @param name4 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 34-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -840,12 +930,14 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 35-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second middle 8 bytes of the name to match
-     * @param name4 the last 8 bytes of the name to match
+     * @param name4 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 35-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -853,9 +945,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 36-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second middle 8 bytes of the name to match
      * @param name4 the second to last 8 bytes of the name to match
@@ -867,13 +961,15 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 37-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second middle 8 bytes of the name to match
      * @param name4 the third to last 8 bytes of the name to match
-     * @param name5 the last 4 bytes of the name to match
+     * @param name5 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 37-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -881,13 +977,15 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 38-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second middle 8 bytes of the name to match
      * @param name4 the third to last 8 bytes of the name to match
-     * @param name5 the last 4 bytes of the name to match
+     * @param name5 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 38-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -895,13 +993,15 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 39-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second middle 8 bytes of the name to match
      * @param name4 the third to last 8 bytes of the name to match
-     * @param name5 the last 4 bytes of the name to match
+     * @param name5 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 39-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -909,9 +1009,11 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 40-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second middle 8 bytes of the name to match
      * @param name4 the third to last 8 bytes of the name to match
@@ -924,13 +1026,15 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 41-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second middle 8 bytes of the name to match
      * @param name4 the third middle 8 bytes of the name to match
-     * @param name5 the last 8 bytes of the name to match
+     * @param name5 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 41-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -938,13 +1042,15 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 42-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second middle 8 bytes of the name to match
      * @param name4 the third middle 8 bytes of the name to match
-     * @param name5 the last 8 bytes of the name to match
+     * @param name5 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 42-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -952,13 +1058,15 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches a 43-character pattern.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
-     * @param name1 the first 8 bytes of the name to match
+     * @param name1 packed continuation bytes to match, including delimiters where required by this helper
      * @param name2 the middle 8 bytes of the name to match
      * @param name3 the second middle 8 bytes of the name to match
      * @param name4 the third middle 8 bytes of the name to match
-     * @param name5 the last 8 bytes of the name to match
+     * @param name5 packed continuation bytes to match, including delimiters where required by this helper
      * @return true if the field name matches the 43-character pattern, false otherwise
      * @since 2.0.51
      */
@@ -966,7 +1074,9 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches an 8-character pattern with no additional characters.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
      * @return true if the field name matches the 8-character pattern, false otherwise
      * @since 2.0.51
@@ -977,7 +1087,9 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches an 8-character pattern with 1 additional character.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
      * @return true if the field name matches the 8+1 character pattern, false otherwise
      * @since 2.0.51
@@ -988,7 +1100,9 @@ public abstract class JSONReader
 
     /**
      * Checks if the next field name matches an 8-character pattern with 2 additional characters.
-     * This method is used for optimized field name matching in JSONB format.
+     * Low-level generated-reader helper: the caller must first verify the packed input prefix.
+     * A successful match consumes the remaining name and separator; unsupported implementations return false.
+     * <details><summary>中文</summary>供生成读取器使用：调用前须验证打包的输入前缀；匹配成功后消费剩余字段名及分隔符，不支持的实现返回 false。</details>
      *
      * @return true if the field name matches the 8+2 character pattern, false otherwise
      * @since 2.0.51
@@ -1001,6 +1115,9 @@ public abstract class JSONReader
      * Handles resolve tasks for circular references in the JSON data.
      * This method processes all pending reference resolution tasks after the main
      * parsing is complete, resolving circular references and updating the object graph.
+     * This also resolves forward and shared references. Call it after low-level read methods
+     * when the parsed value can contain deferred references; the supplied root anchors JSONPath evaluation.
+     * <details><summary>中文</summary>同时处理前向引用与共享引用；低层读取可能登记延迟引用时，应在读取完成后调用，传入根对象作为 JSONPath 求值起点。</details>
      *
      * @param root The root object of the parsed JSON structure
      */
@@ -1263,9 +1380,11 @@ public abstract class JSONReader
     public abstract boolean nextIfObjectEnd();
 
     /**
-     * Starts reading a JSON array, advancing the reader to the first element.
+     * Consumes an array header. Text readers return {@link Integer#MAX_VALUE} because
+     * the element count is not encoded; JSONB readers return the encoded count, or -1 for null.
+     * <details><summary>中文</summary>消费数组头；文本格式不包含元素数量，因此返回 Integer.MAX_VALUE；JSONB 返回元素数量，null 返回 -1。</details>
      *
-     * @return The maximum integer value as a placeholder
+     * @return the encoded JSONB array length, -1 for JSONB null, or Integer.MAX_VALUE for text arrays
      * @throws JSONException if the current character is not the start of an array ('[')
      */
     public int startArray() {
@@ -1290,7 +1409,9 @@ public abstract class JSONReader
     public abstract String readReference();
 
     /**
-     * Reads a reference value from JSON data and adds it to the specified list at the given index.
+     * Consumes a reference token if present. A parent reference appends the list itself;
+     * other references register deferred work for {@link #handleResolveTasks(Object)}.
+     * <details><summary>中文</summary>存在引用时消费该标记；父引用追加列表自身，其余引用登记为延迟解析任务，稍后调用 handleResolveTasks。</details>
      *
      * @param list The list to which the reference should be added
      * @param i The index at which to add the reference in the list
@@ -1304,7 +1425,9 @@ public abstract class JSONReader
     }
 
     /**
-     * Reads a reference value from JSON data and adds it to the specified collection at the given index.
+     * Consumes a reference token if present, appending the collection itself for a parent
+     * reference or registering a deferred resolution task for other paths.
+     * <details><summary>中文</summary>消费引用标记；父引用追加集合自身，其他路径登记为延迟解析任务。</details>
      *
      * @param list The collection to which the reference should be added
      * @param i The index at which to add the reference in the collection
@@ -1482,6 +1605,13 @@ public abstract class JSONReader
      */
     public abstract String readPattern();
 
+    /**
+     * Returns the current cursor offset in bytes for byte-backed readers or UTF-16 code units
+     * for character-backed readers. It is a parser cursor, not an element or field index.
+     * <details><summary>中文</summary>返回当前游标偏移量：字节读取器使用字节，字符读取器使用 UTF-16 代码单元；它不是元素或字段索引。</details>
+     *
+     * @return the current input cursor offset
+     */
     public final int getOffset() {
         return offset;
     }
@@ -1826,6 +1956,13 @@ public abstract class JSONReader
         return getInt64Value();
     }
 
+    /**
+     * Converts the cached numeric token to an int without consuming another input value.
+     * Use {@link #readInt32Value()} to read from the input.
+     * <details><summary>中文</summary>将已缓存数字转换为 int，不读取下一个输入值；读取输入请使用 readInt32Value。</details>
+     *
+     * @return the cached numeric value as an int
+     */
     public final int getInt32Value() {
         switch (valueType) {
             case JSON_TYPE_INT8:
@@ -1912,6 +2049,13 @@ public abstract class JSONReader
         }
     }
 
+    /**
+     * Converts the cached numeric token to a long without consuming another input value.
+     * Use {@link #readInt64Value()} to read from the input.
+     * <details><summary>中文</summary>将已缓存的数字标记转换为 long，不读取下一个输入值；读取输入请使用 readInt64Value。</details>
+     *
+     * @return the cached numeric value as a long
+     */
     public final long getInt64Value() {
         switch (valueType) {
             case JSON_TYPE_INT8:
@@ -1981,6 +2125,12 @@ public abstract class JSONReader
         }
     }
 
+    /**
+     * Converts the cached numeric token to a double without advancing the input.
+     * <details><summary>中文</summary>将已缓存的数字标记转换为 double，不推进输入位置。</details>
+     *
+     * @return the cached numeric value as a double
+     */
     public final double getDoubleValue() {
         switch (valueType) {
             case JSON_TYPE_NaN:
@@ -2040,6 +2190,12 @@ public abstract class JSONReader
         }
     }
 
+    /**
+     * Converts the cached numeric token to a float without advancing the input.
+     * <details><summary>中文</summary>将已缓存的数字标记转换为 float，不推进输入位置。</details>
+     *
+     * @return the cached numeric value as a float
+     */
     public final float getFloatValue() {
         return (float) getDoubleValue();
     }
@@ -3026,9 +3182,12 @@ public abstract class JSONReader
     protected abstract void readNumber0();
 
     /**
-     * Reads a Base64 encoded string from JSON data and decodes it to bytes.
+     * Decodes a Base64 string, including a supported {@code data:image/...;base64,} prefix.
+     * JSON null produces null, and an empty string produces an empty byte array.
+     * <details><summary>中文</summary>解码 Base64 字符串，也支持带 data:image/...;base64, 前缀的数据；null 返回 null，空字符串返回空数组。</details>
      *
      * @return The decoded byte array
+     * @throws IllegalArgumentException if the encoded content is not valid Base64
      */
     public byte[] readBase64() {
         String str = readString();
@@ -3112,7 +3271,9 @@ public abstract class JSONReader
     }
 
     /**
-     * Reads a character value from JSON data.
+     * Reads a string and returns its first UTF-16 code unit. Longer strings are not rejected.
+     * A null or empty string returns {@code '\0'} and sets {@link #wasNull()}.
+     * <details><summary>中文</summary>读取字符串的第一个 UTF-16 代码单元，不拒绝较长字符串；null 或空字符串返回零字符并设置 wasNull。</details>
      *
      * @return The character value
      */
@@ -3126,7 +3287,9 @@ public abstract class JSONReader
     }
 
     /**
-     * Reads a Character object from JSON data.
+     * Reads a string and returns its first UTF-16 code unit, or null for a null or empty string.
+     * Longer strings are not rejected.
+     * <details><summary>中文</summary>返回字符串的第一个 UTF-16 代码单元；null 或空字符串返回 null，不拒绝较长字符串。</details>
      *
      * @return The Character object, or null if the value is null in JSON
      */
@@ -3162,16 +3325,40 @@ public abstract class JSONReader
      */
     public abstract String getString();
 
+    /**
+     * Returns the null-state flag maintained by value-reading methods. Consult it immediately
+     * after a primitive read when distinguishing JSON null from the primitive default value.
+     * <details><summary>中文</summary>返回值读取方法维护的 null 标记；需要区分 JSON null 与基本类型默认值时，应在基本类型读取后立即检查。</details>
+     *
+     * @return whether the preceding value read recorded a null value
+     */
     public boolean wasNull() {
         return wasNull;
     }
 
+    /**
+     * Reads the next value using the context's reader for the specified type, including generic types.
+     * It does not require end of input or execute deferred reference-resolution tasks.
+     * <details><summary>中文</summary>使用上下文中的读取器读取指定类型的下一个值，支持泛型；不检查输入是否结束，也不执行延迟引用解析。</details>
+     *
+     * @param <T> the expected result type
+     * @param type the target type
+     * @return the converted value
+     * @see #handleResolveTasks(Object)
+     */
     public <T> T read(Type type) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
         return (T) objectReader.readObject(this, null, null, 0);
     }
 
+    /**
+     * Reads a JSON array and appends its values to an existing list without clearing it.
+     * <details><summary>中文</summary>读取 JSON 数组并追加到现有列表，不清空原有元素。</details>
+     *
+     * @param list the destination list
+     * @throws JSONException if the input is not an array or exceeds the nesting limit
+     */
     public final void read(List list) {
         if (!nextIfArrayStart()) {
             throw new JSONException("illegal input, offset " + offset + ", char " + ch);
@@ -3197,6 +3384,13 @@ public abstract class JSONReader
         nextIfComma();
     }
 
+    /**
+     * Reads a JSON array and appends its values to an existing collection without clearing it.
+     * <details><summary>中文</summary>读取 JSON 数组并追加到现有集合，不清空原有元素。</details>
+     *
+     * @param list the destination collection
+     * @throws JSONException if the input is not an array or exceeds the nesting limit
+     */
     public final void read(Collection list) {
         if (!nextIfArrayStart()) {
             throw new JSONException("illegal input, offset " + offset + ", char " + ch);
@@ -3221,6 +3415,15 @@ public abstract class JSONReader
         nextIfComma();
     }
 
+    /**
+     * Reads properties into an existing bean or map using the additional features.
+     * Properties absent from the input are not reset by this operation.
+     * <details><summary>中文</summary>使用附加特性将属性读入现有 bean 或 map；不会主动重置输入中未出现的属性。</details>
+     *
+     * @param object the non-null destination
+     * @param features additional reader features
+     * @throws JSONException if the destination is null or its reader does not support in-place population
+     */
     public final void readObject(Object object, Feature... features) {
         long featuresLong = 0;
         for (Feature feature : features) {
@@ -3229,6 +3432,14 @@ public abstract class JSONReader
         readObject(object, featuresLong);
     }
 
+    /**
+     * Populates an existing bean or map using a feature bitmask in addition to context features.
+     * <details><summary>中文</summary>在上下文特性基础上使用附加位掩码，将数据填充到现有 bean 或 map。</details>
+     *
+     * @param object the non-null destination
+     * @param features additional reader feature bits
+     * @throws JSONException if the destination is null or does not support in-place population
+     */
     public final void readObject(Object object, long features) {
         if (object == null) {
             throw new JSONException("object is null");
@@ -3589,6 +3800,16 @@ public abstract class JSONReader
         nextIfComma();
     }
 
+    /**
+     * Reads the next value as the requested class using this reader's context.
+     * It does not check for trailing input or resolve deferred references; use
+     * {@link #isEnd()} and {@link #handleResolveTasks(Object)} when those operations are required.
+     * <details><summary>中文</summary>按指定类读取下一个值；不会检查尾随输入或处理延迟引用，需要时分别调用 isEnd 和 handleResolveTasks。</details>
+     *
+     * @param <T> the result type
+     * @param type the target class
+     * @return the converted value
+     */
     public <T> T read(Class<T> type) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
@@ -3928,10 +4149,28 @@ public abstract class JSONReader
         return list;
     }
 
+    /**
+     * Appends typed values to a list using the array-or-single-value rules of
+     * {@link #readArray(Collection, Type)}.
+     * <details><summary>中文</summary>按 readArray(Collection, Type) 的数组或单值规则，将指定类型的值追加到列表。</details>
+     *
+     * @param list the destination list, which is not cleared
+     * @param itemType the target element type
+     */
     public final void readArray(List list, Type itemType) {
         readArray((Collection) list, itemType);
     }
 
+    /**
+     * Appends values converted to {@code itemType}. Arrays contribute all their elements;
+     * other values contribute one element. For non-String element types, a string containing
+     * commas is split and converted using the provider's String conversion function.
+     * <details><summary>中文</summary>追加转换为 itemType 的值：数组逐项追加，其他值追加一项；元素类型不是 String 时，含逗号的字符串会拆分并使用提供者的字符串转换函数转换。</details>
+     *
+     * @param list the destination collection, which is not cleared
+     * @param itemType the target element type
+     * @throws JSONException if the input cannot be converted to the element type
+     */
     public void readArray(Collection list, Type itemType) {
         if (nextIfArrayStart()) {
             while (!nextIfArrayEnd()) {
@@ -4131,6 +4370,13 @@ public abstract class JSONReader
         }
     }
 
+    /**
+     * Converts the cached numeric token to BigInteger without advancing the input.
+     * A cached BigDecimal loses its fractional part through {@link BigDecimal#toBigInteger()}.
+     * <details><summary>中文</summary>将已缓存数字转换为 BigInteger，不推进输入；BigDecimal 的小数部分通过 toBigInteger 截去。</details>
+     *
+     * @return the converted integer, or null for a cached null value
+     */
     public final BigInteger getBigInteger() {
         Number number = getNumber();
 
@@ -4147,6 +4393,12 @@ public abstract class JSONReader
         return BigInteger.valueOf(number.longValue());
     }
 
+    /**
+     * Converts the cached numeric token to BigDecimal without reading another value.
+     * <details><summary>中文</summary>将已缓存数字转换为 BigDecimal，不读取下一个值。</details>
+     *
+     * @return the converted decimal, or null for a cached null value
+     */
     public final BigDecimal getBigDecimal() {
         if (wasNull) {
             return null;
@@ -4248,6 +4500,13 @@ public abstract class JSONReader
         }
     }
 
+    /**
+     * Returns the cached numeric token as a Number, selecting its representation according
+     * to the token and context features. This method does not read the next input value.
+     * <details><summary>中文</summary>根据已缓存标记及上下文特性返回相应 Number 表示，不读取下一个输入值。</details>
+     *
+     * @return the cached numeric value, or null
+     */
     public final Number getNumber() {
         if (wasNull) {
             return null;
@@ -4449,12 +4708,13 @@ public abstract class JSONReader
         }
     }
 
-    @Override
     /**
-     * Closes the JSONReader and releases any resources associated with it.
-     *
-     * @throws IOException if an I/O error occurs
+     * Releases reusable buffers. Text readers created from a stream or Reader also close
+     * that input, suppressing close-time I/O exceptions. JSONB stream factories retain no
+     * stream handle, so their callers remain responsible for closing the input.
+     * <details><summary>中文</summary>释放可复用缓冲区；文本读取器还会关闭输入流或 Reader，并忽略关闭时的 I/O 异常。JSONB 流工厂不保留流句柄，调用方须自行关闭输入。</details>
      */
+    @Override
     public abstract void close();
 
     protected final int toInt32(String val) {
@@ -4624,6 +4884,16 @@ public abstract class JSONReader
                 jsonbBytes.length);
     }
 
+    /**
+     * Reads the stream to end of input and creates a reader over the buffered JSONB bytes.
+     * Neither this factory nor the returned reader closes the stream.
+     * <details><summary>中文</summary>读取流至结束并缓冲 JSONB 数据；工厂及返回的读取器均不关闭输入流。</details>
+     *
+     * @param in the binary JSON input stream
+     * @param context the reading context
+     * @return a JSONB reader
+     * @throws JSONException if reading the stream fails
+     */
     public static JSONReader ofJSONB(InputStream in, Context context) {
         return new JSONReaderJSONB(context, in);
     }
@@ -4658,6 +4928,18 @@ public abstract class JSONReader
                 length);
     }
 
+    /**
+     * Creates a text reader for a byte-array slice using a supported standard charset.
+     * The charset must be UTF-8, UTF-16, US-ASCII, or ISO-8859-1; null is not accepted by this overload.
+     * <details><summary>中文</summary>按指定标准字符集读取字节数组切片；仅支持 UTF-8、UTF-16、US-ASCII、ISO-8859-1，此重载不接受 null 字符集。</details>
+     *
+     * @param bytes the input bytes
+     * @param offset the first byte to read
+     * @param length the number of bytes to read, not the end index
+     * @param charset the input charset
+     * @return a text JSON reader using a default context
+     * @throws JSONException if the charset is unsupported
+     */
     public static JSONReader of(byte[] bytes, int offset, int length, Charset charset) {
         Context context = JSONFactory.createReadContext();
 
@@ -4684,6 +4966,19 @@ public abstract class JSONReader
         return new JSONReaderUTF16(ctx, str, chars, offset, length);
     }
 
+    /**
+     * Creates a text reader for a byte-array slice with the supplied context.
+     * Supported charsets are UTF-8, UTF-16, US-ASCII, and ISO-8859-1.
+     * <details><summary>中文</summary>使用指定上下文读取字节数组切片，支持 UTF-8、UTF-16、US-ASCII、ISO-8859-1。</details>
+     *
+     * @param bytes the input bytes
+     * @param offset the first byte to read
+     * @param length the number of bytes to read
+     * @param charset the supported input charset, not null
+     * @param context the reading context
+     * @return a text JSON reader
+     * @throws JSONException if the charset is unsupported or null
+     */
     public static JSONReader of(byte[] bytes, int offset, int length, Charset charset, Context context) {
         if (charset == StandardCharsets.UTF_8) {
             return JSONReaderUTF8.of(bytes, offset, length, context);
@@ -4716,6 +5011,16 @@ public abstract class JSONReader
         return ofUTF16(null, chars, offset, length, context);
     }
 
+    /**
+     * Opens the URL, buffers its UTF-8 JSON content, and closes the opened stream before returning.
+     * <details><summary>中文</summary>打开 URL，缓冲其 UTF-8 JSON 内容，并在返回前关闭所打开的流。</details>
+     *
+     * @param url the JSON resource
+     * @param context the reading context
+     * @return a reader over the buffered content
+     * @throws IOException if opening or closing the URL stream fails
+     * @throws JSONException if reading the content fails
+     */
     public static JSONReader of(URL url, Context context) throws IOException {
         try (InputStream is = url.openStream()) {
             return of(is, StandardCharsets.UTF_8, context);
@@ -4723,7 +5028,9 @@ public abstract class JSONReader
     }
 
     /**
-     * Creates a JSONReader from an InputStream containing JSON data.
+     * Buffers text JSON from an InputStream using the specified charset, or UTF-8 when null.
+     * Closing the returned reader closes the input stream.
+     * <details><summary>中文</summary>按指定字符集缓冲流中的 JSON 文本，null 表示 UTF-8；关闭返回的读取器会关闭输入流。</details>
      *
      * @param is The InputStream containing JSON data
      * @param charset The character encoding of the JSON data
@@ -4734,6 +5041,17 @@ public abstract class JSONReader
         return of(is, charset, context);
     }
 
+    /**
+     * Buffers text JSON from a stream using the supplied context. A null charset means UTF-8;
+     * other charsets can be decoded through an InputStreamReader. Closing this reader closes the input.
+     * <details><summary>中文</summary>使用指定上下文缓冲流中的 JSON 文本；null 字符集表示 UTF-8，其他字符集可通过 InputStreamReader 解码；关闭读取器会关闭输入流。</details>
+     *
+     * @param is the input stream
+     * @param charset the input charset, or null for UTF-8
+     * @param context the reading context
+     * @return a text JSON reader
+     * @throws JSONException if the stream is null or reading fails
+     */
     public static JSONReader of(InputStream is, Charset charset, Context context) {
         if (is == null) {
             throw new JSONException("inputStream is null");
@@ -4755,7 +5073,8 @@ public abstract class JSONReader
     }
 
     /**
-     * Creates a JSONReader from a Reader containing JSON data.
+     * Buffers JSON characters from the supplied Reader. Closing the returned JSONReader closes the input.
+     * <details><summary>中文</summary>缓冲输入 Reader 中的 JSON 字符；关闭返回的 JSONReader 会关闭输入 Reader。</details>
      *
      * @param is The Reader containing JSON data
      * @return A JSONReader instance
@@ -4767,6 +5086,15 @@ public abstract class JSONReader
         );
     }
 
+    /**
+     * Buffers JSON characters using the supplied context. Closing the returned reader closes the input.
+     * <details><summary>中文</summary>使用指定上下文缓冲 JSON 字符；关闭返回的读取器会关闭输入 Reader。</details>
+     *
+     * @param is the character input
+     * @param context the reading context
+     * @return a text JSON reader
+     * @throws JSONException if reading fails
+     */
     public static JSONReader of(Reader is, Context context) {
         return new JSONReaderUTF16(
                 context,
@@ -4774,6 +5102,16 @@ public abstract class JSONReader
         );
     }
 
+    /**
+     * Copies the buffer's remaining bytes as UTF-8 JSON, advancing its position to its limit.
+     * Only UTF-8 or a null charset is supported.
+     * <details><summary>中文</summary>复制缓冲区剩余字节作为 UTF-8 JSON，并将 position 推进到 limit；字符集仅支持 UTF-8 或 null。</details>
+     *
+     * @param buffer the source buffer
+     * @param charset UTF-8, or null to select UTF-8
+     * @return a reader over the copied bytes
+     * @throws JSONException if the charset is unsupported
+     */
     public static JSONReader of(ByteBuffer buffer, Charset charset) {
         Context context = JSONFactory.createReadContext();
 
@@ -4784,6 +5122,17 @@ public abstract class JSONReader
         throw new JSONException("not support charset " + charset);
     }
 
+    /**
+     * Copies the buffer's remaining UTF-8 bytes using the supplied context, advancing its
+     * position to its limit. The returned reader does not depend on later buffer changes.
+     * <details><summary>中文</summary>使用指定上下文复制缓冲区剩余 UTF-8 字节，并将 position 推进到 limit；之后修改缓冲区不影响返回的读取器。</details>
+     *
+     * @param buffer the source buffer
+     * @param charset UTF-8, or null to select UTF-8
+     * @param context the reading context
+     * @return a reader over the copied bytes
+     * @throws JSONException if the charset is unsupported
+     */
     public static JSONReader of(ByteBuffer buffer, Charset charset, Context context) {
         if (charset == StandardCharsets.UTF_8 || charset == null) {
             return new JSONReaderUTF8(context, buffer);
@@ -5159,18 +5508,53 @@ public abstract class JSONReader
         Class<?> apply(String typeName, Class<?> expectClass, long features);
     }
 
+    /**
+     * Creates an auto-type handler accepting the supplied class-name or package-name prefixes.
+     * Register it with {@link Context#config(Filter)}; this method does not change global configuration.
+     * <details><summary>中文</summary>创建接受指定类名或包名前缀的自动类型处理器；通过 Context.config 注册，不修改全局配置。</details>
+     *
+     * @param names accepted name prefixes
+     * @return the auto-type handler
+     */
     public static AutoTypeBeforeHandler autoTypeFilter(String... names) {
         return new ContextAutoTypeBeforeHandler(names);
     }
 
+    /**
+     * Creates a prefix-based auto-type handler, optionally including the built-in set of
+     * common scalar, temporal, and collection types.
+     * <details><summary>中文</summary>创建按名称前缀匹配的自动类型处理器，并可包含内置的常用标量、时间和集合类型。</details>
+     *
+     * @param includeBasic whether to include the built-in basic type set
+     * @param names accepted class-name or package-name prefixes
+     * @return the auto-type handler
+     */
     public static AutoTypeBeforeHandler autoTypeFilter(boolean includeBasic, String... names) {
         return new ContextAutoTypeBeforeHandler(includeBasic, names);
     }
 
+    /**
+     * Creates an auto-type handler from the serialization names of the supplied classes.
+     * Names are matched using the same prefix rules as {@link #autoTypeFilter(String...)};
+     * this is not an assignability-based subtype filter.
+     * <details><summary>中文</summary>使用指定类的序列化名称创建自动类型处理器；采用与字符串重载相同的前缀规则，并非基于继承关系筛选子类型。</details>
+     *
+     * @param types classes whose serialization names should be accepted
+     * @return the auto-type handler
+     */
     public static AutoTypeBeforeHandler autoTypeFilter(Class... types) {
         return new ContextAutoTypeBeforeHandler(types);
     }
 
+    /**
+     * Creates a name-based auto-type handler from classes, optionally adding the built-in basic types.
+     * Class names use the prefix rules described by {@link #autoTypeFilter(Class...)}.
+     * <details><summary>中文</summary>按类名创建自动类型处理器，并可加入内置基础类型；类名使用 Class 重载描述的前缀匹配规则。</details>
+     *
+     * @param includeBasic whether to include the built-in basic type set
+     * @param types classes whose serialization names should be accepted
+     * @return the auto-type handler
+     */
     public static AutoTypeBeforeHandler autoTypeFilter(boolean includeBasic, Class... types) {
         return new ContextAutoTypeBeforeHandler(includeBasic, types);
     }
@@ -5702,7 +6086,9 @@ public abstract class JSONReader
         }
 
         /**
-         * Sets the date format pattern for this context.
+         * Sets a date/time pattern or the special format {@code millis}, {@code unixtime}, or
+         * {@code iso8601}. Null or an empty string clears the format and its cached formatter.
+         * <details><summary>中文</summary>设置日期时间模式或 millis、unixtime、iso8601 特殊格式；null 或空字符串清除格式及缓存格式化器。</details>
          *
          * @param format The date format pattern to set
          */
@@ -6522,10 +6908,23 @@ public abstract class JSONReader
         }
     }
 
+    /**
+     * Captures a lightweight cursor bookmark for this reader. It does not snapshot the context,
+     * cached values, nesting level, or deferred reference-resolution tasks.
+     * <details><summary>中文</summary>记录当前读取器的轻量游标书签，不保存上下文、缓存值、嵌套层级或延迟引用解析任务。</details>
+     *
+     * @return a cursor bookmark for use with reset
+     */
     public SavePoint mark() {
         return new SavePoint(this.offset, this.ch);
     }
 
+    /**
+     * Restores a cursor bookmark created by this reader. This is not a rollback of all parser state.
+     * <details><summary>中文</summary>恢复由当前读取器创建的游标书签；这并不回滚全部解析状态。</details>
+     *
+     * @param savePoint a bookmark previously obtained from this reader
+     */
     public void reset(SavePoint savePoint) {
         this.offset = savePoint.offset;
         this.ch = (char) savePoint.current;
