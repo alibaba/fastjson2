@@ -1339,8 +1339,19 @@ public abstract class JSONReader
     }
 
     static char char2(int c1, int c2) {
+        if (!isHex2(c1, c2)) {
+            throw char2Error(c1, c2);
+        }
         return (char) (DIGITS2[c1] * 0x10
                 + DIGITS2[c2]);
+    }
+
+    private static boolean isHex2(int c1, int c2) {
+        return IOUtils.isHex(c1) && IOUtils.isHex(c2);
+    }
+
+    static JSONException char2Error(int c1, int c2) {
+        return new JSONException("invalid escape character \\x" + (char) c1 + (char) c2);
     }
 
     /**

@@ -4628,17 +4628,7 @@ class JSONReaderUTF8
                     ch = offset == end ? EOI : bytes[offset++];
                     break;
                 } else {
-                    ch = bytes[slashIndex + 1];
-                    if (ch == 'u') {
-                        offset = slashIndex + 6;
-                    } else if (ch == 'x') {
-                        offset = slashIndex + 4;
-                    } else {
-                        if (ch != '\\' && ch != '"' && ch != 'n') {
-                            jsonReader.char1(ch);
-                        }
-                        offset = slashIndex + 2;
-                    }
+                    offset = skipEscape(jsonReader, bytes, slashIndex, end);
 
                     if (offset > quoteIndex) {
                         quoteIndex = IOUtils.indexOfQuote(bytes, quote, offset, end);
@@ -4677,6 +4667,27 @@ class JSONReaderUTF8
         return offset;
     }
 
+    /**
+     * Validates the escape at {@code slashIndex} and returns the offset just past it. Unicode and hex
+     * escapes have their digits checked here so that the skip path rejects exactly what the decode path
+     * rejects; the advances themselves are unchanged.
+     */
+    private static int skipEscape(JSONReaderUTF8 jsonReader, byte[] bytes, int slashIndex, int end) {
+        int ch = bytes[slashIndex + 1];
+        if (ch == 'u') {
+            hexDigit4(bytes, slashIndex + 2, end);
+            return slashIndex + 6;
+        }
+        if (ch == 'x') {
+            char2(bytes[slashIndex + 2], bytes[slashIndex + 3]);
+            return slashIndex + 4;
+        }
+        if (ch != '\\' && ch != '"' && ch != 'n') {
+            jsonReader.char1(ch);
+        }
+        return slashIndex + 2;
+    }
+
     private static int skipStringEscaped(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int quote) {
         int ch = '\\';
         offset++;
@@ -4684,8 +4695,10 @@ class JSONReaderUTF8
             if (ch == '\\') {
                 ch = bytes[offset++];
                 if (ch == 'u') {
+                    hexDigit4(bytes, offset, jsonReader.end);
                     offset += 4;
                 } else if (ch == 'x') {
+                    char2(bytes[offset], bytes[offset + 1]);
                     offset += 2;
                 } else if (ch != '\\' && ch != '"') {
                     jsonReader.char1(ch);
