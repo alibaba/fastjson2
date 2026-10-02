@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.JSONReader;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +11,7 @@ import java.util.Random;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("util")
 public class FnvTest {
@@ -76,9 +78,13 @@ public class FnvTest {
 
     @Test
     public void testHashCode64ByteArrayShortTail() {
-        // when a short name starts less than 8 bytes before the end of the array,
-        // the fast path must not read past the end of the array, and the result
-        // must be identical to the case where 8 readable bytes are available
+        // pins that the short-tail composition produces the same canonical
+        // little-endian packing as the 8-byte masked load: tight (only 2 spare
+        // bytes, slow path) must equal padded (8 spare bytes, fast path), and both
+        // must equal the reference hashCode64(byte...) packing. The filler after
+        // the name makes a dropped or sign-shifted mask observable. The
+        // bounds guard itself cannot be observed from Java without Unsafe and is
+        // protected by review; the SIGSEGV it prevents is issue 7872.
         Random rnd = new Random(42);
         for (int len = 1; len <= 8; ++len) {
             for (int trial = 0; trial < 200; ++trial) {
@@ -93,9 +99,12 @@ public class FnvTest {
                 // only 2 spare bytes after offset -> fewer than 8 readable, name ends at the array end
                 byte[] tight = new byte[len + 2];
                 System.arraycopy(name, 0, tight, 2, len);
-                // 8 spare bytes after offset -> original fast path
+                // 8 spare bytes after offset -> original fast path; the 'x' filler
+                // sits inside the 8-byte read window of every len < 8 name, so a
+                // mask regression changes the padded hash and turns this red
                 byte[] padded = new byte[len + 10];
                 System.arraycopy(name, 0, padded, 2, len);
+                Arrays.fill(padded, 2 + len, padded.length, (byte) 'x');
 
                 assertEquals(
                         Fnv.hashCode64(padded, 2, len, true),
@@ -107,6 +116,20 @@ public class FnvTest {
                 );
             }
         }
+    }
+
+    @Test
+    public void readFieldNameHashCodeMatchesFnvAtIncidentGeometry() {
+        // pins the readFieldNameHashCode -> Fnv.hashCode64(byte[], offset, len, ascii)
+        // wiring: the 8-byte document starts the 2-byte name at offset 2, so only 6
+        // readable bytes remain and the reader takes the same short-tail path as the
+        // incident geometry of issue 7872. The expected hash is the canonical
+        // little-endian packing, so an endian-flipped or unmasked composition fails here too.
+        byte[] doc = "{\"ab\":1}".getBytes(StandardCharsets.UTF_8);
+        JSONReader reader = JSONReader.of(doc);
+        assertTrue(reader.nextIfObjectStart());
+        assertEquals(Fnv.hashCode64("ab"), reader.readFieldNameHashCode());
+        reader.close();
     }
 
     public static long hashCode64(byte... name) {
