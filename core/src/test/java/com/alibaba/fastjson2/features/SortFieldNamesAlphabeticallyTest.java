@@ -196,7 +196,8 @@ public class SortFieldNamesAlphabeticallyTest {
         JSON.toJSONString(new AlphabeticFalse(), JSONWriter.Feature.SortFieldNamesAlphabetically);
         ObjectWriterProvider provider = JSONFactory.getDefaultObjectWriterProvider();
         ObjectWriter natural = provider.getObjectWriter(AlphabeticFalse.class, AlphabeticFalse.class, false);
-        ObjectWriter sorted = provider.getObjectWriter(AlphabeticFalse.class, AlphabeticFalse.class, false, true);
+        ObjectWriter sorted = provider.getObjectWriter(AlphabeticFalse.class, AlphabeticFalse.class,
+                JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
         assertNotEquals(natural, sorted);
     }
 

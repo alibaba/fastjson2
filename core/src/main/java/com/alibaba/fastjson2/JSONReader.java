@@ -3383,7 +3383,7 @@ public abstract class JSONReader
             }
 
             if ((contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 && map.containsKey(name)) {
-                throw new JSONException(info("duplicate key : " + name));
+                throw duplicateKeyError(name);
             }
             Object origin = map.put(name, value);
             if (origin != null) {
@@ -3595,7 +3595,7 @@ public abstract class JSONReader
             }
 
             if ((contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 && map.containsKey(name)) {
-                throw new JSONException(info("duplicate key : " + name));
+                throw duplicateKeyError(name);
             }
             Object origin = map.put(name, value);
             if (origin != null) {
@@ -3669,7 +3669,7 @@ public abstract class JSONReader
             }
 
             if ((contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 && object.containsKey(name)) {
-                throw new JSONException(info("duplicate key : " + name));
+                throw duplicateKeyError(name);
             }
             Object origin = object.put(name, value);
             if (origin != null) {
@@ -3828,7 +3828,7 @@ public abstract class JSONReader
             if ((context.features & Feature.ErrorOnDuplicateKeys.mask) != 0
                     && (innerMap != null ? innerMap : object).containsKey(name)
             ) {
-                throw new JSONException(info("duplicate key : " + name));
+                throw duplicateKeyError(name);
             }
             Object origin;
             if (innerMap != null) {
@@ -6655,6 +6655,10 @@ public abstract class JSONReader
 
     final JSONException notSupportName() {
         return new JSONException(info("not support unquoted name"));
+    }
+
+    final JSONException duplicateKeyError(Object name) {
+        return new JSONException(info("duplicate key : " + name));
     }
 
     final JSONException valueError() {

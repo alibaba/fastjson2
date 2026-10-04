@@ -876,10 +876,7 @@ public abstract class JSONWriter
      * @return the ObjectWriter for the specified class
      */
     public final ObjectWriter getObjectWriter(Class objectClass) {
-        long contextFeatures = context.features;
-        boolean fieldBased = (contextFeatures & FieldBased.mask) != 0;
-        boolean sortFieldNames = (contextFeatures & SortFieldNamesAlphabetically.mask) != 0;
-        return context.provider.getObjectWriter(objectClass, objectClass, fieldBased, sortFieldNames);
+        return context.provider.getObjectWriter(objectClass, objectClass, context.features);
     }
 
     /**
@@ -892,9 +889,7 @@ public abstract class JSONWriter
      * @return the ObjectWriter for the specified class and format
      */
     public final ObjectWriter getObjectWriter(Class objectClass, String format) {
-        long contextFeatures = context.features;
-        boolean fieldBased = (contextFeatures & FieldBased.mask) != 0;
-        return context.provider.getObjectWriter(objectClass, objectClass, format, fieldBased, (contextFeatures & SortFieldNamesAlphabetically.mask) != 0);
+        return context.provider.getObjectWriter(objectClass, objectClass, format, context.features);
     }
 
     /**
@@ -906,9 +901,7 @@ public abstract class JSONWriter
      * @return the ObjectWriter for the specified type and class
      */
     public final ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
-        long contextFeatures = context.features;
-        boolean fieldBased = (contextFeatures & FieldBased.mask) != 0;
-        return context.provider.getObjectWriter(objectType, objectClass, fieldBased, (contextFeatures & SortFieldNamesAlphabetically.mask) != 0);
+        return context.provider.getObjectWriter(objectType, objectClass, context.features);
     }
 
     /**
@@ -3499,9 +3492,7 @@ public abstract class JSONWriter
          * @return the ObjectWriter for the specified type
          */
         public <T> ObjectWriter<T> getObjectWriter(Class<T> objectType) {
-            boolean fieldBased = (features & FieldBased.mask) != 0;
-            boolean sortFieldNames = (features & SortFieldNamesAlphabetically.mask) != 0;
-            return provider.getObjectWriter(objectType, objectType, fieldBased, sortFieldNames);
+            return provider.getObjectWriter(objectType, objectType, features);
         }
 
         /**
@@ -3514,9 +3505,7 @@ public abstract class JSONWriter
          * @return the ObjectWriter for the specified type and class
          */
         public <T> ObjectWriter<T> getObjectWriter(Type objectType, Class<T> objectClass) {
-            boolean fieldBased = (features & FieldBased.mask) != 0;
-            boolean sortFieldNames = (features & SortFieldNamesAlphabetically.mask) != 0;
-            return provider.getObjectWriter(objectType, objectClass, fieldBased, sortFieldNames);
+            return provider.getObjectWriter(objectType, objectClass, features);
         }
 
         /**
