@@ -47,6 +47,35 @@ public class ErrorOnDuplicateKeysTest {
     }
 
     @Test
+    public void duplicateWithReferenceValue() {
+        // a duplicate key whose second occurrence is a $ref value must still be rejected
+        String str = "{\"a\":1,\"a\":{\"$ref\":\"$.b\"},\"b\":2}";
+        JSONException error = assertThrows(JSONException.class,
+                () -> JSON.parseObject(str, JSONReader.Feature.ErrorOnDuplicateKeys));
+        assertTrue(error.getMessage().contains("duplicate key : a"));
+    }
+
+    @Test
+    public void duplicateWithIgnoreNullNullFirst() {
+        String str = "{\"a\":null,\"a\":1}";
+        JSONException error = assertThrows(JSONException.class,
+                () -> JSON.parseObject(str,
+                        JSONReader.Feature.ErrorOnDuplicateKeys,
+                        JSONReader.Feature.IgnoreNullPropertyValue));
+        assertTrue(error.getMessage().contains("duplicate key : a"));
+    }
+
+    @Test
+    public void duplicateWithIgnoreNullNullSecond() {
+        String str = "{\"a\":1,\"a\":null}";
+        JSONException error = assertThrows(JSONException.class,
+                () -> JSON.parseObject(str,
+                        JSONReader.Feature.ErrorOnDuplicateKeys,
+                        JSONReader.Feature.IgnoreNullPropertyValue));
+        assertTrue(error.getMessage().contains("duplicate key : a"));
+    }
+
+    @Test
     public void parseObjectNestedDuplicate() {
         String str = "{\"a\":{\"x\":1,\"x\":2}}";
         JSONException error = assertThrows(JSONException.class,

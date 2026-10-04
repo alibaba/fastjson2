@@ -4596,7 +4596,10 @@ public class ObjectWriterCreatorASM
         boolean direct = false;
         List<FieldWriter> fieldWriters = null;
         Class<?> itemClass = TypeUtils.getClass(itemType);
-        if (itemClass != null && field != null && field.getDeclaringClass() != itemClass) {
+        if (itemClass != null
+                && field != null
+                && field.getDeclaringClass() != itemClass
+                && (features & JSONWriter.Feature.BeanToArray.mask) == 0) {
             ObjectWriter fieldValueWriter = provider.getObjectWriterFromCache(itemType, itemClass, FieldBased.isEnabled(features));
             if (fieldValueWriter == null && itemClass != null) {
                 fieldValueWriter = super.createObjectWriter(itemClass, features, provider);

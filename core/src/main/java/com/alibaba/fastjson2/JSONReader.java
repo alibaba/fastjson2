@@ -3371,7 +3371,9 @@ public abstract class JSONReader
             String name = readFieldName();
             Object value = itemReader.readObject(this, itemReader.getObjectClass(), name, features);
 
-            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
+            if (value == null
+                    && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0
+                    && (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) == 0) {
                 continue;
             }
 
@@ -3498,6 +3500,10 @@ public abstract class JSONReader
 
             if (isReference()) {
                 String reference = readReference();
+                if (map.containsKey(name)
+                        && (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0) {
+                    throw duplicateKeyError(name);
+                }
                 Object value = null;
                 if ("..".equals(reference)) {
                     value = map;
@@ -3583,7 +3589,9 @@ public abstract class JSONReader
                     throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
             }
 
-            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
+            if (value == null
+                    && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0
+                    && (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) == 0) {
                 continue;
             }
 
@@ -3657,7 +3665,9 @@ public abstract class JSONReader
 
             Object value = valueReader.readObject(this, null, null, 0L);
 
-            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
+            if (value == null
+                    && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0
+                    && (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) == 0) {
                 continue;
             }
 
@@ -3776,6 +3786,10 @@ public abstract class JSONReader
                     break;
                 case '{':
                     if (isReference()) {
+                        if ((innerMap != null ? innerMap : object).containsKey(name)
+                                && (context.features & Feature.ErrorOnDuplicateKeys.mask) != 0) {
+                            throw duplicateKeyError(name);
+                        }
                         addResolveTask(object, name, JSONPath.of(readReference()));
                         val = null;
                     } else {
@@ -3814,7 +3828,9 @@ public abstract class JSONReader
                     throw new JSONException(info("illegal input " + ch));
             }
 
-            if (val == null && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0) {
+            if (val == null
+                    && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0
+                    && (context.features & Feature.ErrorOnDuplicateKeys.mask) == 0) {
                 continue;
             }
 

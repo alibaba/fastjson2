@@ -75,10 +75,15 @@ public class FieldWriterObject<T>
 
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        if (format == null
-                && (jsonWriter.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+        if (!writeUsing
+                && format == null
+                && ((this.features | jsonWriter.getFeatures()) & (
+                        JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
+                        == JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
             // sorted writers must never be stored in initValueClass/initObjectWriter,
-            // otherwise a writer resolved under one sort variant would be reused under the other
+            // otherwise a writer resolved under one sort variant would be reused under the other;
+            // explicitly configured writers (@JSONField(writeUsing)) are always honored instead,
+            // and positional (BeanToArray) output never takes a sorted writer
             return jsonWriter.getObjectWriter(valueClass);
         }
 

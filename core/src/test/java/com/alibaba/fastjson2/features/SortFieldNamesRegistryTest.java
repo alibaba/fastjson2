@@ -163,6 +163,78 @@ public class SortFieldNamesRegistryTest {
         }
     }
 
+    public static class Secret {
+        public String value = "sensitive";
+    }
+
+    public static class MaskWriter
+            implements ObjectWriter<Secret> {
+        @Override
+        public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+            jsonWriter.writeString("MASKED");
+        }
+    }
+
+    public static class Holder {
+        @JSONField(writeUsing = MaskWriter.class)
+        public Secret secret = new Secret();
+    }
+
+    @Test
+    public void writeUsingFieldWriterHonoredUnderSortedContext() {
+        Holder holder = new Holder();
+        assertEquals("{\"secret\":\"MASKED\"}", JSON.toJSONString(holder));
+        assertEquals("{\"secret\":\"MASKED\"}",
+                JSON.toJSONString(holder, JSONWriter.Feature.SortFieldNamesAlphabetically));
+    }
+
+    @JSONType(alphabetic = false)
+    public static class Child {
+        public int zebra = 3;
+        public int apple = 1;
+    }
+
+    public static class ChildHolder {
+        @JSONField(serializeFeatures = JSONWriter.Feature.BeanToArray)
+        public Child child = new Child();
+    }
+
+    @Test
+    public void beanToArrayAnnotatedFieldKeepsPositionalOrder() {
+        ChildHolder holder = new ChildHolder();
+        assertEquals("{\"child\":[3,1]}", JSON.toJSONString(holder));
+        assertEquals("{\"child\":[3,1]}",
+                JSON.toJSONString(holder, JSONWriter.Feature.SortFieldNamesAlphabetically));
+    }
+
+    public static class ChildListHolder {
+        @JSONField(serializeFeatures = JSONWriter.Feature.BeanToArray)
+        public java.util.List<Child> children = java.util.Collections.singletonList(new Child());
+    }
+
+    @Test
+    public void beanToArrayAnnotatedListFieldDoesNotArrayifyItems() {
+        // field-level BeanToArray on a List field does not array-ify item beans (matches main);
+        // the sorted variant orders item bean fields alphabetically, as everywhere else
+        ChildListHolder holder = new ChildListHolder();
+        assertEquals("{\"children\":[{\"zebra\":3,\"apple\":1}]}", JSON.toJSONString(holder));
+        assertEquals("{\"children\":[{\"apple\":1,\"zebra\":3}]}",
+                JSON.toJSONString(holder, JSONWriter.Feature.SortFieldNamesAlphabetically));
+    }
+
+    public static class DatesBean {
+        @JSONField(format = "yyyy-MM-dd")
+        public java.util.List<java.util.Date> dates = java.util.Collections.singletonList(new java.util.Date(0L));
+    }
+
+    @Test
+    public void listItemFormatPreservedUnderSortedContext() {
+        DatesBean bean = new DatesBean();
+        assertEquals("{\"dates\":[\"1970-01-01\"]}", JSON.toJSONString(bean));
+        assertEquals("{\"dates\":[\"1970-01-01\"]}",
+                JSON.toJSONString(bean, JSONWriter.Feature.SortFieldNamesAlphabetically));
+    }
+
     @Test
     public void cleanupClassLoaderReleasesLoader() throws Exception {
         ClassLoader parent = SortFieldNamesRegistryTest.class.getClassLoader();

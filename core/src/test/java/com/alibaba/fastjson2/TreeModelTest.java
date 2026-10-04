@@ -149,6 +149,14 @@ public class TreeModelTest {
         map.put("negInf", Double.NEGATIVE_INFINITY);
         map.put("overIntDec", new BigDecimal("2147483648"));
         map.put("hugeDec", new BigDecimal("1e30"));
+        // value bounds are checked on the value itself, not on the truncated integer (jackson)
+        map.put("overIntByFraction", new BigDecimal("2147483647.1"));
+        map.put("maxIntMinusFraction", new BigDecimal("2147483646.9"));
+        map.put("underMinByFraction", new BigDecimal("-2147483648.1"));
+        map.put("overLongByFraction", new BigDecimal("9223372036854775807.1"));
+        map.put("underMinLongByFraction", new BigDecimal("-9223372036854775808.1"));
+        map.put("hugeExponent", new BigDecimal("1e2147483647"));
+        map.put("tinyExponent", new BigDecimal("1e-2147483647"));
         JSONObject object = new JSONObject(map);
         assertTrue(object.canConvertToInt("maxInt"));
         assertFalse(object.canConvertToInt("overInt"));
@@ -171,6 +179,15 @@ public class TreeModelTest {
         assertTrue(object.canConvertToLong("overIntDec"));
         assertFalse(object.canConvertToInt("hugeDec"));
         assertFalse(object.canConvertToLong("hugeDec"));
+        assertFalse(object.canConvertToInt("overIntByFraction"));
+        assertTrue(object.canConvertToInt("maxIntMinusFraction"));
+        assertFalse(object.canConvertToInt("underMinByFraction"));
+        assertFalse(object.canConvertToLong("overLongByFraction"));
+        assertFalse(object.canConvertToLong("underMinLongByFraction"));
+        assertFalse(object.canConvertToInt("hugeExponent"));
+        assertFalse(object.canConvertToLong("hugeExponent"));
+        assertTrue(object.canConvertToInt("tinyExponent"));
+        assertTrue(object.canConvertToLong("tinyExponent"));
     }
 
     @Test

@@ -94,9 +94,13 @@ public class FieldWriterList<T>
             return this.itemObjectWriter = jsonWriter.getObjectWriter(this.contentAs, contentAs);
         }
 
-        if ((jsonWriter.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+        if (format == null
+                && ((this.features | jsonWriter.getFeatures()) & (
+                        JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
+                        == JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
             // sorted writers must never be stored in itemObjectWriter,
-            // otherwise a writer resolved under one sort variant would be reused under the other
+            // otherwise a writer resolved under one sort variant would be reused under the other;
+            // format-aware and positional (BeanToArray) output keep the regular resolution
             if (itemType == null || itemType == this.itemType) {
                 return jsonWriter.getObjectWriter(this.itemType, itemClass);
             }
@@ -124,7 +128,9 @@ public class FieldWriterList<T>
 
     @Override
     public final ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        if ((jsonWriter.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+        if (((this.features | jsonWriter.getFeatures()) & (
+                JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
+                == JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
             return jsonWriter.getObjectWriter(valueClass);
         }
 

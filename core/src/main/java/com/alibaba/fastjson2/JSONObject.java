@@ -201,7 +201,9 @@ public class JSONObject
                     && v >= -2147483648.0 && v <= 2147483647.0;
         }
         if (value instanceof BigDecimal) {
-            return ((BigDecimal) value).toBigInteger().bitLength() <= 31;
+            BigDecimal decimal = (BigDecimal) value;
+            return decimal.compareTo(BigDecimal.valueOf(Integer.MIN_VALUE)) >= 0
+                    && decimal.compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) <= 0;
         }
         return false;
     }
@@ -232,7 +234,9 @@ public class JSONObject
                     && v >= -9.223372036854776E18 && v <= 9.223372036854776E18;
         }
         if (value instanceof BigDecimal) {
-            return ((BigDecimal) value).toBigInteger().bitLength() <= 63;
+            BigDecimal decimal = (BigDecimal) value;
+            return decimal.compareTo(BigDecimal.valueOf(Long.MIN_VALUE)) >= 0
+                    && decimal.compareTo(BigDecimal.valueOf(Long.MAX_VALUE)) <= 0;
         }
         return false;
     }

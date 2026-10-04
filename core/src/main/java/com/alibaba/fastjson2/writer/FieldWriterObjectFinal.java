@@ -42,9 +42,14 @@ public class FieldWriterObjectFinal<T>
             return super.getObjectWriter(jsonWriter, valueClass);
         }
 
-        if (format == null
-                && (jsonWriter.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
-            // sorted writers must not be stored in objectWriter (see FieldWriterObject#getObjectWriter)
+        if (!writeUsing
+                && format == null
+                && ((features | jsonWriter.getFeatures()) & (
+                        JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
+                        == JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
+            // sorted writers must not be stored in objectWriter (see FieldWriterObject#getObjectWriter);
+            // explicitly configured writers (@JSONField(writeUsing)) are always honored instead,
+            // and positional (BeanToArray) output never takes a sorted writer
             return jsonWriter.getObjectWriter(valueClass);
         }
 
