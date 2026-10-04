@@ -76,6 +76,32 @@ public class ErrorOnDuplicateKeysTest {
     }
 
     @Test
+    public void typedMapWithIgnoreNull() {
+        String str = "{\"a\":null,\"a\":1}";
+        JSONException error = assertThrows(JSONException.class,
+                () -> JSON.parseObject(str, new TypeReference<Map<String, Integer>>() {
+                }, JSONReader.Feature.ErrorOnDuplicateKeys, JSONReader.Feature.IgnoreNullPropertyValue));
+        assertTrue(error.getMessage().contains("duplicate key : a"));
+    }
+
+    @Test
+    public void stringMapWithIgnoreNull() {
+        String str = "{\"a\":null,\"a\":\"x\"}";
+        JSONException error = assertThrows(JSONException.class,
+                () -> JSON.parseObject(str, new TypeReference<Map<String, String>>() {
+                }, JSONReader.Feature.ErrorOnDuplicateKeys, JSONReader.Feature.IgnoreNullPropertyValue));
+        assertTrue(error.getMessage().contains("duplicate key : a"));
+    }
+
+    @Test
+    public void ignoreNullStillHonoredWithoutStrictFeature() {
+        String str = "{\"a\":null,\"a\":1}";
+        JSONObject object = JSON.parseObject(str, JSONReader.Feature.IgnoreNullPropertyValue);
+        assertEquals(1, object.getIntValue("a"));
+        assertEquals(1, object.size());
+    }
+
+    @Test
     public void parseObjectNestedDuplicate() {
         String str = "{\"a\":{\"x\":1,\"x\":2}}";
         JSONException error = assertThrows(JSONException.class,

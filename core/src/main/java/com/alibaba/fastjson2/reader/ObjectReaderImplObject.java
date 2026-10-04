@@ -199,7 +199,9 @@ public final class ObjectReaderImplObject
                         throw new JSONException(jsonReader.info());
                 }
 
-                if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
+                if (value == null
+                        && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0
+                        && (contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) == 0) {
                     continue;
                 }
 
