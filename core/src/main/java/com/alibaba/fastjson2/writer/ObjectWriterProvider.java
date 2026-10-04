@@ -178,6 +178,7 @@ public class ObjectWriterProvider
             mixInCache.put(target, mixinSource);
         }
         cache.remove(target);
+        cacheFieldNamesSorted.remove(target);
     }
 
     /**
@@ -256,11 +257,14 @@ public class ObjectWriterProvider
         }
 
         ConcurrentMap<Type, ObjectWriter> cache = fieldBased ? this.cacheFieldBased : this.cache;
+        ConcurrentMap<Type, ObjectWriter> sortedCache = cacheOf(fieldBased, true);
 
         if (objectWriter == null) {
+            sortedCache.remove(type);
             return cache.remove(type);
         }
 
+        sortedCache.put(type, objectWriter);
         return cache.put(type, objectWriter);
     }
 
@@ -286,7 +290,11 @@ public class ObjectWriterProvider
      */
     public ObjectWriter registerIfAbsent(Type type, ObjectWriter objectWriter, boolean fieldBased) {
         ConcurrentMap<Type, ObjectWriter> cache = fieldBased ? this.cacheFieldBased : this.cache;
-        return cache.putIfAbsent(type, objectWriter);
+        ObjectWriter previous = cache.putIfAbsent(type, objectWriter);
+        if (previous == null) {
+            cacheOf(fieldBased, true).put(type, objectWriter);
+        }
+        return previous;
     }
 
     /**
@@ -308,6 +316,7 @@ public class ObjectWriterProvider
      */
     public ObjectWriter unregister(Type type, boolean fieldBased) {
         ConcurrentMap<Type, ObjectWriter> cache = fieldBased ? this.cacheFieldBased : this.cache;
+        cacheOf(fieldBased, true).remove(type);
         return cache.remove(type);
     }
 
@@ -334,6 +343,7 @@ public class ObjectWriterProvider
      */
     public boolean unregister(Type type, ObjectWriter objectWriter, boolean fieldBased) {
         ConcurrentMap<Type, ObjectWriter> cache = fieldBased ? this.cacheFieldBased : this.cache;
+        cacheOf(fieldBased, true).remove(type, objectWriter);
         return cache.remove(type, objectWriter);
     }
 
@@ -613,7 +623,10 @@ public class ObjectWriterProvider
      */
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, long contextFeatures) {
         boolean fieldBased = (contextFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
-        boolean fieldNamesSorted = (contextFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0;
+        // BeanToArray output is positional, so it never takes the sorted writer variant
+        boolean fieldNamesSorted = (contextFeatures
+                & (JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
+                == JSONWriter.Feature.SortFieldNamesAlphabetically.mask;
         ConcurrentMap<Type, ObjectWriter> cache = cacheOf(fieldBased, fieldNamesSorted);
         ObjectWriter objectWriter = cache.get(objectType);
         return objectWriter != null
@@ -871,6 +884,8 @@ public class ObjectWriterProvider
         mixInCache.clear();
         cache.clear();
         cacheFieldBased.clear();
+        cacheFieldNamesSorted.clear();
+        cacheFieldNamesSortedFieldBased.clear();
     }
 
     /**
@@ -882,6 +897,8 @@ public class ObjectWriterProvider
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
         cacheFieldBased.remove(objectClass);
+        cacheFieldNamesSorted.remove(objectClass);
+        cacheFieldNamesSortedFieldBased.remove(objectClass);
 
         BeanUtils.cleanupCache(objectClass);
     }
@@ -946,6 +963,14 @@ public class ObjectWriterProvider
         );
 
         cacheFieldBased.entrySet().removeIf(
+                entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMap)
+        );
+
+        cacheFieldNamesSorted.entrySet().removeIf(
+                entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMap)
+        );
+
+        cacheFieldNamesSortedFieldBased.entrySet().removeIf(
                 entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMap)
         );
 

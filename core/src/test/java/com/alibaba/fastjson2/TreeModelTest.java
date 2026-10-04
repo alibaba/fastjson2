@@ -109,7 +109,8 @@ public class TreeModelTest {
         assertTrue(object.canConvertToInt("i"));
         assertFalse(object.canConvertToInt("l"));
         assertFalse(object.canConvertToInt("big"));
-        assertFalse(object.canConvertToInt("f"));
+        // jackson semantics: decimal within int range converts by truncation
+        assertTrue(object.canConvertToInt("f"));
         assertFalse(object.canConvertToInt("s"));
         assertFalse(object.canConvertToInt("n"));
         assertFalse(object.canConvertToInt("missing"));
@@ -123,7 +124,8 @@ public class TreeModelTest {
         assertTrue(object.canConvertToLong("i"));
         assertTrue(object.canConvertToLong("l"));
         assertFalse(object.canConvertToLong("big"));
-        assertFalse(object.canConvertToLong("f"));
+        // jackson semantics: decimal within long range converts by truncation
+        assertTrue(object.canConvertToLong("f"));
         assertFalse(object.canConvertToLong("s"));
         assertFalse(object.canConvertToLong("missing"));
     }
@@ -139,6 +141,14 @@ public class TreeModelTest {
         map.put("overLong", BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE));
         map.put("underLong", BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE));
         map.put("decimal", new BigDecimal("10"));
+        map.put("overIntD", 2147483648.0);
+        map.put("maxIntD", 2147483647.0);
+        map.put("fraction", 0.999);
+        map.put("nan", Double.NaN);
+        map.put("posInf", Double.POSITIVE_INFINITY);
+        map.put("negInf", Double.NEGATIVE_INFINITY);
+        map.put("overIntDec", new BigDecimal("2147483648"));
+        map.put("hugeDec", new BigDecimal("1e30"));
         JSONObject object = new JSONObject(map);
         assertTrue(object.canConvertToInt("maxInt"));
         assertFalse(object.canConvertToInt("overInt"));
@@ -147,9 +157,20 @@ public class TreeModelTest {
         assertTrue(object.canConvertToLong("minLong"));
         assertFalse(object.canConvertToLong("overLong"));
         assertFalse(object.canConvertToLong("underLong"));
-        // jackson semantics: decimal values are never reported as convertible to int/long
-        assertFalse(object.canConvertToInt("decimal"));
-        assertFalse(object.canConvertToLong("decimal"));
+        assertTrue(object.canConvertToInt("decimal"));
+        assertTrue(object.canConvertToLong("decimal"));
+        // jackson doubles: finite values within range convert by truncation
+        assertTrue(object.canConvertToInt("maxIntD"));
+        assertFalse(object.canConvertToInt("overIntD"));
+        assertTrue(object.canConvertToInt("fraction"));
+        assertFalse(object.canConvertToInt("nan"));
+        assertFalse(object.canConvertToLong("nan"));
+        assertFalse(object.canConvertToInt("posInf"));
+        assertFalse(object.canConvertToLong("negInf"));
+        assertFalse(object.canConvertToInt("overIntDec"));
+        assertTrue(object.canConvertToLong("overIntDec"));
+        assertFalse(object.canConvertToInt("hugeDec"));
+        assertFalse(object.canConvertToLong("hugeDec"));
     }
 
     @Test

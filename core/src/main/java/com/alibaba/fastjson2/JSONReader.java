@@ -6357,6 +6357,10 @@ public abstract class JSONReader
          * and is intended for strict parsing of protocol and signature payloads.
          * It takes precedence over {@link #DuplicateKeyValueAsArray} when both are enabled.
          *
+         * <p>Scope: untyped Map/tree reading only. Typed POJO targets are not covered
+         * (fields are assigned as they arrive, last value wins), and JSONB input is not
+         * covered, consistent with {@link #DuplicateKeyValueAsArray}.
+         *
          * @since 2.0.66
          */
         ErrorOnDuplicateKeys(1L << 35L),

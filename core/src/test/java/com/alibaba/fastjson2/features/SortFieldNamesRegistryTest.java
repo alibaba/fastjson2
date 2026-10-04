@@ -1,0 +1,189 @@
+package com.alibaba.fastjson2.features;
+
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Type;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+@Tag("features")
+public class SortFieldNamesRegistryTest {
+    public static class Money {
+        public long cents = 123;
+    }
+
+    static final class DollarWriter
+            implements ObjectWriter<Money> {
+        static final DollarWriter INSTANCE = new DollarWriter();
+
+        @Override
+        public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+            jsonWriter.writeString("$1.23");
+        }
+    }
+
+    @Test
+    public void registeredWriterHonoredUnderSortedContext() {
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.register(Money.class, DollarWriter.INSTANCE);
+        Money money = new Money();
+        assertEquals("\"$1.23\"", JSON.toJSONString(money, new JSONWriter.Context(provider)));
+        assertEquals("\"$1.23\"", JSON.toJSONString(money,
+                new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+
+        provider.unregister(Money.class);
+        assertEquals("{\"cents\":123}", JSON.toJSONString(money,
+                new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+    }
+
+    @Test
+    public void registerIfAbsentHonoredUnderSortedContext() {
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.registerIfAbsent(Money.class, DollarWriter.INSTANCE);
+        assertEquals("\"$1.23\"", JSON.toJSONString(new Money(),
+                new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+    }
+
+    @JSONType(alphabetic = false)
+    public static class Transfer {
+        public long to = 1001;
+        public long from = 2002;
+        public long amount = 300;
+    }
+
+    @Test
+    public void perCallBeanToArrayKeepsPositionalOrder() {
+        Transfer t = new Transfer();
+        assertEquals("[1001,2002,300]", JSON.toJSONString(t, JSONWriter.Feature.BeanToArray));
+        assertEquals("[1001,2002,300]", JSON.toJSONString(t,
+                JSONWriter.Feature.BeanToArray, JSONWriter.Feature.SortFieldNamesAlphabetically));
+    }
+
+    public static class Account {
+        public int a = 2;
+        public int z = 1;
+    }
+
+    public static class AccountMixIn {
+        @JSONField(name = "renamed")
+        public int a;
+        public int z;
+    }
+
+    @Test
+    public void mixInAfterWarmupAppliesToSortedWriter() {
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        Account account = new Account();
+        JSONWriter.Context natural = new JSONWriter.Context(provider);
+        JSONWriter.Context sorted = new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
+
+        assertEquals("{\"a\":2,\"z\":1}", JSON.toJSONString(account, natural));
+        assertEquals("{\"a\":2,\"z\":1}", JSON.toJSONString(account, sorted));
+
+        provider.mixIn(Account.class, AccountMixIn.class);
+        // natural writes are also alphabetical on the default-alphabetic provider
+        assertEquals("{\"renamed\":2,\"z\":1}", JSON.toJSONString(account, natural));
+        assertEquals("{\"renamed\":2,\"z\":1}", JSON.toJSONString(account, sorted));
+    }
+
+    @Test
+    public void cleanupClassEvictsSortedWriter() {
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        Account account = new Account();
+        JSONWriter.Context sorted = new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
+        assertEquals("{\"a\":2,\"z\":1}", JSON.toJSONString(account, sorted));
+
+        provider.cleanup(Account.class);
+        provider.mixIn(Account.class, AccountMixIn.class);
+        assertEquals("{\"renamed\":2,\"z\":1}", JSON.toJSONString(account, sorted));
+    }
+
+    @Test
+    public void clearEvictsSortedWriter() {
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        Account account = new Account();
+        JSONWriter.Context sorted = new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
+        assertEquals("{\"a\":2,\"z\":1}", JSON.toJSONString(account, sorted));
+
+        provider.clear();
+        provider.mixIn(Account.class, AccountMixIn.class);
+        // mixIn alone does not re-create the writer here? clear() wiped both caches,
+        // so the next write is created with the mixIn mapping visible
+        assertEquals("{\"renamed\":2,\"z\":1}", JSON.toJSONString(account, sorted));
+    }
+
+    static class IsolatedLoader
+            extends ClassLoader {
+        IsolatedLoader(ClassLoader parent) {
+            super(parent);
+        }
+
+        @Override
+        public Class<?> loadClass(String name) throws ClassNotFoundException {
+            if (name.equals(LeakBean.class.getName())) {
+                // bypass parent delegation so this loader actually defines the class
+                return findClass(name);
+            }
+            return super.loadClass(name);
+        }
+
+        @Override
+        protected Class<?> findClass(String name) throws ClassNotFoundException {
+            if (name.equals(LeakBean.class.getName())) {
+                String path = name.replace('.', '/') + ".class";
+                try (InputStream in = getParent().getResourceAsStream(path)) {
+                    if (in == null) {
+                        throw new ClassNotFoundException(name);
+                    }
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                    byte[] chunk = new byte[4096];
+                    int n;
+                    while ((n = in.read(chunk)) != -1) {
+                        buffer.write(chunk, 0, n);
+                    }
+                    byte[] bytes = buffer.toByteArray();
+                    return defineClass(name, bytes, 0, bytes.length);
+                } catch (IOException e) {
+                    throw new ClassNotFoundException(name, e);
+                }
+            }
+            return super.findClass(name);
+        }
+    }
+
+    @Test
+    public void cleanupClassLoaderReleasesLoader() throws Exception {
+        ClassLoader parent = SortFieldNamesRegistryTest.class.getClassLoader();
+        IsolatedLoader childLoader = new IsolatedLoader(parent);
+        Class<?> loadedClass = childLoader.loadClass(LeakBean.class.getName());
+        assert loadedClass != LeakBean.class;
+
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.getObjectWriter(loadedClass, loadedClass, false);
+        provider.getObjectWriter(loadedClass, loadedClass, JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+
+        provider.cleanup(childLoader);
+
+        WeakReference<Class<?>> weakClass = new WeakReference<>(loadedClass);
+        WeakReference<ClassLoader> weakLoader = new WeakReference<>(childLoader);
+        loadedClass = null;
+        childLoader = null;
+        System.gc();
+        System.gc();
+        Thread.sleep(20);
+        assertNull(weakClass.get());
+        assertNull(weakLoader.get());
+    }
+}

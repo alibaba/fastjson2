@@ -150,6 +150,9 @@ public class JSONObject
      * Returns the typed value associated with the specified key, throwing a {@link JSONException}
      * when the key is absent, associated with a null value, or not an instance of the given class.
      *
+     * <p>No numeric widening is performed: a value parsed as {@code Integer} does not match
+     * {@code Long.class}. Use {@link #getLong} or {@link #getObject} for widening conversions.
+     *
      * @param key the key whose associated value is required
      * @param valueClass the expected class of the value
      * @param <T> the expected type of the value
@@ -169,16 +172,15 @@ public class JSONObject
     }
 
     /**
-     * Checks whether the value associated with the specified key is an integral number
-     * that fits into a 32-bit int.
-     *
-     * <p>This is the counterpart of jackson {@code JsonNode.canConvertToInt()}: it returns
-     * true for {@link Byte}, {@link Short} and {@link Integer} values, for {@link Long}
-     * and {@link BigInteger} values within the int range, and false for everything else,
-     * including decimal values, strings, missing keys and null values.
+     * Checks whether the value associated with the specified key is a number that can be
+     * converted to a 32-bit int without overflow, following jackson
+     * {@code JsonNode.canConvertToInt()} semantics: integral values within the int range,
+     * and decimal values within the int range (jackson's conversion truncates any fraction),
+     * count as convertible. Strings, missing keys, null values, non-finite values and
+     * values out of range report false.
      *
      * @param key the key whose associated value is to be checked
-     * @return true if the value is an integral number convertible to int without overflow
+     * @return true if the value is a number convertible to int without overflow
      * @since 2.0.66
      */
     public boolean canConvertToInt(String key) {
@@ -191,22 +193,29 @@ public class JSONObject
             return v >= Integer.MIN_VALUE && v <= Integer.MAX_VALUE;
         }
         if (value instanceof BigInteger) {
-            return ((BigInteger) value).bitLength() < 32;
+            return ((BigInteger) value).bitLength() <= 31;
+        }
+        if (value instanceof Double || value instanceof Float) {
+            double v = ((Number) value).doubleValue();
+            return !Double.isNaN(v) && !Double.isInfinite(v)
+                    && v >= -2147483648.0 && v <= 2147483647.0;
+        }
+        if (value instanceof BigDecimal) {
+            return ((BigDecimal) value).toBigInteger().bitLength() <= 31;
         }
         return false;
     }
 
     /**
-     * Checks whether the value associated with the specified key is an integral number
-     * that fits into a 64-bit long.
-     *
-     * <p>This is the counterpart of jackson {@code JsonNode.canConvertToLong()}: it returns
-     * true for {@link Byte}, {@link Short}, {@link Integer} and {@link Long} values, for
-     * {@link BigInteger} values within the long range, and false for everything else,
-     * including decimal values, strings, missing keys and null values.
+     * Checks whether the value associated with the specified key is a number that can be
+     * converted to a 64-bit long without overflow, following jackson
+     * {@code JsonNode.canConvertToLong()} semantics: integral values within the long range,
+     * and decimal values within the long range (jackson's conversion truncates any fraction),
+     * count as convertible. Strings, missing keys, null values, non-finite values and
+     * values out of range report false.
      *
      * @param key the key whose associated value is to be checked
-     * @return true if the value is an integral number convertible to long without overflow
+     * @return true if the value is a number convertible to long without overflow
      * @since 2.0.66
      */
     public boolean canConvertToLong(String key) {
@@ -215,7 +224,15 @@ public class JSONObject
             return true;
         }
         if (value instanceof BigInteger) {
-            return ((BigInteger) value).bitLength() < 64;
+            return ((BigInteger) value).bitLength() <= 63;
+        }
+        if (value instanceof Double || value instanceof Float) {
+            double v = ((Number) value).doubleValue();
+            return !Double.isNaN(v) && !Double.isInfinite(v)
+                    && v >= -9.223372036854776E18 && v <= 9.223372036854776E18;
+        }
+        if (value instanceof BigDecimal) {
+            return ((BigDecimal) value).toBigInteger().bitLength() <= 63;
         }
         return false;
     }
