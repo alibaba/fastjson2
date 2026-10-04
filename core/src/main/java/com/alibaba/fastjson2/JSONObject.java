@@ -127,6 +127,100 @@ public class JSONObject
     }
 
     /**
+     * Returns the value associated with the specified key, throwing a {@link JSONException}
+     * when the key is absent or associated with a null value.
+     *
+     * <p>This is the counterpart of jackson {@code JsonNode.required(String)} and is
+     * intended for validating protocol and fixture payloads.
+     *
+     * @param key the key whose associated value is required
+     * @return the non-null value associated with the key
+     * @throws JSONException if the key is absent or its value is null
+     * @since 2.0.66
+     */
+    public Object required(String key) {
+        Object value = get(key);
+        if (value == null) {
+            throw new JSONException("required value missing : " + key);
+        }
+        return value;
+    }
+
+    /**
+     * Returns the typed value associated with the specified key, throwing a {@link JSONException}
+     * when the key is absent, associated with a null value, or not an instance of the given class.
+     *
+     * @param key the key whose associated value is required
+     * @param valueClass the expected class of the value
+     * @param <T> the expected type of the value
+     * @return the non-null value associated with the key
+     * @throws JSONException if the key is absent, its value is null, or the value is not of the expected type
+     * @since 2.0.66
+     */
+    public <T> T required(String key, Class<T> valueClass) {
+        Object value = get(key);
+        if (value == null) {
+            throw new JSONException("required value missing : " + key);
+        }
+        if (!valueClass.isInstance(value)) {
+            throw new JSONException("required value not of type " + valueClass.getName() + " : " + key);
+        }
+        return valueClass.cast(value);
+    }
+
+    /**
+     * Checks whether the value associated with the specified key is an integral number
+     * that fits into a 32-bit int.
+     *
+     * <p>This is the counterpart of jackson {@code JsonNode.canConvertToInt()}: it returns
+     * true for {@link Byte}, {@link Short} and {@link Integer} values, for {@link Long}
+     * and {@link BigInteger} values within the int range, and false for everything else,
+     * including decimal values, strings, missing keys and null values.
+     *
+     * @param key the key whose associated value is to be checked
+     * @return true if the value is an integral number convertible to int without overflow
+     * @since 2.0.66
+     */
+    public boolean canConvertToInt(String key) {
+        Object value = get(key);
+        if (value instanceof Integer || value instanceof Short || value instanceof Byte) {
+            return true;
+        }
+        if (value instanceof Long) {
+            long v = (Long) value;
+            return v >= Integer.MIN_VALUE && v <= Integer.MAX_VALUE;
+        }
+        if (value instanceof BigInteger) {
+            return ((BigInteger) value).bitLength() < 32;
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether the value associated with the specified key is an integral number
+     * that fits into a 64-bit long.
+     *
+     * <p>This is the counterpart of jackson {@code JsonNode.canConvertToLong()}: it returns
+     * true for {@link Byte}, {@link Short}, {@link Integer} and {@link Long} values, for
+     * {@link BigInteger} values within the long range, and false for everything else,
+     * including decimal values, strings, missing keys and null values.
+     *
+     * @param key the key whose associated value is to be checked
+     * @return true if the value is an integral number convertible to long without overflow
+     * @since 2.0.66
+     */
+    public boolean canConvertToLong(String key) {
+        Object value = get(key);
+        if (value instanceof Integer || value instanceof Short || value instanceof Byte || value instanceof Long) {
+            return true;
+        }
+        if (value instanceof BigInteger) {
+            return ((BigInteger) value).bitLength() < 64;
+        }
+        return false;
+    }
+
+    /**
      * Returns true if this map contains a mapping for the specified key
      *
      * @param key the key whose presence in this map is to be tested
@@ -1915,6 +2009,32 @@ public class JSONObject
     @Override
     public JSONObject clone() {
         return new JSONObject(this);
+    }
+
+    /**
+     * Returns a deep copy of this {@link JSONObject}: nested {@link JSONObject} and
+     * {@link JSONArray} values are copied recursively, so structural changes to the
+     * returned object never affect this instance.
+     *
+     * <p>Values that are not {@link JSONObject} or {@link JSONArray} (strings, numbers,
+     * dates, POJOs and so on) are shared between this object and the copy.
+     *
+     * @return a deep copy of this object
+     * @see #clone()
+     * @since 2.0.66
+     */
+    public JSONObject deepCopy() {
+        JSONObject copy = new JSONObject(this.size(), 1F);
+        for (Map.Entry<String, Object> entry : entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof JSONObject) {
+                value = ((JSONObject) value).deepCopy();
+            } else if (value instanceof JSONArray) {
+                value = ((JSONArray) value).deepCopy();
+            }
+            copy.put(entry.getKey(), value);
+        }
+        return copy;
     }
 
     /**

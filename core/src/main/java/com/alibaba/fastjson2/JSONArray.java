@@ -1599,6 +1599,31 @@ public class JSONArray
     }
 
     /**
+     * Returns a deep copy of this {@link JSONArray}: nested {@link JSONObject} and
+     * {@link JSONArray} elements are copied recursively, so structural changes to the
+     * returned array never affect this instance.
+     *
+     * <p>Elements that are not {@link JSONObject} or {@link JSONArray} (strings, numbers,
+     * dates, POJOs and so on) are shared between this array and the copy.
+     *
+     * @return a deep copy of this array
+     * @see #clone()
+     * @since 2.0.66
+     */
+    public JSONArray deepCopy() {
+        JSONArray copy = new JSONArray(this.size());
+        for (Object value : this) {
+            if (value instanceof JSONObject) {
+                value = ((JSONObject) value).deepCopy();
+            } else if (value instanceof JSONArray) {
+                value = ((JSONArray) value).deepCopy();
+            }
+            copy.add(value);
+        }
+        return copy;
+    }
+
+    /**
      * Pack multiple elements as {@link JSONArray}
      *
      * <pre>
