@@ -125,4 +125,27 @@ public class ErrorOnDuplicateKeysTest {
         JSONObject object = JSON.parseObject(str);
         assertEquals(2, object.getIntValue("item"));
     }
+
+    @Test
+    public void multiValueBranchArraySecond() {
+        // first occurrence scalar, duplicate occurrence array: the multiValue branch must reject
+        String str = "{\"a\":\"x\",\"a\":[\"y\"]}";
+        TypeReference<Map<String, java.util.List<String>>> typeReference =
+                new TypeReference<Map<String, java.util.List<String>>>() {
+                };
+        JSONException error = assertThrows(JSONException.class,
+                () -> JSON.parseObject(str, typeReference, JSONReader.Feature.ErrorOnDuplicateKeys));
+        assertTrue(error.getMessage().contains("duplicate key : a"));
+    }
+
+    @Test
+    public void multiValueBranchScalarSecond() {
+        String str = "{\"a\":[\"x\"],\"a\":\"y\"}";
+        TypeReference<Map<String, java.util.List<String>>> typeReference =
+                new TypeReference<Map<String, java.util.List<String>>>() {
+                };
+        JSONException error = assertThrows(JSONException.class,
+                () -> JSON.parseObject(str, typeReference, JSONReader.Feature.ErrorOnDuplicateKeys));
+        assertTrue(error.getMessage().contains("duplicate key : a"));
+    }
 }

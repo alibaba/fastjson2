@@ -56,6 +56,9 @@ final class ObjectReaderImplMapString
             String name = jsonReader.readFieldName();
 
             if (multiValue && jsonReader.nextIfArrayStart()) {
+                if ((contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0 && object.containsKey(name)) {
+                    throw new JSONException(jsonReader.info("duplicate key : " + name));
+                }
                 List list = new JSONArray();
                 while (!jsonReader.nextIfArrayEnd()) {
                     String value = jsonReader.readString();

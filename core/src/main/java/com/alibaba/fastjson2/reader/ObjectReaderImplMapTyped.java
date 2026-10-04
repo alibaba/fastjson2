@@ -400,6 +400,9 @@ class ObjectReaderImplMapTyped
                 }
             } else {
                 if (multiValue && jsonReader.nextIfArrayStart()) {
+                    if ((contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0 && object.containsKey(name)) {
+                        throw new JSONException(jsonReader.info("duplicate key : " + name));
+                    }
                     List list = new JSONArray();
                     while (!jsonReader.nextIfArrayEnd()) {
                         value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
