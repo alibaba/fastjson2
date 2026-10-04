@@ -75,6 +75,13 @@ public class FieldWriterObject<T>
 
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+        if (format == null
+                && (jsonWriter.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+            // sorted writers must never be stored in initValueClass/initObjectWriter,
+            // otherwise a writer resolved under one sort variant would be reused under the other
+            return jsonWriter.getObjectWriter(valueClass);
+        }
+
         final Class initValueClass = this.initValueClass;
         if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
             return getObjectWriterVoid(jsonWriter, valueClass);

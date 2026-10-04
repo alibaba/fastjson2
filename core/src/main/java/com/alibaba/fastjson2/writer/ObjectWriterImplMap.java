@@ -217,6 +217,7 @@ public final class ObjectWriterImplMap
         long contextFeatures = context.getFeatures();
         boolean writeNulls = (contextFeatures & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) != 0;
         boolean fieldBased = (contextFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
+        boolean sortFieldNames = (contextFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0;
         ObjectWriterProvider provider = context.provider;
 
         Class itemClass = null;
@@ -351,7 +352,7 @@ public final class ObjectWriterImplMap
             }
 
             ObjectWriter valueWriter;
-            if (valueClass == this.valueType && this.valueWriter != null) {
+            if (valueClass == this.valueType && this.valueWriter != null && !sortFieldNames) {
                 valueWriter = this.valueWriter;
             } else if (itemClass == valueClass) {
                 valueWriter = itemWriter;
@@ -365,7 +366,7 @@ public final class ObjectWriterImplMap
                 } else if (valueClass == TypeUtils.CLASS_JSON_ARRAY_1x) {
                     valueWriter = ObjectWriterImplList.INSTANCE;
                 } else {
-                    valueWriter = provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                    valueWriter = provider.getObjectWriter(valueClass, valueClass, fieldBased, sortFieldNames);
                 }
 
                 if (itemWriter == null) {
@@ -373,7 +374,7 @@ public final class ObjectWriterImplMap
                     itemClass = valueClass;
                 }
 
-                if (valueClass == this.valueType) {
+                if (valueClass == this.valueType && !sortFieldNames) {
                     this.valueWriter = valueWriter;
                 }
             }
@@ -491,6 +492,7 @@ public final class ObjectWriterImplMap
         }
 
         ObjectWriterProvider provider = jsonWriter.context.provider;
+        boolean sortFieldNames = (jsonWriter.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0;
         for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             final Object value = entry.getValue();
             Object key = entry.getKey();
@@ -555,8 +557,13 @@ public final class ObjectWriterImplMap
             boolean isPrimitiveOrEnum;
             ObjectWriter<?> valueWriter;
             if (valueClass == this.valueType) {
-                if (this.valueWriter != null) {
+                if (this.valueWriter != null && !sortFieldNames) {
                     valueWriter = this.valueWriter;
+                } else if (sortFieldNames) {
+                    // sorted variant must not be cached in valueWriter
+                    valueWriter = format != null
+                            ? jsonWriter.getObjectWriter(valueClass, format)
+                            : jsonWriter.getObjectWriter(valueClass);
                 } else {
                     valueWriter = this.valueWriter = format != null
                             ? jsonWriter.getObjectWriter(valueClass, format)

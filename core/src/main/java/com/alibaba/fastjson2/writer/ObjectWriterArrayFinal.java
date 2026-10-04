@@ -33,6 +33,14 @@ final class ObjectWriterArrayFinal
     }
 
     public ObjectWriter getItemObjectWriter(JSONWriter jsonWriter) {
+        if ((jsonWriter.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
+                && itemClass != Float.class
+                && itemClass != Double.class
+                && itemClass != BigDecimal.class) {
+            // bean items must resolve the sorted variant (see FieldWriterObject#getObjectWriter)
+            return jsonWriter.getObjectWriter(itemClass);
+        }
+
         ObjectWriter itemObjectWriter = this.itemObjectWriter;
         if (itemObjectWriter == null) {
             if (itemClass == Float.class) {

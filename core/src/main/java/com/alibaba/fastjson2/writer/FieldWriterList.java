@@ -93,6 +93,16 @@ public class FieldWriterList<T>
             }
             return this.itemObjectWriter = jsonWriter.getObjectWriter(this.contentAs, contentAs);
         }
+
+        if ((jsonWriter.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+            // sorted writers must never be stored in itemObjectWriter,
+            // otherwise a writer resolved under one sort variant would be reused under the other
+            if (itemType == null || itemType == this.itemType) {
+                return jsonWriter.getObjectWriter(this.itemType, itemClass);
+            }
+            return jsonWriter.getObjectWriter(itemType, TypeUtils.getClass(itemType));
+        }
+
         if (itemType == null || itemType == this.itemType) {
             if (itemObjectWriter != null) {
                 return itemObjectWriter;
@@ -114,6 +124,10 @@ public class FieldWriterList<T>
 
     @Override
     public final ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+        if ((jsonWriter.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+            return jsonWriter.getObjectWriter(valueClass);
+        }
+
         ObjectWriter listWriter = this.listWriter;
         if (listWriter != null && fieldClass.isAssignableFrom(valueClass)) {
             return listWriter;

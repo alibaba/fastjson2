@@ -3288,7 +3288,8 @@ public interface JSON {
                 Class<?> valueClass = object.getClass();
 
                 boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
-                ObjectWriter<?> objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                boolean sortFieldNames = (context.features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0;
+                ObjectWriter<?> objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased, sortFieldNames);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.toString();

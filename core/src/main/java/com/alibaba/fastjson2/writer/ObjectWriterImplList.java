@@ -164,6 +164,7 @@ final class ObjectWriterImplList
         }
 
         JSONWriter.Context context = jsonWriter.context;
+        boolean sortFieldNames = (context.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0;
 
         jsonWriter.startArray(size);
         for (int i = 0; i < size; i++) {
@@ -186,7 +187,7 @@ final class ObjectWriterImplList
 
             ObjectWriter itemObjectWriter;
 
-            if (itemClass == this.itemClass && itemClassWriter != null) {
+            if (itemClass == this.itemClass && itemClassWriter != null && !sortFieldNames) {
                 itemObjectWriter = itemClassWriter;
             } else if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
@@ -205,7 +206,7 @@ final class ObjectWriterImplList
 
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
-                if (itemClass == this.itemClass) {
+                if (itemClass == this.itemClass && !sortFieldNames) {
                     this.itemClassWriter = itemObjectWriter;
                 }
             }
@@ -265,6 +266,7 @@ final class ObjectWriterImplList
 
         JSONWriter.Context context = jsonWriter.context;
         ObjectWriterProvider provider = context.provider;
+        boolean sortFieldNames = (context.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0;
 
         int size = list.size();
         if (size == 0) {
@@ -325,7 +327,7 @@ final class ObjectWriterImplList
             boolean refDetect;
             ObjectWriter itemObjectWriter;
 
-            if (itemClass == this.itemClass && itemClassWriter != null) {
+            if (itemClass == this.itemClass && itemClassWriter != null && !sortFieldNames) {
                 itemObjectWriter = itemClassWriter;
                 refDetect = this.itemClassRefDetect && jsonWriter.isRefDetect();
             } else if (itemClass == previousClass) {
@@ -352,7 +354,7 @@ final class ObjectWriterImplList
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
                 previousRefDetect = refDetect;
-                if (itemClass == this.itemClass) {
+                if (itemClass == this.itemClass && !sortFieldNames) {
                     this.itemClassWriter = itemObjectWriter;
                 }
             }

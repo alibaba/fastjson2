@@ -42,6 +42,12 @@ public class FieldWriterObjectFinal<T>
             return super.getObjectWriter(jsonWriter, valueClass);
         }
 
+        if (format == null
+                && (jsonWriter.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+            // sorted writers must not be stored in objectWriter (see FieldWriterObject#getObjectWriter)
+            return jsonWriter.getObjectWriter(valueClass);
+        }
+
         if (objectWriter != null) {
             return objectWriter;
         } else {

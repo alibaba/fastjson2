@@ -394,7 +394,8 @@ public class ObjectWriterCreatorASM
         fieldWriters = new ArrayList<>(fieldWriterMap.values());
 
         handleIgnores(beanInfo, fieldWriters);
-        if (beanInfo.alphabetic) {
+        if (beanInfo.alphabetic
+                || (features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
             try {
                 Collections.sort(fieldWriters);
             } catch (Exception e) {

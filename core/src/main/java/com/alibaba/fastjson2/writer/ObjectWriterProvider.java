@@ -66,6 +66,8 @@ public class ObjectWriterProvider
 
     final ConcurrentMap<Type, ObjectWriter> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectWriter> cacheFieldBased = new ConcurrentHashMap<>();
+    final ConcurrentMap<Type, ObjectWriter> cacheFieldNamesSorted = new ConcurrentHashMap<>();
+    final ConcurrentMap<Type, ObjectWriter> cacheFieldNamesSortedFieldBased = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
     final ObjectWriterCreator creator;
     final List<ObjectWriterModule> modules = new ArrayList<>();
@@ -554,7 +556,23 @@ public class ObjectWriterProvider
      * @return the ObjectWriter for the specified type, class, and format
      */
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, String format, boolean fieldBased) {
-        ObjectWriter objectWriter = getObjectWriter(objectType, objectClass, fieldBased);
+        return getObjectWriter(objectType, objectClass, format, fieldBased, false);
+    }
+
+    /**
+     * Gets an ObjectWriter for the specified type, class, format, field-based option, and sort option.
+     *
+     * @param objectType the type for which to get an ObjectWriter
+     * @param objectClass the class for which to get an ObjectWriter
+     * @param format the format string to use
+     * @param fieldBased whether to use field-based writing
+     * @param fieldNamesSorted whether bean properties are serialized in alphabetical order
+     * @return the ObjectWriter for the specified type, class, and format
+     * @see JSONWriter.Feature#SortFieldNamesAlphabetically
+     * @since 2.0.66
+     */
+    public ObjectWriter getObjectWriter(Type objectType, Class objectClass, String format, boolean fieldBased, boolean fieldNamesSorted) {
+        ObjectWriter objectWriter = getObjectWriter(objectType, objectClass, fieldBased, fieldNamesSorted);
         if (format != null) {
             if (objectType == LocalDateTime.class && objectWriter == ObjectWriterImplLocalDateTime.INSTANCE) {
                 return ObjectWriterImplLocalDateTime.of(format, null);
@@ -574,21 +592,44 @@ public class ObjectWriterProvider
      * @return the ObjectWriter for the specified type and class
      */
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
-        ObjectWriter objectWriter = fieldBased
-                ? cacheFieldBased.get(objectType)
-                : cache.get(objectType);
-        return objectWriter != null
-                ? objectWriter
-                : getObjectWriterInternal(objectType, objectClass, fieldBased);
+        return getObjectWriter(objectType, objectClass, fieldBased, false);
     }
 
-    private ObjectWriter getObjectWriterInternal(Type objectType, Class objectClass, boolean fieldBased) {
+    /**
+     * Gets an ObjectWriter for the specified type, class, field-based option, and sort option.
+     * Writers created with fieldNamesSorted are cached separately from writers created without it,
+     * so a type can be written both sorted and unsorted by different writer contexts.
+     *
+     * @param objectType the type for which to get an ObjectWriter
+     * @param objectClass the class of objects to be serialized
+     * @param fieldBased whether to use field-based writing
+     * @param fieldNamesSorted whether bean properties are serialized in alphabetical order
+     * @return the ObjectWriter for the specified type and class
+     * @see JSONWriter.Feature#SortFieldNamesAlphabetically
+     * @since 2.0.66
+     */
+    public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased, boolean fieldNamesSorted) {
+        ConcurrentMap<Type, ObjectWriter> cache = cacheOf(fieldBased, fieldNamesSorted);
+        ObjectWriter objectWriter = cache.get(objectType);
+        return objectWriter != null
+                ? objectWriter
+                : getObjectWriterInternal(objectType, objectClass, fieldBased, fieldNamesSorted);
+    }
+
+    ConcurrentMap<Type, ObjectWriter> cacheOf(boolean fieldBased, boolean fieldNamesSorted) {
+        if (fieldNamesSorted) {
+            return fieldBased ? cacheFieldNamesSortedFieldBased : cacheFieldNamesSorted;
+        }
+        return fieldBased ? cacheFieldBased : cache;
+    }
+
+    private ObjectWriter getObjectWriterInternal(Type objectType, Class objectClass, boolean fieldBased, boolean fieldNamesSorted) {
         Class superclass = objectClass.getSuperclass();
         if (!objectClass.isEnum()
                 && superclass != null
                 && superclass.isEnum()
         ) {
-            return getObjectWriter(superclass, superclass, fieldBased);
+            return getObjectWriter(superclass, superclass, fieldBased, fieldNamesSorted);
         }
 
         final String className = objectClass.getName();
@@ -620,9 +661,7 @@ public class ObjectWriterProvider
             }
         }
 
-        ObjectWriter objectWriter = fieldBased
-                ? cacheFieldBased.get(objectType)
-                : cache.get(objectType);
+        ObjectWriter objectWriter = cacheOf(fieldBased, fieldNamesSorted).get(objectType);
 
         if (objectWriter != null) {
             return objectWriter;
@@ -643,12 +682,8 @@ public class ObjectWriterProvider
                 objectType = proxyTarget;
             }
             objectClass = proxyTarget;
-            if (fieldBased) {
-                fieldBased = false;
-                objectWriter = cacheFieldBased.get(objectType);
-            } else {
-                objectWriter = cache.get(objectType);
-            }
+            fieldBased = false;
+            objectWriter = cacheOf(false, fieldNamesSorted).get(objectType);
             if (objectWriter != null) {
                 return objectWriter;
             }
@@ -667,9 +702,7 @@ public class ObjectWriterProvider
                 ObjectWriterModule module = modules.get(i);
                 objectWriter = module.getObjectWriter(objectType, objectClass);
                 if (objectWriter != null) {
-                    ObjectWriter previous = fieldBased
-                            ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
-                            : cache.putIfAbsent(objectType, objectWriter);
+                    ObjectWriter previous = cacheOf(fieldBased, fieldNamesSorted).putIfAbsent(objectType, objectWriter);
 
                     if (previous != null) {
                         objectWriter = previous;
@@ -709,9 +742,7 @@ public class ObjectWriterProvider
         }
 
         if (objectWriter != null) {
-            ObjectWriter previous = fieldBased
-                    ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
-                    : cache.putIfAbsent(objectType, objectWriter);
+            ObjectWriter previous = cacheOf(fieldBased, fieldNamesSorted).putIfAbsent(objectType, objectWriter);
             if (previous != null) {
                 objectWriter = previous;
             }
@@ -729,12 +760,11 @@ public class ObjectWriterProvider
             ObjectWriterCreator creator = getCreator();
             objectWriter = creator.createObjectWriter(
                     objectClass,
-                    fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,
+                    (fieldBased ? JSONWriter.Feature.FieldBased.mask : 0)
+                            | (fieldNamesSorted ? JSONWriter.Feature.SortFieldNamesAlphabetically.mask : 0),
                     this
             );
-            ObjectWriter previous = fieldBased
-                    ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
-                    : cache.putIfAbsent(objectType, objectWriter);
+            ObjectWriter previous = cacheOf(fieldBased, fieldNamesSorted).putIfAbsent(objectType, objectWriter);
 
             if (previous != null) {
                 objectWriter = previous;

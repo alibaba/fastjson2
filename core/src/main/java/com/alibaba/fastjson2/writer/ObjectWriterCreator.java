@@ -649,7 +649,8 @@ public class ObjectWriterCreator {
 
         handleIgnores(beanInfo, fieldWriters);
 
-        if (beanInfo.alphabetic) {
+        if (beanInfo.alphabetic
+                || (features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
             Collections.sort(fieldWriters);
         }
 

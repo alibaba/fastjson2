@@ -1661,7 +1661,8 @@ public interface JSONB {
             } else {
                 Class<?> valueClass = object.getClass();
                 boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
-                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                boolean sortFieldNames = (context.features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0;
+                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased, sortFieldNames);
                 objectWriter.writeJSONB(writer, object, null, null, 0);
             }
             return writer.getBytes();
@@ -1688,9 +1689,10 @@ public interface JSONB {
                 writer.path = JSONWriter.Path.ROOT;
 
                 boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
+                boolean sortFieldNames = (context.features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0;
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased, sortFieldNames);
                 if ((context.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
                     objectWriter.writeArrayMappingJSONB(writer, object, null, null, 0);
                 } else {
@@ -1758,8 +1760,9 @@ public interface JSONB {
                 Class<?> valueClass = object.getClass();
 
                 boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
+                boolean sortFieldNames = (context.features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0;
 
-                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased, sortFieldNames);
                 if ((context.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
                     objectWriter.writeArrayMappingJSONB(writer, object, null, null, 0);
                 } else {
@@ -1795,8 +1798,9 @@ public interface JSONB {
                 Class<?> valueClass = object.getClass();
 
                 boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
+                boolean sortFieldNames = (context.features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0;
 
-                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased, sortFieldNames);
                 if ((context.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
                     objectWriter.writeArrayMappingJSONB(writer, object, null, null, 0);
                 } else {
@@ -1827,9 +1831,10 @@ public interface JSONB {
                 writer.path = JSONWriter.Path.ROOT;
 
                 boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
+                boolean sortFieldNames = (context.features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0;
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased, sortFieldNames);
                 if ((context.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
                     objectWriter.writeArrayMappingJSONB(writer, object, null, null, 0);
                 } else {
