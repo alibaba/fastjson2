@@ -57,6 +57,16 @@
         <kotest.version>5.5.5</kotest.version>
         <jmh.version>1.37</jmh.version>
 
+        <!--
+          Explicit stack headroom for surefire forked JVMs.
+          The depth-guard test family (Issue1543_1544, DeepTest, CVE_2020_36518) recursively
+          serializes until the maxLevel guard fires (~2050 frames), which rides the default
+          thread stack budget and flips lanes by environment/JIT timing.
+        -->
+        <test.stack.size>2m</test.stack.size>
+        <!-- JaCoCo prepare-agent writes its -javaagent string into this property on CI -->
+        <jacoco.argLine></jacoco.argLine>
+
         <!-- overridden by submodule that need skip deploy -->
         <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
@@ -721,6 +731,12 @@
                 </dependencies>
             </plugin>
             <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>@{jacoco.argLine} -Xss${test.stack.size}</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
                 <version>0.8.0</version>
@@ -987,6 +1003,7 @@
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>0.8.13</version>
                         <configuration>
+                            <propertyName>jacoco.argLine</propertyName>
                             <excludes>
                                 <exclude>com/alibaba/fastjson2/benchmark</exclude>
                                 <exclude>com/alibaba/example/springtest</exclude>
