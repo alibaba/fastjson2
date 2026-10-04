@@ -49,8 +49,9 @@ public class FieldWriterObjectFinal<T>
                         == JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
             // sorted writers must not be stored in objectWriter (see FieldWriterObject#getObjectWriter);
             // explicitly configured writers (@JSONField(writeUsing)) are always honored instead,
-            // and positional (BeanToArray) output never takes a sorted writer
-            return jsonWriter.getObjectWriter(valueClass);
+            // and resolution merges field features so positional output never sorts
+            return jsonWriter.getContext().getProvider()
+                    .getObjectWriter(valueClass, valueClass, features | jsonWriter.getFeatures());
         }
 
         if (objectWriter != null) {

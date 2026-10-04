@@ -100,11 +100,13 @@ public class FieldWriterList<T>
                         == JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
             // sorted writers must never be stored in itemObjectWriter,
             // otherwise a writer resolved under one sort variant would be reused under the other;
-            // format-aware and positional (BeanToArray) output keep the regular resolution
+            // resolve with merged features so positional (BeanToArray) output never sorts
             if (itemType == null || itemType == this.itemType) {
-                return jsonWriter.getObjectWriter(this.itemType, itemClass);
+                return jsonWriter.getContext().getProvider()
+                        .getObjectWriter(this.itemType, itemClass, this.features | jsonWriter.getFeatures());
             }
-            return jsonWriter.getObjectWriter(itemType, TypeUtils.getClass(itemType));
+            return jsonWriter.getContext().getProvider()
+                    .getObjectWriter(itemType, TypeUtils.getClass(itemType), this.features | jsonWriter.getFeatures());
         }
 
         if (itemType == null || itemType == this.itemType) {
@@ -118,12 +120,12 @@ public class FieldWriterList<T>
                         .getObjectWriter(itemType, format, null);
             }
 
-            return itemObjectWriter = jsonWriter
-                    .getObjectWriter(this.itemType, itemClass);
+            return itemObjectWriter = jsonWriter.getContext().getProvider()
+                    .getObjectWriter(this.itemType, itemClass, this.features | jsonWriter.getFeatures());
         }
 
-        return jsonWriter
-                .getObjectWriter(itemType, TypeUtils.getClass(itemType));
+        return jsonWriter.getContext().getProvider()
+                .getObjectWriter(itemType, TypeUtils.getClass(itemType), this.features | jsonWriter.getFeatures());
     }
 
     @Override

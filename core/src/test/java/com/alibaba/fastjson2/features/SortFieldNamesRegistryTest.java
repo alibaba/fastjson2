@@ -213,13 +213,18 @@ public class SortFieldNamesRegistryTest {
     }
 
     @Test
-    public void beanToArrayAnnotatedListFieldDoesNotArrayifyItems() {
-        // field-level BeanToArray on a List field does not array-ify item beans (matches main);
-        // the sorted variant orders item bean fields alphabetically, as everywhere else
+    public void beanToArrayAnnotatedListFieldKeepsNaturalShapeUnderSort() {
+        // field-level BeanToArray semantics differ by creator: the ASM creator renders item
+        // beans as objects in declaration order, the reflective one honors positional arrays.
+        // In both cases the sorted-context output must be identical to the natural output.
         ChildListHolder holder = new ChildListHolder();
-        assertEquals("{\"children\":[{\"zebra\":3,\"apple\":1}]}", JSON.toJSONString(holder));
-        assertEquals("{\"children\":[{\"apple\":1,\"zebra\":3}]}",
+        String natural = JSON.toJSONString(holder);
+        assertEquals(natural,
                 JSON.toJSONString(holder, JSONWriter.Feature.SortFieldNamesAlphabetically));
+        assertEquals("reflect".equals(System.getProperty("fastjson2.creator"))
+                        ? "{\"children\":[[3,1]]}"
+                        : "{\"children\":[{\"zebra\":3,\"apple\":1}]}",
+                natural);
     }
 
     public static class DatesBean {

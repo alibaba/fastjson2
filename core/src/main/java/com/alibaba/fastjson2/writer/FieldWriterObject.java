@@ -83,8 +83,9 @@ public class FieldWriterObject<T>
             // sorted writers must never be stored in initValueClass/initObjectWriter,
             // otherwise a writer resolved under one sort variant would be reused under the other;
             // explicitly configured writers (@JSONField(writeUsing)) are always honored instead,
-            // and positional (BeanToArray) output never takes a sorted writer
-            return jsonWriter.getObjectWriter(valueClass);
+            // and resolution merges field features so positional output never sorts
+            return jsonWriter.getContext().getProvider()
+                    .getObjectWriter(valueClass, valueClass, this.features | jsonWriter.getFeatures());
         }
 
         final Class initValueClass = this.initValueClass;
