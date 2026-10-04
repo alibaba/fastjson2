@@ -230,4 +230,18 @@ public class SortFieldNamesAlphabeticallyTest {
                 JSON.toJSONString(bean, JSONWriter.Feature.SortFieldNamesAlphabetically));
         assertEquals("{\"entries\":{\"k\":{\"zebra\":3,\"apple\":1}},\"id\":9}", JSON.toJSONString(bean));
     }
+
+    @JSONType(alphabetic = false, serializeFeatures = JSONWriter.Feature.BeanToArray)
+    public static class ArrayForm {
+        public int zulu = 8;
+        public int apple = 6;
+    }
+
+    @Test
+    public void beanToArrayOrderKeptPositional() {
+        // BeanToArray output order is positional; the sort feature must not reorder elements
+        ArrayForm bean = new ArrayForm();
+        assertEquals("[8,6]", JSON.toJSONString(bean));
+        assertEquals("[8,6]", JSON.toJSONString(bean, JSONWriter.Feature.SortFieldNamesAlphabetically));
+    }
 }
