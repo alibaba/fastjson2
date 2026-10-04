@@ -416,6 +416,9 @@ class ObjectReaderImplMapTyped
                 continue;
             }
 
+            if ((contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0 && object.containsKey(name)) {
+                throw new JSONException(jsonReader.info("duplicate key : " + name));
+            }
             Object origin = object.put(name, value);
 
             if (origin != null) {

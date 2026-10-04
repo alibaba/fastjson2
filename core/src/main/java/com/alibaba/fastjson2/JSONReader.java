@@ -3382,6 +3382,9 @@ public abstract class JSONReader
                 continue;
             }
 
+            if ((contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 && map.containsKey(name)) {
+                throw new JSONException(info("duplicate key : " + name));
+            }
             Object origin = map.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -3591,6 +3594,9 @@ public abstract class JSONReader
                 continue;
             }
 
+            if ((contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 && map.containsKey(name)) {
+                throw new JSONException(info("duplicate key : " + name));
+            }
             Object origin = map.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -3662,6 +3668,9 @@ public abstract class JSONReader
                 continue;
             }
 
+            if ((contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 && object.containsKey(name)) {
+                throw new JSONException(info("duplicate key : " + name));
+            }
             Object origin = object.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -3816,6 +3825,11 @@ public abstract class JSONReader
                 continue;
             }
 
+            if ((context.features & Feature.ErrorOnDuplicateKeys.mask) != 0
+                    && (innerMap != null ? innerMap : object).containsKey(name)
+            ) {
+                throw new JSONException(info("duplicate key : " + name));
+            }
             Object origin;
             if (innerMap != null) {
                 origin = innerMap.put(name, val);
@@ -6328,6 +6342,24 @@ public abstract class JSONReader
          * @since 2.0.0
          */
         DuplicateKeyValueAsArray(1 << 16),
+
+        /**
+         * Feature that determines whether to throw an exception when a duplicate key is
+         * encountered while reading a JSON object into an untyped Map or tree.
+         * When enabled, a {@link JSONException} is thrown as soon as the same key occurs
+         * more than once in the same object, including when the first occurrence has a
+         * null value.
+         *
+         * <p>By default, this feature is disabled, meaning that duplicate keys overwrite
+         * previous values unless {@link #DuplicateKeyValueAsArray} is enabled.
+         *
+         * <p>This feature is the counterpart of jackson {@code StreamReadFeature.STRICT_DUPLICATE_DETECTION}
+         * and is intended for strict parsing of protocol and signature payloads.
+         * It takes precedence over {@link #DuplicateKeyValueAsArray} when both are enabled.
+         *
+         * @since 2.0.66
+         */
+        ErrorOnDuplicateKeys(1L << 35L),
 
         /**
          * Feature that determines whether to allow unquoted field names in JSON.

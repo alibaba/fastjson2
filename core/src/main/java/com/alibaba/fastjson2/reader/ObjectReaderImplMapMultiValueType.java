@@ -146,6 +146,11 @@ public class ObjectReaderImplMapMultiValueType
                 continue;
             }
 
+            if ((contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0
+                    && (innerMap != null ? innerMap : object).containsKey(name)
+            ) {
+                throw new JSONException(jsonReader.info("duplicate key : " + name));
+            }
             Object origin;
             if (innerMap != null) {
                 origin = innerMap.put(name, value);
