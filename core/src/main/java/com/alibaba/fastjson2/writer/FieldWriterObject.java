@@ -77,12 +77,14 @@ public class FieldWriterObject<T>
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (!writeUsing
                 && format == null
+                && !BeanUtils.SUPER.equals(fieldName)
                 && ((this.features | jsonWriter.getFeatures()) & (
                         JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
                         == JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
             // sorted writers must never be stored in initValueClass/initObjectWriter,
             // otherwise a writer resolved under one sort variant would be reused under the other;
             // explicitly configured writers (@JSONField(writeUsing)) are always honored instead,
+            // $super$ pseudo-fields always resolve via getObjectWriterVoid's dedicated branch,
             // and resolution merges field features so positional output never sorts
             return jsonWriter.getContext().getProvider()
                     .getObjectWriter(valueClass, valueClass, this.features | jsonWriter.getFeatures());
@@ -186,13 +188,16 @@ public class FieldWriterObject<T>
         }
 
         if (formattedWriter == null) {
-            boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
             formattedWriter = jsonWriter.getObjectWriter(valueClass);
-            if (success) {
-                initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
+            if (((features | jsonWriter.getFeatures()) & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
+                boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
+                if (success) {
+                    initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
+                }
             }
         } else {
-            if (initObjectWriter == null) {
+            if (initObjectWriter == null
+                    && ((features | jsonWriter.getFeatures()) & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
                 boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
                 if (success) {
                     initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
@@ -243,7 +248,9 @@ public class FieldWriterObject<T>
         } else {
             objectWriter = jsonWriter.getObjectWriter(valueClass);
         }
-        initObjectWriterUpdater.compareAndSet(this, null, objectWriter);
+        if (((features | jsonWriter.getFeatures()) & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
+            initObjectWriterUpdater.compareAndSet(this, null, objectWriter);
+        }
         return objectWriter;
     }
 
@@ -258,9 +265,12 @@ public class FieldWriterObject<T>
         Class<?> valueClass = e.getClass();
         ObjectWriter valueWriter;
         if (initValueClass == null) {
-            initValueClass = valueClass;
             valueWriter = jsonWriter.getObjectWriter(valueClass);
-            initObjectWriterUpdater.compareAndSet(this, null, valueWriter);
+            if (((this.features | jsonWriter.getFeatures()) & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
+                // the field write and the CAS are skipped as a pair on the sorted variant
+                initValueClass = valueClass;
+                initObjectWriterUpdater.compareAndSet(this, null, valueWriter);
+            }
         } else {
             if (initValueClass == valueClass) {
                 valueWriter = initObjectWriter;
@@ -493,9 +503,12 @@ public class FieldWriterObject<T>
         Class<?> valueClass = value.getClass();
         ObjectWriter valueWriter;
         if (initValueClass == null) {
-            initValueClass = valueClass;
             valueWriter = jsonWriter.getObjectWriter(valueClass);
-            initObjectWriterUpdater.compareAndSet(this, null, valueWriter);
+            if (((this.features | jsonWriter.getFeatures()) & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
+                // the field write and the CAS are skipped as a pair on the sorted variant
+                initValueClass = valueClass;
+                initObjectWriterUpdater.compareAndSet(this, null, valueWriter);
+            }
         } else {
             if (initValueClass == valueClass) {
                 valueWriter = initObjectWriter;

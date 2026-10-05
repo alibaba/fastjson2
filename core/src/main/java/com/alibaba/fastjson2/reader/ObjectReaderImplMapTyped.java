@@ -299,6 +299,8 @@ class ObjectReaderImplMapTyped
             object = (Map) createInstance(contextFeatures);
         }
 
+        Set<String> seenKeys = (contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0 ? new HashSet<>() : null;
+
         Object name;
         for (; ; index++) {
             if (jsonReader.nextIfObjectEnd() || jsonReader.isEnd()) {
@@ -385,6 +387,11 @@ class ObjectReaderImplMapTyped
                     jsonReader.nextIfMatch(':');
                 }
             }
+            if (seenKeys != null
+                    && !seenKeys.add(name instanceof String ? (String) name : String.valueOf(name))) {
+                throw new JSONException(jsonReader.info("duplicate key : " + name));
+            }
+
             if (valueObjectReader == null) {
                 valueObjectReader = jsonReader.getObjectReader(valueType);
             }
@@ -400,30 +407,22 @@ class ObjectReaderImplMapTyped
                 }
             } else {
                 if (multiValue && jsonReader.nextIfArrayStart()) {
-                    if ((contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0 && object.containsKey(name)) {
-                        throw new JSONException(jsonReader.info("duplicate key : " + name));
-                    }
                     List list = new JSONArray();
                     while (!jsonReader.nextIfArrayEnd()) {
-                        value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
+                        value = valueObjectReader.readObject(jsonReader, valueType, fieldName, contextFeatures);
                         list.add(value);
                     }
                     object.put(name, list);
                     continue;
                 } else {
-                    value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
+                    value = valueObjectReader.readObject(jsonReader, valueType, fieldName, contextFeatures);
                 }
             }
 
-            if (value == null
-                    && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0
-                    && (contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) == 0) {
+            if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
                 continue;
             }
 
-            if ((contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0 && object.containsKey(name)) {
-                throw new JSONException(jsonReader.info("duplicate key : " + name));
-            }
             Object origin = object.put(name, value);
 
             if (origin != null) {

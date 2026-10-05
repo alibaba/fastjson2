@@ -117,6 +117,8 @@ public class ObjectReaderImplMapMultiValueType
             object = (Map) createInstance(contextFeatures);
         }
 
+        Set<String> seenKeys = (contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0 ? new HashSet<>() : null;
+
         String name;
         Type valueType = null;
         for (int i = 0; ; i++) {
@@ -131,6 +133,9 @@ public class ObjectReaderImplMapMultiValueType
                 name = null;
             } else {
                 name = jsonReader.readFieldName();
+                if (seenKeys != null && !seenKeys.add((String) name)) {
+                    throw new JSONException(jsonReader.info("duplicate key : " + name));
+                }
                 valueType = multiValueType.getType(name);
             }
 
@@ -142,17 +147,10 @@ public class ObjectReaderImplMapMultiValueType
                 value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
             }
 
-            if (value == null
-                    && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0
-                    && (contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) == 0) {
+            if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
                 continue;
             }
 
-            if ((contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0
-                    && (innerMap != null ? innerMap : object).containsKey(name)
-            ) {
-                throw new JSONException(jsonReader.info("duplicate key : " + name));
-            }
             Object origin;
             if (innerMap != null) {
                 origin = innerMap.put(name, value);

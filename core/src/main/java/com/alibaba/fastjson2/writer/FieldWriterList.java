@@ -86,66 +86,68 @@ public class FieldWriterList<T>
 
     @Override
     public final ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
+        boolean sortVariant = ((this.features | jsonWriter.getFeatures()) & (
+                JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
+                == JSONWriter.Feature.SortFieldNamesAlphabetically.mask;
+        long resolvedFeatures = this.features | jsonWriter.getFeatures();
+
         if (contentAs != null) {
             ObjectWriter itemObjectWriter = this.itemObjectWriter;
             if (itemObjectWriter != null) {
                 return itemObjectWriter;
             }
+            if (sortVariant) {
+                // never store sorted writers in this cross-context field
+                return jsonWriter.getObjectWriter(this.contentAs, contentAs);
+            }
             return this.itemObjectWriter = jsonWriter.getObjectWriter(this.contentAs, contentAs);
         }
 
-        if (format == null
-                && ((this.features | jsonWriter.getFeatures()) & (
-                        JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
-                        == JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
-            // sorted writers must never be stored in itemObjectWriter,
-            // otherwise a writer resolved under one sort variant would be reused under the other;
-            // resolve with merged features so positional (BeanToArray) output never sorts
-            if (itemType == null || itemType == this.itemType) {
-                return jsonWriter.getContext().getProvider()
-                        .getObjectWriter(this.itemType, itemClass, this.features | jsonWriter.getFeatures());
-            }
-            return jsonWriter.getContext().getProvider()
-                    .getObjectWriter(itemType, TypeUtils.getClass(itemType), this.features | jsonWriter.getFeatures());
-        }
-
         if (itemType == null || itemType == this.itemType) {
+            ObjectWriter itemObjectWriter = this.itemObjectWriter;
             if (itemObjectWriter != null) {
+                // constructor presets (e.g. format-aware Date writers) are sort-invariant
                 return itemObjectWriter;
             }
-
             if (format != null) {
                 return jsonWriter.getContext()
                         .getProvider()
                         .getObjectWriter(itemType, format, null);
             }
-
-            return itemObjectWriter = jsonWriter.getContext().getProvider()
-                    .getObjectWriter(this.itemType, itemClass, this.features | jsonWriter.getFeatures());
+            if (sortVariant) {
+                return jsonWriter.getContext().getProvider()
+                        .getObjectWriter(this.itemType, itemClass, resolvedFeatures);
+            }
+            return this.itemObjectWriter = jsonWriter.getContext().getProvider()
+                    .getObjectWriter(this.itemType, itemClass, resolvedFeatures);
         }
 
         return jsonWriter.getContext().getProvider()
-                .getObjectWriter(itemType, TypeUtils.getClass(itemType), this.features | jsonWriter.getFeatures());
+                .getObjectWriter(itemType, TypeUtils.getClass(itemType), resolvedFeatures);
     }
 
     @Override
     public final ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        if (((this.features | jsonWriter.getFeatures()) & (
-                JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
-                == JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
-            return jsonWriter.getObjectWriter(valueClass);
-        }
-
+        // constructor-built list writers are sort-invariant and always honoured first
         ObjectWriter listWriter = this.listWriter;
         if (listWriter != null && fieldClass.isAssignableFrom(valueClass)) {
             return listWriter;
         }
 
+        long resolvedFeatures = this.features | jsonWriter.getFeatures();
         if (listWriter == null && valueClass == fieldClass) {
-            return this.listWriter = jsonWriter.getObjectWriter(valueClass);
+            ObjectWriter resolved = jsonWriter.getContext().getProvider()
+                    .getObjectWriter(valueClass, valueClass, resolvedFeatures);
+            if ((resolvedFeatures & (
+                    JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
+                    != JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
+                this.listWriter = resolved;
+            }
+            return resolved;
         }
 
-        return jsonWriter.getObjectWriter(valueClass);
+        return jsonWriter.getContext().getProvider()
+                .getObjectWriter(valueClass, valueClass, resolvedFeatures);
     }
 
     @Override

@@ -3354,6 +3354,7 @@ public abstract class JSONReader
         }
 
         long contextFeatures = features | context.getFeatures();
+        Set<String> seenKeys = (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 ? new HashSet<>() : null;
 
         for (int i = 0; ; ++i) {
             if (ch == '/') {
@@ -3369,11 +3370,12 @@ public abstract class JSONReader
             }
 
             String name = readFieldName();
+            if (seenKeys != null && !seenKeys.add(name)) {
+                throw duplicateKeyError(name);
+            }
             Object value = itemReader.readObject(this, itemReader.getObjectClass(), name, features);
 
-            if (value == null
-                    && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0
-                    && (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) == 0) {
+            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
                 continue;
             }
 
@@ -3384,9 +3386,6 @@ public abstract class JSONReader
                 continue;
             }
 
-            if ((contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 && map.containsKey(name)) {
-                throw duplicateKeyError(name);
-            }
             Object origin = map.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -3451,6 +3450,7 @@ public abstract class JSONReader
         }
 
         long contextFeatures = features | context.getFeatures();
+        Set<String> seenKeys = (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 ? new HashSet<>() : null;
 
         for (int i = 0; ; ++i) {
             if (ch == '/') {
@@ -3498,12 +3498,13 @@ public abstract class JSONReader
                 }
             }
 
+            if (seenKeys != null
+                    && !seenKeys.add(name instanceof String ? (String) name : String.valueOf(name))) {
+                throw duplicateKeyError(name);
+            }
+
             if (isReference()) {
                 String reference = readReference();
-                if (map.containsKey(name)
-                        && (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0) {
-                    throw duplicateKeyError(name);
-                }
                 Object value = null;
                 if ("..".equals(reference)) {
                     value = map;
@@ -3546,7 +3547,7 @@ public abstract class JSONReader
                     if (typeRedirect) {
                         value = ObjectReaderImplObject.INSTANCE.readObject(this, null, name, features);
                     } else {
-                        value = readObject();
+                        value = readObject(contextFeatures);
                     }
                     break;
                 case '"':
@@ -3589,9 +3590,7 @@ public abstract class JSONReader
                     throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
             }
 
-            if (value == null
-                    && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0
-                    && (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) == 0) {
+            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
                 continue;
             }
 
@@ -3602,9 +3601,6 @@ public abstract class JSONReader
                 continue;
             }
 
-            if ((contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 && map.containsKey(name)) {
-                throw duplicateKeyError(name);
-            }
             Object origin = map.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -3640,6 +3636,7 @@ public abstract class JSONReader
         ObjectReader valueReader = context.getObjectReader(valueType);
 
         long contextFeatures = features | context.getFeatures();
+        Set<String> seenKeys = (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 ? new HashSet<>() : null;
 
         for (int i = 0; ; ++i) {
             if (ch == '/') {
@@ -3663,11 +3660,14 @@ public abstract class JSONReader
                 nextIfMatch(':');
             }
 
+            if (seenKeys != null
+                    && !seenKeys.add(name instanceof String ? (String) name : String.valueOf(name))) {
+                throw duplicateKeyError(name);
+            }
+
             Object value = valueReader.readObject(this, null, null, 0L);
 
-            if (value == null
-                    && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0
-                    && (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) == 0) {
+            if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
                 continue;
             }
 
@@ -3678,9 +3678,6 @@ public abstract class JSONReader
                 continue;
             }
 
-            if ((contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 && object.containsKey(name)) {
-                throw duplicateKeyError(name);
-            }
             Object origin = object.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & Feature.DuplicateKeyValueAsArray.mask) != 0) {
@@ -3711,6 +3708,10 @@ public abstract class JSONReader
      * @throws JSONException if there is an error parsing the JSON
      */
     public Map<String, Object> readObject() {
+        return readObject(context.features);
+    }
+
+    public Map<String, Object> readObject(long features) {
         nextIfObjectStart();
 
         level++;
@@ -3720,6 +3721,7 @@ public abstract class JSONReader
 
         Map innerMap = null;
         Map object;
+        Set<String> seenKeys = null;
         if (context.objectSupplier == null) {
             if ((context.features & Feature.UseNativeObject.mask) != 0) {
                 object = new HashMap();
@@ -3729,6 +3731,9 @@ public abstract class JSONReader
         } else {
             object = context.objectSupplier.get();
             innerMap = TypeUtils.getInnerMap(object);
+        }
+        if (((features | context.features) & Feature.ErrorOnDuplicateKeys.mask) != 0) {
+            seenKeys = new HashSet<>();
         }
 
         for (int i = 0; ; ++i) {
@@ -3751,7 +3756,7 @@ public abstract class JSONReader
                     readNumber0();
                     name = getNumber();
                 } else if (ch == '{') {
-                    name = readObject();
+                    name = readObject(features);
                 } else if (ch == '[') {
                     name = readArray();
                 } else {
@@ -3764,6 +3769,12 @@ public abstract class JSONReader
                 String typeName = readString();
                 throw new JSONException("autoType not support : " + typeName);
             }
+
+            if (seenKeys != null
+                    && !seenKeys.add(name instanceof String ? (String) name : String.valueOf(name))) {
+                throw duplicateKeyError(name);
+            }
+
             Object val;
             switch (ch) {
                 case '-':
@@ -3786,14 +3797,10 @@ public abstract class JSONReader
                     break;
                 case '{':
                     if (isReference()) {
-                        if ((innerMap != null ? innerMap : object).containsKey(name)
-                                && (context.features & Feature.ErrorOnDuplicateKeys.mask) != 0) {
-                            throw duplicateKeyError(name);
-                        }
                         addResolveTask(object, name, JSONPath.of(readReference()));
                         val = null;
                     } else {
-                        val = readObject();
+                        val = readObject(features);
                     }
                     break;
                 case '"':
@@ -3828,9 +3835,7 @@ public abstract class JSONReader
                     throw new JSONException(info("illegal input " + ch));
             }
 
-            if (val == null
-                    && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0
-                    && (context.features & Feature.ErrorOnDuplicateKeys.mask) == 0) {
+            if (val == null && (context.features & Feature.IgnoreNullPropertyValue.mask) != 0) {
                 continue;
             }
 
@@ -3841,11 +3846,6 @@ public abstract class JSONReader
                 continue;
             }
 
-            if ((context.features & Feature.ErrorOnDuplicateKeys.mask) != 0
-                    && (innerMap != null ? innerMap : object).containsKey(name)
-            ) {
-                throw duplicateKeyError(name);
-            }
             Object origin;
             if (innerMap != null) {
                 origin = innerMap.put(name, val);

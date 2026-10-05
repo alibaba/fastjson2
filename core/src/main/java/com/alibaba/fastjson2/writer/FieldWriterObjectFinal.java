@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.BeanUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -44,11 +45,13 @@ public class FieldWriterObjectFinal<T>
 
         if (!writeUsing
                 && format == null
+                && !BeanUtils.SUPER.equals(fieldName)
                 && ((features | jsonWriter.getFeatures()) & (
                         JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
                         == JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
             // sorted writers must not be stored in objectWriter (see FieldWriterObject#getObjectWriter);
             // explicitly configured writers (@JSONField(writeUsing)) are always honored instead,
+            // $super$ pseudo-fields always resolve via the parent's dedicated branch,
             // and resolution merges field features so positional output never sorts
             return jsonWriter.getContext().getProvider()
                     .getObjectWriter(valueClass, valueClass, features | jsonWriter.getFeatures());

@@ -80,7 +80,10 @@ final class ObjectWriterImplList
             if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
             } else {
-                itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                // resolve items with the merged effective features so positional output
+                // never takes a sorted writer
+                itemObjectWriter = jsonWriter.getContext().getProvider()
+                        .getObjectWriter(itemClass, itemClass, this.features | features | jsonWriter.getFeatures());
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
             }
