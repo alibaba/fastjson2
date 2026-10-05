@@ -49,11 +49,14 @@ jobs:
       - name: Build with Maven
         # Retry once on failure: a stalled dependency download now fails fast
         # (see .mvn/maven.config) and the retry resumes from the partially
-        # populated ~/.m2, usually landing on a healthy CDN edge.
+        # populated ~/.m2. MVNW_REPOURL lets the Maven wrapper itself fall back
+        # to the GCS Maven Central mirror when repo.maven.apache.org is
+        # unreachable from the runner (observed on windows-latest).
         run: |
           ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package || {
-            echo "::warning::Maven build failed; retrying once to recover from transient download failures"
-            ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
+            echo "::warning::Maven build failed; retrying once with the GCS Maven Central mirror as fallback"
+            sleep 10
+            MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2 ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
           }
 
   test-reflect:
@@ -85,8 +88,9 @@ jobs:
         # Same transient-download retry as the test job.
         run: |
           ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package || {
-            echo "::warning::Maven build failed; retrying once to recover from transient download failures"
-            ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package
+            echo "::warning::Maven build failed; retrying once with the GCS Maven Central mirror as fallback"
+            sleep 10
+            MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2 ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package
           }
         shell: bash
 
@@ -111,8 +115,9 @@ jobs:
         # Same transient-download retry as the test jobs.
         run: |
           ./mvnw -V --no-transfer-progress clean package || {
-            echo "::warning::Maven build failed; retrying once to recover from transient download failures"
-            ./mvnw -V --no-transfer-progress clean package
+            echo "::warning::Maven build failed; retrying once with the GCS Maven Central mirror as fallback"
+            sleep 10
+            MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2 ./mvnw -V --no-transfer-progress clean package
           }
         env:
           CI: true  # Explicitly set CI to ensure JaCoCo profile is activated
