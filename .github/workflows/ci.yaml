@@ -47,7 +47,17 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
+        # Retry once on failure: a stalled dependency download now fails fast
+        # (see .mvn/maven.config) and the retry resumes from the partially
+        # populated ~/.m2. MVNW_REPOURL lets the Maven wrapper itself fall back
+        # to the GCS Maven Central mirror when repo.maven.apache.org is
+        # unreachable from the runner (observed on windows-latest).
+        run: |
+          ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package || {
+            echo "::warning::Maven build failed; retrying once with the GCS Maven Central mirror as fallback"
+            sleep 10
+            MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2 ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
+          }
 
   test-reflect:
     timeout-minutes: 20
@@ -75,7 +85,13 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package
+        # Same transient-download retry as the test job.
+        run: |
+          ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package || {
+            echo "::warning::Maven build failed; retrying once with the GCS Maven Central mirror as fallback"
+            sleep 10
+            MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2 ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package
+          }
         shell: bash
 
   coverage:
@@ -96,12 +112,22 @@ jobs:
           cache: maven
 
       - name: Build with Maven and generate coverage
-        run: ./mvnw -V --no-transfer-progress clean package
+        # Same transient-download retry as the test jobs.
+        run: |
+          ./mvnw -V --no-transfer-progress clean package || {
+            echo "::warning::Maven build failed; retrying once with the GCS Maven Central mirror as fallback"
+            sleep 10
+            MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2 ./mvnw -V --no-transfer-progress clean package
+          }
         env:
           CI: true  # Explicitly set CI to ensure JaCoCo profile is activated
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        # v5 runs natively on the Node.js 24 runtime; v4 targets Node 20, which
+        # runners now force onto Node 24, where the upload intermittently dies
+        # with EPROTO SSL handshake errors that fail the step despite
+        # fail_ci_if_error: false.
+        uses: codecov/codecov-action@v5
         with:
           name: codecov-umbrella
           token: ${{ secrets.CODECOV_TOKEN }}
