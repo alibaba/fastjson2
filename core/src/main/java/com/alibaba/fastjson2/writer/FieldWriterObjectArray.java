@@ -43,7 +43,12 @@ final class FieldWriterObjectArray<T>
     @Override
     public ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
         if (itemType == null || itemType == this.itemType) {
-            if (itemObjectWriter != null) {
+            // the natural and sorted variants of a registered writer share this field writer, so the cache
+            // only serves and stores lookups outside the sorted variant
+            boolean sortVariant = ((this.features | jsonWriter.getFeatures()) & (SortFieldNamesAlphabetically.mask | BeanToArray.mask))
+                    == SortFieldNamesAlphabetically.mask;
+            ObjectWriter itemObjectWriter = this.itemObjectWriter;
+            if (itemObjectWriter != null && !sortVariant) {
                 return itemObjectWriter;
             }
 
@@ -84,11 +89,25 @@ final class FieldWriterObjectArray<T>
                     return ObjectWriterImplBigDecimal.INSTANCE;
                 }
             }
-            return itemObjectWriter = jsonWriter
-                    .getObjectWriter(this.itemType, itemClass);
+            itemObjectWriter = resolveItemWriter(jsonWriter, this.itemType, itemClass);
+            if (!sortVariant) {
+                this.itemObjectWriter = itemObjectWriter;
+            }
+            return itemObjectWriter;
         }
-        return jsonWriter
-                .getObjectWriter(itemType, TypeUtils.getClass(itemType));
+        return resolveItemWriter(jsonWriter, itemType, TypeUtils.getClass(itemType));
+    }
+
+    /**
+     * A field-level BeanToArray is passed to the provider so positional items never take the sorted variant;
+     * without it this is {@link JSONWriter#getObjectWriter(Type, Class)}.
+     */
+    private ObjectWriter resolveItemWriter(JSONWriter jsonWriter, Type itemType, Class itemClass) {
+        if ((features & BeanToArray.mask) == 0) {
+            return jsonWriter.getObjectWriter(itemType, itemClass);
+        }
+        return jsonWriter.getContext().getProvider()
+                .getObjectWriter(itemType, itemClass, jsonWriter.getFeatures() | BeanToArray.mask);
     }
 
     @Override

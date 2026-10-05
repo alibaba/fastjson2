@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
@@ -497,5 +498,61 @@ public class SortFieldNamesRegistryTest {
         assertEquals("{\"name\":\"alice\",\"password\":\"***\"}", JSON.toJSONString(new FilteredRegistered(), sorted));
         writer.setFilter(drop);
         assertEquals("{\"name\":\"alice\"}", JSON.toJSONString(new FilteredRegistered(), sorted));
+    }
+
+    @JSONType(alphabetic = false)
+    public static class SharedArrayHolder {
+        public int zulu = 9;
+        public SharedChild[] items = {new SharedChild()};
+    }
+
+    public static class AlphabeticArrayHolder {
+        public int apple;
+        public SharedChild[] items = {new SharedChild()};
+    }
+
+    @Test
+    public void registeredVariantsIsolateArrayItemCaches() {
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.register(SharedArrayHolder.class, ObjectWriterCreator.INSTANCE.createObjectWriter(SharedArrayHolder.class));
+        JSONWriter.Context natural = new JSONWriter.Context(provider);
+        JSONWriter.Context sorted = new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
+        String naturalExpected = "{\"zulu\":9,\"items\":[{\"zebra\":3,\"apple\":1}]}";
+        String sortedExpected = "{\"items\":[{\"apple\":1,\"zebra\":3}],\"zulu\":9}";
+        assertEquals(sortedExpected, JSON.toJSONString(new SharedArrayHolder(), sorted));
+        assertEquals(naturalExpected, JSON.toJSONString(new SharedArrayHolder(), natural));
+        assertEquals(sortedExpected, JSON.toJSONString(new SharedArrayHolder(), sorted));
+        assertEquals(naturalExpected, JSON.toJSONString(new SharedArrayHolder(), natural));
+
+        // already alphabetical: both cells hold the registered writer itself; a sorted write must not change
+        // what a later write without the feature produces
+        ObjectWriterProvider provider2 = new ObjectWriterProvider();
+        provider2.register(AlphabeticArrayHolder.class, ObjectWriterCreator.INSTANCE.createObjectWriter(AlphabeticArrayHolder.class));
+        assertEquals("{\"apple\":0,\"items\":[{\"apple\":1,\"zebra\":3}]}", JSON.toJSONString(new AlphabeticArrayHolder(),
+                new JSONWriter.Context(provider2, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+        assertEquals("{\"apple\":0,\"items\":[{\"zebra\":3,\"apple\":1}]}", JSON.toJSONString(new AlphabeticArrayHolder(),
+                new JSONWriter.Context(provider2)));
+    }
+
+    public static class ChildArrayHolder {
+        @JSONField(serializeFeatures = JSONWriter.Feature.BeanToArray)
+        public Child[] children = {new Child()};
+    }
+
+    @Test
+    public void beanToArrayAnnotatedArrayFieldKeepsPositionalOrder() {
+        // reflective creator: the ASM creator writes array items as objects for this annotation; a context
+        // creator left on the thread by another test would override the provider's creator
+        ObjectWriterCreator contextCreator = JSONFactory.getContextWriterCreator();
+        JSONFactory.setContextWriterCreator(null);
+        try {
+            ObjectWriterProvider provider = new ObjectWriterProvider(ObjectWriterCreator.INSTANCE);
+            JSONWriter.Context sorted = new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
+            assertEquals("{\"children\":[[3,1]]}", JSON.toJSONString(new ChildArrayHolder(), sorted));
+            assertEquals("{\"children\":[[3,1]]}", JSON.toJSONString(new ChildArrayHolder(), new JSONWriter.Context(provider)));
+            assertEquals("{\"children\":[[3,1]]}", JSON.toJSONString(new ChildArrayHolder(), sorted));
+        } finally {
+            JSONFactory.setContextWriterCreator(contextCreator);
+        }
     }
 }

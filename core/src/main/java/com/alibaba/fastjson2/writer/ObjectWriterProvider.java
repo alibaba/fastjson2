@@ -833,6 +833,9 @@ public class ObjectWriterProvider
             if (previous != null) {
                 objectWriter = previous;
             }
+            // reconcile: the counterpart variant may have been published after the pre-publication
+            // lookup, so two writers created concurrently are linked by at least the later attempt
+            linkSortedVariant(objectType, fieldBased, fieldNamesSorted, objectWriter);
         }
         return objectWriter;
     }
@@ -840,6 +843,7 @@ public class ObjectWriterProvider
     /**
      * Links a newly created bean writer with the other field-order variant of the same type, so a filter set on
      * the natural writer (for example by {@code JSON.register(Class, Filter)}) also applies to the sorted one.
+     * Idempotent: the reconciling second call in the create path adds nothing twice.
      */
     private void linkSortedVariant(Type objectType, boolean fieldBased, boolean fieldNamesSorted, ObjectWriter objectWriter) {
         ObjectWriter other = cacheOf(fieldBased, !fieldNamesSorted).get(objectType);

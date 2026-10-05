@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
@@ -27,13 +28,20 @@ public class ObjectWriterAdapter<T>
 
     /**
      * Variants linked to this writer (for example the serving of {@link JSONWriter.Feature#SortFieldNamesAlphabetically}
-     * for the same type): filters set on this writer are applied to all of them. The array is append-only
-     * and replaced under a lock, so reads never see a variant before its filters were copied.
+     * for the same type): filters set on this writer are applied to all of them. Held weakly, so replaced or
+     * unregistered variants leave neither retention nor traversal cost behind; cleared entries are compacted
+     * away on the next link. The array is replaced under a lock, so reads never see a variant before its
+     * filters were copied.
      */
-    volatile ObjectWriterAdapter[] linkedVariants = EMPTY_VARIANTS;
+    volatile WeakReference<ObjectWriterAdapter>[] linkedVariants = EMPTY_VARIANTS;
 
-    static final ObjectWriterAdapter[] EMPTY_VARIANTS = new ObjectWriterAdapter[0];
+    @SuppressWarnings("unchecked")
+    static final WeakReference<ObjectWriterAdapter>[] EMPTY_VARIANTS = new WeakReference[0];
 
+    /**
+     * Guards the linked-variants array and the filter updates forwarded to it: filter copying and
+     * joining the list are atomic with respect to setters on this writer.
+     */
     private final Object linkedVariantsLock = new Object();
 
     /**
@@ -156,75 +164,108 @@ public class ObjectWriterAdapter<T>
     }
 
     public void setPropertyFilter(PropertyFilter propertyFilter) {
-        this.propertyFilter = propertyFilter;
-        if (propertyFilter != null) {
-            hasFilter = true;
-        }
-        for (ObjectWriterAdapter variant : this.linkedVariants) {
-            variant.setPropertyFilter(propertyFilter);
+        synchronized (linkedVariantsLock) {
+            this.propertyFilter = propertyFilter;
+            if (propertyFilter != null) {
+                hasFilter = true;
+            }
+            for (WeakReference<ObjectWriterAdapter> linked : this.linkedVariants) {
+                ObjectWriterAdapter variant = linked.get();
+                if (variant != null) {
+                    variant.setPropertyFilter(propertyFilter);
+                }
+            }
         }
     }
 
     public void setValueFilter(ValueFilter valueFilter) {
-        this.valueFilter = valueFilter;
-        if (valueFilter != null) {
-            hasFilter = true;
-        }
-        for (ObjectWriterAdapter variant : this.linkedVariants) {
-            variant.setValueFilter(valueFilter);
+        synchronized (linkedVariantsLock) {
+            this.valueFilter = valueFilter;
+            if (valueFilter != null) {
+                hasFilter = true;
+            }
+            for (WeakReference<ObjectWriterAdapter> linked : this.linkedVariants) {
+                ObjectWriterAdapter variant = linked.get();
+                if (variant != null) {
+                    variant.setValueFilter(valueFilter);
+                }
+            }
         }
     }
 
     public void setNameFilter(NameFilter nameFilter) {
-        this.nameFilter = nameFilter;
-        if (nameFilter != null) {
-            hasFilter = true;
-        }
-        for (ObjectWriterAdapter variant : this.linkedVariants) {
-            variant.setNameFilter(nameFilter);
+        synchronized (linkedVariantsLock) {
+            this.nameFilter = nameFilter;
+            if (nameFilter != null) {
+                hasFilter = true;
+            }
+            for (WeakReference<ObjectWriterAdapter> linked : this.linkedVariants) {
+                ObjectWriterAdapter variant = linked.get();
+                if (variant != null) {
+                    variant.setNameFilter(nameFilter);
+                }
+            }
         }
     }
 
     public void setPropertyPreFilter(PropertyPreFilter propertyPreFilter) {
-        this.propertyPreFilter = propertyPreFilter;
-        if (propertyPreFilter != null) {
-            hasFilter = true;
-        }
-        for (ObjectWriterAdapter variant : this.linkedVariants) {
-            variant.setPropertyPreFilter(propertyPreFilter);
+        synchronized (linkedVariantsLock) {
+            this.propertyPreFilter = propertyPreFilter;
+            if (propertyPreFilter != null) {
+                hasFilter = true;
+            }
+            for (WeakReference<ObjectWriterAdapter> linked : this.linkedVariants) {
+                ObjectWriterAdapter variant = linked.get();
+                if (variant != null) {
+                    variant.setPropertyPreFilter(propertyPreFilter);
+                }
+            }
         }
     }
 
     /**
      * Links {@code variant} to this writer: the filters set on this writer so far are copied to it,
-     * and later ones follow. Every linked variant stays connected, so registering this writer for
-     * another variant does not detach an earlier one. Linking is idempotent.
+     * and later ones follow. Copying and joining the list hold the same lock as the setters, so a
+     * concurrent filter update cannot slip between them. Every linked variant stays connected until it
+     * leaves the provider caches, and linking is idempotent.
      */
     void linkSortedVariant(ObjectWriterAdapter variant) {
         if (variant == this) {
             return;
         }
-        if (propertyPreFilter != null) {
-            variant.setPropertyPreFilter(propertyPreFilter);
-        }
-        if (propertyFilter != null) {
-            variant.setPropertyFilter(propertyFilter);
-        }
-        if (nameFilter != null) {
-            variant.setNameFilter(nameFilter);
-        }
-        if (valueFilter != null) {
-            variant.setValueFilter(valueFilter);
-        }
         synchronized (linkedVariantsLock) {
-            for (ObjectWriterAdapter linked : this.linkedVariants) {
-                if (linked == variant) {
+            if (propertyPreFilter != null) {
+                variant.setPropertyPreFilter(propertyPreFilter);
+            }
+            if (propertyFilter != null) {
+                variant.setPropertyFilter(propertyFilter);
+            }
+            if (nameFilter != null) {
+                variant.setNameFilter(nameFilter);
+            }
+            if (valueFilter != null) {
+                variant.setValueFilter(valueFilter);
+            }
+
+            WeakReference<ObjectWriterAdapter>[] current = this.linkedVariants;
+            int live = 0;
+            for (WeakReference<ObjectWriterAdapter> linked : current) {
+                ObjectWriterAdapter resolved = linked.get();
+                if (resolved == variant) {
                     return;
                 }
+                if (resolved != null) {
+                    live++;
+                }
             }
-            ObjectWriterAdapter[] current = this.linkedVariants;
-            ObjectWriterAdapter[] next = Arrays.copyOf(current, current.length + 1);
-            next[current.length] = variant;
+            WeakReference<ObjectWriterAdapter>[] next = new WeakReference[live + 1];
+            int i = 0;
+            for (WeakReference<ObjectWriterAdapter> linked : current) {
+                if (linked.get() != null) {
+                    next[i++] = linked;
+                }
+            }
+            next[live] = new WeakReference<>(variant);
             this.linkedVariants = next;
         }
     }
