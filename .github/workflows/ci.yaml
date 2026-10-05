@@ -2,15 +2,25 @@ name: CI
 
 on:
   push:
-    # Restricted to long-lived branches that may receive direct pushes; every
-    # other branch reaches CI through the pull_request trigger below. Triggering
-    # on all pushes made a branch with an open PR run the whole matrix twice for
-    # the same commit (verified on sha 2e6afd5d44, which produced both a push
-    # run and a pull_request run), doubling demand on the runner pool.
+    # Restricted to the refs that take direct pushes without an open pull
+    # request; every other branch reaches CI through the pull_request trigger
+    # below. Triggering on all pushes made a branch with an open PR run the
+    # whole matrix twice for the same commit (verified on sha 2e6afd5d44, which
+    # produced both a push run and a pull_request run), doubling demand on the
+    # runner pool.
+    #
+    # `tags` must be listed explicitly: declaring only `branches` excludes tag
+    # pushes altogether, and a release tag is the last full-matrix gate before
+    # publishing to Maven Central. Tag pushes do run this workflow today -- e.g.
+    # run 30743811143 (head_branch=2.0.64), plus 2.0.62 through
+    # 2.0.64.android8. '2.*' covers those and future 2.x releases while
+    # excluding the legacy 0.x/1.x tags and the fastcode_*/bak_* scratch tags.
     branches:
       - main
       - 'release/**'
-      - 'v2.1.x*'
+      - v2.1.x
+    tags:
+      - '2.*'
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-excluding-paths
     paths-ignore:
       - 'docs/**'
@@ -27,9 +37,18 @@ on:
 # every new commit on a PR branch queued a fresh full matrix while the previous
 # one still held runners, so stale commits kept saturating the pool.
 concurrency:
-  group: ci-${{ github.ref }}
-  # Only supersede in-flight PR runs. A push to main or a release branch is the
-  # record of what was merged, so let it finish even if another push follows.
+  # Prefixed because concurrency group names are repository-scoped, not
+  # workflow-scoped -- a bare `ci-...` could collide with another workflow here.
+  #
+  # PRs group by ref so that pushing a new commit supersedes the in-flight run
+  # for that PR. Pushes group by sha, which is unique per commit, so they never
+  # share a group: every main/release/tag push still gets its own run, exactly
+  # as before this block existed. Grouping pushes by ref instead would let
+  # GitHub's default `queue: single` silently drop intermediate commits when
+  # several merges land in quick succession -- and `queue: max`, the documented
+  # remedy, is rejected in combination with cancel-in-progress, so one block
+  # cannot express "cancel superseded PR runs, queue every main run".
+  group: fastjson2-ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -41,12 +60,14 @@ env:
 
 jobs:
   test:
-    # Two test passes over one build. Worst case is the retry path: a failed
-    # pass 1 (~9 min on windows) plus its retry (~9 min) plus the reflect pass
-    # (~5 min) and setup, which lands near 24 min. The resolver timeouts in
-    # .mvn/maven.config already bound silent download hangs, so the extra
-    # headroom only costs anything on a genuinely stuck lane.
-    timeout-minutes: 30
+    # Two test passes over one build, so the budget has to cover the retry path.
+    # Sized against the measured tail, not the mean: job 111846711588 spent
+    # 19m51s in "Build with Maven" -- pass 1 alone -- before the old 20-minute
+    # cap cancelled it, on a lane whose healthy duration is about 5 minutes. A
+    # degraded pass 1 plus its retry plus the reflect pass goes past 30. The
+    # resolver timeouts in .mvn/maven.config bound silent download stalls, but
+    # not this kind of overall inflation.
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       max-parallel: 16
@@ -71,9 +92,9 @@ jobs:
           java-version: ${{ matrix.java }}
           cache: maven
 
-      - name: Build with Maven and test (default + reflect creator)
+      - name: Build with Maven and test (default creator)
         # This job absorbed the former test-reflect job, which repeated the
-        # entire 17-module build and differed only by -Dfastjson2.creator=reflect
+        # entire reactor build and differed only by -Dfastjson2.creator=reflect
         # at test time. Running the suite twice over one build halves the lane
         # count (28 -> 14), which is what relieves the runner queue.
         #
@@ -87,37 +108,38 @@ jobs:
         # test-reflect lanes -- which did declare bash -- were the ones that
         # actually depended on the fallback.
         shell: bash
+        # Retry once on failure: a stalled dependency download now fails fast
+        # (see .mvn/maven.config) and the retry resumes from the partially
+        # populated ~/.m2. MVNW_REPOURL lets the Maven wrapper itself fall back
+        # to the GCS Maven Central mirror when repo.maven.apache.org is
+        # unreachable from the runner (observed on windows-latest).
         run: |
-          # Retry once on failure: a stalled dependency download now fails fast
-          # (see .mvn/maven.config) and the retry resumes from the partially
-          # populated ~/.m2. MVNW_REPOURL lets the Maven wrapper itself fall back
-          # to the GCS Maven Central mirror when repo.maven.apache.org is
-          # unreachable from the runner (observed on windows-latest).
-          mvnw_with_retry() {
-            ./mvnw -V --no-transfer-progress "$@" || {
-              echo "::warning::Maven build failed; retrying once with the GCS Maven Central mirror as fallback"
-              sleep 10
-              MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2 ./mvnw -V --no-transfer-progress "$@"
-            }
+          ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package || {
+            echo "::warning::Maven build failed; retrying once with the GCS Maven Central mirror as fallback"
+            sleep 10
+            MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2 ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
           }
 
-          mvnw_with_retry -Pgen-javadoc -Pgen-dokka clean package
-
-          # Second pass re-runs the suite in reflect mode without `clean`, so it
-          # reuses the compiled classes: ~38s of lifecycle overhead across the
-          # 17-module reactor plus the tests themselves.
-          #
-          # This must be the `test` phase, not a bare `surefire:test` goal. A
-          # bare goal never runs `package` for the sibling modules, so Maven's
-          # ReactorReader has no artifact to serve for them and resolution dies
-          # with "Could not find artifact
-          # com.alibaba.fastjson2:fastjson2:jar:2.0.66-SNAPSHOT" even though the
-          # jar is sitting in core/target/ from the first pass.
-          #
-          # No retry here: the first pass already resolved every dependency, so
-          # a failure is a real test failure and re-running would only delay
-          # reporting it.
-          ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect test
+      - name: Test again with -Dfastjson2.creator=reflect
+        # Kept as its own step so a red lane still says which suite failed --
+        # the job name no longer carries "Reflect" -- and so each pass's
+        # duration stays visible in the job summary.
+        #
+        # No `clean`: this reuses the classes the previous step compiled. It has
+        # to be the `test` phase, not a bare `surefire:test` goal. A bare goal
+        # never runs `package` for the sibling modules, so Maven's ReactorReader
+        # has no artifact to serve for them and resolution dies with "Could not
+        # find artifact com.alibaba.fastjson2:fastjson2:jar:...-SNAPSHOT" even
+        # though the jar is sitting in core/target/ from the previous step.
+        #
+        # No retry, which is a deliberate change: the former test-reflect job
+        # retried its whole `clean package` on any failure, flaky tests
+        # included. This pass downloads nothing new -- the previous step already
+        # resolved every dependency, and dropping -Pgen-javadoc/-Pgen-dokka only
+        # removes plugins -- so a failure here is a test failure, and re-running
+        # would just delay reporting it.
+        shell: bash
+        run: ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect test
 
   coverage:
     timeout-minutes: 20
