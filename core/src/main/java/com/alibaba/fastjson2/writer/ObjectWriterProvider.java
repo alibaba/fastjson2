@@ -264,6 +264,14 @@ public class ObjectWriterProvider
             return cache.remove(type);
         }
 
+        if (objectWriter instanceof ObjectWriterAdapter) {
+            // adapter field order is baked at creation time, so a created bean writer only
+            // matches the variant it was created for; registering it under the natural cell
+            // must not suppress creation of the sorted variant
+            sortedCache.remove(type);
+            return cache.put(type, objectWriter);
+        }
+
         sortedCache.put(type, objectWriter);
         return cache.put(type, objectWriter);
     }
@@ -292,7 +300,12 @@ public class ObjectWriterProvider
         ConcurrentMap<Type, ObjectWriter> cache = fieldBased ? this.cacheFieldBased : this.cache;
         ObjectWriter previous = cache.putIfAbsent(type, objectWriter);
         if (previous == null) {
-            cacheOf(fieldBased, true).put(type, objectWriter);
+            if (objectWriter instanceof ObjectWriterAdapter) {
+                // see register(): created bean writers only match the variant they were created for
+                cacheOf(fieldBased, true).remove(type);
+            } else {
+                cacheOf(fieldBased, true).put(type, objectWriter);
+            }
         }
         return previous;
     }

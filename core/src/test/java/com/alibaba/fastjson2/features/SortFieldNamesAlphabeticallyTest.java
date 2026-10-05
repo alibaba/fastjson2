@@ -109,6 +109,16 @@ public class SortFieldNamesAlphabeticallyTest {
     }
 
     @Test
+    public void pojoTreeConversionSortsNestedWriters() {
+        // JSONObject.from must forward the feature word so nested writers sort too
+        Outer outer = new Outer();
+        com.alibaba.fastjson2.JSONObject tree = com.alibaba.fastjson2.JSONObject.from(outer,
+                JSONWriter.Feature.SortFieldNamesAlphabetically);
+        assertEquals("{\"inner\":{\"apple\":1,\"zebra\":3},\"items\":[{\"apple\":1,\"zebra\":3}],\"zulu\":9}",
+                tree.toString());
+    }
+
+    @Test
     public void customProviderWithAlphabeticOff() {
         ObjectWriterProvider provider = new ObjectWriterProvider();
         provider.setAlphabetic(false);
@@ -244,5 +254,41 @@ public class SortFieldNamesAlphabeticallyTest {
         ArrayForm bean = new ArrayForm();
         assertEquals("[8,6]", JSON.toJSONString(bean));
         assertEquals("[8,6]", JSON.toJSONString(bean, JSONWriter.Feature.SortFieldNamesAlphabetically));
+    }
+
+    @JSONType(alphabetic = false)
+    public static class Item {
+        public int zebra = 3;
+        public int apple = 1;
+    }
+
+    public static class Container {
+        @JSONField(contentAs = Item.class)
+        public List<Object> items = new ArrayList<>();
+    }
+
+    @Test
+    public void contentAsItemWriterNeverSharedAcrossVariants() {
+        // a writer installed via register() must serve both variants without the
+        // contentAs-hoisted item writer leaking sorted output into the natural variant
+        ObjectWriterProvider provider = JSONFactory.getDefaultObjectWriterProvider();
+        provider.registerIfAbsent(Item.class,
+                new ObjectWriterCreator().createObjectWriter(Item.class, 0L, provider));
+
+        String naturalExpected = "{\"items\":[{\"zebra\":3,\"apple\":1}]}";
+        String sortedExpected = "{\"items\":[{\"apple\":1,\"zebra\":3}]}";
+
+        // first order: natural first, then sorted, then natural again
+        Container holder = new Container();
+        holder.items.add(new Item());
+        assertEquals(naturalExpected, JSON.toJSONString(holder));
+        assertEquals(sortedExpected, JSON.toJSONString(holder, JSONWriter.Feature.SortFieldNamesAlphabetically));
+        assertEquals(naturalExpected, JSON.toJSONString(holder));
+
+        // second order: sorted first, then natural
+        Container holder2 = new Container();
+        holder2.items.add(new Item());
+        assertEquals(sortedExpected, JSON.toJSONString(holder2, JSONWriter.Feature.SortFieldNamesAlphabetically));
+        assertEquals(naturalExpected, JSON.toJSONString(holder2));
     }
 }

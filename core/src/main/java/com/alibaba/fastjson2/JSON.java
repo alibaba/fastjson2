@@ -4079,6 +4079,37 @@ public interface JSON {
     }
 
     /**
+     * Converts the specified object to a {@link JSONArray} or
+     * {@link JSONObject}, forwarding the caller's writer feature word so nested
+     * conversions pick the matching writer variant (e.g. sorted field names)
+     *
+     * @param object the specified object
+     * @param features the specified features is applied to serialization
+     * @return {@link JSONArray} or {@link JSONObject} or {@code null}
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static Object toJSON(Object object, long features) {
+        if (object == null) {
+            return null;
+        }
+
+        if (object instanceof JSONObject || object instanceof JSONArray) {
+            return object;
+        }
+
+        Class<?> valueClass = object.getClass();
+        ObjectWriter<?> objectWriter = JSONFactory.getObjectWriter(valueClass, features);
+        if (objectWriter instanceof ObjectWriterAdapter
+                && (features & JSONWriter.Feature.ReferenceDetection.mask) == 0
+                && (objectWriter.getFeatures() & JSONWriter.Feature.WriteClassName.mask) == 0) {
+            ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) objectWriter;
+            return objectWriterAdapter.toJSONObject(object, features);
+        }
+
+        return toJSON(object);
+    }
+
+    /**
      * Converts the specified object to an object of the specified goal type
      *
      * @param <T> the target type
