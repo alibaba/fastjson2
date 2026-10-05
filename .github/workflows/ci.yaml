@@ -47,7 +47,14 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
+        # Retry once on failure: a stalled dependency download now fails fast
+        # (see .mvn/maven.config) and the retry resumes from the partially
+        # populated ~/.m2, usually landing on a healthy CDN edge.
+        run: |
+          ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package || {
+            echo "::warning::Maven build failed; retrying once to recover from transient download failures"
+            ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
+          }
 
   test-reflect:
     timeout-minutes: 20
@@ -75,7 +82,12 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package
+        # Same transient-download retry as the test job.
+        run: |
+          ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package || {
+            echo "::warning::Maven build failed; retrying once to recover from transient download failures"
+            ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package
+          }
         shell: bash
 
   coverage:
@@ -96,7 +108,12 @@ jobs:
           cache: maven
 
       - name: Build with Maven and generate coverage
-        run: ./mvnw -V --no-transfer-progress clean package
+        # Same transient-download retry as the test jobs.
+        run: |
+          ./mvnw -V --no-transfer-progress clean package || {
+            echo "::warning::Maven build failed; retrying once to recover from transient download failures"
+            ./mvnw -V --no-transfer-progress clean package
+          }
         env:
           CI: true  # Explicitly set CI to ensure JaCoCo profile is activated
 
