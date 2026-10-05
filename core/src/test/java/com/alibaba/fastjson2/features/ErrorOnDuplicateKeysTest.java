@@ -307,4 +307,12 @@ public class ErrorOnDuplicateKeysTest {
             assertTrue(error.getMessage().contains("duplicate key : b"));
         }
     }
+
+    @Test
+    public void readObjectWithFeaturesOnJSONBReader() {
+        byte[] bytes = com.alibaba.fastjson2.JSONB.toBytes(JSONObject.of("a", 1, "b", JSONObject.of("c", 2)));
+        Map<String, Object> expected = JSONReader.ofJSONB(bytes).readObject();
+        assertEquals(expected, JSONReader.ofJSONB(bytes).readObject(0L));
+        assertEquals(expected, JSONReader.ofJSONB(bytes).readObject(JSONReader.Feature.ErrorOnDuplicateKeys.mask));
+    }
 }

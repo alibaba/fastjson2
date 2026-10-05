@@ -4097,8 +4097,10 @@ public interface JSON {
             return object;
         }
 
+        JSONWriter.Context writeContext = JSONFactory.createWriteContext();
+        writeContext.features |= features;
         Class<?> valueClass = object.getClass();
-        ObjectWriter<?> objectWriter = JSONFactory.getObjectWriter(valueClass, features);
+        ObjectWriter<?> objectWriter = writeContext.getObjectWriter(valueClass, valueClass);
         if (objectWriter instanceof ObjectWriterAdapter
                 && (features & JSONWriter.Feature.ReferenceDetection.mask) == 0
                 && (objectWriter.getFeatures() & JSONWriter.Feature.WriteClassName.mask) == 0) {
@@ -4106,7 +4108,15 @@ public interface JSON {
             return objectWriterAdapter.toJSONObject(object, features);
         }
 
-        return toJSON(object);
+        String str;
+        try (JSONWriter writer = JSONWriter.of(writeContext)) {
+            objectWriter.write(writer, object, null, null, writeContext.features);
+            str = writer.toString();
+        } catch (NullPointerException | NumberFormatException ex) {
+            throw new JSONException("toJSONString error", ex);
+        }
+
+        return parse(str);
     }
 
     /**

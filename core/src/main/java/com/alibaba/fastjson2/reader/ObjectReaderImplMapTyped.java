@@ -300,6 +300,9 @@ class ObjectReaderImplMapTyped
         }
 
         Set<String> seenKeys = (contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0 ? new HashSet<>() : null;
+        // only the strict bit is forwarded to value readers; other field-level features keep
+        // applying to this map alone, as before
+        long valueFeatures = contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask;
 
         Object name;
         for (; ; index++) {
@@ -409,13 +412,13 @@ class ObjectReaderImplMapTyped
                 if (multiValue && jsonReader.nextIfArrayStart()) {
                     List list = new JSONArray();
                     while (!jsonReader.nextIfArrayEnd()) {
-                        value = valueObjectReader.readObject(jsonReader, valueType, fieldName, contextFeatures);
+                        value = valueObjectReader.readObject(jsonReader, valueType, fieldName, valueFeatures);
                         list.add(value);
                     }
                     object.put(name, list);
                     continue;
                 } else {
-                    value = valueObjectReader.readObject(jsonReader, valueType, fieldName, contextFeatures);
+                    value = valueObjectReader.readObject(jsonReader, valueType, fieldName, valueFeatures);
                 }
             }
 

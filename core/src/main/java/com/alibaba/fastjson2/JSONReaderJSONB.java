@@ -322,6 +322,12 @@ final class JSONReaderJSONB
     }
 
     @Override
+    public Map<String, Object> readObject(long features) {
+        // ErrorOnDuplicateKeys does not cover JSONB input, so the feature word adds nothing here
+        return readObject();
+    }
+
+    @Override
     public Map<String, Object> readObject() {
         final int end = this.end;
         final byte[] bytes = this.bytes;

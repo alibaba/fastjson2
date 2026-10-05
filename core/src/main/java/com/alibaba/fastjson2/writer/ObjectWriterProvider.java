@@ -264,17 +264,37 @@ public class ObjectWriterProvider
             return cache.remove(type);
         }
 
-        if (objectWriter instanceof ObjectWriterAdapter) {
-            // adapter field order is baked at creation time, so a created bean writer only
-            // matches the variant it was created for; registering it under the natural cell
-            // must not suppress creation of the sorted variant
-            sortedCache.remove(type);
-            return cache.put(type, objectWriter);
-        }
-
-        sortedCache.put(type, objectWriter);
+        sortedCache.put(type, sortedVariantOf(objectWriter));
         return cache.put(type, objectWriter);
     }
+
+    /**
+     * Returns the writer to serve the sorted variant of a registered writer. A plain bean adapter
+     * (for example one built by {@code ObjectWriters.objectWriter(...)}) keeps the registered field
+     * writers and only changes their order; any other writer, including adapter subclasses with
+     * their own write logic and positional (BeanToArray) adapters, is honored as registered.
+     */
+    static ObjectWriter sortedVariantOf(ObjectWriter objectWriter) {
+        if (!(objectWriter instanceof ObjectWriterAdapter) || !PLAIN_ADAPTERS.contains(objectWriter.getClass())) {
+            return objectWriter;
+        }
+        ObjectWriterAdapter adapter = (ObjectWriterAdapter) objectWriter;
+        if ((adapter.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
+            return objectWriter;
+        }
+        List<FieldWriter> sorted = new ArrayList<>(adapter.fieldWriters);
+        Collections.sort(sorted);
+        if (sorted.equals(adapter.fieldWriters)) {
+            return objectWriter;
+        }
+        return new ObjectWriterAdapter(adapter.objectClass, adapter.typeKey, adapter.typeName, adapter.features, sorted);
+    }
+
+    static final Set<Class<?>> PLAIN_ADAPTERS = new HashSet<>(Arrays.asList(
+            ObjectWriterAdapter.class, ObjectWriter1.class, ObjectWriter2.class, ObjectWriter3.class,
+            ObjectWriter4.class, ObjectWriter5.class, ObjectWriter6.class, ObjectWriter7.class,
+            ObjectWriter8.class, ObjectWriter9.class, ObjectWriter10.class, ObjectWriter11.class,
+            ObjectWriter12.class));
 
     /**
      * Registers an ObjectWriter for the specified type using method-based writing
@@ -300,12 +320,7 @@ public class ObjectWriterProvider
         ConcurrentMap<Type, ObjectWriter> cache = fieldBased ? this.cacheFieldBased : this.cache;
         ObjectWriter previous = cache.putIfAbsent(type, objectWriter);
         if (previous == null) {
-            if (objectWriter instanceof ObjectWriterAdapter) {
-                // see register(): created bean writers only match the variant they were created for
-                cacheOf(fieldBased, true).remove(type);
-            } else {
-                cacheOf(fieldBased, true).put(type, objectWriter);
-            }
+            cacheOf(fieldBased, true).put(type, sortedVariantOf(objectWriter));
         }
         return previous;
     }
@@ -356,8 +371,12 @@ public class ObjectWriterProvider
      */
     public boolean unregister(Type type, ObjectWriter objectWriter, boolean fieldBased) {
         ConcurrentMap<Type, ObjectWriter> cache = fieldBased ? this.cacheFieldBased : this.cache;
-        cacheOf(fieldBased, true).remove(type, objectWriter);
-        return cache.remove(type, objectWriter);
+        if (cache.remove(type, objectWriter)) {
+            // the sorted cell holds the registered writer or the variant derived from it
+            cacheOf(fieldBased, true).remove(type);
+            return true;
+        }
+        return false;
     }
 
     /**

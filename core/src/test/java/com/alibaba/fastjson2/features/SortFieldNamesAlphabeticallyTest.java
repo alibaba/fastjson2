@@ -118,6 +118,26 @@ public class SortFieldNamesAlphabeticallyTest {
                 tree.toString());
     }
 
+    public static class NullableItem {
+        public String name;
+        public int rank = 1;
+    }
+
+    @JSONType(serializeFeatures = JSONWriter.Feature.WriteNulls)
+    public static class NullsOwner {
+        public String label;
+        public List<NullableItem> items = java.util.Collections.singletonList(new NullableItem());
+    }
+
+    @Test
+    public void treeConversionKeepsTypeFeaturesOnTheirType() {
+        // the owner's type-level WriteNulls applies to the owner's fields, not to its items
+        NullsOwner owner = new NullsOwner();
+        assertEquals("{\"items\":[{\"rank\":1}],\"label\":null}", JSON.toJSONString(owner));
+        assertEquals("{\"items\":[{\"rank\":1}],\"label\":null}",
+                JSON.toJSONString(com.alibaba.fastjson2.JSONObject.from(owner), JSONWriter.Feature.WriteNulls));
+    }
+
     @Test
     public void customProviderWithAlphabeticOff() {
         ObjectWriterProvider provider = new ObjectWriterProvider();

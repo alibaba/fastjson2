@@ -244,4 +244,34 @@ public class TreeModelTest {
         assertTrue(object.canConvertToInt("i"));
         assertTrue(object.canConvertToLong("l"));
     }
+
+    @com.alibaba.fastjson2.annotation.JSONType(alphabetic = false)
+    public static class SortChild {
+        public int zebra = 3;
+        public int apple = 1;
+    }
+
+    @Test
+    public void toJSONLongOverloadCarriesFeatures() {
+        // non-adapter writers (lists, maps) in toJSON(Object, long) must still see the caller word
+        Object converted = JSON.toJSON(java.util.Collections.singletonList(new SortChild()),
+                JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+        assertEquals("[{\"apple\":1,\"zebra\":3}]", converted.toString());
+    }
+
+    public static class NestedSortHolder {
+        public java.util.List<java.util.List<SortChild>> rows =
+                java.util.Collections.singletonList(java.util.Collections.singletonList(new SortChild()));
+
+        public java.util.List<java.util.Map<String, SortChild>> indexBy =
+                java.util.Collections.singletonList(java.util.Collections.singletonMap("k", new SortChild()));
+    }
+
+    @Test
+    public void fromSortsBeansInsideNestedListsAndMaps() {
+        JSONObject tree = JSONObject.from(new NestedSortHolder(),
+                JSONWriter.Feature.SortFieldNamesAlphabetically);
+        assertEquals("{\"indexBy\":[{\"k\":{\"apple\":1,\"zebra\":3}}],\"rows\":[[{\"apple\":1,\"zebra\":3}]]}",
+                tree.toString());
+    }
 }

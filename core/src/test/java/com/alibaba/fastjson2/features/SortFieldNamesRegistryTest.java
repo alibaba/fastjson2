@@ -1,11 +1,14 @@
 package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import com.alibaba.fastjson2.writer.ObjectWriters;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -47,6 +50,39 @@ public class SortFieldNamesRegistryTest {
         provider.unregister(Money.class);
         assertEquals("{\"cents\":123}", JSON.toJSONString(money,
                 new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+    }
+
+    public static class Credentials {
+        public long id = 7;
+        public String name = "alice";
+        public String password = "hunter2";
+    }
+
+    @Test
+    public void registeredAdapterKeepsItsFieldWritersUnderSortedContext() {
+        // a bean writer built with ObjectWriters.objectWriter(...) decides which fields are written;
+        // the sorted variant may only change their order, never fall back to the class's own fields
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        JSONWriter.Context sorted = new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
+        assertTrue(JSON.toJSONString(new Credentials(), sorted).contains("hunter2"));
+
+        ObjectWriter writer = ObjectWriters.objectWriter(Credentials.class,
+                ObjectWriters.fieldWriter("name", String.class, (Credentials c) -> c.name),
+                ObjectWriters.fieldWriter("password", String.class, (Credentials c) -> "***"));
+        provider.register(Credentials.class, writer);
+        assertEquals("{\"name\":\"alice\",\"password\":\"***\"}",
+                JSON.toJSONString(new Credentials(), new JSONWriter.Context(provider)));
+        assertEquals("{\"name\":\"alice\",\"password\":\"***\"}", JSON.toJSONString(new Credentials(), sorted));
+
+        ObjectWriterProvider provider2 = new ObjectWriterProvider();
+        provider2.registerIfAbsent(Credentials.class, ObjectWriters.objectWriter(Credentials.class,
+                ObjectWriters.fieldWriter("password", String.class, (Credentials c) -> "***"),
+                ObjectWriters.fieldWriter("name", String.class, (Credentials c) -> c.name)));
+        assertEquals("{\"name\":\"alice\",\"password\":\"***\"}", JSON.toJSONString(new Credentials(),
+                new JSONWriter.Context(provider2, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+
+        assertTrue(provider.unregister(Credentials.class, writer));
+        assertTrue(JSON.toJSONString(new Credentials(), sorted).contains("hunter2"));
     }
 
     @Test
@@ -206,6 +242,20 @@ public class SortFieldNamesRegistryTest {
         assertEquals("{\"child\":[3,1]}", JSON.toJSONString(holder));
         assertEquals("{\"child\":[3,1]}",
                 JSON.toJSONString(holder, JSONWriter.Feature.SortFieldNamesAlphabetically));
+    }
+
+    @Test
+    public void beanToArrayAnnotatedFieldSortedFirstOnColdProvider() {
+        // no natural writer of Child is cached yet when the first write on the provider is sorted;
+        // the field's BeanToArray must still select the positional variant
+        for (ObjectWriterProvider provider : new ObjectWriterProvider[]{
+                new ObjectWriterProvider(), new ObjectWriterProvider(ObjectWriterCreator.INSTANCE)}) {
+            assertEquals("{\"child\":[3,1]}", JSON.toJSONString(new ChildHolder(),
+                    new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+        }
+        byte[] jsonb = JSONB.toBytes(new ChildHolder(),
+                new JSONWriter.Context(new ObjectWriterProvider(), JSONWriter.Feature.SortFieldNamesAlphabetically));
+        assertEquals("{\"child\":[3,1]}", JSON.toJSONString(JSONB.parse(jsonb)));
     }
 
     public static class ChildListHolder {

@@ -663,7 +663,7 @@ public class ObjectWriterAdapter<T>
                     for (Object item : collection) {
                         Object itemJSON = item == object
                                 ? jsonObject
-                                : JSON.toJSON(item, this.features | features);
+                                : JSON.toJSON(item, features);
                         array.add(itemJSON);
                     }
                     fieldValue = array;
@@ -704,15 +704,15 @@ public class ObjectWriterAdapter<T>
                     // path and toJSONString produce, instead of leaving the raw Java object in the
                     // JSONObject. See issue #7714.
                     if (!(valueWriter instanceof ObjectWriterAdapter)) {
-                        fieldValue = JSON.toJSON(fieldValue, this.features | features);
+                        fieldValue = JSON.toJSON(fieldValue, features);
                     }
                 }
                 if (valueWriter instanceof ObjectWriterAdapter) {
                     ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) valueWriter;
                     if (!objectWriterAdapter.getFieldWriters().isEmpty()) {
-                        fieldValue = objectWriterAdapter.toJSONObject(fieldValue, this.features | features);
+                        fieldValue = objectWriterAdapter.toJSONObject(fieldValue, features);
                     } else {
-                        fieldValue = JSON.toJSON(fieldValue, this.features | features);
+                        fieldValue = JSON.toJSON(fieldValue, features);
                     }
                 }
             }

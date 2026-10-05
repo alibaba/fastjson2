@@ -6377,6 +6377,10 @@ public abstract class JSONReader
          * (fields are assigned as they arrive, last value wins), and JSONB input is not
          * covered, consistent with {@link #DuplicateKeyValueAsArray}.
          *
+         * <p>When enabled per field ({@code @JSONField(deserializeFeatures = ErrorOnDuplicateKeys)}),
+         * the check covers the field's object and the objects nested in it, but not objects
+         * inside arrays; enable the feature on the reader context to cover the whole payload.
+         *
          * @since 2.0.66
          */
         ErrorOnDuplicateKeys(1L << 35L),

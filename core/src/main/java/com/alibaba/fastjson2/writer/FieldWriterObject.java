@@ -188,7 +188,7 @@ public class FieldWriterObject<T>
         }
 
         if (formattedWriter == null) {
-            formattedWriter = jsonWriter.getObjectWriter(valueClass);
+            formattedWriter = resolveObjectWriter(jsonWriter, valueClass);
             if (((features | jsonWriter.getFeatures()) & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
                 boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
                 if (success) {
@@ -231,7 +231,7 @@ public class FieldWriterObject<T>
                 objectWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
             }
             if (objectWriter == null) {
-                objectWriter = jsonWriter.getObjectWriter(valueClass);
+                objectWriter = resolveObjectWriter(jsonWriter, valueClass);
             }
             return objectWriter;
         }
@@ -246,12 +246,25 @@ public class FieldWriterObject<T>
                 objectWriter = ObjectWriterImplMap.of(valueClass);
             }
         } else {
-            objectWriter = jsonWriter.getObjectWriter(valueClass);
+            objectWriter = resolveObjectWriter(jsonWriter, valueClass);
         }
         if (((features | jsonWriter.getFeatures()) & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
             initObjectWriterUpdater.compareAndSet(this, null, objectWriter);
         }
         return objectWriter;
+    }
+
+    /**
+     * Resolves the value writer outside the sorted gate. A field-level BeanToArray is passed to the
+     * provider so a positional field never takes the sorted variant, also when no natural writer is
+     * cached yet; without it this is {@link JSONWriter#getObjectWriter(Class)}.
+     */
+    final ObjectWriter resolveObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+        if ((features & JSONWriter.Feature.BeanToArray.mask) == 0) {
+            return jsonWriter.getObjectWriter(valueClass);
+        }
+        return jsonWriter.context.provider.getObjectWriter(
+                valueClass, valueClass, jsonWriter.getFeatures() | JSONWriter.Feature.BeanToArray.mask);
     }
 
     @Override
