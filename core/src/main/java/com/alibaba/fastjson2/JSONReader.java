@@ -3711,6 +3711,16 @@ public abstract class JSONReader
         return readObject(context.features);
     }
 
+    /**
+     * Reads JSON data and returns it as a Map, honoring the supplied feature word on
+     * top of the reader context features. Only {@link Feature#ErrorOnDuplicateKeys}
+     * is honored today; other bits are parsed as on the plain {@link #readObject()} call.
+     *
+     * @param features the per-call feature word, a mask of {@link Feature} bits
+     * @return A Map representation of the JSON data
+     * @throws JSONException if there is an error parsing the JSON
+     * @since 2.0.66
+     */
     public Map<String, Object> readObject(long features) {
         nextIfObjectStart();
 
