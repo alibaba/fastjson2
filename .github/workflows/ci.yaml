@@ -21,6 +21,9 @@ on:
       - v2.1.x
     tags:
       - '2.*'
+      - 'v2.*'  # the repo already uses a v-prefix for branches (v2.1.x), so a
+                # v-prefixed release tag is plausible; missing it fails silently
+                # -- no run at all -- on the release gate
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-excluding-paths
     paths-ignore:
       - 'docs/**'
@@ -31,24 +34,37 @@ on:
       - '**.md'
   workflow_dispatch:
 
-# Lane queueing, not compile or test time, dominates CI wall-clock: a single run
-# of 29 lanes once spent 94 minutes end to end while individual lanes only ran
-# 3-10 minutes, and one macOS lane waited 1h26m for a runner. Without this block
-# every new commit on a PR branch queued a fresh full matrix while the previous
-# one still held runners, so stale commits kept saturating the pool.
+# Lane queueing, not compile or test time, dominates CI wall-clock: run
+# 34414883838 (29 lanes) spent 94 minutes end to end while its individual lanes
+# ran only 3-10 minutes, and its `Test JDK 11 on macos-latest` lane waited 1h26m
+# for a runner before running for 8. Without this block every new commit on a PR
+# branch queued a fresh full matrix while the previous one still held runners,
+# so stale commits kept saturating the pool.
 concurrency:
   # Prefixed because concurrency group names are repository-scoped, not
   # workflow-scoped -- a bare `ci-...` could collide with another workflow here.
   #
-  # PRs group by ref so that pushing a new commit supersedes the in-flight run
-  # for that PR. Pushes group by sha, which is unique per commit, so they never
-  # share a group: every main/release/tag push still gets its own run, exactly
-  # as before this block existed. Grouping pushes by ref instead would let
-  # GitHub's default `queue: single` silently drop intermediate commits when
-  # several merges land in quick succession -- and `queue: max`, the documented
-  # remedy, is rejected in combination with cancel-in-progress, so one block
-  # cannot express "cancel superseded PR runs, queue every main run".
-  group: fastjson2-ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  # The group key differs per ref type on purpose:
+  #   pull_request -> github.ref (refs/pull/N/merge), stable across commits on
+  #                   one PR, so a new commit supersedes the in-flight run.
+  #                   This is the block's only real job; it does not deduplicate
+  #                   anything on the push side -- the branch/tag filter above
+  #                   does that.
+  #   push (branch) -> github.sha, unique per commit, so consecutive main
+  #                   pushes never share a group and none is dropped. A
+  #                   ref-keyed group would let GitHub's default `queue: single`
+  #                   silently cancel the pending run when several merges land in
+  #                   quick succession. (`queue: max` would keep them but is
+  #                   rejected in combination with cancel-in-progress.)
+  #   push (tag)    -> github.ref (refs/tags/<tag>). A release tag is cut on
+  #                   main's HEAD, so tag and branch push carry the SAME sha;
+  #                   sha-keying tags would put the release gate in the same
+  #                   group as the main run and queue it behind one that has
+  #                   measured at 104 minutes (tag 2.0.64, sha 39531157: main
+  #                   run 30743786350 at 10:27:40, tag run 30743811143 45s
+  #                   later). Tags need neither cancellation nor queueing, only
+  #                   a distinct group.
+  group: fastjson2-ci-${{ github.event_name == 'push' && github.ref_type == 'branch' && github.sha || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -60,14 +76,21 @@ env:
 
 jobs:
   test:
-    # Two test passes over one build, so the budget has to cover the retry path.
-    # Sized against the measured tail, not the mean: job 111846711588 spent
-    # 19m51s in "Build with Maven" -- pass 1 alone -- before the old 20-minute
-    # cap cancelled it, on a lane whose healthy duration is about 5 minutes. A
-    # degraded pass 1 plus its retry plus the reflect pass goes past 30. The
-    # resolver timeouts in .mvn/maven.config bound silent download stalls, but
-    # not this kind of overall inflation.
-    timeout-minutes: 40
+    # Sized for a healthy two-pass lane, with margin. Measured on run
+    # 34414883838: the slowest build-plus-default-suite lane was 10 min (Test
+    # JDK 21 on windows) and the slowest clean-build-plus-reflect-suite lane was
+    # 8 min (Test Reflect JDK 21 on windows). Pass 2 skips the clean and the
+    # packaging, so ~18 min plus setup is the realistic worst case.
+    #
+    # Deliberately NOT sized for the 19m51s that job 111846711588 spent in
+    # "Build with Maven". That was not slow compute: its tests were done by
+    # 15:52, dokka printed its banner at 15:52:16, and the step emitted nothing
+    # more until the 20-minute cap killed it at 16:07:12, leaving an orphaned
+    # java process. Every cancelled lane in recent history is that same dokka
+    # hang, and all are default-creator ubuntu lanes, because only this job
+    # passes -Pgen-dokka. Raising the cap would let the hang burn more runner
+    # time and fail anyway.
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       max-parallel: 16
