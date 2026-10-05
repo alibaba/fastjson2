@@ -17,6 +17,7 @@ import java.lang.reflect.Type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("features")
 public class SortFieldNamesRegistryTest {
@@ -262,5 +263,28 @@ public class SortFieldNamesRegistryTest {
         Thread.sleep(20);
         assertNull(weakClass.get());
         assertNull(weakLoader.get());
+    }
+
+    public static class Inner {
+        private int hidden = 42;
+        private String name = "n";
+    }
+
+    public static class Inner$$EnhancerBySpringCGLIB$$abcdef extends Inner {
+    }
+
+    @Test
+    public void fieldBasedProxyKeepsFieldBasedWriterVariant() {
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        JSONWriter.Context context = new JSONWriter.Context(provider, JSONWriter.Feature.FieldBased);
+
+        Inner plain = new Inner();
+        String plainJSON = JSON.toJSONString(plain, context);
+        assertTrue(plainJSON.contains("hidden"), plainJSON);
+
+        Inner proxy = new Inner$$EnhancerBySpringCGLIB$$abcdef();
+        String proxyJSON = JSON.toJSONString(proxy, context);
+        assertTrue(proxyJSON.contains("hidden"), proxyJSON);
+        assertTrue(proxyJSON.contains("\"name\":\"n\""), proxyJSON);
     }
 }

@@ -700,8 +700,17 @@ public class ObjectWriterProvider
                 objectType = proxyTarget;
             }
             objectClass = proxyTarget;
-            fieldBased = false;
-            objectWriter = cacheOf(false, fieldNamesSorted).get(objectType);
+            if (fieldBased) {
+                objectWriter = cacheOf(true, fieldNamesSorted).get(objectType);
+                if (objectWriter == null) {
+                    objectWriter = cacheOf(false, fieldNamesSorted).get(objectType);
+                }
+                if (objectWriter == null) {
+                    fieldBased = false;
+                }
+            } else {
+                objectWriter = cacheOf(false, fieldNamesSorted).get(objectType);
+            }
             if (objectWriter != null) {
                 return objectWriter;
             }
@@ -956,22 +965,27 @@ public class ObjectWriterProvider
                 (entry -> entry.getKey().getClassLoader() == classLoader
                 );
 
-        IdentityHashMap<ObjectWriter, Object> checkedMap = new IdentityHashMap();
-
+        // the memo records "examined", not the verdict, so it must not be shared across sweeps:
+        // a writer evicted from one cell would otherwise be reported non-matching by later sweeps
+        // and stay alive in another cell
+        IdentityHashMap<ObjectWriter, Object> checkedMapCache = new IdentityHashMap();
         cache.entrySet().removeIf(
-                entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMap)
+                entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMapCache)
         );
 
+        IdentityHashMap<ObjectWriter, Object> checkedMapFieldBased = new IdentityHashMap();
         cacheFieldBased.entrySet().removeIf(
-                entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMap)
+                entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMapFieldBased)
         );
 
+        IdentityHashMap<ObjectWriter, Object> checkedMapSorted = new IdentityHashMap();
         cacheFieldNamesSorted.entrySet().removeIf(
-                entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMap)
+                entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMapSorted)
         );
 
+        IdentityHashMap<ObjectWriter, Object> checkedMapSortedFieldBased = new IdentityHashMap();
         cacheFieldNamesSortedFieldBased.entrySet().removeIf(
-                entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMap)
+                entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMapSortedFieldBased)
         );
 
         BeanUtils.cleanupCache(classLoader);
