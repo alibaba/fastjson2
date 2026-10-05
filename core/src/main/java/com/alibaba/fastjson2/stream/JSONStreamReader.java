@@ -81,11 +81,17 @@ public abstract class JSONStreamReader<T>
             return;
         }
 
+        if (value instanceof String) {
+            stat.stat((String) value);
+            return;
+        }
+
+        stat.values++;
+
         if (value == null) {
             stat.nulls++;
             return;
         }
-        stat.values++;
 
         if (value instanceof Number) {
             stat.numbers++;
@@ -95,11 +101,6 @@ public abstract class JSONStreamReader<T>
             } else if (value instanceof Float || value instanceof Double) {
                 stat.doubles++;
             }
-            return;
-        }
-
-        if (value instanceof String) {
-            stat.stat((String) value);
             return;
         }
 
@@ -154,7 +155,7 @@ public abstract class JSONStreamReader<T>
         for (int i = 0; i < list.size(); i++) {
             Object item = list.get(i);
             String strKey = parentKey == null ? "[" + i + "]" : parentKey + "[" + i + "]";
-            ColumnStat stat = getColumnStat(parentKey);
+            ColumnStat stat = getColumnStat(strKey);
             stat(stat, item);
 
             if (item instanceof Map) {

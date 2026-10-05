@@ -11,7 +11,11 @@ import java.util.TreeSet;
  * Symbol table for fast name lookup.
  *
  * <p>This class provides a way to efficiently map names (strings) to ordinals and vice versa.
- * It uses FNV-1a hash algorithm for fast hashing and maintains sorted hash codes for binary search.
+ * Names use {@link Fnv#hashCode64(String)}, including its compact encoding for short names,
+ * with sorted hash codes for binary search. Hash lookups do not resolve collisions by comparing names.
+ * <details><summary>中文</summary>
+ * 名称使用 fastjson 的 64 位哈希（包含短名称紧凑编码）并通过二分查找定位；哈希查找不比较名称以消除冲突。
+ * </details>
  *
  * <p>SymbolTable is designed to be immutable after construction, making it thread-safe.
  *
@@ -20,13 +24,16 @@ import java.util.TreeSet;
 public final class SymbolTable {
     private final String[] names;
     private final long hashCode64;
-    private final short[] mapping;
+    // Keep full indexes for tables with more than 32,768 names.
+    // <details><summary>中文</summary>保留完整索引，支持超过 32,768 个名称的符号表。</details>
+    private final int[] mapping;
 
     private final long[] hashCodes;
     private final long[] hashCodesOrigin;
 
     /**
-     * Create a symbol table from class names.
+     * Creates a symbol table from the binary names returned by {@link Class#getName()}.
+     * <details><summary>中文</summary>使用 Class.getName() 返回的二进制名称创建符号表。</details>
      *
      * @param input classes whose names will be added to the symbol table
      * @since 2.0.58
@@ -53,7 +60,10 @@ public final class SymbolTable {
      * Create a symbol table from string names.
      *
      * <p>The names will be sorted and deduplicated. Each name is assigned a unique ordinal
-     * starting from 1. The ordinal 0 is reserved and means "not found".
+     * starting from 1 in natural string order. Ordinal lookups return -1 when no matching hash is found.
+     * <details><summary>中文</summary>
+     * 名称按字符串自然顺序排序并去重，从 1 开始编号；序号查找未找到匹配哈希时返回 -1。
+     * </details>
      *
      * @param input names to be added to the symbol table
      */
@@ -78,11 +88,11 @@ public final class SymbolTable {
         this.hashCodes = Arrays.copyOf(hashCodes, hashCodes.length);
         Arrays.sort(this.hashCodes);
 
-        mapping = new short[this.hashCodes.length];
+        mapping = new int[this.hashCodes.length];
         for (int i = 0; i < hashCodes.length; i++) {
             long hashCode = hashCodes[i];
             int index = Arrays.binarySearch(this.hashCodes, hashCode);
-            mapping[index] = (short) i;
+            mapping[index] = i;
         }
 
         long hashCode64 = Fnv.MAGIC_HASH_CODE;
@@ -105,8 +115,11 @@ public final class SymbolTable {
     /**
      * Get the 64-bit hash code of this symbol table.
      *
-     * <p>The hash code is computed from all the names in the symbol table.
-     * It can be used to quickly compare if two symbol tables have the same content.
+     * <p>The fingerprint is computed from the sorted, deduplicated names. Equal fingerprints
+     * alone do not guarantee equal contents because hash collisions are possible.
+     * <details><summary>中文</summary>
+     * 根据排序去重后的名称计算指纹；哈希可能冲突，因此指纹相同不能保证内容相同。
+     * </details>
      *
      * @return the 64-bit hash code of this symbol table
      */
@@ -115,9 +128,10 @@ public final class SymbolTable {
     }
 
     /**
-     * Get the name by its hash code.
+     * Gets a name using its {@link Fnv#hashCode64(String)} hash.
+     * <details><summary>中文</summary>通过 fastjson 名称哈希查找名称。</details>
      *
-     * @param hashCode the FNV-1a 64-bit hash code of the name
+     * @param hashCode the fastjson 64-bit hash of the name
      * @return the name if found, {@code null} otherwise
      */
     public String getNameByHashCode(long hashCode) {
@@ -131,9 +145,10 @@ public final class SymbolTable {
     }
 
     /**
-     * Get the ordinal of a name by its hash code.
+     * Gets a name's one-based ordinal using its {@link Fnv#hashCode64(String)} hash.
+     * <details><summary>中文</summary>通过 fastjson 名称哈希查找从 1 开始的序号。</details>
      *
-     * @param hashCode the FNV-1a 64-bit hash code of the name
+     * @param hashCode the fastjson 64-bit hash of the name
      * @return the ordinal (1-based) if found, -1 otherwise
      */
     public int getOrdinalByHashCode(long hashCode) {
@@ -172,10 +187,11 @@ public final class SymbolTable {
     }
 
     /**
-     * Get the hash code of a name by its ordinal.
+     * Gets the {@link Fnv#hashCode64(String)} hash of a name by its one-based ordinal.
+     * <details><summary>中文</summary>根据从 1 开始的序号返回 fastjson 名称哈希。</details>
      *
      * @param ordinal the ordinal (1-based) of the name
-     * @return the FNV-1a 64-bit hash code of the name at the specified ordinal
+     * @return the fastjson 64-bit hash of the name at the specified ordinal
      * @throws ArrayIndexOutOfBoundsException if the ordinal is invalid
      */
     public long getHashCode(int ordinal) {

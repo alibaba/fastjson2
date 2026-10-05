@@ -359,7 +359,7 @@ class JSONPathSegmentName
                 if ((context.readerFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(value);
-                        map.put(name, value);
+                        map.put(name, origin);
                     } else {
                         JSONArray array = JSONArray.of(origin, value);
                         map.put(name, array);
@@ -383,7 +383,7 @@ class JSONPathSegmentName
                         if ((context.readerFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                             if (origin instanceof Collection) {
                                 ((Collection) origin).add(value);
-                                map.put(name, value);
+                                map.put(name, origin);
                             } else {
                                 JSONArray array = JSONArray.of(origin, value);
                                 map.put(name, array);

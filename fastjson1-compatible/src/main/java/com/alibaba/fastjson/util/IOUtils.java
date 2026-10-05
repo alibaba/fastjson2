@@ -181,7 +181,7 @@ public class IOUtils {
         // get the padding count (=) (0, 1 or 2)
         int pad = s.charAt(eIx) == '=' ? (s.charAt(eIx - 1) == '=' ? 2 : 1) : 0; // Count '=' at end.
         int cCnt = eIx - sIx + 1; // Content count including possible separators
-        int sepCnt = sLen > 76 ? (s.charAt(76) == '\r' ? cCnt / 78 : 0) << 1 : 0;
+        int sepCnt = cCnt > 76 ? (s.charAt(sIx + 76) == '\r' ? cCnt / 78 : 0) << 1 : 0;
 
         int len = ((cCnt - sepCnt) * 6 >> 3) - pad; // The number of decoded bytes
         byte[] dArr = new byte[len]; // Preallocate byte[] of exact length

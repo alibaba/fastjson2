@@ -1,0 +1,22 @@
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/JSONReaderJSONB.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/JSONWriterJSONB.java
+NARROW DELEGATED REVIEW | core/src/main/java/com/alibaba/fastjson2/JSONB.java IO.writeTypeName external-symbol branch
+
+Full source read, including all executable branches and existing Javadocs; this is not proof of absence of defects.
+Regression suite: core/src/test/java/com/alibaba/fastjson2/JSONBCodecReviewRegressionTest.java
+Tests coordinated by root; no Maven run by this agent.
+
+Implemented: numeric conversion narrowing; type/value/name hash consistency across UTF8/UTF16/Latin1;
+symbol sign and metadata; shared symbol retention on skip; array reference placeholders and boxed Long;
+variable string/date/character cursor movement; empty-string features; nullable binary; UUID and hex validation;
+missing skipValue encodings; context time zone; writer capacity for variable prefixes and symbols.
+
+Performance tradeoff: UTF8/UTF16 wire hash paths use decoded String plus Fnv for canonical UTF16 character
+hashing, including surrogate pairs, BOM and endian handling. This allocates a String on those paths in place
+of duplicated broken specialized decoders. Common Latin1 names retain allocation-free hash paths; Latin1
+hash code is shared with Fnv, retaining bulk loads when eight bytes are safely available.
+No throughput benchmark was run. This allocation tradeoff needs performance measurement before release.
+
+Further review candidates, not asserted fixed: uniform bounds checks on truncated JSONB primitive reads;
+numeric exponent string conversion parity; saturation semantics for floating-to-integer coercions; extended-year
+date encodings; predicate methods at EOF; writer symbol state after flushTo.

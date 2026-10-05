@@ -47,7 +47,7 @@ final class ObjectReaderImplMonthDay
 
     private static MonthDay readMonthDayFromNumber(JSONReader jsonReader) {
         long value = jsonReader.readInt64Value();
-        if (value <= 0) {
+        if (value <= 0 || value > 1231) {
             throw new JSONException(jsonReader.info("read MonthDay error"));
         }
 

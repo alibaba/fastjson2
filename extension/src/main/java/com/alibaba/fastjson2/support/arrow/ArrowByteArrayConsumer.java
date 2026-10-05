@@ -176,8 +176,8 @@ public class ArrowByteArrayConsumer
         }
 
         if (vector instanceof Float8Vector) {
-            float floatValue = TypeUtils.parseFloat(bytes, off, len);
-            ((Float8Vector) vector).set(row, floatValue);
+            double doubleValue = TypeUtils.parseDouble(bytes, off, len);
+            ((Float8Vector) vector).set(row, doubleValue);
             return;
         }
 

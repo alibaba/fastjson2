@@ -213,7 +213,7 @@ public interface ObjectWriter<T> {
                     }
 
                     ObjectWriter processValueWriter = fieldWriter.getObjectWriter(jsonWriter, processValue.getClass());
-                    processValueWriter.write(jsonWriter, fieldValue);
+                    processValueWriter.write(jsonWriter, processValue);
                 } else {
                     if (fieldValue == null) {
                         jsonWriter.writeNull();

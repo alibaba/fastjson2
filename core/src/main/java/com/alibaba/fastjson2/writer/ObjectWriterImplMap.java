@@ -232,7 +232,9 @@ public final class ObjectWriterImplMap
             Object value = entry.getValue();
             if (value == null) {
                 if (writeNulls) {
-                    if (entryKey instanceof String) {
+                    if (entryKey == null) {
+                        jsonWriter.writeNull();
+                    } else if (entryKey instanceof String) {
                         jsonWriter.writeString((String) entryKey);
                     } else {
                         Class<?> entryKeyClass = entryKey.getClass();
@@ -260,7 +262,9 @@ public final class ObjectWriterImplMap
                 continue;
             }
 
-            if (entryKey instanceof String || (contextFeatures & JSONWriter.Feature.WriteClassName.mask) == 0) {
+            if (entryKey == null) {
+                jsonWriter.writeNull();
+            } else if (entryKey instanceof String || (contextFeatures & JSONWriter.Feature.WriteClassName.mask) == 0) {
                 String key;
                 if (entryKey instanceof String) {
                     key = (String) entryKey;
@@ -278,8 +282,6 @@ public final class ObjectWriterImplMap
                 } else {
                     jsonWriter.writeString(key);
                 }
-            } else if (entryKey == null) {
-                jsonWriter.writeNull();
             } else {
                 if (contextRefDetect) {
                     jsonWriter.config(JSONWriter.Feature.ReferenceDetection, false);
@@ -330,7 +332,7 @@ public final class ObjectWriterImplMap
                 String refPath;
                 if (entryKey instanceof String) {
                     refPath = jsonWriter.setPath((String) entryKey, value);
-                } else if (ObjectWriterProvider.isPrimitiveOrEnum(entryKey.getClass())) {
+                } else if (entryKey != null && ObjectWriterProvider.isPrimitiveOrEnum(entryKey.getClass())) {
                     refPath = jsonWriter.setPath(entryKey.toString(), value);
                 } else {
                     if (map.size() != 1 && !(map instanceof SortedMap) && !(map instanceof LinkedHashMap)) {

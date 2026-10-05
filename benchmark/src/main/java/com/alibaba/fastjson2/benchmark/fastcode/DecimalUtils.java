@@ -6,8 +6,13 @@ import java.util.Arrays;
 
 public class DecimalUtils {
     public static String toString(long unscaledVal, int scale) {
-        if (scale == 0) {
+        if (scale == 0 || (unscaledVal == 0 && scale < 0)) {
             return Long.toString(unscaledVal);
+        }
+        // The minimum long has no positive long magnitude.
+        // <details><summary>中文</summary>最小 long 值的绝对值无法用正 long 表示。</details>
+        if (unscaledVal == Long.MIN_VALUE) {
+            return toString(BigInteger.valueOf(unscaledVal), scale);
         }
 
         boolean negative = false;
@@ -55,6 +60,7 @@ public class DecimalUtils {
                 }
                 getChars(div, off + divSize, buf);
                 buf[divSize + off] = '.';
+                Arrays.fill(buf, divSize + off + 1, buf.length, (byte) '0');
                 getChars(rem, buf.length, buf);
             }
         }
@@ -64,7 +70,7 @@ public class DecimalUtils {
 
     @SuppressWarnings("deprecated")
     public static String toString(BigInteger unscaledVal, int scale) {
-        if (scale == 0) {
+        if (scale == 0 || (unscaledVal.signum() == 0 && scale < 0)) {
             return unscaledVal.toString(10);
         }
 
@@ -147,6 +153,9 @@ public class DecimalUtils {
         if (scale == 0) {
             return Long.toString(intCompact);
         }
+        if (intCompact == Long.MIN_VALUE) {
+            return layout(BigInteger.valueOf(intCompact), scale, sci);
+        }
 
         long unscaledVal;
         boolean negative = false;
@@ -189,6 +198,7 @@ public class DecimalUtils {
                 long rem = unscaledVal - div * power;
                 getChars(div, off + coeffLen - scale, buf);
                 buf[off + coeffLen - scale] = '.';
+                Arrays.fill(buf, off + coeffLen - scale + 1, buf.length, (byte) '0');
                 getChars(rem, off + coeffLen + 1, buf);
             }
         } else {
@@ -205,6 +215,7 @@ public class DecimalUtils {
                     long rem = unscaledVal - div * power;
                     buf[off] = (byte) (div + '0');
                     buf[off + 1] = '.';
+                    Arrays.fill(buf, off + 2, off + coeffLen + 1, (byte) '0');
                     getChars(rem, off + coeffLen + 1, buf);
                     off += coeffLen + 1;
                 } else {
@@ -258,7 +269,7 @@ public class DecimalUtils {
                             throw new AssertionError("Unexpected sig value " + sig);
                     }
                 } else if (sig >= coeffLen) {
-                    buf = new byte[adjustedSize + (negative ? 2 : 1) + sig - coeffLen];
+                    buf = new byte[adjustedSize + (negative ? 1 : 0) + sig];
                     if (negative) {
                         buf[0] = '-';
                         off = 1;
@@ -280,6 +291,7 @@ public class DecimalUtils {
                     long rem = unscaledVal - div * power;
                     getChars(div, off + sig, buf);
                     buf[off + sig] = '.';
+                    Arrays.fill(buf, off + sig + 1, off + coeffLen + 1, (byte) '0');
                     getChars(rem, off + coeffLen + 1, buf);
                     off += coeffLen + 1;
                 }
@@ -406,7 +418,7 @@ public class DecimalUtils {
                             throw new AssertionError("Unexpected sig value " + sig);
                     }
                 } else if (sig >= coeffLen) {
-                    buf = new byte[adjustedSize + (negative ? 2 : 1) + sig - coeffLen];
+                    buf = new byte[adjustedSize + (negative ? 1 : 0) + sig];
                     if (negative) {
                         buf[0] = '-';
                         off = 1;

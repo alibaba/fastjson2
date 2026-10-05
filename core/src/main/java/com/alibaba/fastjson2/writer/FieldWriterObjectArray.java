@@ -124,7 +124,7 @@ final class FieldWriterObjectArray<T>
 
     public void writeArray(JSONWriter jsonWriter, boolean writeFieldName, Object[] array) {
         long features = this.features | jsonWriter.getFeatures();
-        if (array.length == 0 && (features & MASK_NOT_WRITE_EMPTY_ARRAY) != 0) {
+        if (writeFieldName && array.length == 0 && (features & MASK_NOT_WRITE_EMPTY_ARRAY) != 0) {
             return;
         }
         Class previousClass = null;
@@ -141,6 +141,7 @@ final class FieldWriterObjectArray<T>
             String path = jsonWriter.setPath(fieldName, array);
             if (path != null) {
                 jsonWriter.writeReference(path);
+                jsonWriter.popPath(array);
                 return;
             }
         }
@@ -228,8 +229,27 @@ final class FieldWriterObjectArray<T>
                 previousObjectWriter = itemObjectWriter;
             }
 
+            // Track each item under its array index, then restore the array path for its siblings.
+            // <details><summary>中文</summary>按数组索引跟踪每个元素，随后恢复数组路径以处理同级元素。</details>
+            boolean itemRefDetect = refDetect && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
+            if (itemRefDetect) {
+                String refPath = jsonWriter.setPath(i, item);
+                if (refPath != null) {
+                    jsonWriter.writeReference(refPath);
+                    jsonWriter.popPath(item);
+                    continue;
+                }
+            }
+
             itemObjectWriter.write(jsonWriter, item, i, this.itemType, this.features);
+
+            if (itemRefDetect) {
+                jsonWriter.popPath(item);
+            }
         }
         jsonWriter.endArray();
+        if (refDetect) {
+            jsonWriter.popPath(array);
+        }
     }
 }

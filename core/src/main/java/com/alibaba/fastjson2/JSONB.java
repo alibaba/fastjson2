@@ -410,6 +410,10 @@ public interface JSONB {
     /**
      * Parses JSONB bytes to an object using the specified context
      *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
+     *
      * @param jsonbBytes the JSONB bytes to parse
      * @param context the JSON reader context
      * @return the parsed object
@@ -433,6 +437,10 @@ public interface JSONB {
     /**
      * Parses JSONB bytes to an object with specified features
      *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
+     *
      * @param jsonbBytes the JSONB bytes to parse
      * @param features the JSON reader features to apply
      * @return the parsed object
@@ -455,6 +463,9 @@ public interface JSONB {
     /**
      * Parses JSONB from an input stream to an object using the specified context
      *
+     * <p>Reads and buffers the stream to EOF, then parses the JSONB value. The stream is not closed.</p>
+     * <details><summary>中文</summary>读取并缓存输入流直到 EOF，然后解析 JSONB 值；不会关闭输入流。</details>
+     *
      * @param in the input stream to parse from
      * @param context the JSON reader context
      * @return the parsed object
@@ -471,6 +482,10 @@ public interface JSONB {
 
     /**
      * Parses JSONB bytes to an object with a symbol table and features
+     *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
      *
      * @param jsonbBytes the JSONB bytes to parse
      * @param symbolTable the symbol table to use
@@ -495,6 +510,10 @@ public interface JSONB {
     /**
      * Parses JSONB bytes to a JSONObject
      *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
+     *
      * @param jsonbBytes the JSONB bytes to parse
      * @return the parsed JSONObject
      */
@@ -515,6 +534,10 @@ public interface JSONB {
 
     /**
      * Parses JSONB bytes to a JSONObject with specified features
+     *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
      *
      * @param jsonbBytes the JSONB bytes to parse
      * @param features the JSON reader features to apply
@@ -538,6 +561,9 @@ public interface JSONB {
     /**
      * Parses JSONB bytes to a JSONObject using the specified context
      *
+     * <p>Reads and buffers the stream to EOF, then parses the JSONB value. The stream is not closed.</p>
+     * <details><summary>中文</summary>读取并缓存输入流直到 EOF，然后解析 JSONB 值；不会关闭输入流。</details>
+     *
      * @param in the input stream to parse from
      * @param context the JSON reader context
      * @return the parsed JSONObject
@@ -554,6 +580,10 @@ public interface JSONB {
 
     /**
      * Parses JSONB bytes to a JSONArray
+     *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
      *
      * @param jsonbBytes the JSONB bytes to parse
      * @return the parsed JSONArray
@@ -576,6 +606,9 @@ public interface JSONB {
     /**
      * Parses JSONB from an input stream to a JSONArray using the specified context
      *
+     * <p>Reads and buffers the stream to EOF, then parses the JSONB value. The stream is not closed.</p>
+     * <details><summary>中文</summary>读取并缓存输入流直到 EOF，然后解析 JSONB 值；不会关闭输入流。</details>
+     *
      * @param in the input stream to parse from
      * @param context the JSON reader context
      * @return the parsed JSONArray
@@ -593,10 +626,13 @@ public interface JSONB {
     /**
      * Parses JSONB bytes to a list of objects of the specified type
      *
+     * <p>Null or empty input returns null. The input is JSONB binary data, not UTF-8 JSON text.</p>
+     * <details><summary>中文</summary>null 或空输入返回 null；输入必须是 JSONB 二进制数据，而不是 UTF-8 JSON 文本。</details>
+     *
      * @param <T> the type of objects in the list
      * @param jsonbBytes the JSONB bytes to parse
      * @param type the type of objects in the list
-     * @return the parsed list of objects
+     * @return the parsed list, or null for null, empty, or encoded-null input
      */
     static <T> List<T> parseArray(byte[] jsonbBytes, Type type) {
         if (jsonbBytes == null || jsonbBytes.length == 0) {
@@ -624,11 +660,14 @@ public interface JSONB {
     /**
      * Parses JSONB bytes to a list of objects of the specified type with features
      *
+     * <p>Null or empty input returns null. The input is JSONB binary data, not UTF-8 JSON text.</p>
+     * <details><summary>中文</summary>null 或空输入返回 null；输入必须是 JSONB 二进制数据，而不是 UTF-8 JSON 文本。</details>
+     *
      * @param <T> the type of objects in the list
      * @param jsonbBytes the JSONB bytes to parse
      * @param type the type of objects in the list
      * @param features the JSON reader features to apply
-     * @return the parsed list of objects
+     * @return the parsed list, or null for null, empty, or encoded-null input
      */
     static <T> List<T> parseArray(byte[] jsonbBytes, Type type, JSONReader.Feature... features) {
         if (jsonbBytes == null || jsonbBytes.length == 0) {
@@ -656,10 +695,14 @@ public interface JSONB {
     /**
      * Parses JSONB bytes to a list of objects with specified types
      *
+     * <p>Null or empty input returns null. The input is JSONB binary data, not UTF-8 JSON text.
+     * Types are positional: {@code types[i]} controls the conversion of array element {@code i}.</p>
+     * <details><summary>中文</summary>null 或空输入返回 null；输入必须是 JSONB 二进制数据，而不是 UTF-8 JSON 文本。types[i] 指定数组第 i 个元素的目标类型。</details>
+     *
      * @param <T> the type of objects in the list
      * @param jsonbBytes the JSONB bytes to parse
      * @param types the types of objects in the list
-     * @return the parsed list of objects
+     * @return the parsed list, or null for null, empty, or encoded-null input
      */
     static <T> List<T> parseArray(byte[] jsonbBytes, Type... types) {
         if (jsonbBytes == null || jsonbBytes.length == 0) {
@@ -683,11 +726,15 @@ public interface JSONB {
     /**
      * Parses JSONB bytes to a list of objects with specified types and features
      *
+     * <p>Null or empty input returns null. The input is JSONB binary data, not UTF-8 JSON text.
+     * Types are positional: {@code types[i]} controls the conversion of array element {@code i}.</p>
+     * <details><summary>中文</summary>null 或空输入返回 null；输入必须是 JSONB 二进制数据，而不是 UTF-8 JSON 文本。types[i] 指定数组第 i 个元素的目标类型。</details>
+     *
      * @param <T> the type of objects in the list
      * @param jsonbBytes the JSONB bytes to parse
      * @param types the types of objects in the list
      * @param features the JSON reader features to apply
-     * @return the parsed list of objects
+     * @return the parsed list, or null for null, empty, or encoded-null input
      */
     static <T> List<T> parseArray(byte[] jsonbBytes, Type[] types, JSONReader.Feature... features) {
         if (jsonbBytes == null || jsonbBytes.length == 0) {
@@ -709,6 +756,10 @@ public interface JSONB {
 
     /**
      * Parses JSONB bytes to an object of the specified class
+     *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
      *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
@@ -744,6 +795,10 @@ public interface JSONB {
     /**
      * Parses JSONB bytes to an object of the specified type
      *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
+     *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
      * @param objectType the type of the object to parse to
@@ -768,12 +823,17 @@ public interface JSONB {
     }
 
     /**
-     * Parses JSONB bytes to an object with specified types
+     * Parses a JSONB array into an Object[] with a target type for each position
+     *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.
+     * Types are positional: {@code types[i]} controls the conversion of array element {@code i}.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。types[i] 指定数组第 i 个元素的目标类型。</details>
      *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
      * @param types the types of the object to parse to
-     * @return the parsed object
+     * @return an Object[] of types.length, with nulls for missing elements, or null for an encoded null
      */
     static <T> T parseObject(byte[] jsonbBytes, Type... types) {
         return parseObject(jsonbBytes, new MultiType(types));
@@ -781,6 +841,10 @@ public interface JSONB {
 
     /**
      * Parses JSONB bytes to an object of the specified type with a symbol table
+     *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
      *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
@@ -808,6 +872,10 @@ public interface JSONB {
 
     /**
      * Parses JSONB bytes to an object of the specified type with a symbol table and features
+     *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
      *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
@@ -843,6 +911,10 @@ public interface JSONB {
 
     /**
      * Parses JSONB bytes to an object of the specified class with a filter and features
+     *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
      *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
@@ -889,13 +961,16 @@ public interface JSONB {
     /**
      * Parses JSONB bytes to an object of the specified type with a symbol table, filters and features
      *
+     * <p>Null or empty input returns null. The input is JSONB binary data, not UTF-8 JSON text.</p>
+     * <details><summary>中文</summary>null 或空输入返回 null；输入必须是 JSONB 二进制数据，而不是 UTF-8 JSON 文本。</details>
+     *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
      * @param objectType the type of the object to parse to
      * @param symbolTable the symbol table to use
      * @param filters the filters to apply
      * @param features the JSON reader features to apply
-     * @return the parsed object
+     * @return the parsed object, or null for null or empty input
      */
     static <T> T parseObject(
             byte[] jsonbBytes,
@@ -939,6 +1014,10 @@ public interface JSONB {
     /**
      * Creates a deep copy of the specified object
      *
+     * <p>Delegates to {@link JSON#copy(Object, JSONWriter.Feature...)}. Null returns null; supported
+     * immutable values may be returned unchanged.</p>
+     * <details><summary>中文</summary>委托给 JSON.copy；null 返回 null，支持的不可变值可能直接返回。</details>
+     *
      * @param <T> the type of the object
      * @param object the object to copy
      * @param features the JSON writer features to apply
@@ -952,6 +1031,10 @@ public interface JSONB {
     /**
      * Parses JSONB bytes to an object of the specified type reference
      *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
+     *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
      * @param typeReference the type reference of the object to parse to
@@ -964,6 +1047,9 @@ public interface JSONB {
 
     /**
      * Parses JSONB from an input stream to an object of the specified class
+     *
+     * <p>Reads and buffers the stream to EOF, then parses the JSONB value. The stream is not closed.</p>
+     * <details><summary>中文</summary>读取并缓存输入流直到 EOF，然后解析 JSONB 值；不会关闭输入流。</details>
      *
      * @param <T> the type of the object
      * @param in the input stream to parse from
@@ -984,6 +1070,9 @@ public interface JSONB {
     /**
      * Parses JSONB from an input stream to an object of the specified type
      *
+     * <p>Reads and buffers the stream to EOF, then parses the JSONB value. The stream is not closed.</p>
+     * <details><summary>中文</summary>读取并缓存输入流直到 EOF，然后解析 JSONB 值；不会关闭输入流。</details>
+     *
      * @param <T> the type of the object
      * @param in the input stream to parse from
      * @param objectType the type of the object to parse to
@@ -1002,6 +1091,9 @@ public interface JSONB {
 
     /**
      * Parses JSONB from an input stream to an object of the specified type using the specified context
+     *
+     * <p>Reads and buffers the stream to EOF, then parses the JSONB value. The stream is not closed.</p>
+     * <details><summary>中文</summary>读取并缓存输入流直到 EOF，然后解析 JSONB 值；不会关闭输入流。</details>
      *
      * @param <T> the type of the object
      * @param in the input stream to parse from
@@ -1035,6 +1127,9 @@ public interface JSONB {
     /**
      * Parses JSONB from an input stream to an object of the specified class using the specified context
      *
+     * <p>Reads and buffers the stream to EOF, then parses the JSONB value. The stream is not closed.</p>
+     * <details><summary>中文</summary>读取并缓存输入流直到 EOF，然后解析 JSONB 值；不会关闭输入流。</details>
+     *
      * @param <T> the type of the object
      * @param in the input stream to parse from
      * @param objectClass the class of the object to parse to
@@ -1066,12 +1161,17 @@ public interface JSONB {
     /**
      * Parses JSONB from an input stream with specified length to an object of the specified type using the specified context
      *
+     * <p>Reads exactly {@code length} bytes, leaving subsequent bytes and the stream open.
+     * Premature EOF causes IllegalArgumentException.</p>
+     * <details><summary>中文</summary>读取恰好 length 个字节，保留后续字节且不关闭输入流；提前到达 EOF 时抛出 IllegalArgumentException。</details>
+     *
      * @param <T> the type of the object
      * @param in the input stream to parse from
      * @param length the length of data to read
      * @param objectType the type of the object to parse to
      * @param context the JSON reader context
      * @return the parsed object
+     * @throws IllegalArgumentException if EOF occurs before length bytes are read
      * @throws IOException if an I/O error occurs
      */
     static <T> T parseObject(
@@ -1091,7 +1191,24 @@ public interface JSONB {
             if (bytes.length < length) {
                 bytes = new byte[length];
             }
-            int read = in.read(bytes, 0, length);
+            // A stream may return fewer bytes than requested without reaching EOF.
+            // <details><summary>中文</summary>流未结束时，单次读取也可能少于请求的字节数。</details>
+            int read = 0;
+            while (read < length) {
+                int count = in.read(bytes, read, length - read);
+                if (count < 0) {
+                    break;
+                }
+                if (count == 0) {
+                    int value = in.read();
+                    if (value < 0) {
+                        break;
+                    }
+                    bytes[read++] = (byte) value;
+                } else {
+                    read += count;
+                }
+            }
             if (read != length) {
                 throw new IllegalArgumentException("deserialize failed. expected read length: " + length + " but actual read: " + read);
             }
@@ -1105,12 +1222,17 @@ public interface JSONB {
     /**
      * Parses JSONB from an input stream with specified length to an object of the specified type with features
      *
+     * <p>Reads exactly {@code length} bytes, leaving subsequent bytes and the stream open.
+     * Premature EOF causes IllegalArgumentException.</p>
+     * <details><summary>中文</summary>读取恰好 length 个字节，保留后续字节且不关闭输入流；提前到达 EOF 时抛出 IllegalArgumentException。</details>
+     *
      * @param <T> the type of the object
      * @param in the input stream to parse from
      * @param length the length of data to read
      * @param objectType the type of the object to parse to
      * @param features the JSON reader features to apply
      * @return the parsed object
+     * @throws IllegalArgumentException if EOF occurs before length bytes are read
      * @throws IOException if an I/O error occurs
      */
     static <T> T parseObject(
@@ -1119,29 +1241,15 @@ public interface JSONB {
             Type objectType,
             JSONReader.Feature... features
     ) throws IOException {
-        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
-        final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
-        byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
-        if (bytes == null) {
-            bytes = new byte[8192];
-        }
-        try {
-            if (bytes.length < length) {
-                bytes = new byte[length];
-            }
-            int read = in.read(bytes, 0, length);
-            if (read != length) {
-                throw new IllegalArgumentException("deserialize failed. expected read length: " + length + " but actual read: " + read);
-            }
-
-            return parseObject(bytes, 0, length, objectType, features);
-        } finally {
-            BYTES_UPDATER.lazySet(cacheItem, bytes);
-        }
+        return parseObject(in, length, objectType, JSONFactory.createReadContext(features));
     }
 
     /**
      * Parses JSONB bytes to an object of the specified class with features
+     *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
      *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
@@ -1185,6 +1293,10 @@ public interface JSONB {
     /**
      * Parses JSONB bytes to an object of the specified class using the specified context
      *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
+     *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
      * @param objectClass the class of the object to parse to
@@ -1226,6 +1338,10 @@ public interface JSONB {
     /**
      * Parses JSONB bytes to an object of the specified type with features
      *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。</details>
+     *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
      * @param objectClass the type of the object to parse to
@@ -1257,6 +1373,10 @@ public interface JSONB {
     /**
      * Parses JSONB bytes with offset and length to an object of the specified class
      *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference. The slice starts at {@code off} and spans {@code len} bytes.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。切片从 off 开始，共 len 字节。</details>
+     *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
      * @param off the offset in the byte array
@@ -1287,6 +1407,10 @@ public interface JSONB {
     /**
      * Parses JSONB bytes with offset and length to an object of the specified type
      *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference. The slice starts at {@code off} and spans {@code len} bytes.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。切片从 off 开始，共 len 字节。</details>
+     *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
      * @param off the offset in the byte array
@@ -1316,6 +1440,10 @@ public interface JSONB {
 
     /**
      * Parses JSONB bytes with offset and length to an object of the specified class with features
+     *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference. The slice starts at {@code off} and spans {@code len} bytes.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。切片从 off 开始，共 len 字节。</details>
      *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
@@ -1354,6 +1482,10 @@ public interface JSONB {
     /**
      * Parses JSONB bytes with offset and length to an object of the specified type using the specified context
      *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference. The slice starts at {@code off} and spans {@code len} bytes.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。切片从 off 开始，共 len 字节。</details>
+     *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
      * @param off the offset in the byte array
@@ -1384,6 +1516,10 @@ public interface JSONB {
     /**
      * Parses JSONB bytes with offset and length to an object of the specified type with features
      *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference. The slice starts at {@code off} and spans {@code len} bytes.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。切片从 off 开始，共 len 字节。</details>
+     *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
      * @param off the offset in the byte array
@@ -1413,6 +1549,10 @@ public interface JSONB {
     /**
      * Parses JSONB bytes with offset and length to an object of the specified class with a symbol table
      *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference. The slice starts at {@code off} and spans {@code len} bytes.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。切片从 off 开始，共 len 字节。</details>
+     *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
      * @param off the offset in the byte array
@@ -1440,6 +1580,10 @@ public interface JSONB {
 
     /**
      * Parses JSONB bytes with offset and length to an object of the specified type with a symbol table
+     *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference. The slice starts at {@code off} and spans {@code len} bytes.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。切片从 off 开始，共 len 字节。</details>
      *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
@@ -1469,6 +1613,10 @@ public interface JSONB {
 
     /**
      * Parses JSONB bytes with offset and length to an object of the specified class with a symbol table and features
+     *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference. The slice starts at {@code off} and spans {@code len} bytes.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。切片从 off 开始，共 len 字节。</details>
      *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
@@ -1507,6 +1655,10 @@ public interface JSONB {
     /**
      * Parses JSONB bytes with offset and length to an object of the specified type with a symbol table and features
      *
+     * <p>The input must be nonnull JSONB binary data containing a value, not UTF-8 JSON text.
+     * An encoded JSONB null value is distinct from a null byte-array reference. The slice starts at {@code off} and spans {@code len} bytes.</p>
+     * <details><summary>中文</summary>输入必须为包含一个值的非 null JSONB 二进制数据，而不是 UTF-8 JSON 文本；编码后的 JSONB null 值不同于 null 字节数组引用。切片从 off 开始，共 len 字节。</details>
+     *
      * @param <T> the type of the object
      * @param jsonbBytes the JSONB bytes to parse
      * @param off the offset in the byte array
@@ -1543,6 +1695,10 @@ public interface JSONB {
 
     /**
      * Converts a string to JSONB bytes
+     *
+     * <p>Serializes the String as a JSONB string value; it does not parse the String as JSON.
+     * A null String produces the JSONB null marker. Use {@link #fromJSONString(String)} to encode JSON text.</p>
+     * <details><summary>中文</summary>将 String 序列化为 JSONB 字符串，不将其作为 JSON 解析；null 字符串生成 JSONB null 标记。转换 JSON 文本请使用 fromJSONString。</details>
      *
      * @param str the string to convert
      * @return the JSONB bytes representation
@@ -1598,6 +1754,11 @@ public interface JSONB {
 
     /**
      * Converts a string to JSONB bytes with specified charset
+     *
+     * <p>Selects the JSONB string encoding for UTF-8, UTF-16, UTF-16BE, UTF-16LE, US-ASCII,
+     * ISO-8859-1 or GB18030. A null or unrecognized charset falls back to {@link #toBytes(String)}.
+     * A null String produces the JSONB null marker; the result includes JSONB headers, not just encoded text.</p>
+     * <details><summary>中文</summary>支持 UTF-8、UTF-16、UTF-16BE、UTF-16LE、US-ASCII、ISO-8859-1 和 GB18030；null 或未识别的字符集回退到默认编码。null 字符串生成 JSONB null 标记，结果包含 JSONB 头部。</details>
      *
      * @param str the string to convert
      * @param charset the charset to use
@@ -1749,6 +1910,7 @@ public interface JSONB {
      * @return the JSONB bytes representation
      */
     static byte[] toBytes(Object object, JSONWriter.Context context, SymbolTable symbolTable, JSONWriter.Feature... features) {
+        context.config(features);
         try (JSONWriterJSONB writer = new JSONWriterJSONB(context, symbolTable)) {
             if (object == null) {
                 writer.writeNull();
@@ -1843,6 +2005,10 @@ public interface JSONB {
     /**
      * Creates a symbol table with the specified names
      *
+     * <p>Names are sorted and deduplicated before assigning ordinals starting at 1. The same external
+     * symbol table must be available when decoding data written with it.</p>
+     * <details><summary>中文</summary>名称排序去重后从 1 开始编号；解码使用外部符号表写入的数据时必须提供同一符号表。</details>
+     *
      * @param names the names to include in the symbol table
      * @return the created symbol table
      */
@@ -1852,6 +2018,10 @@ public interface JSONB {
 
     /**
      * Converts JSONB bytes to a JSON string
+     *
+     * <p>Produces a diagnostic JSON representation that may include JSONB type and reference metadata.
+     * It is not a byte-preserving conversion.</p>
+     * <details><summary>中文</summary>生成可能包含 JSONB 类型和引用元数据的诊断 JSON 表示，并非保留原始字节的转换。</details>
      *
      * @param jsonbBytes the JSONB bytes to convert
      * @return the JSON string representation
@@ -1864,8 +2034,12 @@ public interface JSONB {
     /**
      * Converts JSONB bytes to a JSON string
      *
+     * <p>Produces a diagnostic JSON representation that may include JSONB type and reference metadata.
+     * It is not a byte-preserving conversion.</p>
+     * <details><summary>中文</summary>生成可能包含 JSONB 类型和引用元数据的诊断 JSON 表示，并非保留原始字节的转换。</details>
+     *
      * @param jsonbBytes the JSONB bytes to convert
-     * @param raw whether to use raw format
+     * @param raw true to expose symbol ordinals and raw type wrappers; false to resolve symbol names
      * @return the JSON string representation
      * @since 2.0.28
      */
@@ -1876,6 +2050,10 @@ public interface JSONB {
 
     /**
      * Converts JSONB bytes to a JSON string with a symbol table
+     *
+     * <p>Produces a diagnostic JSON representation that may include JSONB type and reference metadata.
+     * It is not a byte-preserving conversion.</p>
+     * <details><summary>中文</summary>生成可能包含 JSONB 类型和引用元数据的诊断 JSON 表示，并非保留原始字节的转换。</details>
      *
      * @param jsonbBytes the JSONB bytes to convert
      * @param symbolTable the symbol table to use
@@ -1888,9 +2066,13 @@ public interface JSONB {
     /**
      * Converts JSONB bytes to a JSON string with a symbol table
      *
+     * <p>Produces a diagnostic JSON representation that may include JSONB type and reference metadata.
+     * It is not a byte-preserving conversion.</p>
+     * <details><summary>中文</summary>生成可能包含 JSONB 类型和引用元数据的诊断 JSON 表示，并非保留原始字节的转换。</details>
+     *
      * @param jsonbBytes the JSONB bytes to convert
      * @param symbolTable the symbol table to use
-     * @param raw whether to use raw format
+     * @param raw true to expose symbol ordinals and raw type wrappers; false to resolve symbol names
      * @return the JSON string representation
      */
     static String toJSONString(byte[] jsonbBytes, SymbolTable symbolTable, boolean raw) {
@@ -1900,6 +2082,10 @@ public interface JSONB {
 
     /**
      * Writes an object to an output stream as JSONB bytes
+     *
+     * <p>Writes JSONB bytes without closing or flushing the supplied OutputStream. Null objects are
+     * written as the JSONB null marker. I/O failures are wrapped in JSONException.</p>
+     * <details><summary>中文</summary>写入 JSONB 字节，但不关闭或刷新传入的输出流；null 对象写为 JSONB null 标记，I/O 错误包装为 JSONException。</details>
      *
      * @param out the output stream to write to
      * @param object the object to write
@@ -1936,6 +2122,10 @@ public interface JSONB {
     /**
      * Converts a JSON string to JSONB bytes
      *
+     * <p>Parses JSON text before encoding its value as JSONB. Formatting and lexical number spelling
+     * are not preserved. Null or empty text is converted to the JSONB null marker.</p>
+     * <details><summary>中文</summary>先解析 JSON 文本，再将其值编码为 JSONB；不保留排版或数字的原始文本形式。null 或空文本转换为 JSONB null 标记。</details>
+     *
      * @param str the JSON string to convert
      * @return the JSONB bytes representation
      */
@@ -1944,9 +2134,12 @@ public interface JSONB {
     }
 
     /**
-     * Converts JSON bytes to JSONB bytes
+     * Converts UTF-8 JSON text bytes to JSONB bytes
      *
-     * @param jsonUtf8Bytes the JSON bytes to convert
+     * <p>Parses UTF-8 JSON text before encoding its value as JSONB; the input is not already JSONB.</p>
+     * <details><summary>中文</summary>先解析 UTF-8 JSON 文本，再将其值编码为 JSONB；输入不是已有的 JSONB 数据。</details>
+     *
+     * @param jsonUtf8Bytes the UTF-8 JSON text bytes to convert
      * @return the JSONB bytes representation
      */
     static byte[] fromJSONBytes(byte[] jsonUtf8Bytes) {
@@ -2079,6 +2272,9 @@ public interface JSONB {
     /**
      * Checks if the specified type is an int32 number type
      *
+     * <p>Checks a JSONB type marker, not the numeric value to encode. This form uses a single marker byte with no payload.</p>
+     * <details><summary>中文</summary>检查的是 JSONB 类型标记，不是待编码的数值。</details>
+     *
      * @param type the type to check
      * @return true if the type is an int32 number type, false otherwise
      */
@@ -2088,6 +2284,9 @@ public interface JSONB {
 
     /**
      * Checks if the specified type is an int32 byte type
+     *
+     * <p>Checks a JSONB type marker, not the numeric value to encode. This form uses a marker followed by one payload byte.</p>
+     * <details><summary>中文</summary>检查的是 JSONB 类型标记，不是待编码的数值。</details>
      *
      * @param type the type to check
      * @return true if the type is an int32 byte type, false otherwise
@@ -2099,6 +2298,9 @@ public interface JSONB {
     /**
      * Checks if the specified type is an int32 short type
      *
+     * <p>Checks a JSONB type marker, not the numeric value to encode. This form uses a marker followed by two payload bytes.</p>
+     * <details><summary>中文</summary>检查的是 JSONB 类型标记，不是待编码的数值。</details>
+     *
      * @param type the type to check
      * @return true if the type is an int32 short type, false otherwise
      */
@@ -2108,6 +2310,9 @@ public interface JSONB {
 
     /**
      * Checks if the specified type is an int64 number type
+     *
+     * <p>Checks a JSONB type marker, not the numeric value to encode. This form uses a single marker byte with no payload.</p>
+     * <details><summary>中文</summary>检查的是 JSONB 类型标记，不是待编码的数值。</details>
      *
      * @param type the type to check
      * @return true if the type is an int64 number type, false otherwise
@@ -2119,6 +2324,9 @@ public interface JSONB {
     /**
      * Checks if the specified type is an int64 byte type
      *
+     * <p>Checks a JSONB type marker, not the numeric value to encode. This form uses a marker followed by one payload byte.</p>
+     * <details><summary>中文</summary>检查的是 JSONB 类型标记，不是待编码的数值。</details>
+     *
      * @param type the type to check
      * @return true if the type is an int64 byte type, false otherwise
      */
@@ -2128,6 +2336,9 @@ public interface JSONB {
 
     /**
      * Checks if the specified type is an int64 short type
+     *
+     * <p>Checks a JSONB type marker, not the numeric value to encode. This form uses a marker followed by two payload bytes.</p>
+     * <details><summary>中文</summary>检查的是 JSONB 类型标记，不是待编码的数值。</details>
      *
      * @param type the type to check
      * @return true if the type is an int64 short type, false otherwise
@@ -2139,15 +2350,21 @@ public interface JSONB {
     /**
      * Checks if the specified integer value can be represented as an int32 byte value
      *
+     * <p>Tests the inclusive value range {@code [-2048, 2047]}, which fits the two-byte int32 encoding.</p>
+     * <details><summary>中文</summary>检查包含边界的 [-2048, 2047] 数值范围，该范围可用两字节 int32 编码。</details>
+     *
      * @param i the integer value to check
      * @return true if the value can be represented as an int32 byte value, false otherwise
      */
     static boolean isInt32ByteValue(int i) {
-        return ((i + 2048) & ~0xFFF) != 0;
+        return ((i + 2048) & ~0xFFF) == 0;
     }
 
     /**
      * Checks if the specified integer value is within the int32 byte value range
+     *
+     * <p>Tests the same inclusive range as {@link #isInt32ByteValue(int)}.</p>
+     * <details><summary>中文</summary>检查的包含边界数值范围与 isInt32ByteValue 相同。</details>
      *
      * @param i the integer value to check
      * @return true if the value is within the int32 byte value range, false otherwise
@@ -2157,7 +2374,11 @@ public interface JSONB {
     }
 
     /**
-     * IO utility methods for JSONB serialization
+     * Low-level JSONB serialization into caller-owned buffers.
+     * Callers must provide valid slices and sufficient capacity; these methods do not grow buffers.
+     * Write methods return the exclusive end offset. Capacity helpers return allocation estimates,
+     * not necessarily the exact encoded length.
+     * <details><summary>中文</summary>向调用方缓冲区写入 JSONB；调用方须提供有效切片和足够容量，方法不会扩容。写入方法返回结束偏移（不含），容量方法返回分配估计而非精确编码长度。</details>
      */
     interface IO {
         /**
@@ -2320,7 +2541,6 @@ public interface JSONB {
                 bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0
                         ? BC_NULL
                         : BC_DOUBLE_NUM_0;
-                bytes[off] = (features & (MASK_NULL_AS_DEFAULT_VALUE | MASK_WRITE_NULL_NUMBER_AS_ZERO)) == 0 ? BC_NULL : BC_DOUBLE_NUM_0;
                 return off + 1;
             }
             return IO.writeDouble(bytes, off, value);
@@ -2542,6 +2762,9 @@ public interface JSONB {
             int symbol = -1;
             if (symbolTable != null) {
                 symbol = symbolTable.getOrdinalByHashCode(hash);
+                if (symbol != -1) {
+                    return writeInt32(bytes, off, -symbol);
+                }
                 if (symbol == -1 && jsonWriterJSONB.symbols != null) {
                     symbol = jsonWriterJSONB.symbols.get(hash);
                 }
@@ -2749,6 +2972,10 @@ public interface JSONB {
         /**
          * Writes a UTF-16 string to a byte array
          *
+         * <p>The source contains UTF-16 code units in the current JVM native byte order, without a BOM.
+         * The emitted JSONB marker records that byte order.</p>
+         * <details><summary>中文</summary>源字节为当前 JVM 本机字节序的 UTF-16 编码且不含 BOM；输出 JSONB 标记记录该字节序。</details>
+         *
          * @param bytes the byte array to write to
          * @param off the offset in the byte array
          * @param value the UTF-16 byte array to write
@@ -2840,7 +3067,7 @@ public interface JSONB {
          */
         static int stringCapacity(String str) {
             if (str == null) {
-                return 0;
+                return 1;
             }
 
             int strlen = str.length();
@@ -2966,7 +3193,10 @@ public interface JSONB {
         }
 
         /**
-         * Writes a UTF-8 character array to a byte array
+         * Writes a character-array slice as a JSONB UTF-8 string
+         *
+         * <p>Encodes a slice of Java UTF-16 characters as a JSONB UTF-8 string, including its type and length.</p>
+         * <details><summary>中文</summary>将 Java UTF-16 字符切片编码为 JSONB UTF-8 字符串，包含类型和长度。</details>
          *
          * @param bytes the byte array to write to
          * @param off the offset in the byte array
@@ -2991,6 +3221,9 @@ public interface JSONB {
 
         /**
          * Calculates the size needed for an integer value
+         *
+         * <p>Includes the type marker; the result is 1, 2, 3 or 5 bytes.</p>
+         * <details><summary>中文</summary>包含类型标记，结果为 1、2、3 或 5 字节。</details>
          *
          * @param i the integer value
          * @return the size needed

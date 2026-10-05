@@ -69,7 +69,7 @@ class ObjectReaderImplInt16Array
                 }
 
                 Integer i = jsonReader.readInt32();
-                values[size++] = i == null ? 0 : i.shortValue();
+                values[size++] = i == null ? null : i.shortValue();
             }
             jsonReader.nextIfComma();
 

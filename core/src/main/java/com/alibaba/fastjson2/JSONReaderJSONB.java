@@ -331,7 +331,7 @@ final class JSONReaderJSONB
             return null;
         }
 
-        if (type >= BC_OBJECT) {
+        if (type == BC_OBJECT) {
             Map map;
             if ((features & Feature.UseNativeObject.mask) != 0) {
                 if (JVM_VERSION == 8 && bytes[offset] != BC_OBJECT_END) {
@@ -474,8 +474,9 @@ final class JSONReaderJSONB
         }
 
         if (type == BC_TYPED_ANY) {
+            offset--;
             ObjectReader objectReader = checkAutoType(Map.class, 0, 0);
-            return (Map) objectReader.readObject(this, null, null, 0);
+            return objectReader == null ? readObject() : (Map) objectReader.readJSONBObject(this, null, null, 0);
         }
 
         throw notSupportType(type);
@@ -546,7 +547,7 @@ final class JSONReaderJSONB
     public Object readAny() {
         int end = this.end;
         byte[] bytes = this.bytes;
-        if (offset >= bytes.length) {
+        if (offset >= end) {
             throw new JSONException("readAny overflow : " + offset + "/" + bytes.length);
         }
 
@@ -1059,6 +1060,9 @@ final class JSONReaderJSONB
     @Override
     public List readArray() {
         int entryCnt = startArray();
+        if (entryCnt == -1) {
+            return null;
+        }
         JSONArray array = new JSONArray(entryCnt);
         for (int i = 0; i < entryCnt; i++) {
             byte valueType = bytes[offset];
@@ -1136,7 +1140,7 @@ final class JSONReaderJSONB
             } else if (isInt64Short(valueType) && offset + 2 < end) {
                 int int3 = getLong3(bytes, offset + 1, valueType);
                 offset += 3;
-                value = int3;
+                value = (long) int3;
             } else if (valueType == BC_INT32) {
                 value = getIntBE(bytes, check3(offset + 1, end));
                 offset += 5;
@@ -1145,6 +1149,7 @@ final class JSONReaderJSONB
                 if ("..".equals(reference)) {
                     value = array;
                 } else {
+                    array.add(null);
                     addResolveTask(array, i, JSONPath.of(reference));
                     continue;
                 }
@@ -1198,14 +1203,23 @@ final class JSONReaderJSONB
 
     @Override
     public byte[] readHex() {
+        if (isBinary()) {
+            return readBinary();
+        }
         String str = readString();
+        if (str == null) {
+            return null;
+        }
+        if ((str.length() & 1) != 0) {
+            throw new JSONException("illegal hex string");
+        }
         byte[] bytes = new byte[str.length() / 2];
         for (int i = 0; i < bytes.length; ++i) {
-            char c0 = str.charAt(i * 2);
-            char c1 = str.charAt(i * 2 + 1);
-
-            int b0 = c0 - (c0 <= 57 ? 48 : 55);
-            int b1 = c1 - (c1 <= 57 ? 48 : 55);
+            int b0 = Character.digit(str.charAt(i * 2), 16);
+            int b1 = Character.digit(str.charAt(i * 2 + 1), 16);
+            if (b0 < 0 || b1 < 0) {
+                throw new JSONException("illegal hex string");
+            }
             bytes[i] = (byte) ((b0 << 4) | b1);
         }
         return bytes;
@@ -1213,7 +1227,7 @@ final class JSONReaderJSONB
 
     @Override
     public boolean isReference() {
-        return offset < bytes.length && bytes[offset] == BC_REFERENCE;
+        return offset < end && bytes[offset] == BC_REFERENCE;
     }
 
     @Override
@@ -1444,6 +1458,7 @@ final class JSONReaderJSONB
                 }
 
                 if (symbol < 0) {
+                    strlen = symbol;
                     return symbolTable.getHashCode(-symbol);
                 }
 
@@ -1475,7 +1490,7 @@ final class JSONReaderJSONB
         final int strlen;
         if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII_FIX_MAX) {
             strlen = strtype - BC_STR_ASCII_FIX_MIN;
-        } else if (strtype == BC_STR_ASCII || strtype == BC_STR_UTF8) {
+        } else if (strtype >= BC_STR_ASCII && strtype <= BC_STR_UTF16BE) {
             strlen = readLength();
         } else {
             throw readFieldNameHashCodeError();
@@ -1485,54 +1500,12 @@ final class JSONReaderJSONB
         long hashCode;
         if (strlen < 0) {
             hashCode = symbolTable.getHashCode(-strlen);
+        } else if (strtype >= BC_STR_UTF8 && strtype <= BC_STR_UTF16BE) {
+            hashCode = Fnv.hashCode64(getString());
+            offset += strlen;
         } else {
-            long nameValue = 0;
-            if (strlen <= 8 && offset + strlen <= bytes.length) {
-                long offsetBase = this.offset + BASE;
-                switch (strlen) {
-                    case 1:
-                        nameValue = bytes[offset];
-                        break;
-                    case 2:
-                        nameValue = UNSAFE.getShort(bytes, offsetBase) & 0xFFFFL;
-                        break;
-                    case 3:
-                        nameValue = (bytes[offset + 2] << 16)
-                                + (UNSAFE.getShort(bytes, offsetBase) & 0xFFFFL);
-                        break;
-                    case 4:
-                        nameValue = UNSAFE.getInt(bytes, offsetBase);
-                        break;
-                    case 5:
-                        nameValue = (((long) bytes[offset + 4]) << 32)
-                                + (UNSAFE.getInt(bytes, offsetBase) & 0xFFFFFFFFL);
-                        break;
-                    case 6:
-                        nameValue = ((long) UNSAFE.getShort(bytes, offsetBase + 4) << 32)
-                                + (UNSAFE.getInt(bytes, offsetBase) & 0xFFFFFFFFL);
-                        break;
-                    case 7:
-                        nameValue = (((long) bytes[offset + 6]) << 48)
-                                + (((long) bytes[offset + 5] & 0xFFL) << 40)
-                                + (((long) bytes[offset + 4] & 0xFFL) << 32)
-                                + (UNSAFE.getInt(bytes, offsetBase) & 0xFFFFFFFFL);
-                        break;
-                    default:
-                        nameValue = UNSAFE.getLong(bytes, offsetBase);
-                        break;
-                }
-            }
-
-            if (nameValue != 0) {
-                offset += strlen;
-                hashCode = nameValue;
-            } else {
-                hashCode = Fnv.MAGIC_HASH_CODE;
-                for (int i = 0; i < strlen; ++i) {
-                    hashCode ^= bytes[offset++];
-                    hashCode *= Fnv.MAGIC_PRIME;
-                }
-            }
+            hashCode = Fnv.hashCode64(bytes, offset, strlen, true);
+            offset += strlen;
         }
 
         if (typeSymbol) {
@@ -1644,7 +1617,7 @@ final class JSONReaderJSONB
             int strBegin = offset;
             hashCode = Fnv.MAGIC_HASH_CODE;
             for (int i = 0; i < typelen; ++i) {
-                hashCode ^= bytes[offset++];
+                hashCode ^= bytes[offset++] & 0xFF;
                 hashCode *= Fnv.MAGIC_PRIME;
             }
 
@@ -1695,6 +1668,7 @@ final class JSONReaderJSONB
                 }
 
                 if (symbol < 0) {
+                    strlen = symbol;
                     return symbolTable.getHashCode(-symbol);
                 }
 
@@ -1745,15 +1719,15 @@ final class JSONReaderJSONB
                 }
                 refTypeHash = symbol0Hash;
             } else if (typeIndex < 0) {
-                strlen = strtype;
+                strlen = typeIndex;
                 refTypeHash = symbolTable.getHashCode(-typeIndex);
             } else {
                 refTypeHash = symbols[typeIndex * 2];
+                long strInfo = symbols[typeIndex * 2 + 1];
+                this.strtype = (byte) strInfo;
+                strlen = ((int) strInfo) >> 8;
+                strBegin = (int) (strInfo >> 32);
                 if (refTypeHash == 0) {
-                    long strInfo = symbols[typeIndex * 2 + 1];
-                    this.strtype = (byte) strInfo;
-                    strlen = ((int) strInfo) >> 8;
-                    strBegin = (int) (strInfo >> 32);
                     refTypeHash = Fnv.hashCode64(getString());
                 }
             }
@@ -1793,108 +1767,14 @@ final class JSONReaderJSONB
         long hashCode;
         if (strlen < 0) {
             hashCode = symbolTable.getHashCode(-strlen);
-        } else if (strtype == BC_STR_UTF8) {
-            hashCode = Fnv.MAGIC_HASH_CODE;
-            int end = offset + strlen;
-            while (offset < end) {
-                int c = bytes[offset];
-
-                if (c >= 0) {
-                    offset++;
-                } else {
-                    c &= 0xFF;
-                    switch (c >> 4) {
-                        case 12:
-                        case 13: {
-                            /* 110x xxxx   10xx xxxx*/
-                            c = char2_utf8(c, bytes[offset + 1], offset);
-                            offset += 2;
-                            break;
-                        }
-                        case 14: {
-                            c = char2_utf8(c, bytes[offset + 1], bytes[offset + 2], offset);
-                            offset += 3;
-                            break;
-                        }
-                        default:
-                            /* 10xx xxxx,  1111 xxxx */
-                            throw new JSONException("malformed input around byte " + offset);
-                    }
-                }
-
-                hashCode ^= c;
-                hashCode *= Fnv.MAGIC_PRIME;
-            }
-        } else if (strtype == BC_STR_UTF16 || strtype == BC_STR_UTF16BE) {
-            hashCode = Fnv.MAGIC_HASH_CODE;
-            for (int i = 0; i < strlen; i += 2) {
-                byte c0 = bytes[offset + i];
-                byte c1 = bytes[offset + i + 1];
-                char ch = (char) ((c1 & 0xff) | ((c0 & 0xff) << 8));
-                hashCode ^= ch;
-                hashCode *= Fnv.MAGIC_PRIME;
-            }
-        } else if (strtype == BC_STR_UTF16LE) {
-            hashCode = Fnv.MAGIC_HASH_CODE;
-            for (int i = 0; i < strlen; i += 2) {
-                byte c0 = bytes[offset + i];
-                byte c1 = bytes[offset + i + 1];
-                char ch = (char) ((c0 & 0xff) | ((c1 & 0xff) << 8));
-                hashCode ^= ch;
-                hashCode *= Fnv.MAGIC_PRIME;
-            }
+        } else if (strtype >= BC_STR_UTF8 && strtype <= BC_STR_UTF16BE) {
+            // Hash decoded UTF-16 characters, matching Fnv for every wire encoding.
+            // <details><summary>中文</summary>对解码后的字符计算哈希，使所有编码与 Fnv 保持一致。</details>
+            hashCode = Fnv.hashCode64(getString());
+            offset += strlen;
         } else {
-            long nameValue = 0;
-            if (strlen <= 8) {
-                for (int i = 0, start = offset; i < strlen; offset++, i++) {
-                    byte c = bytes[offset];
-                    if (c < 0 || (c == 0 && bytes[start] == 0)) {
-                        nameValue = 0;
-                        offset = start;
-                        break;
-                    }
-
-                    switch (i) {
-                        case 0:
-                            nameValue = c;
-                            break;
-                        case 1:
-                            nameValue = ((c) << 8) + (nameValue & 0xFFL);
-                            break;
-                        case 2:
-                            nameValue = ((c) << 16) + (nameValue & 0xFFFFL);
-                            break;
-                        case 3:
-                            nameValue = ((c) << 24) + (nameValue & 0xFFFFFFL);
-                            break;
-                        case 4:
-                            nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
-                            break;
-                        case 5:
-                            nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                            break;
-                        case 6:
-                            nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                            break;
-                        case 7:
-                            nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-
-            if (nameValue != 0) {
-                hashCode = nameValue;
-            } else {
-                hashCode = Fnv.MAGIC_HASH_CODE;
-                for (int i = 0; i < strlen; ++i) {
-                    byte c = bytes[offset++];
-                    hashCode ^= c;
-                    hashCode *= Fnv.MAGIC_PRIME;
-                }
-            }
+            hashCode = Fnv.hashCode64(bytes, offset, strlen, true);
+            offset += strlen;
         }
 
         int symbol;
@@ -1951,363 +1831,46 @@ final class JSONReaderJSONB
         long hashCode;
         if (strlen < 0) {
             hashCode = symbolTable.getHashCode(-strlen);
-        } else if (strtype == BC_STR_UTF8) {
-            hashCode = Fnv.MAGIC_HASH_CODE;
-            int end = offset + strlen;
-            while (offset < end) {
-                int c = bytes[offset];
-
-                if (c >= 0) {
-                    offset++;
-                } else {
-                    c &= 0xFF;
-                    switch (c >> 4) {
-                        case 12:
-                        case 13: {
-                            /* 110x xxxx   10xx xxxx*/
-                            c = char2_utf8(c, bytes[offset + 1], offset);
-                            offset += 2;
-                            break;
-                        }
-                        case 14: {
-                            c = char2_utf8(c, bytes[offset + 1], bytes[offset + 2], offset);
-                            offset += 3;
-                            break;
-                        }
-                        default:
-                            /* 10xx xxxx,  1111 xxxx */
-                            throw new JSONException("malformed input around byte " + offset);
-                    }
-                }
-
-                hashCode ^= c;
-                hashCode *= Fnv.MAGIC_PRIME;
-            }
-        } else if (strtype == BC_STR_UTF16) {
-            final int offset = this.offset;
-            hashCode = Fnv.MAGIC_HASH_CODE;
-            if (bytes[offset] == (byte) 0xFE
-                    && bytes[offset + 1] == (byte) 0xFF
-            ) {
-                if (strlen <= 16) {
-                    long nameValue = 0;
-                    for (int i = 2; i < strlen; i += 2) {
-                        byte c0 = bytes[offset + i];
-                        byte c1 = bytes[offset + i + 1];
-                        char ch = (char) ((c1 & 0xff) | ((c0 & 0xff) << 8));
-
-                        if (ch > 0x7F || (i == 0 && ch == 0)) {
-                            nameValue = 0;
-                            break;
-                        }
-
-                        byte c = (byte) ch;
-                        switch ((i - 2) >> 1) {
-                            case 0:
-                                nameValue = c;
-                                break;
-                            case 1:
-                                nameValue = ((c) << 8) + (nameValue & 0xFFL);
-                                break;
-                            case 2:
-                                nameValue = ((c) << 16) + (nameValue & 0xFFFFL);
-                                break;
-                            case 3:
-                                nameValue = ((c) << 24) + (nameValue & 0xFFFFFFL);
-                                break;
-                            case 4:
-                                nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
-                                break;
-                            case 5:
-                                nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                                break;
-                            case 6:
-                                nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                                break;
-                            case 7:
-                                nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-
-                    if (nameValue != 0) {
-                        return nameValue;
-                    }
-                }
-
-                for (int i = 2; i < strlen; i += 2) {
-                    byte c0 = bytes[offset + i];
-                    byte c1 = bytes[offset + i + 1];
-                    char ch = (char) ((c1 & 0xff) | ((c0 & 0xff) << 8));
-                    hashCode ^= ch;
-                    hashCode *= Fnv.MAGIC_PRIME;
-                }
-            } else if (bytes[offset] == (byte) 0xFF
-                    && bytes[offset + 1] == (byte) 0xFE
-            ) {
-                for (int i = 2; i < strlen; i += 2) {
-                    byte c1 = bytes[offset + i];
-                    byte c0 = bytes[offset + i + 1];
-                    char ch = (char) ((c1 & 0xff) | ((c0 & 0xff) << 8));
-                    hashCode ^= ch;
-                    hashCode *= Fnv.MAGIC_PRIME;
-                }
-            } else {
-                for (int i = 0; i < strlen; i += 2) {
-                    byte c0 = bytes[offset + i];
-                    byte c1 = bytes[offset + i + 1];
-                    char ch = (char) ((c0 & 0xff) | ((c1 & 0xff) << 8));
-                    hashCode ^= ch;
-                    hashCode *= Fnv.MAGIC_PRIME;
-                }
-            }
-        } else if (strtype == BC_STR_UTF16BE) {
-            final int offset = this.offset;
-            if (strlen <= 16) {
-                long nameValue = 0;
-                for (int i = 0; i < strlen; i += 2) {
-                    byte c0 = bytes[offset + i];
-                    byte c1 = bytes[offset + i + 1];
-                    char ch = (char) ((c1 & 0xff) | ((c0 & 0xff) << 8));
-
-                    if (ch > 0x7F || (i == 0 && ch == 0)) {
-                        nameValue = 0;
-                        break;
-                    }
-
-                    byte c = (byte) ch;
-                    switch (i >> 1) {
-                        case 0:
-                            nameValue = c;
-                            break;
-                        case 1:
-                            nameValue = ((c) << 8) + (nameValue & 0xFFL);
-                            break;
-                        case 2:
-                            nameValue = ((c) << 16) + (nameValue & 0xFFFFL);
-                            break;
-                        case 3:
-                            nameValue = ((c) << 24) + (nameValue & 0xFFFFFFL);
-                            break;
-                        case 4:
-                            nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
-                            break;
-                        case 5:
-                            nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                            break;
-                        case 6:
-                            nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                            break;
-                        case 7:
-                            nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                if (nameValue != 0) {
-                    return nameValue;
-                }
-            }
-
-            hashCode = Fnv.MAGIC_HASH_CODE;
-            for (int i = 0; i < strlen; i += 2) {
-                byte c0 = bytes[offset + i];
-                byte c1 = bytes[offset + i + 1];
-                char ch = (char) ((c1 & 0xff) | ((c0 & 0xff) << 8));
-                hashCode ^= ch;
-                hashCode *= Fnv.MAGIC_PRIME;
-            }
-        } else if (strtype == BC_STR_UTF16LE) {
-            final int offset = this.offset;
-            if (strlen <= 16) {
-                long nameValue = 0;
-                for (int i = 0; i < strlen; i += 2) {
-                    byte c0 = bytes[offset + i];
-                    byte c1 = bytes[offset + i + 1];
-                    char ch = (char) ((c0 & 0xff) | ((c1 & 0xff) << 8));
-
-                    if (ch > 0x7F || (i == 0 && ch == 0)) {
-                        nameValue = 0;
-                        break;
-                    }
-
-                    byte c = (byte) ch;
-                    switch (i >> 1) {
-                        case 0:
-                            nameValue = c;
-                            break;
-                        case 1:
-                            nameValue = ((c) << 8) + (nameValue & 0xFFL);
-                            break;
-                        case 2:
-                            nameValue = ((c) << 16) + (nameValue & 0xFFFFL);
-                            break;
-                        case 3:
-                            nameValue = ((c) << 24) + (nameValue & 0xFFFFFFL);
-                            break;
-                        case 4:
-                            nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
-                            break;
-                        case 5:
-                            nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                            break;
-                        case 6:
-                            nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                            break;
-                        case 7:
-                            nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                if (nameValue != 0) {
-                    return nameValue;
-                }
-            }
-
-            hashCode = Fnv.MAGIC_HASH_CODE;
-            for (int i = 0; i < strlen; i += 2) {
-                byte c0 = bytes[offset + i];
-                byte c1 = bytes[offset + i + 1];
-                char ch = (char) ((c0 & 0xff) | ((c1 & 0xff) << 8));
-                hashCode ^= ch;
-                hashCode *= Fnv.MAGIC_PRIME;
-            }
+        } else if (strtype >= BC_STR_UTF8 && strtype <= BC_STR_UTF16BE) {
+            // Hash decoded UTF-16 characters, matching Fnv for every wire encoding.
+            // <details><summary>中文</summary>对解码后的字符计算哈希，使所有编码与 Fnv 保持一致。</details>
+            hashCode = Fnv.hashCode64(getString());
+            offset += strlen;
         } else {
-            if (strlen <= 8) {
-                long nameValue = 0;
-                for (int i = 0, start = offset; i < strlen; offset++, i++) {
-                    byte c = bytes[offset];
-                    if (c < 0 || (c == 0 && bytes[start] == 0)) {
-                        nameValue = 0;
-                        offset = start;
-                        break;
-                    }
-
-                    switch (i) {
-                        case 0:
-                            nameValue = c;
-                            break;
-                        case 1:
-                            nameValue = ((c) << 8) + (nameValue & 0xFFL);
-                            break;
-                        case 2:
-                            nameValue = ((c) << 16) + (nameValue & 0xFFFFL);
-                            break;
-                        case 3:
-                            nameValue = ((c) << 24) + (nameValue & 0xFFFFFFL);
-                            break;
-                        case 4:
-                            nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
-                            break;
-                        case 5:
-                            nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                            break;
-                        case 6:
-                            nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                            break;
-                        case 7:
-                            nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                if (nameValue != 0) {
-                    return nameValue;
-                }
-            }
-
-            hashCode = Fnv.MAGIC_HASH_CODE;
-            for (int i = 0; i < strlen; ++i) {
-                byte c = bytes[offset++];
-                hashCode ^= c;
-                hashCode *= Fnv.MAGIC_PRIME;
-            }
+            hashCode = Fnv.hashCode64(bytes, offset, strlen, true);
+            offset += strlen;
         }
 
         return hashCode;
     }
 
     long getNameHashCode() {
-        int offset = strBegin;
-        long nameValue = 0;
-        for (int i = 0; i < strlen; offset++) {
-            byte c = bytes[offset];
-            if (c < 0 || i >= 8 || (i == 0 && bytes[strBegin] == 0)) {
-                offset = strBegin;
-                nameValue = 0;
-                break;
-            }
-
-            switch (i) {
-                case 0:
-                    nameValue = c;
-                    break;
-                case 1:
-                    nameValue = ((c) << 8) + (nameValue & 0xFFL);
-                    break;
-                case 2:
-                    nameValue = ((c) << 16) + (nameValue & 0xFFFFL);
-                    break;
-                case 3:
-                    nameValue = ((c) << 24) + (nameValue & 0xFFFFFFL);
-                    break;
-                case 4:
-                    nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
-                    break;
-                case 5:
-                    nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                    break;
-                case 6:
-                    nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                    break;
-                case 7:
-                    nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                    break;
-                default:
-                    break;
-            }
-            i++;
+        if (strtype >= BC_STR_UTF8 && strtype <= BC_STR_UTF16BE || strlen < 0) {
+            return Fnv.hashCode64(getString());
         }
-
-        if (nameValue != 0) {
-            return nameValue;
-        }
-
-        long hashCode = Fnv.MAGIC_HASH_CODE;
-        for (int i = 0; i < strlen; ++i) {
-            byte c = bytes[offset++];
-            hashCode ^= c;
-            hashCode *= Fnv.MAGIC_PRIME;
-        }
-        return hashCode;
+        return Fnv.hashCode64(bytes, strBegin, strlen, true);
     }
 
     @Override
     public long getNameHashCodeLCase() {
+        if (strtype >= BC_STR_UTF8 && strtype <= BC_STR_UTF16BE || strlen < 0) {
+            return Fnv.hashCode64LCase(getString());
+        }
         int offset = strBegin;
         long nameValue = 0;
-        for (int i = 0; i < strlen; offset++) {
+        for (int i = 0; offset < strBegin + strlen; offset++) {
             byte c = bytes[offset];
-            if (c < 0 || i >= 8 || (i == 0 && bytes[strBegin] == 0)) {
+            if (c < 0) {
+                return Fnv.hashCode64LCase(getString());
+            }
+            if (i >= 8 || (i == 0 && bytes[strBegin] == 0)) {
                 offset = strBegin;
                 nameValue = 0;
                 break;
             }
 
             if (c == '_' || c == '-' || c == ' ') {
-                byte c1 = bytes[offset + 1];
-                if (c1 != c) {
-                    continue;
-                }
+                continue;
             }
 
             if (c >= 'A' && c <= 'Z') {
@@ -2351,7 +1914,7 @@ final class JSONReaderJSONB
 
         long hashCode = Fnv.MAGIC_HASH_CODE;
         for (int i = 0; i < strlen; ++i) {
-            byte c = bytes[offset++];
+            int c = bytes[offset++] & 0xFF;
             if (c >= 'A' && c <= 'Z') {
                 c = (byte) (c + 32);
             }
@@ -2393,6 +1956,7 @@ final class JSONReaderJSONB
                 offset += 4;
                 return;
             case BC_FLOAT_INT:
+            case BC_CHAR:
                 readInt32Value(); // skip
                 return;
             case BC_INT64:
@@ -2402,7 +1966,12 @@ final class JSONReaderJSONB
                 return;
             case BC_DOUBLE_LONG:
             case BC_DECIMAL_LONG:
+            case BC_BIGINT_LONG:
                 readInt64Value();
+                return;
+            case BC_TIMESTAMP:
+                readInt64Value();
+                readInt32Value();
                 return;
             case BC_DECIMAL:
                 // TODO skip big decimal
@@ -2423,7 +1992,9 @@ final class JSONReaderJSONB
                 readString(); // skip
                 return;
             case BC_BINARY:
+            case BC_BIGINT:
                 int byteslen = readInt32Value();
+                checkBigintLen(byteslen, offset, end);
                 offset += byteslen;
                 return;
             case BC_STR_ASCII:
@@ -2431,8 +2002,15 @@ final class JSONReaderJSONB
             case BC_STR_UTF16:
             case BC_STR_UTF16LE:
             case BC_STR_UTF16BE:
+            case BC_STR_GB18030:
                 int strlen = readInt32Value();
-                offset += strlen;
+                if (strlen > 0) {
+                    offset += strlen;
+                }
+                return;
+            case BC_SYMBOL:
+                offset--;
+                readFieldName();
                 return;
             case BC_TYPED_ANY: {
                 readTypeHashCode();
@@ -2453,7 +2031,7 @@ final class JSONReaderJSONB
                     } else if (size == -1) {
                         offset++;
                         int len = readInt32Value();
-                        offset += len;
+                        offset += Math.max(len, 0);
                     } else {
                         skipName();
                     }
@@ -2465,7 +2043,7 @@ final class JSONReaderJSONB
                     } else if (size == -1) {
                         offset++;
                         int len = readInt32Value();
-                        offset += len;
+                        offset += Math.max(len, 0);
                     } else {
                         skipValue();
                     }
@@ -2514,7 +2092,7 @@ final class JSONReaderJSONB
                         } else if (size == -1) {
                             offset++;
                             int len = readInt32Value();
-                            offset += len;
+                            offset += Math.max(len, 0);
                         } else {
                             skipValue();
                         }
@@ -2541,19 +2119,15 @@ final class JSONReaderJSONB
                 || strtype == BC_STR_UTF16BE
         ) {
             strlen = readLength();
-            offset += strlen;
+            offset += Math.max(strlen, 0);
             return true;
         }
 
         if (strtype == BC_SYMBOL) {
-            int type = bytes[offset];
-            if (type >= BC_INT32_NUM_MIN && type <= BC_INT32) {
-                readInt32Value();
-                return true;
-            }
-
-            readString();
-            readInt32Value();
+            // Skipped definitions still belong to the document's shared symbol table.
+            // <details><summary>中文</summary>跳过的符号定义仍须保留在文档共享符号表中。</details>
+            offset--;
+            readFieldName();
             return true;
         }
 
@@ -2727,7 +2301,7 @@ final class JSONReaderJSONB
             }
 
             final int strlen = this.strlen;
-            if (bytes[offset + strlen - 1] > 0 && nameValue0 != -1) {
+            if (strlen > 0 && bytes[offset + strlen - 1] > 0 && nameValue0 != -1) {
                 if (nameValue1 != -1) {
                     long nameValue01 = nameValue0 ^ nameValue1;
                     int indexMask = ((int) (nameValue01 ^ (nameValue01 >>> 32))) & (NAME_CACHE2.length - 1);
@@ -2867,7 +2441,7 @@ final class JSONReaderJSONB
                 if (symbols == null) {
                     symbols = new long[Math.max(minCapacity, 32)];
                 } else if (symbols.length < minCapacity) {
-                    symbols = Arrays.copyOf(symbols, symbols.length + 16);
+                    symbols = Arrays.copyOf(symbols, minCapacity + 16);
                 }
 
                 long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
@@ -2947,9 +2521,6 @@ final class JSONReaderJSONB
             charset = StandardCharsets.UTF_16LE;
         } else if (strtype == BC_STR_UTF16BE) {
             str = readUTF16BE();
-            if (str != null) {
-                return str;
-            }
             charset = StandardCharsets.UTF_16BE;
         } else if (strtype == BC_STR_GB18030) {
             readGB18030();
@@ -3028,14 +2599,6 @@ final class JSONReaderJSONB
             String str = STRING_CREATOR_JDK11.apply(chars, UTF16);
             offset += strlen;
 
-            if ((context.features & Feature.TrimString.mask) != 0) {
-                str = str.trim();
-            }
-            // empty string to null
-            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
-                str = null;
-            }
-
             return str;
         }
 
@@ -3064,14 +2627,6 @@ final class JSONReaderJSONB
             System.arraycopy(bytes, offset, chars, 0, strlen);
             String str = STRING_CREATOR_JDK11.apply(chars, UTF16);
             offset += strlen;
-
-            if ((context.features & Feature.TrimString.mask) != 0) {
-                str = str.trim();
-            }
-            // empty string to null
-            if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
-                str = null;
-            }
             return str;
         }
         return null;
@@ -3109,14 +2664,6 @@ final class JSONReaderJSONB
                 System.arraycopy(valueBytes, 0, value, 0, utf16_len);
                 String str = STRING_CREATOR_JDK11.apply(value, UTF16);
                 offset += strlen;
-
-                if ((context.features & Feature.TrimString.mask) != 0) {
-                    str = str.trim();
-                }
-                // empty string to null
-                if (str.isEmpty() && (context.features & Feature.EmptyStringAsNull.mask) != 0) {
-                    str = null;
-                }
 
                 return str;
             }
@@ -3272,7 +2819,9 @@ final class JSONReaderJSONB
             return '\0';
         } else if (type > BC_STR_ASCII_FIX_0 && type < BC_STR_ASCII_FIX_MAX) {
             offset++;
-            return (char) (bytes[offset++] & 0xff);
+            char value = (char) (bytes[offset] & 0xff);
+            offset += type - BC_STR_ASCII_FIX_MIN;
+            return value;
         }
 
         String str = readString();
@@ -3451,9 +3000,9 @@ final class JSONReaderJSONB
                 String str = new String(bytes, offset, strlen, ISO_8859_1);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
-                    return new BigInteger(str).intValue();
+                    return new BigInteger(str).longValue();
                 } else {
-                    return toBigDecimal(str).intValue();
+                    return toBigDecimal(str).longValue();
                 }
             }
             case BC_STR_UTF8: {
@@ -3461,9 +3010,9 @@ final class JSONReaderJSONB
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
-                    return new BigInteger(str).intValue();
+                    return new BigInteger(str).longValue();
                 } else {
-                    return toBigDecimal(str).intValue();
+                    return toBigDecimal(str).longValue();
                 }
             }
             case BC_STR_UTF16LE: {
@@ -3471,9 +3020,9 @@ final class JSONReaderJSONB
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
-                    return new BigInteger(str).intValue();
+                    return new BigInteger(str).longValue();
                 } else {
-                    return toBigDecimal(str).intValue();
+                    return toBigDecimal(str).longValue();
                 }
             }
             default:
@@ -3649,6 +3198,9 @@ final class JSONReaderJSONB
     @Override
     public byte[] readBinary() {
         byte type = bytes[offset++];
+        if (type == BC_NULL) {
+            return null;
+        }
         if (type != BC_BINARY) {
             throw notSupportType(type);
         }
@@ -3823,9 +3375,9 @@ final class JSONReaderJSONB
                 String str = new String(bytes, offset, strlen, ISO_8859_1);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
-                    return new BigInteger(str).intValue();
+                    return new BigInteger(str).floatValue();
                 } else {
-                    return toBigDecimal(str).intValue();
+                    return toBigDecimal(str).floatValue();
                 }
             }
             case BC_STR_UTF16LE: {
@@ -3833,9 +3385,9 @@ final class JSONReaderJSONB
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
-                    return new BigInteger(str).intValue();
+                    return new BigInteger(str).floatValue();
                 } else {
-                    return toBigDecimal(str).intValue();
+                    return toBigDecimal(str).floatValue();
                 }
             }
             case BC_STR_UTF8: {
@@ -3843,9 +3395,9 @@ final class JSONReaderJSONB
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
-                    return new BigInteger(str).intValue();
+                    return new BigInteger(str).floatValue();
                 } else {
-                    return toBigDecimal(str).intValue();
+                    return toBigDecimal(str).floatValue();
                 }
             }
             case BC_DECIMAL: {
@@ -3857,7 +3409,7 @@ final class JSONReaderJSONB
                 } else {
                     decimal = new BigDecimal(unscaledValue, scale);
                 }
-                return decimal.intValue();
+                return decimal.floatValue();
             }
             case BC_FALSE:
 //            case FLOAT_NUM_0:
@@ -3975,9 +3527,9 @@ final class JSONReaderJSONB
                 String str = new String(bytes, offset, strlen, ISO_8859_1);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
-                    return new BigInteger(str).intValue();
+                    return new BigInteger(str).doubleValue();
                 } else {
-                    return toBigDecimal(str).intValue();
+                    return toBigDecimal(str).doubleValue();
                 }
             }
             case BC_STR_UTF16LE: {
@@ -3985,9 +3537,9 @@ final class JSONReaderJSONB
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
-                    return new BigInteger(str).intValue();
+                    return new BigInteger(str).doubleValue();
                 } else {
-                    return toBigDecimal(str).intValue();
+                    return toBigDecimal(str).doubleValue();
                 }
             }
             case BC_STR_UTF8: {
@@ -3995,9 +3547,9 @@ final class JSONReaderJSONB
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
-                    return new BigInteger(str).intValue();
+                    return new BigInteger(str).doubleValue();
                 } else {
-                    return toBigDecimal(str).intValue();
+                    return toBigDecimal(str).doubleValue();
                 }
             }
             case BC_DECIMAL: {
@@ -4009,7 +3561,7 @@ final class JSONReaderJSONB
                 } else {
                     decimal = new BigDecimal(unscaledValue, scale);
                 }
-                return decimal.intValue();
+                return decimal.doubleValue();
             }
             case BC_FALSE:
 //            case FLOAT_NUM_0:
@@ -4097,7 +3649,7 @@ final class JSONReaderJSONB
         if (isInt64Short(type) && offset + 1 < end) {
             int value = getLong3(bytes, offset, type);
             offset += 2;
-            return value;
+            return (long) value;
         }
 
         switch (type) {
@@ -4270,14 +3822,13 @@ final class JSONReaderJSONB
                 int int32Value = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 float floatValue = Float.intBitsToFloat(int32Value);
-                return BigDecimal.valueOf((long) floatValue);
+                return new BigDecimal(Float.toString(floatValue));
             }
             case BC_DOUBLE: {
                 long int64Value = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 double doubleValue = Double.longBitsToDouble(int64Value);
-                return BigDecimal.valueOf(
-                        (long) doubleValue);
+                return BigDecimal.valueOf(doubleValue);
             }
             case BC_INT64: {
                 long int64Value = getLongBE(bytes, check7(offset, end));
@@ -4285,6 +3836,7 @@ final class JSONReaderJSONB
                 return BigDecimal.valueOf(int64Value);
             }
             case BC_BIGINT: {
+                offset--;
                 BigInteger bigInt = readBigInteger();
                 return new BigDecimal(bigInt);
             }
@@ -4581,19 +4133,9 @@ final class JSONReaderJSONB
             strtype = (byte) type;
             offset++;
             strlen = readLength();
-            switch (strlen) {
-                case 8:
-                    return readLocalDate8();
-                case 9:
-                    return readLocalDate9();
-                case 10: {
-                    return readLocalDate10();
-                }
-                case 11:
-                    return readLocalDate11();
-                default:
-                    break;
-            }
+            LocalDate date = DateUtils.parseLocalDate(bytes, offset, strlen);
+            offset += strlen;
+            return date;
         }
 
         throw notSupportType((byte) type);
@@ -4822,6 +4364,8 @@ final class JSONReaderJSONB
                     return readLocalTime11();
                 case 12:
                     return readLocalTime12();
+                case 15:
+                    return readLocalTime15();
                 case 18:
                     return readLocalTime18();
                 default:
@@ -4924,26 +4468,26 @@ final class JSONReaderJSONB
                 long second = readInt64Value();
                 int nano = readInt32Value();
                 Instant instant = Instant.ofEpochSecond(second, nano);
-                return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
+                return ZonedDateTime.ofInstant(instant, context.getZoneId());
             }
             case BC_TIMESTAMP_MINUTES: {
                 long minutes = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 Instant instant = Instant.ofEpochSecond(minutes * 60);
-                return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
+                return ZonedDateTime.ofInstant(instant, context.getZoneId());
             }
             case BC_TIMESTAMP_SECONDS: {
                 long seconds = getIntBE(bytes, check3(offset, end));
                 offset += 4;
                 Instant instant = Instant.ofEpochSecond(seconds);
-                return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
+                return ZonedDateTime.ofInstant(instant, context.getZoneId());
             }
             case BC_LOCAL_DATE: {
                 int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
                 byte month = bytes[offset++];
                 byte dayOfMonth = bytes[offset++];
                 LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
-                return ZonedDateTime.of(localDate, LocalTime.MIN, DEFAULT_ZONE_ID);
+                return ZonedDateTime.of(localDate, LocalTime.MIN, context.getZoneId());
             }
             case BC_LOCAL_DATETIME: {
                 int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
@@ -4954,14 +4498,14 @@ final class JSONReaderJSONB
                 byte second = bytes[offset++];
                 int nano = readInt32Value();
                 LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
-                return ZonedDateTime.of(ldt, DEFAULT_ZONE_ID);
+                return ZonedDateTime.of(ldt, context.getZoneId());
             }
             case BC_INT64:
             case BC_TIMESTAMP_MILLIS: {
                 long millis = getLongBE(bytes, check7(offset, end));
                 offset += 8;
                 Instant instant = Instant.ofEpochMilli(millis);
-                return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
+                return ZonedDateTime.ofInstant(instant, context.getZoneId());
             }
             default:
                 if (type >= BC_STR_ASCII_FIX_0 && type <= BC_STR_ASCII_FIX_MAX) {
@@ -4984,7 +4528,7 @@ final class JSONReaderJSONB
                 break;
             case BC_BINARY:
                 int len = bytes[offset++];
-                if (len != 16 && offset + 15 >= end) {
+                if (len != 16 || offset + 15 >= end) {
                     throw new JSONException("uuid not support " + len);
                 }
                 uuid = new UUID(
@@ -5083,6 +4627,7 @@ final class JSONReaderJSONB
                     offset++;
                     return false;
                 }
+                throw notSupportType(type);
             case BC_STR_ASCII_FIX_4:
                 if (bytes[offset] == 't'
                         && bytes[offset + 1] == 'r'
@@ -5100,6 +4645,7 @@ final class JSONReaderJSONB
                     offset += 4;
                     return true;
                 }
+                throw notSupportType(type);
             case BC_STR_ASCII_FIX_5:
                 if (bytes[offset] == 'f'
                         && bytes[offset + 1] == 'a'
@@ -5119,6 +4665,7 @@ final class JSONReaderJSONB
                     offset += 5;
                     return false;
                 }
+                throw notSupportType(type);
             case BC_STR_UTF8:
             case BC_STR_ASCII: {
                 strlen = readLength();
@@ -5129,7 +4676,7 @@ final class JSONReaderJSONB
                     }
                     if (bytes[offset] == 'N') {
                         offset++;
-                        return true;
+                        return false;
                     }
                 } else if (strlen == 4
                         && bytes[offset] == 't'

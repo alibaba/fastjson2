@@ -25,7 +25,9 @@ final class JSONPathSingleName
     @Override
     public Object eval(Object root) {
         Object value;
-        if (root instanceof Map) {
+        if (root == null) {
+            value = null;
+        } else if (root instanceof Map) {
             Map map = (Map) root;
             value = map.get(name);
             if (value == null) {
@@ -111,6 +113,9 @@ final class JSONPathSingleName
 
     @Override
     public boolean contains(Object root) {
+        if (root == null) {
+            return false;
+        }
         if (root instanceof Map) {
             return ((Map) root).containsKey(name);
         }
@@ -180,7 +185,7 @@ final class JSONPathSingleName
                 if (duplicateKeyValueAsArray) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(value);
-                        map.put(name, value);
+                        map.put(name, origin);
                     } else {
                         JSONArray array = JSONArray.of(origin, value);
                         map.put(name, array);
@@ -273,7 +278,7 @@ final class JSONPathSingleName
                     }
 
                     boolean match = nameHashCode == this.nameHashCode;
-                    if (!match && (!jsonReader.isObject()) && !jsonReader.isArray()) {
+                    if (!match) {
                         jsonReader.skipValue();
                         continue;
                     }
@@ -366,8 +371,7 @@ final class JSONPathSingleName
                 long nameHashCode = jsonReader.readFieldNameHashCode();
 
                 boolean match = nameHashCode == this.nameHashCode;
-                char ch = jsonReader.ch;
-                if (!match && ch != '{' && ch != '[') {
+                if (!match) {
                     jsonReader.skipValue();
                     continue;
                 }

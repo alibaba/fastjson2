@@ -988,6 +988,9 @@ public class ObjectReaderCreator {
                     null,
                     fieldReaders);
         }
+        if (typeKey != null) {
+            return new ObjectReaderAdapter(objectClass, typeKey, null, features, schema, defaultCreator, buildFunction, fieldReaders);
+        }
         switch (fieldReaders.length) {
             case 1:
                 return new ObjectReader1(
@@ -1620,14 +1623,14 @@ public class ObjectReaderCreator {
                                 alternateName,
                                 fieldInfo.ordinal,
                                 fieldInfo.features,
-                                null,
+                                fieldInfo.format,
                                 fieldInfo.locale,
                                 fieldInfo.defaultValue,
                                 schema,
                                 fieldType,
                                 fieldClass,
                                 field,
-                                null
+                                initReader
                         ),
                         objectClass);
             }
@@ -2430,48 +2433,6 @@ public class ObjectReaderCreator {
      * @param paramName the name of the parameter
      * @param declaringClass the declaring class of the parameter
      * @param parameter the parameter to create a reader for
-     * @param schema the JSON schema to use
-     * @param initReader the initialization reader to use
-     * @return a FieldReader instance for the specified parameter
-     */
-    /**
-     * Creates a FieldReader for the specified parameter with comprehensive configuration including locale, default value, and initialization reader.
-     *
-     * @param <T> the type of objects that contain the field
-     * @param objectClass the class containing the field
-     * @param objectType the type of the object
-     * @param fieldName the name of the field
-     * @param ordinal the ordinal position of the field
-     * @param features the features to use for the field
-     * @param format the date format to use for the field
-     * @param locale the locale to use for the field
-     * @param defaultValue the default value for the field
-     * @param fieldType the type of the field
-     * @param fieldClass the class of the field
-     * @param paramName the name of the parameter
-     * @param declaringClass the declaring class of the parameter
-     * @param parameter the parameter to create a reader for
-     * @param schema the JSON schema to use for the field
-     * @param initReader the initialization reader to use
-     * @return a FieldReader instance for the specified parameter
-     */
-    /**
-     * Creates a FieldReader for the specified parameter with comprehensive configuration.
-     *
-     * @param <T> the type of objects that contain the field
-     * @param objectClass the class containing the field
-     * @param objectType the type of the object
-     * @param fieldName the name of the field
-     * @param ordinal the ordinal position of the field
-     * @param features the features to use for the field
-     * @param format the date format to use for the field
-     * @param locale the locale to use for the field
-     * @param defaultValue the default value for the field
-     * @param fieldType the type of the field
-     * @param fieldClass the class of the field
-     * @param paramName the name of the parameter
-     * @param declaringClass the declaring class of the parameter
-     * @param parameter the parameter to create a reader for
      * @param schema the JSON schema to use for the field
      * @param initReader the initialization reader to use
      * @return a FieldReader instance for the specified parameter
@@ -2572,7 +2533,7 @@ public class ObjectReaderCreator {
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
             if (actualTypeArguments.length == 1) {
                 itemType = actualTypeArguments[0];
-                itemClass = TypeUtils.getClass(itemClass);
+                itemClass = TypeUtils.getClass(itemType);
             }
         }
         if (fieldClassResolved != null && Collection.class.isAssignableFrom(fieldClassResolved) && itemType != null) {
@@ -3192,7 +3153,7 @@ public class ObjectReaderCreator {
                 objectClass,
                 objectType,
                 fieldName,
-                0,
+                ordinal,
                 features,
                 format,
                 locale,

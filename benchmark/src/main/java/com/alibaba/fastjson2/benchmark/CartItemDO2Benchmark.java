@@ -24,7 +24,7 @@ public class CartItemDO2Benchmark {
 
         synchronized (CartItemDO2Benchmark.class) {
             if (list == null) {
-                list = new ArrayList<>();
+                List<CartItemDO2> items = new ArrayList<>();
                 for (long i = 90000000000L; i < 90000000000L + 1000; i++) {
                     CartItemDO2 cartItemDO2 = new CartItemDO2();
                     cartItemDO2.setUserId(i);
@@ -38,8 +38,11 @@ public class CartItemDO2Benchmark {
                     cartItemDO2.setSubType(i * 6);
                     cartItemDO2.setTpId(i * 7);
                     cartItemDO2.setTrackId(String.valueOf(i * 8));
-                    list.add(cartItemDO2);
+                    items.add(cartItemDO2);
                 }
+                // Publish only after construction so other benchmark threads see every item.
+                // <details><summary>中文</summary>构建完成后再发布，确保其他基准线程看到全部条目。</details>
+                list = items;
             }
         }
         return list;

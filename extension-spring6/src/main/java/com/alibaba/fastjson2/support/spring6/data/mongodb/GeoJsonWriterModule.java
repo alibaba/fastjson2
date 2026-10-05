@@ -93,7 +93,7 @@ public class GeoJsonWriterModule
                     if (j != 0) {
                         jsonWriter.writeComma();
                     }
-                    Point point = points.get(i);
+                    Point point = points.get(j);
                     jsonWriter.writeDoubleArray(point.getX(), point.getY());
                 }
                 jsonWriter.endArray();

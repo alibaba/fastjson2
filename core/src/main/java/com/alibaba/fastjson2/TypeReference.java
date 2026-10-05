@@ -16,12 +16,19 @@ import java.util.Map;
 /**
  * Represents a generic type {@code T}.
  *
- * <p>Java doesn't yet provide a way to represent generic types, so this class does.
- * Forces clients to create a subclass of this class which enables retrieval the type
- * information even at runtime.</p>
+ * <p>Captures a reflective {@link Type} from a parameterized subclass, preserving generic
+ * arguments that an object's runtime class alone cannot describe. An existing Type can
+ * also be wrapped using {@link #get(Type)} without declaring a subclass.</p>
+ * <details><summary>中文</summary>
+ * 从参数化子类捕获反射 Type，保留仅靠对象运行时类无法表达的泛型参数；已有 Type 也可通过 get(Type) 包装。
+ * </details>
  *
- * <p>This syntax cannot be used to create type literals that have wildcard
- * parameters, such as {@code Class<T>} or {@code List<? extends CharSequence>}.</p>
+ * <p>Wildcard arguments such as {@code List<? extends CharSequence>} are retained.
+ * A type variable such as {@code T} remains unresolved unless actual type arguments
+ * are supplied to the corresponding constructor.</p>
+ * <details><summary>中文</summary>
+ * 通配符类型参数会被保留；类型变量不会自动解析为运行时类型，可以通过构造方法提供实际类型参数。
+ * </details>
  *
  * <p>For example, to create a type literal for {@code List<String>}, you can
  * create an empty anonymous inner class:</p>
@@ -35,7 +42,7 @@ import java.util.Map;
  * User user = new TypeReference<User>(){}.parseObject(text);
  * }</pre>
  *
- * @param <T> the type refered to
+ * @param <T> the type referred to
  * @author wenshao[szujobs@hotmail.com]
  * @since 2.0.2
  */
@@ -45,10 +52,13 @@ public abstract class TypeReference<T> {
     protected final Class<? super T> rawType;
 
     /**
-     * Constructs a new type literal. Derives represented class from type parameter.
+     * Captures the type argument declared by a direct parameterized subclass.
      *
      * <p>Clients create an empty anonymous subclass. Doing so embeds the type
      * parameter in the anonymous class's type hierarchy, so we can reconstitute it at runtime despite erasure.</p>
+     * <details><summary>中文</summary>
+     * 捕获直接参数化子类声明的类型参数；通常使用空匿名子类，在运行时保留泛型类型信息。
+     * </details>
      */
     @SuppressWarnings("unchecked")
     public TypeReference() {
@@ -124,7 +134,8 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSON#parseObject(String, Type)} for details
+     * Parses JSON into the captured type. See {@link JSON#parseObject(String, Type)}.
+     * <details><summary>中文</summary>将 JSON 文本解析为捕获的类型。</details>
      *
      * <pre>{@code
      * String text = "{\"id\":1,\"name\":\"kraity\"}";
@@ -132,6 +143,7 @@ public abstract class TypeReference<T> {
      * }</pre>
      *
      * @param text the JSON {@link String} to be parsed
+     * @return the parsed value, or null for null, empty, or JSON null input
      * @since 2.0.2
      */
     public T parseObject(String text) {
@@ -139,14 +151,16 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSON#parseObject(byte[], Type)} for details
+     * Parses UTF-8 JSON into the captured type. See {@link JSON#parseObject(byte[], Type)}.
+     * <details><summary>中文</summary>将 UTF-8 JSON 字节解析为捕获的类型。</details>
      *
      * <pre>{@code
-     * String utf8Bytes = "{\"id\":1,\"name\":\"kraity\"}".getBytes(StandardCharsets.UTF_8);
+     * byte[] utf8Bytes = "{\"id\":1,\"name\":\"kraity\"}".getBytes(StandardCharsets.UTF_8);
      * User user = new TypeReference<User>(){}.parseObject(utf8Bytes);
      * }</pre>
      *
      * @param utf8Bytes UTF8 encoded JSON byte array to parse
+     * @return the parsed value, or null for null, empty, or JSON null input
      * @since 2.0.3
      */
     public T parseObject(byte[] utf8Bytes) {
@@ -154,7 +168,9 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSON#parseArray(String, JSONReader.Feature...)} for details
+     * Parses an array whose elements have the captured type {@code T}.
+     * See {@link JSON#parseArray(String, Type, JSONReader.Feature...)} for details.
+     * <details><summary>中文</summary>解析数组，捕获的 T 表示每个元素的类型，而非整个列表的类型。</details>
      *
      * <pre>{@code
      * String text = "[{\"id\":1,\"name\":\"kraity\"}]";
@@ -163,6 +179,7 @@ public abstract class TypeReference<T> {
      *
      * @param text the JSON {@link String} to be parsed
      * @param features features to be enabled in parsing
+     * @return the parsed list, or null for null, empty, or JSON null input
      * @since 2.0.2
      */
     public List<T> parseArray(String text, JSONReader.Feature... features) {
@@ -170,15 +187,18 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSON#parseArray(byte[], Type, JSONReader.Feature...)} for details
+     * Parses a UTF-8 array whose elements have the captured type {@code T}.
+     * See {@link JSON#parseArray(byte[], Type, JSONReader.Feature...)} for details.
+     * <details><summary>中文</summary>解析 UTF-8 数组，捕获的 T 表示每个元素的类型，而非整个列表的类型。</details>
      *
      * <pre>{@code
-     * String utf8Bytes = "[{\"id\":1,\"name\":\"kraity\"}]".getBytes(StandardCharsets.UTF_8);
+     * byte[] utf8Bytes = "[{\"id\":1,\"name\":\"kraity\"}]".getBytes(StandardCharsets.UTF_8);
      * List<User> users = new TypeReference<User>(){}.parseArray(utf8Bytes);
      * }</pre>
      *
      * @param utf8Bytes UTF8 encoded JSON byte array to parse
      * @param features features to be enabled in parsing
+     * @return the parsed list, or null for null, empty, or JSON null input
      * @since 2.0.3
      */
     public List<T> parseArray(byte[] utf8Bytes, JSONReader.Feature... features) {
@@ -186,7 +206,9 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSONArray#to(Type)} for details
+     * Converts the entire array to the captured type, such as {@code List<User>}.
+     * See {@link JSONArray#to(Type)} for details.
+     * <details><summary>中文</summary>将整个数组转换为捕获的类型，例如 List&lt;User&gt;。</details>
      *
      * <pre>{@code
      * JSONArray array = ...
@@ -194,6 +216,8 @@ public abstract class TypeReference<T> {
      * }</pre>
      *
      * @param array specify the {@link JSONArray} to convert
+     * @return the converted value
+     * @throws NullPointerException if array is null
      * @since 2.0.4
      */
     public T to(JSONArray array) {
@@ -201,7 +225,9 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSONObject#to(Type, JSONReader.Feature...)} for details
+     * Converts the entire object to the captured type.
+     * See {@link JSONObject#to(Type, JSONReader.Feature...)} for details.
+     * <details><summary>中文</summary>将整个 JSON 对象转换为捕获的类型。</details>
      *
      * <pre>{@code
      * JSONObject object = ...
@@ -210,6 +236,8 @@ public abstract class TypeReference<T> {
      *
      * @param object specify the {@link JSONObject} to convert
      * @param features features to be enabled in parsing
+     * @return the converted value
+     * @throws NullPointerException if object is null
      * @since 2.0.4
      */
     public T to(JSONObject object, JSONReader.Feature... features) {
@@ -240,10 +268,12 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * Gets a type reference for the specified type.
+     * Wraps an existing reflective type without requiring a caller-defined subclass.
+     * <details><summary>中文</summary>包装已有的反射类型，无需调用者定义子类。</details>
      *
      * @param type specify the {@link Type} to be converted
      * @return the type reference
+     * @throws NullPointerException if type is null
      */
     public static TypeReference<?> get(Type type) {
         return new TypeReference<Object>(type) {
@@ -336,7 +366,9 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * Creates a multi-type from the specified types.
+     * Creates a positional type descriptor for a heterogeneous JSON array.
+     * Each supplied type describes the element at the corresponding index.
+     * <details><summary>中文</summary>创建异构 JSON 数组的类型描述，每个类型对应同一索引处的元素。</details>
      *
      * @param types the types
      * @return the multi-type
@@ -360,7 +392,9 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * Creates an array type with the specified element type.
+     * Creates a {@link GenericArrayType} descriptor with the specified component type.
+     * The result is a reflective descriptor, not an array {@link Class}.
+     * <details><summary>中文</summary>创建指定组件类型的 GenericArrayType 描述，返回值不是数组 Class。</details>
      *
      * @param elementType the element type
      * @return the generic array type

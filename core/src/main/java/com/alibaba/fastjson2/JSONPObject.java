@@ -6,15 +6,17 @@ import java.util.List;
 /**
  * JSONPObject is used to represent JSONP (JSON with Padding) data structure.
  *
- * <p>JSONP is a technique for safely requesting data from another domain.
- * It wraps JSON data in a function call to bypass the same-origin policy
- * that prevents direct access to resources from different domains.</p>
+ * <p>JSONP wraps JSON values in a JavaScript callback invocation. The callback name is
+ * emitted as supplied, without validation or JSON string escaping.</p>
+ * <details><summary>中文</summary>
+ * JSONP 将 JSON 值包装为 JavaScript 回调调用；回调名称按原样输出，不进行校验或 JSON 字符串转义。
+ * </details>
  *
  * <p>Example usage:
  * <pre>{@code
  * // Create a JSONP object
  * JSONPObject jsonp = new JSONPObject("callback");
- * jsonp.addParameter(new JSONObject().fluentPut("id", 1).fluentPut("name", "test"));
+ * jsonp.addParameter(JSONObject.of("id", 1, "name", "test"));
  *
  * // Serialize to JSONP string
  * String jsonpString = jsonp.toString(); // "callback({\"id\":1,\"name\":\"test\"})"
@@ -61,7 +63,8 @@ public class JSONPObject {
     }
 
     /**
-     * Sets the function name of this JSONP object
+     * Sets the callback name, which is emitted verbatim during serialization.
+     * <details><summary>中文</summary>设置回调名称；序列化时按原样输出。</details>
      *
      * @param function the function name to set
      */
@@ -70,7 +73,9 @@ public class JSONPObject {
     }
 
     /**
-     * Gets the parameters list of this JSONP object
+     * Gets the mutable parameters list of this JSONP object.
+     * Changes to this list affect subsequent serialization.
+     * <details><summary>中文</summary>返回可修改的参数列表；修改会影响后续序列化结果。</details>
      *
      * @return the parameters list
      */
@@ -79,7 +84,8 @@ public class JSONPObject {
     }
 
     /**
-     * Adds a parameter to this JSONP object
+     * Appends a parameter, including null, to the ordered callback argument list.
+     * <details><summary>中文</summary>将参数追加到有序的回调参数列表，允许 null。</details>
      *
      * @param parameter the parameter to add
      */
@@ -88,7 +94,8 @@ public class JSONPObject {
     }
 
     /**
-     * Serializes this JSONP object to JSONP string format
+     * Serializes this object as a JavaScript callback invocation, rather than a JSON document.
+     * <details><summary>中文</summary>序列化为 JavaScript 回调调用，而非独立的 JSON 文档。</details>
      *
      * @return the JSONP string representation
      */

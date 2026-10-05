@@ -207,7 +207,10 @@ final class ObjectWriterImplDate
             formatter = ctx.getDateFormatter();
         }
         ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), zoneId);
-        String str = formatter.format(zdt);
-        jsonWriter.writeString(str);
+        if (formatter == null) {
+            jsonWriter.writeZonedDateTime(zdt);
+        } else {
+            jsonWriter.writeString(formatter.format(zdt));
+        }
     }
 }

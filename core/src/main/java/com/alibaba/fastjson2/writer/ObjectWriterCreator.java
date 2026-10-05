@@ -1521,7 +1521,7 @@ public class ObjectWriterCreator {
      * @return a FieldWriter instance
      */
     public <T> FieldWriter createFieldWriter(String fieldName, ToFloatFunction<T> function) {
-        return new FieldWriterFloatValue<>(fieldName, 0, 0, null, null, null, double.class, double.class, null, null, function);
+        return new FieldWriterFloatValue<>(fieldName, 0, 0, null, null, null, float.class, float.class, null, null, function);
     }
 
     /**
@@ -1567,7 +1567,7 @@ public class ObjectWriterCreator {
      * @param <V> the type of field values
      * @param fieldName the name of the field
      * @param fieldClass the class of the field
-     * @param function the Function to create a writer fork
+     * @param function the function that extracts the field value
      * @return a FieldWriter instance
      */
     public <T, V> FieldWriter createFieldWriter(

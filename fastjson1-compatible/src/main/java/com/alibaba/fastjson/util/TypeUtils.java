@@ -289,7 +289,7 @@ public class TypeUtils {
         while (genericComponentType instanceof GenericArrayType) {
             genericComponentType = ((GenericArrayType) genericComponentType)
                     .getGenericComponentType();
-            prefix += prefix;
+            prefix += "[";
         }
 
         if (genericComponentType instanceof Class<?>) {

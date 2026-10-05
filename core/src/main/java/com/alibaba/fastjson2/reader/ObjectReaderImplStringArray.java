@@ -12,7 +12,7 @@ public final class ObjectReaderImplStringArray
     public static final long HASH_TYPE = Fnv.hashCode64("[String");
 
     ObjectReaderImplStringArray() {
-        super(Long[].class);
+        super(String[].class);
     }
 
     @Override

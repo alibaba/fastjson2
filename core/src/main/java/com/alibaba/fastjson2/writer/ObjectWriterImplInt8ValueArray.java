@@ -78,7 +78,7 @@ final class ObjectWriterImplInt8ValueArray
             GZIPOutputStream gzipOut = null;
             try {
                 ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-                if (bytes.length < 512) {
+                if (bytes.length > 0 && bytes.length < 512) {
                     gzipOut = new GZIPOutputStream(byteOut, bytes.length);
                 } else {
                     gzipOut = new GZIPOutputStream(byteOut);

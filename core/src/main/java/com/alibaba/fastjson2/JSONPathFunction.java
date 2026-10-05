@@ -245,6 +245,8 @@ final class JSONPathFunction
         return value;
     }
 
+    // Reuse widening negation so integer minima have a nonnegative absolute value.
+    // <details><summary>中文</summary>复用可扩展数值类型的取负逻辑，确保最小整数的绝对值非负。</details>
     static Object abs(Object value) {
         if (value == null) {
             return null;
@@ -253,7 +255,7 @@ final class JSONPathFunction
         if (value instanceof Integer) {
             int intValue = (Integer) value;
             if (intValue < 0) {
-                return -intValue;
+                return negative(value);
             }
             return value;
         }
@@ -261,7 +263,7 @@ final class JSONPathFunction
         if (value instanceof Long) {
             long longValue = (Long) value;
             if (longValue < 0) {
-                return -longValue;
+                return negative(value);
             }
             return value;
         }
@@ -269,7 +271,7 @@ final class JSONPathFunction
         if (value instanceof Byte) {
             byte byteValue = (Byte) value;
             if (byteValue < 0) {
-                return (byte) -byteValue;
+                return negative(value);
             }
 
             return value;
@@ -278,28 +280,18 @@ final class JSONPathFunction
         if (value instanceof Short) {
             short shortValue = (Short) value;
             if (shortValue < 0) {
-                return (short) -shortValue;
+                return negative(value);
             }
 
             return value;
         }
 
         if (value instanceof Double) {
-            double doubleValue = (Double) value;
-            if (doubleValue < 0) {
-                return -doubleValue;
-            }
-
-            return value;
+            return Math.abs((Double) value);
         }
 
         if (value instanceof Float) {
-            float floatValue = (Float) value;
-            if (floatValue < 0) {
-                return -floatValue;
-            }
-
-            return value;
+            return Math.abs((Float) value);
         }
 
         if (value instanceof BigDecimal) {

@@ -646,7 +646,7 @@ final class JSONReaderASCII
         } else {
             hashCode = Fnv.MAGIC_HASH_CODE;
             for (int i = 0; ; ++i) {
-                ch = bytes[offset];
+                ch = bytes[offset] & 0xFF;
                 if (ch == '\\') {
                     nameEscape = true;
                     ch = bytes[++offset];
@@ -673,7 +673,7 @@ final class JSONReaderASCII
                     continue;
                 }
 
-                if (ch == '"') {
+                if (ch == quote) {
                     this.nameLength = i;
                     this.nameEnd = offset;
                     offset++;
@@ -871,8 +871,6 @@ final class JSONReaderASCII
                             b = (byte) char1(b);
                             break;
                     }
-                } else if (b == '"') {
-                    break;
                 }
                 chars[i] = b;
                 offset++;
@@ -920,8 +918,6 @@ final class JSONReaderASCII
                         ch = char1(ch);
                         break;
                 }
-            } else if (ch == '"') {
-                break;
             }
             chars[i] = ch;
             offset++;
@@ -1363,7 +1359,7 @@ final class JSONReaderASCII
                             c = char1(c);
                             break;
                     }
-                } else if (c == '"') {
+                } else if (c == quote) {
                     break;
                 }
                 chars[i] = c;
@@ -1380,12 +1376,12 @@ final class JSONReaderASCII
             }
         }
 
-        int ch = bytes[++offset];
+        int ch = ++offset == end ? EOI : bytes[offset];
         while (ch > 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = bytes[++offset];
+            ch = ++offset == end ? EOI : bytes[offset];
         }
 
-        this.offset = offset + 1;
+        this.offset = offset == end ? end : offset + 1;
         if (comma = (ch == ',')) {
             next();
         } else {

@@ -543,6 +543,16 @@ public abstract class StreamReader<T> {
         }
     }
 
+    /**
+     * Returns a sequential stream that reads records lazily, including a final record
+     * without a line terminator. Parallel traversal is not supported.
+     * <details><summary>中文</summary>
+     * 返回按需读取记录的顺序流，包含没有行结束符的最后一条记录。不支持并行遍历。
+     * </details>
+     *
+     * @param <T> the record type
+     * @return a sequential stream of records
+     */
     public <T> Stream<T> stream() {
         return StreamSupport.stream(new StreamReaderSpliterator<>((StreamReader<T>) this), false);
     }
@@ -584,7 +594,7 @@ public abstract class StreamReader<T> {
                 throw new IllegalArgumentException("action must not be null");
             }
             T object = next();
-            if ((streamReader.inputEnd && streamReader.off >= streamReader.end) || object == null) {
+            if (object == null) {
                 return false;
             } else {
                 action.accept(object);
@@ -595,7 +605,7 @@ public abstract class StreamReader<T> {
         private T next() {
             if (csvReader != null) {
                 Object[] objects = csvReader.readLineValues();
-                if (clazz != null & !clazz.isAssignableFrom(objects.getClass())) {
+                if (objects != null && clazz != null && !clazz.isAssignableFrom(objects.getClass())) {
                     throw new ClassCastException(String.format("%s can not cast to %s", objects.getClass(), clazz));
                 }
                 return (T) objects;

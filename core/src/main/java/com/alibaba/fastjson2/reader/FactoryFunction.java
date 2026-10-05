@@ -31,7 +31,7 @@ final class FactoryFunction<T>
             } else {
                 name = parameters[i].getName();
             }
-            paramNames[i] = name;
+            this.paramNames[i] = name;
             hashCodes[i] = Fnv.hashCode64(name);
         }
 

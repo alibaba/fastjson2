@@ -140,6 +140,8 @@ public class JSONScannerTest {
     @Test
     public void isEnabled() {
         JSONScanner lexer = new JSONScanner("{\"id\":false}", 0);
+        assertFalse(lexer.isEnabled(Feature.OrderedField));
+        lexer.config(Feature.OrderedField, true);
         assertTrue(lexer.isEnabled(Feature.OrderedField));
 
         lexer.config(Feature.AllowUnQuotedFieldNames, true);

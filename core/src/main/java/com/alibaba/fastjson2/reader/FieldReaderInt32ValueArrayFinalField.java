@@ -53,7 +53,9 @@ final class FieldReaderInt32ValueArrayFinalField<T>
             throw new JSONException("set " + fieldName + " error", e);
         }
         int[] valueArray = (int[]) value;
-        System.arraycopy(valueArray, 0, array, 0, valueArray.length);
+        if (array != null && valueArray != null) {
+            System.arraycopy(valueArray, 0, array, 0, Math.min(valueArray.length, array.length));
+        }
     }
 
     @Override

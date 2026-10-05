@@ -101,26 +101,27 @@ abstract class JSONPathFilter
 
     static final class NameIsNull
             extends NameFilter {
+        final boolean not;
+
         public NameIsNull(
                 String fieldName,
                 long fieldNameNameHash,
                 String[] fieldName2,
                 long[] fieldNameNameHash2,
-                Function function
+                Function function,
+                boolean not
         ) {
             super(fieldName, fieldNameNameHash, fieldName2, fieldNameNameHash2, function);
+            this.not = not;
         }
 
         protected boolean applyNull() {
-            return true;
+            return !not;
         }
 
         @Override
         boolean apply(Object fieldValue) {
-            if (function != null) {
-                fieldValue = function.apply(fieldValue);
-            }
-            return fieldValue == null;
+            return (fieldValue == null) != not;
         }
     }
 
@@ -761,10 +762,10 @@ abstract class JSONPathFilter
                             return applyNull();
                         }
                         if (fieldName2 != null) {
-                            return this instanceof NameIsNull;
+                            return this instanceof NameIsNull && applyNull();
                         }
                     }
-                    return false;
+                    return this instanceof NameIsNull && applyNull();
                 }
 
                 if (function != null) {
@@ -1483,16 +1484,19 @@ abstract class JSONPathFilter
             extends NameFilter {
         final String fieldName1;
         final long fieldNameName1Hash;
+        final Operator operator;
 
         public NameName(
                 String fieldName,
                 long fieldNameNameHash,
                 String fieldName1,
-                long fieldNameName1Hash
+                long fieldNameName1Hash,
+                Operator operator
         ) {
             super(fieldName, fieldNameNameHash);
             this.fieldName1 = fieldName1;
             this.fieldNameName1Hash = fieldNameName1Hash;
+            this.operator = operator;
         }
 
         @Override
@@ -1517,7 +1521,7 @@ abstract class JSONPathFilter
                     }
                     fieldValue = fieldWriter.getFieldValue(object);
 
-                    FieldWriter fieldWriter1 = objectWriter.getFieldWriter(fieldNameNameHash);
+                    FieldWriter fieldWriter1 = objectWriter.getFieldWriter(fieldNameName1Hash);
                     if (fieldWriter1 == null) {
                         return false;
                     }
@@ -1527,7 +1531,28 @@ abstract class JSONPathFilter
                 }
             }
 
-            return Objects.equals(fieldValue, fieldValue1);
+            if (operator == Operator.EQ) {
+                return Objects.equals(fieldValue, fieldValue1);
+            }
+            if (operator == Operator.NE) {
+                return !Objects.equals(fieldValue, fieldValue1);
+            }
+            if (fieldValue == null || fieldValue1 == null) {
+                return false;
+            }
+            int comparison = TypeUtils.compare(fieldValue, fieldValue1);
+            switch (operator) {
+                case LT:
+                    return comparison < 0;
+                case LE:
+                    return comparison <= 0;
+                case GT:
+                    return comparison > 0;
+                case GE:
+                    return comparison >= 0;
+                default:
+                    throw new JSONException("not support operator : " + operator);
+            }
         }
 
         @Override

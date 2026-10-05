@@ -24,10 +24,6 @@ final class ObjectWriterImplAtomicReference
 
         AtomicReference atomic = (AtomicReference) object;
         Object ref = atomic.get();
-        if (ref == null) {
-            jsonWriter.writeNull();
-        }
-
         jsonWriter.writeAny(ref);
     }
 
@@ -40,10 +36,6 @@ final class ObjectWriterImplAtomicReference
 
         AtomicReference atomic = (AtomicReference) object;
         Object ref = atomic.get();
-        if (ref == null) {
-            jsonWriter.writeNull();
-        }
-
         jsonWriter.writeAny(ref);
     }
 }

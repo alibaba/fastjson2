@@ -47,40 +47,61 @@ public interface ObjectReader<T> {
     String VALUE_NAME = "@value";
 
     /**
-     * @return {@link T}
-     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     * Creates an instance without additional reader features.
+     * <details><summary>中文</summary>不启用额外读取特性来创建实例。</details>
+     *
+     * @return the new instance
+     * @throws UnsupportedOperationException if this reader does not support instance creation
      */
     default T createInstance() {
         return createInstance(0);
     }
 
     /**
-     * @return {@link T}
-     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     * Creates an instance using the supplied feature mask.
+     * <details><summary>中文</summary>使用指定的特性位掩码创建实例。</details>
+     *
+     * @param features additional reader features as a bit mask
+     * @return the new instance
+     * @throws UnsupportedOperationException if this reader does not support instance creation
      */
     default T createInstance(long features) {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @return {@link T}
-     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     * Creates an instance from collection values without additional reader features.
+     * <details><summary>中文</summary>从集合值创建实例，不启用额外读取特性。</details>
+     *
+     * @param collection the source values
+     * @return the converted instance
+     * @throws UnsupportedOperationException if this reader does not support collection conversion
      */
     default T createInstance(Collection collection) {
         return createInstance(collection, 0L);
     }
 
     /**
-     * @return {@link T}
-     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     * Creates an instance from collection values using the supplied features.
+     * <details><summary>中文</summary>使用指定特性将集合值转换为实例。</details>
+     *
+     * @param collection the source values
+     * @param features additional reader features
+     * @return the converted instance
+     * @throws UnsupportedOperationException if this reader does not support collection conversion
      */
     default T createInstance(Collection collection, JSONReader.Feature... features) {
         return createInstance(collection, JSONReader.Feature.of(features));
     }
 
     /**
-     * @return {@link T}
-     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     * Creates an instance from collection values using the supplied feature mask.
+     * <details><summary>中文</summary>使用指定特性位掩码将集合值转换为实例。</details>
+     *
+     * @param collection the source values
+     * @param features additional reader features as a bit mask
+     * @return the converted instance
+     * @throws UnsupportedOperationException if this reader does not support collection conversion
      */
     default T createInstance(Collection collection, long features) {
         throw new UnsupportedOperationException(this.getClass().getName());

@@ -242,6 +242,10 @@ public class ObjectReader2<T>
                     throw new JSONException(jsonReader.info("array to bean end error"));
                 }
                 jsonReader.next();
+                jsonReader.nextIfComma();
+                if (buildFunction != null) {
+                    return (T) buildFunction.apply(object);
+                }
                 return object;
             }
 

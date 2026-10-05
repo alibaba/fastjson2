@@ -97,6 +97,7 @@ public class TypeCollector {
         if (collector == null || !collector.debugInfoPresent) {
             return new String[0];
         }
-        return collector.getResult().split(",");
+        String result = collector.getResult();
+        return result.isEmpty() ? new String[0] : result.split(",");
     }
 }

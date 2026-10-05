@@ -181,6 +181,16 @@ public abstract class JSONSchema {
         return of(type, null);
     }
 
+    /**
+     * Infers a schema from a value. Empty collections and collections containing only
+     * null values produce an array schema without an item constraint.
+     * <details><summary>中文</summary>
+     * 根据值推断模式。空集合和仅包含 null 的集合生成不限制元素类型的数组模式。
+     * </details>
+     *
+     * @param value the value to inspect
+     * @return the inferred schema, or null if the value is null
+     */
     public static JSONSchema ofValue(Object value) {
         return ofValue(value, null);
     }
@@ -211,6 +221,10 @@ public abstract class JSONSchema {
                         sameClass = false;
                     }
                 }
+            }
+
+            if (firstItemClass == null) {
+                return new ArraySchema(JSONObject.of("type", "array"), root);
             }
 
             if (sameClass) {

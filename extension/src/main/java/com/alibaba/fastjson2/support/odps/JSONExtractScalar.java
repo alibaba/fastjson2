@@ -59,7 +59,9 @@ public class JSONExtractScalar
 
         @Override
         public void accept(int val) {
-            int size = (val < 0) ? IOUtils.stringSize(-val) + 1 : IOUtils.stringSize(val);
+            // MIN_VALUE cannot be negated when sizing the destination buffer.
+            // <details><summary>中文</summary>计算缓冲区大小时，最小整数取反会溢出。</details>
+            int size = val == Integer.MIN_VALUE ? 11 : (val < 0) ? IOUtils.stringSize(-val) + 1 : IOUtils.stringSize(val);
             text.setCapacity(size, false);
             byte[] bytes = text.bytes;
             IOUtils.getChars(val, size, bytes);
@@ -68,7 +70,7 @@ public class JSONExtractScalar
 
         @Override
         public void accept(long val) {
-            int size = (val < 0) ? IOUtils.stringSize(-val) + 1 : IOUtils.stringSize(val);
+            int size = val == Long.MIN_VALUE ? 20 : (val < 0) ? IOUtils.stringSize(-val) + 1 : IOUtils.stringSize(val);
             text.setCapacity(size, false);
             byte[] bytes = text.bytes;
             IOUtils.getChars(val, size, bytes);

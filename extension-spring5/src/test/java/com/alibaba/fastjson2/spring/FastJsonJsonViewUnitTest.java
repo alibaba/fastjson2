@@ -15,6 +15,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class FastJsonJsonViewUnitTest {
     @Test
+    public void missingSelectedAttribute() throws Exception {
+        FastJsonJsonView view = new FastJsonJsonView();
+        view.setRenderedAttributes(Collections.singleton("selected"));
+        view.setExtractValueFromSingleKeyModel(true);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        view.render(Collections.singletonMap("other", 1), new MockHttpServletRequest(), response);
+        assertEquals("{}", response.getContentAsString());
+
+        response = new MockHttpServletResponse();
+        view.render(Collections.singletonMap("selected", null), new MockHttpServletRequest(), response);
+        assertEquals("null", response.getContentAsString());
+    }
+
+    @Test
     public void test_0() throws Exception {
         FastJsonJsonView view = new FastJsonJsonView();
         FastJsonConfig config = new FastJsonConfig();

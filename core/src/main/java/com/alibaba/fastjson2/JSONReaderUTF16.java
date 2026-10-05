@@ -40,6 +40,10 @@ final class JSONReaderUTF16
     JSONReaderUTF16(Context ctx, byte[] bytes, int offset, int length) {
         super(ctx, false, false);
 
+        if ((length & 1) != 0) {
+            throw new JSONException("illegal input utf16 bytes, length " + length);
+        }
+
         this.str = null;
         this.chars = new char[length / 2];
         int j = 0;
@@ -49,7 +53,7 @@ final class JSONReaderUTF16
             byte c1 = bytes[i + 1];
             chars[j] = (char) ((c1 & 0xff) | ((c0 & 0xff) << 8));
         }
-        this.start = offset;
+        this.start = 0;
         this.end = this.length = j;
 
         // inline next();
@@ -62,7 +66,7 @@ final class JSONReaderUTF16
             ch = chars[this.offset];
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 this.offset++;
-                if (this.offset >= length) {
+                if (this.offset >= end) {
                     ch = EOI;
                     return;
                 }
@@ -70,7 +74,7 @@ final class JSONReaderUTF16
             }
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 this.offset++;
-                if (this.offset >= length) {
+                if (this.offset >= end) {
                     ch = EOI;
                     return;
                 }
@@ -219,7 +223,7 @@ final class JSONReaderUTF16
             ch = chars[this.offset];
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 this.offset++;
-                if (this.offset >= length) {
+                if (this.offset >= end) {
                     ch = EOI;
                     return;
                 }
@@ -303,7 +307,7 @@ final class JSONReaderUTF16
             ch = chars[offset];
         }
         this.ch = ch;
-        this.offset++;
+        this.offset = offset + 1;
 
         if (ch == '\uFFFE' || ch == '\uFEFF') {
             next();
@@ -1758,7 +1762,7 @@ final class JSONReaderUTF16
                     continue;
                 }
 
-                if (c == '"') {
+                if (c == quote) {
                     this.nameLength = i;
                     this.nameEnd = offset;
                     this.stringValue = null;
@@ -1956,8 +1960,6 @@ final class JSONReaderUTF16
                         c = char1(c);
                         break;
                 }
-            } else if (c == '"') {
-                break;
             }
             buf[i] = c;
             offset++;
@@ -3059,7 +3061,7 @@ final class JSONReaderUTF16
         final char[] chars = this.chars;
         char[] buf = new char[nameLength];
         int offset = nameBegin;
-        for (int i = 0; ; ++i) {
+        for (int i = 0; offset < nameEnd; ++i) {
             char c = chars[offset];
 
             if (c == '\\') {
@@ -3082,8 +3084,6 @@ final class JSONReaderUTF16
                         c = char1(c);
                         break;
                 }
-            } else if (c == '"') {
-                break;
             }
             buf[i] = c;
             offset++;
@@ -3133,7 +3133,7 @@ final class JSONReaderUTF16
                     } else if (c != '\\' && c != '"') {
                         c = char1(c);
                     }
-                } else if (c == '"') {
+                } else if (c == quote) {
                     break;
                 }
                 buf[i] = c;
@@ -3153,20 +3153,20 @@ final class JSONReaderUTF16
             b = chars[offset];
         }
         while (b <= ' ' && ((1L << b) & SPACE) != 0) {
-            b = chars[++offset];
+            b = ++offset == end ? EOI : chars[offset];
         }
 
         if (comma = (b == ',')) {
             this.offset = offset + 1;
 
             // inline next
-            ch = chars[this.offset++];
+            ch = this.offset == end ? EOI : chars[this.offset++];
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 if (this.offset >= end) {
                     ch = EOI;
                 } else {
-                    ch = chars[this.offset++];
+                    ch = this.offset == end ? EOI : chars[this.offset++];
                 }
             }
         } else {

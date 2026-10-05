@@ -92,7 +92,9 @@ class FieldWriterDate<T>
                 && !formatISO8601
                 && !formatUnixTime
         ) {
-            formatter = DateTimeFormatter.ofPattern(format);
+            formatter = locale == null
+                    ? DateTimeFormatter.ofPattern(format)
+                    : DateTimeFormatter.ofPattern(format, locale);
         }
 
         return formatter;
@@ -109,7 +111,7 @@ class FieldWriterDate<T>
                     if (format == null) {
                         return dateWriter = ObjectWriterImplDate.INSTANCE;
                     }
-                    return dateWriter = new ObjectWriterImplDate(format, null);
+                    return dateWriter = new ObjectWriterImplDate(format, locale);
                 }
             }
 

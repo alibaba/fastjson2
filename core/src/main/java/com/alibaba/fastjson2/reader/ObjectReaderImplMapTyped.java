@@ -79,7 +79,9 @@ class ObjectReaderImplMapTyped
             Object key = entry.getKey();
             Object fieldValue = entry.getValue();
             Object fieldName;
-            if (keyType == null || keyType == String.class) {
+            if (keyType == null || key == null) {
+                fieldName = key;
+            } else if (keyType == String.class) {
                 fieldName = key.toString();
             } else {
                 fieldName = TypeUtils.cast(key, keyType);
@@ -225,7 +227,9 @@ class ObjectReaderImplMapTyped
             }
 
             if (jsonReader.nextIfNull()) {
-                object.put(name, null);
+                if ((contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) == 0) {
+                    object.put(name, null);
+                }
                 continue;
             }
 

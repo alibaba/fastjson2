@@ -28,6 +28,8 @@ public class Base64 {
      * + The array CAN have illegal characters at the beginning and end, those will be dealt with appropriately.<br>
      *
      * @param chars The source array. Length 0 will return an empty array. <code>null</code> will throw an exception.
+     * @param offset start of the encoded region, including any leading ignored characters
+     * @param charsLen length of the encoded region
      * @return The decoded array of bytes. May be of length 0.
      */
     public static byte[] decodeFast(char[] chars, int offset, int charsLen) {
@@ -51,7 +53,9 @@ public class Base64 {
         // get the padding count (=) (0, 1 or 2)
         int pad = chars[eIx] == '=' ? (chars[eIx - 1] == '=' ? 2 : 1) : 0; // Count '=' at end.
         int cCnt = eIx - sIx + 1; // Content count including possible separators
-        int sepCnt = charsLen > 76 ? (chars[76] == '\r' ? cCnt / 78 : 0) << 1 : 0;
+        // MIME line lengths are relative to the first encoded character, not the backing array.
+        // <details><summary>中文</summary>MIME 行长度相对于首个编码字符计算，而不是数组起点。</details>
+        int sepCnt = cCnt > 76 ? (chars[sIx + 76] == '\r' ? cCnt / 78 : 0) << 1 : 0;
 
         int len = ((cCnt - sepCnt) * 6 >> 3) - pad; // The number of decoded bytes
         byte[] bytes = new byte[len]; // Preallocate byte[] of exact length
@@ -115,7 +119,7 @@ public class Base64 {
         // get the padding count (=) (0, 1 or 2)
         int pad = chars.charAt(eIx) == '=' ? (chars.charAt(eIx - 1) == '=' ? 2 : 1) : 0; // Count '=' at end.
         int cCnt = eIx - sIx + 1; // Content count including possible separators
-        int sepCnt = charsLen > 76 ? (chars.charAt(76) == '\r' ? cCnt / 78 : 0) << 1 : 0;
+        int sepCnt = cCnt > 76 ? (chars.charAt(sIx + 76) == '\r' ? cCnt / 78 : 0) << 1 : 0;
 
         int len = ((cCnt - sepCnt) * 6 >> 3) - pad; // The number of decoded bytes
         byte[] bytes = new byte[len]; // Preallocate byte[] of exact length
@@ -191,7 +195,7 @@ public class Base64 {
         // get the padding count (=) (0, 1 or 2)
         int pad = s.charAt(eIx) == '=' ? (s.charAt(eIx - 1) == '=' ? 2 : 1) : 0; // Count '=' at end.
         int cCnt = eIx - sIx + 1; // Content count including possible separators
-        int sepCnt = sLen > 76 ? (s.charAt(76) == '\r' ? cCnt / 78 : 0) << 1 : 0;
+        int sepCnt = cCnt > 76 ? (s.charAt(sIx + 76) == '\r' ? cCnt / 78 : 0) << 1 : 0;
 
         int len = ((cCnt - sepCnt) * 6 >> 3) - pad; // The number of decoded bytes
         byte[] dArr = new byte[len]; // Preallocate byte[] of exact length

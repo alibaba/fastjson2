@@ -79,7 +79,7 @@ public class Issue256 {
         assertEquals(100, point.getX());
         assertEquals(0, point.getY());
 
-        assertEquals("{\"type\":\"Polygon\",\"coordinates\":[[[100.0,0.0],[100.0,0.0],[100.0,0.0],[100.0,0.0],[100.0,0.0]]]}", JSON.toJSONString(polygon));
+        assertEquals("{\"type\":\"Polygon\",\"coordinates\":[[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]}", JSON.toJSONString(polygon));
     }
 
     @Test

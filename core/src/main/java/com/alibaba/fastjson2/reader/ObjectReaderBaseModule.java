@@ -411,7 +411,7 @@ public class ObjectReaderBaseModule
                 Class<? extends Annotation> annotationType = annotation.annotationType();
                 JSONType jsonType = findAnnotation(annotation, JSONType.class);
                 if (jsonType != null) {
-                    getBeanInfo1x(beanInfo, annotation);
+                    getBeanInfo1x(beanInfo, jsonType);
                     if (jsonType == annotation) {
                         continue;
                     }
@@ -778,7 +778,7 @@ public class ObjectReaderBaseModule
 
                     Method interfaceMethod = BeanUtils.getMethod(i, method);
                     if (interfaceMethod != null) {
-                        getFieldInfo(fieldInfo, superclass, interfaceMethod);
+                        getFieldInfo(fieldInfo, i, interfaceMethod);
                     }
                 }
 
@@ -1469,7 +1469,9 @@ public class ObjectReaderBaseModule
         JSONCreator jsonCreator = null;
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
-            jsonCreator = findAnnotation(annotation, JSONCreator.class);
+            if (jsonCreator == null) {
+                jsonCreator = findAnnotation(annotation, JSONCreator.class);
+            }
             if (jsonCreator == annotation) {
                 continue;
             }
@@ -2149,13 +2151,16 @@ public class ObjectReaderBaseModule
                 Type itemType = actualTypeArguments[0];
                 Class itemClass = TypeUtils.getMapping(itemType);
 
+                if (rawType == Stack.class) {
+                    return ObjectReaderImplList.of(type, Stack.class, 0);
+                }
+
                 if (rawType == Iterable.class
                         || rawType == Collection.class
                         || rawType == List.class
                         || rawType == AbstractCollection.class
                         || rawType == AbstractList.class
-                        || rawType == ArrayList.class
-                        || rawType == Stack.class) {
+                        || rawType == ArrayList.class) {
                     if (itemClass == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, ArrayList.class);
                     } else if (itemClass == Long.class) {

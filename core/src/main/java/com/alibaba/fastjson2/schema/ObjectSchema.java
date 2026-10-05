@@ -317,8 +317,7 @@ public final class ObjectSchema
         if (dependentRequired != null) {
             for (Map.Entry<String, String[]> entry : dependentRequired.entrySet()) {
                 String key = entry.getKey();
-                Object value = map.get(key);
-                if (value != null) {
+                if (map.containsKey(key)) {
                     String[] dependentRequiredProperties = entry.getValue();
                     for (String dependentRequiredProperty : dependentRequiredProperties) {
                         if (!map.containsKey(dependentRequiredProperty)) {
@@ -332,8 +331,7 @@ public final class ObjectSchema
         if (dependentSchemas != null) {
             for (Map.Entry<String, JSONSchema> entry : dependentSchemas.entrySet()) {
                 String key = entry.getKey();
-                Object fieldValue = map.get(key);
-                if (fieldValue == null) {
+                if (!map.containsKey(key)) {
                     continue;
                 }
 
@@ -489,8 +487,7 @@ public final class ObjectSchema
                 long[] dependentRequiredProperties = entry.getValue();
 
                 FieldWriter fieldWriter = objectWriter.getFieldWriter(keyHash);
-                Object fieldValue = fieldWriter.getFieldValue(value);
-                if (fieldValue == null) {
+                if (fieldWriter == null || fieldWriter.getFieldValue(value) == null) {
                     propertyIndex++;
                     continue;
                 }
@@ -503,10 +500,11 @@ public final class ObjectSchema
                         int i = 0;
                         String property = null, dependentRequiredProperty = null;
                         for (Iterator<Map.Entry<String, String[]>> it = this.dependentRequired.entrySet().iterator(); it.hasNext(); ++i) {
+                            Map.Entry<String, String[]> dependentRequiredEntry = it.next();
                             if (propertyIndex == i) {
-                                Map.Entry<String, String[]> dependentRequiredEntry = it.next();
                                 property = dependentRequiredEntry.getKey();
                                 dependentRequiredProperty = dependentRequiredEntry.getValue()[requiredIndex];
+                                break;
                             }
                         }
                         return new ValidateResult(false, "property %s, dependentRequired property %s", property, dependentRequiredProperty);

@@ -24,7 +24,9 @@ public class JSONPathTest3 {
                         .of("$[0,1]")
                         .eval(values)
                         .toString());
-        assertEquals("[1,2]",
+        // Slice end indexes are exclusive for Java arrays, as for lists and parsed JSON arrays.
+        // <details><summary>中文</summary>Java 数组的切片结束下标与列表及 JSON 数组一样不包含在结果中。</details>
+        assertEquals("[1]",
                 JSONPath
                         .of("$[:1]")
                         .eval(values)

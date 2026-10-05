@@ -2422,7 +2422,7 @@ public abstract class JSON
         ObjectReaderProvider readerProvider = JSONFactory.getDefaultObjectReaderProvider();
         readerProvider.mixIn((Class) target, null);
 
-        ObjectWriterProvider writerProvider = JSONFactory.getDefaultObjectWriterProvider();
+        ObjectWriterProvider writerProvider = SerializeConfig.DEFAULT_PROVIDER;
         writerProvider.mixIn((Class) target, null);
     }
 
@@ -2430,7 +2430,7 @@ public abstract class JSON
         ObjectReaderProvider readerProvider = JSONFactory.getDefaultObjectReaderProvider();
         readerProvider.cleanupMixIn();
 
-        ObjectWriterProvider writerProvider = JSONFactory.getDefaultObjectWriterProvider();
+        ObjectWriterProvider writerProvider = SerializeConfig.DEFAULT_PROVIDER;
         writerProvider.cleanupMixIn();
     }
 
@@ -2438,7 +2438,7 @@ public abstract class JSON
         ObjectReaderProvider readerProvider = JSONFactory.getDefaultObjectReaderProvider();
         Class mixIn = readerProvider.getMixIn((Class) target);
         if (mixIn == null) {
-            mixIn = JSONFactory.getDefaultObjectWriterProvider().getMixIn((Class) target);
+            mixIn = SerializeConfig.DEFAULT_PROVIDER.getMixIn((Class) target);
         }
         return mixIn;
     }

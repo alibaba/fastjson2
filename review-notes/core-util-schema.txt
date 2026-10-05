@@ -1,0 +1,82 @@
+Review coverage ledger, core util/schema/stream/support/internal.
+Full means full source read and control-flow/API/Javadoc review, not proof of absence of bugs.
+Tests are coordinated by the root agent; this agent has not run Maven.
+
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/ApacheLang3Support.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/BeanUtils.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/DateUtils.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/DynamicClassLoader.java
+EXECUTABLE SOURCE REVIEW + ALL TABLE ROWS STRUCTURALLY CHECKED | core/src/main/java/com/alibaba/fastjson2/util/ED.java
+EXECUTABLE SOURCE REVIEW + ALL TABLE ROWS STRUCTURALLY CHECKED | core/src/main/java/com/alibaba/fastjson2/util/ED5.java
+EXECUTABLE SOURCE REVIEW + ALL TABLE ROWS STRUCTURALLY CHECKED | core/src/main/java/com/alibaba/fastjson2/util/EF.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/FDBigInteger.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/Fnv.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/GuavaSupport.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/IOUtils.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/JdbcSupport.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/JDKUtils.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/JodaSupport.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/JSONObject1O.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/KotlinUtils.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/MapMultiValueType.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/MultiType.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/MutableBigInteger.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/NumberUtils.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/ParameterizedTypeImpl.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/PropertiesUtils.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/ReferenceKey.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/Scientific.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/StringUtils.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/TypeUtils.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/util/Wrapper.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/AllOf.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/Any.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/AnyOf.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/ArraySchema.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/BooleanSchema.java
+EXECUTABLE SOURCE REVIEW + ALL TLD ENTRIES STRUCTURALLY CHECKED | core/src/main/java/com/alibaba/fastjson2/schema/DomainValidator.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/EnumSchema.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/IntegerSchema.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/JSONSchema.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/Not.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/NullSchema.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/NumberSchema.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/ObjectSchema.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/OneOf.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/StringSchema.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/UnresolvedReference.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/schema/ValidateResult.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/stream/JSONStreamReader.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/stream/JSONStreamReaderUTF16.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/stream/JSONStreamReaderUTF8.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/stream/StreamReader.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/support/LambdaMiscCodec.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/support/csv/CSVReader.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/support/csv/CSVReaderUTF16.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/support/csv/CSVReaderUTF8.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/support/csv/CSVWriter.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/support/csv/CSVWriterUTF16.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/support/csv/CSVWriterUTF8.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/support/money/MoneySupport.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/Cast.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/CodeGenUtils.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/ASMUtils.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/ByteVector.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/ClassReader.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/ClassWriter.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/Constants.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/Edge.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/FieldWriter.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/Frame.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/Label.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/MethodCollector.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/MethodWriter.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/Opcodes.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/Symbol.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/SymbolTable.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/Type.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/asm/TypeCollector.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/mixin/spring/SimpleGrantedAuthorityMixin.java
+FULL SOURCE REVIEW | core/src/main/java/com/alibaba/fastjson2/internal/trove/map/hash/TLongIntHashMap.java
+
+Generated numerical data was structurally checked entry by entry and ED/EF decimal exponents checked against binary exponents; numerical multiplier/rounding constants are not independently proven. DomainValidator's 2015 TLD registry snapshot was not updated against today's IANA registry; all entries were checked for sort order and duplicates. See core-generated-table-checks.txt.

@@ -276,8 +276,9 @@ final class JSONBDump {
                         break;
                     case BC_INT32:
                         unscaledValue = BigInteger.valueOf(
-                                readInt32Value()
+                                IOUtils.getIntBE(bytes, offset)
                         );
+                        offset += 4;
                         break;
                     case BC_INT64:
                         unscaledValue = BigInteger.valueOf(

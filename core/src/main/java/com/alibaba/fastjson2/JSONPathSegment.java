@@ -87,8 +87,7 @@ abstract class JSONPathSegment {
                     random = new Random();
                 }
 
-                int index = Math.abs(random.nextInt()) % array.size();
-                context.value = array.get(index);
+                context.value = array.isEmpty() ? null : array.get(random.nextInt(array.size()));
                 context.eval = true;
                 return;
             }
@@ -149,8 +148,7 @@ abstract class JSONPathSegment {
                 random = new Random();
             }
 
-            int index = Math.abs(random.nextInt()) % array.size();
-            context.value = array.get(index);
+            context.value = array.isEmpty() ? null : array.get(random.nextInt(array.size()));
             context.eval = true;
         }
 
@@ -171,7 +169,7 @@ abstract class JSONPathSegment {
                     random = new Random();
                 }
 
-                int randomIndex = Math.abs(random.nextInt()) % list.size();
+                int randomIndex = random.nextInt(list.size());
                 context.value = list.get(randomIndex);
                 context.eval = true;
                 return;
@@ -188,7 +186,7 @@ abstract class JSONPathSegment {
                     random = new Random();
                 }
 
-                int randomIndex = random.nextInt() % array.length;
+                int randomIndex = random.nextInt(array.length);
                 context.value = array[randomIndex];
                 context.eval = true;
                 return;
@@ -205,11 +203,14 @@ abstract class JSONPathSegment {
             if (object instanceof List) {
                 List list = (List) object;
 
+                if (list.isEmpty()) {
+                    return;
+                }
                 if (random == null) {
                     random = new Random();
                 }
 
-                int randomIndex = Math.abs(random.nextInt()) % list.size();
+                int randomIndex = random.nextInt(list.size());
                 Object item = list.get(randomIndex);
                 Object apply = callback.apply(list, item);
                 list.set(randomIndex, apply);
@@ -254,8 +255,8 @@ abstract class JSONPathSegment {
             if (object instanceof Object[]) {
                 Object[] array = (Object[]) object;
                 for (int i = 0; i < array.length; i++) {
-                    boolean match = i >= begin && i <= end
-                            || i - array.length > begin && i - array.length <= end;
+                    int index = begin >= 0 ? i : i - array.length;
+                    boolean match = index >= begin && index < end;
                     if (match) {
                         result.add(array[i]);
                     }
@@ -429,7 +430,7 @@ abstract class JSONPathSegment {
                     if (index >= begin && index < end) {
                         Object item = list.get(i);
                         item = callback.apply(list, item);
-                        list.set(index, item);
+                        list.set(i, item);
                     }
                 }
                 return;
@@ -1504,7 +1505,11 @@ abstract class JSONPathSegment {
                         } else if (nameHashCode == HASH_EMPTY) {
                             values.add(value);
                         }
-                        collection.forEach(this);
+                        // Advance the depth for containers as well as beans so cycles reach the limit.
+                        // <details><summary>中文</summary>容器和 Bean 均增加深度，使循环引用受到深度限制。</details>
+                        for (Object item : collection) {
+                            recursive(item, values, level + 1);
+                        }
                     } else if (value instanceof Collection) {
                         Collection collection = (Collection) value;
                         if (nameHashCode == HASH_STAR) {
@@ -1512,7 +1517,9 @@ abstract class JSONPathSegment {
                         } else if (nameHashCode == HASH_EMPTY) {
                             values.add(value);
                         }
-                        collection.forEach(this);
+                        for (Object item : collection) {
+                            recursive(item, values, level + 1);
+                        }
                     } else if (value != null) {
                         ObjectWriter<?> objectWriter = context.path
                                 .getWriterContext()
@@ -1538,6 +1545,9 @@ abstract class JSONPathSegment {
             }
 
             public void accept(Object object) {
+                if (object == null) {
+                    return;
+                }
                 if (object instanceof Map) {
                     for (Iterator<Map.Entry> it = ((Map) object).entrySet().iterator(); it.hasNext();) {
                         Map.Entry entry = it.next();
@@ -1552,7 +1562,7 @@ abstract class JSONPathSegment {
                         }
                     }
                 } else if (object instanceof Collection) {
-                    for (Object item : ((List<?>) object)) {
+                    for (Object item : ((Collection<?>) object)) {
                         if (item != null) {
                             accept(item);
                         }
@@ -1589,6 +1599,9 @@ abstract class JSONPathSegment {
             }
 
             public void accept(Object object) {
+                if (object == null) {
+                    return;
+                }
                 if (object instanceof Map) {
                     for (Map.Entry entry : (Iterable<Map.Entry>) ((Map) object).entrySet()) {
                         if (name.equals(entry.getKey())) {
@@ -1602,7 +1615,7 @@ abstract class JSONPathSegment {
                         }
                     }
                 } else if (object instanceof Collection) {
-                    for (Object item : ((List<?>) object)) {
+                    for (Object item : ((Collection<?>) object)) {
                         if (item != null) {
                             accept(item);
                         }
@@ -1639,6 +1652,9 @@ abstract class JSONPathSegment {
             }
 
             public void accept(Object object) {
+                if (object == null) {
+                    return;
+                }
                 if (object instanceof Map) {
                     for (Map.Entry entry : (Iterable<Map.Entry>) ((Map) object).entrySet()) {
                         Object entryValue = entry.getValue();
@@ -1653,7 +1669,7 @@ abstract class JSONPathSegment {
                         }
                     }
                 } else if (object instanceof Collection) {
-                    for (Object item : ((List<?>) object)) {
+                    for (Object item : ((Collection<?>) object)) {
                         if (item != null) {
                             accept(item);
                         }

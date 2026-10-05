@@ -333,7 +333,9 @@ final class CSVReaderUTF16<T>
                         }
                     } else {
                         char[] chars = new char[valueSize - escapeCount];
-                        int valueEnd = valueStart + valueSize;
+                        // The content starts after the opening quote; exclude the closing quote.
+                        // <details><summary>中文</summary>内容从起始引号之后开始，不包含结束引号。</details>
+                        int valueEnd = valueStart + valueSize + 1;
                         for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
                             char c = buf[j];
                             chars[k++] = c;
@@ -405,7 +407,7 @@ final class CSVReaderUTF16<T>
                     }
                 } else {
                     char[] chars = new char[valueSize - escapeCount];
-                    int valueEnd = lineEnd;
+                    int valueEnd = valueStart + valueSize + 1;
                     for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
                         char c = buf[j];
                         chars[k++] = c;
@@ -636,7 +638,7 @@ final class CSVReaderUTF16<T>
                             consumer.accept(rowCount, columnIndex, buf, valueStart + 1, valueSize);
                         } else {
                             char[] bytes = new char[valueSize - escapeCount];
-                            int valueEnd = valueStart + valueSize;
+                            int valueEnd = valueStart + valueSize + 1;
                             for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
                                 char c = buf[j];
                                 bytes[k++] = c;
@@ -669,7 +671,7 @@ final class CSVReaderUTF16<T>
                         consumer.accept(rowCount, columnIndex, buf, valueStart + 1, valueSize);
                     } else {
                         char[] bytes = new char[valueSize - escapeCount];
-                        int valueEnd = lineEnd;
+                        int valueEnd = valueStart + valueSize + 1;
                         for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
                             char c = buf[j];
                             bytes[k++] = c;

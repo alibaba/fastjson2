@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.support.odps;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.aliyun.odps.io.Text;
 import com.aliyun.odps.io.Writable;
@@ -49,12 +50,7 @@ public class JSONExtract
 
         @Override
         public void accept(String str) {
-            int len = str.length() + 2;
-            byte[] bytes = new byte[len];
-            bytes[0] = '"';
-            bytes[len - 1] = '"';
-            str.getBytes(0, str.length(), bytes, 1);
-            text.set(bytes);
+            text.set(JSON.toJSONBytes(str));
         }
     }
 }

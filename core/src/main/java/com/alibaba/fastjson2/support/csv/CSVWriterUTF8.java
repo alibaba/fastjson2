@@ -89,11 +89,18 @@ final class CSVWriterUTF8
     }
 
     public void writeString(String value) {
+        if (value == null) {
+            return;
+        }
         byte[] bytes;
         if (JDKUtils.STRING_CODER != null
                 && JDKUtils.STRING_VALUE != null
-                && JDKUtils.STRING_CODER.applyAsInt(value) == JDKUtils.LATIN1) {
+                && JDKUtils.STRING_CODER.applyAsInt(value) == JDKUtils.LATIN1
+                && (charset == StandardCharsets.ISO_8859_1 || charset == StandardCharsets.UTF_8)) {
             bytes = JDKUtils.STRING_VALUE.apply(value);
+            if (charset == StandardCharsets.UTF_8 && !IOUtils.isASCII(bytes)) {
+                bytes = value.getBytes(charset);
+            }
         } else {
             bytes = value.getBytes(charset);
         }
@@ -128,34 +135,23 @@ final class CSVWriterUTF8
     }
 
     public void writeString(byte[] utf8) {
-        if (utf8 == null || utf8.length == 0) {
+        if (utf8 == null) {
             return;
         }
 
         final int len = utf8.length;
         int escapeCount = 0;
-        boolean comma = false;
-
-        if (utf8[0] == '"') {
-            for (byte ch : utf8) {
-                if (ch == '"') {
-                    escapeCount++;
-                }
-            }
-        } else {
-            for (byte ch : utf8) {
-                if (ch == ',') {
-                    comma = true;
-                } else if (ch == '"' || ch == '\n' || ch == '\r') {
-                    escapeCount++;
-                }
-            }
-            if (!comma) {
-                escapeCount = 0;
+        boolean quote = alwaysQuoteStrings;
+        for (byte ch : utf8) {
+            if (ch == '"') {
+                escapeCount++;
+                quote = true;
+            } else if (ch == ',' || ch == '\n' || ch == '\r') {
+                quote = true;
             }
         }
 
-        if (escapeCount == 0 && !comma) {
+        if (!quote) {
             writeRaw(utf8);
             return;
         }
@@ -176,6 +172,9 @@ final class CSVWriterUTF8
                 bytes[off++] = ch;
             }
             if (off >= max) {
+                // Publish the local position before flushing a field that spans buffers.
+                // <details><summary>中文</summary>跨缓冲区字段刷新前须保存局部写入位置。</details>
+                this.off = off;
                 flush();
                 off = this.off;
             }
@@ -189,13 +188,7 @@ final class CSVWriterUTF8
             return;
         }
 
-        String str = value.toString();
-        int strlen = str.length();
-
-        checkCapacity(24);
-
-        str.getBytes(0, strlen, bytes, off);
-        off += strlen;
+        writeRaw(value.toString());
     }
 
     public void writeDecimal(long unscaledVal, int scale) {
@@ -250,7 +243,7 @@ final class CSVWriterUTF8
         // "yyyy-MM-dd HH:mm:ss"
         int off = this.off;
         byte[] bytes = this.bytes;
-        if (off + 19 > bytes.length) {
+        if (off + 35 > bytes.length) {
             flush();
             off = 0;
         }
@@ -278,7 +271,7 @@ final class CSVWriterUTF8
         if (out instanceof ByteArrayOutputStream) {
             flush();
             byte[] strBytes = ((ByteArrayOutputStream) out).toByteArray();
-            return new String(strBytes, StandardCharsets.UTF_8);
+            return new String(strBytes, charset);
         }
         return super.toString();
     }

@@ -623,6 +623,10 @@ public class ObjectReaderAdapter<T>
             object = createInstance(jsonReader.getContext().getFeatures() | features);
         }
 
+        if (buildFunction != null) {
+            object = (T) buildFunction.apply(object);
+        }
+
         if (schema != null) {
             schema.assertValidate(object);
         }

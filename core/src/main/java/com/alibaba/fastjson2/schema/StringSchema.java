@@ -256,12 +256,16 @@ public final class StringSchema
             object.put("minLength", minLength);
         }
 
+        if (maxLength != -1) {
+            object.put("maxLength", maxLength);
+        }
+
         if (format != null) {
             object.put("format", format);
         }
 
         if (patternFormat != null) {
-            object.put("pattern", pattern);
+            object.put("pattern", patternFormat);
         }
 
         if (anyOf != null) {

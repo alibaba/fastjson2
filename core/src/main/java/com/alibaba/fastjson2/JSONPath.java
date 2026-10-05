@@ -242,11 +242,12 @@ public abstract class JSONPath {
     }
 
     /**
-     * Sets a callback function for the specified path in an object
+     * Replaces selected values by immediately applying a function to each current value.
+     * <details><summary>中文</summary>立即对选中的当前值调用函数，并用返回值替换原值。</details>
      *
      * @param rootObject the root object to modify
      * @param path the JSONPath expression
-     * @param callback the callback function to set
+     * @param callback a function from the current value to its replacement
      * @return the modified root object
      */
     public static Object setCallback(Object rootObject, String path, Function callback) {
@@ -257,11 +258,13 @@ public abstract class JSONPath {
     }
 
     /**
-     * Sets a callback function for the specified path in an object
+     * Replaces selected values by immediately applying a callback.
+     * The callback receives the containing object and the current value, in that order.
+     * <details><summary>中文</summary>立即调用回调替换选中的值；参数依次为包含该值的对象和当前值。</details>
      *
      * @param rootObject the root object to modify
      * @param path the JSONPath expression
-     * @param callback the callback function to set
+     * @param callback a function from the containing object and current value to the replacement
      * @return the modified root object
      */
     public static Object setCallback(Object rootObject, String path, BiFunction callback) {
@@ -299,7 +302,12 @@ public abstract class JSONPath {
     }
 
     /**
-     * Gets all paths in the object
+     * Collects paths to non-null values, starting at {@code $}.
+     * Map entries with non-string keys are skipped. Repeated references to non-scalar
+     * objects are visited only once, so cycles do not cause infinite traversal.
+     * <details><summary>中文</summary>
+     * 从 $ 开始收集非 null 值的路径；忽略非字符串 Map 键，对重复引用的非标量对象仅遍历一次以避免循环。
+     * </details>
      *
      * @param javaObject the object to get paths from
      * @return a map of paths to values
@@ -441,7 +449,12 @@ public abstract class JSONPath {
     public abstract boolean isRef();
 
     /**
-     * Adds values to an array at the specified root object
+     * Appends values to the collection selected by this path.
+     * If evaluation returns null, assigns a new {@link JSONArray} at the path.
+     * An existing value that is not a collection, including a Java array, is left unchanged.
+     * <details><summary>中文</summary>
+     * 向路径选中的集合追加值；求值为 null 时设置新 JSONArray；已有值不是集合时（包括 Java 数组）不作修改。
+     * </details>
      *
      * @param root the root object
      * @param values the values to add
@@ -501,7 +514,8 @@ public abstract class JSONPath {
     }
 
     /**
-     * Extracts a value from a JSON byte array
+     * Extracts a value from a UTF-8 JSON byte array.
+     * <details><summary>中文</summary>从 UTF-8 编码的 JSON 字节数组提取值。</details>
      *
      * @param jsonBytes the JSON bytes to extract from
      * @return the extracted value, or null if input is null
@@ -536,7 +550,12 @@ public abstract class JSONPath {
     }
 
     /**
-     * Extracts a value using the provided JSONReader
+     * Extracts a value from the reader's current position.
+     * Extraction may stop once the selected value is found; it does not validate the
+     * complete remaining document. The caller retains responsibility for closing the reader.
+     * <details><summary>中文</summary>
+     * 从读取器当前位置提取值，找到结果后可能提前停止，不校验剩余文档；读取器由调用者负责关闭。
+     * </details>
      *
      * @param jsonReader the JSONReader to use
      * @return the extracted value
@@ -544,10 +563,15 @@ public abstract class JSONPath {
     public abstract Object extract(JSONReader jsonReader);
 
     /**
-     * Extracts a scalar value using the provided JSONReader
+     * Extracts a value as JSON text, retaining JSON quoting and escaping for strings.
+     * For example, selecting the string {@code hello} returns text containing {@code "hello"}.
+     * The reader remains the caller's responsibility to close.
+     * <details><summary>中文</summary>
+     * 将提取的值作为 JSON 文本返回，字符串保留 JSON 引号和转义；读取器由调用者负责关闭。
+     * </details>
      *
      * @param jsonReader the JSONReader to use
-     * @return the extracted scalar value
+     * @return the JSON representation of the selected value; a missing selection may return null
      */
     public abstract String extractScalar(JSONReader jsonReader);
 
@@ -615,10 +639,11 @@ public abstract class JSONPath {
     public abstract void set(Object object, Object value, JSONReader.Feature... readerFeatures);
 
     /**
-     * Sets a callback function for the object
+     * Replaces selected values by immediately applying a function to each current value.
+     * <details><summary>中文</summary>立即对选中的当前值调用函数，并用返回值替换原值。</details>
      *
      * @param object the object to modify
-     * @param callback the callback function to set
+     * @param callback a function from the current value to its replacement
      */
     public void setCallback(Object object, Function callback) {
         setCallback(
@@ -628,10 +653,12 @@ public abstract class JSONPath {
     }
 
     /**
-     * Sets a callback function for the object
+     * Replaces selected values by immediately applying a callback to their containing
+     * object and current value, in that order.
+     * <details><summary>中文</summary>立即调用回调替换选中的值；参数依次为包含该值的对象和当前值。</details>
      *
      * @param object the object to modify
-     * @param callback the callback function to set
+     * @param callback a function from the containing object and current value to the replacement
      */
     public abstract void setCallback(Object object, BiFunction callback);
 
@@ -906,13 +933,20 @@ public abstract class JSONPath {
     /**
      * Creates a multi-path JSONPath
      *
+     * <details><summary>中文</summary>
+     * 创建按路径顺序返回对象数组的 JSONPath；缺失的值返回 null，未指定的路径特性默认为零。
+     * 提取共享数组索引前缀的路径时，如果该前缀明确为 null，则整体返回 null。
+     * </details>
+     *
      * @param paths the JSONPath expressions
      * @param types the types of the results
      * @param formats the formats to apply
-     * @param pathFeatures the path features
+     * @param pathFeatures per-path feature masks; missing entries use no path features
      * @param zoneId the zone ID
      * @param features the reader features to apply
-     * @return the created JSONPath
+     * @return a JSONPath producing an {@code Object[]} in the same order as {@code paths},
+     *         with null entries for missing values; extraction of paths sharing an array-index
+     *         prefix returns null when that prefix is explicitly null
      * @since 2.0.20
      */
     public static JSONPath of(
@@ -1104,7 +1138,8 @@ public abstract class JSONPath {
                     if (first0 instanceof JSONPathSegmentName) {
                         JSONPathSegmentName name = (JSONPathSegmentName) first0;
                         prefix = new JSONPathSingleName("$." + name.name, name);
-                    } else if (first0 instanceof JSONPathSegmentIndex) {
+                    } else if (first0 instanceof JSONPathSegmentIndex
+                            && ((JSONPathSegmentIndex) first0).index >= 0) {
                         JSONPathSegmentIndex index = (JSONPathSegmentIndex) first0;
                         prefix = new JSONPathSingleIndex("$[" + index.index + "]", index);
                     }
@@ -1218,33 +1253,31 @@ public abstract class JSONPath {
                         break;
                     }
                 }
-                if (sameType) {
-                    List<JSONPathSegment> prefixSegments = firstMulti.segments.subList(0, lastIndex - 1);
-                    String prefixPath = null;
-                    int dotIndex = firstMulti.path.lastIndexOf('.');
-                    if (dotIndex != -1) {
-                        prefixPath = firstMulti.path.substring(0, dotIndex - 1);
-                    }
-                    if (prefixPath != null) {
-                        JSONPathMulti prefix = new JSONPathMulti(prefixPath, prefixSegments);
-                        if (lastSegment instanceof JSONPathSegmentIndex) {
-                            JSONPath[] indexPaths = new JSONPath[paths.length];
-                            for (int i = 0; i < jsonPaths.length; i++) {
-                                JSONPathMulti path = (JSONPathMulti) jsonPaths[i];
-                                JSONPathSegmentIndex lastSegmentIndex = (JSONPathSegmentIndex) path.segments.get(lastIndex);
-                                indexPaths[i] = new JSONPathSingleIndex(lastSegmentIndex.toString(), lastSegmentIndex);
-                            }
-                            return new JSONPathTypedMultiIndexes(
-                                    jsonPaths,
-                                    prefix,
-                                    indexPaths,
-                                    types,
-                                    formats,
-                                    pathFeatures,
-                                    zoneId,
-                                    featuresValue
-                            );
+                if (sameType && lastSegment instanceof JSONPathSegmentIndex) {
+                    JSONPath[] indexPaths = new JSONPath[paths.length];
+                    boolean positiveIndexes = true;
+                    for (int i = 0; i < jsonPaths.length; i++) {
+                        JSONPathMulti path = (JSONPathMulti) jsonPaths[i];
+                        JSONPathSegmentIndex lastSegmentIndex = (JSONPathSegmentIndex) path.segments.get(lastIndex);
+                        if (lastSegmentIndex.index < 0) {
+                            positiveIndexes = false;
+                            break;
                         }
+                        indexPaths[i] = new JSONPathSingleIndex(lastSegmentIndex.toString(), lastSegmentIndex);
+                    }
+                    if (positiveIndexes) {
+                        // Preserve every parent segment, including bracket-notation paths.
+                        // <details><summary>中文</summary>保留完整父路径的所有片段，包括方括号路径。</details>
+                        return new JSONPathTypedMultiIndexes(
+                                jsonPaths,
+                                firstMulti.getParent(),
+                                indexPaths,
+                                types,
+                                formats,
+                                pathFeatures,
+                                zoneId,
+                                featuresValue
+                        );
                     }
                 }
             }

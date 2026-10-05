@@ -6,11 +6,23 @@ public abstract class BeforeFilter
         implements Filter {
     private static final ThreadLocal<JSONWriter> serializerLocal = new ThreadLocal<>();
 
+    /**
+     * Invokes the callback with this writer and restores the enclosing callback's writer even if it fails.
+     * <details><summary>中文</summary>
+     * 使用指定的写入器调用回调，即使回调失败也会恢复外层回调的写入器。
+     * </details>
+     *
+     * @param serializer the writer used by {@link #writeKeyValue(String, Object)}
+     * @param object the object being serialized
+     */
     public void writeBefore(JSONWriter serializer, Object object) {
         JSONWriter last = serializerLocal.get();
         serializerLocal.set(serializer);
-        writeBefore(object);
-        serializerLocal.set(last);
+        try {
+            writeBefore(object);
+        } finally {
+            serializerLocal.set(last);
+        }
     }
 
     protected final void writeKeyValue(String key, Object value) {

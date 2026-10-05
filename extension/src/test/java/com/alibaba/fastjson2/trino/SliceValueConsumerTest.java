@@ -11,6 +11,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SliceValueConsumerTest {
     @Test
+    public void integerExtremes() {
+        SliceValueConsumer consumer = new SliceValueConsumer();
+        consumer.accept(Integer.MIN_VALUE);
+        assertEquals(Integer.toString(Integer.MIN_VALUE), consumer.slice.toStringAscii());
+        consumer.accept(Long.MIN_VALUE);
+        assertEquals(Long.toString(Long.MIN_VALUE), consumer.slice.toStringAscii());
+        consumer.accept((Number) Integer.MIN_VALUE);
+        assertEquals(Integer.toString(Integer.MIN_VALUE), consumer.slice.toStringAscii());
+        consumer.accept((Number) Long.MIN_VALUE);
+        assertEquals(Long.toString(Long.MIN_VALUE), consumer.slice.toStringAscii());
+    }
+
+    @Test
     public void test_str() {
         String json = "{\"value\":\"999\"}";
         SliceValueConsumer consumer = new SliceValueConsumer();

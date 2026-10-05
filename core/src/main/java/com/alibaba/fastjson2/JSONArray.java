@@ -29,7 +29,10 @@ public class JSONArray
     static ObjectWriter<JSONArray> arrayWriter;
 
     /**
-     * default
+     * Creates an empty, mutable JSON array.
+     * <details><summary>中文</summary>创建可修改的空 JSON 数组。</details>
+     *
+
      */
     public JSONArray() {
         super();
@@ -44,6 +47,9 @@ public class JSONArray
     }
 
     /**
+     * <p>Copies the element references in iteration order; nested objects are shared.</p>
+     * <details><summary>中文</summary>按迭代顺序复制元素引用；嵌套对象仍共享。</details>
+     *
      * @param collection the collection whose elements are to be placed into this {@link JSONArray}
      * @throws NullPointerException If the specified collection is null
      */
@@ -52,6 +58,9 @@ public class JSONArray
     }
 
     /**
+     * <p>Copies the array elements into a mutable list. A null element is allowed, but a null array is not.</p>
+     * <details><summary>中文</summary>将数组元素复制到可修改列表中；元素可为 null，数组本身不可为 null。</details>
+     *
      * @param items the array whose elements are to be placed into this {@link JSONArray}
      * @throws NullPointerException If the specified items is null
      */
@@ -62,6 +71,14 @@ public class JSONArray
 
     /**
      * Replaces the element at the specified position with the specified element
+     *
+     * <p>Negative indexes count from the end; an index before the beginning prepends
+     * the element. Nonnegative indexes can extend the array with nulls when the index
+     * is less than {@code size() + 4096}; larger indexes leave the array unchanged.</p>
+     * <details><summary>中文</summary>
+     * 负索引从末尾计数，超出左侧边界时在开头插入。非负索引小于 size() + 4096 时可用 null 扩展数组，
+     * 更大的索引不会修改数组。
+     * </details>
      *
      * <pre>{@code
      *    JSONArray array = new JSONArray();
@@ -76,7 +93,7 @@ public class JSONArray
      *
      * @param index index of the element to replace
      * @param element element to be stored at the specified position
-     * @return the element previously at the specified position
+     * @return the previous element, or null if an element was inserted or the array was unchanged
      * @since 2.0.3
      */
     @Override
@@ -112,6 +129,12 @@ public class JSONArray
 
     /**
      * Returns the {@link JSONArray} at the specified location in this {@link JSONArray}.
+     *
+     * <p>Existing JSON arrays are returned directly. Collections and Java arrays are copied into a JSONArray
+     * and replace the stored element. Strings beginning with {@code [} are parsed; other nonempty strings
+     * become singleton arrays. String conversions do not replace the stored element. Null, empty strings,
+     * case-insensitive {@code "null"}, and unsupported values return null.</p>
+     * <details><summary>中文</summary>已有 JSONArray 直接返回；集合和 Java 数组转换后替换原元素。以 [ 开头的字符串被解析，其他非空字符串包装为单元素数组，字符串转换不修改原元素；空值或不支持的类型返回 null。</details>
      *
      * @param index index of the element to return
      * @return {@link JSONArray} or null
@@ -173,6 +196,11 @@ public class JSONArray
     /**
      * Returns the {@link JSONObject} at the specified location in this {@link JSONArray}.
      *
+     * <p>Maps and supported beans are converted and replace the stored element. JSON object strings are parsed
+     * without replacing the element. Existing JSONObject values are returned directly; null, empty strings
+     * and case-insensitive {@code "null"} return null.</p>
+     * <details><summary>中文</summary>Map 和支持的 Bean 转换后替换原元素；字符串解析不修改原元素。已有 JSONObject 直接返回；null、空字符串及忽略大小写的 null 字符串返回 null。</details>
+     *
      * @param index index of the element to return
      * @return {@link JSONObject} or null
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
@@ -220,8 +248,12 @@ public class JSONArray
     /**
      * Returns the {@link String} at the specified location in this {@link JSONArray}.
      *
+     * <p>Strings are returned unchanged. Scalar values use their text representation, dates use the default
+     * time zone, and other values are serialized as JSON.</p>
+     * <details><summary>中文</summary>字符串保持不变；标量转换为文本，日期使用默认时区，其他值序列化为 JSON。</details>
+     *
      * @param index index of the element to return
-     * @return {@link String} or null
+     * @return the converted string, or null for a null element
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public String getString(int index) {
@@ -231,9 +263,13 @@ public class JSONArray
     /**
      * Returns the {@link String} at the specified location in this {@link JSONArray}.
      *
+     * <p>Strings are returned unchanged. Scalar values use their text representation, dates use the default
+     * time zone, and other values are serialized as JSON.</p>
+     * <details><summary>中文</summary>字符串保持不变；标量转换为文本，日期使用默认时区，其他值序列化为 JSON。</details>
+     *
      * @param index index of the element to return
-     * @param defaultValue the default mapping of the index
-     * @return {@link String} or null
+     * @param defaultValue the value returned for a null element
+     * @return the converted string, or defaultValue for a null element
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public String getString(int index, String defaultValue) {
@@ -266,6 +302,10 @@ public class JSONArray
 
     /**
      * Returns the {@link Double} at the specified location in this {@link JSONArray}.
+     *
+     * <p>Converts Number values using the target numeric type. String values are trimmed; empty strings
+     * and case-insensitive {@code "null"} return null. Numeric conversion may lose precision or narrow.</p>
+     * <details><summary>中文</summary>Number 按目标数值类型转换，可能损失精度或缩窄；字符串先去除首尾空白，空字符串或忽略大小写的 null 字符串返回 null。</details>
      *
      * @param index index of the element to return
      * @return {@link Double} or null
@@ -304,6 +344,10 @@ public class JSONArray
     /**
      * Returns a double value at the specified location in this {@link JSONArray}.
      *
+     * <p>Null, empty strings and case-insensitive {@code "null"} return zero. Numeric conversions may
+     * narrow or truncate according to the target primitive type.</p>
+     * <details><summary>中文</summary>null、空字符串及忽略大小写的 null 字符串返回零；数值转换可能按目标基本类型缩窄或截断。</details>
+     *
      * @param index index of the element to return
      * @return double
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable double
@@ -317,6 +361,10 @@ public class JSONArray
 
     /**
      * Returns the {@link Float} at the specified location in this {@link JSONArray}.
+     *
+     * <p>Converts Number values using the target numeric type. String values are trimmed; empty strings
+     * and case-insensitive {@code "null"} return null. Numeric conversion may lose precision or narrow.</p>
+     * <details><summary>中文</summary>Number 按目标数值类型转换，可能损失精度或缩窄；字符串先去除首尾空白，空字符串或忽略大小写的 null 字符串返回 null。</details>
      *
      * @param index index of the element to return
      * @return {@link Float} or null
@@ -355,6 +403,10 @@ public class JSONArray
     /**
      * Returns a float value at the specified location in this {@link JSONArray}.
      *
+     * <p>Null, empty strings and case-insensitive {@code "null"} return zero. Numeric conversions may
+     * narrow or truncate according to the target primitive type.</p>
+     * <details><summary>中文</summary>null、空字符串及忽略大小写的 null 字符串返回零；数值转换可能按目标基本类型缩窄或截断。</details>
+     *
      * @param index index of the element to return
      * @return float
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable float
@@ -368,6 +420,10 @@ public class JSONArray
 
     /**
      * Returns the {@link Long} at the specified location in this {@link JSONArray}.
+     *
+     * <p>Converts Number values using the target numeric type. String values are trimmed; empty strings
+     * and case-insensitive {@code "null"} return null. Numeric conversion may lose precision or narrow.</p>
+     * <details><summary>中文</summary>Number 按目标数值类型转换，可能损失精度或缩窄；字符串先去除首尾空白，空字符串或忽略大小写的 null 字符串返回 null。</details>
      *
      * @param index index of the element to return
      * @return {@link Long} or null
@@ -413,6 +469,10 @@ public class JSONArray
     /**
      * Returns a long value at the specified location in this {@link JSONArray}.
      *
+     * <p>Null, empty strings and case-insensitive {@code "null"} return zero. Numeric conversions may
+     * narrow or truncate according to the target primitive type.</p>
+     * <details><summary>中文</summary>null、空字符串及忽略大小写的 null 字符串返回零；数值转换可能按目标基本类型缩窄或截断。</details>
+     *
      * @param index index of the element to return
      * @return long
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable long
@@ -449,6 +509,10 @@ public class JSONArray
 
     /**
      * Returns the {@link Integer} at the specified location in this {@link JSONArray}.
+     *
+     * <p>Converts Number values using the target numeric type. String values are trimmed; empty strings
+     * and case-insensitive {@code "null"} return null. Numeric conversion may lose precision or narrow.</p>
+     * <details><summary>中文</summary>Number 按目标数值类型转换，可能损失精度或缩窄；字符串先去除首尾空白，空字符串或忽略大小写的 null 字符串返回 null。</details>
      *
      * @param index index of the element to return
      * @return {@link Integer} or null
@@ -494,6 +558,10 @@ public class JSONArray
     /**
      * Returns an int value at the specified location in this {@link JSONArray}.
      *
+     * <p>Null, empty strings and case-insensitive {@code "null"} return zero. Numeric conversions may
+     * narrow or truncate according to the target primitive type.</p>
+     * <details><summary>中文</summary>null、空字符串及忽略大小写的 null 字符串返回零；数值转换可能按目标基本类型缩窄或截断。</details>
+     *
      * @param index index of the element to return
      * @return int
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable int
@@ -530,6 +598,10 @@ public class JSONArray
 
     /**
      * Returns the {@link Short} at the specified location in this {@link JSONArray}.
+     *
+     * <p>Converts Number values using the target numeric type. String values are trimmed; empty strings
+     * and case-insensitive {@code "null"} return null. Numeric conversion may lose precision or narrow.</p>
+     * <details><summary>中文</summary>Number 按目标数值类型转换，可能损失精度或缩窄；字符串先去除首尾空白，空字符串或忽略大小写的 null 字符串返回 null。</details>
      *
      * @param index index of the element to return
      * @return {@link Short} or null
@@ -568,6 +640,10 @@ public class JSONArray
     /**
      * Returns a short value at the specified location in this {@link JSONArray}.
      *
+     * <p>Null, empty strings and case-insensitive {@code "null"} return zero. Numeric conversions may
+     * narrow or truncate according to the target primitive type.</p>
+     * <details><summary>中文</summary>null、空字符串及忽略大小写的 null 字符串返回零；数值转换可能按目标基本类型缩窄或截断。</details>
+     *
      * @param index index of the element to return
      * @return short
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable short
@@ -581,6 +657,10 @@ public class JSONArray
 
     /**
      * Returns the {@link Byte} at the specified location in this {@link JSONArray}.
+     *
+     * <p>Converts Number values using the target numeric type. String values are trimmed; empty strings
+     * and case-insensitive {@code "null"} return null. Numeric conversion may lose precision or narrow.</p>
+     * <details><summary>中文</summary>Number 按目标数值类型转换，可能损失精度或缩窄；字符串先去除首尾空白，空字符串或忽略大小写的 null 字符串返回 null。</details>
      *
      * @param index index of the element to return
      * @return {@link Byte} or null
@@ -615,6 +695,10 @@ public class JSONArray
     /**
      * Returns a byte value at the specified location in this {@link JSONArray}.
      *
+     * <p>Null, empty strings and case-insensitive {@code "null"} return zero. Numeric conversions may
+     * narrow or truncate according to the target primitive type.</p>
+     * <details><summary>中文</summary>null、空字符串及忽略大小写的 null 字符串返回零；数值转换可能按目标基本类型缩窄或截断。</details>
+     *
      * @param index index of the element to return
      * @return byte
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable byte
@@ -628,6 +712,10 @@ public class JSONArray
 
     /**
      * Returns the {@link Boolean} at the specified location in this {@link JSONArray}.
+     *
+     * <p>Numbers are true only when {@link Number#intValue()} equals 1. Strings are true only for
+     * case-insensitive {@code "true"} or {@code "1"}; empty strings and {@code "null"} return null.</p>
+     * <details><summary>中文</summary>数值仅在 intValue() 为 1 时为 true；字符串仅 true（忽略大小写）或 1 为 true，空字符串和 null 字符串返回 null。</details>
      *
      * @param index index of the element to return
      * @return {@link Boolean} or null
@@ -664,6 +752,9 @@ public class JSONArray
 
     /**
      * Returns a boolean value at the specified location in this {@link JSONArray}.
+     *
+     * <p>Uses {@link #getBoolean(int)} and returns false when that conversion returns null.</p>
+     * <details><summary>中文</summary>使用 getBoolean 转换，其结果为 null 时返回 false。</details>
      *
      * @param index index of the element to return
      * @return boolean
@@ -774,6 +865,10 @@ public class JSONArray
     /**
      * Returns the {@link Date} at the specified location in this {@link JSONArray}.
      *
+     * <p>Numeric values are epoch milliseconds; numeric zero returns null. Existing Date values are
+     * returned directly, including a Date at the epoch.</p>
+     * <details><summary>中文</summary>数值表示纪元毫秒，数值零返回 null；已有 Date 直接返回，包括纪元时刻的 Date。</details>
+     *
      * @param index index of the element to return
      * @return {@link Date} or null
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
@@ -807,8 +902,11 @@ public class JSONArray
     /**
      * Returns the {@link Date} at the specified location in this {@link JSONArray}.
      *
+     * <p>The default is used whenever {@link #getDate(int)} returns null, including numeric zero.</p>
+     * <details><summary>中文</summary>getDate 返回 null 时使用默认值，包括原值为数值零的情况。</details>
+     *
      * @param index index of the element to return
-     * @param defaultValue default value to return if the element is null
+     * @param defaultValue the value returned when date conversion returns null
      * @return {@link Date} or defaultValue
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      * @since 2.0.27
@@ -823,6 +921,10 @@ public class JSONArray
 
     /**
      * Returns the {@link Instant} at the specified location in this {@link JSONArray}.
+     *
+     * <p>Numeric values are epoch milliseconds; numeric zero returns null. Existing Instant values
+     * are returned directly.</p>
+     * <details><summary>中文</summary>数值表示纪元毫秒，数值零返回 null；已有 Instant 直接返回。</details>
      *
      * @param index index of the element to return
      * @return {@link Instant} or null
@@ -1089,10 +1191,15 @@ public class JSONArray
     }
 
     /**
-     * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
+     * Serialize Java Object to JSON {@link String} with specified {@link JSONWriter.Feature}s enabled
+     * <details><summary>中文</summary>使用指定的写入特性将对象序列化为 JSON 字符串。</details>
+     *
+     * <p>A null input is serialized as the JSON text {@code "null"}.</p>
+     * <details><summary>中文</summary>null 输入序列化为 JSON 文本 null。</details>
      *
      * @param object Java Object to be serialized into JSON {@link String}
      * @param features features to be enabled in serialization
+     * @return the serialized JSON text
      * @since 2.0.15
      */
     public static String toJSONString(Object object, JSONWriter.Feature... features) {
@@ -1121,7 +1228,12 @@ public class JSONArray
      * List<User> users = array.to(new TypeReference<ArrayList<User>>(){}.getType());
      * }</pre>
      *
+     * <p>Converts the array through the registered object reader. A String target produces JSON text.</p>
+     * <details><summary>中文</summary>通过注册的对象读取器转换数组；String 目标类型得到 JSON 文本。</details>
+     *
+     * @param <T> the result type
      * @param type specify the {@link Type} to be converted
+     * @return the converted value
      * @since 2.0.4
      */
     public <T> T to(Type type) {
@@ -1136,7 +1248,13 @@ public class JSONArray
      * List<User> users = array.to(new TypeReference<ArrayList<User>>(){}.getType());
      * }</pre>
      *
+     * <p>Converts the array through the registered object reader. A String target produces JSON text.</p>
+     * <details><summary>中文</summary>通过注册的对象读取器转换数组；String 目标类型得到 JSON 文本。</details>
+     *
+     * @param <T> the result type
      * @param type specify the {@link Type} to be converted
+     * @param features the combined JSONReader.Feature masks used for conversion
+     * @return the converted value
      * @since 2.0.51
      */
     @SuppressWarnings("unchecked")
@@ -1151,6 +1269,13 @@ public class JSONArray
     }
 
     /**
+     * Converts this array to the requested class through its registered object reader.
+     * A String target produces JSON text.
+     * <details><summary>中文</summary>通过注册的对象读取器转换为指定类；String 目标类型得到 JSON 文本。</details>
+     *
+     * @param <T> the result type
+     * @param type the target class
+     * @return the converted value
      * @since 2.0.9
      */
     @SuppressWarnings("unchecked")
@@ -1188,8 +1313,15 @@ public class JSONArray
      * List<User> users = array.toList(User.class);
      * }</pre>
      *
+     * <p>Returns a new list without replacing this array's elements. Null elements are preserved;
+     * elements already of the requested type may be shared with the result.</p>
+     * <details><summary>中文</summary>返回新的容器，不替换原数组元素；保留 null 元素，已符合目标类型的元素可能共享。</details>
+     *
+     * @param <T> the element type
      * @param itemClass specify the {@code Class<T>} to be converted
      * @param features features to be enabled in parsing
+     * @return a new list containing the converted elements
+     * @throws JSONException if an element cannot be converted
      * @since 2.0.4
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -1242,11 +1374,18 @@ public class JSONArray
      * <pre>{@code
      * String json = "[{\"id\": 1, \"name\": \"fastjson\"}, {\"id\": 2, \"name\": \"fastjson2\"}]";
      * JSONArray array = JSON.parseArray(json);
-     * List<User> users = array.toList(User.class);
+     * User[] users = array.toArray(User.class);
      * }</pre>
      *
+     * <p>Returns a new array without replacing this array's elements. Null elements are preserved;
+     * elements already of the requested type may be shared with the result.</p>
+     * <details><summary>中文</summary>返回新的容器，不替换原数组元素；保留 null 元素，已符合目标类型的元素可能共享。</details>
+     *
+     * @param <T> the element type
      * @param itemClass specify the {@code Class<T>} to be converted
      * @param features features to be enabled in parsing
+     * @return a new array containing the converted elements
+     * @throws JSONException if an element cannot be converted
      * @since 2.0.4
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -1309,11 +1448,16 @@ public class JSONArray
      *
      * <pre>{@code
      * JSONArray array = ...
-     * User user = array.getObject(0, TypeReference<HashMap<String ,User>>(){}.getType());
+     * Map<String, User> users = array.getObject(0, new TypeReference<HashMap<String, User>>(){}.getType());
      * }</pre>
      *
+     * <p>Converts the selected value without replacing the stored element. A null element returns null.</p>
+     * <details><summary>中文</summary>转换指定元素但不替换原元素；原元素为 null 时返回 null。</details>
+     *
+     * @param <T> the result type
      * @param index index of the element to return
      * @param type specify the {@link Type} to be converted
+     * @param features reader features used for conversion
      * @return {@code <T>} or null
      * @throws JSONException If no suitable conversion method is found
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
@@ -1353,8 +1497,7 @@ public class JSONArray
             return objectReader.createInstance((Collection) value, featuresValue);
         }
 
-        Class clazz = TypeUtils.getMapping(type);
-        if (clazz.isInstance(value)) {
+        if (type instanceof Class && ((Class<?>) type).isInstance(value)) {
             return (T) value;
         }
 
@@ -1362,7 +1505,9 @@ public class JSONArray
         JSONReader jsonReader = JSONReader.of(json);
         jsonReader.context.config(features);
 
-        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
+        // Preserve type arguments when converting a bean through its JSON representation.
+        // <details><summary>中文</summary>通过 JSON 表示转换 Java 对象时保留泛型参数。</details>
+        ObjectReader objectReader = provider.getObjectReader(type, fieldBased);
         return (T) objectReader.readObject(jsonReader, null, null, 0);
     }
 
@@ -1371,8 +1516,13 @@ public class JSONArray
      * <p>
      * {@code User user = jsonArray.getObject(0, User.class);}
      *
+     * <p>Converts the selected value without replacing the stored element. A null element returns null.</p>
+     * <details><summary>中文</summary>转换指定元素但不替换原元素；原元素为 null 时返回 null。</details>
+     *
+     * @param <T> the result type
      * @param index index of the element to return
      * @param type specify the {@link Class} to be converted
+     * @param features reader features used for conversion
      * @return {@code <T>} or null
      * @throws JSONException If no suitable conversion method is found
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
@@ -1451,6 +1601,14 @@ public class JSONArray
     }
 
     /**
+     * Converts the element using {@link #getJSONObject(int)}, then applies the creator if the result is nonnull.
+     * The preliminary conversion may replace the stored element.
+     * <details><summary>中文</summary>先调用 getJSONObject 转换，结果非 null 时再调用创建函数；转换过程可能替换原元素。</details>
+     *
+     * @param <T> the result type
+     * @param index the element index
+     * @param creator the function applied to the converted JSONObject
+     * @return the function result, or null if conversion returns null
      * @since 2.0.3
      */
     public <T> T getObject(int index, Function<JSONObject, T> creator) {
@@ -1529,6 +1687,9 @@ public class JSONArray
     /**
      * Chained set operation that replaces the element at the specified position.
      *
+     * <p>Uses the negative-index and bounded-expansion behavior of {@link #set(int, Object)}.</p>
+     * <details><summary>中文</summary>遵循 set 的负索引及有界扩展行为。</details>
+     *
      * @param index index of the element to replace
      * @param element element to be stored at the specified position
      * @return this {@link JSONArray} instance
@@ -1591,6 +1752,9 @@ public class JSONArray
     /**
      * Creates and returns a copy of this {@link JSONArray}.
      *
+     * <p>The copy is shallow: element objects are shared with the original array.</p>
+     * <details><summary>中文</summary>执行浅复制，元素对象与原数组共享。</details>
+     *
      * @return a clone of this instance
      */
     @Override
@@ -1630,8 +1794,14 @@ public class JSONArray
      * Returns an {@link JSONArray} containing the elements of the given Collection, in its iteration order.
      *
      * <pre>
-     * JSONArray array = JSONArray.copyOf(List.of("fastjson"));
+     * JSONArray array = JSONArray.copyOf(Collections.singletonList("fastjson"));
      * </pre>
+     * <p>The result is mutable and shallow; null elements are retained.</p>
+     * <details><summary>中文</summary>结果可修改且为浅复制，保留 null 元素。</details>
+     *
+     * @param collection the collection to copy, not null
+     * @return a new mutable array in iteration order
+     * @throws NullPointerException if collection is null
      * @since 2.0.22
      */
     public static JSONArray copyOf(Collection collection) {
@@ -1675,31 +1845,41 @@ public class JSONArray
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray}
+     * Parses JSON array text. Null or empty input and the JSON null literal return null.
+     * <details><summary>中文</summary>解析 JSON 数组文本；null、空输入或 JSON null 字面量返回 null。</details>
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param features features to be enabled in parsing
+     * @param text the JSON array text
+     * @param features reader features enabled for parsing
+     * @return the parsed JSONArray, or null
+     * @see JSON#parseArray(String, JSONReader.Feature...)
      */
     public static JSONArray parseArray(String text, JSONReader.Feature... features) {
         return JSON.parseArray(text, features);
     }
 
     /**
-     * Parse JSON {@link String} into {@link List}
+     * Parses JSON array text and converts each element to the requested class.
+     * <details><summary>中文</summary>解析 JSON 数组文本，并将各元素转换为指定类。</details>
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param type specify the {@link Class} to be converted
-     * @param features features to be enabled in parsing
+     * @param <T> the element type
+     * @param text the JSON array text
+     * @param type the element class
+     * @param features reader features enabled for parsing
+     * @return the parsed list, or null for null, empty, or JSON null input
+     * @see JSON#parseArray(String, Class, JSONReader.Feature...)
      */
     public static <T> List<T> parseArray(String text, Class<T> type, JSONReader.Feature... features) {
         return JSON.parseArray(text, type, features);
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray}
+     * Parses JSON array text. Null or empty input and the JSON null literal return null.
+     * <details><summary>中文</summary>解析 JSON 数组文本；null、空输入或 JSON null 字面量返回 null。</details>
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param features features to be enabled in parsing
+     * @param text the JSON array text
+     * @param features reader features enabled for parsing
+     * @return the parsed JSONArray, or null
+     * @see JSON#parseArray(String, JSONReader.Feature...)
      * @since 2.0.13
      */
     public static JSONArray parse(String text, JSONReader.Feature... features) {
@@ -1707,11 +1887,14 @@ public class JSONArray
     }
 
     /**
+     * Parses JSON array text and converts each element to the requested class.
+     * <details><summary>中文</summary>解析 JSON 数组文本，并将各元素转换为指定类。</details>
      *
-     * Parse JSON {@link String} into {@link List}
-     *
-     * @param input the JSON {@link String} to be parsed
-     * @param type specify the {@link Class} to be converted
+     * @param <T> the element type
+     * @param input the JSON array text
+     * @param type the element class
+     * @return the parsed list, or null for null, empty, or JSON null input
+     * @see JSON#parseArray(String, Class)
      * @since 2.0.24
      */
     public static <T> List<T> parseArray(String input, Class<T> type) {
@@ -1719,14 +1902,27 @@ public class JSONArray
     }
 
     /**
-     * See {@link JSON#toJSON} for details
+     * Converts a Java value through {@link JSON#toJSON(Object, JSONWriter.Feature...)} and requires an array result.
+     * An existing JSONArray may be returned unchanged; this method is not a deep-copy operation.
+     * <details><summary>中文</summary>通过 JSON.toJSON 转换并要求结果为 JSONArray；已有 JSONArray 可能直接返回，并非深复制操作。</details>
+     *
+     * @param obj the value to convert, or null
+     * @return the resulting JSONArray, or null for a null input
+     * @throws ClassCastException if conversion produces a non-array value
      */
     public static JSONArray from(Object obj) {
         return (JSONArray) JSON.toJSON(obj);
     }
 
     /**
-     * See {@link JSON#toJSON} for details
+     * Converts a Java value through {@link JSON#toJSON(Object, JSONWriter.Feature...)} and requires an array result.
+     * An existing JSONArray may be returned unchanged; this method is not a deep-copy operation.
+     * <details><summary>中文</summary>通过 JSON.toJSON 转换并要求结果为 JSONArray；已有 JSONArray 可能直接返回，并非深复制操作。</details>
+     *
+     * @param obj the value to convert, or null
+     * @param writeFeatures serialization features used during conversion
+     * @return the resulting JSONArray, or null for a null input
+     * @throws ClassCastException if conversion produces a non-array value
      */
     public static JSONArray from(Object obj, JSONWriter.Feature... writeFeatures) {
         return (JSONArray) JSON.toJSON(obj, writeFeatures);

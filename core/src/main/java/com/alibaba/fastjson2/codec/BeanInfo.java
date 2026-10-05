@@ -110,12 +110,23 @@ public class BeanInfo {
         skipTransient = provider.isSkipTransient();
     }
 
+    /**
+     * Adds a required property while preserving the existing schema constraints.
+     * <details><summary>中文</summary>
+     * 添加必需属性，同时保留已有的模式约束。
+     * </details>
+     *
+     * @param fieldName the name of the required property
+     */
     public void required(String fieldName) {
         if (schema == null) {
             schema = JSONObject.of("required", JSONArray.of(fieldName)).toString();
         } else {
             JSONObject object = JSONObject.parseObject(schema);
             JSONArray array = object.getJSONArray("required");
+            if (array == null) {
+                object.put("required", array = new JSONArray());
+            }
             array.add(fieldName);
             schema = object.toString();
         }

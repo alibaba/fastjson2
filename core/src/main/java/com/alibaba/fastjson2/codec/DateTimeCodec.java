@@ -83,27 +83,19 @@ public abstract class DateTimeCodec {
         return dateFormatter;
     }
 
+    /**
+     * Returns a formatter with the requested locale without changing the cached default formatter.
+     * A null locale uses this codec's configured locale or the default locale.
+     * <details><summary>中文</summary>
+     * 返回使用指定区域设置的格式化器，不改变缓存的默认格式化器。
+     * 区域设置为 null 时使用此编解码器的区域设置或默认区域设置。
+     * </details>
+     *
+     * @param locale the locale override, or null to use the codec's locale
+     * @return the formatter, or null for a missing format or a special timestamp format
+     */
     public DateTimeFormatter getDateFormatter(Locale locale) {
-        if (format == null || formatMillis || formatISO8601 || formatUnixTime) {
-            return null;
-        }
-
-        if (dateFormatter != null) {
-            if ((this.locale == null && (locale == null || locale == Locale.getDefault()))
-                    || this.locale != null && this.locale.equals(locale)
-            ) {
-                return dateFormatter;
-            }
-        }
-
-        if (locale == null) {
-            if (this.locale == null) {
-                return dateFormatter = DateTimeFormatter.ofPattern(format);
-            } else {
-                return dateFormatter = DateTimeFormatter.ofPattern(format, this.locale);
-            }
-        }
-
-        return dateFormatter = DateTimeFormatter.ofPattern(format, locale);
+        DateTimeFormatter formatter = getDateFormatter();
+        return formatter == null || locale == null ? formatter : formatter.withLocale(locale);
     }
 }

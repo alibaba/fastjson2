@@ -185,6 +185,8 @@ final class JSONPathCompilerReflectASM
                 } else if (fieldClass == char.class) {
                     mw.checkcast("java/lang/Character");
                     mw.invokevirtual("java/lang/Character", "charValue", "()C");
+                } else {
+                    mw.checkcast(ASMUtils.type(fieldClass));
                 }
                 gwSetValue(mw, TYPE_OBJECT, fieldReader);
 
@@ -194,7 +196,7 @@ final class JSONPathCompilerReflectASM
         }
 
         if (fieldWriter != null) {
-            Class fieldClass = fieldReader.fieldClass;
+            Class fieldClass = fieldWriter.fieldClass;
 
             int OBJECT = 1;
 
@@ -255,7 +257,13 @@ final class JSONPathCompilerReflectASM
             String methodDesc = '(' + fieldClassDesc + ')' + ASMUtils.desc(returnType);
             mw.invokevirtual(TYPE_OBJECT, method.getName(), methodDesc);
             if (returnType != Void.TYPE) { // builder
-                mw.pop();
+                // JVM long and double return values occupy two operand-stack slots.
+                // <details><summary>中文</summary>JVM 的 long 和 double 返回值占用两个操作数栈槽。</details>
+                if (returnType == long.class || returnType == double.class) {
+                    mw.pop2();
+                } else {
+                    mw.pop();
+                }
             }
         } else {
             mw.putfield(TYPE_OBJECT, field.getName(), fieldClassDesc);

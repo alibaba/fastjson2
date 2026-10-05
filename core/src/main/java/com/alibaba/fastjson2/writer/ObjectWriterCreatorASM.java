@@ -1676,7 +1676,7 @@ public class ObjectWriterCreatorASM
 
         mw.visitLabel(notNull_);
 
-        boolean refDetection = (!mwc.disableSupportArrayMapping()) && !ObjectWriterProvider.isNotReferenceDetect(fieldClass);
+        boolean refDetection = (!mwc.disableReferenceDetect()) && !ObjectWriterProvider.isNotReferenceDetect(fieldClass);
         if (refDetection) {
             int REF_PATH = mwc.var("REF_PATH");
             Label endDetect_ = new Label(), refSetPath_ = new Label();
@@ -1735,10 +1735,19 @@ public class ObjectWriterCreatorASM
         mw.visitLdcInsn(fieldName);
         mwc.loadFieldType(i, fieldWriter.fieldType);
         mw.visitLdcInsn(fieldWriter.features);
-        mw.invokeinterface(
-                TYPE_OBJECT_WRITER,
-                beanToArray ? "writeJSONB" : "writeArrayMappingJSONB",
-                METHOD_DESC_WRITE_OBJECT);
+        if (beanToArray) {
+            mw.invokeinterface(TYPE_OBJECT_WRITER, "writeArrayMappingJSONB", METHOD_DESC_WRITE_OBJECT);
+        } else {
+            // Context features can enable array mapping after this writer has been generated.
+            // <details><summary>中文</summary>写入器生成后，上下文仍可动态启用数组映射。</details>
+            Label objectMapping = new Label(), endMapping = new Label();
+            mwc.genIsEnabled(BeanToArray.mask, objectMapping);
+            mw.invokeinterface(TYPE_OBJECT_WRITER, "writeArrayMappingJSONB", METHOD_DESC_WRITE_OBJECT);
+            mw.goto_(endMapping);
+            mw.visitLabel(objectMapping);
+            mw.invokeinterface(TYPE_OBJECT_WRITER, "writeJSONB", METHOD_DESC_WRITE_OBJECT);
+            mw.visitLabel(endMapping);
+        }
 
         if (refDetection) {
             mw.aload(JSON_WRITER);
@@ -3630,7 +3639,8 @@ public class ObjectWriterCreatorASM
 
             boolean asciiName = true;
             for (int j = 0; j < fieldNameUTF8.length; j++) {
-                if (fieldNameUTF8[j] < 0) {
+                if (fieldNameUTF8[j] < ' ' || fieldNameUTF8[j] == '"'
+                        || fieldNameUTF8[j] == '\'' || fieldNameUTF8[j] == '\\') {
                     asciiName = false;
                     break;
                 }
@@ -4724,6 +4734,24 @@ public class ObjectWriterCreatorASM
             mw.lstore(FEATURES);
 
             Label L_SUPPER = new Label();
+            // The generic writer emits collection and item type metadata when requested.
+            // <details><summary>中文</summary>请求类型信息时，通用写入器负责输出集合及元素类型。</details>
+            mw.lload(FEATURES);
+            mw.visitLdcInsn(WriteClassName.mask);
+            mw.land();
+            mw.lconst_0();
+            mw.lcmp();
+            mw.ifne(L_SUPPER);
+            // Positional item encoding is valid only when bean-to-array mapping is enabled.
+            // <details><summary>中文</summary>仅在启用 BeanToArray 时才能按位置编码列表元素。</details>
+            if ((features & BeanToArray.mask) == 0) {
+                mw.lload(FEATURES);
+                mw.visitLdcInsn(BeanToArray.mask);
+                mw.land();
+                mw.lconst_0();
+                mw.lcmp();
+                mw.ifeq(L_SUPPER);
+            }
             if (!provider.isDisableReferenceDetect()) {
                 /*
                  * if ((features & ReferenceDetection.mask) != 0) {
@@ -4781,12 +4809,6 @@ public class ObjectWriterCreatorASM
             mw.iload(SIZE);
             mw.if_icmpge(L3);
 
-            mw.aload(BYTES);
-            mw.iload(OFFSET);
-            mw.visitLdcInsn(fieldWriters.size());
-            mw.invokestatic(TYPE_JSONB_IO, "startArray", "([BII)I", true);
-            mw.istore(OFFSET);
-
             int ITEM = mwc.var("ITEM");
 
             mw.aload(LIST);
@@ -4808,6 +4830,7 @@ public class ObjectWriterCreatorASM
                 mw.bipush(BC_NULL);
                 mw.bastore();
                 mw.visitIincInsn(OFFSET, 1);
+                mw.visitIincInsn(I, 1);
                 mw.goto_(L0);
 
                 mw.visitLabel(L1);
@@ -4817,9 +4840,15 @@ public class ObjectWriterCreatorASM
                 mw.aload(ITEM);
                 mw.invokevirtual(TYPE_OBJECT, "getClass", "()Ljava/lang/Class;");
                 mw.aload(THIS);
-                mw.getfield(TYPE_FIELD_WRITER, "fieldClass", "Ljava/lang/Class;");
-                mw.if_acmpeq(L_SUPPER);
+                mw.invokevirtual(TYPE_FIELD_WRITER, "getItemClass", "()Ljava/lang/Class;");
+                mw.if_acmpne(L_SUPPER);
             }
+
+            mw.aload(BYTES);
+            mw.iload(OFFSET);
+            mw.visitLdcInsn(fieldWriters.size());
+            mw.invokestatic(TYPE_JSONB_IO, "startArray", "([BII)I", true);
+            mw.istore(OFFSET);
 
             for (int i = 0; i < fieldWriters.size(); i++) {
                 FieldWriter fieldWriter = fieldWriters.get(i);

@@ -35,6 +35,7 @@ public class DefaultJSONParser
 
     public DefaultJSONParser(String text, ParserConfig config) {
         this(JSONReader.of(text), config);
+        this.input = text;
     }
 
     public DefaultJSONParser(JSONReader reader, ParserConfig config) {
