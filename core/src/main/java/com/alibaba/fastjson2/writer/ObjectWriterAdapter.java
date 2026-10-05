@@ -25,6 +25,20 @@ public class ObjectWriterAdapter<T>
     NameFilter nameFilter;
     ValueFilter valueFilter;
 
+    /**
+     * The writer serving {@link JSONWriter.Feature#SortFieldNamesAlphabetically} for the same type, if it is
+     * a different instance; filters set on this writer are set on it too.
+     */
+    volatile ObjectWriterAdapter sortedVariant;
+
+    /**
+     * Caller features forwarded to nested tree conversions in {@link #toJSONObject(Object, long)}: the ones that
+     * select the writer variant or that the conversion applies itself. Value-format features are not applied to
+     * the tree at any depth.
+     */
+    static final long TREE_FEATURES = SortFieldNamesAlphabetically.mask | FieldBased.mask
+            | WriteNulls.mask | WriteEnumsUsingName.mask;
+
     static final String TYPE = "@type";
 
     final Class objectClass;
@@ -141,12 +155,20 @@ public class ObjectWriterAdapter<T>
         if (propertyFilter != null) {
             hasFilter = true;
         }
+        ObjectWriterAdapter sortedVariant = this.sortedVariant;
+        if (sortedVariant != null) {
+            sortedVariant.setPropertyFilter(propertyFilter);
+        }
     }
 
     public void setValueFilter(ValueFilter valueFilter) {
         this.valueFilter = valueFilter;
         if (valueFilter != null) {
             hasFilter = true;
+        }
+        ObjectWriterAdapter sortedVariant = this.sortedVariant;
+        if (sortedVariant != null) {
+            sortedVariant.setValueFilter(valueFilter);
         }
     }
 
@@ -155,12 +177,43 @@ public class ObjectWriterAdapter<T>
         if (nameFilter != null) {
             hasFilter = true;
         }
+        ObjectWriterAdapter sortedVariant = this.sortedVariant;
+        if (sortedVariant != null) {
+            sortedVariant.setNameFilter(nameFilter);
+        }
     }
 
     public void setPropertyPreFilter(PropertyPreFilter propertyPreFilter) {
         this.propertyPreFilter = propertyPreFilter;
         if (propertyPreFilter != null) {
             hasFilter = true;
+        }
+        ObjectWriterAdapter sortedVariant = this.sortedVariant;
+        if (sortedVariant != null) {
+            sortedVariant.setPropertyPreFilter(propertyPreFilter);
+        }
+    }
+
+    /**
+     * Makes {@code variant} the sorted field-names writer of this type: the filters set on this writer so far are
+     * copied to it, and later ones follow.
+     */
+    void linkSortedVariant(ObjectWriterAdapter variant) {
+        if (variant == this) {
+            return;
+        }
+        this.sortedVariant = variant;
+        if (propertyPreFilter != null) {
+            variant.setPropertyPreFilter(propertyPreFilter);
+        }
+        if (propertyFilter != null) {
+            variant.setPropertyFilter(propertyFilter);
+        }
+        if (nameFilter != null) {
+            variant.setNameFilter(nameFilter);
+        }
+        if (valueFilter != null) {
+            variant.setValueFilter(valueFilter);
         }
     }
 
@@ -612,6 +665,7 @@ public class ObjectWriterAdapter<T>
 
     public JSONObject toJSONObject(T object, long features) {
         JSONObject jsonObject = new JSONObject();
+        long nestedFeatures = features & TREE_FEATURES;
 
         for (int i = 0, size = fieldWriters.size(); i < size; i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
@@ -663,7 +717,7 @@ public class ObjectWriterAdapter<T>
                     for (Object item : collection) {
                         Object itemJSON = item == object
                                 ? jsonObject
-                                : JSON.toJSON(item, features);
+                                : toJSON(item, nestedFeatures);
                         array.add(itemJSON);
                     }
                     fieldValue = array;
@@ -704,15 +758,15 @@ public class ObjectWriterAdapter<T>
                     // path and toJSONString produce, instead of leaving the raw Java object in the
                     // JSONObject. See issue #7714.
                     if (!(valueWriter instanceof ObjectWriterAdapter)) {
-                        fieldValue = JSON.toJSON(fieldValue, features);
+                        fieldValue = toJSON(fieldValue, nestedFeatures);
                     }
                 }
                 if (valueWriter instanceof ObjectWriterAdapter) {
                     ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) valueWriter;
                     if (!objectWriterAdapter.getFieldWriters().isEmpty()) {
-                        fieldValue = objectWriterAdapter.toJSONObject(fieldValue, features);
+                        fieldValue = objectWriterAdapter.toJSONObject(fieldValue, nestedFeatures);
                     } else {
-                        fieldValue = JSON.toJSON(fieldValue, features);
+                        fieldValue = toJSON(fieldValue, nestedFeatures);
                     }
                 }
             }
@@ -720,6 +774,52 @@ public class ObjectWriterAdapter<T>
         }
 
         return jsonObject;
+    }
+
+    /**
+     * Converts the specified value to a {@link JSONArray} or {@link JSONObject}, honoring the
+     * caller's feature word merged with the context defaults. Writer-variant bits (such as
+     * {@link JSONWriter.Feature#SortFieldNamesAlphabetically}) reach nested conversions through
+     * the context; value-format bits are masked off by {@link #TREE_FEATURES} before that.
+     *
+     * @param object the specified value
+     * @param features the caller's feature word, a mask of {@link JSONWriter.Feature} bits
+     * @return {@link JSONArray} or {@link JSONObject} or {@code null}
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static Object toJSON(Object object, long features) {
+        if (object == null) {
+            return null;
+        }
+
+        if (object instanceof JSONObject || object instanceof JSONArray) {
+            return object;
+        }
+
+        JSONWriter.Context writeContext = JSONFactory.createWriteContext();
+        for (JSONWriter.Feature feature : JSONWriter.Feature.values()) {
+            if ((features & feature.mask) == feature.mask && feature.mask != 0) {
+                writeContext.config(feature);
+            }
+        }
+        Class<?> valueClass = object.getClass();
+        ObjectWriter<?> objectWriter = writeContext.getObjectWriter(valueClass, valueClass);
+        if (objectWriter instanceof ObjectWriterAdapter
+                && !writeContext.isEnabled(JSONWriter.Feature.ReferenceDetection)
+                && (objectWriter.getFeatures() & JSONWriter.Feature.WriteClassName.mask) == 0) {
+            ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) objectWriter;
+            return objectWriterAdapter.toJSONObject(object, writeContext.getFeatures());
+        }
+
+        String str;
+        try (JSONWriter writer = JSONWriter.of(writeContext)) {
+            objectWriter.write(writer, object, null, null, writeContext.getFeatures());
+            str = writer.toString();
+        } catch (NullPointerException | NumberFormatException ex) {
+            throw new JSONException("toJSONString error", ex);
+        }
+
+        return JSON.parse(str);
     }
 
     @Override

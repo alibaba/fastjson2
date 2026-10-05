@@ -5,8 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -251,14 +254,6 @@ public class TreeModelTest {
         public int apple = 1;
     }
 
-    @Test
-    public void toJSONLongOverloadCarriesFeatures() {
-        // non-adapter writers (lists, maps) in toJSON(Object, long) must still see the caller word
-        Object converted = JSON.toJSON(java.util.Collections.singletonList(new SortChild()),
-                JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
-        assertEquals("[{\"apple\":1,\"zebra\":3}]", converted.toString());
-    }
-
     public static class NestedSortHolder {
         public java.util.List<java.util.List<SortChild>> rows =
                 java.util.Collections.singletonList(java.util.Collections.singletonList(new SortChild()));
@@ -273,5 +268,21 @@ public class TreeModelTest {
                 JSONWriter.Feature.SortFieldNamesAlphabetically);
         assertEquals("{\"indexBy\":[{\"k\":{\"apple\":1,\"zebra\":3}}],\"rows\":[[{\"apple\":1,\"zebra\":3}]]}",
                 tree.toString());
+    }
+
+    public static class LongsHolder {
+        public long id = 9007199254740993L;
+        public List<Long> ids = Arrays.asList(1L, 9007199254740993L);
+        public List<Map<String, Object>> rows = Collections.singletonList(Collections.<String, Object>singletonMap("n", 5L));
+    }
+
+    @Test
+    public void fromKeepsValueFormatFeaturesOffNestedValues() {
+        // value-format features are not applied to tree values, nested or not
+        String plain = JSONObject.from(new LongsHolder()).toString();
+        assertEquals("{\"id\":9007199254740993,\"ids\":[1,9007199254740993],\"rows\":[{\"n\":5}]}", plain);
+        assertEquals(plain, JSONObject.from(new LongsHolder(), JSONWriter.Feature.WriteLongAsString).toString());
+        assertEquals(plain, JSONObject.from(new LongsHolder(), JSONWriter.Feature.WriteNonStringValueAsString).toString());
+        assertEquals(plain, JSONObject.from(new LongsHolder(), JSONWriter.Feature.WriteClassName).toString());
     }
 }

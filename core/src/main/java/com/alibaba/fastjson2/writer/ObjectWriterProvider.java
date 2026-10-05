@@ -271,8 +271,8 @@ public class ObjectWriterProvider
     /**
      * Returns the writer to serve the sorted variant of a registered writer. A plain bean adapter
      * (for example one built by {@code ObjectWriters.objectWriter(...)}) keeps the registered field
-     * writers and only changes their order; any other writer, including adapter subclasses with
-     * their own write logic and positional (BeanToArray) adapters, is honored as registered.
+     * writers and filters and only changes the field order; any other writer, including adapter
+     * subclasses with their own write logic and positional (BeanToArray) adapters, is honored as registered.
      */
     static ObjectWriter sortedVariantOf(ObjectWriter objectWriter) {
         if (!(objectWriter instanceof ObjectWriterAdapter) || !PLAIN_ADAPTERS.contains(objectWriter.getClass())) {
@@ -287,7 +287,9 @@ public class ObjectWriterProvider
         if (sorted.equals(adapter.fieldWriters)) {
             return objectWriter;
         }
-        return new ObjectWriterAdapter(adapter.objectClass, adapter.typeKey, adapter.typeName, adapter.features, sorted);
+        ObjectWriterAdapter variant = new ObjectWriterAdapter(adapter.objectClass, adapter.typeKey, adapter.typeName, adapter.features, sorted);
+        adapter.linkSortedVariant(variant);
+        return variant;
     }
 
     static final Set<Class<?>> PLAIN_ADAPTERS = new HashSet<>(Arrays.asList(
@@ -827,9 +829,24 @@ public class ObjectWriterProvider
 
             if (previous != null) {
                 objectWriter = previous;
+            } else {
+                linkSortedVariant(objectType, fieldBased, fieldNamesSorted, objectWriter);
             }
         }
         return objectWriter;
+    }
+
+    /**
+     * Links a newly created bean writer with the other field-order variant of the same type, so a filter set on
+     * the natural writer (for example by {@code JSON.register(Class, Filter)}) also applies to the sorted one.
+     */
+    private void linkSortedVariant(Type objectType, boolean fieldBased, boolean fieldNamesSorted, ObjectWriter objectWriter) {
+        ObjectWriter other = cacheOf(fieldBased, !fieldNamesSorted).get(objectType);
+        ObjectWriter natural = fieldNamesSorted ? other : objectWriter;
+        ObjectWriter sorted = fieldNamesSorted ? objectWriter : other;
+        if (natural instanceof ObjectWriterAdapter && sorted instanceof ObjectWriterAdapter) {
+            ((ObjectWriterAdapter) natural).linkSortedVariant((ObjectWriterAdapter) sorted);
+        }
     }
 
     static final int ENUM = 0x00004000;

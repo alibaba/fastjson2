@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.filter.PropertyFilter;
+import com.alibaba.fastjson2.filter.ValueFilter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
@@ -323,6 +325,48 @@ public class SortFieldNamesRegistryTest {
     public static class Inner$$EnhancerBySpringCGLIB$$abcdef extends Inner {
     }
 
+    @JSONType(alphabetic = false)
+    public static class SharedChild {
+        public int zebra = 3;
+        public int apple = 1;
+    }
+
+    @JSONType(alphabetic = false)
+    public static class SharedHolder {
+        public int zulu = 9;
+        public java.util.List<SharedChild> items = new java.util.ArrayList<>();
+
+        public SharedHolder() {
+            items.add(new SharedChild());
+        }
+    }
+
+    @Test
+    public void registeredVariantsIsolateListItemCaches() {
+        // the natural and sorted registered variants share FieldWriter instances; a dynamically
+        // cached list-item writer must not leak one variant's writer into the other
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.register(SharedHolder.class,
+                new ObjectWriterCreator().createObjectWriter(SharedHolder.class));
+        JSONWriter.Context natural = new JSONWriter.Context(provider);
+        JSONWriter.Context sorted = new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
+
+        String naturalExpected = "{\"zulu\":9,\"items\":[{\"zebra\":3,\"apple\":1}]}";
+        String sortedExpected = "{\"items\":[{\"apple\":1,\"zebra\":3}],\"zulu\":9}";
+
+        // natural first, then sorted, then natural again
+        SharedHolder holder = new SharedHolder();
+        assertEquals(naturalExpected, JSON.toJSONString(holder, natural));
+        assertEquals(sortedExpected, JSON.toJSONString(holder, sorted));
+        assertEquals(naturalExpected, JSON.toJSONString(holder, natural));
+
+        // sorted first, then natural, then sorted again
+        SharedHolder holder2 = new SharedHolder();
+        assertEquals(sortedExpected, JSON.toJSONString(holder2, sorted));
+        assertEquals(naturalExpected, JSON.toJSONString(holder2, natural));
+        assertEquals(sortedExpected, JSON.toJSONString(holder2, sorted));
+    }
+
     @Test
     public void fieldBasedProxyKeepsFieldBasedWriterVariant() {
         ObjectWriterProvider provider = new ObjectWriterProvider();
@@ -336,5 +380,50 @@ public class SortFieldNamesRegistryTest {
         String proxyJSON = JSON.toJSONString(proxy, context);
         assertTrue(proxyJSON.contains("hidden"), proxyJSON);
         assertTrue(proxyJSON.contains("\"name\":\"n\""), proxyJSON);
+    }
+
+    public static class Filtered {
+        public long id = 7;
+        public String password = "hunter2";
+        public String name = "alice";
+    }
+
+    public static class FilteredWarm {
+        public long id = 7;
+        public String password = "hunter2";
+        public String name = "alice";
+    }
+
+    public static class FilteredRegistered {
+        public long id = 7;
+        public String password = "hunter2";
+        public String name = "alice";
+    }
+
+    @Test
+    public void typeFiltersApplyToSortedVariant() {
+        ValueFilter mask = (object, name, value) -> "password".equals(name) ? "***" : value;
+        PropertyFilter drop = (object, name, value) -> !"password".equals(name);
+
+        // a filter set on the writer the provider hands out (what JSON.register(Class, Filter) does)
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        JSONWriter.Context sorted = new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
+        provider.getObjectWriter(Filtered.class).setFilter(mask);
+        assertEquals("{\"id\":7,\"name\":\"alice\",\"password\":\"***\"}", JSON.toJSONString(new Filtered(), sorted));
+
+        // the sorted variant already exists when the filter is set
+        assertTrue(JSON.toJSONString(new FilteredWarm(), sorted).contains("hunter2"));
+        provider.getObjectWriter(FilteredWarm.class).setFilter(drop);
+        assertEquals("{\"id\":7,\"name\":\"alice\"}", JSON.toJSONString(new FilteredWarm(), sorted));
+
+        // a registered adapter keeps its filters in the variant rebuilt for the feature, also ones set later
+        ObjectWriter writer = ObjectWriters.objectWriter(FilteredRegistered.class,
+                ObjectWriters.fieldWriter("password", String.class, (FilteredRegistered s) -> s.password),
+                ObjectWriters.fieldWriter("name", String.class, (FilteredRegistered s) -> s.name));
+        writer.setFilter(mask);
+        provider.register(FilteredRegistered.class, writer);
+        assertEquals("{\"name\":\"alice\",\"password\":\"***\"}", JSON.toJSONString(new FilteredRegistered(), sorted));
+        writer.setFilter(drop);
+        assertEquals("{\"name\":\"alice\"}", JSON.toJSONString(new FilteredRegistered(), sorted));
     }
 }

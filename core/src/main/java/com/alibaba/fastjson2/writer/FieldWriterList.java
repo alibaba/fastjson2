@@ -93,7 +93,9 @@ public class FieldWriterList<T>
 
         if (contentAs != null) {
             ObjectWriter itemObjectWriter = this.itemObjectWriter;
-            if (itemObjectWriter != null) {
+            if (itemObjectWriter != null && (!sortVariant || (format != null && itemClass == Date.class))) {
+                // format-aware Date presets are sort-invariant; other entries may have been stored
+                // by the natural variant when registered variants share this field writer
                 return itemObjectWriter;
             }
             if (sortVariant) {
@@ -105,8 +107,9 @@ public class FieldWriterList<T>
 
         if (itemType == null || itemType == this.itemType) {
             ObjectWriter itemObjectWriter = this.itemObjectWriter;
-            if (itemObjectWriter != null) {
-                // constructor presets (e.g. format-aware Date writers) are sort-invariant
+            if (itemObjectWriter != null && (!sortVariant || (format != null && itemClass == Date.class))) {
+                // constructor presets (e.g. format-aware Date writers) are sort-invariant; other
+                // entries may have been stored by the natural variant sharing this field writer
                 return itemObjectWriter;
             }
             if (format != null) {
@@ -178,11 +181,7 @@ public class FieldWriterList<T>
             ObjectWriter itemObjectWriter;
             if (itemClass != previousClass) {
                 refDetect = jsonWriter.isRefDetect();
-                if (itemClass == this.itemType && this.itemObjectWriter != null) {
-                    previousObjectWriter = this.itemObjectWriter;
-                } else {
-                    previousObjectWriter = getItemWriter(jsonWriter, itemClass);
-                }
+                previousObjectWriter = getItemWriter(jsonWriter, itemClass);
                 previousClass = itemClass;
                 if (refDetect) {
                     if (itemClass == this.itemClass) {
@@ -312,11 +311,7 @@ public class FieldWriterList<T>
             ObjectWriter itemObjectWriter;
             if (itemClass != previousClass) {
                 refDetect = jsonWriter.isRefDetect();
-                if (itemClass == this.itemType && this.itemObjectWriter != null) {
-                    previousObjectWriter = this.itemObjectWriter;
-                } else {
-                    previousObjectWriter = getItemWriter(jsonWriter, itemClass);
-                }
+                previousObjectWriter = getItemWriter(jsonWriter, itemClass);
                 previousClass = itemClass;
                 if (refDetect) {
                     if (itemClass == this.itemClass) {
