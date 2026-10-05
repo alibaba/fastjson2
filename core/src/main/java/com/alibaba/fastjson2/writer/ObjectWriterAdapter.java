@@ -247,25 +247,20 @@ public class ObjectWriterAdapter<T>
                 variant.setValueFilter(valueFilter);
             }
 
-            WeakReference<ObjectWriterAdapter>[] current = this.linkedVariants;
-            int live = 0;
-            for (WeakReference<ObjectWriterAdapter> linked : current) {
+            // one scan builds a dense array: GC can clear a reference between passes,
+            // and interior null slots would NPE later setters and links
+            List<WeakReference<ObjectWriterAdapter>> live = new ArrayList<>(this.linkedVariants.length + 1);
+            for (WeakReference<ObjectWriterAdapter> linked : this.linkedVariants) {
                 ObjectWriterAdapter resolved = linked.get();
                 if (resolved == variant) {
                     return;
                 }
                 if (resolved != null) {
-                    live++;
+                    live.add(linked);
                 }
             }
-            WeakReference<ObjectWriterAdapter>[] next = new WeakReference[live + 1];
-            int i = 0;
-            for (WeakReference<ObjectWriterAdapter> linked : current) {
-                if (linked.get() != null) {
-                    next[i++] = linked;
-                }
-            }
-            next[live] = new WeakReference<>(variant);
+            WeakReference<ObjectWriterAdapter>[] next = live.toArray(new WeakReference[live.size() + 1]);
+            next[live.size()] = new WeakReference<>(variant);
             this.linkedVariants = next;
         }
     }

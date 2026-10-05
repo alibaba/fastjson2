@@ -516,6 +516,45 @@ public class SortFieldNamesRegistryTest {
         public String name = "alice";
     }
 
+    @Test
+    public void counterpartAndFilterAfterInitialLookupStillMaskLaterHits() throws Exception {
+        // sorted created with the natural cell still empty; natural writer and its filter arrive
+        // only during/after the sorted publication — every later hit must still be masked
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.getObjectWriter(Filtered.class, Filtered.class, JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+        provider.getObjectWriter(Filtered.class).setFilter(
+                (ValueFilter) (object, name, value) -> "password".equals(name) ? "***" : value);
+
+        java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(3);
+        try {
+            java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
+            java.util.concurrent.Future<String> first = pool.submit(() -> {
+                start.await();
+                return JSON.toJSONString(new Filtered(),
+                        new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically));
+            });
+            java.util.concurrent.Future<String> second = pool.submit(() -> {
+                start.await();
+                return JSON.toJSONString(new Filtered(),
+                        new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically));
+            });
+            java.util.concurrent.Future<?> third = pool.submit(() -> {
+                start.await();
+                provider.getObjectWriter(Filtered.class).setFilter(
+                        (ValueFilter) (object, name, value) -> "password".equals(name) ? "***" : value);
+                return null;
+            });
+            start.countDown();
+            third.get(30, java.util.concurrent.TimeUnit.SECONDS);
+            assertEquals("{\"id\":7,\"name\":\"alice\",\"password\":\"***\"}",
+                    first.get(30, java.util.concurrent.TimeUnit.SECONDS));
+            assertEquals("{\"id\":7,\"name\":\"alice\",\"password\":\"***\"}",
+                    second.get(30, java.util.concurrent.TimeUnit.SECONDS));
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
     public static class FilteredWarm {
         public long id = 7;
         public String password = "hunter2";

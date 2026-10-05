@@ -54,10 +54,18 @@ public class ObjectWriterAdapterLinkTest {
         int live = liveVariants(source.linkedVariants).size();
         assertEquals(0, live, "unregistered variants must become collectible, not stay attached");
 
-        // the next link compacts the cleared entries instead of growing the array further
+        // the next link compacts the cleared entries instead of growing the array further,
+        // and the published array is dense: interior null slots would NPE later setters and links
         provider.register(RentCreds.class, writer);
         assertTrue(source.linkedVariants.length <= 4,
                 "expected compaction, array length " + source.linkedVariants.length);
+        for (Object entry : (Object[]) (Object) source.linkedVariants) {
+            assertTrue(entry != null, "linkedVariants must not publish null slots");
+            if (entry instanceof java.lang.ref.WeakReference) {
+                assertTrue(((java.lang.ref.WeakReference<?>) entry).get() != null,
+                        "linkedVariants must not publish cleared entries while the provider holds the variant");
+            }
+        }
     }
 
     public static class LinkTargets {
