@@ -72,6 +72,47 @@ public class TreeModelTest {
     }
 
     @Test
+    public void deepCopyCyclicObject() {
+        JSONObject object = JSON.parseObject("{\"a\":{\"$ref\":\"$\"}}");
+        assertSame(object, object.get("a"));
+        JSONObject copy = object.deepCopy();
+        assertTrue(object != copy);
+        assertSame(copy, copy.get("a"));
+    }
+
+    @Test
+    public void deepCopyCyclicArray() {
+        JSONArray array = new JSONArray();
+        array.add(array);
+        JSONArray copy = array.deepCopy();
+        assertTrue(array != copy);
+        assertSame(copy, copy.get(0));
+    }
+
+    @Test
+    public void deepCopyNestedCycle() {
+        JSONObject object = JSON.parseObject("{\"a\":{\"b\":{\"$ref\":\"$.a\"}}}");
+        JSONObject copy = object.deepCopy();
+        assertTrue(object != copy);
+        assertSame(copy.getJSONObject("a"), copy.getJSONObject("a").getJSONObject("b"));
+    }
+
+    @Test
+    public void deepCopySharedSubtreesStayDistinct() {
+        JSONObject left = JSONObject.of("k", 1);
+        JSONObject right = JSONObject.of("k", 1);
+        JSONObject root = new JSONObject();
+        root.put("l", left);
+        root.put("r", right);
+        JSONObject copy = root.deepCopy();
+        // equal-but-distinct source subtrees must not collapse into one shared copy
+        assertNotSame(copy.get("l"), copy.get("r"));
+        assertEquals(left, copy.get("l"));
+        assertEquals(right, copy.get("r"));
+        assertNotSame(left, right);
+    }
+
+    @Test
     public void requiredPresent() {
         JSONObject object = JSON.parseObject("{\"a\":1,\"b\":{\"c\":2}}");
         assertEquals(1, object.required("a"));

@@ -1606,17 +1606,29 @@ public class JSONArray
      * <p>Elements that are not {@link JSONObject} or {@link JSONArray} (strings, numbers,
      * dates, POJOs and so on) are shared between this array and the copy.
      *
+     * <p>Cyclic trees (reachable for example through {@code $ref} reference detection)
+     * are copied into copies with the same cycle shape.
+     *
      * @return a deep copy of this array
      * @see #clone()
      * @since 2.0.66
      */
     public JSONArray deepCopy() {
+        return deepCopy(new IdentityHashMap<>());
+    }
+
+    JSONArray deepCopy(IdentityHashMap<Object, Object> visited) {
+        JSONArray already = (JSONArray) visited.get(this);
+        if (already != null) {
+            return already;
+        }
         JSONArray copy = new JSONArray(this.size());
+        visited.put(this, copy);
         for (Object value : this) {
             if (value instanceof JSONObject) {
-                value = ((JSONObject) value).deepCopy();
+                value = ((JSONObject) value).deepCopy(visited);
             } else if (value instanceof JSONArray) {
-                value = ((JSONArray) value).deepCopy();
+                value = ((JSONArray) value).deepCopy(visited);
             }
             copy.add(value);
         }

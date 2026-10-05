@@ -2040,18 +2040,30 @@ public class JSONObject
      * <p>Values that are not {@link JSONObject} or {@link JSONArray} (strings, numbers,
      * dates, POJOs and so on) are shared between this object and the copy.
      *
+     * <p>Cyclic trees (reachable for example through {@code $ref} reference detection)
+     * are copied into copies with the same cycle shape.
+     *
      * @return a deep copy of this object
      * @see #clone()
      * @since 2.0.66
      */
     public JSONObject deepCopy() {
+        return deepCopy(new IdentityHashMap<>());
+    }
+
+    JSONObject deepCopy(IdentityHashMap<Object, Object> visited) {
+        JSONObject already = (JSONObject) visited.get(this);
+        if (already != null) {
+            return already;
+        }
         JSONObject copy = new JSONObject(this.size(), 1F);
+        visited.put(this, copy);
         for (Map.Entry<String, Object> entry : entrySet()) {
             Object value = entry.getValue();
             if (value instanceof JSONObject) {
-                value = ((JSONObject) value).deepCopy();
+                value = ((JSONObject) value).deepCopy(visited);
             } else if (value instanceof JSONArray) {
-                value = ((JSONArray) value).deepCopy();
+                value = ((JSONArray) value).deepCopy(visited);
             }
             copy.put(entry.getKey(), value);
         }
