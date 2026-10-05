@@ -297,15 +297,93 @@ public class ErrorOnDuplicateKeysTest {
     }
 
     @Test
+    public void annotationDrivenStrictnessCrossesArrays() {
+        // field-level strictness must reach objects nested inside arrays too
+        JSONException error = assertThrows(JSONException.class,
+                () -> JSON.parseObject("{\"data\":{\"l\":[{\"x\":1,\"x\":2}]}}", StrictPayloadHolder.class));
+        assertDuplicateKeyMessage(error, "x");
+    }
+
+    @Test
+    public void readObjectWordCrossesArrays() {
+        try (JSONReader jsonReader = JSONReader.of("{\"l\":[{\"x\":1,\"x\":2}]}")) {
+            JSONException error = assertThrows(JSONException.class,
+                    () -> jsonReader.readObject(JSONReader.Feature.ErrorOnDuplicateKeys.mask));
+            assertTrue(error.getMessage().contains("duplicate key : x"));
+        }
+    }
+
+    @Test
+    public void typedReadWordCrossesArrays() {
+        try (JSONReader jsonReader = JSONReader.of("{\"a\":{\"x\":1,\"x\":2}}")) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            JSONException error = assertThrows(JSONException.class,
+                    () -> jsonReader.read(map, String.class, Object.class, JSONReader.Feature.ErrorOnDuplicateKeys.mask));
+            assertTrue(error.getMessage().contains("duplicate key : x"));
+        }
+    }
+
+    @Test
     public void readObjectPerCallFeatures() {
-        String str = "{\"a\":{\"b\":1,\"b\":2}}";
+        // the word alone (no context config) must reject duplicates, including through arrays
+        String str = "{\"a\":{\"l\":[{\"b\":1,\"b\":2}]}}";
         java.io.StringReader reader = new java.io.StringReader(str);
         try (com.alibaba.fastjson2.JSONReader jsonReader = com.alibaba.fastjson2.JSONReader.of(reader)) {
-            jsonReader.getContext().config(JSONReader.Feature.ErrorOnDuplicateKeys);
             java.util.LinkedHashMap<String, Object> map = new java.util.LinkedHashMap<>();
-            JSONException error = assertThrows(JSONException.class, () -> jsonReader.read(map, 0));
+            JSONException error = assertThrows(JSONException.class,
+                    () -> jsonReader.read(map, JSONReader.Feature.ErrorOnDuplicateKeys.mask));
             assertTrue(error.getMessage().contains("duplicate key : b"));
         }
+    }
+
+    public static class ObjBox {
+        public Object data;
+    }
+
+    @Test
+    public void duplicatedTypeDiscriminatorRejected() {
+        // the discriminator is a key too; two of them must be rejected, not silently last-win
+        JSONException error = assertThrows(JSONException.class,
+                () -> JSON.parseObject(
+                        "{\"data\":{\"@type\":\"a.B\",\"@type\":\"c.D\"}}",
+                        ObjBox.class,
+                        JSONReader.Feature.ErrorOnDuplicateKeys));
+        assertDuplicateKeyMessage(error, "@type");
+
+        // root level: the registration precedes the @type handling
+        JSONException root = assertThrows(JSONException.class,
+                () -> JSON.parseObject("{\"@type\":\"x.Y\",\"@type\":\"other\"}",
+                        JSONReader.Feature.ErrorOnDuplicateKeys));
+        assertTrue(root.getMessage().contains("duplicate key"));
+
+        // a single discriminator is not a duplicate
+        ObjBox ok = JSON.parseObject(
+                "{\"data\":{\"@type\":\"a.B\",\"n\":1}}",
+                ObjBox.class,
+                JSONReader.Feature.ErrorOnDuplicateKeys);
+        Map<?, ?> data = (Map<?, ?>) ok.data;
+        assertEquals("a.B", data.get("@type"));
+        assertEquals(1, data.get("n"));
+    }
+
+    @Test
+    public void duplicatedTypeDiscriminatorRejectedTypedMap() {
+        JSONException error = assertThrows(JSONException.class,
+                () -> JSON.parseObject(
+                        "{\"@type\":\"java.util.HashMap\",\"@type\":\"java.util.HashMap\"}",
+                        new TypeReference<Map<Object, Object>>() {
+                        },
+                        JSONReader.Feature.ErrorOnDuplicateKeys,
+                        JSONReader.Feature.SupportAutoType));
+        assertTrue(error.getMessage().contains("duplicate key"));
+
+        Map<Object, Object> ok = JSON.parseObject(
+                "{\"@type\":\"java.util.HashMap\",\"n\":1}",
+                new TypeReference<Map<Object, Object>>() {
+                },
+                JSONReader.Feature.ErrorOnDuplicateKeys,
+                JSONReader.Feature.SupportAutoType);
+        assertEquals(1, ok.get("n"));
     }
 
     @Test

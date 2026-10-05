@@ -100,6 +100,11 @@ public final class ObjectReaderImplObject
                 }
             }
 
+            Set<String> seenKeys = null;
+            if (((features | context.getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0) {
+                seenKeys = new HashSet<>();
+            }
+
             if (typeName != null) {
                 switch (typeName) {
                     case "java.util.ImmutableCollections$Map1":
@@ -107,14 +112,13 @@ public final class ObjectReaderImplObject
                         break;
                     default:
                         object.put("@type", typeName);
+                        if (seenKeys != null) {
+                            // register the discriminator where it is consumed, without storing it twice
+                            seenKeys.add("@type");
+                        }
                         break;
                 }
                 hash = 0;
-            }
-
-            Set<String> seenKeys = null;
-            if (((features | context.getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0) {
-                seenKeys = new HashSet<>();
             }
 
             for (int i = 0; ; ++i) {
@@ -173,7 +177,7 @@ public final class ObjectReaderImplObject
                         value = jsonReader.readNumber();
                         break;
                     case '[':
-                        value = jsonReader.readArray();
+                        value = jsonReader.readArray(features);
                         break;
                     case '{':
                         if (jsonReader.isReference()) {
@@ -257,7 +261,7 @@ public final class ObjectReaderImplObject
                 value = jsonReader.readNumber();
                 break;
             case '[':
-                value = jsonReader.readArray();
+                value = jsonReader.readArray(features);
                 break;
             case '"':
             case '\'':

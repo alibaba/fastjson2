@@ -148,10 +148,12 @@ public class TreeModelTest {
     @Test
     public void canConvertToIntCheck() {
         JSONObject object = JSON.parseObject(
-                "{\"i\":1,\"l\":1234567890123,\"big\":999999999999999999999,\"f\":1.5,\"s\":\"1\",\"n\":null}"
+                "{\"i\":1,\"l\":1234567890123,\"inRange\":100000,\"big\":999999999999999999999,\"f\":1.5,\"s\":\"1\",\"n\":null}"
         );
         assertTrue(object.canConvertToInt("i"));
         assertFalse(object.canConvertToInt("l"));
+        // an in-range Long is convertible
+        assertTrue(object.canConvertToInt("inRange"));
         assertFalse(object.canConvertToInt("big"));
         // jackson semantics: decimal within int range converts by truncation
         assertTrue(object.canConvertToInt("f"));
@@ -241,11 +243,29 @@ public class TreeModelTest {
         map.put("s", (short) 2);
         map.put("i", 3);
         map.put("l", 4L);
+        map.put("ai", new java.util.concurrent.atomic.AtomicInteger(5));
+        map.put("al", new java.util.concurrent.atomic.AtomicLong(6));
+        java.util.concurrent.atomic.LongAdder adder = new java.util.concurrent.atomic.LongAdder();
+        adder.add(8);
+        map.put("adder", adder);
+        map.put("alMax", new java.util.concurrent.atomic.AtomicLong(Long.MAX_VALUE));
         JSONObject object = new JSONObject(map);
         assertTrue(object.canConvertToInt("b"));
         assertTrue(object.canConvertToInt("s"));
         assertTrue(object.canConvertToInt("i"));
+        assertTrue(object.canConvertToLong("b"));
+        assertTrue(object.canConvertToLong("s"));
+        assertTrue(object.canConvertToLong("i"));
         assertTrue(object.canConvertToLong("l"));
+        // other integral Number types are answered like getIntValue/getLongValue would convert them
+        assertTrue(object.canConvertToInt("ai"));
+        assertTrue(object.canConvertToLong("ai"));
+        assertTrue(object.canConvertToInt("al"));
+        assertTrue(object.canConvertToLong("al"));
+        assertTrue(object.canConvertToInt("adder"));
+        assertTrue(object.canConvertToLong("adder"));
+        assertFalse(object.canConvertToInt("alMax"));
+        assertTrue(object.canConvertToLong("alMax"));
     }
 
     @com.alibaba.fastjson2.annotation.JSONType(alphabetic = false)

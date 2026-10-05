@@ -214,7 +214,7 @@ public final class ObjectWriterImplMap
             }
         }
 
-        long contextFeatures = context.getFeatures();
+        long contextFeatures = jsonWriter.getFeatures(features) | this.features;
         boolean writeNulls = (contextFeatures & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) != 0;
         boolean fieldBased = (contextFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
         ObjectWriterProvider provider = context.provider;
@@ -247,7 +247,7 @@ public final class ObjectWriterImplMap
                         if (refPath != null) {
                             jsonWriter.writeReference(refPath);
                         } else {
-                            ObjectWriter keyWriter = provider.getObjectWriter(entryKeyClass, entryKeyClass, fieldBased);
+                            ObjectWriter keyWriter = provider.getObjectWriter(entryKeyClass, entryKeyClass, contextFeatures);
                             keyWriter.writeJSONB(jsonWriter, entryKey, null, null, 0);
                         }
                         if (keyRefDetect) {
@@ -285,7 +285,7 @@ public final class ObjectWriterImplMap
                     jsonWriter.config(JSONWriter.Feature.ReferenceDetection, false);
                 }
                 Class<?> entryKeyClass = entryKey.getClass();
-                ObjectWriter keyWriter = provider.getObjectWriter(entryKeyClass, entryKeyClass, fieldBased);
+                ObjectWriter keyWriter = provider.getObjectWriter(entryKeyClass, entryKeyClass, contextFeatures);
                 keyWriter.writeJSONB(jsonWriter, entryKey, null, null, 0);
                 if (contextRefDetect) {
                     jsonWriter.config(JSONWriter.Feature.ReferenceDetection, true);
@@ -367,8 +367,7 @@ public final class ObjectWriterImplMap
                 } else if (valueClass == TypeUtils.CLASS_JSON_ARRAY_1x) {
                     valueWriter = ObjectWriterImplList.INSTANCE;
                 } else {
-                    // Context#getObjectWriter honors FieldBased/SortFieldNamesAlphabetically from context features
-                    valueWriter = context.getObjectWriter(valueClass);
+                    valueWriter = provider.getObjectWriter(valueClass, valueClass, contextFeatures);
                 }
 
                 if (itemWriter == null) {
@@ -382,7 +381,7 @@ public final class ObjectWriterImplMap
                 }
             }
 
-            valueWriter.writeJSONB(jsonWriter, value, entryKey, fieldValueType, this.features);
+            valueWriter.writeJSONB(jsonWriter, value, entryKey, fieldValueType, contextFeatures);
 
             if (valueRefDetecChanged) {
                 jsonWriter.config(JSONWriter.Feature.ReferenceDetection, true);
@@ -415,7 +414,9 @@ public final class ObjectWriterImplMap
         }
 
         final JSONWriter.Context context = jsonWriter.getContext();
-        String str = JSON.toJSONString(key, context);
+        JSONWriter.Context keyContext = new JSONWriter.Context(context.provider);
+        keyContext.setFeatures(jsonWriter.getFeatures() | this.features | features);
+        String str = JSON.toJSONString(key, keyContext);
         if (str != null) {
             final int length = str.length();
             if (length > 1) {
@@ -442,8 +443,13 @@ public final class ObjectWriterImplMap
                     jsonWriter.writeName((Integer) key);
                 } else if (key instanceof Long) {
                     jsonWriter.writeName((Long) key);
-                } else {
+                } else if (((jsonWriter.getFeatures() | this.features | features)
+                        & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
                     jsonWriter.writeNameAny(key);
+                } else {
+                    // bean keys under the sort feature resolve with the merged word, so a
+                    // field-level sort request reaches the key's own fields
+                    jsonWriter.writeName(strKey = mapKeyToString(key, jsonWriter, features));
                 }
             }
         }
@@ -486,7 +492,7 @@ public final class ObjectWriterImplMap
             writeTypeInfo(jsonWriter);
         }
 
-        features |= jsonWriter.getFeatures();
+        features |= (jsonWriter.getFeatures() | this.features);
         if ((features & (MapSortField.mask | SortMapEntriesByKeys.mask)) != 0) {
             if (!(map instanceof SortedMap)
                     && (map.getClass() != LinkedHashMap.class || (features & SortMapEntriesByKeys.mask) != 0)) {
@@ -539,7 +545,7 @@ public final class ObjectWriterImplMap
                 if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT64_MASK) == 0) {
                     jsonWriter.writeInt64((Long) value);
                 } else {
-                    ObjectWriter<?> valueWriter = jsonWriter.getObjectWriter(valueClass);
+                    ObjectWriter<?> valueWriter = provider.getObjectWriter(valueClass, valueClass, features);
                     valueWriter.write(jsonWriter, value, strKey, Long.class, features);
                 }
                 continue;
@@ -550,8 +556,8 @@ public final class ObjectWriterImplMap
                 if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DECIMAL_MASK) == 0) {
                     jsonWriter.writeDecimal((BigDecimal) value, features, null);
                 } else {
-                    ObjectWriter<?> valueWriter = jsonWriter.getObjectWriter(valueClass);
-                    valueWriter.write(jsonWriter, value, key, this.valueType, this.features);
+                    ObjectWriter<?> valueWriter = provider.getObjectWriter(valueClass, valueClass, features);
+                    valueWriter.write(jsonWriter, value, key, this.valueType, features);
                 }
                 continue;
             }
@@ -560,13 +566,13 @@ public final class ObjectWriterImplMap
             ObjectWriter<?> valueWriter;
             if (valueClass == this.valueType) {
                 if (this.valueWriter != null
-                        && (jsonWriter.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
+                        && (features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
                     valueWriter = this.valueWriter;
-                } else if ((jsonWriter.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+                } else if ((features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
                     // sorted variant must not be cached in valueWriter
                     valueWriter = format != null
                             ? jsonWriter.getObjectWriter(valueClass, format)
-                            : jsonWriter.getObjectWriter(valueClass);
+                            : provider.getObjectWriter(valueClass, valueClass, features);
                 } else {
                     valueWriter = this.valueWriter = format != null
                             ? jsonWriter.getObjectWriter(valueClass, format)
@@ -587,7 +593,7 @@ public final class ObjectWriterImplMap
                     valueWriter = ObjectWriterImplList.INSTANCE;
                     isPrimitiveOrEnum = false;
                 } else {
-                    valueWriter = jsonWriter.getObjectWriter(valueClass);
+                    valueWriter = provider.getObjectWriter(valueClass, valueClass, features);
                     isPrimitiveOrEnum = ObjectWriterProvider.isPrimitiveOrEnum(valueClass);
                 }
             }
@@ -607,7 +613,7 @@ public final class ObjectWriterImplMap
                 }
             }
 
-            valueWriter.write(jsonWriter, value, key, this.valueType, this.features);
+            valueWriter.write(jsonWriter, value, key, this.valueType, features);
 
             if (valueRefDetect) {
                 jsonWriter.popPath(value);
@@ -633,7 +639,7 @@ public final class ObjectWriterImplMap
             writeTypeInfo(jsonWriter);
         }
 
-        features |= jsonWriter.getFeatures();
+        features |= (jsonWriter.getFeatures() | this.features);
         if ((features & (MapSortField.mask | SortMapEntriesByKeys.mask)) != 0) {
             if (!(map instanceof SortedMap)
                     && (map.getClass() != LinkedHashMap.class || (features & SortMapEntriesByKeys.mask) != 0)) {

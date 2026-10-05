@@ -155,7 +155,8 @@ final class ObjectWriterImplList
                 if (itemClass == previousClass) {
                     itemObjectWriter = previousObjectWriter;
                 } else {
-                    itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                    itemObjectWriter = jsonWriter.getContext().getProvider()
+                            .getObjectWriter(itemClass, itemClass, jsonWriter.getFeatures(features) | this.features);
                     previousClass = itemClass;
                     previousObjectWriter = itemObjectWriter;
                 }
@@ -205,7 +206,7 @@ final class ObjectWriterImplList
                 } else if (itemClass == CLASS_JSON_ARRAY_1x) {
                     itemObjectWriter = ObjectWriterImplList.INSTANCE_JSON_ARRAY_1x;
                 } else {
-                    itemObjectWriter = context.getObjectWriter(itemClass);
+                    itemObjectWriter = context.provider.getObjectWriter(itemClass, itemClass, jsonWriter.getFeatures(features) | this.features);
                 }
 
                 previousClass = itemClass;
@@ -259,7 +260,8 @@ final class ObjectWriterImplList
                 if (itemClass == previousClass) {
                     itemObjectWriter = previousObjectWriter;
                 } else {
-                    itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                    itemObjectWriter = jsonWriter.getContext().getProvider()
+                            .getObjectWriter(itemClass, itemClass, jsonWriter.getFeatures(features) | this.features);
                     previousClass = itemClass;
                     previousObjectWriter = itemObjectWriter;
                 }
@@ -353,7 +355,7 @@ final class ObjectWriterImplList
                     itemObjectWriter = ObjectWriterImplList.INSTANCE_JSON_ARRAY_1x;
                     refDetect = jsonWriter.isRefDetect();
                 } else {
-                    itemObjectWriter = context.getObjectWriter(itemClass);
+                    itemObjectWriter = context.provider.getObjectWriter(itemClass, itemClass, jsonWriter.getFeatures(features) | this.features);
                     refDetect = jsonWriter.isRefDetect(item);
                 }
 

@@ -321,6 +321,9 @@ class ObjectReaderImplMapTyped
                         && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                         && name.equals(getTypeKey())
                 ) {
+                    if (seenKeys != null && !seenKeys.add(getTypeKey())) {
+                        throw new JSONException(jsonReader.info("duplicate key : " + name));
+                    }
                     jsonReader.readTypeHashCode();
                     ObjectReader objectReaderAutoType = jsonReader.getContext()
                             .getObjectReaderAutoType(jsonReader.getString(), mapType, features);
@@ -348,6 +351,9 @@ class ObjectReaderImplMapTyped
                 ) {
                     name = jsonReader.readFieldName();
                     if (name.equals(getTypeKey())) {
+                        if (seenKeys != null && !seenKeys.add(getTypeKey())) {
+                            throw new JSONException(jsonReader.info("duplicate key : " + name));
+                        }
                         jsonReader.readTypeHashCode();
                         ObjectReader objectReaderAutoType = jsonReader.getContext()
                                 .getObjectReaderAutoType(jsonReader.getString(), mapType, features);
@@ -375,6 +381,9 @@ class ObjectReaderImplMapTyped
                     if (index == 0
                             && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                             && name.equals(getTypeKey())) {
+                        if (seenKeys != null && !seenKeys.add(getTypeKey())) {
+                            throw new JSONException(jsonReader.info("duplicate key : " + name));
+                        }
                         jsonReader.readTypeHashCode();
                         ObjectReader objectReaderAutoType = jsonReader.getContext()
                                 .getObjectReaderAutoType(jsonReader.getString(), mapType, features);

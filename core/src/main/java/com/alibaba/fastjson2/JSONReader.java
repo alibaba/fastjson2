@@ -3541,11 +3541,11 @@ public abstract class JSONReader
                     value = readNumber();
                     break;
                 case '[':
-                    value = readArray();
+                    value = readArray(contextFeatures);
                     break;
                 case '{':
                     if (typeRedirect) {
-                        value = ObjectReaderImplObject.INSTANCE.readObject(this, null, name, features);
+                        value = ObjectReaderImplObject.INSTANCE.readObject(this, null, name, contextFeatures);
                     } else {
                         value = readObject(contextFeatures);
                     }
@@ -3665,7 +3665,8 @@ public abstract class JSONReader
                 throw duplicateKeyError(name);
             }
 
-            Object value = valueReader.readObject(this, null, null, 0L);
+            Object value = valueReader.readObject(this, null, null,
+                    contextFeatures & Feature.ErrorOnDuplicateKeys.mask);
 
             if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
                 continue;
@@ -3803,7 +3804,7 @@ public abstract class JSONReader
                     val = getNumber();
                     break;
                 case '[':
-                    val = readArray();
+                    val = readArray(features);
                     break;
                 case '{':
                     if (isReference()) {
@@ -4129,6 +4130,19 @@ public abstract class JSONReader
      * @return A List representation of the JSON array
      */
     public List readArray() {
+        return readArray(context.features);
+    }
+
+    /**
+     * Reads a JSON array and returns it as a List, honoring the supplied feature word on
+     * top of the reader context features. Only {@link Feature#ErrorOnDuplicateKeys} is
+     * honored today; other bits are parsed as on the plain {@link #readArray()} call.
+     *
+     * @param features the per-call feature word, a mask of {@link Feature} bits
+     * @return A List representation of the JSON array
+     * @since 2.0.66
+     */
+    public List readArray(long features) {
         next();
 
         level++;
@@ -4148,15 +4162,15 @@ public abstract class JSONReader
                     next();
                     break _for;
                 case '[':
-                    val = readArray();
+                    val = readArray(features);
                     break;
                 case '{':
                     if (context.autoTypeBeforeHandler != null || (context.features & Feature.SupportAutoType.mask) != 0) {
-                        val = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, 0);
+                        val = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, features);
                     } else if (isReference()) {
                         val = JSONPath.of(readReference());
                     } else {
-                        val = readObject();
+                        val = readObject(features);
                     }
                     break;
                 case '\'':
@@ -6388,8 +6402,8 @@ public abstract class JSONReader
          * covered, consistent with {@link #DuplicateKeyValueAsArray}.
          *
          * <p>When enabled per field ({@code @JSONField(deserializeFeatures = ErrorOnDuplicateKeys)}),
-         * the check covers the field's object and the objects nested in it, but not objects
-         * inside arrays; enable the feature on the reader context to cover the whole payload.
+         * the check covers the field's object and the objects nested in it at any depth,
+         * including objects inside arrays, mirroring the reader-context behavior.
          *
          * @since 2.0.66
          */

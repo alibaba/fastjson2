@@ -144,7 +144,8 @@ public class ObjectReaderImplMapMultiValueType
                 value = jsonReader.readAny();
             } else {
                 ObjectReader valueObjectReader = jsonReader.getObjectReader(valueType);
-                value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
+                value = valueObjectReader.readObject(jsonReader, valueType, fieldName,
+                        contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
             }
 
             if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {

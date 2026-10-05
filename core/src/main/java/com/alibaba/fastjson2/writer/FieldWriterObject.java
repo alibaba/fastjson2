@@ -78,6 +78,7 @@ public class FieldWriterObject<T>
         if (!writeUsing
                 && format == null
                 && !BeanUtils.SUPER.equals(fieldName)
+                && !Map.class.isAssignableFrom(fieldClass)
                 && ((this.features | jsonWriter.getFeatures()) & (
                         JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
                         == JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
@@ -85,6 +86,8 @@ public class FieldWriterObject<T>
             // otherwise a writer resolved under one sort variant would be reused under the other;
             // explicitly configured writers (@JSONField(writeUsing)) are always honored instead,
             // $super$ pseudo-fields always resolve via getObjectWriterVoid's dedicated branch,
+            // Map-valued fields keep the type-carrying resolution (the untyped provider writer
+            // would drop the declared key/value types and gain a spurious @type under WriteClassName),
             // and resolution merges field features so positional output never sorts
             return jsonWriter.getContext().getProvider()
                     .getObjectWriter(valueClass, valueClass, this.features | jsonWriter.getFeatures());
@@ -150,7 +153,9 @@ public class FieldWriterObject<T>
             return formattedWriter;
         }
 
-        if (format == null) {
+        if (format == null && !Map.class.isAssignableFrom(fieldClass)) {
+            // a Map-valued field keeps its declared key/value types: the shared provider cell for
+            // a runtime Map implementation is untyped, so a cache hit here would silently drop them
             JSONWriter.Context context = jsonWriter.context;
             boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
             formattedWriter = context.provider.getObjectWriterFromCache(valueClass, valueClass, fieldBased);

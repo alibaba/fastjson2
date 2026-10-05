@@ -32,13 +32,18 @@ final class ObjectWriterArrayFinal
         refDetect = !ObjectWriterProvider.isNotReferenceDetect(itemClass);
     }
 
-    public ObjectWriter getItemObjectWriter(JSONWriter jsonWriter) {
-        if ((jsonWriter.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
+    public ObjectWriter getItemObjectWriter(JSONWriter jsonWriter, long features) {
+        long mergedFeatures = jsonWriter.getFeatures() | features;
+        if ((mergedFeatures & (JSONWriter.Feature.SortFieldNamesAlphabetically.mask
+                        | JSONWriter.Feature.BeanToArray.mask))
+                        == JSONWriter.Feature.SortFieldNamesAlphabetically.mask
                 && itemClass != Float.class
                 && itemClass != Double.class
                 && itemClass != BigDecimal.class) {
-            // bean items must resolve the sorted variant (see FieldWriterObject#getObjectWriter)
-            return jsonWriter.getObjectWriter(itemClass);
+            // bean items must resolve the sorted variant (see FieldWriterObject#getObjectWriter),
+            // with the caller's field-level word merged in; positional (BeanToArray) items never sort
+            return jsonWriter.getContext().getProvider()
+                    .getObjectWriter(itemClass, itemClass, mergedFeatures);
         }
 
         ObjectWriter itemObjectWriter = this.itemObjectWriter;
@@ -99,7 +104,7 @@ final class ObjectWriterArrayFinal
                 jsonWriter.writeNull();
                 continue;
             }
-            ObjectWriter itemObjectWriter = getItemObjectWriter(jsonWriter);
+            ObjectWriter itemObjectWriter = getItemObjectWriter(jsonWriter, features);
             if (refDetect) {
                 String refPath = jsonWriter.setPath(i, item);
                 if (refPath != null) {
@@ -144,7 +149,7 @@ final class ObjectWriterArrayFinal
                 continue;
             }
 
-            ObjectWriter itemObjectWriter = getItemObjectWriter(jsonWriter);
+            ObjectWriter itemObjectWriter = getItemObjectWriter(jsonWriter, features);
 
             if (refDetect) {
                 String refPath = jsonWriter.setPath(i, item);

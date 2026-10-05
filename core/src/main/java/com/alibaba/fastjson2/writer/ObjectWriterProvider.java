@@ -178,7 +178,9 @@ public class ObjectWriterProvider
             mixInCache.put(target, mixinSource);
         }
         cache.remove(target);
+        cacheFieldBased.remove(target);
         cacheFieldNamesSorted.remove(target);
+        cacheFieldNamesSortedFieldBased.remove(target);
     }
 
     /**
@@ -739,7 +741,9 @@ public class ObjectWriterProvider
                 if (objectWriter == null) {
                     objectWriter = cacheOf(false, fieldNamesSorted).get(objectType);
                 }
-                if (objectWriter == null) {
+                if (objectWriter == null && !fieldNamesSorted) {
+                    // only the natural variant degrades; a sorted request lets the creator build
+                    // the field-based sorted writer for the proxy target, like the non-proxy path
                     fieldBased = false;
                 }
             } else {

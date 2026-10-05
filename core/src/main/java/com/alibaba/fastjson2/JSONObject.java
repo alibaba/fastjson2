@@ -205,6 +205,12 @@ public class JSONObject
             return decimal.compareTo(BigDecimal.valueOf(Integer.MIN_VALUE)) >= 0
                     && decimal.compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) <= 0;
         }
+        if (value instanceof Number) {
+            // any other integral Number (AtomicInteger, AtomicLong, LongAdder, custom types):
+            // answered from the same conversion getIntValue would use
+            long v = ((Number) value).longValue();
+            return v >= Integer.MIN_VALUE && v <= Integer.MAX_VALUE;
+        }
         return false;
     }
 
@@ -237,6 +243,11 @@ public class JSONObject
             BigDecimal decimal = (BigDecimal) value;
             return decimal.compareTo(BigDecimal.valueOf(Long.MIN_VALUE)) >= 0
                     && decimal.compareTo(BigDecimal.valueOf(Long.MAX_VALUE)) <= 0;
+        }
+        if (value instanceof Number) {
+            // any other integral Number (AtomicInteger, AtomicLong, LongAdder, custom types):
+            // answered from the same conversion getLongValue would use
+            return true;
         }
         return false;
     }

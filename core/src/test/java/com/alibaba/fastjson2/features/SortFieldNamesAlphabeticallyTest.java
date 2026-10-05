@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
+import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("features")
 public class SortFieldNamesAlphabeticallyTest {
@@ -116,6 +119,136 @@ public class SortFieldNamesAlphabeticallyTest {
                 JSONWriter.Feature.SortFieldNamesAlphabetically);
         assertEquals("{\"inner\":{\"apple\":1,\"zebra\":3},\"items\":[{\"apple\":1,\"zebra\":3}],\"zulu\":9}",
                 tree.toString());
+    }
+
+    @JSONType(alphabetic = false)
+    public static class UnwrappedInner {
+        public int zebra = 3;
+        public int apple = 1;
+    }
+
+    public static class UnwrappedHolder {
+        public int aaa;
+
+        @JSONField(unwrapped = true)
+        public UnwrappedInner inner = new UnwrappedInner();
+    }
+
+    @Test
+    public void unwrappedTreeMatchesStringOutput() {
+        UnwrappedHolder holder = new UnwrappedHolder();
+        String viaString = JSON.toJSONString(holder, JSONWriter.Feature.SortFieldNamesAlphabetically);
+        assertEquals("{\"aaa\":0,\"apple\":1,\"zebra\":3}", viaString);
+        assertEquals(viaString,
+                com.alibaba.fastjson2.JSONObject.from(holder, JSONWriter.Feature.SortFieldNamesAlphabetically).toString());
+    }
+
+    public static class SortedFieldHolder {
+        public int aaa;
+
+        @JSONField(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public AlphabeticFalse inner = new AlphabeticFalse();
+    }
+
+    @Test
+    public void fieldAnnotatedTreeMatchesStringOutput() {
+        SortedFieldHolder holder = new SortedFieldHolder();
+        String viaString = JSON.toJSONString(holder);
+        assertEquals("{\"aaa\":0,\"inner\":{\"apple\":1,\"zebra\":3}}", viaString);
+        assertEquals(viaString, com.alibaba.fastjson2.JSONObject.from(holder).toString());
+    }
+
+    @JSONType(alphabetic = false)
+    public static class SortedBase {
+        public int zebra = 3;
+    }
+
+    public static class SortedSub
+            extends SortedBase {
+        public int apple = 1;
+    }
+
+    public static class SortedHolderSuper {
+        public SortedBase data = new SortedSub();
+    }
+
+    @Test
+    public void treeConversionReResolvesByRuntimeTypeUnderSortedVariant() {
+        // the sorted variant never primes initValueClass, so conversion must re-resolve the
+        // value writer by runtime class instead of writing the declared base type's fields only
+        SortedHolderSuper holder = new SortedHolderSuper();
+        JSON.toJSONString(holder); // warm the natural path first, as in production
+        assertEquals("{\"data\":{\"apple\":1,\"zebra\":3}}",
+                com.alibaba.fastjson2.JSONObject.from(holder, JSONWriter.Feature.SortFieldNamesAlphabetically).toString());
+    }
+
+    @JSONType(alphabetic = false)
+    public static class Shape {
+        public int zebra = 3;
+        public int apple = 1;
+    }
+
+    public static class EveryShapeHolder {
+        @JSONField(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public Shape scalar = new Shape();
+
+        @JSONField(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public List<Shape> list = new ArrayList<>();
+
+        @JSONField(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public java.util.Set<Shape> set = new java.util.LinkedHashSet<>();
+
+        @JSONField(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public Shape[] finalArr = {new Shape()};
+
+        @JSONField(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public Object[] openArr = {new Shape()};
+
+        @JSONField(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public Map<String, Shape> rows = new LinkedHashMap<>();
+
+        @JSONField(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public Map<Shape, String> byKey = new LinkedHashMap<>();
+
+        public Shape plain = new Shape();
+
+        public EveryShapeHolder() {
+            list.add(new Shape());
+            set.add(new Shape());
+            rows.put("k", new Shape());
+            byKey.put(new Shape(), "v");
+        }
+    }
+
+    @Test
+    public void fieldAnnotationSortsEveryFieldShape() {
+        EveryShapeHolder holder = new EveryShapeHolder();
+        String json = JSON.toJSONString(holder);
+        assertFieldShapes(json, "JSON");
+        String jsonb = JSON.toJSONString(
+                com.alibaba.fastjson2.JSONB.parseObject(com.alibaba.fastjson2.JSONB.toBytes(holder)));
+        assertFieldShapes(jsonb, "JSONB");
+    }
+
+    private static void assertFieldShapes(String json, String label) {
+        String sortedItem = "{\"apple\":1,\"zebra\":3}";
+        assertTrue(json.contains("\"scalar\":" + sortedItem), label + " scalar: " + json);
+        assertTrue(json.contains("\"list\":[" + sortedItem + "]"), label + " list: " + json);
+        assertTrue(json.contains("\"set\":[" + sortedItem + "]"), label + " set: " + json);
+        assertTrue(json.contains("\"finalArr\":[" + sortedItem + "]"), label + " finalArr: " + json);
+        assertTrue(json.contains("\"openArr\":[" + sortedItem + "]"), label + " openArr: " + json);
+        assertTrue(json.contains("\"rows\":{\"k\":" + sortedItem + "}"), label + " rows: " + json);
+
+        int byKeyAt = json.indexOf("\"byKey\"");
+        assertTrue(byKeyAt >= 0, label + " byKey missing: " + json);
+        String tail = json.substring(byKeyAt);
+        int appleAt = tail.indexOf("\"apple\":1");
+        int zebraAt = tail.indexOf("\"zebra\":3");
+        assertTrue(appleAt >= 0 && zebraAt > appleAt,
+                label + " byKey item not sorted: " + tail);
+
+        // unannotated sibling keeps declaration order
+        assertTrue(json.contains("\"plain\":{\"zebra\":3,\"apple\":1}"), label + " plain: " + json);
     }
 
     public static class NullableItem {
@@ -262,6 +395,26 @@ public class SortFieldNamesAlphabeticallyTest {
         assertEquals("{\"entries\":{\"k\":{\"zebra\":3,\"apple\":1}},\"id\":9}", JSON.toJSONString(bean));
     }
 
+    @Test
+    public void mapFieldKeepsTypedResolutionUnderWriteClassName() {
+        // the map field keeps declared key/value types on the sorted path too, so values
+        // sort without gaining a per-entry @type (the untyped provider writer would add one),
+        // also after the shared provider cell for the runtime Map type is already warm.
+        // (the reflective creator renders class names under WriteClassName unconditionally,
+        // so the no-spurious-type assertion is creator-conditional, like the sibling test)
+        boolean asm = new ObjectWriterProvider().getCreator() instanceof ObjectWriterCreatorASM;
+        WithMap bean = new WithMap();
+        String sorted = JSON.toJSONString(bean,
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.SortFieldNamesAlphabetically);
+        assertTrue(sorted.contains("\"apple\":1,\"zebra\":3"), sorted);
+        if (asm) {
+            assertFalse(sorted.contains(
+                    "\"@type\":\"com.alibaba.fastjson2.features.SortFieldNamesAlphabeticallyTest$AlphabeticFalse\""),
+                    sorted);
+        }
+    }
+
     @JSONType(alphabetic = false, serializeFeatures = JSONWriter.Feature.BeanToArray)
     public static class ArrayForm {
         public int zulu = 8;
@@ -285,6 +438,31 @@ public class SortFieldNamesAlphabeticallyTest {
     public static class Container {
         @JSONField(contentAs = Item.class)
         public List<Object> items = new ArrayList<>();
+    }
+
+    public static class FieldSortItem {
+        @JSONField(contentAs = Item.class, serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public List<Object> contentAsList = new ArrayList<>();
+
+        @JSONField(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public Item single = new Item();
+
+        @JSONField(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public List<Item> typed = new ArrayList<>();
+
+        public FieldSortItem() {
+            contentAsList.add(new Item());
+            typed.add(new Item());
+        }
+    }
+
+    @Test
+    public void fieldLevelSortReachesContentAsResolution() {
+        // identical field-level annotation on three shapes: the contentAs arm must sort too
+        String json = JSON.toJSONString(new FieldSortItem());
+        assertEquals(
+                "{\"contentAsList\":[{\"apple\":1,\"zebra\":3}],\"single\":{\"apple\":1,\"zebra\":3},\"typed\":[{\"apple\":1,\"zebra\":3}]}",
+                json);
     }
 
     @Test

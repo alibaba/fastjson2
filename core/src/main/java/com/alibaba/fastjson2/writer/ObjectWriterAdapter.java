@@ -748,7 +748,7 @@ public class ObjectWriterAdapter<T>
 
                 ObjectWriter fieldObjectWriter = fieldWriter.getInitWriter();
                 if (fieldObjectWriter == null) {
-                    fieldObjectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(fieldClass);
+                    fieldObjectWriter = JSONFactory.getObjectWriter(fieldClass, this.features | features);
                 }
                 List<FieldWriter> unwrappedFieldWriters = fieldObjectWriter.getFieldWriters();
                 for (int j = 0, unwrappedSize = unwrappedFieldWriters.size(); j < unwrappedSize; j++) {
@@ -792,7 +792,8 @@ public class ObjectWriterAdapter<T>
             if (fieldWriter instanceof FieldWriterObject && fieldValue != null && !(fieldValue instanceof Map)) {
                 ObjectWriter valueWriter = fieldWriter.getInitWriter();
                 if (valueWriter == null) {
-                    valueWriter = JSONFactory.getObjectWriter(fieldWriter.fieldType, this.features | features);
+                    valueWriter = JSONFactory.getObjectWriter(fieldWriter.fieldType,
+                            this.features | features | fieldFeatures);
                 }
                 // The cached writer was selected by the first value seen on this field (e.g. an Object
                 // or generic field whose fieldClass erases to Object). When a later value has a
@@ -803,9 +804,16 @@ public class ObjectWriterAdapter<T>
                 // FieldWriterObject.getObjectWriter(jsonWriter, valueClass), so toJSON stays
                 // consistent with toJSONString. See issue #7714.
                 FieldWriterObject objectFieldWriter = (FieldWriterObject) fieldWriter;
-                if (objectFieldWriter.initValueClass != null
-                        && !objectFieldWriter.isTypeMatch(fieldValue.getClass())) {
-                    valueWriter = JSONFactory.getObjectWriter(fieldValue.getClass(), this.features | features);
+                Class fieldValueClass = fieldValue.getClass();
+                boolean reResolve = objectFieldWriter.initValueClass != null
+                        ? !objectFieldWriter.isTypeMatch(fieldValueClass)
+                        // the sorted variant's stores are suppressed, so priming never happens there;
+                        // fall back to the runtime type instead of silently dropping subclass fields
+                        : fieldWriter.fieldClass != fieldValueClass
+                                && fieldWriter.fieldClass.isAssignableFrom(fieldValueClass);
+                if (reResolve) {
+                    valueWriter = JSONFactory.getObjectWriter(fieldValueClass,
+                            this.features | features | fieldFeatures);
                     // When the re-resolved writer is not an ObjectWriterAdapter (arrays, Date, enums,
                     // etc.), convert the value via JSON.toJSON so it matches the shape the unprimed
                     // path and toJSONString produce, instead of leaving the raw Java object in the

@@ -10,6 +10,7 @@ import com.alibaba.fastjson2.filter.PropertyFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
+import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.alibaba.fastjson2.writer.ObjectWriters;
 import org.junit.jupiter.api.Tag;
@@ -136,6 +137,24 @@ public class SortFieldNamesRegistryTest {
         // natural writes are also alphabetical on the default-alphabetic provider
         assertEquals("{\"renamed\":2,\"z\":1}", JSON.toJSONString(account, natural));
         assertEquals("{\"renamed\":2,\"z\":1}", JSON.toJSONString(account, sorted));
+    }
+
+    @Test
+    public void mixInAfterWarmupAppliesToFieldBasedVariantsToo() {
+        // mixIn after the first write must evict all four writer cells, or FieldBased and
+        // FieldBased|Sort keep serving the pre-mixin writer (including dropped fields)
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        Account account = new Account();
+        JSONWriter.Context fieldBased = new JSONWriter.Context(provider, JSONWriter.Feature.FieldBased);
+        JSONWriter.Context fieldBasedSorted = new JSONWriter.Context(provider,
+                JSONWriter.Feature.FieldBased, JSONWriter.Feature.SortFieldNamesAlphabetically);
+
+        assertEquals("{\"a\":2,\"z\":1}", JSON.toJSONString(account, fieldBased));
+        assertEquals("{\"a\":2,\"z\":1}", JSON.toJSONString(account, fieldBasedSorted));
+
+        provider.mixIn(Account.class, AccountMixIn.class);
+        assertEquals("{\"renamed\":2,\"z\":1}", JSON.toJSONString(account, fieldBased));
+        assertEquals("{\"renamed\":2,\"z\":1}", JSON.toJSONString(account, fieldBasedSorted));
     }
 
     @Test
@@ -271,13 +290,16 @@ public class SortFieldNamesRegistryTest {
         // field-level BeanToArray semantics differ by creator: the ASM creator renders item
         // beans as objects in declaration order, the reflective one honors positional arrays.
         // In both cases the sorted-context output must be identical to the natural output.
+        // The creator is read back resolved (covers "reflect", "lambda", and the properties file),
+        // not re-derived from one input channel.
+        boolean asm = new ObjectWriterProvider().getCreator() instanceof ObjectWriterCreatorASM;
         ChildListHolder holder = new ChildListHolder();
         String natural = JSON.toJSONString(holder);
         assertEquals(natural,
                 JSON.toJSONString(holder, JSONWriter.Feature.SortFieldNamesAlphabetically));
-        assertEquals("reflect".equals(System.getProperty("fastjson2.creator"))
-                        ? "{\"children\":[[3,1]]}"
-                        : "{\"children\":[{\"zebra\":3,\"apple\":1}]}",
+        assertEquals(asm
+                        ? "{\"children\":[{\"zebra\":3,\"apple\":1}]}"
+                        : "{\"children\":[[3,1]]}",
                 natural);
     }
 
@@ -453,6 +475,39 @@ public class SortFieldNamesRegistryTest {
         String proxyJSON = JSON.toJSONString(proxy, context);
         assertTrue(proxyJSON.contains("hidden"), proxyJSON);
         assertTrue(proxyJSON.contains("\"name\":\"n\""), proxyJSON);
+    }
+
+    @Test
+    public void fieldBasedSortedProxyKeepsFields() {
+        // FB+SORT on a CGLIB-shaped proxy previously hit the getter-based degrade and dropped
+        // every field without a getter; the sorted request must build the field-based variant
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        JSONWriter.Context sorted = new JSONWriter.Context(provider,
+                JSONWriter.Feature.FieldBased, JSONWriter.Feature.SortFieldNamesAlphabetically);
+        Inner proxy = new Inner$$EnhancerBySpringCGLIB$$abcdef();
+        String proxySorted = JSON.toJSONString(proxy, sorted);
+        assertTrue(proxySorted.contains("hidden"), proxySorted);
+        assertTrue(proxySorted.contains("\"name\":\"n\""), proxySorted);
+    }
+
+    @com.alibaba.fastjson2.annotation.JSONType(alphabetic = false)
+    public static class AlphaInner {
+        private int zulu = 9;
+        private int apple = 1;
+    }
+
+    public static class AlphaInner$$EnhancerBySpringCGLIB$$uvwxyz
+            extends AlphaInner {
+    }
+
+    @Test
+    public void fieldBasedSortedProxyWritesSortedFields() {
+        // the proxy target must get a field-based sorted writer, complete and ordered
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        JSONWriter.Context sorted = new JSONWriter.Context(provider,
+                JSONWriter.Feature.FieldBased, JSONWriter.Feature.SortFieldNamesAlphabetically);
+        AlphaInner proxy = new AlphaInner$$EnhancerBySpringCGLIB$$uvwxyz();
+        assertEquals("{\"apple\":1,\"zulu\":9}", JSON.toJSONString(proxy, sorted));
     }
 
     public static class Filtered {

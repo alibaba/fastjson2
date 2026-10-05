@@ -99,15 +99,12 @@ final class FieldWriterObjectArray<T>
     }
 
     /**
-     * A field-level BeanToArray is passed to the provider so positional items never take the sorted variant;
-     * without it this is {@link JSONWriter#getObjectWriter(Type, Class)}.
+     * Resolves the item writer with the merged field|context word, so a field-level sort request reaches
+     * the provider and a field-level BeanToArray keeps positional items off the sorted variant.
      */
     private ObjectWriter resolveItemWriter(JSONWriter jsonWriter, Type itemType, Class itemClass) {
-        if ((features & BeanToArray.mask) == 0) {
-            return jsonWriter.getObjectWriter(itemType, itemClass);
-        }
         return jsonWriter.getContext().getProvider()
-                .getObjectWriter(itemType, itemClass, jsonWriter.getFeatures() | BeanToArray.mask);
+                .getObjectWriter(itemType, itemClass, jsonWriter.getFeatures() | features);
     }
 
     @Override

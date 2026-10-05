@@ -98,11 +98,15 @@ public class FieldWriterList<T>
                 // by the natural variant when registered variants share this field writer
                 return itemObjectWriter;
             }
+            // resolve with the merged word so a field-level sort request reaches the provider;
+            // only the store is gated, never the resolution
+            ObjectWriter resolved = jsonWriter.getContext().getProvider()
+                    .getObjectWriter(this.contentAs, contentAs, resolvedFeatures);
             if (sortVariant) {
                 // never store sorted writers in this cross-context field
-                return jsonWriter.getObjectWriter(this.contentAs, contentAs);
+                return resolved;
             }
-            return this.itemObjectWriter = jsonWriter.getObjectWriter(this.contentAs, contentAs);
+            return this.itemObjectWriter = resolved;
         }
 
         if (itemType == null || itemType == this.itemType) {
