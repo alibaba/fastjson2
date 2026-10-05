@@ -322,7 +322,7 @@ class ObjectReaderImplMapTyped
                         && name.equals(getTypeKey())
                 ) {
                     if (seenKeys != null && !seenKeys.add(getTypeKey())) {
-                        throw new JSONException(jsonReader.info("duplicate key : " + name));
+                        throw duplicateKeyError(jsonReader, name);
                     }
                     jsonReader.readTypeHashCode();
                     ObjectReader objectReaderAutoType = jsonReader.getContext()
@@ -352,7 +352,7 @@ class ObjectReaderImplMapTyped
                     name = jsonReader.readFieldName();
                     if (name.equals(getTypeKey())) {
                         if (seenKeys != null && !seenKeys.add(getTypeKey())) {
-                            throw new JSONException(jsonReader.info("duplicate key : " + name));
+                            throw duplicateKeyError(jsonReader, name);
                         }
                         jsonReader.readTypeHashCode();
                         ObjectReader objectReaderAutoType = jsonReader.getContext()
@@ -382,7 +382,7 @@ class ObjectReaderImplMapTyped
                             && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                             && name.equals(getTypeKey())) {
                         if (seenKeys != null && !seenKeys.add(getTypeKey())) {
-                            throw new JSONException(jsonReader.info("duplicate key : " + name));
+                            throw duplicateKeyError(jsonReader, name);
                         }
                         jsonReader.readTypeHashCode();
                         ObjectReader objectReaderAutoType = jsonReader.getContext()
@@ -401,7 +401,7 @@ class ObjectReaderImplMapTyped
             }
             if (seenKeys != null
                     && !seenKeys.add(name instanceof String ? (String) name : String.valueOf(name))) {
-                throw new JSONException(jsonReader.info("duplicate key : " + name));
+                throw duplicateKeyError(jsonReader, name);
             }
 
             if (valueObjectReader == null) {
@@ -456,5 +456,8 @@ class ObjectReaderImplMapTyped
         }
 
         return object;
+    }
+    static JSONException duplicateKeyError(JSONReader jsonReader, Object name) {
+        return new JSONException(jsonReader.info("duplicate key : " + name));
     }
 }

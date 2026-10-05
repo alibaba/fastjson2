@@ -134,7 +134,7 @@ public class ObjectReaderImplMapMultiValueType
             } else {
                 name = jsonReader.readFieldName();
                 if (seenKeys != null && !seenKeys.add((String) name)) {
-                    throw new JSONException(jsonReader.info("duplicate key : " + name));
+                    throw duplicateKeyError(jsonReader, name);
                 }
                 valueType = multiValueType.getType(name);
             }
@@ -179,5 +179,8 @@ public class ObjectReaderImplMapMultiValueType
         }
 
         return object;
+    }
+    static JSONException duplicateKeyError(JSONReader jsonReader, Object name) {
+        return new JSONException(jsonReader.info("duplicate key : " + name));
     }
 }

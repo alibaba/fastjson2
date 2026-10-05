@@ -141,7 +141,7 @@ public class JSONObject
     public Object required(String key) {
         Object value = get(key);
         if (value == null) {
-            throw new JSONException("required value missing : " + key);
+            throw new JSONException(missingRequiredMessage(key));
         }
         return value;
     }
@@ -163,12 +163,20 @@ public class JSONObject
     public <T> T required(String key, Class<T> valueClass) {
         Object value = get(key);
         if (value == null) {
-            throw new JSONException("required value missing : " + key);
+            throw new JSONException(missingRequiredMessage(key));
         }
         if (!valueClass.isInstance(value)) {
-            throw new JSONException("required value not of type " + valueClass.getName() + " : " + key);
+            throw new JSONException(typeMismatchMessage(valueClass, key));
         }
         return valueClass.cast(value);
+    }
+
+    private static String missingRequiredMessage(String key) {
+        return "required value missing : " + key;
+    }
+
+    private static String typeMismatchMessage(Class<?> valueClass, String key) {
+        return "required value not of type " + valueClass.getName() + " : " + key;
     }
 
     /**

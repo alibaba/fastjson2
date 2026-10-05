@@ -156,7 +156,7 @@ public final class ObjectReaderImplObject
 
                 if (seenKeys != null
                         && !seenKeys.add(name instanceof String ? (String) name : String.valueOf(name))) {
-                    throw new JSONException(jsonReader.info("duplicate key : " + name));
+                    throw duplicateKeyError(jsonReader, name);
                 }
 
                 Object value;
@@ -313,5 +313,8 @@ public final class ObjectReaderImplObject
         }
 
         return jsonReader.readAny();
+    }
+    static JSONException duplicateKeyError(JSONReader jsonReader, Object name) {
+        return new JSONException(jsonReader.info("duplicate key : " + name));
     }
 }
