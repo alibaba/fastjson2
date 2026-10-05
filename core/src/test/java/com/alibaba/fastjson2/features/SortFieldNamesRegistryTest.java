@@ -367,6 +367,78 @@ public class SortFieldNamesRegistryTest {
         assertEquals(sortedExpected, JSON.toJSONString(holder2, sorted));
     }
 
+    public static class DualCreds {
+        public String password = "hunter2";
+        public String name = "alice";
+    }
+
+    @Test
+    public void filterUpdatesReachEveryRegisteredVariant() {
+        ValueFilter mask = (object, name, value) -> "password".equals(name) ? "***" : value;
+        String masked = "{\"name\":\"alice\",\"password\":\"***\"}";
+
+        ObjectWriter writer = ObjectWriters.objectWriter(DualCreds.class,
+                ObjectWriters.fieldWriter("password", String.class, (DualCreds s) -> s.password),
+                ObjectWriters.fieldWriter("name", String.class, (DualCreds s) -> s.name));
+        ObjectWriterProvider p1 = new ObjectWriterProvider();
+        ObjectWriterProvider p2 = new ObjectWriterProvider();
+        p1.register(DualCreds.class, writer);
+        p2.register(DualCreds.class, writer);
+
+        // updates made after both registrations must reach every live variant
+        writer.setValueFilter(mask);
+        assertEquals(masked, JSON.toJSONString(new DualCreds(),
+                new JSONWriter.Context(p1, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+        assertEquals(masked, JSON.toJSONString(new DualCreds(),
+                new JSONWriter.Context(p2, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+
+        // one provider, both cache kinds
+        ObjectWriter writer2 = ObjectWriters.objectWriter(DualCreds.class,
+                ObjectWriters.fieldWriter("password", String.class, (DualCreds s) -> s.password),
+                ObjectWriters.fieldWriter("name", String.class, (DualCreds s) -> s.name));
+        ObjectWriterProvider p3 = new ObjectWriterProvider();
+        p3.register(DualCreds.class, writer2, false);
+        p3.register(DualCreds.class, writer2, true);
+        writer2.setValueFilter(mask);
+        assertEquals(masked, JSON.toJSONString(new DualCreds(),
+                new JSONWriter.Context(p3, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+        assertEquals(masked, JSON.toJSONString(new DualCreds(),
+                new JSONWriter.Context(p3,
+                        JSONWriter.Feature.FieldBased, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+    }
+
+    @Test
+    public void filtersVisibleOnConcurrentFirstSortedWrites() throws Exception {
+        // the sorted writer must be fully initialized with the natural variant's filters
+        // before any thread can take it from the cache
+        java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(2);
+        try {
+            for (int round = 0; round < 20; round++) {
+                ObjectWriterProvider provider = new ObjectWriterProvider();
+                provider.getObjectWriter(Filtered.class).setFilter(
+                        (ValueFilter) (object, name, value) -> "password".equals(name) ? "***" : value);
+                JSONWriter.Context sorted = new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
+
+                java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
+                java.util.concurrent.Future<String> first = pool.submit(() -> {
+                    start.await();
+                    return JSON.toJSONString(new Filtered(), sorted);
+                });
+                java.util.concurrent.Future<String> second = pool.submit(() -> {
+                    start.await();
+                    return JSON.toJSONString(new Filtered(), sorted);
+                });
+                start.countDown();
+                assertEquals("{\"id\":7,\"name\":\"alice\",\"password\":\"***\"}",
+                        first.get(30, java.util.concurrent.TimeUnit.SECONDS));
+                assertEquals("{\"id\":7,\"name\":\"alice\",\"password\":\"***\"}",
+                        second.get(30, java.util.concurrent.TimeUnit.SECONDS));
+            }
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
     @Test
     public void fieldBasedProxyKeepsFieldBasedWriterVariant() {
         ObjectWriterProvider provider = new ObjectWriterProvider();

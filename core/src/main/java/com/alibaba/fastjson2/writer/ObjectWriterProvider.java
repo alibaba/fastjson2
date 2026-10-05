@@ -825,12 +825,13 @@ public class ObjectWriterProvider
                             | (fieldNamesSorted ? JSONWriter.Feature.SortFieldNamesAlphabetically.mask : 0),
                     this
             );
+            // link before publication: a cache hit by another thread must never see the writer
+            // without the filters its counterpart variant carries
+            linkSortedVariant(objectType, fieldBased, fieldNamesSorted, objectWriter);
             ObjectWriter previous = cacheOf(fieldBased, fieldNamesSorted).putIfAbsent(objectType, objectWriter);
 
             if (previous != null) {
                 objectWriter = previous;
-            } else {
-                linkSortedVariant(objectType, fieldBased, fieldNamesSorted, objectWriter);
             }
         }
         return objectWriter;

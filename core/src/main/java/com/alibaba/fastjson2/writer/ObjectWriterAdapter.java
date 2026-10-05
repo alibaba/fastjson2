@@ -26,10 +26,15 @@ public class ObjectWriterAdapter<T>
     ValueFilter valueFilter;
 
     /**
-     * The writer serving {@link JSONWriter.Feature#SortFieldNamesAlphabetically} for the same type, if it is
-     * a different instance; filters set on this writer are set on it too.
+     * Variants linked to this writer (for example the serving of {@link JSONWriter.Feature#SortFieldNamesAlphabetically}
+     * for the same type): filters set on this writer are applied to all of them. The array is append-only
+     * and replaced under a lock, so reads never see a variant before its filters were copied.
      */
-    volatile ObjectWriterAdapter sortedVariant;
+    volatile ObjectWriterAdapter[] linkedVariants = EMPTY_VARIANTS;
+
+    static final ObjectWriterAdapter[] EMPTY_VARIANTS = new ObjectWriterAdapter[0];
+
+    private final Object linkedVariantsLock = new Object();
 
     /**
      * Caller features forwarded to nested tree conversions in {@link #toJSONObject(Object, long)}: the ones that
@@ -155,9 +160,8 @@ public class ObjectWriterAdapter<T>
         if (propertyFilter != null) {
             hasFilter = true;
         }
-        ObjectWriterAdapter sortedVariant = this.sortedVariant;
-        if (sortedVariant != null) {
-            sortedVariant.setPropertyFilter(propertyFilter);
+        for (ObjectWriterAdapter variant : this.linkedVariants) {
+            variant.setPropertyFilter(propertyFilter);
         }
     }
 
@@ -166,9 +170,8 @@ public class ObjectWriterAdapter<T>
         if (valueFilter != null) {
             hasFilter = true;
         }
-        ObjectWriterAdapter sortedVariant = this.sortedVariant;
-        if (sortedVariant != null) {
-            sortedVariant.setValueFilter(valueFilter);
+        for (ObjectWriterAdapter variant : this.linkedVariants) {
+            variant.setValueFilter(valueFilter);
         }
     }
 
@@ -177,9 +180,8 @@ public class ObjectWriterAdapter<T>
         if (nameFilter != null) {
             hasFilter = true;
         }
-        ObjectWriterAdapter sortedVariant = this.sortedVariant;
-        if (sortedVariant != null) {
-            sortedVariant.setNameFilter(nameFilter);
+        for (ObjectWriterAdapter variant : this.linkedVariants) {
+            variant.setNameFilter(nameFilter);
         }
     }
 
@@ -188,21 +190,20 @@ public class ObjectWriterAdapter<T>
         if (propertyPreFilter != null) {
             hasFilter = true;
         }
-        ObjectWriterAdapter sortedVariant = this.sortedVariant;
-        if (sortedVariant != null) {
-            sortedVariant.setPropertyPreFilter(propertyPreFilter);
+        for (ObjectWriterAdapter variant : this.linkedVariants) {
+            variant.setPropertyPreFilter(propertyPreFilter);
         }
     }
 
     /**
-     * Makes {@code variant} the sorted field-names writer of this type: the filters set on this writer so far are
-     * copied to it, and later ones follow.
+     * Links {@code variant} to this writer: the filters set on this writer so far are copied to it,
+     * and later ones follow. Every linked variant stays connected, so registering this writer for
+     * another variant does not detach an earlier one. Linking is idempotent.
      */
     void linkSortedVariant(ObjectWriterAdapter variant) {
         if (variant == this) {
             return;
         }
-        this.sortedVariant = variant;
         if (propertyPreFilter != null) {
             variant.setPropertyPreFilter(propertyPreFilter);
         }
@@ -214,6 +215,17 @@ public class ObjectWriterAdapter<T>
         }
         if (valueFilter != null) {
             variant.setValueFilter(valueFilter);
+        }
+        synchronized (linkedVariantsLock) {
+            for (ObjectWriterAdapter linked : this.linkedVariants) {
+                if (linked == variant) {
+                    return;
+                }
+            }
+            ObjectWriterAdapter[] current = this.linkedVariants;
+            ObjectWriterAdapter[] next = Arrays.copyOf(current, current.length + 1);
+            next[current.length] = variant;
+            this.linkedVariants = next;
         }
     }
 
@@ -797,11 +809,7 @@ public class ObjectWriterAdapter<T>
         }
 
         JSONWriter.Context writeContext = JSONFactory.createWriteContext();
-        for (JSONWriter.Feature feature : JSONWriter.Feature.values()) {
-            if ((features & feature.mask) == feature.mask && feature.mask != 0) {
-                writeContext.config(feature);
-            }
-        }
+        writeContext.setFeatures(writeContext.getFeatures() | features);
         Class<?> valueClass = object.getClass();
         ObjectWriter<?> objectWriter = writeContext.getObjectWriter(valueClass, valueClass);
         if (objectWriter instanceof ObjectWriterAdapter
