@@ -41,10 +41,12 @@ env:
 
 jobs:
   test:
-    # Two test passes over one build, so the budget covers a full rebuild plus
-    # the retry path (build+test ~9 min on windows, doubled by the retry, plus
-    # the reflect pass).
-    timeout-minutes: 25
+    # Two test passes over one build. Worst case is the retry path: a failed
+    # pass 1 (~9 min on windows) plus its retry (~9 min) plus the reflect pass
+    # (~5 min) and setup, which lands near 24 min. The resolver timeouts in
+    # .mvn/maven.config already bound silent download hangs, so the extra
+    # headroom only costs anything on a genuinely stuck lane.
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       max-parallel: 16
@@ -75,11 +77,15 @@ jobs:
         # at test time. Running the suite twice over one build halves the lane
         # count (28 -> 14), which is what relieves the runner queue.
         #
-        # shell: bash is required, not cosmetic. The default shell on
-        # windows-latest is pwsh, where `|| { ... }` does not invoke the block
-        # and `VAR=value cmd` is not valid syntax, so the mirror fallback below
-        # silently does nothing (confirmed: the windows test lanes run under
-        # C:\Program Files\PowerShell\7\pwsh.EXE).
+        # shell: bash is required, not cosmetic. windows-latest defaults to
+        # pwsh -- confirmed from a windows test lane's job log, which records
+        # `shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"`.
+        # The retry below is written in bash: `|| { ... }` and the
+        # `MVNW_REPOURL=... ./mvnw` environment prefix are not pwsh syntax, so
+        # the mirror fallback cannot behave as intended there. Until now all 5
+        # windows test lanes ran this block under pwsh, while the windows
+        # test-reflect lanes -- which did declare bash -- were the ones that
+        # actually depended on the fallback.
         shell: bash
         run: |
           # Retry once on failure: a stalled dependency download now fails fast
