@@ -101,7 +101,11 @@ jobs:
           CI: true  # Explicitly set CI to ensure JaCoCo profile is activated
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        # v5 runs natively on the Node.js 24 runtime; v4 targets Node 20, which
+        # runners now force onto Node 24, where the upload intermittently dies
+        # with EPROTO SSL handshake errors that fail the step despite
+        # fail_ci_if_error: false.
+        uses: codecov/codecov-action@v5
         with:
           name: codecov-umbrella
           token: ${{ secrets.CODECOV_TOKEN }}
