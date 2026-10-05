@@ -276,15 +276,24 @@ public class ErrorOnDuplicateKeysTest {
     public void annotationDrivenDepthOneAndTwo() {
         JSONException error = assertThrows(JSONException.class,
                 () -> JSON.parseObject("{\"data\":{\"b\":1,\"b\":2}}", StrictPayloadHolder.class));
-        assertTrue(error.getMessage().contains("duplicate key : b"));
+        assertDuplicateKeyMessage(error, "b");
 
         JSONException nested = assertThrows(JSONException.class,
                 () -> JSON.parseObject("{\"data\":{\"a\":{\"b\":1,\"b\":2}}}", StrictPayloadHolder.class));
-        assertTrue(nested.getMessage().contains("duplicate key : b"));
+        assertDuplicateKeyMessage(nested, "b");
 
         String ok = JSON.toJSONString(
                 JSON.parseObject("{\"data\":{\"a\":{\"b\":1}}}", StrictPayloadHolder.class));
         assertEquals("{\"data\":{\"a\":{\"b\":1}}}", ok);
+    }
+
+    private static void assertDuplicateKeyMessage(Throwable error, String key) {
+        Throwable leaf = error;
+        while (leaf.getCause() != null && leaf.getCause() != leaf) {
+            leaf = leaf.getCause();
+        }
+        String message = error.getMessage() + " <- " + (leaf == error ? "" : leaf.getMessage());
+        assertTrue(leaf.getMessage().contains("duplicate key : " + key), message);
     }
 
     @Test
