@@ -9,8 +9,10 @@ import com.alibaba.fastjson2.filter.ValueFilter;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -86,6 +88,25 @@ public class MapKeyContextTest {
         context.configFilter((ValueFilter) (object, name, value) -> "password".equals(name) ? "***" : value);
         assertEquals("{\"m\":{\"{\\\"first\\\":{\\\"a\\\":1},\\\"password\\\":\\\"***\\\",\\\"second\\\":{\\\"a\\\":1},\\\"zeta\\\":\\\"z\\\"}\":\"v\"}}",
                 JSON.toJSONString(new SortedKeys(), context));
+    }
+
+    public static class SortedListKeys {
+        @JSONField(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public Map<List<UnsortedKey>, String> m = new LinkedHashMap<>(
+                Collections.singletonMap(new ArrayList<>(Collections.singletonList(new UnsortedKey())), "v"));
+    }
+
+    @Test
+    public void fieldLevelSortedListKeysSortTheirBeans() {
+        // the beans inside a list key take their sorted variants as in a field-level sorted list value,
+        // with either creator and whether or not a filter sends the write through the context
+        String expected = "{\"m\":{\"[{\\\"first\\\":{\\\"a\\\":1},\\\"password\\\":\\\"hunter2\\\",\\\"second\\\":{\\\"a\\\":1},\\\"zeta\\\":\\\"z\\\"}]\":\"v\"}}";
+        for (ObjectWriterCreator creator : new ObjectWriterCreator[]{ObjectWriterCreatorASM.INSTANCE, ObjectWriterCreator.INSTANCE}) {
+            JSONWriter.Context context = new JSONWriter.Context(new ObjectWriterProvider(creator));
+            assertEquals(expected, JSON.toJSONString(new SortedListKeys(), context), creator.getClass().getSimpleName());
+            context.configFilter((PropertyFilter) (object, name, value) -> true);
+            assertEquals(expected, JSON.toJSONString(new SortedListKeys(), context), creator.getClass().getSimpleName() + " with a filter");
+        }
     }
 
     @Test

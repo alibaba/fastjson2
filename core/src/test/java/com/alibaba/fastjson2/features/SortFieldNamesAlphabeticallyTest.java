@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
@@ -14,10 +15,13 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -488,5 +492,43 @@ public class SortFieldNamesAlphabeticallyTest {
         holder2.items.add(new Item());
         assertEquals(sortedExpected, JSON.toJSONString(holder2, JSONWriter.Feature.SortFieldNamesAlphabetically));
         assertEquals(naturalExpected, JSON.toJSONString(holder2));
+    }
+
+    public static class NestedHolder {
+        @JSONField(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public Object value;
+    }
+
+    static List<Object> listOf(Object item) {
+        return new ArrayList<>(Collections.singletonList(item));
+    }
+
+    @Test
+    public void fieldLevelSortReachesBeansInNestedContainersWithEitherCreator() {
+        // the sort word travels through nested lists, arrays, Optional and AtomicReference as the context sort does;
+        // the reflective field writer merges it into the context, the ASM writer passes it as the feature word
+        String sorted = "{\"apple\":1,\"zebra\":3}";
+        for (ObjectWriterCreator creator : new ObjectWriterCreator[]{ObjectWriterCreatorASM.INSTANCE, ObjectWriterCreator.INSTANCE}) {
+            Object[] values = {
+                    listOf(listOf(new Item())),
+                    new Object[]{listOf(new Item())},
+                    Optional.of(listOf(new Item())),
+                    new AtomicReference<>(new Item())
+            };
+            String[] expected = {
+                    "{\"value\":[[" + sorted + "]]}",
+                    "{\"value\":[[" + sorted + "]]}",
+                    "{\"value\":[" + sorted + "]}",
+                    "{\"value\":" + sorted + "}"
+            };
+            for (int i = 0; i < values.length; i++) {
+                NestedHolder holder = new NestedHolder();
+                holder.value = values[i];
+                String message = creator.getClass().getSimpleName() + " " + values[i].getClass().getSimpleName();
+                assertEquals(expected[i], JSON.toJSONString(holder, new JSONWriter.Context(new ObjectWriterProvider(creator))), message);
+                byte[] jsonb = JSONB.toBytes(holder, new JSONWriter.Context(new ObjectWriterProvider(creator)));
+                assertEquals(expected[i], JSON.toJSONString(JSONB.parse(jsonb)), message + " JSONB");
+            }
+        }
     }
 }

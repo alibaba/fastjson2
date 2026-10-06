@@ -79,6 +79,6 @@ final class ObjectWriterImplOptional
             valueWriter = jsonWriter.getContext().getProvider()
                     .getObjectWriter(valueClass, valueClass, jsonWriter.getFeatures() | this.features | features);
         }
-        valueWriter.write(jsonWriter, value, fieldName, valueType, this.features);
+        valueWriter.write(jsonWriter, value, fieldName, valueType, this.features | (features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask));
     }
 }

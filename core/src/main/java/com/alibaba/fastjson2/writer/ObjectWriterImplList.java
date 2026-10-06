@@ -226,7 +226,7 @@ final class ObjectWriterImplList
                 }
             }
 
-            itemObjectWriter.writeJSONB(jsonWriter, item, i, this.itemType, this.features);
+            itemObjectWriter.writeJSONB(jsonWriter, item, i, this.itemType, this.features | (features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask));
 
             if (refDetect) {
                 jsonWriter.popPath0(item);
@@ -377,7 +377,7 @@ final class ObjectWriterImplList
                 }
             }
 
-            itemObjectWriter.write(jsonWriter, item, i, this.itemType, this.features);
+            itemObjectWriter.write(jsonWriter, item, i, this.itemType, this.features | (features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask));
 
             if (refDetect) {
                 jsonWriter.popPath(item);

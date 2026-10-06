@@ -427,7 +427,9 @@ public final class ObjectWriterImplMap
             try (JSONWriter keyWriter = JSONWriter.of(context)) {
                 // the key is the root of its own document, as in JSON.toJSONString(key, context)
                 keyWriter.setRootObject(key);
-                keyObjectWriter.write(keyWriter, key, null, null, 0);
+                // the sort request also travels in the feature word, so the beans inside list, map and Optional keys
+                // resolve their sorted variants as they do in field-level sorted values
+                keyObjectWriter.write(keyWriter, key, null, null, JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
                 str = keyWriter.toString();
             }
         }
