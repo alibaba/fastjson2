@@ -464,8 +464,10 @@ public final class ObjectWriterImplMap
                     jsonWriter.writeNameAny(key);
                 } else {
                     // bean keys under the sort feature resolve with the merged word, so a
-                    // field-level sort request reaches the key's own fields
-                    jsonWriter.writeName(strKey = mapKeyToString(key, jsonWriter, features));
+                    // field-level sort request reaches the key's own fields. The rendered blob is
+                    // not a name any reader resolves, so do NOT keep it in strKey: a $ref built
+                    // from the blob loses its value on the round trip
+                    jsonWriter.writeName(mapKeyToString(key, jsonWriter, features));
                 }
             }
         }
@@ -737,7 +739,9 @@ public final class ObjectWriterImplMap
                     } else {
                         valueClass = value.getClass();
                     }
-                    ObjectWriter<?> valueWriter = jsonWriter.getObjectWriter(valueClass);
+                    // resolve with the merged word used by write(), so this map writer's own
+                    // feature word (e.g. a field-level Sort) also reaches filtered values
+                    ObjectWriter<?> valueWriter = jsonWriter.context.provider.getObjectWriter(valueClass, valueClass, features);
                     valueWriter.write(jsonWriter, value, fieldName, fieldType, this.features);
                 }
             } finally {

@@ -4596,11 +4596,14 @@ public class ObjectWriterCreatorASM
         boolean direct = false;
         List<FieldWriter> fieldWriters = null;
         Class<?> itemClass = TypeUtils.getClass(itemType);
+        // bail under the sort bit as under BeanToArray: direct-JIT list writers bake the natural
+        // field order into JSONB output, which a sorted creation must not ship
         if (itemClass != null
                 && field != null
                 && field.getDeclaringClass() != itemClass
-                && (features & JSONWriter.Feature.BeanToArray.mask) == 0) {
-            ObjectWriter fieldValueWriter = provider.getObjectWriterFromCache(itemType, itemClass, FieldBased.isEnabled(features));
+                && (features & (JSONWriter.Feature.BeanToArray.mask
+                        | JSONWriter.Feature.SortFieldNamesAlphabetically.mask)) == 0) {
+            ObjectWriter fieldValueWriter = provider.getObjectWriterFromCache(itemType, itemClass, features);
             if (fieldValueWriter == null && itemClass != null) {
                 fieldValueWriter = super.createObjectWriter(itemClass, features, provider);
             }

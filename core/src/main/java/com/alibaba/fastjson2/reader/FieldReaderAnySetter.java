@@ -38,7 +38,9 @@ class FieldReaderAnySetter<T>
         String name = jsonReader.getFieldName();
 
         ObjectReader itemObjectReader = getItemObjectReader(jsonReader);
-        Object value = itemObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
+        Object value = itemObjectReader.readObject(jsonReader, fieldType, fieldName,
+                (features | jsonReader.getContext().getFeatures())
+                        & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
 
         try {
             method.invoke(object, name, value);

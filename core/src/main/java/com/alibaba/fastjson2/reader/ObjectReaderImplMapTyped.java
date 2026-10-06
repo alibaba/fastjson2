@@ -369,11 +369,10 @@ class ObjectReaderImplMapTyped
                         name = TypeUtils.cast(name, keyType);
                     }
                 } else {
-                    if (keyObjectReader != null) {
-                        name = keyObjectReader.readObject(jsonReader, null, null, 0);
-                    } else {
-                        name = jsonReader.read(keyType);
-                    }
+                    ObjectReader resolvedKeyReader = keyObjectReader != null
+                            ? keyObjectReader
+                            : jsonReader.getObjectReader(keyType);
+                    name = resolvedKeyReader.readObject(jsonReader, null, null, valueFeatures);
                     if (name == null && Enum.class.isAssignableFrom((Class) keyType)) {
                         name = jsonReader.getString();
                         jsonReader.nextIfMatch(':');

@@ -3932,6 +3932,27 @@ public abstract class JSONReader
     }
 
     /**
+     * Reads any JSON value and returns it as an Object, honoring the supplied feature word
+     * on top of the reader context features. Only {@link Feature#ErrorOnDuplicateKeys} is
+     * honored today; other bits are parsed as on the plain {@link #readAny()} call.
+     *
+     * @param features the per-call feature word, a mask of {@link Feature} bits
+     * @return The JSON value as an Object
+     * @since 2.0.66
+     */
+    public Object readAny(long features) {
+        if ((features & Feature.ErrorOnDuplicateKeys.mask) != 0) {
+            if (ch == '{') {
+                return readObject(features);
+            }
+            if (ch == '[') {
+                return readArray(features);
+            }
+        }
+        return read(Object.class);
+    }
+
+    /**
      * Reads a JSON array with elements of a specified type.
      *
      * @param itemType The type of elements in the array

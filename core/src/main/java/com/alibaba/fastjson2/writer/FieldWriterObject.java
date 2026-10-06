@@ -154,11 +154,13 @@ public class FieldWriterObject<T>
         }
 
         if (format == null && !Map.class.isAssignableFrom(fieldClass)) {
-            // a Map-valued field keeps its declared key/value types: the shared provider cell for
-            // a runtime Map implementation is untyped, so a cache hit here would silently drop them
-            JSONWriter.Context context = jsonWriter.context;
-            boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
-            formattedWriter = context.provider.getObjectWriterFromCache(valueClass, valueClass, fieldBased);
+            formattedWriter = jsonWriter.context.provider.getObjectWriterFromCache(valueClass, valueClass, features | jsonWriter.getFeatures());
+        }
+        if (formattedWriter instanceof ObjectWriterImplMap && Map.class.isAssignableFrom(fieldClass)) {
+            // a Map-valued field keeps its declared key/value types: the shared natural cell for the
+            // runtime Map class is untyped and would silently drop them; a custom registered writer
+            // (not an impl Map) is honored instead via the declared-type resolution below
+            formattedWriter = null;
         }
 
         final DecimalFormat decimalFormat = this.decimalFormat;

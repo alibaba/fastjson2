@@ -142,7 +142,8 @@ public final class ObjectReaderImplObject
                 if (name == null) {
                     char current = jsonReader.current();
                     if (current == '{' || current == '[') {
-                        name = jsonReader.readAny();
+                        name = jsonReader.readAny((features | context.getFeatures())
+                                & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
                         if (!jsonReader.nextIfMatch(':')) {
                             throw new JSONException(jsonReader.info("illegal input"));
                         }
@@ -177,7 +178,7 @@ public final class ObjectReaderImplObject
                         value = jsonReader.readNumber();
                         break;
                     case '[':
-                        value = jsonReader.readArray(features);
+                        value = jsonReader.readArray((features & JSONReader.Feature.ErrorOnDuplicateKeys.mask));
                         break;
                     case '{':
                         if (jsonReader.isReference()) {
@@ -189,7 +190,7 @@ public final class ObjectReaderImplObject
                                 continue;
                             }
                         } else {
-                            value = jsonReader.readObject(features);
+                            value = jsonReader.readObject((features & JSONReader.Feature.ErrorOnDuplicateKeys.mask));
                         }
                         break;
                     case '"':
@@ -261,7 +262,7 @@ public final class ObjectReaderImplObject
                 value = jsonReader.readNumber();
                 break;
             case '[':
-                value = jsonReader.readArray(features);
+                value = jsonReader.readArray((features & JSONReader.Feature.ErrorOnDuplicateKeys.mask));
                 break;
             case '"':
             case '\'':

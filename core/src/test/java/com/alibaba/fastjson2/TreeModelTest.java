@@ -266,6 +266,18 @@ public class TreeModelTest {
         assertTrue(object.canConvertToLong("adder"));
         assertFalse(object.canConvertToInt("alMax"));
         assertTrue(object.canConvertToLong("alMax"));
+
+        // wrapped or non-integral values are not convertible: a DoubleAdder's longValue
+        // overflows Long at 1e30, and NaN has no integral conversion at all
+        JSONObject wrapped = new JSONObject();
+        java.util.concurrent.atomic.DoubleAdder huge = new java.util.concurrent.atomic.DoubleAdder();
+        huge.add(1.0e30);
+        wrapped.put("huge", huge);
+        wrapped.put("nanAcc", Double.NaN);
+        assertFalse(wrapped.canConvertToLong("huge"));
+        assertFalse(wrapped.canConvertToLong("nanAcc"));
+        wrapped.put("maxLongDiscriminatingProbe", Long.MAX_VALUE);
+        assertTrue(wrapped.canConvertToLong("maxLongDiscriminatingProbe"));
     }
 
     @com.alibaba.fastjson2.annotation.JSONType(alphabetic = false)

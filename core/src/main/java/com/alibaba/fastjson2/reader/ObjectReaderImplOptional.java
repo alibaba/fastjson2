@@ -88,7 +88,7 @@ class ObjectReaderImplOptional
                     itemObjectReader = formattedObjectReader;
                 }
             }
-            value = itemObjectReader.readObject(jsonReader, itemType, fieldName, 0);
+            value = itemObjectReader.readObject(jsonReader, itemType, fieldName, (features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
         }
 
         if (value == null) {

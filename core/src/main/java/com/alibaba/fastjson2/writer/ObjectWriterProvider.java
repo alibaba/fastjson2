@@ -286,7 +286,7 @@ public class ObjectWriterProvider
      * subclasses with their own write logic and positional (BeanToArray) adapters, is honored as registered.
      */
     static ObjectWriter sortedVariantOf(ObjectWriter objectWriter) {
-        if (!(objectWriter instanceof ObjectWriterAdapter) || !PLAIN_ADAPTERS.contains(objectWriter.getClass())) {
+        if (!(objectWriter instanceof ObjectWriterAdapter) || !isPlainAdapter(objectWriter.getClass())) {
             return objectWriter;
         }
         ObjectWriterAdapter adapter = (ObjectWriterAdapter) objectWriter;
@@ -308,6 +308,21 @@ public class ObjectWriterProvider
             ObjectWriter4.class, ObjectWriter5.class, ObjectWriter6.class, ObjectWriter7.class,
             ObjectWriter8.class, ObjectWriter9.class, ObjectWriter10.class, ObjectWriter11.class,
             ObjectWriter12.class));
+
+    /**
+     * The anonymous creator's OWG_* adapters are plain bean adapters too: they share the standard
+     * fieldWriters list with no custom write logic beyond the creator's baseline, so a sorted copy is
+     * sound to rebuild for the sorted cell. ObjectWriterException-style adapter subclasses carrying
+     * their own write logic stay excluded.
+     */
+    static boolean isPlainAdapter(Class<?> clazz) {
+        if (PLAIN_ADAPTERS.contains(clazz)) {
+            return true;
+        }
+        String name = clazz.getName();
+        return name.startsWith("com.alibaba.fastjson2.writer.OWG_")
+                && !name.equals("com.alibaba.fastjson2.writer.ObjectWriterException");
+    }
 
     /**
      * Registers an ObjectWriter for the specified type using method-based writing
@@ -602,6 +617,18 @@ public class ObjectWriterProvider
     }
 
     /**
+     * Read-only lookup on the variant cell matching the feature word, computed with the same
+     * fieldBased/sorted axes as {@link #getObjectWriter(Type, Class, long)}; never creates a writer.
+     */
+    public ObjectWriter getObjectWriterFromCache(Type objectType, Class objectClass, long contextFeatures) {
+        boolean fieldBased = (contextFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
+        boolean fieldNamesSorted = (contextFeatures & (
+                JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
+                == JSONWriter.Feature.SortFieldNamesAlphabetically.mask;
+        return cacheOf(fieldBased, fieldNamesSorted).get(objectType);
+    }
+
+    /**
      * Gets an ObjectWriter for the specified type, class, and format with field-based option.
      *
      * @param objectType the type for which to get an ObjectWriter
@@ -776,6 +803,10 @@ public class ObjectWriterProvider
                 ObjectWriterModule module = modules.get(i);
                 objectWriter = module.getObjectWriter(objectType, objectClass);
                 if (objectWriter != null) {
+                    if (fieldNamesSorted) {
+                        // module-provided bean writers must not leave the sorted cell natural either
+                        objectWriter = sortedVariantOf(objectWriter);
+                    }
                     ObjectWriter previous = cacheOf(fieldBased, fieldNamesSorted).putIfAbsent(objectType, objectWriter);
 
                     if (previous != null) {
@@ -816,6 +847,11 @@ public class ObjectWriterProvider
         }
 
         if (objectWriter != null) {
+            // special-name publication paths must not leave the sorted cell served a writer that
+            // never honored the sort axis; plain adapters get a rebuilt sorted variant as elsewhere
+            if (fieldNamesSorted) {
+                objectWriter = sortedVariantOf(objectWriter);
+            }
             ObjectWriter previous = cacheOf(fieldBased, fieldNamesSorted).putIfAbsent(objectType, objectWriter);
             if (previous != null) {
                 objectWriter = previous;
@@ -839,12 +875,19 @@ public class ObjectWriterProvider
                     this
             );
             synchronized (createLock) {
-                // link before publication: a cache hit by another thread must never see the writer
-                // without the filters its counterpart variant carries
-                linkSortedVariant(objectType, fieldBased, fieldNamesSorted, objectWriter);
-                ObjectWriter previous = cacheOf(fieldBased, fieldNamesSorted).putIfAbsent(objectType, objectWriter);
-                if (previous != null) {
-                    objectWriter = previous;
+                // double-check inside the lock: a creator that races another loses only the building
+                // cost, not a redundant generated class published into the same cell (R2-20)
+                ObjectWriter existing = cacheOf(fieldBased, fieldNamesSorted).get(objectType);
+                if (existing != null) {
+                    objectWriter = existing;
+                } else {
+                    // link before publication: a cache hit by another thread must never see the writer
+                    // without the filters its counterpart variant carries
+                    linkSortedVariant(objectType, fieldBased, fieldNamesSorted, objectWriter);
+                    ObjectWriter previous = cacheOf(fieldBased, fieldNamesSorted).putIfAbsent(objectType, objectWriter);
+                    if (previous != null) {
+                        objectWriter = previous;
+                    }
                 }
             }
         }

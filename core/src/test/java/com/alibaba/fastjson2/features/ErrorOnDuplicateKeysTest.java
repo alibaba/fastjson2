@@ -393,4 +393,63 @@ public class ErrorOnDuplicateKeysTest {
         assertEquals(expected, JSONReader.ofJSONB(bytes).readObject(0L));
         assertEquals(expected, JSONReader.ofJSONB(bytes).readObject(JSONReader.Feature.ErrorOnDuplicateKeys.mask));
     }
+
+    public static class StrictTypedListHolder {
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public java.util.List<Map<String, Object>> rows;
+
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public Map<String, Object>[] cells;
+    }
+
+    @Test
+    public void typedContainerFieldsEnforceStrictness() {
+        // the strict bit travels to item readers of typed list/array fields, not just maps
+        JSONException list = assertThrows(JSONException.class,
+                () -> JSON.parseObject("{\"rows\":[{\"b\":1,\"b\":2}]}", StrictTypedListHolder.class));
+        assertDuplicateKeyMessage(list, "b");
+        JSONException array = assertThrows(JSONException.class,
+                () -> JSON.parseObject("{\"cells\":[{\"b\":1,\"b\":2}]}", StrictTypedListHolder.class));
+        assertDuplicateKeyMessage(array, "b");
+    }
+
+    public static class AnyCollect {
+        public Map<String, Object> extras = new LinkedHashMap<>();
+
+        @com.alibaba.fastjson2.annotation.JSONField(unwrapped = true)
+        public void add(String name, Object value) {
+            extras.put(name, value);
+        }
+    }
+
+    @Test
+    public void anySetterValuesEnforceStrictness() {
+        String json = "{\"l\":[{\"x\":1,\"x\":2}]}";
+        JSONException contextLevel = assertThrows(JSONException.class,
+                () -> JSON.parseObject(json, AnyCollect.class, JSONReader.Feature.ErrorOnDuplicateKeys));
+        assertDuplicateKeyMessage(contextLevel, "x");
+    }
+
+    @Test
+    public void objectAndArrayMapKeysGetTheStrictWord() {
+        // structural JSON map-keys also get the per-call strict word; without it the duplicate
+        // inside a key was silently last-win (the parser drops one member of the key object)
+        JSONException objectKey = assertThrows(JSONException.class,
+                () -> JSON.parse("{{\"a\":1,\"a\":2}:\"v\"}",
+                        JSONReader.Feature.ErrorOnDuplicateKeys));
+        assertTrue(objectKey.getMessage().contains("duplicate key : a"), objectKey.getMessage());
+        JSONException arrayKey = assertThrows(JSONException.class,
+                () -> JSON.parse("{[{\"x\":1,\"x\":2}]:1}",
+                        JSONReader.Feature.ErrorOnDuplicateKeys));
+        assertTrue(arrayKey.getMessage().contains("duplicate key : x"), arrayKey.getMessage());
+    }
+
+    @Test
+    public void typedMapObjectKeysGetTheStrictWord() {
+        try (JSONReader jsonReader = JSONReader.of("{{\"a\":1,\"a\":2}:\"v\"}")) {
+            JSONException error = assertThrows(JSONException.class,
+                    () -> jsonReader.readObject(JSONReader.Feature.ErrorOnDuplicateKeys.mask));
+            assertTrue(error.getMessage().contains("duplicate key"));
+        }
+    }
 }
