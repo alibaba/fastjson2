@@ -41,6 +41,7 @@ final class ObjectWriterImplList
     final long features;
     final boolean itemClassRefDetect;
     volatile ObjectWriter itemClassWriter;
+    volatile ObjectWriterImplList sortedItemsWriter;
 
     public ObjectWriterImplList(
             Class defineClass,
@@ -55,6 +56,19 @@ final class ObjectWriterImplList
         this.itemType = itemType;
         this.features = features;
         this.itemClassRefDetect = itemClass != null && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
+    }
+
+    /**
+     * This writer with the sort bit in its own feature word. A field-level sort reaches the items, and the containers
+     * nested in them, through this instance, so the item loops stay unchanged for every other write.
+     */
+    ObjectWriterImplList sortedItemsWriter() {
+        ObjectWriterImplList writer = sortedItemsWriter;
+        if (writer == null) {
+            writer = new ObjectWriterImplList(defineClass, defineType, itemClass, itemType, features | JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+            sortedItemsWriter = writer;
+        }
+        return writer;
     }
 
     @Override
@@ -96,6 +110,10 @@ final class ObjectWriterImplList
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
             jsonWriter.writeArrayNull();
+            return;
+        }
+        if ((features & ~this.features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+            sortedItemsWriter().writeJSONB(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
 
@@ -226,7 +244,7 @@ final class ObjectWriterImplList
                 }
             }
 
-            itemObjectWriter.writeJSONB(jsonWriter, item, i, this.itemType, this.features | (features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask));
+            itemObjectWriter.writeJSONB(jsonWriter, item, i, this.itemType, this.features);
 
             if (refDetect) {
                 jsonWriter.popPath0(item);
@@ -239,6 +257,10 @@ final class ObjectWriterImplList
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
             jsonWriter.writeArrayNull();
+            return;
+        }
+        if ((features & ~this.features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+            sortedItemsWriter().write(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
 
@@ -377,7 +399,7 @@ final class ObjectWriterImplList
                 }
             }
 
-            itemObjectWriter.write(jsonWriter, item, i, this.itemType, this.features | (features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask));
+            itemObjectWriter.write(jsonWriter, item, i, this.itemType, this.features);
 
             if (refDetect) {
                 jsonWriter.popPath(item);
