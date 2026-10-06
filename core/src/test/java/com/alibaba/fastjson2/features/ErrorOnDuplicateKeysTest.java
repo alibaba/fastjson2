@@ -490,6 +490,17 @@ public class ErrorOnDuplicateKeysTest {
         }
     }
 
+    @Test
+    public void singleObjectListFieldForwardsTheStrictBitWithReflect() {
+        // an object in place of the array reads as a one-item list; the strict bit reaches it through
+        // the h12 site with reflect. The ASM generated reader takes a different single-object path
+        // (pre-existing on main, Q26), so this pins the reflect side only
+        ObjectReaderProvider provider = new ObjectReaderProvider(ObjectReaderCreator.INSTANCE);
+        JSONException error = assertThrows(JSONException.class,
+                () -> JSON.parseObject("{\"rows\":{\"b\":1,\"b\":2}}", StrictTypedListHolder.class, new JSONReader.Context(provider)));
+        assertDuplicateKeyMessage(error, "b");
+    }
+
     public static class StrictShapes {
         @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
         public java.util.List<Map<String, Object>> list;
