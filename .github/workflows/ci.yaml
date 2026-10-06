@@ -2,12 +2,25 @@ name: CI
 
 on:
   push:
-    # Restricted to the refs that take direct pushes without an open pull
-    # request; every other branch reaches CI through the pull_request trigger
-    # below. Triggering on all pushes made a branch with an open PR run the
-    # whole matrix twice for the same commit (verified on sha 2e6afd5d44, which
-    # produced both a push run and a pull_request run), doubling demand on the
-    # runner pool.
+    # Only the refs that take direct pushes and have no pull request to trigger
+    # CI for them. Every other branch reaches CI through the pull_request
+    # trigger below; triggering on all pushes made a branch with an open PR run
+    # the whole matrix twice for the same commit (verified on sha 2e6afd5d44,
+    # which produced both a push run and a pull_request run), doubling demand on
+    # the runner pool.
+    #
+    # release/* is deliberately absent. Release branches are merged through PRs
+    # (#7744 head release/2.0.64, #7841 head release/2.0.65), so listing them
+    # would preserve exactly the duplication this filter removes: sha 194bd971
+    # produced a push run and a pull_request run 9 seconds apart. The PR run on
+    # the merge commit is the more relevant gate.
+    #
+    # Branches pushed without a PR (instrospect, fastjson3, android5/android8,
+    # fix/* -- all verified to have zero open PRs) get no CI from this trigger.
+    # Validate them by opening a PR or via workflow_dispatch. Note this includes
+    # the branch carrying this very change: GitHub evaluates the pushed ref's
+    # own workflow file, so this filter cannot be smoke-tested by pushing to the
+    # branch that introduces it.
     #
     # `tags` must be listed explicitly: declaring only `branches` excludes tag
     # pushes altogether, and a release tag is the last full-matrix gate before
@@ -17,7 +30,6 @@ on:
     # excluding the legacy 0.x/1.x tags and the fastcode_*/bak_* scratch tags.
     branches:
       - main
-      - 'release/**'
       - v2.1.x
     tags:
       - '2.*'
@@ -82,14 +94,10 @@ jobs:
     # 8 min (Test Reflect JDK 21 on windows). Pass 2 skips the clean and the
     # packaging, so ~18 min plus setup is the realistic worst case.
     #
-    # Deliberately NOT sized for the 19m51s that job 111846711588 spent in
-    # "Build with Maven". That was not slow compute: its tests were done by
-    # 15:52, dokka printed its banner at 15:52:16, and the step emitted nothing
-    # more until the 20-minute cap killed it at 16:07:12, leaving an orphaned
-    # java process. Every cancelled lane in recent history is that same dokka
-    # hang, and all are default-creator ubuntu lanes, because only this job
-    # passes -Pgen-dokka. Raising the cap would let the hang burn more runner
-    # time and fail anyway.
+    # Deliberately not sized to absorb a hang. Every cancelled lane in recent
+    # history was the dokka stall documented on the build step below, where the
+    # step emitted nothing for ~15 minutes until the cap fired; raising the cap
+    # only lets a hang burn more runner time and fail anyway.
     timeout-minutes: 25
     strategy:
       fail-fast: false
@@ -121,6 +129,19 @@ jobs:
         # at test time. Running the suite twice over one build halves the lane
         # count (28 -> 14), which is what relieves the runner queue.
         #
+        # -Pgen-dokka is deliberately not passed. dokka resolves its ~99 MB
+        # runtime tree at mojo execution time and is the sole source of every
+        # cancelled lane in recent history: job 111846711588 printed the dokka
+        # banner at 15:52:16, then emitted nothing at all until the 20-minute
+        # cap killed it at 16:07:12, leaving an orphaned java process. The
+        # aether timeouts in .mvn/maven.config do not bound it. Dokka output is
+        # JDK- and OS-independent, so 14 lanes validated nothing one lane
+        # wouldn't. The profile still activates on performRelease=true
+        # (kotlin/pom.xml:96-101), so releases keep generating it -- the trade
+        # is that a dokka break now surfaces at release time rather than in CI.
+        # -Pgen-javadoc stays: doclint behaviour is JDK-dependent, and it has
+        # never hung.
+        #
         # shell: bash is required, not cosmetic. windows-latest defaults to
         # pwsh -- confirmed from a windows test lane's job log, which records
         # `shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"`.
@@ -137,10 +158,10 @@ jobs:
         # to the GCS Maven Central mirror when repo.maven.apache.org is
         # unreachable from the runner (observed on windows-latest).
         run: |
-          ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package || {
+          ./mvnw -V --no-transfer-progress -Pgen-javadoc clean package || {
             echo "::warning::Maven build failed; retrying once with the GCS Maven Central mirror as fallback"
             sleep 10
-            MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2 ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
+            MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2 ./mvnw -V --no-transfer-progress -Pgen-javadoc clean package
           }
 
       - name: Test again with -Dfastjson2.creator=reflect
@@ -158,9 +179,9 @@ jobs:
         # No retry, which is a deliberate change: the former test-reflect job
         # retried its whole `clean package` on any failure, flaky tests
         # included. This pass downloads nothing new -- the previous step already
-        # resolved every dependency, and dropping -Pgen-javadoc/-Pgen-dokka only
-        # removes plugins -- so a failure here is a test failure, and re-running
-        # would just delay reporting it.
+        # resolved every dependency, and this one stops at the `test` phase so it
+        # never reaches the javadoc-jar binding at `package` -- so a failure here
+        # is a test failure, and re-running would only delay reporting it.
         shell: bash
         run: ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect test
 
