@@ -635,7 +635,7 @@ public class ObjectReaderCreator {
         });
 
         Supplier instanceSupplier = createSupplier(builderClass);
-        return createObjectReader(builderClass, 0, instanceSupplier, builderFunction, toFieldReaderArray(fieldReaders));
+        return createObjectReader(builderClass, 0, instanceSupplier, builderFunction, toFieldReaderArray(fieldReaders, true));
     }
 
     protected <T> ObjectReader<T> createObjectReaderWithCreator(
@@ -883,7 +883,7 @@ public class ObjectReaderCreator {
                 function,
                 null,
                 paramNames,
-                toFieldReaderArray(fieldReaders),
+                toFieldReaderArray(fieldReaders, true),
                 setterFieldReaders
         );
     }
@@ -1930,7 +1930,10 @@ public class ObjectReaderCreator {
             fieldReaders.put(SUPER, listOf(fieldReader));
         }
 
-        return toFieldReaderArray(fieldReaders);
+        // alphabetic = false keeps declaration order so that array-mapping positions
+        // match the writer, which emits fields in declaration order for such beans;
+        // field-name lookups are order-independent (hashCode mapping arrays)
+        return toFieldReaderArray(fieldReaders, beanInfo.alphabetic);
     }
 
     /**
@@ -4089,11 +4092,13 @@ public class ObjectReaderCreator {
         }
     }
 
-    private FieldReader[] toFieldReaderArray(Map<String, List<FieldReader>> fieldReaders) {
+    private FieldReader[] toFieldReaderArray(Map<String, List<FieldReader>> fieldReaders, boolean sorted) {
         int size = fieldReaders.values().stream().mapToInt(Collection::size).sum();
         FieldReader[] fieldReaderArray = new FieldReader[size];
         fieldReaders.values().stream().flatMap(Collection::stream).collect(Collectors.toList()).toArray(fieldReaderArray);
-        Arrays.sort(fieldReaderArray);
+        if (sorted) {
+            Arrays.sort(fieldReaderArray);
+        }
         return fieldReaderArray;
     }
 }

@@ -481,6 +481,13 @@ public class ObjectReaderBaseModule
                             }
                             break;
                         }
+                        case "alphabetic": {
+                            Boolean alphabetic = (Boolean) result;
+                            if (!alphabetic) {
+                                beanInfo.alphabetic = false;
+                            }
+                            break;
+                        }
                         case "naming": {
                             Enum naming = (Enum) result;
                             beanInfo.namingStrategy = naming.name();
