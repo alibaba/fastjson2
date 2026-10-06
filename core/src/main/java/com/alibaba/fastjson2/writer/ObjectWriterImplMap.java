@@ -425,6 +425,8 @@ public final class ObjectWriterImplMap
             ObjectWriter keyObjectWriter = context.provider.getObjectWriter(keyClass, keyClass,
                     contextFeatures | JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
             try (JSONWriter keyWriter = JSONWriter.of(context)) {
+                // the key is the root of its own document, as in JSON.toJSONString(key, context)
+                keyWriter.setRootObject(key);
                 keyObjectWriter.write(keyWriter, key, null, null, 0);
                 str = keyWriter.toString();
             }
