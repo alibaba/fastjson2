@@ -70,9 +70,11 @@ public class ObjectWriterProvider
     final ConcurrentMap<Type, ObjectWriter> cacheFieldNamesSortedFieldBased = new ConcurrentHashMap<>();
 
     /**
-     * Serializes writer creation with filter-link initialization: a cache hit must never see a variant
-     * before the filters of its counterpart variant were applied to it. Only the creation path takes it,
-     * so hot cache-hit reads stay lock-free.
+     * Makes the counterpart lookup, filter-link initialization and publication of a newly created writer one
+     * step: a cache hit never sees a variant before the filters of its counterpart variant were applied to it,
+     * and of two variants created concurrently the later one always finds the earlier. The creator runs outside
+     * it, because it runs user code (default constructors, enum and class initializers) that may itself
+     * serialize; hot cache-hit reads never take it.
      */
     private final Object createLock = new Object();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
@@ -830,24 +832,20 @@ public class ObjectWriterProvider
 
         if (objectWriter == null) {
             ObjectWriterCreator creator = getCreator();
+            objectWriter = creator.createObjectWriter(
+                    objectClass,
+                    (fieldBased ? JSONWriter.Feature.FieldBased.mask : 0)
+                            | (fieldNamesSorted ? JSONWriter.Feature.SortFieldNamesAlphabetically.mask : 0),
+                    this
+            );
             synchronized (createLock) {
-                objectWriter = creator.createObjectWriter(
-                        objectClass,
-                        (fieldBased ? JSONWriter.Feature.FieldBased.mask : 0)
-                                | (fieldNamesSorted ? JSONWriter.Feature.SortFieldNamesAlphabetically.mask : 0),
-                        this
-                );
                 // link before publication: a cache hit by another thread must never see the writer
                 // without the filters its counterpart variant carries
                 linkSortedVariant(objectType, fieldBased, fieldNamesSorted, objectWriter);
                 ObjectWriter previous = cacheOf(fieldBased, fieldNamesSorted).putIfAbsent(objectType, objectWriter);
-
                 if (previous != null) {
                     objectWriter = previous;
                 }
-                // reconcile: the counterpart variant may have been published after the pre-publication
-                // lookup, so two writers created concurrently are linked by at least the later attempt
-                linkSortedVariant(objectType, fieldBased, fieldNamesSorted, objectWriter);
             }
         }
         return objectWriter;
@@ -856,7 +854,7 @@ public class ObjectWriterProvider
     /**
      * Links a newly created bean writer with the other field-order variant of the same type, so a filter set on
      * the natural writer (for example by {@code JSON.register(Class, Filter)}) also applies to the sorted one.
-     * Idempotent: the reconciling second call in the create path adds nothing twice.
+     * Called under {@code createLock}, so whichever variant is published second is linked before it is visible.
      */
     private void linkSortedVariant(Type objectType, boolean fieldBased, boolean fieldNamesSorted, ObjectWriter objectWriter) {
         ObjectWriter other = cacheOf(fieldBased, !fieldNamesSorted).get(objectType);

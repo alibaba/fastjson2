@@ -414,9 +414,21 @@ public final class ObjectWriterImplMap
         }
 
         final JSONWriter.Context context = jsonWriter.getContext();
-        JSONWriter.Context keyContext = new JSONWriter.Context(context.provider);
-        keyContext.setFeatures(jsonWriter.getFeatures() | this.features | features);
-        String str = JSON.toJSONString(key, keyContext);
+        String str;
+        long contextFeatures = context.getFeatures();
+        if (((this.features | features) & ~contextFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
+            str = JSON.toJSONString(key, context);
+        } else {
+            // a field-level sort request selects the key's sorted writer variant; the key is still written
+            // with the caller's context, so its date format and filters apply as for any other key
+            Class<?> keyClass = key.getClass();
+            ObjectWriter keyObjectWriter = context.provider.getObjectWriter(keyClass, keyClass,
+                    contextFeatures | JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+            try (JSONWriter keyWriter = JSONWriter.of(context)) {
+                keyObjectWriter.write(keyWriter, key, null, null, 0);
+                str = keyWriter.toString();
+            }
+        }
         if (str != null) {
             final int length = str.length();
             if (length > 1) {
