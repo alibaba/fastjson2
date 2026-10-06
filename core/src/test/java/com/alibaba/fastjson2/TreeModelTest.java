@@ -278,6 +278,18 @@ public class TreeModelTest {
         assertFalse(wrapped.canConvertToLong("nanAcc"));
         wrapped.put("maxLongDiscriminatingProbe", Long.MAX_VALUE);
         assertTrue(wrapped.canConvertToLong("maxLongDiscriminatingProbe"));
+
+        // a fraction is truncated as for Double and BigDecimal; NaN in an accumulator is not convertible
+        java.util.concurrent.atomic.DoubleAdder fraction = new java.util.concurrent.atomic.DoubleAdder();
+        fraction.add(1.5);
+        wrapped.put("fraction", fraction);
+        wrapped.put("double", 1.5);
+        assertTrue(wrapped.canConvertToLong("fraction"));
+        assertTrue(wrapped.canConvertToLong("double"));
+        java.util.concurrent.atomic.DoubleAdder nan = new java.util.concurrent.atomic.DoubleAdder();
+        nan.add(Double.NaN);
+        wrapped.put("nan", nan);
+        assertFalse(wrapped.canConvertToLong("nan"));
     }
 
     @com.alibaba.fastjson2.annotation.JSONType(alphabetic = false)

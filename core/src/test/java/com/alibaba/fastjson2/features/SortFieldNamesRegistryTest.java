@@ -649,4 +649,128 @@ public class SortFieldNamesRegistryTest {
             JSONFactory.setContextWriterCreator(contextCreator);
         }
     }
+
+    public static class Ledger
+            extends java.util.HashMap<String, Object> {
+    }
+
+    static final class LedgerWriter
+            implements ObjectWriter<Ledger> {
+        static final LedgerWriter INSTANCE = new LedgerWriter();
+
+        @Override
+        public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+            jsonWriter.writeString("ledger");
+        }
+    }
+
+    public static class LedgerHolder {
+        public java.util.Map<String, Object> asMap = new Ledger();
+        public Ledger asLedger = new Ledger();
+        public Object asObject = new Ledger();
+    }
+
+    @Test
+    public void registeredMapWriterHonoredForMapDeclaredFields() {
+        // a writer registered for the runtime Map class applies whatever the field's declared type, as before;
+        // only the untyped built-in map writer is skipped for Map-declared fields
+        ObjectWriterCreator contextCreator = JSONFactory.getContextWriterCreator();
+        JSONFactory.setContextWriterCreator(null);
+        try {
+            for (ObjectWriterCreator creator : new ObjectWriterCreator[]{ObjectWriterCreatorASM.INSTANCE, ObjectWriterCreator.INSTANCE}) {
+                ObjectWriterProvider provider = new ObjectWriterProvider(creator);
+                provider.register(Ledger.class, LedgerWriter.INSTANCE);
+                String expected = "{\"asLedger\":\"ledger\",\"asMap\":\"ledger\",\"asObject\":\"ledger\"}";
+                assertEquals(expected, JSON.toJSONString(new LedgerHolder(), new JSONWriter.Context(provider)));
+                assertEquals(expected, JSON.toJSONString(new LedgerHolder(),
+                        new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+            }
+        } finally {
+            JSONFactory.setContextWriterCreator(contextCreator);
+        }
+    }
+
+    @JSONType(alphabetic = false)
+    public static class Natural {
+        public int zeta = 1;
+        public int alpha = 2;
+    }
+
+    @Test
+    public void generatedAndModuleWritersGetSortedVariants() {
+        // a registered writer built by the ASM creator, and a plain writer returned by a module, are rebuilt in
+        // field-name order for a sorted context, as a registered writer built by the reflective creator already was
+        ObjectWriterCreator contextCreator = JSONFactory.getContextWriterCreator();
+        JSONFactory.setContextWriterCreator(null);
+        try {
+            ObjectWriterProvider registered = new ObjectWriterProvider();
+            registered.register(Natural.class, ObjectWriterCreatorASM.INSTANCE.createObjectWriter(Natural.class));
+            ObjectWriter moduleWriter = ObjectWriterCreator.INSTANCE.createObjectWriter(Natural.class);
+            ObjectWriterProvider fromModule = new ObjectWriterProvider();
+            fromModule.register(new com.alibaba.fastjson2.modules.ObjectWriterModule() {
+                @Override
+                public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
+                    return objectClass == Natural.class ? moduleWriter : null;
+                }
+            });
+            for (ObjectWriterProvider provider : new ObjectWriterProvider[]{registered, fromModule}) {
+                assertEquals("{\"zeta\":1,\"alpha\":2}", JSON.toJSONString(new Natural(), new JSONWriter.Context(provider)));
+                assertEquals("{\"alpha\":2,\"zeta\":1}", JSON.toJSONString(new Natural(),
+                        new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+            }
+        } finally {
+            JSONFactory.setContextWriterCreator(contextCreator);
+        }
+    }
+
+    public static class TypedMapHolder {
+        public java.util.Map<String, Natural> entries = new java.util.LinkedHashMap<>(java.util.Collections.singletonMap("k", new Natural()));
+    }
+
+    @Test
+    public void mapFieldKeepsTypedWriterAfterTheRuntimeMapCellIsWarm() {
+        // Map-declared fields consult the cache for registered writers, but the built-in untyped map writer cached for
+        // the runtime class is still skipped: it would drop the declared value type and add a per-entry @type
+        ObjectWriterCreator contextCreator = JSONFactory.getContextWriterCreator();
+        JSONFactory.setContextWriterCreator(null);
+        try {
+            ObjectWriterProvider provider = new ObjectWriterProvider(ObjectWriterCreatorASM.INSTANCE);
+            JSON.toJSONString(new java.util.LinkedHashMap<>(), new JSONWriter.Context(provider));
+            String json = JSON.toJSONString(new TypedMapHolder(), new JSONWriter.Context(provider, JSONWriter.Feature.WriteClassName));
+            assertEquals(-1, json.indexOf(Natural.class.getName()), json);
+        } finally {
+            JSONFactory.setContextWriterCreator(contextCreator);
+        }
+    }
+
+    @JSONType(alphabetic = false)
+    public static class Position {
+        public int zulu = 7;
+        public int alpha = 1;
+    }
+
+    @JSONType(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+    public static class SortedPositions {
+        public java.util.List<Position> items = java.util.Collections.singletonList(new Position());
+    }
+
+    @Test
+    public void annotationSortedListItemsKeepPositionalOrderWarmOrCold() {
+        // positional JSONB of a list field's items keeps the declared order whether or not the item's natural writer
+        // was cached first: the generated list writer must not bake either order into a sorted creation
+        ObjectWriterCreator contextCreator = JSONFactory.getContextWriterCreator();
+        JSONFactory.setContextWriterCreator(null);
+        try {
+            for (boolean warm : new boolean[]{false, true}) {
+                ObjectWriterProvider provider = new ObjectWriterProvider(ObjectWriterCreatorASM.INSTANCE);
+                if (warm) {
+                    JSON.toJSONString(new Position(), new JSONWriter.Context(provider));
+                }
+                byte[] jsonb = JSONB.toBytes(new SortedPositions(), new JSONWriter.Context(provider, JSONWriter.Feature.BeanToArray));
+                assertEquals("[[[7,1]]]", JSON.toJSONString(JSONB.parse(jsonb)), warm ? "warm" : "cold");
+            }
+        } finally {
+            JSONFactory.setContextWriterCreator(contextCreator);
+        }
+    }
 }

@@ -117,4 +117,20 @@ public class MapKeyContextTest {
                     JSON.toJSONString(new SortedKeys(), context), creator.getClass().getSimpleName());
         }
     }
+
+    @Test
+    public void sortedBeanKeyValuesAreNotReferencedThroughTheKeyText() {
+        // the text of a sorted bean key is not a path any reader resolves, so a value repeated under such keys is
+        // written in full, as without the sort
+        Secret shared = new Secret();
+        Map<Object, Object> map = new LinkedHashMap<>();
+        map.put(new Secret(), shared);
+        map.put(new Secret(), shared);
+        for (ObjectWriterCreator creator : new ObjectWriterCreator[]{ObjectWriterCreatorASM.INSTANCE, ObjectWriterCreator.INSTANCE}) {
+            JSONWriter.Context context = new JSONWriter.Context(new ObjectWriterProvider(creator),
+                    JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.SortFieldNamesAlphabetically);
+            String json = JSON.toJSONString(map, context);
+            assertEquals(-1, json.indexOf("$ref"), creator.getClass().getSimpleName() + " " + json);
+        }
+    }
 }

@@ -7,6 +7,9 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.TypeReference;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -450,6 +454,142 @@ public class ErrorOnDuplicateKeysTest {
             JSONException error = assertThrows(JSONException.class,
                     () -> jsonReader.readObject(JSONReader.Feature.ErrorOnDuplicateKeys.mask));
             assertTrue(error.getMessage().contains("duplicate key"));
+        }
+    }
+
+    @Test
+    public void arrayMapKeysGetTheStrictWord() {
+        try (JSONReader jsonReader = JSONReader.of("{[{\"x\":1,\"x\":2}]:1}")) {
+            JSONException error = assertThrows(JSONException.class,
+                    () -> jsonReader.readObject(JSONReader.Feature.ErrorOnDuplicateKeys.mask));
+            assertTrue(error.getMessage().contains("duplicate key"));
+        }
+    }
+
+    public static class Row {
+        public String name;
+    }
+
+    public static class StrictRowsHolder {
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = {
+                JSONReader.Feature.ErrorOnDuplicateKeys, JSONReader.Feature.InitStringFieldAsEmpty})
+        public java.util.List<Row> rows;
+    }
+
+    @Test
+    public void typedListFieldsForwardOnlyTheStrictBitWithEitherCreator() {
+        // the strict bit of a list field reaches its item readers with either creator; the field's other
+        // features keep applying to the field alone, so the items are read as without the annotation
+        for (ObjectReaderCreator creator : new ObjectReaderCreator[]{ObjectReaderCreatorASM.INSTANCE, ObjectReaderCreator.INSTANCE}) {
+            ObjectReaderProvider provider = new ObjectReaderProvider(creator);
+            JSONException error = assertThrows(JSONException.class,
+                    () -> JSON.parseObject("{\"rows\":[{\"b\":1,\"b\":2}]}", StrictTypedListHolder.class, new JSONReader.Context(provider)));
+            assertDuplicateKeyMessage(error, "b");
+            StrictRowsHolder holder = JSON.parseObject("{\"rows\":[{}]}", StrictRowsHolder.class, new JSONReader.Context(provider));
+            assertNull(holder.rows.get(0).name, creator.getClass().getSimpleName());
+        }
+    }
+
+    public static class StrictShapes {
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public java.util.List<Map<String, Object>> list;
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public Map<String, Object>[] array;
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public java.util.Set<Map<String, Object>> set;
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public java.util.Optional<Map<String, Object>> optional;
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public Map<String, java.util.List<Map<String, Object>>> listsInMap;
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public java.util.List<java.util.List<Map<String, Object>>> listsInList;
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public Map<Map<String, Object>, String> mapKeys;
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public Map<Object, String> objectKeys;
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public java.util.List<Object> objects;
+    }
+
+    public static class StrictAnySetter {
+        public Map<String, Object> extras = new LinkedHashMap<>();
+
+        @com.alibaba.fastjson2.annotation.JSONField(unwrapped = true, deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public void add(String name, Object value) {
+            extras.put(name, value);
+        }
+    }
+
+    public static class StrictUnwrappedReadOnly {
+        private final Map<String, Object> extras = new LinkedHashMap<>();
+
+        @com.alibaba.fastjson2.annotation.JSONField(unwrapped = true, deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public Map<String, Object> getExtras() {
+            return extras;
+        }
+    }
+
+    public static class StrictCreatorRows {
+        final java.util.List<Map<String, Object>> rows;
+
+        @com.alibaba.fastjson2.annotation.JSONCreator(parameterNames = "rows")
+        public StrictCreatorRows(
+                @com.alibaba.fastjson2.annotation.JSONField(name = "rows", deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+                java.util.List<Map<String, Object>> rows) {
+            this.rows = rows;
+        }
+    }
+
+    @com.alibaba.fastjson2.annotation.JSONType(deserializeFeatures = JSONReader.Feature.SupportArrayToBean)
+    public static class StrictPositionalRows {
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public java.util.List<Map<String, Object>> rows;
+    }
+
+    @Test
+    public void fieldLevelStrictBitReachesNestedMapsWithEitherCreator() {
+        // a field-level strict bit rejects a duplicate in any map nested in the field's value, keys included, as the
+        // context-level one does, with either creator and for String and UTF-8 input
+        String dup = "{\"b\":1,\"b\":2}";
+        String[] inputs = {
+                "{\"list\":[" + dup + "]}",
+                "{\"array\":[" + dup + "]}",
+                "{\"set\":[" + dup + "]}",
+                "{\"optional\":" + dup + "}",
+                "{\"listsInMap\":{\"k\":[" + dup + "]}}",
+                "{\"listsInList\":[[" + dup + "]]}",
+                "{\"mapKeys\":{" + dup + ":\"v\"}}",
+                "{\"objectKeys\":{" + dup + ":\"v\"}}",
+                "{\"objects\":[" + dup + "]}",
+                "{\"objects\":[{" + dup + ":\"v\"}]}",
+        };
+        for (ObjectReaderCreator creator : new ObjectReaderCreator[]{ObjectReaderCreatorASM.INSTANCE, ObjectReaderCreator.INSTANCE}) {
+            for (String json : inputs) {
+                assertDuplicateKeyRejected(creator, StrictShapes.class, json);
+            }
+            assertDuplicateKeyRejected(creator, StrictAnySetter.class, "{\"l\":" + dup + "}");
+            assertDuplicateKeyRejected(creator, StrictUnwrappedReadOnly.class, "{\"x\":" + dup + "}");
+            assertDuplicateKeyRejected(creator, StrictCreatorRows.class, "{\"rows\":[" + dup + "]}");
+            assertDuplicateKeyRejected(creator, StrictPositionalRows.class, "[[" + dup + "]]");
+        }
+    }
+
+    private static void assertDuplicateKeyRejected(ObjectReaderCreator creator, Class<?> type, String json) {
+        for (boolean utf8 : new boolean[]{false, true}) {
+            JSONReader.Context context = new JSONReader.Context(new ObjectReaderProvider(creator));
+            String message = creator.getClass().getSimpleName() + (utf8 ? " utf8 " : " ") + json;
+            JSONException error = assertThrows(JSONException.class, () -> {
+                try (JSONReader reader = utf8
+                        ? JSONReader.of(json.getBytes(java.nio.charset.StandardCharsets.UTF_8), context)
+                        : JSONReader.of(json, context)) {
+                    reader.read(type);
+                }
+            }, message);
+            boolean duplicate = false;
+            for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+                duplicate |= String.valueOf(cause.getMessage()).contains("duplicate key");
+            }
+            assertTrue(duplicate, message + " -> " + error);
         }
     }
 }

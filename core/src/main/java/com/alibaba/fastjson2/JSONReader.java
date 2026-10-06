@@ -3769,7 +3769,7 @@ public abstract class JSONReader
                 } else if (ch == '{') {
                     name = readObject(features);
                 } else if (ch == '[') {
-                    name = readArray();
+                    name = readArray(features);
                 } else {
                     name = readFieldNameUnquote();
                 }

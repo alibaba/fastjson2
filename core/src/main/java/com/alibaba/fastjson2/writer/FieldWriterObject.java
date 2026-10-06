@@ -153,7 +153,7 @@ public class FieldWriterObject<T>
             return formattedWriter;
         }
 
-        if (format == null && !Map.class.isAssignableFrom(fieldClass)) {
+        if (format == null) {
             formattedWriter = jsonWriter.context.provider.getObjectWriterFromCache(valueClass, valueClass, features | jsonWriter.getFeatures());
         }
         if (formattedWriter instanceof ObjectWriterImplMap && Map.class.isAssignableFrom(fieldClass)) {

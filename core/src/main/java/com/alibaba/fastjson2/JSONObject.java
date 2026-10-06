@@ -253,11 +253,12 @@ public class JSONObject
                     && decimal.compareTo(BigDecimal.valueOf(Long.MAX_VALUE)) <= 0;
         }
         if (value instanceof Number) {
-            // any other integral Number (AtomicInteger, AtomicLong, LongAdder, custom types):
-            // answered from the same conversion getLongValue would use, so a wrapped or
-            // non-integral value (DoubleAdder, atomic accumulators) answers false
+            // any other Number (AtomicInteger, AtomicLong, LongAdder, DoubleAdder, custom types):
+            // answered from the same conversion getLongValue would use. It is convertible when
+            // longValue() is the truncated value, so a fraction counts as for Double, while a
+            // wrapped, out-of-range or NaN value answers false
             Number number = (Number) value;
-            return number.longValue() == number.doubleValue();
+            return Math.abs(number.longValue() - number.doubleValue()) < 1;
         }
         return false;
     }

@@ -312,16 +312,15 @@ public class ObjectWriterProvider
     /**
      * The anonymous creator's OWG_* adapters are plain bean adapters too: they share the standard
      * fieldWriters list with no custom write logic beyond the creator's baseline, so a sorted copy is
-     * sound to rebuild for the sorted cell. ObjectWriterException-style adapter subclasses carrying
-     * their own write logic stay excluded.
+     * sound to rebuild for the sorted cell. Adapters carrying their own write logic are neither in
+     * PLAIN_ADAPTERS nor named OWG_*, so they stay excluded.
      */
     static boolean isPlainAdapter(Class<?> clazz) {
         if (PLAIN_ADAPTERS.contains(clazz)) {
             return true;
         }
         String name = clazz.getName();
-        return name.startsWith("com.alibaba.fastjson2.writer.OWG_")
-                && !name.equals("com.alibaba.fastjson2.writer.ObjectWriterException");
+        return name.startsWith("com.alibaba.fastjson2.writer.OWG_");
     }
 
     /**
@@ -620,7 +619,7 @@ public class ObjectWriterProvider
      * Read-only lookup on the variant cell matching the feature word, computed with the same
      * fieldBased/sorted axes as {@link #getObjectWriter(Type, Class, long)}; never creates a writer.
      */
-    public ObjectWriter getObjectWriterFromCache(Type objectType, Class objectClass, long contextFeatures) {
+    ObjectWriter getObjectWriterFromCache(Type objectType, Class objectClass, long contextFeatures) {
         boolean fieldBased = (contextFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
         boolean fieldNamesSorted = (contextFeatures & (
                 JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
