@@ -89,10 +89,10 @@ public class Issue7857 {
 
     @Test
     public void nestedComposedScaleOverflow() {
-        // 200 nested BC_DECIMAL levels (below the depth cap), each with an in-bound scale of
-        // -2048: the per-level bound never fires, but the magnitude multiplies by 10^2048 per
-        // level, so the cumulative budget rejects it. 199 x 2048 + 2048 = 409600.
-        int depth = 200;
+        // 100 nested BC_DECIMAL levels (below the depth cap of 128), each with an in-bound scale
+        // of -2048: the per-level bound never fires, but the magnitude multiplies by 10^2048 per
+        // level, so the cumulative budget rejects it. 99 x 2048 + 2048 = 204800.
+        int depth = 100;
         byte[] bytes = new byte[depth * 6 + 2];
         int off = 0;
         for (int i = 0; i < depth; i++) {
@@ -107,9 +107,9 @@ public class Issue7857 {
         bytes[off] = 1;
         // skipValue never adds the outermost scale to decimalScaleSum, so its cumulative
         // total is one level lower than the value-returning operations
-        assertRejected(bytes, "composed scale overflow : -2048, total 409600",
-                "composed scale overflow : -2048, total 407552", true,
-                "200 nested levels of scale -2048");
+        assertRejected(bytes, "composed scale overflow : -2048, total 204800",
+                "composed scale overflow : -2048, total 202752", true,
+                "100 nested levels of scale -2048");
     }
 
     @Test
@@ -126,7 +126,7 @@ public class Issue7857 {
     public void nestingDepthOverflow() {
         // 3000 nested BC_DECIMAL records whose scale fields nest down to a single int32 scale;
         // every scale is 0, so only the depth bound rejects this before StackOverflowError
-        assertRejected(nestingPayload(3000), "level too large : 256", true, "3000 nested levels");
+        assertRejected(nestingPayload(3000), "level too large : 128", true, "3000 nested levels");
     }
 
     @Test
@@ -144,7 +144,7 @@ public class Issue7857 {
         probe.start();
         probe.join();
         assertInstanceOf(JSONException.class, error[0]);
-        assertEquals("level too large : 256", error[0].getMessage());
+        assertEquals("level too large : 128", error[0].getMessage());
     }
 
     @Test

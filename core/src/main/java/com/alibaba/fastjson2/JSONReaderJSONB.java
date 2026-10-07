@@ -27,9 +27,14 @@ final class JSONReaderJSONB
         extends JSONReader {
     static final long BASE = UNSAFE.arrayBaseOffset(byte[].class);
 
-    // decimal nesting is capped so the guard fires inside small thread stacks; JSONB object/array
-    // nesting does not increment level — this bounds decimal scale/unscaled recursion only
-    static final int MAX_DECIMAL_LEVEL = 256;
+    // decimal nesting is capped so the guard fires before StackOverflowError inside small thread
+    // stacks; JSONB object/array nesting does not increment level — this bounds decimal
+    // scale/unscaled recursion only. Measured on a 256 KB stack, the worst observed platform
+    // (macOS aarch64, JDK 11, JIT-compiled frames) overflows at ~224 nested levels while pure
+    // interpretation overflows at ~304, so 128 keeps a >=1.6x margin. Legitimate JSONB never
+    // nests decimals (JSONWriterJSONB.writeDecimal writes an int32 scale and a BigInteger
+    // unscaled value), so this cap only rejects hand-crafted or hostile bytes.
+    static final int MAX_DECIMAL_LEVEL = 128;
 
     static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
     static Charset GB18030;
