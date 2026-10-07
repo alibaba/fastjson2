@@ -246,6 +246,14 @@ public class JSONWriterTest {
     }
 
     @Test
+    public void test_utf16_writeEmptyDoubleArrayCapacity() {
+        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        jsonWriter.chars = new char[1];
+        jsonWriter.writeDouble(new double[0]);
+        assertEquals("[]", jsonWriter.toString());
+    }
+
+    @Test
     public void test_utf8_writeDoubleArray1() {
         JSONWriter jsonWriter = JSONWriter.ofUTF8(JSONFactory.createWriteContext());
         jsonWriter.writeDoubleArray(0D, 1D);
