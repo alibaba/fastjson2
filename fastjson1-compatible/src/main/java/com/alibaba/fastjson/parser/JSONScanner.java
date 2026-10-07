@@ -25,7 +25,7 @@ public class JSONScanner
     }
 
     public JSONScanner(String str) {
-        this.reader = JSONReader.of(str);
+        this.reader = JSONReader.of(str, JSON.createReadContext());
         this.str = str;
     }
 

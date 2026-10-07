@@ -366,7 +366,7 @@ public class JSONArray
                 return null;
             }
 
-            JSONReader reader = JSONReader.of(str);
+            JSONReader reader = JSONReader.of(str, JSON.createReadContext());
             if (objectReader == null) {
                 objectReader = reader.getObjectReader(JSONObject.class);
             }
@@ -794,7 +794,7 @@ public class JSONArray
                 return null;
             }
 
-            JSONReader reader = JSONReader.of(str);
+            JSONReader reader = JSONReader.of(str, JSON.createReadContext());
             if (arrayReader == null) {
                 arrayReader = reader.getObjectReader(JSONArray.class);
             }
@@ -836,7 +836,7 @@ public class JSONArray
 
         String json = JSON.toJSONString(obj);
         ObjectReader objectReader = provider.getObjectReader(clazz);
-        JSONReader jsonReader = JSONReader.of(json);
+        JSONReader jsonReader = JSONReader.of(json, JSON.createReadContext());
 
         String defaultDateFormat = JSON.DEFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {

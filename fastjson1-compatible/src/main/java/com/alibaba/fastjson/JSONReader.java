@@ -18,7 +18,7 @@ public class JSONReader
     }
 
     public JSONReader(Reader input, Feature... features) {
-        com.alibaba.fastjson2.JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE, features);
+        com.alibaba.fastjson2.JSONReader.Context context = JSON.createReadContext(features);
         this.raw = com.alibaba.fastjson2.JSONReader.of(input, context);
         this.input = input;
         for (int i = 0; i < features.length; i++) {

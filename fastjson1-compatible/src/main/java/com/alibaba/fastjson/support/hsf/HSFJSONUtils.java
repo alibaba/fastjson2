@@ -17,7 +17,7 @@ public class HSFJSONUtils {
     static final long HASH_ARGS_OBJS = Fnv.hashCode64("argsObjs");
 
     public static Object[] parseInvocationArguments(String json, MethodLocator methodLocator) {
-        JSONReader jsonReader = JSONReader.of(json);
+        JSONReader jsonReader = JSONReader.of(json, JSON.createReadContext());
 
         Method method = null;
         Object[] values;
