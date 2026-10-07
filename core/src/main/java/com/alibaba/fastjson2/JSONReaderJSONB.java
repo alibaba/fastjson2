@@ -1222,8 +1222,8 @@ final class JSONReaderJSONB
             char c0 = str.charAt(i * 2);
             char c1 = str.charAt(i * 2 + 1);
 
-            int b0 = c0 - (c0 <= 57 ? 48 : 55);
-            int b1 = c1 - (c1 <= 57 ? 48 : 55);
+            int b0 = c0 <= '9' ? c0 - '0' : (c0 | 0x20) - 'a' + 10;
+            int b1 = c1 <= '9' ? c1 - '0' : (c1 | 0x20) - 'a' + 10;
             bytes[i] = (byte) ((b0 << 4) | b1);
         }
         return bytes;

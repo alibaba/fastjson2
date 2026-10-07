@@ -7345,7 +7345,7 @@ class JSONReaderUTF8
         ch = offset == end ? EOI : bytes[offset++];
 
         for (; ; ) {
-            if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F')) {
+            if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f')) {
                 // continue;
             } else if (ch == quote) {
                 ch = offset == end ? EOI : bytes[offset++];
@@ -7370,8 +7370,8 @@ class JSONReaderUTF8
             byte c0 = bytes[start + i * 2];
             byte c1 = bytes[start + i * 2 + 1];
 
-            int b0 = c0 - (c0 <= 57 ? 48 : 55);
-            int b1 = c1 - (c1 <= 57 ? 48 : 55);
+            int b0 = c0 <= '9' ? c0 - '0' : (c0 | 0x20) - 'a' + 10;
+            int b1 = c1 <= '9' ? c1 - '0' : (c1 | 0x20) - 'a' + 10;
             hex[i] = (byte) ((b0 << 4) | b1);
         }
 
