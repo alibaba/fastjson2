@@ -2911,6 +2911,44 @@ public abstract class BeanUtils {
     }
 
     public static void processJacksonJsonFormat(FieldInfo fieldInfo, Annotation annotation) {
+        processJacksonJsonFormat(fieldInfo, annotation, null);
+    }
+
+    /**
+     * Returns whether the format is one of the sentinel values stored by
+     * {@link #processJacksonJsonFormat}: {@code "string"} for Jackson
+     * shape=STRING and {@code "millis"} for shape=NUMBER. They select a
+     * serialization mode and must never be parsed as a DecimalFormat pattern.
+     */
+    public static boolean isSentinelFormat(String format) {
+        return "string".equals(format) || "millis".equals(format);
+    }
+
+    /**
+     * Returns whether a field of this type is a numeric scalar: the "millis"
+     * sentinel selects the date epoch-millis mode and is meaningless for it.
+     */
+    public static boolean isNumericType(Class<?> fieldClass) {
+        return fieldClass != null && (
+                fieldClass.isPrimitive()
+                        ? fieldClass != boolean.class && fieldClass != char.class && fieldClass != void.class
+                        : Number.class.isAssignableFrom(fieldClass));
+    }
+
+    /**
+     * Returns the bean-level format inherited by a field: the "millis" sentinel
+     * (set for class-level Jackson shape=NUMBER, or explicitly) selects the
+     * date epoch-millis mode and is not inherited by numeric fields, where
+     * pattern consumers emit it verbatim.
+     */
+    public static String inheritBeanFormat(String beanFormat, Class<?> fieldClass) {
+        if ("millis".equals(beanFormat) && isNumericType(fieldClass)) {
+            return null;
+        }
+        return beanFormat;
+    }
+
+    public static void processJacksonJsonFormat(FieldInfo fieldInfo, Annotation annotation, Class<?> fieldClass) {
         Class<? extends Annotation> annotationClass = annotation.getClass();
         final String[] jsonFormatValues = new String[3]; // 0:pattern; 1:shape; 2:locale
         BeanUtils.annotationMethods(annotationClass, m -> {
@@ -2945,7 +2983,12 @@ public abstract class BeanUtils {
         if ("STRING".equals(jsonFormatValues[1]) && fieldInfo.format == null) {
             fieldInfo.format = "string";
         } else if ("NUMBER".equals(jsonFormatValues[1])) {
-            fieldInfo.format = "millis";
+            // "millis" selects the date epoch-millis mode; on a numeric field it
+            // is meaningless and pattern consumers emit it verbatim (e.g.
+            // String.format("millis", value) in JSONWriter.writeInt32)
+            if (!isNumericType(fieldClass)) {
+                fieldInfo.format = "millis";
+            }
         }
 
         if (!jsonFormatValues[2].isEmpty() && !"##default".equals(jsonFormatValues[2])) {

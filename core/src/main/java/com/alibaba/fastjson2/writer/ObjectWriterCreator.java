@@ -341,7 +341,7 @@ public class ObjectWriterCreator {
 
         String format = fieldInfo.format;
         if (format == null && beanInfo.format != null) {
-            format = beanInfo.format;
+            format = BeanUtils.inheritBeanFormat(beanInfo.format, field.getType());
         }
 
         return createFieldWriter(
@@ -509,7 +509,7 @@ public class ObjectWriterCreator {
                 BeanUtils.getters(objectClass, mixIn, beanInfo.kotlin, method -> {
                     fieldInfo.init();
                     fieldInfo.features = writerFieldFeatures;
-                    fieldInfo.format = beanInfo.format;
+                    fieldInfo.format = BeanUtils.inheritBeanFormat(beanInfo.format, method.getReturnType());
                     provider.getFieldInfo(beanInfo, fieldInfo, objectClass, method);
                     if (fieldInfo.ignore) {
                         return;
