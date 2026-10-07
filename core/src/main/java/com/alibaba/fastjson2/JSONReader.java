@@ -1955,7 +1955,9 @@ public abstract class JSONReader
                 Number number = getNumber();
                 if (number instanceof Long) {
                     long longValue = number.longValue();
-                    if (longValue < Integer.MIN_VALUE || longValue > Integer.MAX_VALUE) {
+                    if ((longValue < Integer.MIN_VALUE || longValue > Integer.MAX_VALUE)
+                            && (context.features & Feature.NonErrorOnNumberOverflow.mask) == 0
+                    ) {
                         throw new JSONException(info("integer overflow " + longValue));
                     }
                     return (int) longValue;
@@ -1972,8 +1974,17 @@ public abstract class JSONReader
                     }
                 }
                 return number.intValue();
-            case JSON_TYPE_DEC:
-                return getNumber().intValue();
+            case JSON_TYPE_DEC: {
+                BigDecimal decimal = getBigDecimal();
+                if ((context.features & Feature.NonErrorOnNumberOverflow.mask) != 0) {
+                    return decimal.intValue();
+                }
+                try {
+                    return decimal.toBigInteger().intValueExact();
+                } catch (ArithmeticException e) {
+                    throw numberError();
+                }
+            }
             case JSON_TYPE_BOOL:
                 return boolValue ? 1 : 0;
             case JSON_TYPE_NULL:
