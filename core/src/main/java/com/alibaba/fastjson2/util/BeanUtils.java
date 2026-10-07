@@ -2624,6 +2624,23 @@ public abstract class BeanUtils {
         });
     }
 
+    /**
+     * Returns the enclosing class if the given constructor is a non-static member class
+     * constructor whose first parameter is the enclosing instance ({@code this$0}),
+     * otherwise returns null.
+     */
+    public static Class getEnclosingInstanceParamType(Constructor constructor) {
+        Class declaringClass = constructor.getDeclaringClass();
+        Class enclosingClass = declaringClass.getDeclaringClass();
+        if (enclosingClass != null
+                && !Modifier.isStatic(declaringClass.getModifiers())
+                && constructor.getParameterCount() > 0
+                && constructor.getParameterTypes()[0] == enclosingClass) {
+            return enclosingClass;
+        }
+        return null;
+    }
+
     public static boolean isNoneStaticMemberClass(Class objectClass, Class memberClass) {
         if (memberClass == null
                 || memberClass.isPrimitive()
