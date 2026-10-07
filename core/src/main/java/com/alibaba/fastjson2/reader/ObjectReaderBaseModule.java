@@ -21,7 +21,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.chrono.HijrahDate;
 import java.time.chrono.JapaneseDate;
@@ -2293,7 +2292,7 @@ public class ObjectReaderBaseModule
                     }
                 });
             case "java.text.SimpleDateFormat":
-                return ObjectReaderImplValue.of((Class<SimpleDateFormat>) type, String.class, SimpleDateFormat::new);
+                return ObjectReaderImplSimpleDateFormat.INSTANCE;
             case "java.lang.Throwable":
             case "java.lang.Exception":
             case "java.lang.IllegalStateException":
