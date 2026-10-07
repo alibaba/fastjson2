@@ -1508,4 +1508,18 @@ public class JSONObjectTest {
         LocalDateTime resultWithDefault = jsonObject.getLocalDateTime("nullValue", defaultDateTime);
         assertEquals(defaultDateTime, resultWithDefault);
     }
+
+    @Test
+    public void testGetBigDecimalPrecision() {
+        JSONObject value = new JSONObject().fluentPut("value", 0.00054797);
+        java.math.BigDecimal result = value.getBigDecimal("value");
+        assertEquals(new java.math.BigDecimal("0.00054797"), result);
+    }
+    
+    @Test
+    public void testGetBigDecimalPrecisionFloat() {
+        JSONObject value = new JSONObject().fluentPut("value", 0.00054797f);
+        java.math.BigDecimal result = value.getBigDecimal("value");
+        assertEquals(new java.math.BigDecimal("0.00054797"), result);
+    }
 }
