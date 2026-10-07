@@ -4461,12 +4461,19 @@ public abstract class JSONWriter
          * {@code SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS}.
          *
          * <p>Writers honoring this feature are cached separately from writers of
-         * the same type created without it; writers explicitly registered via
-         * {@link com.alibaba.fastjson2.writer.ObjectWriterProvider#register} are
-         * not affected.
+         * the same type created without it. A writer explicitly
+         * {@link com.alibaba.fastjson2.writer.ObjectWriterProvider#register registered}
+         * with custom logic (its own {@code write}) is used as-is; a registered plain bean
+         * adapter is rebuilt in alphabetical order like a generated one. Ordering is fixed
+         * at writer construction from the declared field names: a
+         * {@link com.alibaba.fastjson2.filter.NameFilter} that renames fields applies its
+         * renaming afterwards, so renamed keys are not re-sorted.
          *
          * <p>By default, this feature is disabled, meaning that bean properties are
-         * written in declaration order.
+         * written in library-default order: alphabetical for method-based discovery (the
+         * {@code fastjson2.writer.alphabetic} global switch is on by default), declaration
+         * order for field-based creation and for types annotated
+         * {@code @JSONType(alphabetic = false)}.
          *
          * @since 2.0.66
          */

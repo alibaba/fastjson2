@@ -86,9 +86,7 @@ public class FieldWriterList<T>
 
     @Override
     public final ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
-        boolean sortVariant = ((this.features | jsonWriter.getFeatures()) & (
-                JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
-                == JSONWriter.Feature.SortFieldNamesAlphabetically.mask;
+        boolean sortVariant = ObjectWriterProvider.isFieldNamesSorted(this.features | jsonWriter.getFeatures());
         long resolvedFeatures = this.features | jsonWriter.getFeatures();
 
         if (contentAs != null) {
@@ -145,9 +143,7 @@ public class FieldWriterList<T>
         if (listWriter == null && valueClass == fieldClass) {
             ObjectWriter resolved = jsonWriter.getContext().getProvider()
                     .getObjectWriter(valueClass, valueClass, resolvedFeatures);
-            if ((resolvedFeatures & (
-                    JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
-                    != JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
+            if (!ObjectWriterProvider.isFieldNamesSorted(resolvedFeatures)) {
                 this.listWriter = resolved;
             }
             return resolved;

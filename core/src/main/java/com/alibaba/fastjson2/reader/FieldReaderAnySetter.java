@@ -54,7 +54,8 @@ class FieldReaderAnySetter<T>
         try {
             method.invoke(object, name, value);
         } catch (Exception e) {
-            throw new JSONException("any set error");
+            // keep the any-setter's own exception reachable, as processExtra does on the text path
+            throw new JSONException("any set error", e);
         }
     }
 

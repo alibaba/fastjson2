@@ -43,6 +43,7 @@ public final class ObjectWriterImplMap
     final boolean valueTypeRefDetect;
     volatile ObjectWriter keyWriter;
     volatile ObjectWriter valueWriter;
+    volatile VariantValueWriter variantValueWriter;
 
     final byte[] jsonbTypeInfo;
     final long typeNameHash;
@@ -216,7 +217,6 @@ public final class ObjectWriterImplMap
 
         long contextFeatures = jsonWriter.getFeatures(features) | this.features;
         boolean writeNulls = (contextFeatures & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) != 0;
-        boolean fieldBased = (contextFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
         ObjectWriterProvider provider = context.provider;
 
         Class itemClass = null;
@@ -432,9 +432,14 @@ public final class ObjectWriterImplMap
             try (JSONWriter keyWriter = JSONWriter.of(context)) {
                 // the key is the root of its own document, as in JSON.toJSONString(key, context)
                 keyWriter.setRootObject(key);
-                // the sort request also travels in the feature word, so the beans inside list, map and Optional keys
-                // resolve their sorted variants as they do in field-level sorted values
-                keyObjectWriter.write(keyWriter, key, null, null, JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+                try {
+                    // the sort request also travels in the feature word, so the beans inside list, map and Optional keys
+                    // resolve their sorted variants as they do in field-level sorted values
+                    keyObjectWriter.write(keyWriter, key, null, null, JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+                } catch (NullPointerException | NumberFormatException e) {
+                    // the same diagnostic the un-sorted render gets from JSON.toJSONString
+                    throw new JSONException(keySerializeErrorMessage(key), e);
+                }
                 str = keyWriter.toString();
             }
         }
@@ -453,6 +458,20 @@ public final class ObjectWriterImplMap
     // bean keys currently being rendered as sorted blobs on this thread; a key that reaches back
     // into the graph it keys renders again through a fresh writer, so the guard must span writers
     private static final ThreadLocal<IdentityHashMap<Object, Object>> MAP_KEY_RENDERING = new ThreadLocal<>();
+
+    static final class VariantValueWriter {
+        final long variantFeatures;
+        final ObjectWriter writer;
+
+        VariantValueWriter(long variantFeatures, ObjectWriter writer) {
+            this.variantFeatures = variantFeatures;
+            this.writer = writer;
+        }
+    }
+
+    private static String keySerializeErrorMessage(Object key) {
+        return "JSON#toJSONString cannot serialize '" + key + "'";
+    }
 
     String writeMapKey(Object key, JSONWriter jsonWriter, long features) {
         String strKey = null;
@@ -624,19 +643,20 @@ public final class ObjectWriterImplMap
             boolean isPrimitiveOrEnum;
             ObjectWriter<?> valueWriter;
             if (valueClass == this.valueType) {
-                if (this.valueWriter != null
-                        && (features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
-                    valueWriter = this.valueWriter;
-                } else if ((features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
-                    // sorted variant must not be cached in valueWriter; the format arm resolves
-                    // with the same merged word so a field-level sort is not dropped
+                // the memo is stamped with the variant features it was resolved under, so a writer
+                // resolved under one axis is never served under another, and the typed-value branch
+                // resolves with the merged word like its three sibling sites
+                long variantFeatures = features & (JSONWriter.Feature.FieldBased.mask
+                        | JSONWriter.Feature.SortFieldNamesAlphabetically.mask
+                        | JSONWriter.Feature.BeanToArray.mask);
+                VariantValueWriter memo = this.variantValueWriter;
+                if (memo != null && memo.variantFeatures == variantFeatures) {
+                    valueWriter = memo.writer;
+                } else {
                     valueWriter = format != null
                             ? provider.getObjectWriter(valueClass, valueClass, format, features)
                             : provider.getObjectWriter(valueClass, valueClass, features);
-                } else {
-                    valueWriter = this.valueWriter = format != null
-                            ? jsonWriter.getObjectWriter(valueClass, format)
-                            : jsonWriter.getObjectWriter(valueClass);
+                    this.variantValueWriter = new VariantValueWriter(variantFeatures, valueWriter);
                 }
                 isPrimitiveOrEnum = ObjectWriterProvider.isPrimitiveOrEnum(value.getClass());
             } else {

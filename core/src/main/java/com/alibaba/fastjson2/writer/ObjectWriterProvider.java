@@ -621,9 +621,7 @@ public class ObjectWriterProvider
      */
     ObjectWriter getObjectWriterFromCache(Type objectType, Class objectClass, long contextFeatures) {
         boolean fieldBased = (contextFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
-        boolean fieldNamesSorted = (contextFeatures & (
-                JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
-                == JSONWriter.Feature.SortFieldNamesAlphabetically.mask;
+        boolean fieldNamesSorted = isFieldNamesSorted(contextFeatures);
         return cacheOf(fieldBased, fieldNamesSorted).get(objectType);
     }
 
@@ -695,9 +693,7 @@ public class ObjectWriterProvider
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, long contextFeatures) {
         boolean fieldBased = (contextFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
         // BeanToArray output is positional, so it never takes the sorted writer variant
-        boolean fieldNamesSorted = (contextFeatures
-                & (JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
-                == JSONWriter.Feature.SortFieldNamesAlphabetically.mask;
+        boolean fieldNamesSorted = isFieldNamesSorted(contextFeatures);
         ConcurrentMap<Type, ObjectWriter> cache = cacheOf(fieldBased, fieldNamesSorted);
         ObjectWriter objectWriter = cache.get(objectType);
         return objectWriter != null
@@ -806,10 +802,20 @@ public class ObjectWriterProvider
                         // module-provided bean writers must not leave the sorted cell natural either
                         objectWriter = sortedVariantOf(objectWriter);
                     }
-                    ObjectWriter previous = cacheOf(fieldBased, fieldNamesSorted).putIfAbsent(objectType, objectWriter);
-
-                    if (previous != null) {
-                        objectWriter = previous;
+                    synchronized (createLock) {
+                        // the same lookup+link+publish discipline as the creator path: a module that
+                        // builds a fresh instance per call must still link to a cached counterpart,
+                        // so filter installation on one variant reaches the other
+                        ObjectWriter existing = cacheOf(fieldBased, fieldNamesSorted).get(objectType);
+                        if (existing != null) {
+                            objectWriter = existing;
+                        } else {
+                            linkSortedVariant(objectType, fieldBased, fieldNamesSorted, objectWriter);
+                            ObjectWriter previous = cacheOf(fieldBased, fieldNamesSorted).putIfAbsent(objectType, objectWriter);
+                            if (previous != null) {
+                                objectWriter = previous;
+                            }
+                        }
                     }
                     return objectWriter;
                 }
@@ -851,9 +857,17 @@ public class ObjectWriterProvider
             if (fieldNamesSorted) {
                 objectWriter = sortedVariantOf(objectWriter);
             }
-            ObjectWriter previous = cacheOf(fieldBased, fieldNamesSorted).putIfAbsent(objectType, objectWriter);
-            if (previous != null) {
-                objectWriter = previous;
+            synchronized (createLock) {
+                ObjectWriter existing = cacheOf(fieldBased, fieldNamesSorted).get(objectType);
+                if (existing != null) {
+                    objectWriter = existing;
+                } else {
+                    linkSortedVariant(objectType, fieldBased, fieldNamesSorted, objectWriter);
+                    ObjectWriter previous = cacheOf(fieldBased, fieldNamesSorted).putIfAbsent(objectType, objectWriter);
+                    if (previous != null) {
+                        objectWriter = previous;
+                    }
+                }
             }
             return objectWriter;
         }
@@ -905,6 +919,16 @@ public class ObjectWriterProvider
         if (natural instanceof ObjectWriterAdapter && sorted instanceof ObjectWriterAdapter) {
             ((ObjectWriterAdapter) natural).linkSortedVariant((ObjectWriterAdapter) sorted);
         }
+    }
+
+    /**
+     * The variant axis every sorted-cell decision shares: a word selects the sorted variant only
+     * when SortFieldNamesAlphabetically is set and BeanToArray is not — positional output never sorts.
+     */
+    static boolean isFieldNamesSorted(long contextFeatures) {
+        return (contextFeatures & (
+                JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
+                == JSONWriter.Feature.SortFieldNamesAlphabetically.mask;
     }
 
     static final int ENUM = 0x00004000;

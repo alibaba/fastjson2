@@ -75,7 +75,7 @@ class ObjectReaderImplOptional
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Object value;
         if (itemType == null) {
-            value = jsonReader.readAny();
+            value = jsonReader.readAny((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
         } else {
             if (itemObjectReader == null) {
                 ObjectReader formattedObjectReader = null;

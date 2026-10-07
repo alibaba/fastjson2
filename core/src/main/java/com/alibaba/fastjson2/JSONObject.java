@@ -160,15 +160,19 @@ public class JSONObject
      * @throws JSONException if the key is absent, its value is null, or the value is not of the expected type
      * @since 2.0.66
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> T required(String key, Class<T> valueClass) {
         Object value = get(key);
         if (value == null) {
             throw new JSONException(missingRequiredMessage(key));
         }
-        if (!valueClass.isInstance(value)) {
+        // Class.isInstance and Class.cast both reject a primitive class literal;
+        // the boxed type is meant
+        Class checkedClass = com.alibaba.fastjson2.util.TypeUtils.nonePrimitive(valueClass);
+        if (!checkedClass.isInstance(value)) {
             throw new JSONException(typeMismatchMessage(valueClass, key));
         }
-        return valueClass.cast(value);
+        return (T) checkedClass.cast(value);
     }
 
     private static String missingRequiredMessage(String key) {

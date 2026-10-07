@@ -47,10 +47,11 @@ public class ObjectWriterAdapter<T>
     /**
      * Caller features forwarded to nested tree conversions in {@link #toJSONObject(Object, long)}: the ones that
      * select the writer variant or that the conversion applies itself. Value-format features are not applied to
-     * the tree at any depth.
+     * the tree at any depth. SortMapEntriesByKeys travels too — the SortFieldNamesAlphabetically javadoc pairs
+     * the two for canonical output, and JSON.toJSON must not drop it where toJSONString honors it.
      */
     static final long TREE_FEATURES = SortFieldNamesAlphabetically.mask | FieldBased.mask
-            | WriteNulls.mask | WriteEnumsUsingName.mask;
+            | WriteNulls.mask | WriteEnumsUsingName.mask | SortMapEntriesByKeys.mask;
 
     static final String TYPE = "@type";
 

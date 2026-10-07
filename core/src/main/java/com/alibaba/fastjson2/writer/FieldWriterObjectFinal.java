@@ -46,15 +46,25 @@ public class FieldWriterObjectFinal<T>
         if (!writeUsing
                 && format == null
                 && !BeanUtils.SUPER.equals(fieldName)
-                && ((features | jsonWriter.getFeatures()) & (
-                        JSONWriter.Feature.SortFieldNamesAlphabetically.mask | JSONWriter.Feature.BeanToArray.mask))
-                        == JSONWriter.Feature.SortFieldNamesAlphabetically.mask) {
-            // sorted writers must not be stored in objectWriter (see FieldWriterObject#getObjectWriter);
-            // explicitly configured writers (@JSONField(writeUsing)) are always honored instead,
-            // $super$ pseudo-fields always resolve via the parent's dedicated branch,
-            // and resolution merges field features so positional output never sorts
-            return jsonWriter.getContext().getProvider()
+                && ObjectWriterProvider.isFieldNamesSorted(features | jsonWriter.getFeatures())) {
+            // sorted writers are memoized in their own slot instead of objectWriter
+            // (see FieldWriterObject#getObjectWriter); explicitly configured writers
+            // (@JSONField(writeUsing)) are always honored instead, $super$ pseudo-fields
+            // resolve via the parent's dedicated branch, and resolution merges field
+            // features so positional output never sorts
+            ObjectWriter sortedWriter = this.sortedObjectWriter;
+            if (sortedWriter != null && this.sortedValueClass == valueClass) {
+                return sortedWriter;
+            }
+            sortedWriter = jsonWriter.getContext().getProvider()
                     .getObjectWriter(valueClass, valueClass, features | jsonWriter.getFeatures());
+            if (this.sortedValueClass == null) {
+                boolean success = sortedValueClassUpdater.compareAndSet(this, null, valueClass);
+                if (success) {
+                    sortedObjectWriterUpdater.compareAndSet(this, null, sortedWriter);
+                }
+            }
+            return sortedWriter;
         }
 
         if (objectWriter != null) {

@@ -4187,7 +4187,10 @@ public abstract class JSONReader
                     break;
                 case '{':
                     if (context.autoTypeBeforeHandler != null || (context.features & Feature.SupportAutoType.mask) != 0) {
-                        val = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, features);
+                        // the ObjectReader contract takes a declared-features word, so forward the
+                        // strict bit only; every other bit keeps parsing as on the plain call
+                        val = ObjectReaderImplObject.INSTANCE.readObject(this, null, null,
+                                features & Feature.ErrorOnDuplicateKeys.mask);
                     } else if (isReference()) {
                         val = JSONPath.of(readReference());
                     } else {

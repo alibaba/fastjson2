@@ -130,6 +130,9 @@ public class ObjectReaderImplMapMultiValueType
                 if (!jsonReader.nextIfMatch(':')) {
                     throw new JSONException(jsonReader.info("illegal json"));
                 }
+                if (seenKeys != null && !seenKeys.add(null)) {
+                    throw duplicateKeyError(jsonReader, null);
+                }
                 name = null;
             } else {
                 name = jsonReader.readFieldName();
