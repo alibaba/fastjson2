@@ -43,6 +43,7 @@ public final class ObjectWriterImplMap
     final boolean valueTypeRefDetect;
     volatile ObjectWriter keyWriter;
     volatile ObjectWriter valueWriter;
+    volatile VariantValueWriter variantValueWriter;
 
     final byte[] jsonbTypeInfo;
     final long typeNameHash;
@@ -214,14 +215,16 @@ public final class ObjectWriterImplMap
             }
         }
 
-        long contextFeatures = context.getFeatures();
+        long contextFeatures = jsonWriter.getFeatures(features) | this.features;
         boolean writeNulls = (contextFeatures & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) != 0;
-        boolean fieldBased = (contextFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
         ObjectWriterProvider provider = context.provider;
 
         Class itemClass = null;
         ObjectWriter itemWriter = null;
         boolean contextRefDetect = (contextFeatures & JSONWriter.Feature.ReferenceDetection.mask) != 0;
+        // the mutating save/restore pairs below must restore the CONTEXT's own bit: the merged
+        // word alone would turn a field-level bit into a permanent change on the caller's context
+        boolean contextOnlyRefDetect = (context.getFeatures() & JSONWriter.Feature.ReferenceDetection.mask) != 0;
 
         int i = 0;
         for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ++i) {
@@ -247,7 +250,7 @@ public final class ObjectWriterImplMap
                         if (refPath != null) {
                             jsonWriter.writeReference(refPath);
                         } else {
-                            ObjectWriter keyWriter = provider.getObjectWriter(entryKeyClass, entryKeyClass, fieldBased);
+                            ObjectWriter keyWriter = provider.getObjectWriter(entryKeyClass, entryKeyClass, contextFeatures);
                             keyWriter.writeJSONB(jsonWriter, entryKey, null, null, 0);
                         }
                         if (keyRefDetect) {
@@ -285,9 +288,9 @@ public final class ObjectWriterImplMap
                     jsonWriter.config(JSONWriter.Feature.ReferenceDetection, false);
                 }
                 Class<?> entryKeyClass = entryKey.getClass();
-                ObjectWriter keyWriter = provider.getObjectWriter(entryKeyClass, entryKeyClass, fieldBased);
+                ObjectWriter keyWriter = provider.getObjectWriter(entryKeyClass, entryKeyClass, contextFeatures);
                 keyWriter.writeJSONB(jsonWriter, entryKey, null, null, 0);
-                if (contextRefDetect) {
+                if (contextOnlyRefDetect) {
                     jsonWriter.config(JSONWriter.Feature.ReferenceDetection, true);
                 }
             }
@@ -351,7 +354,9 @@ public final class ObjectWriterImplMap
             }
 
             ObjectWriter valueWriter;
-            if (valueClass == this.valueType && this.valueWriter != null) {
+            if (valueClass == this.valueType
+                    && this.valueWriter != null
+                    && (contextFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
                 valueWriter = this.valueWriter;
             } else if (itemClass == valueClass) {
                 valueWriter = itemWriter;
@@ -365,7 +370,7 @@ public final class ObjectWriterImplMap
                 } else if (valueClass == TypeUtils.CLASS_JSON_ARRAY_1x) {
                     valueWriter = ObjectWriterImplList.INSTANCE;
                 } else {
-                    valueWriter = provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                    valueWriter = provider.getObjectWriter(valueClass, valueClass, contextFeatures);
                 }
 
                 if (itemWriter == null) {
@@ -373,15 +378,18 @@ public final class ObjectWriterImplMap
                     itemClass = valueClass;
                 }
 
-                if (valueClass == this.valueType) {
+                if (valueClass == this.valueType
+                        && (contextFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
                     this.valueWriter = valueWriter;
                 }
             }
 
-            valueWriter.writeJSONB(jsonWriter, value, entryKey, fieldValueType, this.features);
+            valueWriter.writeJSONB(jsonWriter, value, entryKey, fieldValueType, contextFeatures);
 
             if (valueRefDetecChanged) {
-                jsonWriter.config(JSONWriter.Feature.ReferenceDetection, true);
+                if (contextOnlyRefDetect) {
+                    jsonWriter.config(JSONWriter.Feature.ReferenceDetection, true);
+                }
             } else {
                 if (valueRefDetect) {
                     jsonWriter.popPath(value);
@@ -411,7 +419,30 @@ public final class ObjectWriterImplMap
         }
 
         final JSONWriter.Context context = jsonWriter.getContext();
-        String str = JSON.toJSONString(key, context);
+        String str;
+        long contextFeatures = context.getFeatures();
+        if (((this.features | features) & ~contextFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
+            str = JSON.toJSONString(key, context);
+        } else {
+            // a field-level sort request selects the key's sorted writer variant; the key is still written
+            // with the caller's context, so its date format and filters apply as for any other key
+            Class<?> keyClass = key.getClass();
+            ObjectWriter keyObjectWriter = context.provider.getObjectWriter(keyClass, keyClass,
+                    contextFeatures | JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+            try (JSONWriter keyWriter = JSONWriter.of(context)) {
+                // the key is the root of its own document, as in JSON.toJSONString(key, context)
+                keyWriter.setRootObject(key);
+                try {
+                    // the sort request also travels in the feature word, so the beans inside list, map and Optional keys
+                    // resolve their sorted variants as they do in field-level sorted values
+                    keyObjectWriter.write(keyWriter, key, null, null, JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+                } catch (NullPointerException | NumberFormatException e) {
+                    // the same diagnostic the un-sorted render gets from JSON.toJSONString
+                    throw new JSONException(keySerializeErrorMessage(key), e);
+                }
+                str = keyWriter.toString();
+            }
+        }
         if (str != null) {
             final int length = str.length();
             if (length > 1) {
@@ -422,6 +453,24 @@ public final class ObjectWriterImplMap
             }
         }
         return str;
+    }
+
+    // bean keys currently being rendered as sorted blobs on this thread; a key that reaches back
+    // into the graph it keys renders again through a fresh writer, so the guard must span writers
+    private static final ThreadLocal<IdentityHashMap<Object, Object>> MAP_KEY_RENDERING = new ThreadLocal<>();
+
+    static final class VariantValueWriter {
+        final long variantFeatures;
+        final ObjectWriter writer;
+
+        VariantValueWriter(long variantFeatures, ObjectWriter writer) {
+            this.variantFeatures = variantFeatures;
+            this.writer = writer;
+        }
+    }
+
+    private static String keySerializeErrorMessage(Object key) {
+        return "JSON#toJSONString cannot serialize '" + key + "'";
     }
 
     String writeMapKey(Object key, JSONWriter jsonWriter, long features) {
@@ -438,8 +487,51 @@ public final class ObjectWriterImplMap
                     jsonWriter.writeName((Integer) key);
                 } else if (key instanceof Long) {
                     jsonWriter.writeName((Long) key);
-                } else {
+                } else if (((jsonWriter.getFeatures() | this.features | features)
+                        & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
                     jsonWriter.writeNameAny(key);
+                } else {
+                    // bean and container keys render as sorted blobs: their bean contents are
+                    // what the feature sorts. Scalar keys keep the natural spelling, so an
+                    // ordering feature changes no BigDecimal/Boolean/Date spellings, and a
+                    // registered writer's spelling is never replaced by a blob either
+                    Class<?> keyClass = key.getClass();
+                    ObjectWriter keyObjectWriter = jsonWriter.context.provider.getObjectWriter(keyClass, keyClass,
+                            (jsonWriter.getFeatures() | this.features | features));
+                    if (!(keyObjectWriter instanceof ObjectWriterAdapter)
+                            && !(keyObjectWriter instanceof ObjectWriterImplList)
+                            && !(keyObjectWriter instanceof ObjectWriterImplMap)
+                            && !(keyObjectWriter instanceof ObjectWriterImplCollection)
+                            && !(keyObjectWriter instanceof ObjectWriterArray)
+                            && !(keyObjectWriter instanceof ObjectWriterImplOptional)
+                            && !(keyObjectWriter instanceof ObjectWriterImplAtomicReference)) {
+                        jsonWriter.writeNameAny(key);
+                        return null;
+                    }
+                    IdentityHashMap<Object, Object> rendering = MAP_KEY_RENDERING.get();
+                    if (rendering != null && rendering.containsKey(key)) {
+                        // a key already being rendered reached back into the graph it keys; the
+                        // natural spelling terminates inside this document's reference state
+                        jsonWriter.writeNameAny(key);
+                        return null;
+                    }
+                    if (rendering == null) {
+                        rendering = new IdentityHashMap<>(4);
+                        MAP_KEY_RENDERING.set(rendering);
+                    }
+                    rendering.put(key, key);
+                    try {
+                        // bean keys under the sort feature resolve with the merged word, so a
+                        // field-level sort request reaches the key's own fields. The rendered blob
+                        // is not a name any reader resolves, so NOT kept in strKey: a $ref built
+                        // from the blob loses its value on the round trip
+                        jsonWriter.writeName(mapKeyToString(key, jsonWriter, features));
+                    } finally {
+                        rendering.remove(key);
+                        if (rendering.isEmpty()) {
+                            MAP_KEY_RENDERING.remove();
+                        }
+                    }
                 }
             }
         }
@@ -482,7 +574,7 @@ public final class ObjectWriterImplMap
             writeTypeInfo(jsonWriter);
         }
 
-        features |= jsonWriter.getFeatures();
+        features |= (jsonWriter.getFeatures() | this.features);
         if ((features & (MapSortField.mask | SortMapEntriesByKeys.mask)) != 0) {
             if (!(map instanceof SortedMap)
                     && (map.getClass() != LinkedHashMap.class || (features & SortMapEntriesByKeys.mask) != 0)) {
@@ -535,7 +627,7 @@ public final class ObjectWriterImplMap
                 if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT64_MASK) == 0) {
                     jsonWriter.writeInt64((Long) value);
                 } else {
-                    ObjectWriter<?> valueWriter = jsonWriter.getObjectWriter(valueClass);
+                    ObjectWriter<?> valueWriter = provider.getObjectWriter(valueClass, valueClass, features);
                     valueWriter.write(jsonWriter, value, strKey, Long.class, features);
                 }
                 continue;
@@ -546,8 +638,8 @@ public final class ObjectWriterImplMap
                 if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DECIMAL_MASK) == 0) {
                     jsonWriter.writeDecimal((BigDecimal) value, features, null);
                 } else {
-                    ObjectWriter<?> valueWriter = jsonWriter.getObjectWriter(valueClass);
-                    valueWriter.write(jsonWriter, value, key, this.valueType, this.features);
+                    ObjectWriter<?> valueWriter = provider.getObjectWriter(valueClass, valueClass, features);
+                    valueWriter.write(jsonWriter, value, key, this.valueType, features);
                 }
                 continue;
             }
@@ -555,12 +647,20 @@ public final class ObjectWriterImplMap
             boolean isPrimitiveOrEnum;
             ObjectWriter<?> valueWriter;
             if (valueClass == this.valueType) {
-                if (this.valueWriter != null) {
-                    valueWriter = this.valueWriter;
+                // the memo is stamped with the variant features it was resolved under, so a writer
+                // resolved under one axis is never served under another, and the typed-value branch
+                // resolves with the merged word like its three sibling sites
+                long variantFeatures = features & (JSONWriter.Feature.FieldBased.mask
+                        | JSONWriter.Feature.SortFieldNamesAlphabetically.mask
+                        | JSONWriter.Feature.BeanToArray.mask);
+                VariantValueWriter memo = this.variantValueWriter;
+                if (memo != null && memo.variantFeatures == variantFeatures) {
+                    valueWriter = memo.writer;
                 } else {
-                    valueWriter = this.valueWriter = format != null
-                            ? jsonWriter.getObjectWriter(valueClass, format)
-                            : jsonWriter.getObjectWriter(valueClass);
+                    valueWriter = format != null
+                            ? provider.getObjectWriter(valueClass, valueClass, format, features)
+                            : provider.getObjectWriter(valueClass, valueClass, features);
+                    this.variantValueWriter = new VariantValueWriter(variantFeatures, valueWriter);
                 }
                 isPrimitiveOrEnum = ObjectWriterProvider.isPrimitiveOrEnum(value.getClass());
             } else {
@@ -577,7 +677,7 @@ public final class ObjectWriterImplMap
                     valueWriter = ObjectWriterImplList.INSTANCE;
                     isPrimitiveOrEnum = false;
                 } else {
-                    valueWriter = jsonWriter.getObjectWriter(valueClass);
+                    valueWriter = provider.getObjectWriter(valueClass, valueClass, features);
                     isPrimitiveOrEnum = ObjectWriterProvider.isPrimitiveOrEnum(valueClass);
                 }
             }
@@ -597,7 +697,7 @@ public final class ObjectWriterImplMap
                 }
             }
 
-            valueWriter.write(jsonWriter, value, key, this.valueType, this.features);
+            valueWriter.write(jsonWriter, value, key, this.valueType, features);
 
             if (valueRefDetect) {
                 jsonWriter.popPath(value);
@@ -623,7 +723,7 @@ public final class ObjectWriterImplMap
             writeTypeInfo(jsonWriter);
         }
 
-        features |= jsonWriter.getFeatures();
+        features |= (jsonWriter.getFeatures() | this.features);
         if ((features & (MapSortField.mask | SortMapEntriesByKeys.mask)) != 0) {
             if (!(map instanceof SortedMap)
                     && (map.getClass() != LinkedHashMap.class || (features & SortMapEntriesByKeys.mask) != 0)) {
@@ -705,7 +805,9 @@ public final class ObjectWriterImplMap
                     } else {
                         valueClass = value.getClass();
                     }
-                    ObjectWriter<?> valueWriter = jsonWriter.getObjectWriter(valueClass);
+                    // resolve with the merged word used by write(), so this map writer's own
+                    // feature word (e.g. a field-level Sort) also reaches filtered values
+                    ObjectWriter<?> valueWriter = jsonWriter.context.provider.getObjectWriter(valueClass, valueClass, features);
                     valueWriter.write(jsonWriter, value, fieldName, fieldType, this.features);
                 }
             } finally {

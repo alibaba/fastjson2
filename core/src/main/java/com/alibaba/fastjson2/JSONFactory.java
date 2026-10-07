@@ -589,7 +589,7 @@ public final class JSONFactory {
 
     public static ObjectWriter getObjectWriter(Type type, long features) {
         return getDefaultObjectWriterProvider()
-                .getObjectWriter(type, TypeUtils.getClass(type), JSONWriter.Feature.FieldBased.isEnabled(features));
+                .getObjectWriter(type, TypeUtils.getClass(type), features);
     }
 
     /**

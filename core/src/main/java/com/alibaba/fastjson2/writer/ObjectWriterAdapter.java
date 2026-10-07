@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
@@ -24,6 +25,34 @@ public class ObjectWriterAdapter<T>
     PropertyFilter propertyFilter;
     NameFilter nameFilter;
     ValueFilter valueFilter;
+
+    /**
+     * Variants linked to this writer (for example the serving of {@link JSONWriter.Feature#SortFieldNamesAlphabetically}
+     * for the same type): filters set on this writer are applied to all of them. Held weakly, so replaced or
+     * unregistered variants leave neither retention nor traversal cost behind; cleared entries are compacted
+     * away on the next link. The array is replaced under a lock, so reads never see a variant before its
+     * filters were copied.
+     */
+    volatile WeakReference<ObjectWriterAdapter>[] linkedVariants = EMPTY_VARIANTS;
+
+    @SuppressWarnings("unchecked")
+    static final WeakReference<ObjectWriterAdapter>[] EMPTY_VARIANTS = new WeakReference[0];
+
+    /**
+     * Guards the linked-variants array and the filter updates forwarded to it: filter copying and
+     * joining the list are atomic with respect to setters on this writer.
+     */
+    private final Object linkedVariantsLock = new Object();
+
+    /**
+     * Caller features forwarded to nested tree conversions in {@link #toJSONObject(Object, long)}: the ones that
+     * select the writer variant or that the conversion applies itself. Value-format features are not applied to
+     * the tree at any depth. SortMapEntriesByKeys travels too — the SortFieldNamesAlphabetically javadoc pairs
+     * the two for canonical output. It reaches maps nested in collections; a map held directly by a field
+     * goes into the tree as the field's own object, as on main.
+     */
+    static final long TREE_FEATURES = SortFieldNamesAlphabetically.mask | FieldBased.mask
+            | WriteNulls.mask | WriteEnumsUsingName.mask | SortMapEntriesByKeys.mask;
 
     static final String TYPE = "@type";
 
@@ -137,30 +166,104 @@ public class ObjectWriterAdapter<T>
     }
 
     public void setPropertyFilter(PropertyFilter propertyFilter) {
-        this.propertyFilter = propertyFilter;
-        if (propertyFilter != null) {
-            hasFilter = true;
+        synchronized (linkedVariantsLock) {
+            this.propertyFilter = propertyFilter;
+            if (propertyFilter != null) {
+                hasFilter = true;
+            }
+            for (WeakReference<ObjectWriterAdapter> linked : this.linkedVariants) {
+                ObjectWriterAdapter variant = linked.get();
+                if (variant != null) {
+                    variant.setPropertyFilter(propertyFilter);
+                }
+            }
         }
     }
 
     public void setValueFilter(ValueFilter valueFilter) {
-        this.valueFilter = valueFilter;
-        if (valueFilter != null) {
-            hasFilter = true;
+        synchronized (linkedVariantsLock) {
+            this.valueFilter = valueFilter;
+            if (valueFilter != null) {
+                hasFilter = true;
+            }
+            for (WeakReference<ObjectWriterAdapter> linked : this.linkedVariants) {
+                ObjectWriterAdapter variant = linked.get();
+                if (variant != null) {
+                    variant.setValueFilter(valueFilter);
+                }
+            }
         }
     }
 
     public void setNameFilter(NameFilter nameFilter) {
-        this.nameFilter = nameFilter;
-        if (nameFilter != null) {
-            hasFilter = true;
+        synchronized (linkedVariantsLock) {
+            this.nameFilter = nameFilter;
+            if (nameFilter != null) {
+                hasFilter = true;
+            }
+            for (WeakReference<ObjectWriterAdapter> linked : this.linkedVariants) {
+                ObjectWriterAdapter variant = linked.get();
+                if (variant != null) {
+                    variant.setNameFilter(nameFilter);
+                }
+            }
         }
     }
 
     public void setPropertyPreFilter(PropertyPreFilter propertyPreFilter) {
-        this.propertyPreFilter = propertyPreFilter;
-        if (propertyPreFilter != null) {
-            hasFilter = true;
+        synchronized (linkedVariantsLock) {
+            this.propertyPreFilter = propertyPreFilter;
+            if (propertyPreFilter != null) {
+                hasFilter = true;
+            }
+            for (WeakReference<ObjectWriterAdapter> linked : this.linkedVariants) {
+                ObjectWriterAdapter variant = linked.get();
+                if (variant != null) {
+                    variant.setPropertyPreFilter(propertyPreFilter);
+                }
+            }
+        }
+    }
+
+    /**
+     * Links {@code variant} to this writer: the filters set on this writer so far are copied to it,
+     * and later ones follow. Copying and joining the list hold the same lock as the setters, so a
+     * concurrent filter update cannot slip between them. Every linked variant stays connected until it
+     * leaves the provider caches, and linking is idempotent.
+     */
+    void linkSortedVariant(ObjectWriterAdapter variant) {
+        if (variant == this) {
+            return;
+        }
+        synchronized (linkedVariantsLock) {
+            if (propertyPreFilter != null) {
+                variant.setPropertyPreFilter(propertyPreFilter);
+            }
+            if (propertyFilter != null) {
+                variant.setPropertyFilter(propertyFilter);
+            }
+            if (nameFilter != null) {
+                variant.setNameFilter(nameFilter);
+            }
+            if (valueFilter != null) {
+                variant.setValueFilter(valueFilter);
+            }
+
+            // one scan builds a dense array: GC can clear a reference between passes,
+            // and interior null slots would NPE later setters and links
+            List<WeakReference<ObjectWriterAdapter>> live = new ArrayList<>(this.linkedVariants.length + 1);
+            for (WeakReference<ObjectWriterAdapter> linked : this.linkedVariants) {
+                ObjectWriterAdapter resolved = linked.get();
+                if (resolved == variant) {
+                    return;
+                }
+                if (resolved != null) {
+                    live.add(linked);
+                }
+            }
+            WeakReference<ObjectWriterAdapter>[] next = live.toArray(new WeakReference[live.size() + 1]);
+            next[live.size()] = new WeakReference<>(variant);
+            this.linkedVariants = next;
         }
     }
 
@@ -612,6 +715,7 @@ public class ObjectWriterAdapter<T>
 
     public JSONObject toJSONObject(T object, long features) {
         JSONObject jsonObject = new JSONObject();
+        long nestedFeatures = features & TREE_FEATURES;
 
         for (int i = 0, size = fieldWriters.size(); i < size; i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
@@ -641,7 +745,7 @@ public class ObjectWriterAdapter<T>
 
                 ObjectWriter fieldObjectWriter = fieldWriter.getInitWriter();
                 if (fieldObjectWriter == null) {
-                    fieldObjectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(fieldClass);
+                    fieldObjectWriter = JSONFactory.getObjectWriter(fieldClass, this.features | features);
                 }
                 List<FieldWriter> unwrappedFieldWriters = fieldObjectWriter.getFieldWriters();
                 for (int j = 0, unwrappedSize = unwrappedFieldWriters.size(); j < unwrappedSize; j++) {
@@ -661,7 +765,9 @@ public class ObjectWriterAdapter<T>
                     Collection collection = (Collection) fieldValue;
                     JSONArray array = new JSONArray(collection.size());
                     for (Object item : collection) {
-                        Object itemJSON = item == object ? jsonObject : JSON.toJSON(item);
+                        Object itemJSON = item == object
+                                ? jsonObject
+                                : toJSON(item, nestedFeatures);
                         array.add(itemJSON);
                     }
                     fieldValue = array;
@@ -681,9 +787,16 @@ public class ObjectWriterAdapter<T>
                 }
             }
             if (fieldWriter instanceof FieldWriterObject && fieldValue != null && !(fieldValue instanceof Map)) {
-                ObjectWriter valueWriter = fieldWriter.getInitWriter();
+                // the init memo only ever holds a natural writer: trust it only when no variant
+                // bit can select a different variant, otherwise resolve with the full merged word
+                long variantBits = (this.features | features | fieldFeatures)
+                        & (JSONWriter.Feature.SortFieldNamesAlphabetically.mask
+                                | JSONWriter.Feature.BeanToArray.mask
+                                | JSONWriter.Feature.FieldBased.mask);
+                ObjectWriter valueWriter = variantBits == 0 ? fieldWriter.getInitWriter() : null;
                 if (valueWriter == null) {
-                    valueWriter = JSONFactory.getObjectWriter(fieldWriter.fieldType, this.features | features);
+                    valueWriter = JSONFactory.getObjectWriter(fieldWriter.fieldType,
+                            this.features | features | fieldFeatures);
                 }
                 // The cached writer was selected by the first value seen on this field (e.g. an Object
                 // or generic field whose fieldClass erases to Object). When a later value has a
@@ -694,23 +807,30 @@ public class ObjectWriterAdapter<T>
                 // FieldWriterObject.getObjectWriter(jsonWriter, valueClass), so toJSON stays
                 // consistent with toJSONString. See issue #7714.
                 FieldWriterObject objectFieldWriter = (FieldWriterObject) fieldWriter;
-                if (objectFieldWriter.initValueClass != null
-                        && !objectFieldWriter.isTypeMatch(fieldValue.getClass())) {
-                    valueWriter = JSONFactory.getObjectWriter(fieldValue.getClass(), this.features | features);
+                Class fieldValueClass = fieldValue.getClass();
+                boolean reResolve = objectFieldWriter.initValueClass != null
+                        ? !objectFieldWriter.isTypeMatch(fieldValueClass)
+                        // the sorted variant's stores are suppressed, so priming never happens there;
+                        // fall back to the runtime type instead of silently dropping subclass fields
+                        : fieldWriter.fieldClass != fieldValueClass
+                                && fieldWriter.fieldClass.isAssignableFrom(fieldValueClass);
+                if (reResolve) {
+                    valueWriter = JSONFactory.getObjectWriter(fieldValueClass,
+                            this.features | features | fieldFeatures);
                     // When the re-resolved writer is not an ObjectWriterAdapter (arrays, Date, enums,
                     // etc.), convert the value via JSON.toJSON so it matches the shape the unprimed
                     // path and toJSONString produce, instead of leaving the raw Java object in the
                     // JSONObject. See issue #7714.
                     if (!(valueWriter instanceof ObjectWriterAdapter)) {
-                        fieldValue = JSON.toJSON(fieldValue);
+                        fieldValue = toJSON(fieldValue, nestedFeatures);
                     }
                 }
                 if (valueWriter instanceof ObjectWriterAdapter) {
                     ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) valueWriter;
                     if (!objectWriterAdapter.getFieldWriters().isEmpty()) {
-                        fieldValue = objectWriterAdapter.toJSONObject(fieldValue);
+                        fieldValue = objectWriterAdapter.toJSONObject(fieldValue, nestedFeatures);
                     } else {
-                        fieldValue = JSON.toJSON(fieldValue);
+                        fieldValue = toJSON(fieldValue, nestedFeatures);
                     }
                 }
             }
@@ -718,6 +838,48 @@ public class ObjectWriterAdapter<T>
         }
 
         return jsonObject;
+    }
+
+    /**
+     * Converts the specified value to a {@link JSONArray} or {@link JSONObject}, honoring the
+     * caller's feature word merged with the context defaults. Writer-variant bits (such as
+     * {@link JSONWriter.Feature#SortFieldNamesAlphabetically}) reach nested conversions through
+     * the context; value-format bits are masked off by {@link #TREE_FEATURES} before that.
+     *
+     * @param object the specified value
+     * @param features the caller's feature word, a mask of {@link JSONWriter.Feature} bits
+     * @return {@link JSONArray} or {@link JSONObject} or {@code null}
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static Object toJSON(Object object, long features) {
+        if (object == null) {
+            return null;
+        }
+
+        if (object instanceof JSONObject || object instanceof JSONArray) {
+            return object;
+        }
+
+        JSONWriter.Context writeContext = JSONFactory.createWriteContext();
+        writeContext.setFeatures(writeContext.getFeatures() | features);
+        Class<?> valueClass = object.getClass();
+        ObjectWriter<?> objectWriter = writeContext.getObjectWriter(valueClass, valueClass);
+        if (objectWriter instanceof ObjectWriterAdapter
+                && !writeContext.isEnabled(JSONWriter.Feature.ReferenceDetection)
+                && (objectWriter.getFeatures() & JSONWriter.Feature.WriteClassName.mask) == 0) {
+            ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) objectWriter;
+            return objectWriterAdapter.toJSONObject(object, writeContext.getFeatures());
+        }
+
+        String str;
+        try (JSONWriter writer = JSONWriter.of(writeContext)) {
+            objectWriter.write(writer, object, null, null, writeContext.getFeatures());
+            str = writer.toString();
+        } catch (NullPointerException | NumberFormatException ex) {
+            throw new JSONException("toJSONString error", ex);
+        }
+
+        return JSON.parse(str);
     }
 
     @Override

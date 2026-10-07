@@ -876,8 +876,7 @@ public abstract class JSONWriter
      * @return the ObjectWriter for the specified class
      */
     public final ObjectWriter getObjectWriter(Class objectClass) {
-        boolean fieldBased = (context.features & FieldBased.mask) != 0;
-        return context.provider.getObjectWriter(objectClass, objectClass, fieldBased);
+        return context.provider.getObjectWriter(objectClass, objectClass, context.features);
     }
 
     /**
@@ -890,8 +889,7 @@ public abstract class JSONWriter
      * @return the ObjectWriter for the specified class and format
      */
     public final ObjectWriter getObjectWriter(Class objectClass, String format) {
-        boolean fieldBased = (context.features & FieldBased.mask) != 0;
-        return context.provider.getObjectWriter(objectClass, objectClass, format, fieldBased);
+        return context.provider.getObjectWriter(objectClass, objectClass, format, context.features);
     }
 
     /**
@@ -903,8 +901,7 @@ public abstract class JSONWriter
      * @return the ObjectWriter for the specified type and class
      */
     public final ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
-        boolean fieldBased = (context.features & FieldBased.mask) != 0;
-        return context.provider.getObjectWriter(objectType, objectClass, fieldBased);
+        return context.provider.getObjectWriter(objectType, objectClass, context.features);
     }
 
     /**
@@ -3495,8 +3492,7 @@ public abstract class JSONWriter
          * @return the ObjectWriter for the specified type
          */
         public <T> ObjectWriter<T> getObjectWriter(Class<T> objectType) {
-            boolean fieldBased = (features & FieldBased.mask) != 0;
-            return provider.getObjectWriter(objectType, objectType, fieldBased);
+            return provider.getObjectWriter(objectType, objectType, features);
         }
 
         /**
@@ -3509,8 +3505,7 @@ public abstract class JSONWriter
          * @return the ObjectWriter for the specified type and class
          */
         public <T> ObjectWriter<T> getObjectWriter(Type objectType, Class<T> objectClass) {
-            boolean fieldBased = (features & FieldBased.mask) != 0;
-            return provider.getObjectWriter(objectType, objectClass, fieldBased);
+            return provider.getObjectWriter(objectType, objectClass, features);
         }
 
         /**
@@ -4449,7 +4444,41 @@ public abstract class JSONWriter
          *
          * @since 2.0.61
          */
-        WriteFloatSpecialAsString(1L << 45);
+        WriteFloatSpecialAsString(1L << 45),
+
+        /**
+         * Feature that determines whether to serialize bean properties in alphabetical order
+         * of the serialized field names.
+         * When enabled, beans are written with their properties ordered by
+         * {@link FieldWriter#compareTo} (explicit ordinals first, then field name),
+         * the same ordering used by {@code @JSONType(alphabetic = true)} and the
+         * {@code fastjson2.writer.alphabetic} global switch.
+         *
+         * <p>This applies to bean serialization only; use {@link #SortMapEntriesByKeys}
+         * to sort Map keys. Combined they produce canonical output suitable for
+         * content digests and signature verification, in the manner of jackson
+         * {@code MapperFeature.SORT_PROPERTIES_ALPHABETICALLY} combined with
+         * {@code SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS}.
+         *
+         * <p>Writers honoring this feature are cached separately from writers of
+         * the same type created without it. A writer explicitly
+         * {@link com.alibaba.fastjson2.writer.ObjectWriterProvider#register registered}
+         * with custom logic (its own {@code write}) is used as-is; a registered plain bean
+         * adapter is rebuilt in alphabetical order like a generated one. Ordering is fixed
+         * at writer construction from the declared field names: a
+         * {@link com.alibaba.fastjson2.filter.NameFilter} that renames fields applies its
+         * renaming afterwards, so renamed keys are not re-sorted.
+         *
+         * <p>By default, this feature is disabled, meaning that bean properties are
+         * written in library-default order: alphabetical, with or without
+         * {@link Feature#FieldBased}, while the {@code fastjson2.writer.alphabetic} global switch
+         * is on (the default). For types annotated {@code @JSONType(alphabetic = false)}, or with
+         * the switch off, the order is the writer creator's discovery order, which is not
+         * guaranteed to be declaration order and can differ between creators.
+         *
+         * @since 2.0.66
+         */
+        SortFieldNamesAlphabetically(1L << 46);
 
         public final long mask;
 

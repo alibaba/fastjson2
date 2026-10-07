@@ -649,7 +649,10 @@ public class ObjectWriterCreator {
 
         handleIgnores(beanInfo, fieldWriters);
 
-        if (beanInfo.alphabetic) {
+        if (beanInfo.alphabetic
+                || ((writerFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
+                        && (writerFeatures & JSONWriter.Feature.BeanToArray.mask) == 0)) {
+            // BeanToArray output order is positional and must never be reordered
             Collections.sort(fieldWriters);
         }
 

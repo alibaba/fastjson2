@@ -4051,7 +4051,12 @@ public class ObjectReaderCreatorASM
                 mw.aload(JSON_READER);
                 gwGetFieldType(classNameType, mw, i, fieldType);
                 mw.visitLdcInsn(fieldReader.fieldName);
+                // the FEATURES slot is the caller's word (0 on a root call); merge only the strict bit of the
+                // field's own word, so @JSONField(deserializeFeatures=ErrorOnDuplicateKeys) travels to item
+                // readers while other field features keep applying to the list alone, as with the reflective creator
+                mw.visitLdcInsn(fieldReader.features & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
                 mw.lload(FEATURES);
+                mw.lor();
                 mw.invokeinterface(
                         TYPE_OBJECT_READER,
                         jsonb ? "readArrayMappingJSONBObject" : "readArrayMappingObject",
@@ -4068,7 +4073,9 @@ public class ObjectReaderCreatorASM
             mw.aload(JSON_READER);
             gwGetFieldType(classNameType, mw, i, fieldType);
             mw.visitLdcInsn(fieldReader.fieldName);
+            mw.visitLdcInsn(fieldReader.features & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
             mw.lload(FEATURES);
+            mw.lor();
             mw.invokeinterface(
                     TYPE_OBJECT_READER,
                     jsonb ? "readJSONBObject" : "readObject",

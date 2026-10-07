@@ -86,44 +86,71 @@ public class FieldWriterList<T>
 
     @Override
     public final ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
+        boolean sortVariant = ObjectWriterProvider.isFieldNamesSorted(this.features | jsonWriter.getFeatures());
+        long resolvedFeatures = this.features | jsonWriter.getFeatures();
+
         if (contentAs != null) {
             ObjectWriter itemObjectWriter = this.itemObjectWriter;
-            if (itemObjectWriter != null) {
+            if (itemObjectWriter != null && (!sortVariant || (format != null && itemClass == Date.class))) {
+                // format-aware Date presets are sort-invariant; other entries may have been stored
+                // by the natural variant when registered variants share this field writer
                 return itemObjectWriter;
             }
-            return this.itemObjectWriter = jsonWriter.getObjectWriter(this.contentAs, contentAs);
+            // resolve with the merged word so a field-level sort request reaches the provider;
+            // only the store is gated, never the resolution
+            ObjectWriter resolved = jsonWriter.getContext().getProvider()
+                    .getObjectWriter(this.contentAs, contentAs, resolvedFeatures);
+            if (sortVariant) {
+                // never store sorted writers in this cross-context field
+                return resolved;
+            }
+            return this.itemObjectWriter = resolved;
         }
+
         if (itemType == null || itemType == this.itemType) {
-            if (itemObjectWriter != null) {
+            ObjectWriter itemObjectWriter = this.itemObjectWriter;
+            if (itemObjectWriter != null && (!sortVariant || (format != null && itemClass == Date.class))) {
+                // constructor presets (e.g. format-aware Date writers) are sort-invariant; other
+                // entries may have been stored by the natural variant sharing this field writer
                 return itemObjectWriter;
             }
-
             if (format != null) {
                 return jsonWriter.getContext()
                         .getProvider()
                         .getObjectWriter(itemType, format, null);
             }
-
-            return itemObjectWriter = jsonWriter
-                    .getObjectWriter(this.itemType, itemClass);
+            if (sortVariant) {
+                return jsonWriter.getContext().getProvider()
+                        .getObjectWriter(this.itemType, itemClass, resolvedFeatures);
+            }
+            return this.itemObjectWriter = jsonWriter.getContext().getProvider()
+                    .getObjectWriter(this.itemType, itemClass, resolvedFeatures);
         }
 
-        return jsonWriter
-                .getObjectWriter(itemType, TypeUtils.getClass(itemType));
+        return jsonWriter.getContext().getProvider()
+                .getObjectWriter(itemType, TypeUtils.getClass(itemType), resolvedFeatures);
     }
 
     @Override
     public final ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+        // constructor-built list writers are sort-invariant and always honoured first
         ObjectWriter listWriter = this.listWriter;
         if (listWriter != null && fieldClass.isAssignableFrom(valueClass)) {
             return listWriter;
         }
 
+        long resolvedFeatures = this.features | jsonWriter.getFeatures();
         if (listWriter == null && valueClass == fieldClass) {
-            return this.listWriter = jsonWriter.getObjectWriter(valueClass);
+            ObjectWriter resolved = jsonWriter.getContext().getProvider()
+                    .getObjectWriter(valueClass, valueClass, resolvedFeatures);
+            if (!ObjectWriterProvider.isFieldNamesSorted(resolvedFeatures)) {
+                this.listWriter = resolved;
+            }
+            return resolved;
         }
 
-        return jsonWriter.getObjectWriter(valueClass);
+        return jsonWriter.getContext().getProvider()
+                .getObjectWriter(valueClass, valueClass, resolvedFeatures);
     }
 
     @Override
@@ -154,11 +181,7 @@ public class FieldWriterList<T>
             ObjectWriter itemObjectWriter;
             if (itemClass != previousClass) {
                 refDetect = jsonWriter.isRefDetect();
-                if (itemClass == this.itemType && this.itemObjectWriter != null) {
-                    previousObjectWriter = this.itemObjectWriter;
-                } else {
-                    previousObjectWriter = getItemWriter(jsonWriter, itemClass);
-                }
+                previousObjectWriter = getItemWriter(jsonWriter, itemClass);
                 previousClass = itemClass;
                 if (refDetect) {
                     if (itemClass == this.itemClass) {
@@ -288,11 +311,7 @@ public class FieldWriterList<T>
             ObjectWriter itemObjectWriter;
             if (itemClass != previousClass) {
                 refDetect = jsonWriter.isRefDetect();
-                if (itemClass == this.itemType && this.itemObjectWriter != null) {
-                    previousObjectWriter = this.itemObjectWriter;
-                } else {
-                    previousObjectWriter = getItemWriter(jsonWriter, itemClass);
-                }
+                previousObjectWriter = getItemWriter(jsonWriter, itemClass);
                 previousClass = itemClass;
                 if (refDetect) {
                     if (itemClass == this.itemClass) {

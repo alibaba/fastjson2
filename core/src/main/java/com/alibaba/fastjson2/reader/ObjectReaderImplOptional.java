@@ -75,7 +75,7 @@ class ObjectReaderImplOptional
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Object value;
         if (itemType == null) {
-            value = jsonReader.readAny();
+            value = jsonReader.readAny((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
         } else {
             if (itemObjectReader == null) {
                 ObjectReader formattedObjectReader = null;
@@ -88,7 +88,7 @@ class ObjectReaderImplOptional
                     itemObjectReader = formattedObjectReader;
                 }
             }
-            value = itemObjectReader.readObject(jsonReader, itemType, fieldName, 0);
+            value = itemObjectReader.readObject(jsonReader, itemType, fieldName, (features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
         }
 
         if (value == null) {

@@ -394,7 +394,10 @@ public class ObjectWriterCreatorASM
         fieldWriters = new ArrayList<>(fieldWriterMap.values());
 
         handleIgnores(beanInfo, fieldWriters);
-        if (beanInfo.alphabetic) {
+        if (beanInfo.alphabetic
+                || (((features | beanInfo.writerFeatures) & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
+                        && ((features | beanInfo.writerFeatures) & JSONWriter.Feature.BeanToArray.mask) == 0)) {
+            // BeanToArray output order is positional and must never be reordered
             try {
                 Collections.sort(fieldWriters);
             } catch (Exception e) {
@@ -4593,8 +4596,14 @@ public class ObjectWriterCreatorASM
         boolean direct = false;
         List<FieldWriter> fieldWriters = null;
         Class<?> itemClass = TypeUtils.getClass(itemType);
-        if (itemClass != null && field != null && field.getDeclaringClass() != itemClass) {
-            ObjectWriter fieldValueWriter = provider.getObjectWriterFromCache(itemType, itemClass, FieldBased.isEnabled(features));
+        // bail under the sort bit as under BeanToArray: direct-JIT list writers bake the natural
+        // field order into JSONB output, which a sorted creation must not ship
+        if (itemClass != null
+                && field != null
+                && field.getDeclaringClass() != itemClass
+                && (features & (JSONWriter.Feature.BeanToArray.mask
+                        | JSONWriter.Feature.SortFieldNamesAlphabetically.mask)) == 0) {
+            ObjectWriter fieldValueWriter = provider.getObjectWriterFromCache(itemType, itemClass, features);
             if (fieldValueWriter == null && itemClass != null) {
                 fieldValueWriter = super.createObjectWriter(itemClass, features, provider);
             }

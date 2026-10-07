@@ -75,6 +75,24 @@ public class FieldWriterObject<T>
 
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+        if (!writeUsing
+                && format == null
+                && !BeanUtils.SUPER.equals(fieldName)
+                && !Map.class.isAssignableFrom(fieldClass)
+                && ObjectWriterProvider.isFieldNamesSorted(this.features | jsonWriter.getFeatures())) {
+            // sorted writers are never stored on the field writer: not in initValueClass/initObjectWriter,
+            // where a writer resolved under one variant would be reused under the other, and not in a
+            // memo of their own, which would keep a value class (and its loader) reachable from the
+            // holder's writer after ObjectWriterProvider#cleanup(ClassLoader);
+            // explicitly configured writers (@JSONField(writeUsing)) are always honored instead,
+            // $super$ pseudo-fields always resolve via getObjectWriterVoid's dedicated branch,
+            // Map-valued fields keep the type-carrying resolution (the untyped provider writer
+            // would drop the declared key/value types and gain a spurious @type under WriteClassName),
+            // and resolution merges field features so positional output never sorts
+            return jsonWriter.getContext().getProvider()
+                    .getObjectWriter(valueClass, valueClass, this.features | jsonWriter.getFeatures());
+        }
+
         final Class initValueClass = this.initValueClass;
         if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
             return getObjectWriterVoid(jsonWriter, valueClass);
@@ -136,9 +154,13 @@ public class FieldWriterObject<T>
         }
 
         if (format == null) {
-            JSONWriter.Context context = jsonWriter.context;
-            boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
-            formattedWriter = context.provider.getObjectWriterFromCache(valueClass, valueClass, fieldBased);
+            formattedWriter = jsonWriter.context.provider.getObjectWriterFromCache(valueClass, valueClass, features | jsonWriter.getFeatures());
+        }
+        if (formattedWriter instanceof ObjectWriterImplMap && Map.class.isAssignableFrom(fieldClass)) {
+            // a Map-valued field keeps its declared key/value types: the shared natural cell for the
+            // runtime Map class is untyped and would silently drop them; a custom registered writer
+            // (not an impl Map) is honored instead via the declared-type resolution below
+            formattedWriter = null;
         }
 
         final DecimalFormat decimalFormat = this.decimalFormat;
@@ -173,13 +195,16 @@ public class FieldWriterObject<T>
         }
 
         if (formattedWriter == null) {
-            boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
-            formattedWriter = jsonWriter.getObjectWriter(valueClass);
-            if (success) {
-                initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
+            formattedWriter = resolveObjectWriter(jsonWriter, valueClass);
+            if (!ObjectWriterProvider.isFieldNamesSorted(features | jsonWriter.getFeatures())) {
+                boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
+                if (success) {
+                    initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
+                }
             }
         } else {
-            if (initObjectWriter == null) {
+            if (initObjectWriter == null
+                    && !ObjectWriterProvider.isFieldNamesSorted(features | jsonWriter.getFeatures())) {
                 boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
                 if (success) {
                     initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
@@ -213,7 +238,7 @@ public class FieldWriterObject<T>
                 objectWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
             }
             if (objectWriter == null) {
-                objectWriter = jsonWriter.getObjectWriter(valueClass);
+                objectWriter = resolveObjectWriter(jsonWriter, valueClass);
             }
             return objectWriter;
         }
@@ -228,10 +253,25 @@ public class FieldWriterObject<T>
                 objectWriter = ObjectWriterImplMap.of(valueClass);
             }
         } else {
-            objectWriter = jsonWriter.getObjectWriter(valueClass);
+            objectWriter = resolveObjectWriter(jsonWriter, valueClass);
         }
-        initObjectWriterUpdater.compareAndSet(this, null, objectWriter);
+        if (!ObjectWriterProvider.isFieldNamesSorted(features | jsonWriter.getFeatures())) {
+            initObjectWriterUpdater.compareAndSet(this, null, objectWriter);
+        }
         return objectWriter;
+    }
+
+    /**
+     * Resolves the value writer outside the sorted gate. A field-level BeanToArray is passed to the
+     * provider so a positional field never takes the sorted variant, also when no natural writer is
+     * cached yet; without it this is {@link JSONWriter#getObjectWriter(Class)}.
+     */
+    final ObjectWriter resolveObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+        if ((features & JSONWriter.Feature.BeanToArray.mask) == 0) {
+            return jsonWriter.getObjectWriter(valueClass);
+        }
+        return jsonWriter.context.provider.getObjectWriter(
+                valueClass, valueClass, jsonWriter.getFeatures() | JSONWriter.Feature.BeanToArray.mask);
     }
 
     @Override
@@ -245,9 +285,12 @@ public class FieldWriterObject<T>
         Class<?> valueClass = e.getClass();
         ObjectWriter valueWriter;
         if (initValueClass == null) {
-            initValueClass = valueClass;
             valueWriter = jsonWriter.getObjectWriter(valueClass);
-            initObjectWriterUpdater.compareAndSet(this, null, valueWriter);
+            if (!ObjectWriterProvider.isFieldNamesSorted(this.features | jsonWriter.getFeatures())) {
+                // the field write and the CAS are skipped as a pair on the sorted variant
+                initValueClass = valueClass;
+                initObjectWriterUpdater.compareAndSet(this, null, valueWriter);
+            }
         } else {
             if (initValueClass == valueClass) {
                 valueWriter = initObjectWriter;
@@ -480,9 +523,12 @@ public class FieldWriterObject<T>
         Class<?> valueClass = value.getClass();
         ObjectWriter valueWriter;
         if (initValueClass == null) {
-            initValueClass = valueClass;
             valueWriter = jsonWriter.getObjectWriter(valueClass);
-            initObjectWriterUpdater.compareAndSet(this, null, valueWriter);
+            if (!ObjectWriterProvider.isFieldNamesSorted(this.features | jsonWriter.getFeatures())) {
+                // the field write and the CAS are skipped as a pair on the sorted variant
+                initValueClass = valueClass;
+                initObjectWriterUpdater.compareAndSet(this, null, valueWriter);
+            }
         } else {
             if (initValueClass == valueClass) {
                 valueWriter = initObjectWriter;

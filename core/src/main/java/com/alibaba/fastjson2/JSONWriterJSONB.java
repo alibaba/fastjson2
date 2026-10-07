@@ -63,10 +63,8 @@ final class JSONWriterJSONB
             return;
         }
 
-        boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
-
         Class<?> valueClass = value.getClass();
-        ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+        ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, context.features);
 
         if (isBeanToArray()) {
             objectWriter.writeArrayMappingJSONB(this, value, null, null, 0);
