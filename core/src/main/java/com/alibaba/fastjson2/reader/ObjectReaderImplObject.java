@@ -106,16 +106,17 @@ public final class ObjectReaderImplObject
             }
 
             if (typeName != null) {
+                if (seenKeys != null) {
+                    // register the discriminator where it is consumed, whichever arm handles it;
+                    // the ImmutableCollections arms deliberately never store it in the map
+                    seenKeys.add("@type");
+                }
                 switch (typeName) {
                     case "java.util.ImmutableCollections$Map1":
                     case "java.util.ImmutableCollections$MapN":
                         break;
                     default:
                         object.put("@type", typeName);
-                        if (seenKeys != null) {
-                            // register the discriminator where it is consumed, without storing it twice
-                            seenKeys.add("@type");
-                        }
                         break;
                 }
                 hash = 0;

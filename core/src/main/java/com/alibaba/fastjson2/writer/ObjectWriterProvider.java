@@ -776,9 +776,9 @@ public class ObjectWriterProvider
                 if (objectWriter == null) {
                     objectWriter = cacheOf(false, fieldNamesSorted).get(objectType);
                 }
-                if (objectWriter == null && !fieldNamesSorted) {
-                    // only the natural variant degrades; a sorted request lets the creator build
-                    // the field-based sorted writer for the proxy target, like the non-proxy path
+                if (objectWriter == null) {
+                    // proxies degrade to method-based discovery on both axes, so the natural and
+                    // sorted cells never hold writers with different property sets for one target
                     fieldBased = false;
                 }
             } else {

@@ -214,10 +214,13 @@ public class JSONObject
                     && decimal.compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) <= 0;
         }
         if (value instanceof Number) {
-            // any other integral Number (AtomicInteger, AtomicLong, LongAdder, custom types):
-            // answered from the same conversion getIntValue would use
-            long v = ((Number) value).longValue();
-            return v >= Integer.MIN_VALUE && v <= Integer.MAX_VALUE;
+            // any other Number (AtomicInteger, AtomicLong, LongAdder, DoubleAdder, custom types):
+            // answered from the same conversion getIntValue would use, with the same fractional
+            // tolerance the Double/BigDecimal branches have; NaN and out-of-range values false
+            Number number = (Number) value;
+            double d = number.doubleValue();
+            return Math.abs(number.longValue() - d) < 1
+                    && d >= -2147483648.0 && d <= 2147483647.0;
         }
         return false;
     }
@@ -244,8 +247,11 @@ public class JSONObject
         }
         if (value instanceof Double || value instanceof Float) {
             double v = ((Number) value).doubleValue();
+            // the upper bound is exclusive: 9.223372036854776E18 is exactly 2^63, one greater
+            // than Long.MAX_VALUE, and would read back as Long.MAX_VALUE; the lower bound is
+            // inclusive because -2^63 is exactly (double) Long.MIN_VALUE
             return !Double.isNaN(v) && !Double.isInfinite(v)
-                    && v >= -9.223372036854776E18 && v <= 9.223372036854776E18;
+                    && v >= -9.223372036854776E18 && v < 9.223372036854776E18;
         }
         if (value instanceof BigDecimal) {
             BigDecimal decimal = (BigDecimal) value;
@@ -253,12 +259,18 @@ public class JSONObject
                     && decimal.compareTo(BigDecimal.valueOf(Long.MAX_VALUE)) <= 0;
         }
         if (value instanceof Number) {
-            // any other Number (AtomicInteger, AtomicLong, LongAdder, DoubleAdder, custom types):
-            // answered from the same conversion getLongValue would use. It is convertible when
-            // longValue() is the truncated value, so a fraction counts as for Double, while a
-            // wrapped, out-of-range or NaN value answers false
+            // floating accumulators convert by truncation, as for Double/Float/BigDecimal, but
+            // an accumulator at exactly 2^63 has longValue() clamped to Long.MAX_VALUE while the
+            // truncation diff still reads 0, so the top of the domain is rejected explicitly.
+            // Integral accumulators and custom Number types answer true: longValue() is exactly
+            // what getLongValue reads back
             Number number = (Number) value;
-            return Math.abs(number.longValue() - number.doubleValue()) < 1;
+            if (number instanceof java.util.concurrent.atomic.DoubleAdder
+                    || number instanceof java.util.concurrent.atomic.DoubleAccumulator) {
+                double d = number.doubleValue();
+                return Math.abs(number.longValue() - d) < 1 && d < 9.223372036854776E18;
+            }
+            return true;
         }
         return false;
     }

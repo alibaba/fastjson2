@@ -222,6 +222,9 @@ public final class ObjectWriterImplMap
         Class itemClass = null;
         ObjectWriter itemWriter = null;
         boolean contextRefDetect = (contextFeatures & JSONWriter.Feature.ReferenceDetection.mask) != 0;
+        // the mutating save/restore pairs below must restore the CONTEXT's own bit: the merged
+        // word alone would turn a field-level bit into a permanent change on the caller's context
+        boolean contextOnlyRefDetect = (context.getFeatures() & JSONWriter.Feature.ReferenceDetection.mask) != 0;
 
         int i = 0;
         for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ++i) {
@@ -287,7 +290,7 @@ public final class ObjectWriterImplMap
                 Class<?> entryKeyClass = entryKey.getClass();
                 ObjectWriter keyWriter = provider.getObjectWriter(entryKeyClass, entryKeyClass, contextFeatures);
                 keyWriter.writeJSONB(jsonWriter, entryKey, null, null, 0);
-                if (contextRefDetect) {
+                if (contextOnlyRefDetect) {
                     jsonWriter.config(JSONWriter.Feature.ReferenceDetection, true);
                 }
             }
@@ -384,7 +387,9 @@ public final class ObjectWriterImplMap
             valueWriter.writeJSONB(jsonWriter, value, entryKey, fieldValueType, contextFeatures);
 
             if (valueRefDetecChanged) {
-                jsonWriter.config(JSONWriter.Feature.ReferenceDetection, true);
+                if (contextOnlyRefDetect) {
+                    jsonWriter.config(JSONWriter.Feature.ReferenceDetection, true);
+                }
             } else {
                 if (valueRefDetect) {
                     jsonWriter.popPath(value);
@@ -445,6 +450,10 @@ public final class ObjectWriterImplMap
         return str;
     }
 
+    // bean keys currently being rendered as sorted blobs on this thread; a key that reaches back
+    // into the graph it keys renders again through a fresh writer, so the guard must span writers
+    private static final ThreadLocal<IdentityHashMap<Object, Object>> MAP_KEY_RENDERING = new ThreadLocal<>();
+
     String writeMapKey(Object key, JSONWriter jsonWriter, long features) {
         String strKey = null;
         if (key == null) {
@@ -463,11 +472,43 @@ public final class ObjectWriterImplMap
                         & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
                     jsonWriter.writeNameAny(key);
                 } else {
-                    // bean keys under the sort feature resolve with the merged word, so a
-                    // field-level sort request reaches the key's own fields. The rendered blob is
-                    // not a name any reader resolves, so do NOT keep it in strKey: a $ref built
-                    // from the blob loses its value on the round trip
-                    jsonWriter.writeName(mapKeyToString(key, jsonWriter, features));
+                    // bean and container keys render as sorted blobs: their bean contents are
+                    // what the feature sorts. Scalar keys keep the natural spelling, so an
+                    // ordering feature changes no BigDecimal/Boolean/Date spellings, and a
+                    // registered writer's spelling is never replaced by a blob either
+                    Class<?> keyClass = key.getClass();
+                    ObjectWriter keyObjectWriter = jsonWriter.context.provider.getObjectWriter(keyClass, keyClass,
+                            (jsonWriter.getFeatures() | this.features | features));
+                    if (!(keyObjectWriter instanceof ObjectWriterAdapter)
+                            && !(keyObjectWriter instanceof ObjectWriterImplList)
+                            && !(keyObjectWriter instanceof ObjectWriterImplMap)) {
+                        jsonWriter.writeNameAny(key);
+                        return null;
+                    }
+                    IdentityHashMap<Object, Object> rendering = MAP_KEY_RENDERING.get();
+                    if (rendering != null && rendering.containsKey(key)) {
+                        // a key already being rendered reached back into the graph it keys; the
+                        // natural spelling terminates inside this document's reference state
+                        jsonWriter.writeNameAny(key);
+                        return null;
+                    }
+                    if (rendering == null) {
+                        rendering = new IdentityHashMap<>(4);
+                        MAP_KEY_RENDERING.set(rendering);
+                    }
+                    rendering.put(key, key);
+                    try {
+                        // bean keys under the sort feature resolve with the merged word, so a
+                        // field-level sort request reaches the key's own fields. The rendered blob
+                        // is not a name any reader resolves, so NOT kept in strKey: a $ref built
+                        // from the blob loses its value on the round trip
+                        jsonWriter.writeName(mapKeyToString(key, jsonWriter, features));
+                    } finally {
+                        rendering.remove(key);
+                        if (rendering.isEmpty()) {
+                            MAP_KEY_RENDERING.remove();
+                        }
+                    }
                 }
             }
         }
@@ -587,9 +628,10 @@ public final class ObjectWriterImplMap
                         && (features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
                     valueWriter = this.valueWriter;
                 } else if ((features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
-                    // sorted variant must not be cached in valueWriter
+                    // sorted variant must not be cached in valueWriter; the format arm resolves
+                    // with the same merged word so a field-level sort is not dropped
                     valueWriter = format != null
-                            ? jsonWriter.getObjectWriter(valueClass, format)
+                            ? provider.getObjectWriter(valueClass, valueClass, format, features)
                             : provider.getObjectWriter(valueClass, valueClass, features);
                 } else {
                     valueWriter = this.valueWriter = format != null

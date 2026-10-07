@@ -395,7 +395,7 @@ public class ObjectWriterCreatorASM
 
         handleIgnores(beanInfo, fieldWriters);
         if (beanInfo.alphabetic
-                || ((features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
+                || (((features | beanInfo.writerFeatures) & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
                         && ((features | beanInfo.writerFeatures) & JSONWriter.Feature.BeanToArray.mask) == 0)) {
             // BeanToArray output order is positional and must never be reordered
             try {

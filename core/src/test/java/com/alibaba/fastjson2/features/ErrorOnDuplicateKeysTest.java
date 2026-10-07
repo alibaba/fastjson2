@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -368,6 +369,35 @@ public class ErrorOnDuplicateKeysTest {
         Map<?, ?> data = (Map<?, ?>) ok.data;
         assertEquals("a.B", data.get("@type"));
         assertEquals(1, data.get("n"));
+    }
+
+    @Test
+    public void duplicatedTypeDiscriminatorRejectedThroughSwitchArms() {
+        // the ImmutableCollections switch arms consume the discriminator without storing it;
+        // the duplicate registration must still happen there, not only in the default arm
+        String[] firstTypes = {
+                "java.util.ImmutableCollections$Map1",
+                "java.util.ImmutableCollections$MapN",
+                "a.B"
+        };
+        for (String first : firstTypes) {
+            JSONException error = assertThrows(JSONException.class,
+                    () -> JSON.parseObject(
+                            "{\"data\":{\"@type\":\"" + first + "\",\"@type\":\"c.D\"}}",
+                            ObjBox.class,
+                            JSONReader.Feature.ErrorOnDuplicateKeys),
+                    first);
+            assertDuplicateKeyMessage(error, "@type");
+        }
+
+        // a single ImmutableCollections discriminator is not a duplicate and is not stored
+        ObjBox ok = JSON.parseObject(
+                "{\"data\":{\"@type\":\"java.util.ImmutableCollections$Map1\",\"n\":1}}",
+                ObjBox.class,
+                JSONReader.Feature.ErrorOnDuplicateKeys);
+        Map<?, ?> data = (Map<?, ?>) ok.data;
+        assertEquals(1, data.get("n"));
+        assertFalse(data.containsKey("@type"));
     }
 
     @Test

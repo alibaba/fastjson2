@@ -785,7 +785,13 @@ public class ObjectWriterAdapter<T>
                 }
             }
             if (fieldWriter instanceof FieldWriterObject && fieldValue != null && !(fieldValue instanceof Map)) {
-                ObjectWriter valueWriter = fieldWriter.getInitWriter();
+                // the init memo only ever holds a natural writer: trust it only when no variant
+                // bit can select a different variant, otherwise resolve with the full merged word
+                long variantBits = (this.features | features | fieldFeatures)
+                        & (JSONWriter.Feature.SortFieldNamesAlphabetically.mask
+                                | JSONWriter.Feature.BeanToArray.mask
+                                | JSONWriter.Feature.FieldBased.mask);
+                ObjectWriter valueWriter = variantBits == 0 ? fieldWriter.getInitWriter() : null;
                 if (valueWriter == null) {
                     valueWriter = JSONFactory.getObjectWriter(fieldWriter.fieldType,
                             this.features | features | fieldFeatures);

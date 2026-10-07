@@ -203,6 +203,11 @@ public class TreeModelTest {
         map.put("underMinLongByFraction", new BigDecimal("-9223372036854775808.1"));
         map.put("hugeExponent", new BigDecimal("1e2147483647"));
         map.put("tinyExponent", new BigDecimal("1e-2147483647"));
+        // 2^63 as a double is one greater than Long.MAX_VALUE: not convertible, while the
+        // greatest double below it truncates into range (the lower bound -2^63 stays inclusive)
+        map.put("maxLongPlusOneD", 9.223372036854776E18);
+        map.put("maxLongPlusOneF", 9.223372E18f);
+        map.put("maxLongBelowD", 9223372036854774784.0);
         JSONObject object = new JSONObject(map);
         assertTrue(object.canConvertToInt("maxInt"));
         assertFalse(object.canConvertToInt("overInt"));
@@ -234,6 +239,9 @@ public class TreeModelTest {
         assertFalse(object.canConvertToLong("hugeExponent"));
         assertTrue(object.canConvertToInt("tinyExponent"));
         assertTrue(object.canConvertToLong("tinyExponent"));
+        assertFalse(object.canConvertToLong("maxLongPlusOneD"));
+        assertFalse(object.canConvertToLong("maxLongPlusOneF"));
+        assertTrue(object.canConvertToLong("maxLongBelowD"));
     }
 
     @Test
@@ -290,6 +298,16 @@ public class TreeModelTest {
         nan.add(Double.NaN);
         wrapped.put("nan", nan);
         assertFalse(wrapped.canConvertToLong("nan"));
+        assertFalse(wrapped.canConvertToInt("nan"));
+
+        // an accumulator holding exactly 2^63 saturates longValue() to Long.MAX_VALUE while
+        // doubleValue() reads the same 2^63: still not convertible (the guard-then-read idiom
+        // would otherwise read Long.MAX_VALUE back), and a fraction truncates on the int side too
+        java.util.concurrent.atomic.DoubleAdder maxLongEdge = new java.util.concurrent.atomic.DoubleAdder();
+        maxLongEdge.add(9223372036854775807.0);
+        wrapped.put("maxLongEdgeAcc", maxLongEdge);
+        assertFalse(wrapped.canConvertToLong("maxLongEdgeAcc"));
+        assertTrue(wrapped.canConvertToInt("fraction"));
     }
 
     @com.alibaba.fastjson2.annotation.JSONType(alphabetic = false)

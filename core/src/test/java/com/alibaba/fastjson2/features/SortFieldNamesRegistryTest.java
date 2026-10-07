@@ -316,6 +316,19 @@ public class SortFieldNamesRegistryTest {
                 JSON.toJSONString(bean, JSONWriter.Feature.SortFieldNamesAlphabetically));
     }
 
+    public static class FormatAndSortedMapHolder {
+        @JSONField(format = "yyyy-MM-dd", serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public java.util.Map<String, Natural> map = new java.util.LinkedHashMap<>(
+                java.util.Collections.singletonMap("k", new Natural()));
+    }
+
+    @Test
+    public void mapFieldWithFormatKeepsTheFieldLevelSort() {
+        // a format attribute on a map field must not switch the field-level sort off: the format
+        // arm of the sorted value-writer branch resolves with the merged word, format included
+        assertEquals("{\"map\":{\"k\":{\"alpha\":2,\"zeta\":1}}}", JSON.toJSONString(new FormatAndSortedMapHolder()));
+    }
+
     @Test
     public void cleanupClassLoaderReleasesLoader() throws Exception {
         ClassLoader parent = SortFieldNamesRegistryTest.class.getClassLoader();
@@ -477,37 +490,47 @@ public class SortFieldNamesRegistryTest {
         assertTrue(proxyJSON.contains("\"name\":\"n\""), proxyJSON);
     }
 
+    public static class Mixed {
+        private String secret = "S";
+
+        public String getZulu() {
+            return "z";
+        }
+
+        public String getApple() {
+            return "a";
+        }
+    }
+
+    public static class Mixed$$EnhancerBySpringCGLIB$$1
+            extends Mixed {
+    }
+
     @Test
     public void fieldBasedSortedProxyKeepsFields() {
-        // FB+SORT on a CGLIB-shaped proxy previously hit the getter-based degrade and dropped
-        // every field without a getter; the sorted request must build the field-based variant
+        // a proxy degrades to method-based discovery on both axes, so the natural and sorted
+        // cells never disagree on the property set
         ObjectWriterProvider provider = new ObjectWriterProvider();
-        JSONWriter.Context sorted = new JSONWriter.Context(provider,
-                JSONWriter.Feature.FieldBased, JSONWriter.Feature.SortFieldNamesAlphabetically);
-        Inner proxy = new Inner$$EnhancerBySpringCGLIB$$abcdef();
-        String proxySorted = JSON.toJSONString(proxy, sorted);
-        assertTrue(proxySorted.contains("hidden"), proxySorted);
-        assertTrue(proxySorted.contains("\"name\":\"n\""), proxySorted);
-    }
-
-    @com.alibaba.fastjson2.annotation.JSONType(alphabetic = false)
-    public static class AlphaInner {
-        private int zulu = 9;
-        private int apple = 1;
-    }
-
-    public static class AlphaInner$$EnhancerBySpringCGLIB$$uvwxyz
-            extends AlphaInner {
+        Mixed proxy = new Mixed$$EnhancerBySpringCGLIB$$1();
+        String fb = JSON.toJSONString(proxy, new JSONWriter.Context(provider, JSONWriter.Feature.FieldBased));
+        String fbSorted = JSON.toJSONString(proxy, new JSONWriter.Context(provider,
+                JSONWriter.Feature.FieldBased, JSONWriter.Feature.SortFieldNamesAlphabetically));
+        assertEquals("{\"apple\":\"a\",\"zulu\":\"z\"}", fb);
+        assertEquals(fb, fbSorted);
     }
 
     @Test
     public void fieldBasedSortedProxyWritesSortedFields() {
-        // the proxy target must get a field-based sorted writer, complete and ordered
+        // cold provider, no warm-up: the sorted cell is built from the same degraded discovery
+        // as the natural cell, so a getterless proxy target answers the same empty property set
+        // on both axes instead of leaking its declared fields into one of them
         ObjectWriterProvider provider = new ObjectWriterProvider();
-        JSONWriter.Context sorted = new JSONWriter.Context(provider,
-                JSONWriter.Feature.FieldBased, JSONWriter.Feature.SortFieldNamesAlphabetically);
-        AlphaInner proxy = new AlphaInner$$EnhancerBySpringCGLIB$$uvwxyz();
-        assertEquals("{\"apple\":1,\"zulu\":9}", JSON.toJSONString(proxy, sorted));
+        Inner proxy = new Inner$$EnhancerBySpringCGLIB$$abcdef();
+        String fb = JSON.toJSONString(proxy, new JSONWriter.Context(provider, JSONWriter.Feature.FieldBased));
+        String fbSorted = JSON.toJSONString(proxy, new JSONWriter.Context(provider,
+                JSONWriter.Feature.FieldBased, JSONWriter.Feature.SortFieldNamesAlphabetically));
+        assertEquals("{}", fb);
+        assertEquals("{}", fbSorted);
     }
 
     public static class Filtered {
@@ -768,6 +791,72 @@ public class SortFieldNamesRegistryTest {
                 }
                 byte[] jsonb = JSONB.toBytes(new SortedPositions(), new JSONWriter.Context(provider, JSONWriter.Feature.BeanToArray));
                 assertEquals("[[[7,1]]]", JSON.toJSONString(JSONB.parse(jsonb)), warm ? "warm" : "cold");
+            }
+        } finally {
+            JSONFactory.setContextWriterCreator(contextCreator);
+        }
+    }
+
+    @JSONType(alphabetic = false, serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+    public static class TypeLevelSorted {
+        public int zulu = 9;
+        public int apple = 1;
+    }
+
+    @Test
+    public void typeLevelSortAnnotationOrdersOwnFields() {
+        // the type-level annotation is the only sort source available where the global switch is
+        // off: its writerFeatures word must reach the creation-time sort gate with either creator
+        ObjectWriterCreator contextCreator = JSONFactory.getContextWriterCreator();
+        JSONFactory.setContextWriterCreator(null);
+        try {
+            for (ObjectWriterCreator creator : new ObjectWriterCreator[]{ObjectWriterCreatorASM.INSTANCE, ObjectWriterCreator.INSTANCE}) {
+                ObjectWriterProvider provider = new ObjectWriterProvider(creator);
+                assertEquals("{\"apple\":1,\"zulu\":9}",
+                        JSON.toJSONString(new TypeLevelSorted(), new JSONWriter.Context(provider)),
+                        creator.getClass().getSimpleName());
+            }
+        } finally {
+            JSONFactory.setContextWriterCreator(contextCreator);
+        }
+    }
+
+    @JSONType(alphabetic = false)
+    public static class TreeInner {
+        public int zeta = 1;
+        public int alpha = 2;
+    }
+
+    @JSONType(alphabetic = false)
+    public static class TreeOuter {
+        public int zulu = 9;
+        public TreeInner inner = new TreeInner();
+    }
+
+    @Test
+    public void sortedTreeConversionDoesNotReuseThePrimedNaturalFieldWriter() {
+        // the variants of a registered adapter share FieldWriter instances; a natural write primes
+        // the shared memo with the natural writer, and a sorted tree conversion afterwards must
+        // still resolve the sorted variant for the nested bean instead of trusting the memo
+        ObjectWriterCreator contextCreator = JSONFactory.getContextWriterCreator();
+        JSONFactory.setContextWriterCreator(null);
+        try {
+            for (ObjectWriterCreator creator : new ObjectWriterCreator[]{ObjectWriterCreatorASM.INSTANCE, ObjectWriterCreator.INSTANCE}) {
+                ObjectWriterProvider factory = new ObjectWriterProvider(creator);
+                JSON.register(TreeOuter.class, factory.getObjectWriter(TreeOuter.class));
+                try {
+                    TreeOuter outer = new TreeOuter();
+                    JSON.toJSONString(outer);
+                    com.alibaba.fastjson2.JSONObject tree = com.alibaba.fastjson2.JSONObject.from(outer,
+                            JSONWriter.Feature.SortFieldNamesAlphabetically);
+                    assertEquals(new java.util.ArrayList<>(java.util.Arrays.asList("inner", "zulu")),
+                            new java.util.ArrayList<>(tree.keySet()), creator.getClass().getSimpleName());
+                    com.alibaba.fastjson2.JSONObject nested = tree.getJSONObject("inner");
+                    assertEquals(new java.util.ArrayList<>(java.util.Arrays.asList("alpha", "zeta")),
+                            new java.util.ArrayList<>(nested.keySet()), creator.getClass().getSimpleName());
+                } finally {
+                    JSONFactory.getDefaultObjectWriterProvider().unregister(TreeOuter.class);
+                }
             }
         } finally {
             JSONFactory.setContextWriterCreator(contextCreator);
