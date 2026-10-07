@@ -21,6 +21,7 @@ public class JDKUtils {
     public static final long ARRAY_CHAR_BASE_OFFSET;
 
     public static final int JVM_VERSION;
+    public static final boolean AARCH64_JDK8;
     public static final Byte LATIN1 = 0;
     public static final Byte UTF16 = 1;
 
@@ -87,8 +88,10 @@ public class JDKUtils {
         }
 
         int jvmVersion = -1, android_sdk_int = -1;
+        String osArch = null;
         boolean openj9 = false, android = false, graal = false;
         try {
+            osArch = System.getProperty("os.arch");
             String jvmName = System.getProperty("java.vm.name");
             if (jvmName != null) {
                 openj9 = jvmName.contains("OpenJ9");
@@ -145,6 +148,9 @@ public class JDKUtils {
         CLASS_TRANSIENT = transientClass;
 
         JVM_VERSION = jvmVersion;
+        AARCH64_JDK8 = JVM_VERSION == 8
+                && ("aarch64".equals(osArch) || "arm64".equals(osArch))
+                && !ANDROID && !GRAAL && !OPENJ9;
 
         if (JVM_VERSION == 8) {
             Field field = null;
