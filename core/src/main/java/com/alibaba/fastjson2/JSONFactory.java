@@ -16,6 +16,7 @@ import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -97,6 +98,21 @@ public final class JSONFactory {
     static int defaultDecimalMaxScale = 2048;
     static int defaultMaxLevel;
     public static final PropertyAccessorFactory PROPERTY_ACCESSOR_FACTORY;
+
+    static int checkDecimalScale(int scale) {
+        if (scale < -defaultDecimalMaxScale || scale > defaultDecimalMaxScale) {
+            throw new JSONException("scale overflow : " + scale);
+        }
+        return scale;
+    }
+
+    static BigDecimal checkDecimalScale(BigDecimal decimal) {
+        if (decimal == null) {
+            return null;
+        }
+        checkDecimalScale(decimal.scale());
+        return decimal;
+    }
 
     interface JSONReaderUTF8Creator {
         JSONReader create(JSONReader.Context ctx, String str, byte[] bytes, int offset, int length);

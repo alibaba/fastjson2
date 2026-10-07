@@ -4560,9 +4560,7 @@ public abstract class JSONReader
                 if (hasExponent) {
                     return toBigDecimal(stringValue);
                 } else if (scale > 0) {
-                    if (scale > defaultDecimalMaxScale) {
-                        throw new JSONException("scale overflow : " + scale);
-                    }
+                    checkDecimalScale(scale);
                     return toBigDecimal(stringValue);
                 } else {
                     return new BigInteger(stringValue);

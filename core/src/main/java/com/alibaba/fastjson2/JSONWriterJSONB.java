@@ -1433,7 +1433,7 @@ final class JSONWriterJSONB
         }
 
         int precision = value.precision();
-        int scale = value.scale();
+        int scale = checkDecimalScale(value.scale());
 
         int off = this.off;
         byte[] bytes = this.bytes;
