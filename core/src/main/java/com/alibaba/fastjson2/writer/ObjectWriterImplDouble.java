@@ -62,7 +62,8 @@ final class ObjectWriterImplDouble
         if ((features2 & JSONWriter.Feature.WriteClassName.mask) != 0
                 && (features2 & JSONWriter.Feature.WriteNonStringKeyAsString.mask) == 0
                 && (features2 & JSONWriter.Feature.NotWriteNumberClassName.mask) == 0
-                && fieldType != Double.class && fieldType != double.class) {
+                && fieldType != Double.class && fieldType != double.class
+                && Double.isFinite(value)) {
             jsonWriter.writeRaw('D');
         }
     }
