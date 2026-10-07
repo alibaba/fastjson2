@@ -3830,7 +3830,7 @@ final class JSONReaderUTF16
             boolean endOfComment = false;
             if (multi) {
                 if (ch == '*'
-                        && offset <= end && chars[offset] == '/') {
+                        && offset < end && chars[offset] == '/') {
                     offset++;
                     endOfComment = true;
                 }
