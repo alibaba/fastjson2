@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.reader.ValueConsumer;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -1066,6 +1067,64 @@ public class JSONReaderTest {
         Map map = new HashMap();
         jsonReader.read(map, Long.class, BigDecimal.class, 0L);
         assertEquals(new BigDecimal("456"), map.get(123L));
+    }
+
+    @Test
+    public void readMap_jsonb_stringKey() {
+        Map<String, String> src = new LinkedHashMap<>();
+        src.put("a", "1");
+        src.put("b", "2");
+        byte[] bytes = JSONB.toBytes(src);
+
+        JSONReader jsonReader = JSONReader.ofJSONB(bytes);
+        Map map = new HashMap();
+        jsonReader.read(map, String.class, String.class, 0L);
+        assertEquals("1", map.get("a"));
+        assertEquals("2", map.get("b"));
+    }
+
+    @Test
+    public void readMap_jsonb_nonStringKey() {
+        Map<Long, String> src = new LinkedHashMap<>();
+        src.put(123L, "456");
+        src.put(234L, "567");
+        byte[] bytes = JSONB.toBytes(src);
+
+        JSONReader jsonReader = JSONReader.ofJSONB(bytes);
+        Map map = new HashMap();
+        jsonReader.read(map, Long.class, String.class, 0L);
+        assertEquals("456", map.get(123L));
+        assertEquals("567", map.get(234L));
+    }
+
+    @Test
+    public void readMap_jsonb_parameterizedValueType() {
+        Map<Long, Map<String, Integer>> src = new LinkedHashMap<>();
+        src.put(123L, Collections.singletonMap("a", 1));
+        src.put(234L, Collections.singletonMap("b", 2));
+        byte[] bytes = JSONB.toBytes(src);
+
+        Type valueType = new ParameterizedTypeImpl(new Type[]{String.class, Integer.class}, null, Map.class);
+
+        JSONReader jsonReader = JSONReader.ofJSONB(bytes);
+        Map map = new HashMap();
+        jsonReader.read(map, Long.class, valueType, 0L);
+        assertEquals(Collections.singletonMap("a", 1), map.get(123L));
+        assertEquals(Collections.singletonMap("b", 2), map.get(234L));
+    }
+
+    @Test
+    public void readMap_jsonb_nullKey_autoType() {
+        Map<Long, String> src = new HashMap<>();
+        src.put(null, "456");
+        byte[] bytes = JSONB.toBytes(src,
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName);
+
+        JSONReader jsonReader = JSONReader.ofJSONB(bytes);
+        Map map = new HashMap();
+        jsonReader.read(map, Long.class, String.class, JSONReader.Feature.SupportAutoType.mask);
+        assertEquals("456", map.get(null));
     }
 
     @Test

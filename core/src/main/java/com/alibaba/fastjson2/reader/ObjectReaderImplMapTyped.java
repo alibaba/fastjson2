@@ -193,6 +193,9 @@ class ObjectReaderImplMapTyped
             Object name;
             if (keyType == String.class || jsonReader.isString()) {
                 name = jsonReader.readFieldName();
+                if (keyType != null && keyType != String.class) {
+                    name = TypeUtils.cast(name, keyType);
+                }
             } else {
                 if (jsonReader.isReference()) {
                     String reference = jsonReader.readReference();
@@ -263,6 +266,10 @@ class ObjectReaderImplMapTyped
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.jsonb) {
+            return readJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
         int index = 0;
         if (!jsonReader.nextIfObjectStart()) {
             if (jsonReader.isTypeRedirect()) {

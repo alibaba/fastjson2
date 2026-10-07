@@ -3639,7 +3639,7 @@ public abstract class JSONReader
         Set<String> seenKeys = (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 ? new HashSet<>() : null;
 
         for (int i = 0; ; ++i) {
-            if (ch == '/') {
+            if (!jsonb && ch == '/') {
                 skipComment();
             }
 
@@ -3647,7 +3647,7 @@ public abstract class JSONReader
                 break;
             }
 
-            if (i != 0 && !comma) {
+            if (!jsonb && i != 0 && !comma) {
                 throw new JSONException(info());
             }
 
@@ -3657,7 +3657,9 @@ public abstract class JSONReader
                 name = readFieldName();
             } else {
                 name = keyReader.readObject(this, null, null, 0L);
-                nextIfMatch(':');
+                if (!jsonb) {
+                    nextIfMatch(':');
+                }
             }
 
             if (seenKeys != null
@@ -3673,7 +3675,7 @@ public abstract class JSONReader
             }
 
             if ((contextFeatures & Feature.SupportAutoType.mask) != 0
-                    && name.equals("@type")
+                    && "@type".equals(name)
                     && object.getClass().getName().equals(value)
             ) {
                 continue;
@@ -3693,7 +3695,9 @@ public abstract class JSONReader
             }
         }
 
-        nextIfComma();
+        if (!jsonb) {
+            nextIfComma();
+        }
     }
 
     public <T> T read(Class<T> type) {
