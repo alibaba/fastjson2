@@ -183,7 +183,7 @@ public class FastJsonHttpMessageConverter
         final long contentLength = inputMessage.getHeaders().getContentLength(); // -1 表示未知
         try {
             final byte[] body = fastRead(inputMessage.getBody(), contentLength);
-            return JSON.parseObject(body, type, config.readerContext());
+            return JSON.parseObject(body, type, config.getReaderContext());
         } catch (JSONException ex) {
             throw new HttpMessageNotReadableException("JSON parse error: " + ex.getMessage(), ex, inputMessage);
         } catch (IOException ex) {
@@ -211,7 +211,7 @@ public class FastJsonHttpMessageConverter
                 }
 
                 contentLength = JSON.writeTo(
-                        baos, object, config.writerContext()
+                        baos, object, config.getWriterContext()
                 );
             }
 
