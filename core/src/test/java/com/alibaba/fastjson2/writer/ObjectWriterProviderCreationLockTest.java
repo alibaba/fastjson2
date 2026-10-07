@@ -86,6 +86,8 @@ public class ObjectWriterProviderCreationLockTest {
         a.join(10_000);
         b.join(10_000);
         assertFalse(a.isAlive() || b.isAlive(), "writer creation and a serializing class initializer deadlocked");
+        // both threads actually did the work: reading this field also surfaces a failed initializer
+        org.junit.jupiter.api.Assertions.assertEquals("{\"name\":\"meta\"}", Registry.DESCRIPTION);
     }
 
     public static class Meta2 {
@@ -132,5 +134,7 @@ public class ObjectWriterProviderCreationLockTest {
         a.join(10_000);
         b.join(10_000);
         assertFalse(a.isAlive() || b.isAlive(), "writer creation and a serializing enum initializer deadlocked");
+        // both threads actually did the work: reading this field also surfaces a failed initializer
+        org.junit.jupiter.api.Assertions.assertEquals("{\"name\":\"meta2\"}", Color.DESCRIPTION);
     }
 }

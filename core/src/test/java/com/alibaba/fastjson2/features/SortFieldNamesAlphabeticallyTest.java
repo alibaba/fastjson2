@@ -48,22 +48,23 @@ public class SortFieldNamesAlphabeticallyTest {
 
     @Test
     public void sortByWireName() {
-        assertEquals("{\"alpha\":5,\"b\":1,\"z\":0}",
+        // the sort key is the WIRE name: member names order alpha, beta, omega, zebraWire
+        // ({alpha,b,z,a} on the wire) while the wire names order a, alpha, b, z
+        assertEquals("{\"a\":4,\"alpha\":5,\"b\":1,\"z\":0}",
                 JSON.toJSONString(new Renamed(), JSONWriter.Feature.SortFieldNamesAlphabetically));
+        // unsorted output keeps declaration order, so the discriminating orders stay observable
+        assertEquals("{\"z\":0,\"alpha\":5,\"b\":1,\"a\":4}", JSON.toJSONString(new Renamed()));
     }
 
+    @JSONType(alphabetic = false)
     public static class Renamed {
-        public int alpha = 5;
-
         @JSONField(name = "z")
-        public int omega() {
-            return 0;
-        }
-
+        public int omega;
+        public int alpha = 5;
         @JSONField(name = "b")
-        public int beta() {
-            return 1;
-        }
+        public int beta = 1;
+        @JSONField(name = "a")
+        public int zebraWire = 4;
     }
 
     @JSONType(alphabetic = false)
@@ -245,11 +246,24 @@ public class SortFieldNamesAlphabeticallyTest {
 
         int byKeyAt = json.indexOf("\"byKey\"");
         assertTrue(byKeyAt >= 0, label + " byKey missing: " + json);
-        String tail = json.substring(byKeyAt);
-        int appleAt = tail.indexOf("\"apple\":1");
-        int zebraAt = tail.indexOf("\"zebra\":3");
-        assertTrue(appleAt >= 0 && zebraAt > appleAt,
-                label + " byKey item not sorted: " + tail);
+        int byKeyEnd = json.indexOf("},\"finalArr\"", byKeyAt);
+        assertTrue(byKeyEnd > byKeyAt, label + " byKey segment unterminated: " + json);
+        String segment = json.substring(byKeyAt, byKeyEnd);
+        if (segment.contains("{\\")) {
+            // blob-rendering arms: the sorted evidence must be inside the key blob itself,
+            // never satisfied from unrelated sibling fields
+            int appleAt = segment.indexOf("apple\\\":1");
+            int zebraAt = segment.indexOf("zebra\\\":3");
+            assertTrue(appleAt >= 0 && zebraAt > appleAt,
+                    label + " byKey item not sorted in the key blob: " + segment);
+        } else {
+            // identity-toString key shapes have no field content inside the key text
+            String tail = json.substring(byKeyAt);
+            int appleAt = tail.indexOf("\"apple\":1");
+            int zebraAt = tail.indexOf("\"zebra\":3");
+            assertTrue(appleAt >= 0 && zebraAt > appleAt,
+                    label + " byKey item not sorted: " + tail);
+        }
 
         // unannotated sibling keeps declaration order
         assertTrue(json.contains("\"plain\":{\"zebra\":3,\"apple\":1}"), label + " plain: " + json);
@@ -319,7 +333,7 @@ public class SortFieldNamesAlphabeticallyTest {
     }
 
     public static class CanonicalBean {
-        public Map<String, Integer> meta = new TreeMap<>();
+        public Map<String, Integer> meta = new java.util.LinkedHashMap<>();
         public long id = 7;
 
         public CanonicalBean() {
@@ -408,6 +422,7 @@ public class SortFieldNamesAlphabeticallyTest {
         // so the no-spurious-type assertion is creator-conditional, like the sibling test)
         boolean asm = new ObjectWriterProvider().getCreator() instanceof ObjectWriterCreatorASM;
         WithMap bean = new WithMap();
+        JSON.toJSONString(bean); // warm the shared provider cell for the runtime Map type
         String sorted = JSON.toJSONString(bean,
                 JSONWriter.Feature.WriteClassName,
                 JSONWriter.Feature.SortFieldNamesAlphabetically);
@@ -462,8 +477,9 @@ public class SortFieldNamesAlphabeticallyTest {
 
     @Test
     public void fieldLevelSortReachesContentAsResolution() {
-        // identical field-level annotation on three shapes: the contentAs arm must sort too
-        String json = JSON.toJSONString(new FieldSortItem());
+        // identical field-level annotation on three shapes: the contentAs arm must sort too;
+        // a fresh provider keeps the outcome independent of other tests' global registrations
+        String json = JSON.toJSONString(new FieldSortItem(), new JSONWriter.Context(new ObjectWriterProvider()));
         assertEquals(
                 "{\"contentAsList\":[{\"apple\":1,\"zebra\":3}],\"single\":{\"apple\":1,\"zebra\":3},\"typed\":[{\"apple\":1,\"zebra\":3}]}",
                 json);

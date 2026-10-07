@@ -66,4 +66,87 @@ public class TreeConversionLongFeaturesTest {
             JSON.config(JSONWriter.Feature.ReferenceDetection, false);
         }
     }
+
+    public static class ItemsOuter {
+        public java.util.List<java.util.Map<String, Object>> items = new java.util.ArrayList<>();
+    }
+
+    @Test
+    public void sortMapEntriesByKeysReachesNestedTreeMaps() {
+        // the canonical combination the SortFieldNamesAlphabetically javadoc pairs: the map-sort
+        // bit must reach the maps inside the tree, as it does through toJSONString
+        java.util.Map<String, Object> zetaFirst = new java.util.LinkedHashMap<>();
+        zetaFirst.put("zeta", 1);
+        zetaFirst.put("alpha", 2);
+        ItemsOuter outer = new ItemsOuter();
+        outer.items.add(zetaFirst);
+        Object converted = ObjectWriterAdapter.toJSON(outer, JSONWriter.Feature.SortMapEntriesByKeys.mask);
+        assertEquals("{\"items\":[{\"alpha\":2,\"zeta\":1}]}", converted.toString());
+    }
+
+    public static class NestedNullsInner {
+        public String label;
+        public int rank = 1;
+    }
+
+    public static class NestedNullsOuter {
+        public NestedNullsInner inner = new NestedNullsInner();
+    }
+
+    public static class NestedFieldBasedInner {
+        private int hidden = 5;
+    }
+
+    public static class NestedFieldBasedOuter {
+        public NestedFieldBasedInner inner = new NestedFieldBasedInner();
+    }
+
+    public enum Rank {
+        ACE,
+        KING;
+
+        @Override
+        public String toString() {
+            return name().toLowerCase();
+        }
+    }
+
+    public static class NestedEnumOuter {
+        public NestedEnumOuter.Inner inner = new NestedEnumOuter.Inner();
+
+        public static class Inner {
+            public Rank rank = Rank.KING;
+        }
+    }
+
+    @Test
+    public void treeFeaturesMembersApplyAtDepthTwo() {
+        // each TREE_FEATURES member must reach the nested bean's conversion, not just the root
+        JSONObject nulls = (JSONObject) ObjectWriterAdapter.toJSON(new NestedNullsOuter(),
+                JSONWriter.Feature.WriteNulls.mask);
+        assertTrue(((JSONObject) nulls.get("inner")).containsKey("label"), nulls.toString());
+
+        JSONObject fieldBased = (JSONObject) ObjectWriterAdapter.toJSON(new NestedFieldBasedOuter(),
+                JSONWriter.Feature.FieldBased.mask);
+        assertEquals(5, ((JSONObject) fieldBased.get("inner")).get("hidden"));
+
+        JSONObject enumDefault = (JSONObject) ObjectWriterAdapter.toJSON(new NestedEnumOuter(), 0L);
+        assertEquals(Rank.KING, ((JSONObject) enumDefault.get("inner")).get("rank"));
+        JSONObject enumNamed = (JSONObject) ObjectWriterAdapter.toJSON(new NestedEnumOuter(),
+                JSONWriter.Feature.WriteEnumsUsingName.mask);
+        assertEquals("KING", ((JSONObject) enumNamed.get("inner")).get("rank"));
+    }
+
+    @com.alibaba.fastjson2.annotation.JSONType(serializeFeatures = JSONWriter.Feature.WriteClassName)
+    public static class TypeNamed {
+        public String name = "t";
+    }
+
+    @Test
+    public void writeClassNameTypeSkipsTheDirectTreeBranch() {
+        // the WriteClassName guard of the toJSON fast path: a type-level WriteClassName must take
+        // the round-trip fallback so the @type entry survives
+        JSONObject tree = com.alibaba.fastjson2.JSONObject.from(new TypeNamed());
+        assertTrue(tree.containsKey("@type"), tree.toString());
+    }
 }

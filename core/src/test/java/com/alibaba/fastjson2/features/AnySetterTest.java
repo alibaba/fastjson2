@@ -58,11 +58,36 @@ public class AnySetterTest {
     @Test
     public void rejectUnknownFieldsViaAnySetter() {
         // the jackson @JsonAnySetter-as-unknown-field-rejection pattern, expressed natively;
-        // method exceptions surface wrapped in JSONException
+        // method exceptions surface wrapped in JSONException, with the rejection itself reachable
         JSONException e = assertThrows(JSONException.class,
                 () -> JSON.parseObject("{\"known\":1,\"bogus\":2}", StrictBag.class));
-        assertTrue(e.getCause() instanceof IllegalArgumentException
-                || e.getMessage().contains("any set error"));
+        String chain = String.valueOf(e.getMessage());
+        for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause()) {
+            chain += " | " + cause.getMessage();
+        }
+        assertTrue(chain.contains("Unknown field: bogus"), chain);
+    }
+
+    @Test
+    public void anySetterWinsOverErrorOnUnknownProperties() {
+        // an any-setter consumes unknown fields before the feature sees them, so the combination
+        // silently disables ErrorOnUnknownProperties — precedence pinned deliberately
+        Bag bag = JSON.parseObject("{\"known\":1,\"bogus\":2}", Bag.class,
+                JSONReader.Feature.ErrorOnUnknownProperties);
+        assertEquals(2, bag.extras.get("bogus"));
+    }
+
+    @Test
+    public void anySetterExceptionCauseSurvivesOnTreeToBean() {
+        // the acceptExtra (tree -> bean) path must keep the rejection in the cause chain,
+        // as the text path does
+        JSONException e = assertThrows(JSONException.class,
+                () -> JSON.parseObject("{\"known\":1,\"bogus\":2}").to(StrictBag.class));
+        String chain = String.valueOf(e.getMessage());
+        for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause()) {
+            chain += " | " + cause.getMessage();
+        }
+        assertTrue(chain.contains("Unknown field: bogus"), chain);
     }
 
     @Test

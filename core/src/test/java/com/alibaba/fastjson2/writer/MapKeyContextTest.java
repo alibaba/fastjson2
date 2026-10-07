@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
@@ -130,7 +131,9 @@ public class MapKeyContextTest {
             JSONWriter.Context context = new JSONWriter.Context(new ObjectWriterProvider(creator),
                     JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.SortFieldNamesAlphabetically);
             String json = JSON.toJSONString(map, context);
-            assertEquals(-1, json.indexOf("$ref"), creator.getClass().getSimpleName() + " " + json);
+            // each value is written in full; no reference is built from a rendered key text
+            assertEquals("{\"{\\\"password\\\":\\\"hunter2\\\",\\\"user\\\":\\\"u\\\"}\":{\"password\":\"hunter2\",\"user\":\"u\"},\"{\\\"password\\\":\\\"hunter2\\\",\\\"user\\\":\\\"u\\\"}\":{\"password\":\"hunter2\",\"user\":\"u\"}}",
+                    json, creator.getClass().getSimpleName() + " " + json);
         }
     }
 
@@ -189,6 +192,32 @@ public class MapKeyContextTest {
         holder.m.put(c2, "v");
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> JSON.toJSONString(holder,
                 new JSONWriter.Context(JSONWriter.Feature.ReferenceDetection)));
+    }
+
+    public static class NpeKey {
+        public String getName() {
+            throw new NullPointerException("boom");
+        }
+    }
+
+    @Test
+    public void sortedKeyRenderKeepsTheExceptionDiagnostic() {
+        // a getter failing inside the sorted blob render surfaces as a JSONException carrying
+        // the failure; with the ASM creator the raw NPE wraps exactly as the un-sorted
+        // JSON.toJSONString render wraps it
+        Map<NpeKey, String> map = new LinkedHashMap<>();
+        map.put(new NpeKey(), "v");
+        JSONException error = org.junit.jupiter.api.Assertions.assertThrows(JSONException.class,
+                () -> JSON.toJSONString(map, JSONWriter.Feature.SortFieldNamesAlphabetically));
+        boolean foundNpe = false;
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+            foundNpe |= cause instanceof NullPointerException;
+        }
+        org.junit.jupiter.api.Assertions.assertTrue(foundNpe, String.valueOf(error));
+        boolean asm = new ObjectWriterProvider().getCreator() instanceof ObjectWriterCreatorASM;
+        if (asm) {
+            org.junit.jupiter.api.Assertions.assertTrue(error.getMessage().contains("cannot serialize"), error.getMessage());
+        }
     }
 
     @Test

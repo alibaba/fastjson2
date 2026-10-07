@@ -223,6 +223,12 @@ public class ErrorOnDuplicateKeysTest {
         JSONObject ok = JSON.parseObject("{1:\"a\",\"2\":\"b\"}", JSONReader.Feature.ErrorOnDuplicateKeys);
         assertEquals("a", ok.get(1));
         assertEquals("b", ok.get("2"));
+        // the seen-set normalizes for detection only: the stored keys keep their original forms
+        java.util.List<Class<?>> keyClasses = new java.util.ArrayList<>();
+        for (Object key : ok.keySet()) {
+            keyClasses.add(key.getClass());
+        }
+        assertEquals(java.util.Arrays.asList(Integer.class, String.class), keyClasses);
     }
 
     @Test
@@ -398,6 +404,56 @@ public class ErrorOnDuplicateKeysTest {
         Map<?, ?> data = (Map<?, ?>) ok.data;
         assertEquals(1, data.get("n"));
         assertFalse(data.containsKey("@type"));
+    }
+
+    @Test
+    public void jsonbLongFeatureOverloadsKeepTheNoCustomBehavior() {
+        // the JSONB overrides keep the per-call word out of the parser, as they do for readObject
+        byte[] arrayBytes = com.alibaba.fastjson2.JSONB.toBytes(java.util.Arrays.asList("a", "b"));
+        assertEquals(JSONReader.ofJSONB(arrayBytes).readArray(),
+                JSONReader.ofJSONB(arrayBytes).readArray(JSONReader.Feature.ErrorOnDuplicateKeys.mask));
+        byte[] objectBytes = com.alibaba.fastjson2.JSONB.toBytes(java.util.Collections.singletonMap("k", "v"));
+        assertEquals(JSONReader.ofJSONB(objectBytes).readAny(),
+                JSONReader.ofJSONB(objectBytes).readAny(JSONReader.Feature.ErrorOnDuplicateKeys.mask));
+    }
+
+    @Test
+    public void readArrayArmMasksThePerCallWord() {
+        // the autoType arm takes a declared-features word, so it masks the per-call word down to
+        // the strict bit: UseNativeObject must not leak in, while duplicates are still rejected
+        long word = JSONReader.Feature.UseNativeObject.mask | JSONReader.Feature.ErrorOnDuplicateKeys.mask;
+        JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider(),
+                JSONReader.Feature.SupportAutoType);
+        try (JSONReader reader = JSONReader.of("[{\"b\":1}]", context)) {
+            Object item = ((java.util.List<?>) reader.readArray(word)).get(0);
+            assertTrue(item instanceof JSONObject, item.getClass().getName());
+        }
+        try (JSONReader reader = JSONReader.of("[{\"b\":1,\"b\":2}]", context)) {
+            assertThrows(JSONException.class, () -> reader.readArray(word));
+        }
+    }
+
+    @Test
+    public void multiValueTypeRejectsDuplicatedKeysIncludingNullKeys() {
+        com.alibaba.fastjson2.util.MapMultiValueType type =
+                com.alibaba.fastjson2.util.MapMultiValueType.of("data", Integer.class);
+        assertThrows(JSONException.class, () -> JSON.parseObject("{\"data\":1,\"data\":2}", type,
+                JSONReader.Feature.ErrorOnDuplicateKeys));
+        // the literal null key is registered too, as ObjectReaderImplMapTyped does
+        assertThrows(JSONException.class, () -> JSON.parseObject("{null:1,null:2}", type,
+                JSONReader.Feature.ErrorOnDuplicateKeys));
+    }
+
+    public static class StrictRawOptionalHolder {
+        @com.alibaba.fastjson2.annotation.JSONField(deserializeFeatures = JSONReader.Feature.ErrorOnDuplicateKeys)
+        public java.util.Optional raw;
+    }
+
+    @Test
+    public void rawOptionalFieldRejectsDuplicatesInside() {
+        JSONException error = assertThrows(JSONException.class,
+                () -> JSON.parseObject("{\"raw\":{\"a\":1,\"a\":2}}", StrictRawOptionalHolder.class));
+        assertDuplicateKeyMessage(error, "a");
     }
 
     @Test
@@ -612,6 +668,10 @@ public class ErrorOnDuplicateKeysTest {
             assertDuplicateKeyRejected(creator, StrictUnwrappedReadOnly.class, "{\"x\":" + dup + "}");
             assertDuplicateKeyRejected(creator, StrictCreatorRows.class, "{\"rows\":[" + dup + "]}");
             assertDuplicateKeyRejected(creator, StrictPositionalRows.class, "[[" + dup + "]]");
+
+            // well-formed control: distinct-content items must not false-reject
+            JSON.parseObject("{\"objects\":[{\"a\":1,\"b\":2},{\"a\":1,\"b\":3}]}",
+                    StrictShapes.class, new JSONReader.Context(new ObjectReaderProvider(creator)));
         }
     }
 
@@ -627,10 +687,16 @@ public class ErrorOnDuplicateKeysTest {
                 }
             }, message);
             boolean duplicate = false;
+            boolean namesTheKey = false;
             for (Throwable cause = error; cause != null; cause = cause.getCause()) {
-                duplicate |= String.valueOf(cause.getMessage()).contains("duplicate key");
+                String causeMessage = String.valueOf(cause.getMessage());
+                duplicate |= causeMessage.contains("duplicate key");
+                namesTheKey |= causeMessage.contains("duplicate key : b");
             }
             assertTrue(duplicate, message + " -> " + error);
+            // the diagnostic names the offending key, and only a true duplicate is rejected:
+            // distinct-content keys sharing neither value nor projection must parse cleanly
+            assertTrue(namesTheKey, message + " -> " + error);
         }
     }
 }

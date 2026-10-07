@@ -72,6 +72,11 @@ public class TreeModelTest {
     public void deepCopyEmpty() {
         assertEquals(new JSONObject(), new JSONObject().deepCopy());
         assertEquals(new JSONArray(), new JSONArray().deepCopy());
+        // content equality is not enough: a copy must never alias the receiver
+        JSONObject emptyObject = new JSONObject();
+        assertNotSame(emptyObject, emptyObject.deepCopy());
+        JSONArray emptyArray = new JSONArray();
+        assertNotSame(emptyArray, emptyArray.deepCopy());
     }
 
     @Test
@@ -101,6 +106,26 @@ public class TreeModelTest {
     }
 
     @Test
+    public void deepCopyCrossTypeCycleAndSharedNode() {
+        // an object -> array -> object cycle threads through the shared visited map: the
+        // handoff between the two deepCopy(visited) bodies is what terminates the cycle
+        JSONObject object = new JSONObject();
+        JSONArray array = new JSONArray();
+        object.put("list", array);
+        array.add(object);
+        JSONObject copy = object.deepCopy();
+        assertSame(copy, ((JSONArray) copy.get("list")).get(0));
+
+        // an acyclic shared node deep-copies once and stays shared in the result
+        JSONObject shared = JSONObject.of("k", "v");
+        JSONObject root = new JSONObject();
+        root.put("a", shared);
+        root.put("b", new JSONArray(java.util.Collections.singletonList(shared)));
+        JSONObject copied = root.deepCopy();
+        assertSame(copied.get("a"), ((JSONArray) copied.get("b")).get(0));
+    }
+
+    @Test
     public void deepCopySharedSubtreesStayDistinct() {
         JSONObject left = JSONObject.of("k", 1);
         JSONObject right = JSONObject.of("k", 1);
@@ -127,9 +152,10 @@ public class TreeModelTest {
     public void requiredMissing() {
         JSONObject object = JSON.parseObject("{\"a\":1}");
         JSONException e = assertThrows(JSONException.class, () -> object.required("x"));
-        assertTrue(e.getMessage().contains("x"));
+        assertEquals("required value missing : x", e.getMessage());
+        // the two-arg overload reports a missing key identically, not as a type mismatch
         e = assertThrows(JSONException.class, () -> object.required("x", JSONObject.class));
-        assertTrue(e.getMessage().contains("x"));
+        assertEquals("required value missing : x", e.getMessage());
     }
 
     @Test
@@ -143,6 +169,25 @@ public class TreeModelTest {
         JSONObject object = JSON.parseObject("{\"a\":1}");
         JSONException e = assertThrows(JSONException.class, () -> object.required("a", JSONObject.class));
         assertTrue(e.getMessage().contains(JSONObject.class.getName()));
+    }
+
+    @Test
+    public void requiredNoWidening() {
+        JSONObject object = JSON.parseObject("{\"a\":1}");
+        assertEquals(1, (int) object.required("a", Integer.class));
+        // an Integer is not widened to Long: the type check is strict, as documented
+        JSONException e = assertThrows(JSONException.class, () -> object.required("a", Long.class));
+        assertTrue(e.getMessage().contains(Long.class.getName()));
+    }
+
+    @Test
+    public void requiredPrimitiveClassBoxes() {
+        // a primitive class literal means its boxed type; without the boxing the check could
+        // never succeed, because Class.isInstance is false for every value on a primitive Class
+        JSONObject object = JSON.parseObject("{\"n\":1}");
+        assertEquals(1, (int) object.required("n", int.class));
+        JSONException e = assertThrows(JSONException.class, () -> object.required("n", double.class));
+        assertTrue(e.getMessage().contains("required value not of type double : n"));
     }
 
     @Test
@@ -160,6 +205,30 @@ public class TreeModelTest {
         assertFalse(object.canConvertToInt("s"));
         assertFalse(object.canConvertToInt("n"));
         assertFalse(object.canConvertToInt("missing"));
+
+        // the Long branch, with actual Long values at and past the int boundaries
+        object.put("longInRange", 100000L);
+        object.put("longMaxInt", (long) Integer.MAX_VALUE);
+        object.put("longMinInt", (long) Integer.MIN_VALUE);
+        object.put("longAbove", (long) Integer.MAX_VALUE + 1);
+        object.put("longBelow", (long) Integer.MIN_VALUE - 1);
+        assertTrue(object.canConvertToInt("longInRange"));
+        assertTrue(object.canConvertToInt("longMaxInt"));
+        assertTrue(object.canConvertToInt("longMinInt"));
+        assertFalse(object.canConvertToInt("longAbove"));
+        assertFalse(object.canConvertToInt("longBelow"));
+
+        // Float values take the floating branch on both the int and the long side
+        object.put("floatFraction", 2.5f);
+        object.put("floatNan", Float.NaN);
+        object.put("floatPosInf", Float.POSITIVE_INFINITY);
+        object.put("floatNegInf", Float.NEGATIVE_INFINITY);
+        assertTrue(object.canConvertToInt("floatFraction"));
+        assertTrue(object.canConvertToLong("floatFraction"));
+        assertFalse(object.canConvertToInt("floatNan"));
+        assertFalse(object.canConvertToLong("floatNan"));
+        assertFalse(object.canConvertToInt("floatPosInf"));
+        assertFalse(object.canConvertToLong("floatNegInf"));
     }
 
     @Test

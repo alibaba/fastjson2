@@ -110,11 +110,25 @@ public class ObjectWriterProviderVariantRaceTest {
     }
 
     static void await(CountDownLatch latch) {
+        boolean reached;
         try {
-            latch.await(5, TimeUnit.SECONDS);
+            reached = latch.await(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            return;
         }
+        org.junit.jupiter.api.Assertions.assertTrue(reached,
+                "latch wait timed out: the interleaving the test exists for was never reached");
+    }
+
+    static void awaitPublished(PausingProvider provider) {
+        // a bounded spin: the regression this guards must fail the test, not hang the fork
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (!provider.sortedPublished() && System.nanoTime() < deadline) {
+            Thread.yield();
+        }
+        org.junit.jupiter.api.Assertions.assertTrue(provider.sortedPublished(),
+                "the sorted writer was never published");
     }
 
     @Test
@@ -141,14 +155,14 @@ public class ObjectWriterProviderVariantRaceTest {
             await(bPaused);
             if (!provider.sortedPublished()) {
                 cTurnTaken.countDown();
-                while (!provider.sortedPublished()) {
-                    Thread.yield();
-                }
+                awaitPublished(provider);
             }
             String c = provider.sortedWrite();
             cTurnTaken.countDown();
             assertEquals(MASKED, c);
             assertEquals(MASKED, b.get(10, TimeUnit.SECONDS));
+            org.junit.jupiter.api.Assertions.assertEquals(1, provider.naturalLookups.get(),
+                    "the pause point at the first natural-cell look was not exercised");
         } finally {
             pool.shutdownNow();
         }
@@ -158,12 +172,12 @@ public class ObjectWriterProviderVariantRaceTest {
     public void filterSetWhileBothVariantsAreCreatedReachesTheSortedWriter() throws Exception {
         PausingProvider provider = new PausingProvider();
 
-        // B starts the first sorted write and is paused right after its first look at the (empty) natural cell.
-        // A then creates the natural writer and sets a filter on it. B is paused again at any later look at the
-        // natural cell, while C writes sorted: C starts after setFilter returned, so it must be masked.
+        // B starts the first sorted write and is paused right after its single look at the (empty)
+        // natural cell. A then creates the natural writer and sets a filter on it. Once B resumes it
+        // publishes the sorted writer, and C's sorted write starts only after the filter was set: it
+        // must be masked, because publication links the counterpart's filters first.
         CountDownLatch bPaused = new CountDownLatch(1);
         CountDownLatch aDone = new CountDownLatch(1);
-        CountDownLatch cDone = new CountDownLatch(1);
         Thread[] a = new Thread[1];
         provider.onNaturalLookup = () -> {
             if (provider.naturalLookups.get() == 1) {
@@ -174,8 +188,6 @@ public class ObjectWriterProviderVariantRaceTest {
                         && (a[0] == null || a[0].getState() != Thread.State.BLOCKED)) {
                     Thread.yield();
                 }
-            } else {
-                await(cDone);
             }
         };
         ExecutorService pool = Executors.newFixedThreadPool(2);
@@ -192,11 +204,8 @@ public class ObjectWriterProviderVariantRaceTest {
                 return null;
             });
             natural.get(10, TimeUnit.SECONDS);
-            while (!provider.sortedPublished()) {
-                Thread.yield();
-            }
+            awaitPublished(provider);
             String c = provider.sortedWrite();
-            cDone.countDown();
             b.get(10, TimeUnit.SECONDS);
             assertEquals(MASKED, c);
             assertEquals(MASKED, provider.sortedWrite());

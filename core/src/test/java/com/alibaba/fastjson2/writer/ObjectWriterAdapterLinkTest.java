@@ -2,6 +2,8 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.filter.NameFilter;
+import com.alibaba.fastjson2.filter.PropertyPreFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
 import org.junit.jupiter.api.Test;
 
@@ -49,9 +51,16 @@ public class ObjectWriterAdapterLinkTest {
             provider.register(RentCreds.class, writer);
             provider.unregister(RentCreds.class);
         }
-        System.gc();
-        System.gc();
+        // advisory collection: retry within a deadline instead of trusting one call to be
+        // synchronous, so the outcome tracks the code under test, not the collector's mood
         int live = liveVariants(source.linkedVariants).size();
+        long deadline = System.currentTimeMillis() + 5000;
+        while (live > 0 && System.currentTimeMillis() < deadline) {
+            System.gc();
+            System.runFinalization();
+            Thread.yield();
+            live = liveVariants(source.linkedVariants).size();
+        }
         assertEquals(0, live, "unregistered variants must become collectible, not stay attached");
 
         // the next link compacts the cleared entries instead of growing the array further,
@@ -147,5 +156,62 @@ public class ObjectWriterAdapterLinkTest {
         assertEquals("{\"name\":\"alice\",\"password\":\"***\"}",
                 JSON.toJSONString(new RentCreds(),
                         new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+    }
+
+    @Test
+    public void renamedOutputOnLinkedVariantProperty() {
+        // a NameFilter set on the registered writer must rename through the linked sorted variant
+        NameFilter mask = (object, name, value) -> "password".equals(name) ? "secret" : name;
+        ObjectWriter writer = ObjectWriters.objectWriter(RentCreds.class,
+                ObjectWriters.fieldWriter("password", String.class, (RentCreds s) -> s.password),
+                ObjectWriters.fieldWriter("name", String.class, (RentCreds s) -> s.name));
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.register(RentCreds.class, writer);
+        ((ObjectWriterAdapter) writer).setNameFilter(mask);
+        assertEquals("{\"name\":\"alice\",\"secret\":\"hunter2\"}",
+                JSON.toJSONString(new RentCreds(),
+                        new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+    }
+
+    @Test
+    public void droppedPropertyOnLinkedVariantPropertyPre() {
+        // a PropertyPreFilter set on the registered writer must drop through the linked variant
+        // process(JSONWriter, Object, String) selects by field name
+        PropertyPreFilter mask = (writer, source, fieldName) -> !"password".equals(fieldName);
+        ObjectWriter writer = ObjectWriters.objectWriter(RentCreds.class,
+                ObjectWriters.fieldWriter("password", String.class, (RentCreds s) -> s.password),
+                ObjectWriters.fieldWriter("name", String.class, (RentCreds s) -> s.name));
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.register(RentCreds.class, writer);
+        ((ObjectWriterAdapter) writer).setPropertyPreFilter(mask);
+        assertEquals("{\"name\":\"alice\"}",
+                JSON.toJSONString(new RentCreds(),
+                        new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+    }
+
+    @Test
+    public void moduleWritersLinkAcrossPublication() {
+        // a module returning a fresh instance per call still links each published cell to the
+        // cached counterpart, so a filter set on the natural writer reaches the sorted twin
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.register(new com.alibaba.fastjson2.modules.ObjectWriterModule() {
+            @Override
+            public ObjectWriter getObjectWriter(java.lang.reflect.Type objectType, Class objectClass) {
+                if (objectClass == LinkTargets.class) {
+                    return ObjectWriters.objectWriter(LinkTargets.class,
+                            ObjectWriters.fieldWriter("beta", String.class, (LinkTargets t) -> t.beta),
+                            ObjectWriters.fieldWriter("alpha", String.class, (LinkTargets t) -> t.alpha));
+                }
+                return null;
+            }
+        });
+        LinkTargets value = new LinkTargets();
+        JSON.toJSONString(value, new JSONWriter.Context(provider));
+        JSON.toJSONString(value, new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically));
+        ObjectWriter natural = provider.getObjectWriter(LinkTargets.class, LinkTargets.class, 0L);
+        ((ObjectWriterAdapter) natural).setNameFilter((object, name, fieldValue) -> "beta".equals(name) ? "b" : name);
+        String json = JSON.toJSONString(value,
+                new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically));
+        assertEquals("{\"alpha\":\"a\",\"b\":\"b\"}", json);
     }
 }

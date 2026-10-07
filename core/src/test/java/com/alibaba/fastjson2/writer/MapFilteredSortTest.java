@@ -43,4 +43,25 @@ public class MapFilteredSortTest {
         contextSorted.setNameFilter(nameFilter);
         assertEquals("{\"k\":{\"alpha\":1,\"zeta\":3}}", JSON.toJSONString(map, contextSorted));
     }
+
+    @Test
+    public void unsortedMapValuesKeepInsertionOrder() {
+        // negative control: without the sort bit on the registered writer or the context,
+        // the same shapes keep insertion order
+        ObjectWriterImplMap naturalMapWriter = new ObjectWriterImplMap(LinkedHashMap.class, 0L);
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.register(LinkedHashMap.class, naturalMapWriter);
+
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("k", new KV());
+
+        NameFilter nameFilter = (object, name, value) -> name;
+
+        assertEquals("{\"k\":{\"zeta\":3,\"alpha\":1}}",
+                JSON.toJSONString(map, new JSONWriter.Context(provider)));
+
+        JSONWriter.Context filtered = new JSONWriter.Context(provider);
+        filtered.setNameFilter(nameFilter);
+        assertEquals("{\"k\":{\"zeta\":3,\"alpha\":1}}", JSON.toJSONString(map, filtered));
+    }
 }

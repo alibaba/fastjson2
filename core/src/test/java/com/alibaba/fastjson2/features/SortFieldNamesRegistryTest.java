@@ -163,8 +163,15 @@ public class SortFieldNamesRegistryTest {
         Account account = new Account();
         JSONWriter.Context sorted = new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
         assertEquals("{\"a\":2,\"z\":1}", JSON.toJSONString(account, sorted));
+        ObjectWriter staleSorted = provider.getObjectWriter(Account.class, Account.class,
+                JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
 
         provider.cleanup(Account.class);
+        // evict the sorted cell directly: the re-created writer must be a new instance,
+        // independent of the mixIn that follows (which would mask a stale-cell leak)
+        ObjectWriter recreated = provider.getObjectWriter(Account.class, Account.class,
+                JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+        org.junit.jupiter.api.Assertions.assertNotSame(staleSorted, recreated);
         provider.mixIn(Account.class, AccountMixIn.class);
         assertEquals("{\"renamed\":2,\"z\":1}", JSON.toJSONString(account, sorted));
     }
@@ -175,11 +182,16 @@ public class SortFieldNamesRegistryTest {
         Account account = new Account();
         JSONWriter.Context sorted = new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
         assertEquals("{\"a\":2,\"z\":1}", JSON.toJSONString(account, sorted));
+        ObjectWriter staleSorted = provider.getObjectWriter(Account.class, Account.class,
+                JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
 
         provider.clear();
+        // evict the sorted cell directly: the re-created writer must be a new instance,
+        // independent of the mixIn that follows (which would mask a stale-cell leak)
+        ObjectWriter recreated = provider.getObjectWriter(Account.class, Account.class,
+                JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+        org.junit.jupiter.api.Assertions.assertNotSame(staleSorted, recreated);
         provider.mixIn(Account.class, AccountMixIn.class);
-        // mixIn alone does not re-create the writer here? clear() wiped both caches,
-        // so the next write is created with the mixIn mapping visible
         assertEquals("{\"renamed\":2,\"z\":1}", JSON.toJSONString(account, sorted));
     }
 
@@ -760,7 +772,9 @@ public class SortFieldNamesRegistryTest {
             ObjectWriterProvider provider = new ObjectWriterProvider(ObjectWriterCreatorASM.INSTANCE);
             JSON.toJSONString(new java.util.LinkedHashMap<>(), new JSONWriter.Context(provider));
             String json = JSON.toJSONString(new TypedMapHolder(), new JSONWriter.Context(provider, JSONWriter.Feature.WriteClassName));
-            assertEquals(-1, json.indexOf(Natural.class.getName()), json);
+            assertEquals("{\"@type\":\"" + TypedMapHolder.class.getName()
+                            + "\",\"entries\":{\"@type\":\"java.util.LinkedHashMap\",\"k\":{\"zeta\":1,\"alpha\":2}}}",
+                    json);
         } finally {
             JSONFactory.setContextWriterCreator(contextCreator);
         }
@@ -819,6 +833,74 @@ public class SortFieldNamesRegistryTest {
         } finally {
             JSONFactory.setContextWriterCreator(contextCreator);
         }
+    }
+
+    @JSONType(alphabetic = false)
+    public static final class FinalChild {
+        public int zeta = 1;
+        public int alpha = 2;
+    }
+
+    public static class FinalHolder {
+        public FinalChild c = new FinalChild();
+    }
+
+    @Test
+    public void sortedVariantAppliesToFinalClassedFields() {
+        // final field classes take the FieldWriterObjectFinal sorted branch: deleting it must not
+        // leave the whole suite green
+        assertEquals("{\"c\":{\"alpha\":2,\"zeta\":1}}",
+                JSON.toJSONString(new FinalHolder(), JSONWriter.Feature.SortFieldNamesAlphabetically));
+        assertEquals("{\"c\":{\"zeta\":1,\"alpha\":2}}", JSON.toJSONString(new FinalHolder()));
+    }
+
+    public static class FieldUser {
+        private int hidden = 7;
+    }
+
+    public static class MapHolderFB {
+        @JSONField(serializeFeatures = JSONWriter.Feature.FieldBased)
+        public java.util.Map<String, FieldUser> m = new java.util.LinkedHashMap<>(
+                java.util.Collections.singletonMap("k", new FieldUser()));
+    }
+
+    @Test
+    public void mapTypedValueMemoResolvesWithTheMergedWord() {
+        // the typed-value memo branch resolves with the merged word: a field-level variant bit
+        // reaches the value writer on the first write, and the stamped memo keeps later writes
+        // on the same axis
+        assertEquals("{\"m\":{\"k\":{\"hidden\":7}}}", JSON.toJSONString(new MapHolderFB()));
+        assertEquals("{\"m\":{\"k\":{\"hidden\":7}}}", JSON.toJSONString(new MapHolderFB()));
+    }
+
+    public static class MemoOuter {
+        public Object position = new Position();
+    }
+
+    static final class CountingProvider
+            extends ObjectWriterProvider {
+        final java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+
+        @Override
+        public ObjectWriter getObjectWriter(java.lang.reflect.Type objectType, Class objectClass, long contextFeatures) {
+            if (objectClass == Position.class) {
+                calls.incrementAndGet();
+            }
+            return super.getObjectWriter(objectType, objectClass, contextFeatures);
+        }
+    }
+
+    @Test
+    public void sortedWritesMemoizeTheItemWriterPerVariant() {
+        // the per-variant memo keeps repeated sorted writes free of provider resolution
+        CountingProvider provider = new CountingProvider();
+        String expected = "{\"position\":{\"alpha\":1,\"zulu\":7}}";
+        assertEquals(expected, JSON.toJSONString(new MemoOuter(),
+                new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+        int afterFirst = provider.calls.get();
+        assertEquals(expected, JSON.toJSONString(new MemoOuter(),
+                new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+        assertEquals(afterFirst, provider.calls.get());
     }
 
     @JSONType(alphabetic = false)
