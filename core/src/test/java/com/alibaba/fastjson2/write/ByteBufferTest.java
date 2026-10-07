@@ -69,4 +69,49 @@ public class ByteBufferTest {
         ByteBuffer buffer1 = JSON.parseObject(str, ByteBuffer.class);
         assertArrayEquals(bytes, buffer1.array());
     }
+
+    @Test
+    public void testBufferViews() {
+        byte[] bytes = new byte[]{9, 1, 2, 3, 8};
+
+        ByteBuffer heap = ByteBuffer.wrap(bytes, 1, 3);
+
+        ByteBuffer parent = ByteBuffer.wrap(bytes);
+        parent.position(1);
+        parent.limit(4);
+        ByteBuffer slice = parent.slice();
+
+        ByteBuffer direct = ByteBuffer.allocateDirect(bytes.length);
+        direct.put(bytes);
+        direct.position(1);
+        direct.limit(4);
+
+        ByteBuffer readOnly = ByteBuffer.wrap(bytes).asReadOnlyBuffer();
+        readOnly.position(1);
+        readOnly.limit(4);
+
+        assertRemainingRoundTrip(heap);
+        assertRemainingRoundTrip(slice);
+        assertRemainingRoundTrip(direct);
+        assertRemainingRoundTrip(readOnly);
+    }
+
+    private static void assertRemainingRoundTrip(ByteBuffer buffer) {
+        int position = buffer.position();
+        int limit = buffer.limit();
+        byte[] expected = new byte[]{1, 2, 3};
+
+        String str = JSON.toJSONString(buffer);
+        assertEquals("[1,2,3]", str);
+        ByteBuffer parsed = JSON.parseObject(str, ByteBuffer.class);
+        assertArrayEquals(expected, parsed.array());
+        assertEquals(position, buffer.position());
+        assertEquals(limit, buffer.limit());
+
+        byte[] jsonb = JSONB.toBytes(buffer);
+        ByteBuffer parsedJSONB = JSONB.parseObject(jsonb, ByteBuffer.class);
+        assertArrayEquals(expected, parsedJSONB.array());
+        assertEquals(position, buffer.position());
+        assertEquals(limit, buffer.limit());
+    }
 }
