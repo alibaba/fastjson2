@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderFloat<T, V>
-        extends FieldReader<T> {
+        extends FieldReaderBoxedType<T, Float> {
     FieldReaderFloat(
             String fieldName,
             Class<V> fieldClass,
@@ -26,32 +26,11 @@ final class FieldReaderFloat<T, V>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
     }
 
     @Override
-    public void accept(T object, Object value) {
-        propertyAccessor.setObject(object, value);
-    }
-
-    @Override
-    public void readFieldValue(JSONReader jsonReader, T object) {
-        Float value;
-        try {
-            value = jsonReader.readFloat();
-        } catch (Exception e) {
-            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
-                value = null;
-            } else {
-                throw e;
-            }
-        }
-
-        propertyAccessor.setObject(object, value);
-    }
-
-    @Override
-    public Object readFieldValue(JSONReader jsonReader) {
+    protected Float readValue(JSONReader jsonReader) {
         return jsonReader.readFloat();
     }
 }
