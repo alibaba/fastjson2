@@ -4470,10 +4470,11 @@ public abstract class JSONWriter
          * renaming afterwards, so renamed keys are not re-sorted.
          *
          * <p>By default, this feature is disabled, meaning that bean properties are
-         * written in library-default order: alphabetical for method-based discovery (the
-         * {@code fastjson2.writer.alphabetic} global switch is on by default), declaration
-         * order for field-based creation and for types annotated
-         * {@code @JSONType(alphabetic = false)}.
+         * written in library-default order: alphabetical, with or without
+         * {@link Feature#FieldBased}, while the {@code fastjson2.writer.alphabetic} global switch
+         * is on (the default). For types annotated {@code @JSONType(alphabetic = false)}, or with
+         * the switch off, the order is the writer creator's discovery order, which is not
+         * guaranteed to be declaration order and can differ between creators.
          *
          * @since 2.0.66
          */

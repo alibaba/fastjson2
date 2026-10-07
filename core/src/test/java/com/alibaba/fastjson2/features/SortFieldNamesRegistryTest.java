@@ -891,8 +891,9 @@ public class SortFieldNamesRegistryTest {
     }
 
     @Test
-    public void sortedWritesMemoizeTheItemWriterPerVariant() {
-        // the per-variant memo keeps repeated sorted writes free of provider resolution
+    public void sortedWritesResolveTheItemWriterThroughTheProvider() {
+        // the sorted variant is resolved through the provider on every write: nothing is stored on
+        // the field writer, so cleanup(ClassLoader) and provider-level eviction always take effect
         CountingProvider provider = new CountingProvider();
         String expected = "{\"position\":{\"alpha\":1,\"zulu\":7}}";
         assertEquals(expected, JSON.toJSONString(new MemoOuter(),
@@ -900,7 +901,39 @@ public class SortFieldNamesRegistryTest {
         int afterFirst = provider.calls.get();
         assertEquals(expected, JSON.toJSONString(new MemoOuter(),
                 new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
-        assertEquals(afterFirst, provider.calls.get());
+        assertTrue(provider.calls.get() > afterFirst);
+    }
+
+    public static class ObjectHolder {
+        public Object value;
+    }
+
+    @Test
+    public void cleanupClassLoaderReleasesLoaderHeldThroughAParentLoaderField() throws Exception {
+        // a parent-loader holder survives cleanup(childLoader); its field writer must not keep the
+        // child class's sorted writer reachable
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        WeakReference<ClassLoader> weakLoader = writeThroughParentHolder(provider);
+        long deadline = System.currentTimeMillis() + 5000;
+        while (weakLoader.get() != null && System.currentTimeMillis() < deadline) {
+            System.gc();
+            Thread.sleep(20);
+        }
+        assertNull(weakLoader.get());
+    }
+
+    static WeakReference<ClassLoader> writeThroughParentHolder(ObjectWriterProvider provider) throws Exception {
+        IsolatedLoader childLoader = new IsolatedLoader(SortFieldNamesRegistryTest.class.getClassLoader());
+        Class<?> loadedClass = childLoader.loadClass(LeakBean.class.getName());
+        ObjectHolder holder = new ObjectHolder();
+        holder.value = loadedClass.getConstructor().newInstance();
+        assertEquals("{\"value\":{\"a\":1,\"z\":2}}", JSON.toJSONString(holder,
+                new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
+        JSON.toJSONString(holder, new JSONWriter.Context(provider,
+                JSONWriter.Feature.SortFieldNamesAlphabetically, JSONWriter.Feature.FieldBased));
+        holder.value = null;
+        provider.cleanup(childLoader);
+        return new WeakReference<>(childLoader);
     }
 
     @JSONType(alphabetic = false)

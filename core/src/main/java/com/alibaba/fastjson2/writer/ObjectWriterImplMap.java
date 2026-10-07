@@ -500,7 +500,11 @@ public final class ObjectWriterImplMap
                             (jsonWriter.getFeatures() | this.features | features));
                     if (!(keyObjectWriter instanceof ObjectWriterAdapter)
                             && !(keyObjectWriter instanceof ObjectWriterImplList)
-                            && !(keyObjectWriter instanceof ObjectWriterImplMap)) {
+                            && !(keyObjectWriter instanceof ObjectWriterImplMap)
+                            && !(keyObjectWriter instanceof ObjectWriterImplCollection)
+                            && !(keyObjectWriter instanceof ObjectWriterArray)
+                            && !(keyObjectWriter instanceof ObjectWriterImplOptional)
+                            && !(keyObjectWriter instanceof ObjectWriterImplAtomicReference)) {
                         jsonWriter.writeNameAny(key);
                         return null;
                     }

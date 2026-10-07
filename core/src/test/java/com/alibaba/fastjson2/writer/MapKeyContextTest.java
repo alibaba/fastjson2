@@ -220,6 +220,46 @@ public class MapKeyContextTest {
         }
     }
 
+    @JSONType(alphabetic = false)
+    public static class ZA {
+        public int z = 1;
+        public int a = 2;
+    }
+
+    public static class FieldSortedKeys {
+        @JSONField(serializeFeatures = JSONWriter.Feature.SortFieldNamesAlphabetically)
+        public Map<Object, String> m = new LinkedHashMap<>();
+    }
+
+    public static class PlainKeys {
+        public Map<Object, String> m = new LinkedHashMap<>();
+    }
+
+    @Test
+    public void fieldLevelSortReachesBeansInEveryContainerKeyWithEitherCreator() {
+        java.util.List<java.util.function.Supplier<Object>> keys = java.util.Arrays.asList(
+                () -> new java.util.LinkedHashSet<>(java.util.Collections.singletonList(new ZA())),
+                () -> new ZA[]{new ZA()},
+                () -> new Object[]{new ZA()},
+                () -> java.util.Optional.of(new ZA()),
+                () -> new java.util.concurrent.atomic.AtomicReference<>(new ZA()),
+                () -> new java.util.ArrayList<>(java.util.Collections.singletonList(new ZA())));
+        for (ObjectWriterCreator creator : new ObjectWriterCreator[]{ObjectWriterCreatorASM.INSTANCE, ObjectWriterCreator.INSTANCE}) {
+            for (java.util.function.Supplier<Object> key : keys) {
+                ObjectWriterProvider provider = new ObjectWriterProvider(creator);
+                FieldSortedKeys fieldLevel = new FieldSortedKeys();
+                fieldLevel.m.put(key.get(), "v");
+                PlainKeys contextLevel = new PlainKeys();
+                contextLevel.m.put(key.get(), "v");
+                String fieldJson = JSON.toJSONString(fieldLevel, new JSONWriter.Context(provider));
+                String contextJson = JSON.toJSONString(contextLevel,
+                        new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically));
+                assertEquals(contextJson, fieldJson, creator.getClass().getSimpleName());
+                org.junit.jupiter.api.Assertions.assertTrue(fieldJson.contains("{\\\"a\\\":2,\\\"z\\\":1}"), creator.getClass().getSimpleName() + " " + fieldJson);
+            }
+        }
+    }
+
     @Test
     public void sortedMapsKeepTheNaturalSpellingForNonBeanKeys() {
         // an ordering feature must not change how non-bean keys are spelled: BigDecimal, Boolean,

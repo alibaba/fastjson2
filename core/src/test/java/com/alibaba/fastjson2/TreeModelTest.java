@@ -376,7 +376,73 @@ public class TreeModelTest {
         maxLongEdge.add(9223372036854775807.0);
         wrapped.put("maxLongEdgeAcc", maxLongEdge);
         assertFalse(wrapped.canConvertToLong("maxLongEdgeAcc"));
+
+        // Number types outside the JDK set keep the range check: a saturating longValue()
+        // (as in commons-lang3 MutableDouble) or a wrapping one (as in a BigInteger wrapper)
+        // is not convertible, and neither is a NaN or an infinite value
+        wrapped.put("saturating", new SaturatingNumber(1e30));
+        wrapped.put("saturatingNaN", new SaturatingNumber(Double.NaN));
+        wrapped.put("saturatingInf", new SaturatingNumber(Double.POSITIVE_INFINITY));
+        wrapped.put("saturatingFraction", new SaturatingNumber(3.5));
+        wrapped.put("wrapping", new WrappingNumber(java.math.BigInteger.ONE.shiftLeft(64).subtract(java.math.BigInteger.ONE)));
+        wrapped.put("wrappingMax", new WrappingNumber(java.math.BigInteger.valueOf(Long.MAX_VALUE)));
+        assertFalse(wrapped.canConvertToLong("saturating"));
+        assertFalse(wrapped.canConvertToLong("saturatingNaN"));
+        assertFalse(wrapped.canConvertToLong("saturatingInf"));
+        assertTrue(wrapped.canConvertToLong("saturatingFraction"));
+        assertFalse(wrapped.canConvertToLong("wrapping"));
+        assertTrue(wrapped.canConvertToLong("wrappingMax"));
         assertTrue(wrapped.canConvertToInt("fraction"));
+    }
+
+    static final class SaturatingNumber
+            extends Number {
+        final double value;
+
+        SaturatingNumber(double value) {
+            this.value = value;
+        }
+
+        public int intValue() {
+            return (int) value;
+        }
+
+        public long longValue() {
+            return (long) value;
+        }
+
+        public float floatValue() {
+            return (float) value;
+        }
+
+        public double doubleValue() {
+            return value;
+        }
+    }
+
+    static final class WrappingNumber
+            extends Number {
+        final java.math.BigInteger value;
+
+        WrappingNumber(java.math.BigInteger value) {
+            this.value = value;
+        }
+
+        public int intValue() {
+            return value.intValue();
+        }
+
+        public long longValue() {
+            return value.longValue();
+        }
+
+        public float floatValue() {
+            return value.floatValue();
+        }
+
+        public double doubleValue() {
+            return value.doubleValue();
+        }
     }
 
     @com.alibaba.fastjson2.annotation.JSONType(alphabetic = false)

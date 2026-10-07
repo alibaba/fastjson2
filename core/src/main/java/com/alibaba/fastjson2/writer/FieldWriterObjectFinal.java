@@ -47,24 +47,13 @@ public class FieldWriterObjectFinal<T>
                 && format == null
                 && !BeanUtils.SUPER.equals(fieldName)
                 && ObjectWriterProvider.isFieldNamesSorted(features | jsonWriter.getFeatures())) {
-            // sorted writers are memoized in their own slot instead of objectWriter
-            // (see FieldWriterObject#getObjectWriter); explicitly configured writers
+            // sorted writers are not stored on the field writer (see FieldWriterObject#getObjectWriter);
+            // explicitly configured writers
             // (@JSONField(writeUsing)) are always honored instead, $super$ pseudo-fields
             // resolve via the parent's dedicated branch, and resolution merges field
             // features so positional output never sorts
-            ObjectWriter sortedWriter = this.sortedObjectWriter;
-            if (sortedWriter != null && this.sortedValueClass == valueClass) {
-                return sortedWriter;
-            }
-            sortedWriter = jsonWriter.getContext().getProvider()
+            return jsonWriter.getContext().getProvider()
                     .getObjectWriter(valueClass, valueClass, features | jsonWriter.getFeatures());
-            if (this.sortedValueClass == null) {
-                boolean success = sortedValueClassUpdater.compareAndSet(this, null, valueClass);
-                if (success) {
-                    sortedObjectWriterUpdater.compareAndSet(this, null, sortedWriter);
-                }
-            }
-            return sortedWriter;
         }
 
         if (objectWriter != null) {

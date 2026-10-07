@@ -24,8 +24,6 @@ import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 public class FieldWriterObject<T>
         extends FieldWriter<T> {
     volatile Class initValueClass;
-    volatile ObjectWriter sortedObjectWriter;
-    volatile Class sortedValueClass;
     final boolean unwrapped;
     final boolean array;
     final boolean number;
@@ -35,16 +33,6 @@ public class FieldWriterObject<T>
             FieldWriterObject.class,
             Class.class,
             "initValueClass"
-    );
-    static final AtomicReferenceFieldUpdater<FieldWriterObject, ObjectWriter> sortedObjectWriterUpdater = AtomicReferenceFieldUpdater.newUpdater(
-            FieldWriterObject.class,
-            ObjectWriter.class,
-            "sortedObjectWriter"
-    );
-    static final AtomicReferenceFieldUpdater<FieldWriterObject, Class> sortedValueClassUpdater = AtomicReferenceFieldUpdater.newUpdater(
-            FieldWriterObject.class,
-            Class.class,
-            "sortedValueClass"
     );
 
     public FieldWriterObject(
@@ -92,27 +80,17 @@ public class FieldWriterObject<T>
                 && !BeanUtils.SUPER.equals(fieldName)
                 && !Map.class.isAssignableFrom(fieldClass)
                 && ObjectWriterProvider.isFieldNamesSorted(this.features | jsonWriter.getFeatures())) {
-            // sorted writers are memoized in their own slot instead of initValueClass/
-            // initObjectWriter, so neither variant's writer leaks into the other axis and a
-            // sorted write still resolves once per value class rather than once per write;
+            // sorted writers are never stored on the field writer: not in initValueClass/initObjectWriter,
+            // where a writer resolved under one variant would be reused under the other, and not in a
+            // memo of their own, which would keep a value class (and its loader) reachable from the
+            // holder's writer after ObjectWriterProvider#cleanup(ClassLoader);
             // explicitly configured writers (@JSONField(writeUsing)) are always honored instead,
             // $super$ pseudo-fields always resolve via getObjectWriterVoid's dedicated branch,
             // Map-valued fields keep the type-carrying resolution (the untyped provider writer
             // would drop the declared key/value types and gain a spurious @type under WriteClassName),
             // and resolution merges field features so positional output never sorts
-            ObjectWriter sortedWriter = this.sortedObjectWriter;
-            if (sortedWriter != null && this.sortedValueClass == valueClass) {
-                return sortedWriter;
-            }
-            sortedWriter = jsonWriter.getContext().getProvider()
+            return jsonWriter.getContext().getProvider()
                     .getObjectWriter(valueClass, valueClass, this.features | jsonWriter.getFeatures());
-            if (this.sortedValueClass == null) {
-                boolean success = sortedValueClassUpdater.compareAndSet(this, null, valueClass);
-                if (success) {
-                    sortedObjectWriterUpdater.compareAndSet(this, null, sortedWriter);
-                }
-            }
-            return sortedWriter;
         }
 
         final Class initValueClass = this.initValueClass;

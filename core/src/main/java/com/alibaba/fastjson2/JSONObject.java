@@ -266,15 +266,15 @@ public class JSONObject
             // floating accumulators convert by truncation, as for Double/Float/BigDecimal, but
             // an accumulator at exactly 2^63 has longValue() clamped to Long.MAX_VALUE while the
             // truncation diff still reads 0, so the top of the domain is rejected explicitly.
-            // Integral accumulators and custom Number types answer true: longValue() is exactly
-            // what getLongValue reads back
+            // Other Number types (AtomicLong, LongAdder, custom types) keep the truncation check:
+            // a saturated, wrapped or NaN longValue() is more than one away from doubleValue()
             Number number = (Number) value;
+            double d = number.doubleValue();
             if (number instanceof java.util.concurrent.atomic.DoubleAdder
                     || number instanceof java.util.concurrent.atomic.DoubleAccumulator) {
-                double d = number.doubleValue();
                 return Math.abs(number.longValue() - d) < 1 && d < 9.223372036854776E18;
             }
-            return true;
+            return Math.abs(number.longValue() - d) < 1;
         }
         return false;
     }
