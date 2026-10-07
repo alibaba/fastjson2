@@ -2159,6 +2159,9 @@ public interface JSONB {
          * @return the capacity needed
          */
         static int enumCapacity(Enum e, long features) {
+            if (e == null) {
+                return 1;
+            }
             if ((features & (MASK_WRITE_ENUM_USING_TO_STRING | MASK_WRITE_ENUMS_USING_NAME)) != 0) {
                 return stringCapacity((features & WriteEnumUsingToString.mask) != 0
                         ? e.toString()
@@ -2177,6 +2180,10 @@ public interface JSONB {
          * @return the new offset
          */
         static int writeEnum(byte[] bytes, int off, Enum e, long features) {
+            if (e == null) {
+                bytes[off] = BC_NULL;
+                return off + 1;
+            }
             if ((features & (MASK_WRITE_ENUM_USING_TO_STRING | MASK_WRITE_ENUMS_USING_NAME)) != 0) {
                 return writeString(bytes, off,
                         (features & WriteEnumUsingToString.mask) != 0
