@@ -28,6 +28,10 @@ final class AnyOf
             } else {
                 this.items[i] = JSONSchema.of((JSONObject) item, parent);
             }
+            if (this.items[i] instanceof UnresolvedReference) {
+                parent.addResolveTask(
+                        new UnresolvedReference.ItemsResolveTask(this.items, i, (UnresolvedReference) this.items[i]));
+            }
         }
     }
 

@@ -19,7 +19,7 @@ public final class ObjectSchema
     final Map<String, JSONSchema> properties;
     final Set<String> required;
     final boolean additionalProperties;
-    final JSONSchema additionalPropertySchema;
+    JSONSchema additionalPropertySchema;
     final long[] requiredHashCode;
 
     final PatternProperty[] patternProperties;
@@ -41,8 +41,6 @@ public final class ObjectSchema
     final OneOf oneOf;
     final boolean encoded;
 
-    transient List<UnresolvedReference.ResolveTask> resolveTasks;
-
     public ObjectSchema(JSONObject input) {
         this(input, null);
     }
@@ -57,26 +55,33 @@ public final class ObjectSchema
         this.encoded = input.getBooleanValue("encoded", false);
 
         JSONObject definitions = input.getJSONObject("definitions");
+        JSONObject defs = input.getJSONObject("$defs");
+        prepareDefinitions(definitions, this.definitions);
+        prepareDefinitions(defs, this.defs);
         if (definitions != null) {
             for (Map.Entry<String, Object> entry : definitions.entrySet()) {
                 String entryKey = entry.getKey();
                 JSONObject entryValue = (JSONObject) entry.getValue();
                 JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
                 this.definitions.put(entryKey, schema);
+                if (schema instanceof UnresolvedReference) {
+                    JSONSchema resolveRoot = root == null ? this : root;
+                    resolveRoot.addResolveTask(new UnresolvedReference.PropertyResolveTask(
+                            this.definitions, entryKey, (UnresolvedReference) schema));
+                }
             }
         }
 
-        JSONObject defs = input.getJSONObject("$defs");
         if (defs != null) {
             for (Map.Entry<String, Object> entry : defs.entrySet()) {
                 String entryKey = entry.getKey();
                 JSONObject entryValue = (JSONObject) entry.getValue();
                 JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
                 this.defs.put(entryKey, schema);
-            }
-            if (resolveTasks != null) {
-                for (UnresolvedReference.ResolveTask resolveTask : resolveTasks) {
-                    resolveTask.resolve(this);
+                if (schema instanceof UnresolvedReference) {
+                    JSONSchema resolveRoot = root == null ? this : root;
+                    resolveRoot.addResolveTask(new UnresolvedReference.PropertyResolveTask(
+                            this.defs, entryKey, (UnresolvedReference) schema));
                 }
             }
         }
@@ -96,9 +101,8 @@ public final class ObjectSchema
                 }
                 this.properties.put(entryKey, schema);
                 if (schema instanceof UnresolvedReference) {
-                    String refName = ((UnresolvedReference) schema).refName;
                     UnresolvedReference.PropertyResolveTask task
-                            = new UnresolvedReference.PropertyResolveTask(this.properties, entryKey, refName);
+                            = new UnresolvedReference.PropertyResolveTask(this.properties, entryKey, (UnresolvedReference) schema);
                     JSONSchema resolveRoot = root == null ? this : root;
                     resolveRoot.addResolveTask(task);
                 }
@@ -120,7 +124,13 @@ public final class ObjectSchema
                     schema = JSONSchema.of((JSONObject) entryValue, root == null ? this : root);
                 }
 
-                this.patternProperties[index++] = new PatternProperty(Pattern.compile(entryKey), schema);
+                this.patternProperties[index] = new PatternProperty(Pattern.compile(entryKey), schema);
+                if (schema instanceof UnresolvedReference) {
+                    JSONSchema resolveRoot = root == null ? this : root;
+                    resolveRoot.addResolveTask(
+                            new UnresolvedReference.ObjectResolveTask(this, index, (UnresolvedReference) schema));
+                }
+                index++;
             }
         } else {
             this.patternProperties = new PatternProperty[0];
@@ -150,7 +160,12 @@ public final class ObjectSchema
             this.additionalProperties = (Boolean) additionalProperties;
         } else {
             if (additionalProperties instanceof JSONObject) {
-                this.additionalPropertySchema = JSONSchema.of((JSONObject) additionalProperties, root);
+                JSONSchema resolveRoot = root == null ? this : root;
+                this.additionalPropertySchema = JSONSchema.of((JSONObject) additionalProperties, resolveRoot);
+                if (additionalPropertySchema instanceof UnresolvedReference) {
+                    resolveRoot.addResolveTask(new UnresolvedReference.ObjectResolveTask(
+                            this, -1, (UnresolvedReference) additionalPropertySchema));
+                }
                 this.additionalProperties = false;
             } else {
                 this.additionalPropertySchema = null;
@@ -208,17 +223,18 @@ public final class ObjectSchema
         this.elseSchema = input.getObject("else", JSONSchema::of);
         this.thenSchema = input.getObject("then", JSONSchema::of);
 
-        allOf = allOf(input, null);
-        anyOf = anyOf(input, null);
-        oneOf = oneOf(input, null);
-    }
+        JSONArray allOfItems = input.getJSONArray("allOf");
+        allOf = allOfItems == null || allOfItems.isEmpty()
+                ? null : new AllOf(input, root == null ? this : root);
+        JSONArray anyOfItems = input.getJSONArray("anyOf");
+        anyOf = anyOfItems == null || anyOfItems.isEmpty()
+                ? null : new AnyOf(input, root == null ? this : root);
+        JSONArray oneOfItems = input.getJSONArray("oneOf");
+        oneOf = oneOfItems == null || oneOfItems.isEmpty()
+                ? null : new OneOf(input, root == null ? this : root);
 
-    @Override
-    void addResolveTask(UnresolvedReference.ResolveTask task) {
-        if (resolveTasks == null) {
-            resolveTasks = new ArrayList<>();
-        }
-        resolveTasks.add(task);
+        // Both definition namespaces must be filled before resolving forward targets.
+        runResolveTasks();
     }
 
     @Override

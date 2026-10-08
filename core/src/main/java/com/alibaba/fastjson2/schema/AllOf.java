@@ -61,6 +61,10 @@ final class AllOf
 
             type = itemSchema.getType();
             this.items[i] = itemSchema;
+            if (this.items[i] instanceof UnresolvedReference) {
+                parent.addResolveTask(
+                        new UnresolvedReference.ItemsResolveTask(this.items, i, (UnresolvedReference) this.items[i]));
+            }
         }
     }
 
