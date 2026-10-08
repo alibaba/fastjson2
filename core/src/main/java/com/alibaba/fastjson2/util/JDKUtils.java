@@ -68,6 +68,118 @@ public class JDKUtils {
     static volatile Throwable reflectErrorLast;
     static final AtomicInteger reflectErrorCount = new AtomicInteger();
 
+    /**
+     * Hardcoded FQCN-based deny list for {@link #isAutoTypeDenyClass(Class)}. These classes are
+     * inherently unsafe when reachable via {@code @type} because their static initializers /
+     * setters / class-loading behaviour can lead to RCE, SSRF, or LFD even when no further
+     * gadget-chain setter is involved. Each {@code Class.forName} probe is wrapped in try/catch so
+     * an unloaded or absent module degrades to a silent skip rather than failing the whole class
+     * init of {@code JDKUtils}.
+     */
+    static final String[] AUTO_TYPE_DENY_FQCN = new String[] {
+            "java.lang.Runtime",
+            "java.lang.Process",
+            "java.lang.ProcessBuilder",
+            "java.lang.System",
+            "java.lang.Thread",
+            "java.lang.ClassLoader",
+            "java.lang.Shutdown",
+            "java.lang.Class",
+            "java.io.File",
+            "java.io.FileInputStream",
+            "java.io.FileOutputStream",
+            "java.io.ObjectInputStream",
+            "java.io.ObjectOutputStream",
+            "java.io.RandomAccessFile",
+            "java.net.URL",
+            "java.net.URI",
+            "java.net.URLClassLoader",
+            "java.net.InetAddress",
+            "java.net.InetSocketAddress",
+            "java.net.Socket",
+            "java.net.ServerSocket",
+            "java.net.DatagramSocket",
+            "java.nio.channels.SocketChannel",
+            "java.nio.channels.ServerSocketChannel",
+            "java.rmi.server.UnicastRemoteObject",
+            "java.rmi.activation.Activator",
+            "java.beans.XMLDecoder",
+            "javax.naming.InitialContext",
+            "javax.script.ScriptEngineManager",
+            "javax.management.remote.rmi.RMIConnector",
+            "javax.management.remote.JMXServiceURL",
+            "javax.imageio.ImageIO",
+            "javax.activation.MimeType",
+            "javax.sound.sampled.AudioSystem",
+            "javax.sound.midi.MidiSystem",
+            "sun.print.PrintServiceLookup",
+            "com.sun.rowset.JdbcRowSetImpl",
+            "com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl",
+            "com.sun.org.apache.xpath.internal.jaxp.XPathFactory",
+            "com.sun.org.apache.bcel.internal.util.ClassLoader",
+            "com.sun.org.apache.jndi.ldap.LdapCtx",
+            "com.sun.net.httpserver.HttpServer",
+            "org.apache.xbean.propertyeditor.JndiConverter",
+            "org.apache.catalina.startup.Tomcat",
+            "org.apache.commons.collections.Transformer",
+            "org.apache.commons.collections.functors.InvokerTransformer",
+            "org.apache.commons.collections.functors.ChainedTransformer",
+            "org.apache.commons.collections4.functors.InvokerTransformer",
+            "org.apache.commons.beanutils.BeanComparator",
+            "org.apache.commons.io.FileUtils",
+            "org.apache.commons.io.IOUtils",
+            "org.apache.commons.lang.SerializationUtils",
+            "org.springframework.beans.factory.config.PropertyPathFactoryBean",
+            "org.springframework.context.support.ClassPathXmlApplicationContext",
+            "org.springframework.context.support.FileSystemXmlApplicationContext",
+            "org.springframework.aop.aspectj.AspectJExpressionPointcut",
+            "org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator",
+            "org.springframework.jndi.JndiTemplate",
+            "org.springframework.jndi.JndiObjectTargetSource",
+            "org.springframework.transaction.jta.JtaTransactionManager",
+            "org.springframework.web.client.RestTemplate",
+            "org.hibernate.engine.spi.TypedValue",
+            "org.hibernate.jpa.HibernatePersistenceProvider",
+            "ch.qos.logback.core.db.JNDIConnectionSource",
+            "com.mchange.v2.c3p0.JndiRefForwardingDataSource",
+            "com.mchange.v2.c3p0.WrapperConnectionPoolDataSource",
+            "freemarker.template.utility.Execute",
+            "freemarker.cache.TemplateLoader",
+            "ognl.OgnlContext",
+            "javax.faces.context.FacesContext",
+            "javax.faces.context.ExternalContext",
+            "javax.faces.context.ResponseStream",
+            "javassist.ClassPool",
+            "javassist.CtClass",
+            "bsh.Interpreter",
+            "groovy.lang.GroovyShell",
+            "org.python.core.PyObject",
+            "org.codehaus.groovy.runtime.ConvertedClosure",
+            "org.codehaus.groovy.runtime.MethodClosure",
+            "kafka.utils.VerifiableProperties"
+    };
+
+    /**
+     * Lazily-loaded Class objects corresponding to {@link #AUTO_TYPE_DENY_FQCN}. A null entry means
+     * the class was either absent (e.g. optional module not on classpath) or failed to load during
+     * the static init sweep; the FQCN string itself is the authoritative gate so that a runtime
+     * {@code Class.forName(name)} on attacker input can be cross-referenced even when this array
+     * does not have the class loaded.
+     */
+    static final Class<?>[] AUTO_TYPE_DENY_CLASSES;
+
+    static {
+        Class<?>[] deny = new Class<?>[AUTO_TYPE_DENY_FQCN.length];
+        for (int i = 0; i < AUTO_TYPE_DENY_FQCN.length; i++) {
+            try {
+                deny[i] = Class.forName(AUTO_TYPE_DENY_FQCN[i]);
+            } catch (Throwable ignored) {
+                deny[i] = null;
+            }
+        }
+        AUTO_TYPE_DENY_CLASSES = deny;
+    }
+
     static {
         Unsafe unsafe;
         try {
@@ -456,16 +568,40 @@ public class JDKUtils {
     }
 
     /**
-     * Tests whether a class is a well known deserialization gadget entry point, namely a
-     * {@link ClassLoader} subclass or a JDK SQL {@code DataSource}/{@code RowSet} implementation.
-     * Such types must not be resolved by matching an autoType whitelist prefix; only an accept
-     * entry naming the type in full is treated as an explicit opt-in.
+     * Tests whether a class is unsafe to expose via the autoType mechanism. Three categories are
+     * blocked:
+     * <ol>
+     *   <li>Subclasses of {@link ClassLoader} — they can load arbitrary code.</li>
+     *   <li>Subclasses of {@code javax.sql.DataSource} / {@code javax.sql.RowSet} — classic JNDI
+     *       gadget sinks.</li>
+     *   <li>The hardcoded FQCN list in {@link #AUTO_TYPE_DENY_FQCN} — classes whose presence on the
+     *       classpath or whose static initializer / constructor / setter chain is itself enough to
+     *       reach RCE / SSRF / LFD (e.g. {@code java.lang.Runtime}, {@code TemplatesImpl},
+     *       {@code InvokerTransformer}, {@code URLClassLoader}). The match is done by exact
+     *       FQCN — subclasses of these types are NOT auto-banned so that legitimate app classes
+     *       with the same supertype are not collateral damage.</li>
+     * </ol>
+     * Subclasses of ClassLoader / DataSource / RowSet are blocked because the existing allow-list
+     * semantics in {@link com.alibaba.fastjson2.reader.ObjectReaderProvider#checkAutoType} treat a
+     * single explicit accept as opening the entire type hierarchy.
      *
      * @param type the class to test
      * @return true if the class must not be resolved through a whitelist prefix match
      */
     public static boolean isAutoTypeDenyClass(Class<?> type) {
-        return ClassLoader.class.isAssignableFrom(type) || isSQLDataSourceOrRowSet(type);
+        if (ClassLoader.class.isAssignableFrom(type) || isSQLDataSourceOrRowSet(type)) {
+            return true;
+        }
+        if (type == null) {
+            return false;
+        }
+        String name = type.getName();
+        for (int i = 0; i < AUTO_TYPE_DENY_FQCN.length; i++) {
+            if (name.equals(AUTO_TYPE_DENY_FQCN[i])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void setReflectErrorLast(Throwable error) {

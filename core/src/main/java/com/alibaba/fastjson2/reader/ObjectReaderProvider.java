@@ -214,6 +214,15 @@ public class ObjectReaderProvider
      */
     private volatile Set<String> acceptNameSet = Collections.emptySet();
 
+    /**
+     * Programmatic deny list registered via {@link #addAutoTypeDeny(String)}. Independent from the
+     * hardcoded FQCN list in {@link JDKUtils#AUTO_TYPE_DENY_FQCN}; both lists are consulted on every
+     * {@link #checkAutoType} call. Names are normalized the same way as {@link #acceptNameSet} so a
+     * {@code $} ↔ {@code .} rewrite cannot smuggle a denied entry past the rolling-hash scan.
+     */
+    private volatile long[] denyHashCodes = new long[0];
+    private volatile Set<String> denyNameSet = Collections.emptySet();
+
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
     private Consumer<Class> autoTypeHandler = DEFAULT_AUTO_TYPE_HANDLER;
     PropertyNamingStrategy namingStrategy;
@@ -239,6 +248,22 @@ public class ObjectReaderProvider
         // see addAutoTypeAccept, the name set is published before the hash array
         acceptNameSet = Collections.unmodifiableSet(names);
         acceptHashCodes = hashCodes;
+
+        // Seed the programmatic deny list from the JVM-wide fastjson2.parser.deny system property
+        // so that setting it at JVM start actually works in fastjson2 (this was previously only
+        // honoured by fastjson 1.x's ParserConfig; the 2.x Provider silently ignored it).
+        String denyProp = System.getProperty("fastjson2.parser.deny");
+        if (denyProp == null || denyProp.isEmpty()) {
+            denyProp = JSONFactory.Conf.getProperty("fastjson2.parser.deny");
+        }
+        if (denyProp != null && !denyProp.isEmpty()) {
+            for (String item : denyProp.split(",")) {
+                String trimmed = item.trim();
+                if (!trimmed.isEmpty()) {
+                    addAutoTypeDeny(trimmed);
+                }
+            }
+        }
 
         hashCache.put(ObjectArrayReader.TYPE_HASH_CODE, ObjectArrayReader.INSTANCE);
         final long STRING_CLASS_NAME_HASH = -4834614249632438472L; // Fnv.hashCode64(String.class.getName());
@@ -299,8 +324,40 @@ public class ObjectReaderProvider
         }
     }
 
-    @Deprecated
-    public void addAutoTypeDeny(String name) {
+    /**
+     * Adds a type name to the programmatic deny list. Types on this list are rejected by
+     * {@link #checkAutoType} regardless of {@code SupportAutoType} or any explicit accept entry.
+     * Previously this method was a no-op {@code @Deprecated} stub; this restores parity with
+     * {@code com.alibaba.fastjson.parser.ParserConfig#addDeny} so that downstream apps that
+     * migrate from fastjson 1.x and rely on the legacy deny API still get the protection they
+     * expect.
+     *
+     * @param name the type name to add (matched after {@code $} ↔ {@code .} normalization,
+     *             exactly the same way {@link #addAutoTypeAccept} treats names)
+     */
+    public synchronized void addAutoTypeDeny(String name) {
+        if (name == null || name.isEmpty()) {
+            return;
+        }
+        String denyName = normalizeAcceptName(name);
+
+        // publish the name before the hash, so that a reader seeing the new hash array is
+        // guaranteed to see the name it verifies against rather than transiently rejecting
+        if (!this.denyNameSet.contains(denyName)) {
+            Set<String> names = new HashSet<>(this.denyNameSet);
+            names.add(denyName);
+            this.denyNameSet = Collections.unmodifiableSet(names);
+        }
+
+        long hash = Fnv.hashCode64(denyName);
+        long[] current = this.denyHashCodes;
+        if (Arrays.binarySearch(current, hash) < 0) {
+            long[] hashCodes = new long[current.length + 1];
+            hashCodes[hashCodes.length - 1] = hash;
+            System.arraycopy(current, 0, hashCodes, 0, current.length);
+            Arrays.sort(hashCodes);
+            this.denyHashCodes = hashCodes;
+        }
     }
 
     /**
@@ -856,6 +913,16 @@ public class ObjectReaderProvider
         if (expectClass != null && expectClass.getName().equals(typeName)) {
             afterAutoType(typeName, expectClass);
             return expectClass;
+        }
+
+        // Programmatic deny list check. Run BEFORE any allow-list rolling-hash scan or loadClass
+        // call so a denied type never triggers a Class.forName on attacker input. The name is
+        // normalized the same way as acceptNameSet so $ ↔ . rewrites don't smuggle past.
+        String normalizedDenyName = normalizeAcceptName(typeName);
+        long denyHash = Fnv.hashCode64(normalizedDenyName);
+        if (Arrays.binarySearch(denyHashCodes, denyHash) >= 0
+                && denyNameSet.contains(normalizedDenyName)) {
+            throw new JSONException("autoType is not support. " + typeName);
         }
 
         boolean autoTypeSupport = (features & JSONReader.Feature.SupportAutoType.mask) != 0;
@@ -1535,7 +1602,6 @@ public class ObjectReaderProvider
      * Sets the property naming strategy used by this provider.
      *
      * @param namingStrategy the property naming strategy to set
-     * @since 2.0.52
      */
     public void setNamingStrategy(PropertyNamingStrategy namingStrategy) {
         this.namingStrategy = namingStrategy;
