@@ -774,7 +774,10 @@ public final class ObjectWriterImplMap
                 }
 
                 if (nameFilter != null) {
-                    key = nameFilter.process(object, key, value);
+                    String filteredKey = nameFilter.process(object, key, value);
+                    if (filteredKey != null) {
+                        key = filteredKey;
+                    }
                 }
 
                 if (propertyFilter != null) {
