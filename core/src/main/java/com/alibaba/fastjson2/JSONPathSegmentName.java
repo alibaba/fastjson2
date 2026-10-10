@@ -10,9 +10,12 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
@@ -82,7 +85,11 @@ class JSONPathSegmentName
         Object object = context.parent == null
                 ? context.root
                 : context.parent.value;
+        Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        return contains(context, object, visited, true);
+    }
 
+    private boolean contains(JSONPath.Context context, Object object, Set<Object> visited, boolean direct) {
         if (object == null) {
             return false;
         }
@@ -92,88 +99,39 @@ class JSONPathSegmentName
         }
 
         if (object instanceof Collection) {
-            for (Object item : (Collection) object) {
-                if (item == null) {
-                    continue;
-                }
-
-                if (item instanceof Map) {
-                    if (((Map<?, ?>) item).containsKey(name)) {
-                        return true;
-                    }
-                    continue;
-                }
-
-                ObjectWriter<?> objectWriter = context.path
-                        .getWriterContext()
-                        .getObjectWriter(item.getClass());
-                if (objectWriter instanceof ObjectWriterAdapter) {
-                    FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-                    if (fieldWriter != null) {
-                        if (fieldWriter.getFieldValue(item) != null) {
-                            return true;
-                        }
-                    }
+            if (!visited.add(object)) {
+                return false;
+            }
+            for (Object item : (Collection<?>) object) {
+                if (contains(context, item, visited, false)) {
+                    return true;
                 }
             }
             return false;
         }
 
         if (object instanceof JSONPath.Sequence) {
-            JSONPath.Sequence sequence = (JSONPath.Sequence) object;
-            for (Object item : sequence.values) {
-                if (item == null) {
-                    continue;
-                }
-
-                if (item instanceof Map) {
-                    if (((Map<?, ?>) item).containsKey(name)) {
-                        return true;
-                    }
-                    continue;
-                }
-
-                ObjectWriter<?> objectWriter = context.path
-                        .getWriterContext()
-                        .getObjectWriter(item.getClass());
-                if (objectWriter instanceof ObjectWriterAdapter) {
-                    FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-                    if (fieldWriter != null) {
-                        if (fieldWriter.getFieldValue(item) != null) {
-                            return true;
-                        }
-                    }
+            if (!visited.add(object)) {
+                return false;
+            }
+            for (Object item : ((JSONPath.Sequence) object).values) {
+                if (contains(context, item, visited, false)) {
+                    return true;
                 }
             }
             return false;
         }
 
         if (object instanceof Object[]) {
-            Object[] array = (Object[]) object;
-            for (Object item : array) {
-                if (item == null) {
-                    continue;
-                }
-
-                if (item instanceof Map) {
-                    if (((Map) item).containsKey(name)) {
-                        return true;
-                    }
-                    continue;
-                }
-
-                ObjectWriter<?> objectWriter = context.path
-                        .getWriterContext()
-                        .getObjectWriter(item.getClass());
-                if (objectWriter instanceof ObjectWriterAdapter) {
-                    FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-                    if (fieldWriter != null) {
-                        if (fieldWriter.getFieldValue(item) != null) {
-                            return true;
-                        }
-                    }
+            if (!visited.add(object)) {
+                return false;
+            }
+            for (Object item : (Object[]) object) {
+                if (contains(context, item, visited, false)) {
+                    return true;
                 }
             }
+            return false;
         }
 
         ObjectWriter<?> objectWriter = context.path
@@ -181,9 +139,8 @@ class JSONPathSegmentName
                 .getObjectWriter(object.getClass());
         if (objectWriter instanceof ObjectWriterAdapter) {
             FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-            if (fieldWriter != null) {
-                return fieldWriter.getFieldValue(object) != null;
-            }
+            return fieldWriter != null
+                    && (direct || fieldWriter.getFieldValue(object) != null);
         }
 
         return false;

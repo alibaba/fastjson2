@@ -7,8 +7,11 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 final class JSONPathSingleName
@@ -121,7 +124,8 @@ final class JSONPathSingleName
 
         if (root instanceof List) {
             List list = (List) root;
-            return !list.isEmpty() && contains(list.get(0));
+            Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+            return !list.isEmpty() && containsCollectionValue(list.get(0), visited);
         }
 
         ObjectWriterProvider provider = getWriterContext().provider;
@@ -136,7 +140,34 @@ final class JSONPathSingleName
             return false;
         }
 
-        return fieldWriter.getFieldValue(root) != null;
+        return true;
+    }
+
+    private boolean containsCollectionValue(Object value, Set<Object> visited) {
+        if (value == null) {
+            return false;
+        }
+
+        if (value instanceof Map) {
+            return ((Map) value).containsKey(name);
+        }
+
+        if (value instanceof List) {
+            if (!visited.add(value)) {
+                return false;
+            }
+            List list = (List) value;
+            return !list.isEmpty() && containsCollectionValue(list.get(0), visited);
+        }
+
+        ObjectWriterProvider provider = getWriterContext().provider;
+        ObjectWriter objectWriter = provider.getObjectWriter(value.getClass());
+        if (objectWriter == null) {
+            return false;
+        }
+
+        FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
+        return fieldWriter != null && fieldWriter.getFieldValue(value) != null;
     }
 
     @Override

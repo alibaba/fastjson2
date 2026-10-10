@@ -31,7 +31,7 @@ abstract class JSONPathSegment {
 
     public boolean contains(JSONPath.Context context) {
         eval(context);
-        return context.value != null;
+        return hasMatch(context.value);
     }
 
     static boolean hasMatch(Object value) {
@@ -265,10 +265,20 @@ abstract class JSONPathSegment {
             if (object instanceof Object[]) {
                 Object[] array = (Object[]) object;
                 for (int i = 0; i < array.length; i++) {
-                    boolean match = i >= begin && i <= end
-                            || i - array.length > begin && i - array.length <= end;
-                    if (match) {
+                    if (matches(i, array.length)) {
                         result.add(array[i]);
+                    }
+                }
+                context.value = result;
+                context.eval = true;
+                return;
+            }
+
+            if (object != null && object.getClass().isArray()) {
+                int size = Array.getLength(object);
+                for (int i = 0; i < size; i++) {
+                    if (matches(i, size)) {
+                        result.add(Array.get(object, i));
                     }
                 }
                 context.value = result;
@@ -281,8 +291,42 @@ abstract class JSONPathSegment {
 
         @Override
         public boolean contains(JSONPath.Context context) {
-            eval(context);
-            return hasMatch(context.value);
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+            if (object instanceof List) {
+                return containsList(((List<?>) object).size());
+            }
+
+            if (object instanceof Object[]) {
+                return containsArray(((Object[]) object).length);
+            }
+
+            if (object != null && object.getClass().isArray()) {
+                return containsArray(Array.getLength(object));
+            }
+            return false;
+        }
+
+        private boolean containsList(int size) {
+            if (begin >= 0) {
+                return begin < size && begin < end;
+            }
+            return Math.max(begin, -size) < Math.min(end, 0);
+        }
+
+        private boolean containsArray(int size) {
+            for (int i = 0; i < size; i++) {
+                if (matches(i, size)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean matches(int index, int size) {
+            return index >= begin && index <= end
+                    || index - size > begin && index - size <= end;
         }
 
         @Override
@@ -580,8 +624,59 @@ abstract class JSONPathSegment {
 
         @Override
         public boolean contains(JSONPath.Context context) {
-            eval(context);
-            return hasMatch(context.value);
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+            Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+            return contains(object, visited);
+        }
+
+        private boolean contains(Object object, Set<Object> visited) {
+            if (object instanceof JSONPath.Sequence) {
+                if (!visited.add(object)) {
+                    return false;
+                }
+                for (Object item : ((JSONPath.Sequence) object).values) {
+                    if (contains(item, visited)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            if (object instanceof List) {
+                int size = ((List<?>) object).size();
+                for (int index : indexes) {
+                    int itemIndex = index >= 0 ? index : size + index;
+                    if (itemIndex >= 0 && itemIndex < size) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            if (object instanceof Object[]) {
+                int size = ((Object[]) object).length;
+                for (int index : indexes) {
+                    int itemIndex = index >= 0 ? index : size + index;
+                    if (itemIndex >= 0 && itemIndex < size) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            Class<?> objectClass = object == null ? null : object.getClass();
+            if (objectClass != null && objectClass.isArray()) {
+                int size = Array.getLength(object);
+                for (int index : indexes) {
+                    int itemIndex = index >= 0 ? index : size + index;
+                    if (itemIndex >= 0 && itemIndex < size) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         @Override
@@ -807,6 +902,15 @@ abstract class JSONPathSegment {
             Object object = context.parent == null
                     ? context.root
                     : context.parent.value;
+            Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+            return contains(object, context, visited);
+        }
+
+        private boolean contains(Object object, JSONPath.Context context, Set<Object> visited) {
+            if (object == null) {
+                return false;
+            }
+
             if (object instanceof Map) {
                 Map<?, ?> map = (Map<?, ?>) object;
                 for (String name : names) {
@@ -816,8 +920,53 @@ abstract class JSONPathSegment {
                 }
                 return false;
             }
-            eval(context);
-            return hasMatch(context.value);
+
+            if (object instanceof Collection) {
+                if (!visited.add(object)) {
+                    return false;
+                }
+                for (Object item : (Collection<?>) object) {
+                    if (contains(item, context, visited)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            if (object instanceof JSONPath.Sequence) {
+                if (!visited.add(object)) {
+                    return false;
+                }
+                for (Object item : ((JSONPath.Sequence) object).values) {
+                    if (contains(item, context, visited)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            if (object instanceof Object[]) {
+                if (!visited.add(object)) {
+                    return false;
+                }
+                for (Object item : (Object[]) object) {
+                    if (contains(item, context, visited)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            ObjectWriterProvider provider = context.path.getWriterContext().provider;
+            ObjectWriter objectWriter = provider.getObjectWriter(object.getClass());
+            if (objectWriter instanceof ObjectWriterAdapter) {
+                for (long nameHashCode : nameHashCodes) {
+                    if (objectWriter.getFieldWriter(nameHashCode) != null) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         @Override
@@ -1100,6 +1249,17 @@ abstract class JSONPathSegment {
 
         @Override
         public boolean contains(JSONPath.Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+            if (array && object instanceof Map) {
+                for (Object value : ((Map<?, ?>) object).values()) {
+                    if (!(value instanceof Collection) || !((Collection<?>) value).isEmpty()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
             eval(context);
             return hasMatch(context.value);
         }
@@ -1443,11 +1603,12 @@ abstract class JSONPathSegment {
                     ? context.root
                     : context.parent.value;
             List values = new JSONArray();
+            Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
             Consumer action;
             if (shouldRecursive()) {
-                action = new MapRecursive(context, values, 0);
+                action = new MapRecursive(context, values, 0, visited);
             } else {
-                action = new MapLoop(context, values);
+                action = new MapLoop(context, values, visited);
             }
             action.accept(object);
             return !values.isEmpty();
@@ -1481,16 +1642,30 @@ abstract class JSONPathSegment {
                 implements BiConsumer, Consumer {
             final JSONPath.Context context;
             final List values;
+            final Set<Object> visited;
 
             public MapLoop(JSONPath.Context context, List values) {
+                this(context, values, null);
+            }
+
+            public MapLoop(JSONPath.Context context, List values, Set<Object> visited) {
                 this.context = context;
                 this.values = values;
+                this.visited = visited;
+            }
+
+            private boolean visit(Object value) {
+                return visited == null || value == null || visited.add(value);
             }
 
             @Override
             public void accept(Object key, Object value) {
                 if (name.equals(key)) {
                     values.add(value);
+                }
+
+                if (!visit(value)) {
+                    return;
                 }
 
                 if (value instanceof Map) {
@@ -1505,6 +1680,10 @@ abstract class JSONPathSegment {
             @Override
             public void accept(Object value) {
                 if (value == null) {
+                    return;
+                }
+
+                if (!visit(value)) {
                     return;
                 }
 
@@ -1544,11 +1723,17 @@ abstract class JSONPathSegment {
             final JSONPath.Context context;
             final List values;
             final int level;
+            final Set<Object> visited;
 
             public MapRecursive(JSONPath.Context context, List values, int level) {
+                this(context, values, level, null);
+            }
+
+            public MapRecursive(JSONPath.Context context, List values, int level, Set<Object> visited) {
                 this.context = context;
                 this.values = values;
                 this.level = level;
+                this.visited = visited;
             }
 
             @Override
@@ -1557,6 +1742,10 @@ abstract class JSONPathSegment {
             }
 
             private void recursive(Object value, List values, int level) {
+                if (visited != null && value != null && !visited.add(value)) {
+                    return;
+                }
+
                 if (level >= maxLevel) {
                     throw new JSONException("level too large");
                 } else {

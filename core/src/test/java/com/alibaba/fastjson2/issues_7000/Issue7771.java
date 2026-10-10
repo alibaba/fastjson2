@@ -6,12 +6,18 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue7771 {
+    public static class StatusBean {
+        public String status;
+    }
+
     @Test
     public void containsOnJsonStringMatchesEval() {
         String json = "{\"status\": 200}";
@@ -85,8 +91,52 @@ public class Issue7771 {
     }
 
     @Test
+    public void containsOnNonEmptyMatchSetIsTrue() {
+        assertTrue(JSONPath.contains("[1,2]", "$[0:2]"));
+        assertTrue(JSONPath.contains("[1,2]", "$[0,5]"));
+        assertTrue(JSONPath.contains("{\"x\":1}", "$['x','y']"));
+        assertTrue(JSONPath.contains("{\"a\":1}", "$.*"));
+        assertTrue(JSONPath.contains("{\"a\":1}", "$.values()"));
+        assertTrue(JSONPath.contains("{\"a\":1}", "$.keys()"));
+        assertTrue(JSONPath.contains("{\"a\":1}", "$.entrySet()"));
+        assertTrue(JSONPath.contains("[1,2]", "$[?(@>0)]"));
+        assertTrue(JSONPath.contains("{\"a\":1}", "$..*"));
+        assertTrue(JSONPath.contains("[1,2,3]", "$[-1]"));
+        assertFalse(JSONPath.contains("[1,2,3]", "$[-5]"));
+        assertTrue(JSONPath.contains("{\"0\":\"a\"}", "$[0]"));
+        assertTrue(JSONPath.contains("123", "$[0]"));
+        assertFalse(JSONPath.contains("123", "$[1]"));
+        assertFalse(JSONPath.contains("{\"a\":[]}", "$[*]"));
+        assertTrue(JSONPath.contains("[[],[1]]", "$[0,5]"));
+        assertTrue(JSONPath.contains(new Object[]{1, 2}, "$[0:2]"));
+        assertFalse(JSONPath.contains(new Object[]{1, 2}, "$[2:3]"));
+        assertTrue(JSONPath.contains(new int[]{1, 2}, "$[0:2]"));
+    }
+
+    @Test
+    public void containsOnPojoNullPropertyUsesPresence() {
+        assertTrue(JSONPath.contains(new StatusBean(), "$.status"));
+    }
+
+    @Test
     public void containsOnMalformedJsonThrows() {
         assertThrows(JSONException.class, () -> JSONPath.contains("{invalid json", "$.status"));
+    }
+
+    @Test
+    public void containsOnCollectionAndCompoundPathsUsesPresence() {
+        assertFalse(JSONPath.contains("{}", "$.values()"));
+        assertTrue(JSONPath.contains("{\"a\":[{\"x\":1}],\"b\":[{\"x\":2}]}", "$.*.x"));
+        assertTrue(JSONPath.contains("[{\"a\":null,\"b\":1}]", "$[?(@.b==1 && exists(@.a))]"));
+        assertTrue(JSONPath.contains("{\"a\":1,\"b\":2}", "$[1]"));
+        assertFalse(JSONPath.contains("[{\"z\":1}]", "$['x','y']"));
+        assertFalse(JSONPath.contains("{}", "$['x','y'][0]"));
+
+        JSONPath typedPaths = JSONPath.of(
+                new String[]{"$", "$.id"},
+                new Type[]{JSONObject.class, Long.class}
+        );
+        assertTrue(typedPaths.contains(JSON.parseObject("{\"id\":1}")));
     }
 
     @Test
