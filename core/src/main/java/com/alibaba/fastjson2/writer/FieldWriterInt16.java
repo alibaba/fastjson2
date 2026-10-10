@@ -42,9 +42,6 @@ class FieldWriterInt16<T>
 
     protected final void writeInt16(JSONWriter jsonWriter, short value) {
         long features = jsonWriter.getFeatures(this.features);
-        if (value == 0 && (features & Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
-            return;
-        }
         boolean writeNonStringValueAsString = (features & Feature.WriteNonStringValueAsString.mask) != 0;
         if (writeNonStringValueAsString) {
             writeFieldName(jsonWriter);
