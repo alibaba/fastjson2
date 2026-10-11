@@ -64,11 +64,17 @@ final class FieldReaderDate<T>
             }
             date = null;
         }
+        if (date == null && ignoreSetNullValue(jsonReader)) {
+            return;
+        }
         accept(object, date);
     }
 
     @Override
     protected void accept(T object, Date value) {
+        if (value == null && ignoreSetNullValue()) {
+            return;
+        }
         propertyAccessor.setObject(object, value);
     }
 

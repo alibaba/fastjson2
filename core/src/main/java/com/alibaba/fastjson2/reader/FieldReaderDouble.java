@@ -31,6 +31,9 @@ final class FieldReaderDouble<T, V>
 
     @Override
     public void accept(T object, Object value) {
+        if (value == null && ignoreSetNullValue()) {
+            return;
+        }
         propertyAccessor.setObject(object, value);
     }
 
@@ -48,6 +51,10 @@ final class FieldReaderDouble<T, V>
         }
 
         if (value == null && defaultValue != null) {
+            return;
+        }
+
+        if (value == null && ignoreSetNullValue(jsonReader)) {
             return;
         }
 

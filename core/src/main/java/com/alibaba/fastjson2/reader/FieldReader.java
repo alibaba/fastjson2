@@ -746,4 +746,16 @@ public abstract class FieldReader<T>
     public final boolean isParameter() {
         return paramNameHash != 0;
     }
+
+    protected final boolean ignoreSetNullValue() {
+        return (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0;
+    }
+
+    protected final boolean ignoreSetNullValue(JSONReader jsonReader) {
+        long allFeatures = features;
+        if (jsonReader != null) {
+            allFeatures |= jsonReader.getContext().getFeatures();
+        }
+        return (allFeatures & JSONReader.Feature.IgnoreSetNullValue.mask) != 0;
+    }
 }
