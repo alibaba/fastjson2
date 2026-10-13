@@ -2552,8 +2552,10 @@ public class ObjectWriterCreatorASM
         mw.visitLabel(null_);
 
         // if (!jw.isWriteNulls())
-        mw.iload(mwc.var(WRITE_NULLS));
-        mw.ifeq(notNull_);
+        if ((fieldWriter.features & (WriteNulls.mask | NullAsDefaultValue.mask)) == 0) {
+            mw.iload(mwc.var(WRITE_NULLS));
+            mw.ifeq(notNull_);
+        }
 
         // writeFieldName(w);
         gwFieldName(mwc, fieldWriter, i);
@@ -3978,10 +3980,12 @@ public class ObjectWriterCreatorASM
 
         mw.ifnonnull(notNull_);
 
-        mw.iload(mwc.var(WRITE_NULLS));
-        mw.ifne(writeNullValue_);
+        if ((fieldWriter.features & (WriteNulls.mask | NullAsDefaultValue.mask)) == 0) {
+            mw.iload(mwc.var(WRITE_NULLS));
+            mw.ifne(writeNullValue_);
 
-        mw.goto_(endIfNull_);
+            mw.goto_(endIfNull_);
+        }
 
         mw.visitLabel(writeNullValue_);
 
@@ -4029,8 +4033,10 @@ public class ObjectWriterCreatorASM
         mw.ifne(notDefaultValue_);
 
         if (fieldWriter.defaultValue == null) {
-            mw.iload(WRITE_DEFAULT_VALUE);
-            mw.ifeq(notDefaultValue_);
+            if ((fieldWriter.features & NotWriteDefaultValue.mask) == 0) {
+                mw.iload(WRITE_DEFAULT_VALUE);
+                mw.ifeq(notDefaultValue_);
+            }
             mw.goto_(endWriteValue_);
         }
         mw.visitLabel(notDefaultValue_);
@@ -4081,10 +4087,12 @@ public class ObjectWriterCreatorASM
 
         mw.ifnonnull(notNull_);
 
-        mw.iload(mwc.var(WRITE_NULLS));
-        mw.ifne(writeNullValue_);
+        if ((fieldWriter.features & (WriteNulls.mask | NullAsDefaultValue.mask)) == 0) {
+            mw.iload(mwc.var(WRITE_NULLS));
+            mw.ifne(writeNullValue_);
 
-        mw.goto_(endIfNull_);
+            mw.goto_(endIfNull_);
+        }
 
         mw.visitLabel(writeNullValue_);
 
@@ -4132,8 +4140,10 @@ public class ObjectWriterCreatorASM
         mw.ifne(notDefaultValue_);
 
         if (fieldWriter.defaultValue == null) {
-            mw.iload(WRITE_DEFAULT_VALUE);
-            mw.ifeq(notDefaultValue_);
+            if ((fieldWriter.features & NotWriteDefaultValue.mask) == 0) {
+                mw.iload(WRITE_DEFAULT_VALUE);
+                mw.ifeq(notDefaultValue_);
+            }
             mw.goto_(endWriteValue_);
         }
         mw.visitLabel(notDefaultValue_);
@@ -4165,8 +4175,10 @@ public class ObjectWriterCreatorASM
         mw.ifne(notDefaultValue_);
 
         if (fieldWriter.defaultValue == null) {
-            mw.iload(WRITE_DEFAULT_VALUE);
-            mw.ifeq(notDefaultValue_);
+            if ((fieldWriter.features & NotWriteDefaultValue.mask) == 0) {
+                mw.iload(WRITE_DEFAULT_VALUE);
+                mw.ifeq(notDefaultValue_);
+            }
             mw.goto_(endWriteValue_);
         }
         mw.visitLabel(notDefaultValue_);

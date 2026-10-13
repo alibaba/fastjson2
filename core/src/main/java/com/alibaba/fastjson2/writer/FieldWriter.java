@@ -591,7 +591,7 @@ public abstract class FieldWriter<T>
 
     public void writeBinary(JSONWriter jsonWriter, byte[] value) {
         if (value == null) {
-            if (!jsonWriter.isWriteNulls()) {
+            if ((jsonWriter.getFeatures(this.features) & WriteNulls.mask) == 0) {
                 return;
             }
             writeFieldName(jsonWriter);
@@ -633,7 +633,7 @@ public abstract class FieldWriter<T>
     }
 
     public void writeInt16(JSONWriter jsonWriter, short[] value) {
-        if (value == null && !jsonWriter.isWriteNulls()) {
+        if (value == null && (jsonWriter.getFeatures(this.features) & WriteNulls.mask) == 0) {
             return;
         }
 
@@ -683,7 +683,7 @@ public abstract class FieldWriter<T>
     }
 
     public void writeString(JSONWriter jsonWriter, char[] value) {
-        if (value == null && !jsonWriter.isWriteNulls()) {
+        if (value == null && (jsonWriter.getFeatures(this.features) & WriteNulls.mask) == 0) {
             return;
         }
 
@@ -728,7 +728,7 @@ public abstract class FieldWriter<T>
     }
 
     public void writeBool(JSONWriter jsonWriter, boolean[] value) {
-        if (value == null && !jsonWriter.isWriteNulls()) {
+        if (value == null && (jsonWriter.getFeatures(this.features) & WriteNulls.mask) == 0) {
             return;
         }
 
@@ -741,7 +741,7 @@ public abstract class FieldWriter<T>
     }
 
     public void writeFloat(JSONWriter jsonWriter, float[] value) {
-        if (value == null && !jsonWriter.isWriteNulls()) {
+        if (value == null && (jsonWriter.getFeatures(this.features) & WriteNulls.mask) == 0) {
             return;
         }
 
@@ -754,7 +754,7 @@ public abstract class FieldWriter<T>
     }
 
     public void writeDouble(JSONWriter jsonWriter, double[] value) {
-        if (value == null && !jsonWriter.isWriteNulls()) {
+        if (value == null && (jsonWriter.getFeatures(this.features) & WriteNulls.mask) == 0) {
             return;
         }
 
