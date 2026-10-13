@@ -109,6 +109,26 @@ public class Issue7882 {
         public long amount = 300;
     }
 
+    // an explicit alphabetic = true must not fall through to declaration order
+    @JSONType(alphabetic = true)
+    public static class ExplicitAlphabetic {
+        public long to = 1001;
+        public long from = 2002;
+        public long amount = 300;
+    }
+
+    @Test
+    public void explicitAlphabeticTrueBeanToArrayRoundTrip() {
+        ExplicitAlphabetic t = new ExplicitAlphabetic();
+        String json = JSON.toJSONString(t, JSONWriter.Feature.BeanToArray);
+        assertEquals("[300,2002,1001]", json);
+
+        ExplicitAlphabetic back = JSON.parseObject(json, ExplicitAlphabetic.class, JSONReader.Feature.SupportArrayToBean);
+        assertEquals(1001, back.to);
+        assertEquals(2002, back.from);
+        assertEquals(300, back.amount);
+    }
+
     @Test
     public void defaultAlphabeticBeanToArrayRoundTrip() {
         DefaultOrder t = new DefaultOrder();

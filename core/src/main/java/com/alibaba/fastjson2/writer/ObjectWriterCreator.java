@@ -461,7 +461,7 @@ public class ObjectWriterCreator {
         final FieldInfo fieldInfo = new FieldInfo();
 
         if (fieldBased) {
-            Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
+            Map<String, FieldWriter> fieldWriterMap = beanInfo.alphabetic ? new TreeMap<>() : new LinkedHashMap<>();
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
                 FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
