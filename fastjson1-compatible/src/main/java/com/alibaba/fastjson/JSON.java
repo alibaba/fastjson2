@@ -935,6 +935,9 @@ public abstract class JSON
             } else {
                 object = jsonReader.readAny();
             }
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
             if (!jsonReader.isEnd()) {
                 throw new JSONException(jsonReader.info("input not end"));
             }
@@ -965,6 +968,9 @@ public abstract class JSON
             } else {
                 object = jsonReader.readAny();
             }
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
             if (!jsonReader.isEnd()) {
                 throw new JSONException(jsonReader.info("input not end"));
             }
@@ -986,6 +992,9 @@ public abstract class JSON
                 object = jsonReader.read(JSONObject.class);
             } else {
                 object = jsonReader.read(Object.class);
+            }
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
             }
             if (!jsonReader.isEnd()) {
                 throw new JSONException(jsonReader.info("input not end"));
@@ -1009,6 +1018,9 @@ public abstract class JSON
             } else {
                 object = jsonReader.readAny();
             }
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
             if (!jsonReader.isEnd()) {
                 throw new JSONException(jsonReader.info("input not end"));
             }
@@ -1030,6 +1042,9 @@ public abstract class JSON
                 object = jsonReader.read(JSONObject.class);
             } else {
                 object = jsonReader.readAny();
+            }
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
             }
             if (!jsonReader.isEnd()) {
                 throw new JSONException(jsonReader.info("input not end"));
@@ -1056,6 +1071,9 @@ public abstract class JSON
                 object = jsonReader.read(JSONObject.class);
             } else {
                 object = jsonReader.readAny();
+            }
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
             }
             if (!jsonReader.isEnd()) {
                 throw new JSONException(jsonReader.info("input not end"));
