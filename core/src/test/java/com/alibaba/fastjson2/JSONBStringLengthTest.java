@@ -183,6 +183,51 @@ public class JSONBStringLengthTest {
     }
 
     @Test
+    public void symbolLengthWithoutTableRejected() {
+        // a negative length is a symbol ordinal, but the slice readers carry no symbol table to resolve
+        // it against, so it is rejected rather than dereferencing a null table
+        for (byte strType : new byte[]{BC_STR_ASCII, BC_STR_UTF16}) {
+            assertMessage(NEGATIVE_LENGTH,
+                    () -> JSONB.parseObject(frame(strType, BC_INT32_NUM_MIN), 0, FRAME_LEN, String.class));
+            assertMessage(NEGATIVE_LENGTH,
+                    () -> readerOf(frame(strType, BC_INT32_NUM_MIN), FRAME_LEN).readAny());
+        }
+        assertMessage(NEGATIVE_LENGTH, () -> {
+            JSONReader reader = readerOf(frame(BC_STR_UTF16, BC_INT32_NUM_MIN), FRAME_LEN);
+            reader.readValueHashCode();
+        });
+    }
+
+    @Test
+    public void fieldNameNegativeLengthRejected() {
+        // the UTF8/UTF16LE/UTF16BE fast paths used to consume the length before the symbol tail
+        for (byte strType : STRING_TYPES) {
+            assertMessage(NEGATIVE_LENGTH,
+                    () -> readerOf(frame(strType, BC_INT32_NUM_MIN), FRAME_LEN).readFieldName());
+        }
+    }
+
+    @Test
+    public void fieldNameNegativeAsciiLength() {
+        // the name-cache gate used to index bytes[offset + strlen - 1] before checking nameValue0
+        byte[] buf = new byte[64];
+        buf[0] = BC_OBJECT;
+        buf[1] = BC_STR_ASCII;
+        buf[2] = BC_INT32_NUM_MIN;
+        Arrays.fill(buf, 3, buf.length, (byte) 'S');
+        assertMessage(NEGATIVE_LENGTH, () -> JSONB.parseObject(buf, 0, 5, JSONObject.class));
+    }
+
+    @Test
+    public void fieldNameSymbolLengthResolves() {
+        // with a symbol table the negative length keeps its ordinal meaning
+        SymbolTable symbolTable = JSONB.symbolTable("id");
+        byte[] buf = {BC_OBJECT, BC_STR_ASCII, (byte) 0xFF, (byte) 1, BC_OBJECT_END};
+        JSONObject object = JSONB.parseObject(buf, 0, buf.length, JSONObject.class, symbolTable);
+        assertEquals(1, object.getIntValue("id"));
+    }
+
+    @Test
     public void negativeLengthDoesNotRewindCursor() {
         // readStringUTF8 used to return "" and then apply offset += strlen, leaving the cursor
         // behind where it started
