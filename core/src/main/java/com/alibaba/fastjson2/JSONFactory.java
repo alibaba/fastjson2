@@ -44,6 +44,21 @@ public final class JSONFactory {
 
     static int defaultDecimalMaxScale = 2048;
 
+    static int checkDecimalScale(int scale) {
+        if (scale < -defaultDecimalMaxScale || scale > defaultDecimalMaxScale) {
+            throw new JSONException("scale overflow : " + scale);
+        }
+        return scale;
+    }
+
+    static BigDecimal checkDecimalScale(BigDecimal decimal) {
+        if (decimal == null) {
+            return null;
+        }
+        checkDecimalScale(decimal.scale());
+        return decimal;
+    }
+
     static final class NameCacheEntry2 {
         final String name;
         final long value0;
