@@ -1470,7 +1470,7 @@ final class JSONWriterJSONB
             return;
         }
 
-        int scale = value.scale();
+        int scale = checkDecimalScale(value.scale());
 
         BigInteger unscaledValue = value.unscaledValue();
         if (scale == 0

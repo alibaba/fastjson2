@@ -26,7 +26,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.JSONFactory.defaultDecimalMaxScale;
 import static com.alibaba.fastjson2.JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 import static com.alibaba.fastjson2.util.TypeUtils.toDoubleValue;
@@ -2610,9 +2609,7 @@ public abstract class JSONReader
             }
             case JSON_TYPE_BIG_DEC: {
                 if (scale > 0) {
-                    if (scale > defaultDecimalMaxScale) {
-                        throw new JSONException("scale overflow : " + scale);
-                    }
+                    checkDecimalScale(scale);
                     return toBigDecimal(stringValue);
                 } else {
                     return new BigInteger(stringValue);

@@ -89,7 +89,10 @@ public abstract class FieldWriter<T>
         this.nameJSONB = JSONB.toBytes(fieldName);
 
         DecimalFormat decimalFormat = null;
+        // "string" is a sentinel from @JsonFormat(shape = STRING) / WriteNonStringValueAsString,
+        // not a DecimalFormat pattern (which would emit invalid JSON like string200).
         if (format != null
+                && !"string".equals(format)
                 && (fieldClass == float.class
                 || fieldClass == float[].class
                 || fieldClass == Float.class
@@ -815,7 +818,7 @@ public abstract class FieldWriter<T>
             }
 
             if (BigDecimal.class == valueClass) {
-                if (format == null || format.isEmpty()) {
+                if (format == null || format.isEmpty() || "string".equals(format)) {
                     return ObjectWriterImplBigDecimal.INSTANCE;
                 } else {
                     return new ObjectWriterImplBigDecimal(new DecimalFormat(format), null);
@@ -823,7 +826,7 @@ public abstract class FieldWriter<T>
             }
 
             if (BigDecimal[].class == valueClass) {
-                if (format == null || format.isEmpty()) {
+                if (format == null || format.isEmpty() || "string".equals(format)) {
                     return new ObjectWriterArrayFinal(BigDecimal.class, null);
                 } else {
                     return new ObjectWriterArrayFinal(BigDecimal.class, new DecimalFormat(format));

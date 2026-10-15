@@ -50,7 +50,8 @@ final class ObjectWriterImplFloat
         jsonWriter.writeFloat(floatValue);
 
         if (((jsonWriter.getFeatures() | features) & JSONWriter.Feature.WriteClassName.mask) != 0
-                && fieldType != Float.class && fieldType != float.class) {
+                && fieldType != Float.class && fieldType != float.class
+                && Float.isFinite(floatValue)) {
             jsonWriter.writeRaw('F');
         }
     }

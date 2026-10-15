@@ -50,7 +50,8 @@ final class ObjectWriterImplDouble
         }
         jsonWriter.writeDouble(doubleValue);
         if (((jsonWriter.getFeatures() | features) & JSONWriter.Feature.WriteClassName.mask) != 0
-                && fieldType != Double.class && fieldType != double.class) {
+                && fieldType != Double.class && fieldType != double.class
+                && Double.isFinite(doubleValue)) {
             jsonWriter.writeRaw('D');
         }
     }
