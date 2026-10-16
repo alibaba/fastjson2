@@ -1341,6 +1341,36 @@ public interface JSONB {
         return JSONB.toBytes(object);
     }
 
+    /**
+     * Checks if the specified type is an int32 number type
+     *
+     * @param type the type to check
+     * @return true if the type is an int32 number type, false otherwise
+     */
+    static boolean isInt32Num(int type) {
+        return type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX;
+    }
+
+    /**
+     * Checks if the specified type is an int32 byte type
+     *
+     * @param type the type to check
+     * @return true if the type is an int32 byte type, false otherwise
+     */
+    static boolean isInt32Byte(int type) {
+        return (type & 0xF0) == 0x30;
+    }
+
+    /**
+     * Checks if the specified type is an int32 short type
+     *
+     * @param type the type to check
+     * @return true if the type is an int32 short type, false otherwise
+     */
+    static boolean isInt32Short(int type) {
+        return (type & 0xF8) == 0x40;
+    }
+
     static String typeName(byte type) {
         switch (type) {
             case BC_OBJECT:

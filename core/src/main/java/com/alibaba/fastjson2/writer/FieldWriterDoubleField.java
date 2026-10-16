@@ -18,7 +18,7 @@ class FieldWriterDoubleField<T>
             Field field
     ) {
         super(name, ordinal, features, format, label, Double.class, Double.class, field, null);
-        writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        writeNonStringValueAsString = (this.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
     }
 
     @Override

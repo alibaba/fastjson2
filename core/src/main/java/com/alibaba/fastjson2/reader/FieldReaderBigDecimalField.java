@@ -23,7 +23,16 @@ final class FieldReaderBigDecimalField<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        BigDecimal fieldValue = jsonReader.readBigDecimal();
+        BigDecimal fieldValue;
+        try {
+            fieldValue = jsonReader.readBigDecimal();
+        } catch (Exception e) {
+            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
+                fieldValue = null;
+            } else {
+                throw e;
+            }
+        }
 
         try {
             field.set(object, fieldValue);
