@@ -544,6 +544,8 @@ public class ObjectReaderProvider
                 }
             }
         }
+        hashCache.values().removeIf(reader -> reader.getObjectClass() == objectClass);
+        readerCache = null;
         BeanUtils.cleanupCache(objectClass);
     }
 
@@ -632,7 +634,8 @@ public class ObjectReaderProvider
 
         int tclHash = System.identityHashCode(classLoader);
         tclHashCaches.remove(tclHash);
-
+        hashCache.values().removeIf(reader -> match(reader.getObjectClass(), reader, classLoader));
+        readerCache = null;
         BeanUtils.cleanupCache(classLoader);
     }
 
