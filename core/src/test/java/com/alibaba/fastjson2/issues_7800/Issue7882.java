@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -136,6 +137,28 @@ public class Issue7882 {
         assertEquals("[300,2002,1001]", json);
 
         DefaultOrder back = JSON.parseObject(json, DefaultOrder.class, JSONReader.Feature.SupportArrayToBean);
+        assertEquals(1001, back.to);
+        assertEquals(2002, back.from);
+        assertEquals(300, back.amount);
+    }
+
+    // Jackson @JsonPropertyOrder is a third route into writer declaration order
+    // (consumed on both sides via fastjson2.useJacksonAnnotation, on by default):
+    // the writer already processed it, the reader had no branch for it
+    @JsonPropertyOrder(alphabetic = false)
+    public static class JacksonOrder {
+        public long to = 1001;
+        public long from = 2002;
+        public long amount = 300;
+    }
+
+    @Test
+    public void jacksonJsonPropertyOrderAlphabeticFalseBeanToArrayRoundTrip() {
+        JacksonOrder t = new JacksonOrder();
+        String json = JSON.toJSONString(t, JSONWriter.Feature.BeanToArray);
+        assertEquals("[1001,2002,300]", json);
+
+        JacksonOrder back = JSON.parseObject(json, JacksonOrder.class, JSONReader.Feature.SupportArrayToBean);
         assertEquals(1001, back.to);
         assertEquals(2002, back.from);
         assertEquals(300, back.amount);

@@ -291,6 +291,11 @@ public class ObjectReaderBaseModule
                             processJacksonJsonSubTypes(beanInfo, annotation);
                         }
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonPropertyOrder":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonPropertyOrder(beanInfo, annotation);
+                        }
+                        break;
                     case "kotlin.Metadata":
                         beanInfo.kotlin = true;
                         break;
@@ -404,6 +409,32 @@ public class ObjectReaderBaseModule
                     // ignored
                 }
             });
+        }
+
+        private void processJacksonJsonPropertyOrder(BeanInfo beanInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            final AtomicBoolean alphabetic = new AtomicBoolean(false);
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    if ("value".equals(name)) {
+                        String[] value = (String[]) result;
+                        if (value.length != 0) {
+                            beanInfo.orders = value;
+                        }
+                    } else if ("alphabetic".equals(name)) {
+                        alphabetic.set((Boolean) result);
+                    }
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            });
+            // mirrors ObjectWriterBaseModule#processJacksonJsonPropertyOrder: the explicit
+            // order wins; with no explicit order the alphabetic flag drives both sides
+            if (beanInfo.orders == null || beanInfo.orders.length == 0) {
+                beanInfo.alphabetic = alphabetic.get();
+            }
         }
 
         private void getBeanInfo(BeanInfo beanInfo, Annotation[] annotations) {
