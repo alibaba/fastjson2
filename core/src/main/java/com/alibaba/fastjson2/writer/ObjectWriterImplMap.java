@@ -682,11 +682,16 @@ public final class ObjectWriterImplMap
                 }
             }
 
-            boolean valueRefDetect = refDetect && strKey != null && !isPrimitiveOrEnum;
+            boolean valueRefDetect = refDetect && !isPrimitiveOrEnum
+                    && (strKey != null || key instanceof Integer || key instanceof Long);
             if (valueRefDetect) {
                 if (value == object) {
                     jsonWriter.writeReference("..");
                     continue;
+                }
+
+                if (strKey == null) {
+                    strKey = key.toString();
                 }
 
                 String refPath = jsonWriter.setPath(strKey, value);
