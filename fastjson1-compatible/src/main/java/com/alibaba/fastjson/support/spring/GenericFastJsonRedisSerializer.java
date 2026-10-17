@@ -26,7 +26,7 @@ public class GenericFastJsonRedisSerializer
     }
 
     public GenericFastJsonRedisSerializer(String[] acceptNames) {
-        contextFilter = new ContextAutoTypeBeforeHandler(acceptNames);
+        contextFilter = new ContextAutoTypeBeforeHandler(true, acceptNames);
     }
 
     @Override
@@ -47,7 +47,11 @@ public class GenericFastJsonRedisSerializer
             return null;
         }
         try {
-            return JSON.parseObject(bytes, Object.class, contextFilter, Feature.SupportAutoType);
+            if (contextFilter != null) {
+                // the accept list is the autoType gate, SupportAutoType would let any other type through
+                return JSON.parseObject(bytes, Object.class, contextFilter);
+            }
+            return JSON.parseObject(bytes, Object.class, Feature.SupportAutoType);
         } catch (Exception ex) {
             throw new SerializationException("Could not deserialize: " + ex.getMessage(), ex);
         }
