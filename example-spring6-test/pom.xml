@@ -15,7 +15,7 @@
     <properties>
         <maven.test.skip>true</maven.test.skip>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <fastjson2.version>2.0.66</fastjson2.version>
+        <fastjson2.version>2.0.67-SNAPSHOT</fastjson2.version>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
