@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONValidator;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -274,5 +276,191 @@ public class Issue7669 {
                 (byte) 0x0F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
         };
         assertThrows(JSONException.class, () -> JSONB.parseArray(bytes));
+    }
+
+    // --- R2-5: skipValue()/skipName() consumed stream-declared lengths with no
+    // remaining-buffer check — the same defect class this PR closes elsewhere.
+    // The PR's checkLength/checkArrayLen guards are folded into the skip arms so
+    // a crafted payload fails as JSONException instead of AIOOBE, a rewind loop,
+    // or a billion-iteration spin.
+
+    // 0x91 = BC_BINARY, 0x48 = BC_INT32, 0x7FFFFFFF = Integer.MAX_VALUE.
+    // skipValue's BC_BINARY arm reads the length via readInt32Value(), which has
+    // no 256MB cap — pin that the shared guard fires on the raw declared value.
+    static final byte[] SKIP_BINARY_MAX_LEN = {
+            (byte) 0x91,
+            (byte) 0x48,
+            (byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
+    };
+
+    // 0x79 = BC_STR_ASCII, 0x48 = BC_INT32, 0xFFFFFFFA = -6
+    static final byte[] SKIP_STR_NEG_LEN = {
+            (byte) 0x79,
+            (byte) 0x48,
+            (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFA
+    };
+
+    // 0xA6 = BC_OBJECT, 0x4A = BC_STR_ASCII_FIX(1) name "x" (0x78),
+    // 0x79 = BC_STR_ASCII, 0x48 = BC_INT32, 0xFFFFFFFA = -6: before the fix
+    // offset rewound onto the type byte and the object loop re-dispatched the
+    // same bytes forever (probe-verified hang in review R2-5, scenario 2).
+    static final byte[] SKIP_OBJECT_NEG_ITEM_LEN = {
+            (byte) 0xA6,
+            (byte) 0x4A, 0x78,
+            (byte) 0x79,
+            (byte) 0x48,
+            (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFA
+    };
+
+    // 0xA6 = BC_OBJECT, 0x4A = fix-str(1) "x", 0xB1 = BC_TRUE — one complete
+    // entry, then the stream ends with no BC_OBJECT_END: the loop-top read must
+    // fail as JSONException, not AIOOBE.
+    static final byte[] SKIP_OBJECT_TRUNCATED = {
+            (byte) 0xA6,
+            (byte) 0x4A, 0x78,
+            (byte) 0xB1
+    };
+
+    // 0x96 = BC_ARRAY_FIX(2 elems), 0xBE = BC_INT64 (fixed 9 bytes, 2 remain)
+    static final byte[] SKIP_ARRAY_TRUNCATED = {
+            (byte) 0x96,
+            (byte) 0xBE, 0x00, 0x00
+    };
+
+    // 0x79 = BC_STR_ASCII, 0x48 = BC_INT32, 0x0FFFFFFF = 256MB-1 (passes the
+    // readLength() cap, exceeds the remaining buffer)
+    static final byte[] SKIP_NAME_MAX_LEN = {
+            (byte) 0x79,
+            (byte) 0x48,
+            (byte) 0x0F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
+    };
+
+    // 0xA6 = BC_OBJECT, 0x4A = fix-str(1) unknown field "x",
+    // 0x91 = BC_BINARY, 0x48 = BC_INT32, 0x7FFFFFFF, 0xA5 = BC_OBJECT_END
+    static final byte[] BEAN_UNKNOWN_FIELD_BINARY_MAX_LEN = {
+            (byte) 0xA6,
+            (byte) 0x4A, 0x78,
+            (byte) 0x91,
+            (byte) 0x48,
+            (byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,
+            (byte) 0xA5
+    };
+
+    // 0xA6 = BC_OBJECT, 0x4A = fix-str(1) "x", 0xA4 = BC_ARRAY, then EOF:
+    // the readObject() map-value array branch read bytes[offset] for the item
+    // type before any bounds check (R2-4).
+    static final byte[] MAP_VALUE_ARRAY_TRUNCATED = {
+            (byte) 0xA6,
+            (byte) 0x4A, 0x78,
+            (byte) 0xA4
+    };
+
+    @Test
+    public void testSkipValueBinaryDeclaredLength() {
+        try (JSONReader reader = JSONReader.ofJSONB(SKIP_BINARY_MAX_LEN)) {
+            JSONException ex = assertThrows(JSONException.class, reader::skipValue);
+            assertTrue(ex.getMessage().contains("BC_BINARY length out of range"));
+        }
+    }
+
+    @Test
+    public void testSkipValueStringNegativeLength() {
+        try (JSONReader reader = JSONReader.ofJSONB(SKIP_STR_NEG_LEN)) {
+            JSONException ex = assertThrows(JSONException.class, reader::skipValue);
+            assertTrue(ex.getMessage().contains("string length out of range"));
+        }
+    }
+
+    @Test
+    public void testSkipValueObjectNegativeItemLength() {
+        try (JSONReader reader = JSONReader.ofJSONB(SKIP_OBJECT_NEG_ITEM_LEN)) {
+            JSONException ex = assertThrows(JSONException.class, reader::skipValue);
+            assertTrue(ex.getMessage().contains("object item length out of range"));
+        }
+    }
+
+    @Test
+    public void testSkipValueObjectTruncated() {
+        try (JSONReader reader = JSONReader.ofJSONB(SKIP_OBJECT_TRUNCATED)) {
+            JSONException ex = assertThrows(JSONException.class, reader::skipValue);
+            assertTrue(ex.getMessage().contains("truncated object"));
+        }
+    }
+
+    @Test
+    public void testSkipValueArrayDeclaredLength() {
+        try (JSONReader reader = JSONReader.ofJSONB(ARRAY_PAYLOAD_MAX_LEN)) {
+            JSONException ex = assertThrows(JSONException.class, reader::skipValue);
+            assertTrue(ex.getMessage().contains("array length out of range"));
+        }
+    }
+
+    @Test
+    public void testSkipValueArrayTruncated() {
+        try (JSONReader reader = JSONReader.ofJSONB(SKIP_ARRAY_TRUNCATED)) {
+            JSONException ex = assertThrows(JSONException.class, reader::skipValue);
+            assertTrue(ex.getMessage().contains("truncated array"));
+        }
+    }
+
+    @Test
+    public void testSkipNameDeclaredLength() {
+        try (JSONReader reader = JSONReader.ofJSONB(SKIP_NAME_MAX_LEN)) {
+            JSONException ex = assertThrows(JSONException.class, reader::skipName);
+            assertTrue(ex.getMessage().contains("field name length out of range"));
+        }
+    }
+
+    @Test
+    public void testUnknownFieldSkipDeclaredLength() {
+        // review R2-5 scenario 1: bean deserialization skips the unknown field
+        // "x" through skipValue(); the declared 0x7FFFFFFF binary must fail as
+        // JSONException, not ArrayIndexOutOfBoundsException.
+        assertThrows(JSONException.class,
+                () -> JSONB.parseObject(BEAN_UNKNOWN_FIELD_BINARY_MAX_LEN, Bean.class));
+    }
+
+    @Test
+    public void testValidatorRejectsMalformedSkipPayload() {
+        // review R2-5 scenario 2 reproduced through the validator path.
+        try (JSONReader reader = JSONReader.ofJSONB(SKIP_OBJECT_NEG_ITEM_LEN)) {
+            assertFalse(JSONValidator.from(reader).validate());
+        }
+    }
+
+    @Test
+    public void testReadObjectArrayValueTruncated() {
+        // JSONB.parse routes the top-level object through readAny()'s inline
+        // object handling; its BC_ARRAY arm must reject a stream that ends
+        // right after the BC_ARRAY type byte.
+        assertThrows(JSONException.class, () -> JSONB.parse(MAP_VALUE_ARRAY_TRUNCATED));
+    }
+
+    @Test
+    public void testReadObjectArrayValueTruncated_readObjectBranch() {
+        // The untyped parseObject overload routes through readObject(); its
+        // map-value array branch (R2-4) must fail the same truncated stream as
+        // JSONException, not AIOOBE.
+        assertThrows(JSONException.class, () -> JSONB.parseObject(MAP_VALUE_ARRAY_TRUNCATED));
+    }
+
+    @Test
+    public void testSkipValueValidPayloadStillWorks() {
+        Map<String, Object> m = new HashMap<>();
+        m.put("bin", new byte[]{1, 2, 3});
+        m.put("str", "hello");
+        m.put("arr", new int[]{1, 2, 3});
+        Map<String, Object> nested = new HashMap<>();
+        nested.put("k", "v");
+        m.put("obj", nested);
+        byte[] bytes = JSONB.toBytes(m);
+        try (JSONReader reader = JSONReader.ofJSONB(bytes)) {
+            reader.skipValue();
+            assertTrue(reader.isEnd());
+        }
+    }
+
+    public static class Bean {
+        public int a;
     }
 }

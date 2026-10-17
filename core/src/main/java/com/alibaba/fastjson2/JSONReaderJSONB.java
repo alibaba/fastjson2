@@ -422,6 +422,9 @@ final class JSONReaderJSONB
                     offset++;
                     int len;
                     if (valueType == BC_ARRAY) {
+                        if (offset >= end) {
+                            throw error("malformed JSONB input: truncated array");
+                        }
                         byte itemType = bytes[offset];
                         if (isInt32Num(itemType)) {
                             offset++;
@@ -946,6 +949,9 @@ final class JSONReaderJSONB
                 }
 
                 if (type >= BC_ARRAY_FIX_MIN && type <= BC_ARRAY) {
+                    if (type == BC_ARRAY && offset >= end) {
+                        throw error("malformed JSONB input: truncated array");
+                    }
                     int len = type == BC_ARRAY
                             ? readLength()
                             : type - BC_ARRAY_FIX_MIN;
@@ -2511,6 +2517,7 @@ final class JSONReaderJSONB
                 return;
             case BC_BINARY:
                 int byteslen = readInt32Value();
+                checkLength(byteslen, offset, end, "BC_BINARY length");
                 offset += byteslen;
                 return;
             case BC_STR_ASCII:
@@ -2519,6 +2526,7 @@ final class JSONReaderJSONB
             case BC_STR_UTF16LE:
             case BC_STR_UTF16BE:
                 int strlen = readInt32Value();
+                checkLength(strlen, offset, end, "string length");
                 offset += strlen;
                 return;
             case BC_TYPED_ANY: {
@@ -2528,6 +2536,9 @@ final class JSONReaderJSONB
             }
             case BC_OBJECT: {
                 while (true) {
+                    if (offset >= end) {
+                        throw error("malformed JSONB input: truncated object");
+                    }
                     byte b = bytes[offset];
                     if (b == BC_OBJECT_END) {
                         offset++;
@@ -2540,11 +2551,15 @@ final class JSONReaderJSONB
                     } else if (size == -1) {
                         offset++;
                         int len = readInt32Value();
+                        checkLength(len, offset, end, "object item length");
                         offset += len;
                     } else {
                         skipName();
                     }
 
+                    if (offset >= end) {
+                        throw error("malformed JSONB input: truncated object");
+                    }
                     b = bytes[offset];
                     size = FIXED_TYPE_SIZE[b & 0xFF];
                     if (size > 0) {
@@ -2552,6 +2567,7 @@ final class JSONReaderJSONB
                     } else if (size == -1) {
                         offset++;
                         int len = readInt32Value();
+                        checkLength(len, offset, end, "object item length");
                         offset += len;
                     } else {
                         skipValue();
@@ -2594,13 +2610,18 @@ final class JSONReaderJSONB
                     } else {
                         itemCnt = type - BC_ARRAY_FIX_MIN;
                     }
+                    checkArrayLen(itemCnt, offset, end);
                     for (int i = 0; i < itemCnt; ++i) {
+                        if (offset >= end) {
+                            throw error("malformed JSONB input: truncated array");
+                        }
                         int size = FIXED_TYPE_SIZE[bytes[offset] & 0xFF];
                         if (size > 0) {
                             offset += size;
                         } else if (size == -1) {
                             offset++;
                             int len = readInt32Value();
+                            checkLength(len, offset, end, "array item length");
                             offset += len;
                         } else {
                             skipValue();
@@ -2628,6 +2649,7 @@ final class JSONReaderJSONB
                 || strtype == BC_STR_UTF16BE
         ) {
             strlen = readLength();
+            checkLength(strlen, offset, end, "field name length");
             offset += strlen;
             return true;
         }
