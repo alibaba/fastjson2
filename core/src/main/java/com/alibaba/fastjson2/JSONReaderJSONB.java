@@ -422,6 +422,9 @@ final class JSONReaderJSONB
                     offset++;
                     int len;
                     if (valueType == BC_ARRAY) {
+                        if (offset >= end) {
+                            throw error("malformed JSONB input: truncated array");
+                        }
                         byte itemType = bytes[offset];
                         if (isInt32Num(itemType)) {
                             offset++;
@@ -432,6 +435,8 @@ final class JSONReaderJSONB
                     } else {
                         len = valueType - BC_ARRAY_FIX_MIN;
                     }
+
+                    checkArrayLen(len, offset, end);
 
                     if (len == 0) {
                         if ((features & Feature.UseNativeObject.mask) != 0) {
@@ -730,9 +735,7 @@ final class JSONReaderJSONB
             }
             case BC_BINARY: {
                 int len = readLength();
-                if (len < 0 || len > end - offset) {
-                    throw new JSONException("BC_BINARY length out of range: " + len);
-                }
+                checkLength(len, offset, end, "BC_BINARY length");
                 byte[] binary = Arrays.copyOfRange(this.bytes, offset, offset + len);
                 offset += len;
                 return binary;
@@ -946,9 +949,14 @@ final class JSONReaderJSONB
                 }
 
                 if (type >= BC_ARRAY_FIX_MIN && type <= BC_ARRAY) {
+                    if (type == BC_ARRAY && offset >= end) {
+                        throw error("malformed JSONB input: truncated array");
+                    }
                     int len = type == BC_ARRAY
                             ? readLength()
                             : type - BC_ARRAY_FIX_MIN;
+
+                    checkArrayLen(len, offset, end);
 
                     if (len == 0) {
                         if ((context.features & Feature.UseNativeObject.mask) != 0) {
@@ -1121,6 +1129,8 @@ final class JSONReaderJSONB
                 int len = valueType == BC_ARRAY
                         ? readLength()
                         : valueType - BC_ARRAY_FIX_MIN;
+
+                checkArrayLen(len, offset, end);
 
                 if (len == 0) {
                     if ((context.features & Feature.UseNativeObject.mask) != 0) {
@@ -1447,11 +1457,18 @@ final class JSONReaderJSONB
     // `label` identifies the context in the error message (e.g. "array length",
     // "BC_BIGINT length"). A declared length larger than the remaining buffer is
     // malformed input and must be rejected before any pre-allocation.
+    // Hot/cold split (AGENTS.md MaxInlineSize gate): keep the two comparisons
+    // small enough to inline on every BC_ARRAY header decode; the exception
+    // message StringBuilder chain lives in the cold throw helper.
     static void checkLength(int len, int offset, int end, String label) {
         if (len < 0 || len > end - offset) {
-            throw new JSONException(
-                    label + " out of range at offset " + offset + "/" + end + ": " + len + ", available: " + (end - offset));
+            throwLengthOutOfRange(len, offset, end, label);
         }
+    }
+
+    static void throwLengthOutOfRange(int len, int offset, int end, String label) {
+        throw new JSONException(
+                label + " out of range at offset " + offset + "/" + end + ": " + len + ", available: " + (end - offset));
     }
 
     public String error(byte type) {
@@ -2500,6 +2517,7 @@ final class JSONReaderJSONB
                 return;
             case BC_BINARY:
                 int byteslen = readInt32Value();
+                checkLength(byteslen, offset, end, "BC_BINARY length");
                 offset += byteslen;
                 return;
             case BC_STR_ASCII:
@@ -2508,6 +2526,7 @@ final class JSONReaderJSONB
             case BC_STR_UTF16LE:
             case BC_STR_UTF16BE:
                 int strlen = readInt32Value();
+                checkLength(strlen, offset, end, "string length");
                 offset += strlen;
                 return;
             case BC_TYPED_ANY: {
@@ -2517,6 +2536,9 @@ final class JSONReaderJSONB
             }
             case BC_OBJECT: {
                 while (true) {
+                    if (offset >= end) {
+                        throw error("malformed JSONB input: truncated object");
+                    }
                     byte b = bytes[offset];
                     if (b == BC_OBJECT_END) {
                         offset++;
@@ -2529,11 +2551,15 @@ final class JSONReaderJSONB
                     } else if (size == -1) {
                         offset++;
                         int len = readInt32Value();
+                        checkLength(len, offset, end, "object item length");
                         offset += len;
                     } else {
                         skipName();
                     }
 
+                    if (offset >= end) {
+                        throw error("malformed JSONB input: truncated object");
+                    }
                     b = bytes[offset];
                     size = FIXED_TYPE_SIZE[b & 0xFF];
                     if (size > 0) {
@@ -2541,6 +2567,7 @@ final class JSONReaderJSONB
                     } else if (size == -1) {
                         offset++;
                         int len = readInt32Value();
+                        checkLength(len, offset, end, "object item length");
                         offset += len;
                     } else {
                         skipValue();
@@ -2583,13 +2610,18 @@ final class JSONReaderJSONB
                     } else {
                         itemCnt = type - BC_ARRAY_FIX_MIN;
                     }
+                    checkArrayLen(itemCnt, offset, end);
                     for (int i = 0; i < itemCnt; ++i) {
+                        if (offset >= end) {
+                            throw error("malformed JSONB input: truncated array");
+                        }
                         int size = FIXED_TYPE_SIZE[bytes[offset] & 0xFF];
                         if (size > 0) {
                             offset += size;
                         } else if (size == -1) {
                             offset++;
                             int len = readInt32Value();
+                            checkLength(len, offset, end, "array item length");
                             offset += len;
                         } else {
                             skipValue();
@@ -2617,6 +2649,7 @@ final class JSONReaderJSONB
                 || strtype == BC_STR_UTF16BE
         ) {
             strlen = readLength();
+            checkLength(strlen, offset, end, "field name length");
             offset += strlen;
             return true;
         }
@@ -3806,9 +3839,7 @@ final class JSONReaderJSONB
         }
 
         int len = readLength();
-        if (len < 0 || len > end - offset) {
-            throw new JSONException("BC_BINARY length out of range: " + len);
-        }
+        checkLength(len, offset, end, "BC_BINARY length");
         byte[] bytes = new byte[len];
         System.arraycopy(this.bytes, offset, bytes, 0, len);
         offset += len;
@@ -4587,9 +4618,7 @@ final class JSONReaderJSONB
             }
             case BC_BINARY: {
                 int len = readInt32Value();
-                if (len < 0 || len > end - offset) {
-                    throw new JSONException("BC_BINARY length out of range: " + len);
-                }
+                checkLength(len, offset, end, "BC_BINARY length");
                 byte[] buf = new byte[len];
                 System.arraycopy(this.bytes, offset, buf, 0, len);
                 offset += len;
