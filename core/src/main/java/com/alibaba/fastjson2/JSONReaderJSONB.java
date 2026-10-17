@@ -167,8 +167,9 @@ final class JSONReaderJSONB
         }
 
         if (strlen < 0) {
-            return symbolTable.getName(-strlen);
+            return symbolName(strlen);
         }
+        checkStrLen(strlen, strBegin, end);
 
         Charset charset;
         if (strtype == BC_STR_ASCII) {
@@ -632,6 +633,7 @@ final class JSONReaderJSONB
             }
             case BC_STR_UTF8: {
                 int strlen = readLength();
+                checkStrLenCopy(strlen, offset, end);
 
                 if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
                     if (valueBytes == null) {
@@ -662,12 +664,14 @@ final class JSONReaderJSONB
             }
             case BC_STR_UTF16: {
                 int strlen = readLength();
+                checkStrLenCopy(strlen, offset, end);
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16);
                 offset += strlen;
                 return str;
             }
             case BC_STR_UTF16LE: {
                 int strlen = readLength();
+                checkStrLenCopy(strlen, offset, end);
 
                 String str;
                 if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
@@ -683,6 +687,7 @@ final class JSONReaderJSONB
             }
             case BC_STR_UTF16BE: {
                 int strlen = readLength();
+                checkStrLenCopy(strlen, offset, end);
 
                 String str;
                 if (STRING_CREATOR_JDK11 != null && JDKUtils.BIG_ENDIAN) {
@@ -701,6 +706,7 @@ final class JSONReaderJSONB
                     GB18030 = Charset.forName("GB18030");
                 }
                 int strlen = readLength();
+                checkStrLenCopy(strlen, offset, end);
                 String str = new String(bytes, offset, strlen, GB18030);
                 offset += strlen;
                 return str;
@@ -986,8 +992,9 @@ final class JSONReaderJSONB
                             : type - BC_STR_ASCII_FIX_MIN;
 
                     if (strlen < 0) {
-                        return symbolTable.getName(-strlen);
+                        return symbolName(strlen);
                     }
+                    checkStrLen(strlen, offset, end);
 
                     if (STRING_CREATOR_JDK8 != null) {
                         String str = latin1StringJDK8(bytes, offset, strlen);
@@ -2019,7 +2026,7 @@ final class JSONReaderJSONB
 
         long hashCode;
         if (strlen < 0) {
-            hashCode = symbolTable.getHashCode(-strlen);
+            hashCode = symbolHashCode(strlen);
         } else if (strtype == BC_STR_UTF8) {
             hashCode = Fnv.MAGIC_HASH_CODE;
             int end = offset + strlen;
@@ -2691,10 +2698,12 @@ final class JSONReaderJSONB
         Charset charset = null;
         String str = null;
         if (strtype == BC_STR_ASCII_FIX_MIN + 1) {
+            checkStrLen(1, offset, end);
             str = TypeUtils.toString((char) (bytes[offset] & 0xff));
             strlen = 1;
             offset++;
         } else if (strtype == BC_STR_ASCII_FIX_MIN + 2) {
+            checkStrLen(2, offset, end);
             str = TypeUtils.toString(
                     (char) (bytes[offset] & 0xff),
                     (char) (bytes[offset + 1] & 0xff)
@@ -2707,10 +2716,13 @@ final class JSONReaderJSONB
             if (strtype == BC_STR_ASCII) {
                 strlen = readLength();
                 strBegin = offset;
+                checkStrLen(strlen, offset, end);
             } else {
                 final int offset = this.offset;
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
+                checkStrLen(strlen, offset, end);
 
+                // end may itself exceed bytes.length, so the array bound has to stay as well
                 if (offset + strlen > bytes.length) {
                     throw new JSONException("illegal jsonb data");
                 }
@@ -2796,7 +2808,9 @@ final class JSONReaderJSONB
             }
 
             final int strlen = this.strlen;
-            if (bytes[offset + strlen - 1] > 0 && nameValue0 != -1) {
+            // nameValue0 is only set by the fixed-length arm, so test it first: a BC_STR_ASCII length can be
+            // a negative symbol ordinal and must not index bytes[offset + strlen - 1]
+            if (nameValue0 != -1 && bytes[offset + strlen - 1] > 0) {
                 if (nameValue1 != -1) {
                     long nameValue01 = nameValue0 ^ nameValue1;
                     int indexMask = ((int) (nameValue01 ^ (nameValue01 >>> 32))) & (NAME_CACHE2.length - 1);
@@ -2854,8 +2868,9 @@ final class JSONReaderJSONB
         } else if (strtype == BC_STR_UTF8) {
             strlen = readLength();
             strBegin = offset;
+            checkStrLen(strlen, offset, end);
 
-            if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
+            if (strlen >= 0 && STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
                 if (valueBytes == null) {
                     valueBytes = BYTES_UPDATER.getAndSet(cacheItem, null);
                     if (valueBytes == null) {
@@ -2881,12 +2896,14 @@ final class JSONReaderJSONB
         } else if (strtype == BC_STR_UTF16) {
             strlen = readLength();
             strBegin = offset;
+            checkStrLen(strlen, offset, end);
             charset = StandardCharsets.UTF_16;
         } else if (strtype == BC_STR_UTF16LE) {
             strlen = readLength();
             strBegin = offset;
+            checkStrLen(strlen, offset, end);
 
-            if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
+            if (strlen >= 0 && STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
                 str = STRING_CREATOR_JDK11.apply(chars, UTF16);
@@ -2897,8 +2914,9 @@ final class JSONReaderJSONB
         } else if (strtype == BC_STR_UTF16BE) {
             strlen = readLength();
             strBegin = offset;
+            checkStrLen(strlen, offset, end);
 
-            if (STRING_CREATOR_JDK11 != null && JDKUtils.BIG_ENDIAN) {
+            if (strlen >= 0 && STRING_CREATOR_JDK11 != null && JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
                 str = STRING_CREATOR_JDK11.apply(chars, UTF16);
@@ -2908,6 +2926,7 @@ final class JSONReaderJSONB
             charset = StandardCharsets.UTF_16BE;
         } else if (strtype == BC_STR_GB18030) {
             strlen = readLength();
+            checkStrLen(strlen, offset, end);
 
             if (GB18030 == null) {
                 GB18030 = Charset.forName("GB18030");
@@ -2916,7 +2935,7 @@ final class JSONReaderJSONB
         }
 
         if (strlen < 0) {
-            str = symbolTable.getName(-strlen);
+            str = symbolName(strlen);
         }
 
         if (str == null) {
@@ -2980,6 +2999,7 @@ final class JSONReaderJSONB
 
             String str = null;
             if (strlen >= 0) {
+                checkStrLen(strlen, offset, end);
                 if (STRING_CREATOR_JDK11 != null) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
@@ -3044,8 +3064,9 @@ final class JSONReaderJSONB
     private String readString(Charset charset) {
         String str;
         if (strlen < 0) {
-            return symbolTable.getName(-strlen);
+            return symbolName(strlen);
         }
+        checkStrLen(strlen, offset, end);
 
         char[] chars = null;
         if (JVM_VERSION == 8 && strtype == BC_STR_UTF8 && strlen < 8192) {
@@ -3081,6 +3102,7 @@ final class JSONReaderJSONB
     private void readGB18030() {
         strlen = readLength();
         strBegin = offset;
+        checkStrLenCopy(strlen, offset, end);
 
         if (GB18030 == null) {
             GB18030 = Charset.forName("GB18030");
@@ -3090,6 +3112,7 @@ final class JSONReaderJSONB
     private String readUTF16BE() {
         strlen = readLength();
         strBegin = offset;
+        checkStrLenCopy(strlen, offset, end);
 
         if (STRING_CREATOR_JDK11 != null && JDKUtils.BIG_ENDIAN) {
             byte[] chars = new byte[strlen];
@@ -3123,6 +3146,7 @@ final class JSONReaderJSONB
             strlen = readLength();
         }
         strBegin = offset;
+        checkStrLenCopy(strlen, offset, end);
 
         if (strlen == 0) {
             return "";
@@ -3158,6 +3182,7 @@ final class JSONReaderJSONB
             strlen = readLength();
         }
         strBegin = offset;
+        checkStrLenCopy(strlen, offset, end);
 
         if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
             if (valueBytes == null) {
@@ -6387,6 +6412,54 @@ final class JSONReaderJSONB
 
     static void checkBigintLen(int len, int offset, int end) {
         checkLength(len, offset, end, "BC_BIGINT length");
+    }
+
+    /**
+     * Bound a string byte length against the bytes left in the frame. A negative length is a symbol
+     * reference only at the sites that resolve one before calling - {@link #getString()},
+     * {@link #readAny()}'s BC_STR_ASCII branch, {@link #readString()}, {@link #readString(Charset)}
+     * and {@link #readFieldName()}, which resolves it after its guards - so those pass it through, and
+     * reject it there when no symbol table is set.
+     * A site that copies the length straight out of the backing array must use
+     * {@link #checkStrLenCopy} instead, which rejects the negative too.
+     */
+    static void checkStrLen(int strlen, int offset, int end) {
+        if (strlen > end - offset) {
+            throw strLenOutOfRange(strlen, end - offset);
+        }
+    }
+
+    /**
+     * Bound a string byte length that is copied directly, with no symbol reference resolved ahead of
+     * it, so a negative wire length is rejected here rather than reaching the copy as a negative
+     * array size or count.
+     */
+    static void checkStrLenCopy(int strlen, int offset, int end) {
+        if (strlen < 0 || strlen > end - offset) {
+            throw strLenOutOfRange(strlen, end - offset);
+        }
+    }
+
+    /**
+     * Resolve a negative string length as a symbol ordinal. Without a symbol table there is nothing to
+     * resolve it against, so the length is rejected as out of range instead of dereferencing null.
+     */
+    private String symbolName(int strlen) {
+        if (symbolTable == null) {
+            throw strLenOutOfRange(strlen, end - offset);
+        }
+        return symbolTable.getName(-strlen);
+    }
+
+    private long symbolHashCode(int strlen) {
+        if (symbolTable == null) {
+            throw strLenOutOfRange(strlen, end - offset);
+        }
+        return symbolTable.getHashCode(-strlen);
+    }
+
+    static JSONException strLenOutOfRange(int strlen, int available) {
+        return new JSONException("string length out of range: " + strlen + ", available: " + available);
     }
 
     static JSONException outOfBoundsCheckFromToIndex(int offset, int end) {
