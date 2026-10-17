@@ -5484,16 +5484,18 @@ class JSONReaderUTF8
         if (ch == 'e' || ch == 'E') {
             boolean negativeExp = false;
             int expValue = 0;
-            ch = bytes[offset++];
+            boolean expValid = false;
+            ch = offset == end ? EOI : bytes[offset++];
 
             if (ch == '-') {
                 negativeExp = true;
-                ch = bytes[offset++];
+                ch = offset == end ? EOI : bytes[offset++];
             } else if (ch == '+') {
-                ch = (char) bytes[offset++];
+                ch = offset == end ? EOI : bytes[offset++];
             }
 
             while (ch >= '0' && ch <= '9') {
+                expValid = true;
                 valid = true;
                 int byteVal = (ch - '0');
                 expValue = expValue * 10 + byteVal;
@@ -5510,6 +5512,10 @@ class JSONReaderUTF8
 
             if (negativeExp) {
                 expValue = -expValue;
+            }
+
+            if (!expValid) {
+                throw new JSONException(info("illegal input"));
             }
 
             this.exponent = (short) expValue;
