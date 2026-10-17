@@ -331,7 +331,7 @@ final class JSONReaderUTF16
         ch = offset == end ? EOI : chars[offset++];
 
         for (; ; ) {
-            if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F')) {
+            if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f')) {
                 // continue;
             } else if (ch == quote) {
                 ch = offset == end ? EOI : chars[offset++];
@@ -356,8 +356,8 @@ final class JSONReaderUTF16
             char c0 = chars[start + i * 2];
             char c1 = chars[start + i * 2 + 1];
 
-            int b0 = c0 - (c0 <= 57 ? 48 : 55);
-            int b1 = c1 - (c1 <= 57 ? 48 : 55);
+            int b0 = c0 <= '9' ? c0 - '0' : (c0 | 0x20) - 'a' + 10;
+            int b1 = c1 <= '9' ? c1 - '0' : (c1 | 0x20) - 'a' + 10;
             bytes[i] = (byte) ((b0 << 4) | b1);
         }
 
