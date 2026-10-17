@@ -1668,6 +1668,18 @@ final class JSONReaderUTF16
         return readValueHashCode0();
     }
 
+    @Override
+    public long readTypeHashCode() {
+        long hashCode = readValueHashCode();
+        // a name at or above the 192 limit stays conservative and keeps the downstream
+        // length error
+        typeNameIllegal = hashCode != -1
+                && !nameEscape
+                && nameEnd - nameBegin < 192
+                && IOUtils.containsTypeNameSpecialChar(chars, nameBegin, nameEnd);
+        return hashCode;
+    }
+
     public final long readValueHashCode0() {
         final char quote = ch;
         if (quote != '"' && quote != '\'') {
