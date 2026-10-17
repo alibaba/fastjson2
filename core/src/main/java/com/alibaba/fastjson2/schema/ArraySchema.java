@@ -23,7 +23,7 @@ public final class ArraySchema
     JSONSchema itemSchema;
     final JSONSchema[] prefixItems;
     final boolean additionalItems;
-    final JSONSchema additionalItem;
+    JSONSchema additionalItem;
     final JSONSchema contains;
     final int minContains;
     final int maxContains;
@@ -43,22 +43,34 @@ public final class ArraySchema
         this.encoded = input.getBooleanValue("encoded", false);
 
         JSONObject definitions = input.getJSONObject("definitions");
+        JSONObject defs = input.getJSONObject("$defs");
+        prepareDefinitions(definitions, this.definitions);
+        prepareDefinitions(defs, this.defs);
         if (definitions != null) {
             for (Map.Entry<String, Object> entry : definitions.entrySet()) {
                 String entryKey = entry.getKey();
                 JSONObject entryValue = (JSONObject) entry.getValue();
                 JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
                 this.definitions.put(entryKey, schema);
+                if (schema instanceof UnresolvedReference) {
+                    JSONSchema resolveRoot = root == null ? this : root;
+                    resolveRoot.addResolveTask(new UnresolvedReference.PropertyResolveTask(
+                            this.definitions, entryKey, (UnresolvedReference) schema));
+                }
             }
         }
 
-        JSONObject defs = input.getJSONObject("$defs");
         if (defs != null) {
             for (Map.Entry<String, Object> entry : defs.entrySet()) {
                 String entryKey = entry.getKey();
                 JSONObject entryValue = (JSONObject) entry.getValue();
                 JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
                 this.defs.put(entryKey, schema);
+                if (schema instanceof UnresolvedReference) {
+                    JSONSchema resolveRoot = root == null ? this : root;
+                    resolveRoot.addResolveTask(new UnresolvedReference.PropertyResolveTask(
+                            this.defs, entryKey, (UnresolvedReference) schema));
+                }
             }
         }
 
@@ -87,10 +99,21 @@ public final class ArraySchema
         } else {
             additionalItemsSupport = true;
             this.itemSchema = JSONSchema.of((JSONObject) items, root != null ? root : this);
+            if (itemSchema instanceof UnresolvedReference) {
+                JSONSchema resolveRoot = root == null ? this : root;
+                resolveRoot.addResolveTask(
+                        new UnresolvedReference.ArrayResolveTask(
+                                this, UnresolvedReference.ArrayResolveTask.ITEM, (UnresolvedReference) itemSchema));
+            }
         }
 
         if (additionalItems instanceof JSONObject) {
             additionalItem = JSONSchema.of((JSONObject) additionalItems, root == null ? this : root);
+            if (additionalItem instanceof UnresolvedReference) {
+                JSONSchema resolveRoot = root == null ? this : root;
+                resolveRoot.addResolveTask(new UnresolvedReference.ArrayResolveTask(
+                        this, UnresolvedReference.ArrayResolveTask.ADDITIONAL_ITEM, (UnresolvedReference) additionalItem));
+            }
             additionalItemsSupport = true;
         } else if (additionalItems instanceof Boolean) {
             additionalItemsSupport = (Boolean) additionalItems;
@@ -123,6 +146,11 @@ public final class ArraySchema
                 }
 
                 this.prefixItems[i] = schema;
+                if (schema instanceof UnresolvedReference) {
+                    JSONSchema resolveRoot = root == null ? this : root;
+                    resolveRoot.addResolveTask(
+                            new UnresolvedReference.ArrayResolveTask(this, i, (UnresolvedReference) schema));
+                }
             }
         }
 
@@ -132,9 +160,18 @@ public final class ArraySchema
 
         this.uniqueItems = input.getBooleanValue("uniqueItems");
 
-        allOf = allOf(input, null);
-        anyOf = anyOf(input, null);
-        oneOf = oneOf(input, null);
+        JSONArray allOfItems = input.getJSONArray("allOf");
+        allOf = allOfItems == null || allOfItems.isEmpty()
+                ? null : new AllOf(input, root == null ? this : root);
+        JSONArray anyOfItems = input.getJSONArray("anyOf");
+        anyOf = anyOfItems == null || anyOfItems.isEmpty()
+                ? null : new AnyOf(input, root == null ? this : root);
+        JSONArray oneOfItems = input.getJSONArray("oneOf");
+        oneOf = oneOfItems == null || oneOfItems.isEmpty()
+                ? null : new OneOf(input, root == null ? this : root);
+
+        // Both definition namespaces must be filled before resolving forward targets.
+        runResolveTasks();
     }
 
     @Override
