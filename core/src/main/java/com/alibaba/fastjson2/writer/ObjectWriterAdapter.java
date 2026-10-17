@@ -599,7 +599,11 @@ public class ObjectWriterAdapter<T>
                 throw e;
             }
 
-            if (fieldValue == null && !jsonWriter.isWriteNulls()) {
+            // field-level WriteNulls must survive the filtered path as it does on the
+            // no-filter fast path above: pre-skip only when neither the context nor the
+            // field asks for nulls (a null value that survives is visible to the filters,
+            // exactly like a non-null one)
+            if (fieldValue == null && (jsonWriter.getFeatures(fieldWriter.features) & WriteNulls.mask) == 0) {
                 continue;
             }
 
