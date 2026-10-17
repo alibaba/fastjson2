@@ -1,5 +1,6 @@
 package com.alibaba.fastjson.parser;
 
+import com.alibaba.fastjson.PropertyNamingStrategy;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
@@ -24,6 +25,13 @@ public class ParserConfig {
 
     final ObjectReaderProvider provider;
     public final boolean fieldBase;
+    /**
+     * Mirrors fastjson 1.x's public field so migration code that assigns it directly
+     * (e.g. {@code parserConfig.propertyNamingStrategy = PropertyNamingStrategy.SnakeCase;})
+     * no longer raises {@link NoSuchFieldError}. Kept for source/binary compatibility,
+     * matching {@link com.alibaba.fastjson.serializer.SerializeConfig#propertyNamingStrategy}.
+     */
+    public PropertyNamingStrategy propertyNamingStrategy;
     private boolean asmEnable;
     private boolean autoTypeSupport;
 

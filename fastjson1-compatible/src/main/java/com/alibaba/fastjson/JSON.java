@@ -95,6 +95,10 @@ public abstract class JSON
         writerProvider.register(new Fastjson1xWriterModule(writerProvider));
     }
 
+    public static JSONReader.Context createReadContext(Feature... features) {
+        return createReadContext(JSONFactory.getDefaultObjectReaderProvider(), DEFAULT_PARSER_FEATURE, features);
+    }
+
     public static JSONReader.Context createReadContext(int featuresValue, Feature... features) {
         return createReadContext(JSONFactory.getDefaultObjectReaderProvider(), featuresValue, features);
     }
@@ -2316,6 +2320,22 @@ public abstract class JSON
 
     public static Object adaptResult(Object result) {
         return adaptResult(result, 0);
+    }
+
+    /**
+     * Returns a live wrapper sharing state with the underlying fastjson2 container;
+     * mutations propagate to the parent. Use in {@code get()}-family accessors where
+     * JSONPath navigation must see writes. Use {@link #adaptResult(Object)} for
+     * independent snapshots.
+     */
+    static Object adaptResultLive(Object result) {
+        if (result instanceof com.alibaba.fastjson2.JSONObject) {
+            return new JSONObject((com.alibaba.fastjson2.JSONObject) result);
+        }
+        if (result instanceof com.alibaba.fastjson2.JSONArray) {
+            return new JSONArray((com.alibaba.fastjson2.JSONArray) result);
+        }
+        return result;
     }
 
     private static Object adaptResult(Object result, int level) {

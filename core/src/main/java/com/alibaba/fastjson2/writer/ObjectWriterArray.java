@@ -82,7 +82,8 @@ final class ObjectWriterArray
                 itemObjectWriter = previousObjectWriter;
             } else {
                 refDetect = jsonWriter.isRefDetect();
-                itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                itemObjectWriter = jsonWriter.getContext().getProvider()
+                        .getObjectWriter(itemClass, itemClass, jsonWriter.getFeatures() | features);
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
 
@@ -144,7 +145,8 @@ final class ObjectWriterArray
                 itemObjectWriter = previousObjectWriter;
             } else {
                 refDetect = jsonWriter.isRefDetect();
-                itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                itemObjectWriter = jsonWriter.getContext().getProvider()
+                        .getObjectWriter(itemClass, itemClass, jsonWriter.getFeatures() | features);
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
 
@@ -162,7 +164,7 @@ final class ObjectWriterArray
                 }
             }
 
-            itemObjectWriter.writeJSONB(jsonWriter, item, i, this.itemType, 0);
+            itemObjectWriter.writeJSONB(jsonWriter, item, i, this.itemType, features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
 
             if (refDetect) {
                 jsonWriter.popPath(item);

@@ -1900,6 +1900,17 @@ public class JSONSchemaTest {
     }
 
     @Test
+    public void testAdditionalItemsSchemaWithObjectArray() {
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
+                "  \"items\": [{\"type\": \"integer\"}],\n" +
+                "  \"additionalItems\": {\"type\": \"boolean\"}\n" +
+                "}");
+
+        assertTrue(jsonSchema.isValid(new Object[]{1, true}));
+        assertFalse(jsonSchema.isValid(new Object[]{1, "invalid"}));
+    }
+
+    @Test
     public void test_items_0() {
         JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "            \"definitions\": {\n" +

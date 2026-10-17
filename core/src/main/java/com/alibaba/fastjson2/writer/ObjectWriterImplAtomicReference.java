@@ -28,6 +28,12 @@ final class ObjectWriterImplAtomicReference
             jsonWriter.writeNull();
         }
 
+        if (ref != null && (features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+            Class<?> refClass = ref.getClass();
+            jsonWriter.getContext().getProvider().getObjectWriter(refClass, refClass, jsonWriter.getFeatures() | features)
+                    .writeJSONB(jsonWriter, ref, fieldName, null, features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+            return;
+        }
         jsonWriter.writeAny(ref);
     }
 
@@ -44,6 +50,12 @@ final class ObjectWriterImplAtomicReference
             jsonWriter.writeNull();
         }
 
+        if (ref != null && (features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+            Class<?> refClass = ref.getClass();
+            jsonWriter.getContext().getProvider().getObjectWriter(refClass, refClass, jsonWriter.getFeatures() | features)
+                    .write(jsonWriter, ref, fieldName, null, features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+            return;
+        }
         jsonWriter.writeAny(ref);
     }
 }

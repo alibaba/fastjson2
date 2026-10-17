@@ -164,8 +164,16 @@ public class DynamicClassLoader
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         if (contextClassLoader != null) {
             try {
-                contextClassLoader.loadClass(DynamicClassLoader.class.getName());
-                return contextClassLoader;
+                Class<?> contextDynamicClassLoader = contextClassLoader.loadClass(DynamicClassLoader.class.getName());
+                // A type is identified by its name and the ClassLoader that loaded it, so a class
+                // named DynamicClassLoader loaded by another ClassLoader (another fastjson2 copy)
+                // is not this class. Using it as parent would make dynamic classes resolve types
+                // such as FieldWriterList from that other copy, and the generated writer would no
+                // longer be compatible with this copy, failing with
+                // "OWF_* is not assignable to FieldWriter".
+                if (contextDynamicClassLoader == DynamicClassLoader.class) {
+                    return contextClassLoader;
+                }
             } catch (ClassNotFoundException e) {
                 // skip
             }

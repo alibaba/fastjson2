@@ -24,4 +24,8 @@ mvn validate             # checkstyle + modernizer checks
 - Java (primary), Kotlin (for `kotlin` module)
 - Tests: JUnit 5 / Kotest
 - Code style: Checkstyle (`src/checkstyle/fastjson2-checks.xml`), enforced via `mvn validate`
+- Performance-first project: every change must consider performance impact
+- Watch method bytecode size (codeSize) — keep hot-path methods under the two JIT inlining thresholds: 35 bytes (C1, `-XX:MaxInlineSize`) and 325 bytes (C2, `-XX:FreqInlineSize`) so they can be inlined
+- Prefer the implementation with smaller codeSize when choosing between equivalent approaches
 - PRs should be small and focused; ensure `mvn validate` and `mvn test` pass
+- PRs and comments should be bilingual: English first, Chinese version collapsed in a `<details>` block

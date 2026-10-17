@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -19,6 +21,56 @@ public class SafeModeTest {
     }
 
     public static class Bean {
+    }
+
+    public static class OneFieldBean {
+        public int id;
+    }
+
+    public static class SideEffect {
+        static volatile boolean created;
+
+        public SideEffect() {
+            created = true;
+        }
+    }
+
+    @Test
+    public void testHashCacheDoesNotBypassSafeMode() {
+        String typeName = Bean.class.getName();
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        provider.registerIfAbsent(
+                Fnv.hashCode64(typeName),
+                provider.getObjectReader(Bean.class)
+        );
+
+        Object object = JSON.parseObject(
+                "{\"@type\":\"" + typeName + "\"}",
+                Object.class,
+                JSONFactory.createReadContext(provider, JSONReader.Feature.SupportAutoType)
+        );
+        assertInstanceOf(Map.class, object);
+    }
+
+    @Test
+    public void testConcreteBeanHashCacheDoesNotBypassSafeMode() {
+        String unauthorized = "com.example.Unauthorized";
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        provider.registerIfAbsent(
+                Fnv.hashCode64(unauthorized),
+                provider.getObjectReader(SideEffect.class)
+        );
+
+        SideEffect.created = false;
+        try {
+            JSON.parseObject(
+                    "{\"@type\":\"" + unauthorized + "\",\"id\":1}",
+                    OneFieldBean.class,
+                    JSONFactory.createReadContext(provider, JSONReader.Feature.SupportAutoType)
+            );
+        } catch (JSONException ignored) {
+        }
+        assertFalse(SideEffect.created);
     }
 
     @Test

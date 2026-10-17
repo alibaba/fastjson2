@@ -461,7 +461,7 @@ public class ObjectWriterCreator {
         final FieldInfo fieldInfo = new FieldInfo();
 
         if (fieldBased) {
-            Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
+            Map<String, FieldWriter> fieldWriterMap = beanInfo.alphabetic ? new TreeMap<>() : new LinkedHashMap<>();
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
                 FieldWriter fieldWriter = createFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
@@ -649,7 +649,10 @@ public class ObjectWriterCreator {
 
         handleIgnores(beanInfo, fieldWriters);
 
-        if (beanInfo.alphabetic) {
+        if (beanInfo.alphabetic
+                || ((writerFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
+                        && (writerFeatures & JSONWriter.Feature.BeanToArray.mask) == 0)) {
+            // BeanToArray output order is positional and must never be reordered
             Collections.sort(fieldWriters);
         }
 
@@ -754,10 +757,11 @@ public class ObjectWriterCreator {
         String fieldName;
         if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
             if (record) {
-                fieldName = method.getName();
+                fieldName = beanInfo.namingStrategy != null
+                        ? BeanUtils.fieldName(method.getName(), beanInfo.namingStrategy)
+                        : method.getName();
             } else {
                 fieldName = BeanUtils.getterName(method, beanInfo.kotlin, beanInfo.namingStrategy);
-
                 Field field;
                 if ((provider.userDefineMask & NAME_COMPATIBLE_WITH_FILED) != 0
                         && (field = BeanUtils.getField(objectClass, method)) != null) {
@@ -1379,11 +1383,11 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == char.class) {
-            return new FieldWriterCharValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
+            return new FieldWriterCharValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == Character.class) {
-            return new FieldWriterChar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
+            return new FieldWriterChar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == BigDecimal.class) {
