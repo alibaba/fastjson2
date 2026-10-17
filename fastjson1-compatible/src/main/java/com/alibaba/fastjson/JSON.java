@@ -106,7 +106,7 @@ public abstract class JSON
 
         JSONReader.Context context = new JSONReader.Context(provider);
 
-        if ((featuresValue & Feature.UseBigDecimal.mask) == 0) {
+        if ((featuresValue & Feature.UseBigDecimal.mask) != 0) {
             context.config(JSONReader.Feature.UseBigDecimalForDoubles);
         }
 
