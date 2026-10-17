@@ -580,7 +580,7 @@ class JSONReaderUTF8
 
             if (ch == '\\') {
                 nameEscape = true;
-                ch = (char) bytes[offset++];
+                ch = (char) byteAfterEscape(offset++);
                 switch (ch) {
                     case 'u': {
                         ch = hexDigit4(bytes, offset, end);
@@ -588,7 +588,7 @@ class JSONReaderUTF8
                         break;
                     }
                     case 'x': {
-                        ch = char2(bytes[offset], bytes[offset + 1]);
+                        ch = char2(bytes, offset, end);
                         offset += 2;
                         break;
                     }
@@ -665,7 +665,7 @@ class JSONReaderUTF8
             for (int i = 0; ; ++i) {
                 if (ch == '\\') {
                     nameEscape = true;
-                    ch = bytes[offset++];
+                    ch = byteAfterEscape(offset++);
                     switch (ch) {
                         case 'u': {
                             ch = hexDigit4(bytes, offset, end);
@@ -673,7 +673,7 @@ class JSONReaderUTF8
                             break;
                         }
                         case 'x': {
-                            ch = char2(bytes[offset], bytes[offset + 1]);
+                            ch = char2(bytes, offset, end);
                             offset += 2;
                             break;
                         }
@@ -2619,7 +2619,7 @@ class JSONReaderUTF8
 
                 if (ch == '\\') {
                     nameEscape = true;
-                    ch = bytes[++offset];
+                    ch = byteAfterEscape(++offset);
                     switch (ch) {
                         case 'u': {
                             ch = hexDigit4(bytes, offset + 1, end);
@@ -2627,7 +2627,7 @@ class JSONReaderUTF8
                             break;
                         }
                         case 'x': {
-                            ch = char2(bytes[offset + 1], bytes[offset + 2]);
+                            ch = char2(bytes, offset + 1, end);
                             offset += 2;
                             break;
                         }
@@ -2666,7 +2666,7 @@ class JSONReaderUTF8
                 ch = bytes[offset];
                 if (ch == '\\') {
                     nameEscape = true;
-                    ch = bytes[++offset];
+                    ch = byteAfterEscape(++offset);
                     switch (ch) {
                         case 'u': {
                             ch = hexDigit4(bytes, offset + 1, end);
@@ -2674,7 +2674,7 @@ class JSONReaderUTF8
                             break;
                         }
                         case 'x': {
-                            ch = char2(bytes[offset + 1], bytes[offset + 2]);
+                            ch = char2(bytes, offset + 1, end);
                             offset += 2;
                             break;
                         }
@@ -2853,7 +2853,7 @@ class JSONReaderUTF8
 
             if (ch == '\\') {
                 nameEscape = true;
-                ch = bytes[++offset];
+                ch = byteAfterEscape(++offset);
                 switch (ch) {
                     case 'u': {
                         ch = hexDigit4(bytes, offset + 1, end);
@@ -2861,7 +2861,7 @@ class JSONReaderUTF8
                         break;
                     }
                     case 'x': {
-                        ch = char2(bytes[offset + 1], bytes[offset + 2]);
+                        ch = char2(bytes, offset + 1, end);
                         offset += 2;
                         break;
                     }
@@ -2893,7 +2893,7 @@ class JSONReaderUTF8
                 ch = bytes[offset];
                 if (ch == '\\') {
                     nameEscape = true;
-                    ch = bytes[++offset];
+                    ch = byteAfterEscape(++offset);
                     switch (ch) {
                         case 'u': {
                             ch = hexDigit4(bytes, offset + 1, end);
@@ -2901,7 +2901,7 @@ class JSONReaderUTF8
                             break;
                         }
                         case 'x': {
-                            ch = char2(bytes[offset + 1], bytes[offset + 2]);
+                            ch = char2(bytes, offset + 1, end);
                             offset += 2;
                             break;
                         }
@@ -3017,7 +3017,7 @@ class JSONReaderUTF8
             int ch = bytes[offset];
 
             if (ch == '\\') {
-                ch = bytes[++offset];
+                ch = byteAfterEscape(++offset);
                 switch (ch) {
                     case 'u': {
                         ch = hexDigit4(bytes, offset + 1, end);
@@ -3025,7 +3025,7 @@ class JSONReaderUTF8
                         break;
                     }
                     case 'x': {
-                        ch = char2(bytes[offset + 1], bytes[offset + 2]);
+                        ch = char2(bytes, offset + 1, end);
                         offset += 2;
                         break;
                     }
@@ -3089,7 +3089,7 @@ class JSONReaderUTF8
         for (; ; ) {
             int ch = bytes[offset];
             if (ch == '\\') {
-                ch = bytes[++offset];
+                ch = byteAfterEscape(++offset);
                 switch (ch) {
                     case 'u': {
                         ch = hexDigit4(bytes, offset + 1, end);
@@ -3097,7 +3097,7 @@ class JSONReaderUTF8
                         break;
                     }
                     case 'x': {
-                        ch = char2(bytes[offset + 1], bytes[offset + 2]);
+                        ch = char2(bytes, offset + 1, end);
                         offset += 2;
                         break;
                     }
@@ -3248,7 +3248,7 @@ class JSONReaderUTF8
             }
 
             if (ch == '\\') {
-                ch = (char) bytes[++offset];
+                ch = byteAfterEscape(++offset);
                 switch (ch) {
                     case 'u': {
                         ch = hexDigit4(bytes, offset + 1, end);
@@ -3256,7 +3256,7 @@ class JSONReaderUTF8
                         break;
                     }
                     case 'x': {
-                        ch = char2(bytes[offset + 1], bytes[offset + 2]);
+                        ch = char2(bytes, offset + 1, end);
                         offset += 2;
                         break;
                     }
@@ -3310,8 +3310,9 @@ class JSONReaderUTF8
             int ch = bytes[offset];
             if (ch == '\\') {
                 nameEscape = true;
-                ch = bytes[offset + 1];
+                ch = byteAfterEscape(offset + 1);
                 offset += (ch == 'u' ? 6 : (ch == 'x' ? 4 : 2));
+                checkEscapeEnd(offset);
                 continue;
             }
 
@@ -4148,7 +4149,7 @@ class JSONReaderUTF8
             int c = bytes[offset];
             if (c == '\\') {
                 valueEscape = true;
-                c = bytes[++offset];
+                c = byteAfterEscape(++offset);
                 switch (c) {
                     case 'u': {
                         offset += 4;
@@ -4162,6 +4163,7 @@ class JSONReaderUTF8
                         break;
                 }
                 offset++;
+                checkEscapeEnd(offset);
                 continue;
             }
 
@@ -4203,7 +4205,7 @@ class JSONReaderUTF8
             for (int i = 0, end = this.end; ; ++i) {
                 int c = bytes[offset];
                 if (c == '\\') {
-                    c = bytes[++offset];
+                    c = byteAfterEscape(++offset);
                     switch (c) {
                         case 'u': {
                             c = hexDigit4(bytes, offset + 1, end);
@@ -4211,7 +4213,7 @@ class JSONReaderUTF8
                             break;
                         }
                         case 'x': {
-                            c = char2(bytes[offset + 1], bytes[offset + 2]);
+                            c = char2(bytes, offset + 1, end);
                             offset += 2;
                             break;
                         }
@@ -4332,8 +4334,9 @@ class JSONReaderUTF8
             int c = bytes[offset];
             if (c == '\\') {
                 valueEscape = true;
-                c = bytes[offset + 1];
+                c = byteAfterEscape(offset + 1);
                 offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
+                checkEscapeEnd(offset);
                 continue;
             }
 
@@ -4379,7 +4382,7 @@ class JSONReaderUTF8
             for (int i = 0; ; ++i) {
                 int c = bytes[offset];
                 if (c == '\\') {
-                    c = bytes[++offset];
+                    c = byteAfterEscape(++offset);
                     switch (c) {
                         case 'u': {
                             c = hexDigit4(bytes, offset + 1, end);
@@ -4387,7 +4390,7 @@ class JSONReaderUTF8
                             break;
                         }
                         case 'x': {
-                            c = char2(bytes[offset + 1], bytes[offset + 2]);
+                            c = char2(bytes, offset + 1, end);
                             offset += 2;
                             break;
                         }
@@ -4488,6 +4491,26 @@ class JSONReaderUTF8
         }
 
         stringValue = str;
+    }
+
+    private int byteAfterEscape(int offset) {
+        if (offset >= end) {
+            throw error("invalid escape character EOI");
+        }
+        return bytes[offset];
+    }
+
+    private char char2(byte[] bytes, int offset, int end) {
+        if (offset + 1 >= end) {
+            throw error("invalid escape character EOI");
+        }
+        return char2(bytes[offset], bytes[offset + 1]);
+    }
+
+    private void checkEscapeEnd(int offset) {
+        if (offset >= end) {
+            throw error("invalid escape character EOI");
+        }
     }
 
     @Override
@@ -4685,13 +4708,13 @@ class JSONReaderUTF8
      * rejects; the advances themselves are unchanged.
      */
     private static int skipEscape(JSONReaderUTF8 jsonReader, byte[] bytes, int slashIndex, int end) {
-        int ch = bytes[slashIndex + 1];
+        int ch = jsonReader.byteAfterEscape(slashIndex + 1);
         if (ch == 'u') {
             hexDigit4(bytes, slashIndex + 2, end);
             return slashIndex + 6;
         }
         if (ch == 'x') {
-            char2(bytes[slashIndex + 2], bytes[slashIndex + 3]);
+            jsonReader.char2(bytes, slashIndex + 2, end);
             return slashIndex + 4;
         }
         if (ch != '\\' && ch != '"' && ch != 'n') {
@@ -4705,7 +4728,7 @@ class JSONReaderUTF8
         offset++;
         for (; ; ) {
             if (ch == '\\') {
-                ch = bytes[offset++];
+                ch = jsonReader.byteAfterEscape(offset++);
                 if (ch == 'u') {
                     hexDigit4(bytes, offset, jsonReader.end);
                     offset += 4;
@@ -4715,7 +4738,7 @@ class JSONReaderUTF8
                 } else if (ch != '\\' && ch != '"') {
                     jsonReader.char1(ch);
                 }
-                ch = bytes[offset++];
+                ch = jsonReader.byteAfterEscape(offset++);
                 continue;
             }
             if (ch == quote) {
@@ -5095,7 +5118,7 @@ class JSONReaderUTF8
             }
 
             if (c == '\\') {
-                c = (char) bytes[++offset];
+                c = (char) byteAfterEscape(++offset);
                 switch (c) {
                     case 'u': {
                         c = hexDigit4(bytes, offset + 1, end);
@@ -5103,7 +5126,7 @@ class JSONReaderUTF8
                         break;
                     }
                     case 'x': {
-                        c = char2(bytes[offset + 1], bytes[offset + 2]);
+                        c = char2(bytes, offset + 1, end);
                         offset += 2;
                         break;
                     }
@@ -5317,12 +5340,12 @@ class JSONReaderUTF8
                         if (c == quote) {
                             break LOOP;
                         } else {
-                            c = bytes[offset++];
+                            c = byteAfterEscape(offset++);
                             if (c == 'u') {
                                 c = (char) hexDigit4(bytes, offset, end);
                                 offset += 4;
                             } else if (c == 'x') {
-                                c = char2(bytes[offset], bytes[offset + 1]);
+                                c = char2(bytes, offset, end);
                                 offset += 2;
                             } else {
                                 c = char1(c);
