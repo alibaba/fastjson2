@@ -5124,7 +5124,7 @@ class JSONReaderUTF8
             boolean endOfComment = false;
             if (multi) {
                 if (ch == '*'
-                        && offset <= end && bytes[offset] == '/') {
+                        && offset < end && bytes[offset] == '/') {
                     offset++;
                     endOfComment = true;
                 }
