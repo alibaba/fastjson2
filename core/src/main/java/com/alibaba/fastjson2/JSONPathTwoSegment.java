@@ -66,6 +66,9 @@ class JSONPathTwoSegment
     public boolean contains(Object root) {
         Context context0 = new Context(this, null, first, second, 0);
         context0.root = root;
+        if (first instanceof JSONPathSegment.MultiNameSegment && !first.contains(context0)) {
+            return false;
+        }
         first.eval(context0);
         if (context0.value == null) {
             return false;

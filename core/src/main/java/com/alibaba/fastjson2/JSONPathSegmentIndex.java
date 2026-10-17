@@ -200,6 +200,94 @@ final class JSONPathSegmentIndex
     }
 
     @Override
+    public boolean contains(JSONPath.Context context) {
+        Object object = context.parent == null
+                ? context.root
+                : context.parent.value;
+        Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        return contains(object, visited);
+    }
+
+    private boolean contains(Object object, Set<Object> visited) {
+        if (object == null) {
+            return false;
+        }
+
+        if (object instanceof List) {
+            int size = ((List<?>) object).size();
+            int i = index >= 0 ? index : size + index;
+            return i >= 0 && i < size;
+        }
+
+        if (object instanceof Object[]) {
+            int size = ((Object[]) object).length;
+            int i = index >= 0 ? index : size + index;
+            return i >= 0 && i < size;
+        }
+
+        Class<?> objectClass = object.getClass();
+        if (objectClass.isArray()) {
+            int size = Array.getLength(object);
+            int i = index >= 0 ? index : size + index;
+            return i >= 0 && i < size;
+        }
+
+        if (object instanceof SortedSet
+                || object instanceof LinkedHashSet
+                || object instanceof Queue) {
+            return index >= 0 && index < ((Collection<?>) object).size();
+        }
+
+        if (object instanceof Collection) {
+            return index == 0 && ((Collection<?>) object).size() == 1;
+        }
+
+        if (object instanceof JSONPath.Sequence) {
+            if (!visited.add(object)) {
+                return false;
+            }
+            for (Object item : ((JSONPath.Sequence) object).values) {
+                if (contains(item, visited)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        if (object instanceof Map) {
+            return contains((Map<?, ?>) object);
+        }
+
+        return index == 0;
+    }
+
+    private boolean contains(Map<?, ?> object) {
+        if (object.containsKey(index) || object.containsKey(Integer.toString(index))) {
+            return true;
+        }
+
+        if (index < 0) {
+            return false;
+        }
+
+        int size = object.size();
+        Iterator<?> it = object.entrySet().iterator();
+        for (int i = 0; i <= index && i < size && it.hasNext(); i++) {
+            Map.Entry<?, ?> entry = (Map.Entry<?, ?>) it.next();
+            Object entryKey = entry.getKey();
+            if (entryKey instanceof Long && entryKey.equals((long) index)) {
+                return true;
+            }
+            if ((size == 1 || object instanceof LinkedHashMap || object instanceof SortedMap)
+                    && i == index
+                    && !(entryKey instanceof Long)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public void set(JSONPath.Context context, Object value) {
         Object object = context.parent == null
                 ? context.root

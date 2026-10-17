@@ -32,6 +32,12 @@ abstract class JSONPathFilter
 
     abstract boolean apply(JSONPath.Context context, Object object);
 
+    @Override
+    public boolean contains(JSONPath.Context context) {
+        eval(context);
+        return hasMatch(context.value);
+    }
+
     enum Operator {
         EQ,
         NE,
