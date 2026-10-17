@@ -2,6 +2,50 @@ name: CI
 
 on:
   push:
+    # Only the refs that take direct pushes and have no pull request to trigger
+    # CI for them. Every other branch reaches CI through the pull_request
+    # trigger below; triggering on all pushes made a branch with an open PR run
+    # the whole matrix twice for the same commit (verified on sha 2e6afd5d44,
+    # which produced both a push run and a pull_request run), doubling demand on
+    # the runner pool.
+    #
+    # release/* is deliberately absent. Release branches are merged through PRs
+    # (#7744 head release/2.0.64, #7841 head release/2.0.65), so listing them
+    # would preserve exactly the duplication this filter removes: sha 194bd971
+    # produced a push run and a pull_request run 9 seconds apart. The PR run on
+    # the merge commit is the more relevant gate.
+    #
+    # Branches pushed without a PR (instrospect, fastjson3, android5/android8,
+    # fix/* -- all verified to have zero open PRs) get no CI from this trigger.
+    # Validate them by opening a PR or via workflow_dispatch. Note this includes
+    # the branch carrying this very change: GitHub evaluates the pushed ref's
+    # own workflow file, so this filter cannot be smoke-tested by pushing to the
+    # branch that introduces it.
+    #
+    # `tags` must be listed explicitly: declaring only `branches` excludes tag
+    # pushes altogether, and a main-line release tag is the only full-matrix run
+    # between merge and publishing to Maven Central. Main-line tag pushes do run
+    # this workflow today -- run 30743811143 (head_branch=2.0.64), and 2.0.63 /
+    # 2.0.65 likewise. '2.*' covers those and future 2.x releases while
+    # excluding the legacy 0.x/1.x tags and the fastcode_*/bak_* scratch tags.
+    #
+    # Scope of that claim: GitHub evaluates the workflow file at the tagged
+    # commit, so this filter only governs tags cut on commits carrying this
+    # file. The *.android5 / *.android8 tags are cut on the android5 / android8
+    # branches, which still hold a different legacy workflow at this same path
+    # (`name: Java CI`, `ubuntu-20.04`, JDK 8/11/17). That runner label is
+    # retired, so those runs queue until GitHub's 24-hour cap cancels them --
+    # run 33637740678 (tag 2.0.65.android8) went 13:45:57 to 13:46:00 the next
+    # day, cancelled. Pre-existing gap, not a regression from this change;
+    # porting this file onto android5/android8 is separate work.
+    branches:
+      - main
+      - v2.1.x
+    tags:
+      - '2.*'
+      - 'v2.*'  # the repo already uses a v-prefix for branches (v2.1.x), so a
+                # v-prefixed release tag is plausible; missing it fails silently
+                # -- no run at all -- on the release gate
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-excluding-paths
     paths-ignore:
       - 'docs/**'
@@ -12,6 +56,49 @@ on:
       - '**.md'
   workflow_dispatch:
 
+# Lane queueing, not compile or test time, dominates CI wall-clock: run
+# 34414883838 (29 lanes) spent 94 minutes end to end while its individual lanes
+# ran only 3-10 minutes, and its `Test JDK 11 on macos-latest` lane waited 1h26m
+# for a runner before running for 8.
+#
+# That 94 minutes was cross-run contention, and this block does NOT address it.
+# The overlapping run was 34330335364 -- a re-run (attempt 2) of a different PR,
+# fix-7842-string-to-boolean, whose own 29 lanes spanned 23:00 to 00:31. A group
+# keyed per PR cannot suppress another PR's run, nor a main push run. What
+# relieves that contention is the 29 -> 15 lane merge below.
+#
+# This block exists for a narrower and real problem: without it, every new
+# commit on the same PR branch queued a fresh full matrix while the previous one
+# still held runners, so stale commits on one PR kept saturating the pool.
+concurrency:
+  # Prefixed because concurrency group names are repository-scoped, not
+  # workflow-scoped -- a bare `ci-...` could collide with another workflow here.
+  #
+  # The group key differs per ref type on purpose:
+  #   pull_request -> github.ref (refs/pull/N/merge), stable across commits on
+  #                   one PR, so a new commit supersedes the in-flight run.
+  #                   This is the block's only real job; it does not deduplicate
+  #                   anything on the push side -- the branch/tag filter above
+  #                   does that.
+  #   push (branch) -> github.sha, unique per commit, so consecutive main
+  #                   pushes never share a group and none is dropped. A
+  #                   ref-keyed group would let GitHub's default `queue: single`
+  #                   silently cancel the pending run when several merges land
+  #                   in quick succession. (`queue: max` is documented as
+  #                   incompatible with a literal cancel-in-progress: true; this
+  #                   file sets it by expression, so that interaction is
+  #                   unverified -- sha-keying sidesteps needing `queue` at all.)
+  #   push (tag)    -> github.ref (refs/tags/<tag>). A main-line release tag is
+  #                   cut on main's HEAD, so the tag push and the main branch
+  #                   push carry the SAME sha; sha-keying tags would put the
+  #                   release gate in the same group as the main run and queue
+  #                   it behind one that has measured at 104 minutes (tag
+  #                   2.0.64, sha 39531157: main run 30743786350 at 10:27:40,
+  #                   tag run 30743811143 45s later). Tags need neither
+  #                   cancellation nor queueing, only a distinct group.
+  group: fastjson2-ci-${{ github.event_name == 'push' && github.ref_type == 'branch' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
   pull-requests: write  # Allow posting PR comments for coverage reports
@@ -21,7 +108,24 @@ env:
 
 jobs:
   test:
-    timeout-minutes: 20
+    # Has to cover the retry path below, not just a healthy run. Measured on run
+    # 34414883838: the slowest build-plus-default-suite lane was 10m07s (Test
+    # JDK 21 on windows) and the slowest clean-build-plus-reflect-suite lane was
+    # 8m22s (Test Reflect JDK 17 on windows). Dropping dokka brings pass 1 to
+    # roughly 8m30s, and pass 2 skips the clean and the packaging:
+    #   healthy  setup 1 + pass 1 8.5 + pass 2 5    = ~15 min
+    #   retry    setup 1 + pass 1 8.5 x2 + pass 2 5 = ~23 min
+    # and `cache: maven` adds 2-4 min when it misses cold. 30 covers that; 25
+    # did not, and would have died inside pass 2 with an opaque timeout rather
+    # than reporting the retry's result.
+    #
+    # Deliberately not sized to absorb a hang. Every cancelled lane in recent
+    # history was the dokka stall documented on the build step below, where the
+    # step emitted nothing for ~15 minutes until the cap fired; raising the cap
+    # only lets a hang burn more runner time and fail anyway. With dokka gone
+    # the remaining stall class is a dependency download, which
+    # .mvn/maven.config bounds.
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       max-parallel: 16
@@ -46,53 +150,80 @@ jobs:
           java-version: ${{ matrix.java }}
           cache: maven
 
-      - name: Build with Maven
+      - name: Build with Maven and test (default creator)
+        # This job absorbed the former test-reflect job, which repeated the
+        # entire reactor build and differed only by -Dfastjson2.creator=reflect
+        # at test time. Running the suite twice over one build halves the lane
+        # count (28 -> 14), which is what relieves the runner queue.
+        #
+        # -Pgen-dokka is deliberately not passed. dokka resolves its ~99 MB
+        # runtime tree at mojo execution time and is the sole source of every
+        # cancelled lane in recent history -- 7 confirmed, all ubuntu, all
+        # default-creator, all with one signature: job 111846711588 printed the
+        # dokka banner at 15:52:16, then emitted nothing at all until the
+        # 20-minute cap killed it at 16:07:12, leaving an orphaned java process.
+        # They include job 90506607532, which cancelled the 2.0.63 release-tag
+        # gate with 28 of 29 lanes green, and job 112155369041, dated after
+        # #7883 merged -- so the aether timeouts in .mvn/maven.config do not
+        # bound it. Dokka output is JDK- and OS-independent, so 14 lanes
+        # validated nothing one lane wouldn't.
+        #
+        # The profile still activates on performRelease=true
+        # (kotlin/pom.xml:96-101), so release builds keep generating it and the
+        # published artifacts are unchanged. The trade is where a dokka break
+        # surfaces: kotlin is 12th of 17 in the reactor and deploy-settings
+        # binds nexus-staging:deploy per module, so a release-time dokka failure
+        # strands the ~11 modules already uploaded to staging and needs a manual
+        # drop. It cannot publish a broken artifact -- close is never reached,
+        # and Central requires the kotlin javadoc jar that only dokka produces.
+        #
+        # -Pgen-javadoc stays: doclint behaviour is JDK-dependent and it has
+        # never hung. Not risk-free though -- it hard-failed the 2.0.64 tag run
+        # when maven-javadoc-plugin could not fetch the docs.oracle.com <link>
+        # declared at codegen/pom.xml:168 (a transient runner DNS fault).
+        #
+        # shell: bash is required, not cosmetic. windows-latest defaults to
+        # pwsh -- confirmed from a windows test lane's job log, which records
+        # `shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"`.
+        # The retry below is written in bash: `|| { ... }` and the
+        # `MVNW_REPOURL=... ./mvnw` environment prefix are not pwsh syntax, so
+        # the mirror fallback cannot behave as intended there. Until now all 5
+        # windows test lanes ran this block under pwsh, while the windows
+        # test-reflect lanes -- which did declare bash -- were the ones that
+        # actually depended on the fallback.
+        shell: bash
         # Retry once on failure: a stalled dependency download now fails fast
         # (see .mvn/maven.config) and the retry resumes from the partially
         # populated ~/.m2. MVNW_REPOURL lets the Maven wrapper itself fall back
         # to the GCS Maven Central mirror when repo.maven.apache.org is
         # unreachable from the runner (observed on windows-latest).
         run: |
-          ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package || {
+          ./mvnw -V --no-transfer-progress -Pgen-javadoc clean package || {
             echo "::warning::Maven build failed; retrying once with the GCS Maven Central mirror as fallback"
             sleep 10
-            MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2 ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
+            MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2 ./mvnw -V --no-transfer-progress -Pgen-javadoc clean package
           }
 
-  test-reflect:
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      max-parallel: 16
-      matrix:
-        java: [ 8, 11, 17, 21, 25 ]
-        os: [ ubuntu-24.04, windows-latest, macos-latest ]
-        exclude:
-          - java: 25
-            os: macos-latest
-    name: Test Reflect JDK ${{ matrix.java }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v4
-        with:
-          distribution: zulu
-          java-version: ${{ matrix.java }}
-          cache: maven
-
-      - name: Build with Maven
-        # Same transient-download retry as the test job.
-        run: |
-          ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package || {
-            echo "::warning::Maven build failed; retrying once with the GCS Maven Central mirror as fallback"
-            sleep 10
-            MVNW_REPOURL=https://maven-central.storage-download.googleapis.com/maven2 ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect clean package
-          }
+      - name: Test again with -Dfastjson2.creator=reflect
+        # Kept as its own step so a red lane still says which suite failed --
+        # the job name no longer carries "Reflect" -- and so each pass's
+        # duration stays visible in the job summary.
+        #
+        # No `clean`: this reuses the classes the previous step compiled. It has
+        # to be the `test` phase, not a bare `surefire:test` goal. A bare goal
+        # never runs `package` for the sibling modules, so Maven's ReactorReader
+        # has no artifact to serve for them and resolution dies with "Could not
+        # find artifact com.alibaba.fastjson2:fastjson2:jar:...-SNAPSHOT" even
+        # though the jar is sitting in core/target/ from the previous step.
+        #
+        # No retry, which is a deliberate change: the former test-reflect job
+        # retried its whole `clean package` on any failure, flaky tests
+        # included. This pass downloads nothing new -- the previous step already
+        # resolved every dependency, and this one stops at the `test` phase so it
+        # never reaches the javadoc-jar binding at `package` -- so a failure here
+        # is a test failure, and re-running would only delay reporting it.
         shell: bash
+        run: ./mvnw -V --no-transfer-progress -Dfastjson2.creator=reflect test
 
   coverage:
     timeout-minutes: 20
@@ -112,7 +243,7 @@ jobs:
           cache: maven
 
       - name: Build with Maven and generate coverage
-        # Same transient-download retry as the test jobs.
+        # Same transient-download retry as the test job.
         run: |
           ./mvnw -V --no-transfer-progress clean package || {
             echo "::warning::Maven build failed; retrying once with the GCS Maven Central mirror as fallback"
