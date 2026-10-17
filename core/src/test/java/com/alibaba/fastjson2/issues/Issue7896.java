@@ -41,6 +41,37 @@ public class Issue7896 {
         assertNull(provider.getObjectReader(hashCode));
     }
 
+    @Test
+    public void cleanupClassLoaderRemovesReaderRegisteredUnderOtherContextClassLoader() throws Exception {
+        ClassLoaderTest.ExtClassLoader classLoader = new ClassLoaderTest.ExtClassLoader();
+        Class objectClass = classLoader.loadClass("com.alibaba.mock.demo.api.Demo");
+
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        ObjectReader objectReader = provider.getObjectReader(objectClass);
+        long hashCode = Fnv.hashCode64(objectClass.getName());
+
+        Thread thread = Thread.currentThread();
+        ClassLoader contextClassLoader = thread.getContextClassLoader();
+        thread.setContextClassLoader(new OtherClassLoader(contextClassLoader));
+        try {
+            provider.registerIfAbsent(hashCode, objectReader);
+            assertNotNull(provider.getObjectReader(hashCode));
+
+            provider.cleanup(classLoader);
+
+            assertNull(provider.getObjectReader(hashCode));
+        } finally {
+            thread.setContextClassLoader(contextClassLoader);
+        }
+    }
+
+    public static class OtherClassLoader
+            extends ClassLoader {
+        public OtherClassLoader(ClassLoader parent) {
+            super(parent);
+        }
+    }
+
     public static class Bean {
     }
 }

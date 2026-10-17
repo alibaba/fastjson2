@@ -634,8 +634,12 @@ public class ObjectReaderProvider
 
         int tclHash = System.identityHashCode(classLoader);
         tclHashCaches.remove(tclHash);
+        for (ConcurrentHashMap<Long, ObjectReader> tlc : tclHashCaches.values()) {
+            tlc.values().removeIf(reader -> match(reader.getObjectClass(), reader, classLoader));
+        }
         hashCache.values().removeIf(reader -> match(reader.getObjectClass(), reader, classLoader));
         readerCache = null;
+
         BeanUtils.cleanupCache(classLoader);
     }
 
