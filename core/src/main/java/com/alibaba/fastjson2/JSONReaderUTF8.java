@@ -5976,7 +5976,8 @@ class JSONReaderUTF8
         final byte[] bytes = this.bytes;
         int offset = this.offset;
         int ch;
-        if (bytes[offset] == 'u'
+        if (offset + 2 < end
+                && bytes[offset] == 'u'
                 && bytes[offset + 1] == 'l'
                 && bytes[offset + 2] == 'l') {
             offset += 3;
