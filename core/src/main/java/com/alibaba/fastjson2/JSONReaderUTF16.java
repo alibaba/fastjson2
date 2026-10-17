@@ -5471,17 +5471,7 @@ final class JSONReaderUTF16
             val = false;
         } else if (ch == '-' || (ch >= '0' && ch <= '9')) {
             readNumber();
-            if (valueType == JSON_TYPE_INT) {
-                if ((context.features & Feature.NonZeroNumberCastToBooleanAsTrue.mask) != 0) {
-                    return mag0 != 0 || mag1 != 0 || mag2 != 0 || mag3 != 0;
-                } else {
-                    return mag0 == 0
-                            && mag1 == 0
-                            && mag2 == 0
-                            && mag3 == 1;
-                }
-            }
-            return false;
+            return getBooleanValue();
         } else if (ch == 'n' && offset + 2 < chars.length
                 && chars[offset] == 'u'
                 && chars[offset + 1] == 'l'
