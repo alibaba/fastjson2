@@ -264,6 +264,14 @@ final class JSONPathSingleName
 
     @Override
     public Object extract(JSONReader jsonReader) {
+        if (jsonReader.isArray()) {
+            Object value = super.eval(jsonReader.readAny());
+            if (value == null && (features & Feature.AlwaysReturnList.mask) != 0) {
+                return new JSONArray();
+            }
+            return value;
+        }
+
         if (jsonReader.jsonb) {
             if (jsonReader.nextIfObjectStart()) {
                 while (!jsonReader.nextIfObjectEnd()) {
