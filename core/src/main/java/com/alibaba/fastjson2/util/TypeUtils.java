@@ -2517,6 +2517,12 @@ public class TypeUtils {
         throw new JSONException("can not cast to int");
     }
 
+    public static boolean isTrueSpelling(String str) {
+        return "true".equalsIgnoreCase(str)
+                || "T".equalsIgnoreCase(str)
+                || "Y".equalsIgnoreCase(str);
+    }
+
     public static boolean toBooleanValue(Object value) {
         if (value == null) {
             return false;

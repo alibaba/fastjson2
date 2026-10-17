@@ -965,7 +965,7 @@ public class JSONObject
                 return null;
             }
 
-            return "true".equalsIgnoreCase(str) || "1".equals(str);
+            return TypeUtils.isTrueSpelling(str) || "1".equals(str);
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to boolean");
