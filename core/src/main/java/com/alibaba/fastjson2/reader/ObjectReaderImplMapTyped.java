@@ -318,7 +318,7 @@ class ObjectReaderImplMapTyped
             } else if (keyType == String.class) {
                 name = jsonReader.readFieldName();
                 if (index == 0
-                        && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                        && autoTypeConfigured(context, contextFeatures)
                         && name.equals(getTypeKey())
                 ) {
                     if (seenKeys != null && !seenKeys.add(getTypeKey())) {
@@ -345,7 +345,7 @@ class ObjectReaderImplMapTyped
                 }
             } else {
                 if (index == 0
-                        && (jsonReader.isEnabled(JSONReader.Feature.SupportAutoType) || jsonReader.getContext().getContextAutoTypeBeforeHandler() != null)
+                        && autoTypeConfigured(context, contextFeatures)
                         && jsonReader.current() == '"'
                         && !(keyType instanceof Class && Enum.class.isAssignableFrom((Class) keyType))
                 ) {
@@ -378,7 +378,7 @@ class ObjectReaderImplMapTyped
                         jsonReader.nextIfMatch(':');
                     }
                     if (index == 0
-                            && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                            && autoTypeConfigured(context, contextFeatures)
                             && name.equals(getTypeKey())) {
                         if (seenKeys != null && !seenKeys.add(getTypeKey())) {
                             throw duplicateKeyError(jsonReader, name);
@@ -456,6 +456,13 @@ class ObjectReaderImplMapTyped
 
         return object;
     }
+
+    private static boolean autoTypeConfigured(JSONReader.Context context, long contextFeatures) {
+        return (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                || context.getContextAutoTypeBeforeHandler() != null
+                || context.getProvider().getAutoTypeBeforeHandler() != null;
+    }
+
     static JSONException duplicateKeyError(JSONReader jsonReader, Object name) {
         return new JSONException(jsonReader.info("duplicate key : " + name));
     }
