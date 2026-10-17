@@ -30,6 +30,9 @@ import com.alibaba.fastjson2.util.Wrapper;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.*;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -1020,7 +1023,47 @@ public class JSONObject
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader objectReader = provider.getObjectReader(clazz);
-        return (T) objectReader.createInstance(this, JSONReader.Feature.SupportSmartMatch.mask);
+        try {
+            return (T) objectReader.createInstance(this, JSONReader.Feature.SupportSmartMatch.mask);
+        } catch (Exception e) {
+            // Backport of fastjson 1.x behavior:
+            // fastjson 1.2.83 silently ignored extra/unknown keys (e.g. a key like "/*")
+            // that can raise IntrospectionException on some JDK/architecture combinations
+            // (see https://github.com/alibaba/fastjson2/issues/7782). Here we fall back to
+            // setting only the target bean's own properties and dropping the unknown ones.
+            return toJavaObjectIgnoreUnknown(this, clazz);
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    // package-private so the fallback can be unit-tested directly (see Issue7782); it is the
+    // backport of fastjson 1.x "silently ignore unknown keys" behaviour.
+    static <T> T toJavaObjectIgnoreUnknown(JSONObject map, Class<T> clazz) {
+        try {
+            T instance = clazz.getDeclaredConstructor().newInstance();
+            BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
+            for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
+                Method setter = pd.getWriteMethod();
+                if (setter == null) {
+                    continue;
+                }
+                if (!map.containsKey(pd.getName())) {
+                    continue;
+                }
+                Object value = map.get(pd.getName());
+                if (value == null) {
+                    continue;
+                }
+                try {
+                    setter.invoke(instance, value);
+                } catch (Exception ignored) {
+                    // ignore fields that cannot be set, consistent with fastjson 1.x
+                }
+            }
+            return instance;
+        } catch (Exception e) {
+            throw new JSONException("toJavaObject failed for " + clazz.getName(), e);
+        }
     }
 
     public <T> T toJavaObject(Class<T> clazz, ParserConfig config, int features) {
