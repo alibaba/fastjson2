@@ -23,7 +23,7 @@ public class JSONPath {
     }
 
     public Object eval(Object object) {
-        return path.eval(object);
+        return JSON.adaptResult(path.eval(object));
     }
 
     public boolean set(Object object, Object value) {
@@ -99,6 +99,6 @@ public class JSONPath {
         JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
         JSONReader jsonReader = JSONReader.of(json, context);
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
-        return jsonPath.extract(jsonReader);
+        return JSON.adaptResult(jsonPath.extract(jsonReader));
     }
 }
