@@ -1668,6 +1668,18 @@ final class JSONReaderUTF16
         return readValueHashCode0();
     }
 
+    @Override
+    public long readTypeHashCode() {
+        long hashCode = readValueHashCode();
+        // a name at or above the 192 limit stays conservative and keeps the downstream
+        // length error
+        typeNameIllegal = hashCode != -1
+                && !nameEscape
+                && nameEnd - nameBegin < 192
+                && IOUtils.containsTypeNameSpecialChar(chars, nameBegin, nameEnd);
+        return hashCode;
+    }
+
     public final long readValueHashCode0() {
         final char quote = ch;
         if (quote != '"' && quote != '\'') {
@@ -3371,6 +3383,11 @@ final class JSONReaderUTF16
             char ch = chars[offset++];
             if (ch == '\\') {
                 ch = jsonReader.charAfterEscape(offset);
+                if (ch == 'u') {
+                    hexDigit4(chars, offset + 1, end);
+                } else if (ch == 'x') {
+                    jsonReader.char2(chars, offset + 1, end);
+                }
                 offset += (ch == 'u' ? 5 : (ch == 'x' ? 3 : 1));
                 jsonReader.checkEscapeEnd(offset);
                 continue;
@@ -3501,13 +3518,7 @@ final class JSONReaderUTF16
         for (; ; ) {
             if (ch == '\\') {
                 ch = jsonReader.charAfterEscape(offset++);
-                if (ch == 'u') {
-                    offset += 4;
-                } else if (ch == 'x') {
-                    offset += 2;
-                } else if (ch != '\\' && ch != '"') {
-                    jsonReader.char1(ch);
-                }
+                offset = skipEscape(jsonReader, chars, offset, end, ch);
                 ch = jsonReader.charAfterEscape(offset++);
                 continue;
             }
@@ -3544,6 +3555,26 @@ final class JSONReaderUTF16
         return offset;
     }
 
+    /**
+     * Validates the escape body starting at {@code offset} and returns the offset just past it. Unicode
+     * and hex escapes have their digits checked here so that the skip path rejects exactly what the
+     * decode path rejects; the advances themselves are unchanged.
+     */
+    private static int skipEscape(JSONReaderUTF16 jsonReader, char[] chars, int offset, int end, int ch) {
+        if (ch == 'u') {
+            hexDigit4(chars, offset, end);
+            return offset + 4;
+        }
+        if (ch == 'x') {
+            jsonReader.char2(chars, offset, end);
+            return offset + 2;
+        }
+        if (ch != '\\' && ch != '"') {
+            jsonReader.char1(ch);
+        }
+        return offset;
+    }
+
     private static int skipStringEscaped(JSONReaderUTF16 jsonReader, char[] bytes, int offset, int quote) {
         int ch = bytes[offset++];
         for (; ; ) {
@@ -3552,13 +3583,7 @@ final class JSONReaderUTF16
                     throw jsonReader.error("invalid escape character EOI");
                 }
                 ch = bytes[offset++];
-                if (ch == 'u') {
-                    offset += 4;
-                } else if (ch == 'x') {
-                    offset += 2;
-                } else if (ch != '\\' && ch != '"') {
-                    jsonReader.char1(ch);
-                }
+                offset = skipEscape(jsonReader, bytes, offset, jsonReader.end, ch);
                 if (offset >= bytes.length) {
                     throw jsonReader.error("invalid escape character EOI");
                 }

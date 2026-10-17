@@ -248,14 +248,20 @@ public class ObjectReaderAdapter<T>
 
         ObjectReader autoTypeObjectReader = null;
         if (jsonReader.isSupportAutoTypeOrHandler(featuresAll)) {
-            String typeName = jsonReader.getString();
-            autoTypeObjectReader = context.getObjectReaderAutoType(typeName, expectClass, featuresAll);
+            if (jsonReader.isTypeNameIllegal()
+                    && context.getContextAutoTypeBeforeHandler() == null
+                    && context.getProvider().getAutoTypeBeforeHandler() == null) {
+                // an illegal type name is unresolvable, the same as the provider returning null
+            } else {
+                String typeName = jsonReader.getString();
+                autoTypeObjectReader = context.getObjectReaderAutoType(typeName, expectClass, featuresAll);
+            }
 
             if (autoTypeObjectReader == null) {
                 if (expectClass == objectClass) {
                     autoTypeObjectReader = this;
                 } else {
-                    throw new JSONException(jsonReader.info("autoType not support : " + typeName));
+                    throw new JSONException(jsonReader.info("autoType not support : " + jsonReader.getString()));
                 }
             }
         }

@@ -121,7 +121,10 @@ public abstract class FieldWriter<T>
         this.nameJSONB = JSONB.toBytes(fieldName);
 
         DecimalFormat decimalFormat = null;
+        // "string" is a sentinel from @JsonFormat(shape = STRING) / WriteNonStringValueAsString,
+        // not a DecimalFormat pattern (which would emit invalid JSON like string200).
         if (format != null
+                && !"string".equals(format)
                 && (fieldClass == float.class
                 || fieldClass == float[].class
                 || fieldClass == Float.class
@@ -586,13 +589,24 @@ public abstract class FieldWriter<T>
         jsonWriter.writeEnum(e);
     }
 
+    /**
+     * The field-level features that decide whether a null array field is written, and with
+     * which value: {@link JSONWriter.Feature#WriteNulls} writes {@code null}, while
+     * {@link JSONWriter.Feature#NullAsDefaultValue} and {@link JSONWriter.Feature#WriteNullListAsEmpty}
+     * write {@code []}. This is the reflect-side spelling of the same family the ASM generator
+     * bakes into its null gates (see {@code ObjectWriterCreatorASM#gwFieldValueIntVA} and
+     * {@code FieldWriterObject#write}), so both creators agree on one decision.
+     */
+    static final long ARRAY_NULL_FEATURES = WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask;
+
     public void writeBinary(JSONWriter jsonWriter, byte[] value) {
         if (value == null) {
-            if (!jsonWriter.isWriteNulls()) {
+            long features = jsonWriter.getFeatures(this.features);
+            if ((features & ARRAY_NULL_FEATURES) == 0) {
                 return;
             }
             writeFieldName(jsonWriter);
-            jsonWriter.writeArrayNull();
+            jsonWriter.writeArrayNull(features);
             return;
         }
 
@@ -630,7 +644,13 @@ public abstract class FieldWriter<T>
     }
 
     public void writeInt16(JSONWriter jsonWriter, short[] value) {
-        if (value == null && !jsonWriter.isWriteNulls()) {
+        if (value == null) {
+            long features = jsonWriter.getFeatures(this.features);
+            if ((features & ARRAY_NULL_FEATURES) == 0) {
+                return;
+            }
+            writeFieldName(jsonWriter);
+            jsonWriter.writeArrayNull(features);
             return;
         }
 
@@ -680,16 +700,17 @@ public abstract class FieldWriter<T>
     }
 
     public void writeString(JSONWriter jsonWriter, char[] value) {
-        if (value == null && !jsonWriter.isWriteNulls()) {
+        if (value == null) {
+            long features = jsonWriter.getFeatures(this.features);
+            if ((features & ARRAY_NULL_FEATURES) == 0) {
+                return;
+            }
+            writeFieldName(jsonWriter);
+            jsonWriter.writeArrayNull(features);
             return;
         }
 
         writeFieldName(jsonWriter);
-        if (value == null) {
-            jsonWriter.writeStringNull();
-            return;
-        }
-
         jsonWriter.writeString(value, 0, value.length);
     }
 
@@ -725,7 +746,13 @@ public abstract class FieldWriter<T>
     }
 
     public void writeBool(JSONWriter jsonWriter, boolean[] value) {
-        if (value == null && !jsonWriter.isWriteNulls()) {
+        if (value == null) {
+            long features = jsonWriter.getFeatures(this.features);
+            if ((features & ARRAY_NULL_FEATURES) == 0) {
+                return;
+            }
+            writeFieldName(jsonWriter);
+            jsonWriter.writeArrayNull(features);
             return;
         }
 
@@ -738,7 +765,13 @@ public abstract class FieldWriter<T>
     }
 
     public void writeFloat(JSONWriter jsonWriter, float[] value) {
-        if (value == null && !jsonWriter.isWriteNulls()) {
+        if (value == null) {
+            long features = jsonWriter.getFeatures(this.features);
+            if ((features & ARRAY_NULL_FEATURES) == 0) {
+                return;
+            }
+            writeFieldName(jsonWriter);
+            jsonWriter.writeArrayNull(features);
             return;
         }
 
@@ -751,7 +784,13 @@ public abstract class FieldWriter<T>
     }
 
     public void writeDouble(JSONWriter jsonWriter, double[] value) {
-        if (value == null && !jsonWriter.isWriteNulls()) {
+        if (value == null) {
+            long features = jsonWriter.getFeatures(this.features);
+            if ((features & ARRAY_NULL_FEATURES) == 0) {
+                return;
+            }
+            writeFieldName(jsonWriter);
+            jsonWriter.writeArrayNull(features);
             return;
         }
 
@@ -1048,7 +1087,7 @@ public abstract class FieldWriter<T>
             }
 
             if (BigDecimal.class == valueClass) {
-                if (format == null || format.isEmpty()) {
+                if (format == null || format.isEmpty() || "string".equals(format)) {
                     return ObjectWriterImplBigDecimal.INSTANCE;
                 } else {
                     return new ObjectWriterImplBigDecimal(new DecimalFormat(format), null);
@@ -1056,7 +1095,7 @@ public abstract class FieldWriter<T>
             }
 
             if (BigDecimal[].class == valueClass) {
-                if (format == null || format.isEmpty()) {
+                if (format == null || format.isEmpty() || "string".equals(format)) {
                     return new ObjectWriterArrayFinal(BigDecimal.class, null);
                 } else {
                     return new ObjectWriterArrayFinal(BigDecimal.class, new DecimalFormat(format));

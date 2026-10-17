@@ -66,7 +66,7 @@
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.64</version>
+    <version>2.0.65</version>
 </dependency>
 ```
 
@@ -92,7 +92,7 @@ String json = JSON.toJSONString(user);
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.64</version>
+    <version>2.0.65</version>
 </dependency>
 ```
 
@@ -100,7 +100,7 @@ String json = JSON.toJSONString(user);
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.64'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.65'
 }
 ```
 
@@ -116,7 +116,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.64</version>
+    <version>2.0.65</version>
 </dependency>
 ```
 
@@ -124,7 +124,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba:fastjson:2.0.64'
+    implementation 'com.alibaba:fastjson:2.0.65'
 }
 ```
 
@@ -138,7 +138,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.64</version>
+    <version>2.0.65</version>
 </dependency>
 ```
 
@@ -162,7 +162,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.64")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.65")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
 }
@@ -178,7 +178,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring5</artifactId>
-    <version>2.0.64</version>
+    <version>2.0.65</version>
 </dependency>
 ```
 
@@ -188,7 +188,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring6</artifactId>
-    <version>2.0.64</version>
+    <version>2.0.65</version>
 </dependency>
 ```
 
@@ -197,9 +197,9 @@ dependencies {
 ```groovy
 dependencies {
     // 根据 Spring 版本选择：
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.64'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.65'
     // 或
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.64'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.65'
 }
 ```
 

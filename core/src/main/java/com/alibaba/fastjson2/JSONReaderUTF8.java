@@ -2809,6 +2809,18 @@ class JSONReaderUTF8
         return nameHashCode;
     }
 
+    @Override
+    public long readTypeHashCode() {
+        long hashCode = readValueHashCode();
+        // gate on the byte length; the char length is never larger, so a name at or above
+        // the 192 limit stays conservative and keeps the downstream length error
+        typeNameIllegal = hashCode != -1
+                && !nameEscape
+                && nameEnd - nameBegin < 192
+                && IOUtils.containsTypeNameSpecialChar(bytes, nameBegin, nameEnd);
+        return hashCode;
+    }
+
     private long readValueHashCode0() {
         int ch = this.ch;
         if (ch != '"' && ch != '\'') {
@@ -4651,17 +4663,7 @@ class JSONReaderUTF8
                     ch = offset == end ? EOI : bytes[offset++];
                     break;
                 } else {
-                    ch = jsonReader.byteAfterEscape(slashIndex + 1);
-                    if (ch == 'u') {
-                        offset = slashIndex + 6;
-                    } else if (ch == 'x') {
-                        offset = slashIndex + 4;
-                    } else {
-                        if (ch != '\\' && ch != '"' && ch != 'n') {
-                            jsonReader.char1(ch);
-                        }
-                        offset = slashIndex + 2;
-                    }
+                    offset = skipEscape(jsonReader, bytes, slashIndex, end);
 
                     if (offset > quoteIndex) {
                         quoteIndex = IOUtils.indexOfQuote(bytes, quote, offset, end);
@@ -4700,6 +4702,27 @@ class JSONReaderUTF8
         return offset;
     }
 
+    /**
+     * Validates the escape at {@code slashIndex} and returns the offset just past it. Unicode and hex
+     * escapes have their digits checked here so that the skip path rejects exactly what the decode path
+     * rejects; the advances themselves are unchanged.
+     */
+    private static int skipEscape(JSONReaderUTF8 jsonReader, byte[] bytes, int slashIndex, int end) {
+        int ch = jsonReader.byteAfterEscape(slashIndex + 1);
+        if (ch == 'u') {
+            hexDigit4(bytes, slashIndex + 2, end);
+            return slashIndex + 6;
+        }
+        if (ch == 'x') {
+            jsonReader.char2(bytes, slashIndex + 2, end);
+            return slashIndex + 4;
+        }
+        if (ch != '\\' && ch != '"' && ch != 'n') {
+            jsonReader.char1(ch);
+        }
+        return slashIndex + 2;
+    }
+
     private static int skipStringEscaped(JSONReaderUTF8 jsonReader, byte[] bytes, int offset, int quote) {
         int ch = '\\';
         offset++;
@@ -4707,8 +4730,10 @@ class JSONReaderUTF8
             if (ch == '\\') {
                 ch = jsonReader.byteAfterEscape(offset++);
                 if (ch == 'u') {
+                    hexDigit4(bytes, offset, jsonReader.end);
                     offset += 4;
                 } else if (ch == 'x') {
+                    char2(bytes[offset], bytes[offset + 1]);
                     offset += 2;
                 } else if (ch != '\\' && ch != '"') {
                     jsonReader.char1(ch);
@@ -7707,6 +7732,10 @@ class JSONReaderUTF8
         offset = index + 1;
 
         ch = offset == end ? EOI : (char) bytes[offset++];
+        while (ch <= ' ' && (1L << ch & SPACE) != 0) {
+            ch = offset == end ? EOI : bytes[offset++];
+        }
+
         if (comma = ch == ',') {
             ch = offset == end ? EOI : bytes[offset++];
             while (ch <= ' ' && (1L << ch & SPACE) != 0) {

@@ -299,6 +299,11 @@ class ObjectReaderImplMapTyped
             object = (Map) createInstance(contextFeatures);
         }
 
+        Set<String> seenKeys = (contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0 ? new HashSet<>() : null;
+        // only the strict bit is forwarded to value readers; other field-level features keep
+        // applying to this map alone, as before
+        long valueFeatures = contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask;
+
         Object name;
         for (; ; index++) {
             if (jsonReader.nextIfObjectEnd() || jsonReader.isEnd()) {
@@ -316,6 +321,9 @@ class ObjectReaderImplMapTyped
                         && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                         && name.equals(getTypeKey())
                 ) {
+                    if (seenKeys != null && !seenKeys.add(getTypeKey())) {
+                        throw duplicateKeyError(jsonReader, name);
+                    }
                     jsonReader.readTypeHashCode();
                     ObjectReader objectReaderAutoType = jsonReader.getContext()
                             .getObjectReaderAutoType(jsonReader.getString(), mapType, features);
@@ -343,6 +351,9 @@ class ObjectReaderImplMapTyped
                 ) {
                     name = jsonReader.readFieldName();
                     if (name.equals(getTypeKey())) {
+                        if (seenKeys != null && !seenKeys.add(getTypeKey())) {
+                            throw duplicateKeyError(jsonReader, name);
+                        }
                         jsonReader.readTypeHashCode();
                         ObjectReader objectReaderAutoType = jsonReader.getContext()
                                 .getObjectReaderAutoType(jsonReader.getString(), mapType, features);
@@ -358,11 +369,10 @@ class ObjectReaderImplMapTyped
                         name = TypeUtils.cast(name, keyType);
                     }
                 } else {
-                    if (keyObjectReader != null) {
-                        name = keyObjectReader.readObject(jsonReader, null, null, 0);
-                    } else {
-                        name = jsonReader.read(keyType);
-                    }
+                    ObjectReader resolvedKeyReader = keyObjectReader != null
+                            ? keyObjectReader
+                            : jsonReader.getObjectReader(keyType);
+                    name = resolvedKeyReader.readObject(jsonReader, null, null, valueFeatures);
                     if (name == null && Enum.class.isAssignableFrom((Class) keyType)) {
                         name = jsonReader.getString();
                         jsonReader.nextIfMatch(':');
@@ -370,6 +380,9 @@ class ObjectReaderImplMapTyped
                     if (index == 0
                             && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                             && name.equals(getTypeKey())) {
+                        if (seenKeys != null && !seenKeys.add(getTypeKey())) {
+                            throw duplicateKeyError(jsonReader, name);
+                        }
                         jsonReader.readTypeHashCode();
                         ObjectReader objectReaderAutoType = jsonReader.getContext()
                                 .getObjectReaderAutoType(jsonReader.getString(), mapType, features);
@@ -385,6 +398,11 @@ class ObjectReaderImplMapTyped
                     jsonReader.nextIfMatch(':');
                 }
             }
+            if (seenKeys != null
+                    && !seenKeys.add(name instanceof String ? (String) name : String.valueOf(name))) {
+                throw duplicateKeyError(jsonReader, name);
+            }
+
             if (valueObjectReader == null) {
                 valueObjectReader = jsonReader.getObjectReader(valueType);
             }
@@ -402,13 +420,13 @@ class ObjectReaderImplMapTyped
                 if (multiValue && jsonReader.nextIfArrayStart()) {
                     List list = new JSONArray();
                     while (!jsonReader.nextIfArrayEnd()) {
-                        value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
+                        value = valueObjectReader.readObject(jsonReader, valueType, fieldName, valueFeatures);
                         list.add(value);
                     }
                     object.put(name, list);
                     continue;
                 } else {
-                    value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
+                    value = valueObjectReader.readObject(jsonReader, valueType, fieldName, valueFeatures);
                 }
             }
 
@@ -437,5 +455,8 @@ class ObjectReaderImplMapTyped
         }
 
         return object;
+    }
+    static JSONException duplicateKeyError(JSONReader jsonReader, Object name) {
+        return new JSONException(jsonReader.info("duplicate key : " + name));
     }
 }

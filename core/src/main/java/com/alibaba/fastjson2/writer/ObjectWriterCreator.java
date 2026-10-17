@@ -649,7 +649,10 @@ public class ObjectWriterCreator {
 
         handleIgnores(beanInfo, fieldWriters);
 
-        if (beanInfo.alphabetic) {
+        if (beanInfo.alphabetic
+                || ((writerFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
+                        && (writerFeatures & JSONWriter.Feature.BeanToArray.mask) == 0)) {
+            // BeanToArray output order is positional and must never be reordered
             Collections.sort(fieldWriters);
         }
 
@@ -1380,11 +1383,11 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == char.class) {
-            return new FieldWriterCharValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
+            return new FieldWriterCharValue<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == Character.class) {
-            return new FieldWriterChar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, null, null);
+            return new FieldWriterChar<>(fieldName, ordinal, features, format, locale, label, fieldClass, fieldClass, field, method, null);
         }
 
         if (fieldClass == BigDecimal.class) {

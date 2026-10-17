@@ -150,6 +150,7 @@ public abstract class JSONReader
     protected int nameBegin;
 
     protected boolean nameEscape;
+    protected boolean typeNameIllegal;
     protected boolean valueEscape;
     protected boolean wasNull;
     protected boolean boolValue;
@@ -1339,8 +1340,19 @@ public abstract class JSONReader
     }
 
     static char char2(int c1, int c2) {
+        if (!isHex2(c1, c2)) {
+            throw char2Error(c1, c2);
+        }
         return (char) (DIGITS2[c1] * 0x10
                 + DIGITS2[c2]);
+    }
+
+    private static boolean isHex2(int c1, int c2) {
+        return IOUtils.isHex(c1) && IOUtils.isHex(c2);
+    }
+
+    static JSONException char2Error(int c1, int c2) {
+        return new JSONException("invalid escape character \\x" + (char) c1 + (char) c2);
     }
 
     /**
@@ -1619,6 +1631,22 @@ public abstract class JSONReader
      */
     public long readTypeHashCode() {
         return readValueHashCode();
+    }
+
+    /**
+     * Returns whether the type name scanned by the last {@link #readTypeHashCode()} call
+     * contains a character that cannot appear in a Java binary class name ({@code ':'} or
+     * {@code '!'}), making it illegal for autoType. Detecting this during the scan lets
+     * callers reject the type name without materializing and re-scanning it.
+     *
+     * <p>The result is conservative: it is only set when the scan saw the raw type name
+     * bytes or chars, so escaped or symbol-referenced names report false and are still
+     * validated by the downstream checks.
+     *
+     * @return true if the last scanned type name contains {@code ':'} or {@code '!'}
+     */
+    public final boolean isTypeNameIllegal() {
+        return typeNameIllegal;
     }
 
     /**
@@ -3354,6 +3382,7 @@ public abstract class JSONReader
         }
 
         long contextFeatures = features | context.getFeatures();
+        Set<String> seenKeys = (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 ? new HashSet<>() : null;
 
         for (int i = 0; ; ++i) {
             if (ch == '/') {
@@ -3369,6 +3398,9 @@ public abstract class JSONReader
             }
 
             String name = readFieldName();
+            if (seenKeys != null && !seenKeys.add(name)) {
+                throw duplicateKeyError(name);
+            }
             Object value = itemReader.readObject(this, itemReader.getObjectClass(), name, features);
 
             if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
@@ -3446,6 +3478,7 @@ public abstract class JSONReader
         }
 
         long contextFeatures = features | context.getFeatures();
+        Set<String> seenKeys = (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 ? new HashSet<>() : null;
 
         for (int i = 0; ; ++i) {
             if (ch == '/') {
@@ -3493,6 +3526,11 @@ public abstract class JSONReader
                 }
             }
 
+            if (seenKeys != null
+                    && !seenKeys.add(name instanceof String ? (String) name : String.valueOf(name))) {
+                throw duplicateKeyError(name);
+            }
+
             if (isReference()) {
                 String reference = readReference();
                 Object value = null;
@@ -3531,13 +3569,13 @@ public abstract class JSONReader
                     value = readNumber();
                     break;
                 case '[':
-                    value = readArray();
+                    value = readArray(contextFeatures);
                     break;
                 case '{':
                     if (typeRedirect) {
-                        value = ObjectReaderImplObject.INSTANCE.readObject(this, null, name, features);
+                        value = ObjectReaderImplObject.INSTANCE.readObject(this, null, name, contextFeatures);
                     } else {
-                        value = readObject();
+                        value = readObject(contextFeatures);
                     }
                     break;
                 case '"':
@@ -3626,6 +3664,7 @@ public abstract class JSONReader
         ObjectReader valueReader = context.getObjectReader(valueType);
 
         long contextFeatures = features | context.getFeatures();
+        Set<String> seenKeys = (contextFeatures & Feature.ErrorOnDuplicateKeys.mask) != 0 ? new HashSet<>() : null;
 
         for (int i = 0; ; ++i) {
             if (ch == '/') {
@@ -3649,7 +3688,13 @@ public abstract class JSONReader
                 nextIfMatch(':');
             }
 
-            Object value = valueReader.readObject(this, null, null, 0L);
+            if (seenKeys != null
+                    && !seenKeys.add(name instanceof String ? (String) name : String.valueOf(name))) {
+                throw duplicateKeyError(name);
+            }
+
+            Object value = valueReader.readObject(this, null, null,
+                    contextFeatures & Feature.ErrorOnDuplicateKeys.mask);
 
             if (value == null && (contextFeatures & Feature.IgnoreNullPropertyValue.mask) != 0) {
                 continue;
@@ -3692,6 +3737,20 @@ public abstract class JSONReader
      * @throws JSONException if there is an error parsing the JSON
      */
     public Map<String, Object> readObject() {
+        return readObject(context.features);
+    }
+
+    /**
+     * Reads JSON data and returns it as a Map, honoring the supplied feature word on
+     * top of the reader context features. Only {@link Feature#ErrorOnDuplicateKeys}
+     * is honored today; other bits are parsed as on the plain {@link #readObject()} call.
+     *
+     * @param features the per-call feature word, a mask of {@link Feature} bits
+     * @return A Map representation of the JSON data
+     * @throws JSONException if there is an error parsing the JSON
+     * @since 2.0.66
+     */
+    public Map<String, Object> readObject(long features) {
         nextIfObjectStart();
 
         level++;
@@ -3701,6 +3760,7 @@ public abstract class JSONReader
 
         Map innerMap = null;
         Map object;
+        Set<String> seenKeys = null;
         if (context.objectSupplier == null) {
             if ((context.features & Feature.UseNativeObject.mask) != 0) {
                 object = new HashMap();
@@ -3710,6 +3770,9 @@ public abstract class JSONReader
         } else {
             object = context.objectSupplier.get();
             innerMap = TypeUtils.getInnerMap(object);
+        }
+        if (((features | context.features) & Feature.ErrorOnDuplicateKeys.mask) != 0) {
+            seenKeys = new HashSet<>();
         }
 
         for (int i = 0; ; ++i) {
@@ -3732,9 +3795,9 @@ public abstract class JSONReader
                     readNumber0();
                     name = getNumber();
                 } else if (ch == '{') {
-                    name = readObject();
+                    name = readObject(features);
                 } else if (ch == '[') {
-                    name = readArray();
+                    name = readArray(features);
                 } else {
                     name = readFieldNameUnquote();
                 }
@@ -3745,6 +3808,12 @@ public abstract class JSONReader
                 String typeName = readString();
                 throw new JSONException("autoType not support : " + typeName);
             }
+
+            if (seenKeys != null
+                    && !seenKeys.add(name instanceof String ? (String) name : String.valueOf(name))) {
+                throw duplicateKeyError(name);
+            }
+
             Object val;
             switch (ch) {
                 case '-':
@@ -3763,14 +3832,14 @@ public abstract class JSONReader
                     val = getNumber();
                     break;
                 case '[':
-                    val = readArray();
+                    val = readArray(features);
                     break;
                 case '{':
                     if (isReference()) {
                         addResolveTask(object, name, JSONPath.of(readReference()));
                         val = null;
                     } else {
-                        val = readObject();
+                        val = readObject(features);
                     }
                     break;
                 case '"':
@@ -3887,6 +3956,27 @@ public abstract class JSONReader
      * @return The JSON value as an Object
      */
     public Object readAny() {
+        return read(Object.class);
+    }
+
+    /**
+     * Reads any JSON value and returns it as an Object, honoring the supplied feature word
+     * on top of the reader context features. Only {@link Feature#ErrorOnDuplicateKeys} is
+     * honored today; other bits are parsed as on the plain {@link #readAny()} call.
+     *
+     * @param features the per-call feature word, a mask of {@link Feature} bits
+     * @return The JSON value as an Object
+     * @since 2.0.66
+     */
+    public Object readAny(long features) {
+        if ((features & Feature.ErrorOnDuplicateKeys.mask) != 0) {
+            if (ch == '{') {
+                return readObject(features);
+            }
+            if (ch == '[') {
+                return readArray(features);
+            }
+        }
         return read(Object.class);
     }
 
@@ -4089,6 +4179,19 @@ public abstract class JSONReader
      * @return A List representation of the JSON array
      */
     public List readArray() {
+        return readArray(context.features);
+    }
+
+    /**
+     * Reads a JSON array and returns it as a List, honoring the supplied feature word on
+     * top of the reader context features. Only {@link Feature#ErrorOnDuplicateKeys} is
+     * honored today; other bits are parsed as on the plain {@link #readArray()} call.
+     *
+     * @param features the per-call feature word, a mask of {@link Feature} bits
+     * @return A List representation of the JSON array
+     * @since 2.0.66
+     */
+    public List readArray(long features) {
         next();
 
         level++;
@@ -4108,15 +4211,18 @@ public abstract class JSONReader
                     next();
                     break _for;
                 case '[':
-                    val = readArray();
+                    val = readArray(features);
                     break;
                 case '{':
                     if (context.autoTypeBeforeHandler != null || (context.features & Feature.SupportAutoType.mask) != 0) {
-                        val = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, 0);
+                        // the ObjectReader contract takes a declared-features word, so forward the
+                        // strict bit only; every other bit keeps parsing as on the plain call
+                        val = ObjectReaderImplObject.INSTANCE.readObject(this, null, null,
+                                features & Feature.ErrorOnDuplicateKeys.mask);
                     } else if (isReference()) {
                         val = JSONPath.of(readReference());
                     } else {
-                        val = readObject();
+                        val = readObject(features);
                     }
                     break;
                 case '\'':
@@ -4482,9 +4588,7 @@ public abstract class JSONReader
                 if (hasExponent) {
                     return toBigDecimal(stringValue);
                 } else if (scale > 0) {
-                    if (scale > defaultDecimalMaxScale) {
-                        throw new JSONException("scale overflow : " + scale);
-                    }
+                    checkDecimalScale(scale);
                     return toBigDecimal(stringValue);
                 } else {
                     return new BigInteger(stringValue);
@@ -6330,6 +6434,32 @@ public abstract class JSONReader
         DuplicateKeyValueAsArray(1 << 16),
 
         /**
+         * Feature that determines whether to throw an exception when a duplicate key is
+         * encountered while reading a JSON object into an untyped Map or tree.
+         * When enabled, a {@link JSONException} is thrown as soon as the same key occurs
+         * more than once in the same object, including when the first occurrence has a
+         * null value.
+         *
+         * <p>By default, this feature is disabled, meaning that duplicate keys overwrite
+         * previous values unless {@link #DuplicateKeyValueAsArray} is enabled.
+         *
+         * <p>This feature is the counterpart of jackson {@code StreamReadFeature.STRICT_DUPLICATE_DETECTION}
+         * and is intended for strict parsing of protocol and signature payloads.
+         * It takes precedence over {@link #DuplicateKeyValueAsArray} when both are enabled.
+         *
+         * <p>Scope: untyped Map/tree reading only. Typed POJO targets are not covered
+         * (fields are assigned as they arrive, last value wins), and JSONB input is not
+         * covered, consistent with {@link #DuplicateKeyValueAsArray}.
+         *
+         * <p>When enabled per field ({@code @JSONField(deserializeFeatures = ErrorOnDuplicateKeys)}),
+         * the check covers the field's object and the objects nested in it at any depth,
+         * including objects inside arrays, mirroring the reader-context behavior.
+         *
+         * @since 2.0.66
+         */
+        ErrorOnDuplicateKeys(1L << 35L),
+
+        /**
          * Feature that determines whether to allow unquoted field names in JSON.
          * When enabled, field names in JSON objects do not need to be enclosed in quotes.
          *
@@ -6625,6 +6755,10 @@ public abstract class JSONReader
         return new JSONException(info("not support unquoted name"));
     }
 
+    final JSONException duplicateKeyError(Object name) {
+        return new JSONException(info("duplicate key : " + name));
+    }
+
     final JSONException valueError() {
         return new JSONException(info("illegal value"));
     }
@@ -6798,6 +6932,11 @@ public abstract class JSONReader
      * @return An ObjectReader for the specified type, or null if not found
      */
     public ObjectReader getObjectReaderAutoType(long typeHash, Class expectClass, long features) {
+        if (typeNameIllegal
+                && context.autoTypeBeforeHandler == null
+                && context.provider.getAutoTypeBeforeHandler() == null) {
+            return null;
+        }
         return context.getObjectReaderAutoType(getString(), expectClass, context.features | features);
     }
 

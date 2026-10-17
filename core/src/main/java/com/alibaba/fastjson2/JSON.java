@@ -3225,11 +3225,7 @@ public interface JSON {
                 if (valueClass == JSONObject.class && context.features == 0) {
                     writer.write((JSONObject) object);
                 } else {
-                    ObjectWriter<?> objectWriter = provider.getObjectWriter(
-                            valueClass,
-                            valueClass,
-                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
-                    );
+                    ObjectWriter<?> objectWriter = writer.context.getObjectWriter(valueClass, valueClass);
                     objectWriter.write(writer, object, null, null, 0);
                 }
             }
@@ -3287,8 +3283,7 @@ public interface JSON {
                 writer.path = JSONWriter.Path.ROOT;
                 Class<?> valueClass = object.getClass();
 
-                boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
-                ObjectWriter<?> objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                ObjectWriter<?> objectWriter = context.provider.getObjectWriter(valueClass, valueClass, context.features);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.toString();
@@ -3437,11 +3432,7 @@ public interface JSON {
                 if (valueClass == JSONObject.class && writer.context.features == 0) {
                     writer.write((JSONObject) object);
                 } else {
-                    ObjectWriter<?> objectWriter = provider.getObjectWriter(
-                            valueClass,
-                            valueClass,
-                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
-                    );
+                    ObjectWriter<?> objectWriter = writer.context.getObjectWriter(valueClass, valueClass);
                     objectWriter.write(writer, object, null, null, 0);
                 }
             }
@@ -3472,11 +3463,7 @@ public interface JSON {
                 if (valueClass == JSONObject.class && writer.context.features == 0) {
                     writer.write((JSONObject) object);
                 } else {
-                    ObjectWriter<?> objectWriter = provider.getObjectWriter(
-                            valueClass,
-                            valueClass,
-                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
-                    );
+                    ObjectWriter<?> objectWriter = writer.context.getObjectWriter(valueClass, valueClass);
                     objectWriter.write(writer, object, null, null, 0);
                 }
             }
@@ -3507,11 +3494,7 @@ public interface JSON {
                 if (valueClass == JSONObject.class && writer.context.features == 0) {
                     writer.write((JSONObject) object);
                 } else {
-                    ObjectWriter<?> objectWriter = provider.getObjectWriter(
-                            valueClass,
-                            valueClass,
-                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
-                    );
+                    ObjectWriter<?> objectWriter = writer.context.getObjectWriter(valueClass, valueClass);
                     objectWriter.write(writer, object, null, null, 0);
                 }
             }

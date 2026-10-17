@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
@@ -99,7 +100,17 @@ public final class ObjectReaderImplObject
                 }
             }
 
+            Set<String> seenKeys = null;
+            if (((features | context.getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0) {
+                seenKeys = new HashSet<>();
+            }
+
             if (typeName != null) {
+                if (seenKeys != null) {
+                    // register the discriminator where it is consumed, whichever arm handles it;
+                    // the ImmutableCollections arms deliberately never store it in the map
+                    seenKeys.add("@type");
+                }
                 switch (typeName) {
                     case "java.util.ImmutableCollections$Map1":
                     case "java.util.ImmutableCollections$MapN":
@@ -132,7 +143,8 @@ public final class ObjectReaderImplObject
                 if (name == null) {
                     char current = jsonReader.current();
                     if (current == '{' || current == '[') {
-                        name = jsonReader.readAny();
+                        name = jsonReader.readAny((features | context.getFeatures())
+                                & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
                         if (!jsonReader.nextIfMatch(':')) {
                             throw new JSONException(jsonReader.info("illegal input"));
                         }
@@ -142,6 +154,11 @@ public final class ObjectReaderImplObject
                             jsonReader.next();
                         }
                     }
+                }
+
+                if (seenKeys != null
+                        && !seenKeys.add(name instanceof String ? (String) name : String.valueOf(name))) {
+                    throw duplicateKeyError(jsonReader, name);
                 }
 
                 Object value;
@@ -162,7 +179,7 @@ public final class ObjectReaderImplObject
                         value = jsonReader.readNumber();
                         break;
                     case '[':
-                        value = jsonReader.readArray();
+                        value = jsonReader.readArray((features & JSONReader.Feature.ErrorOnDuplicateKeys.mask));
                         break;
                     case '{':
                         if (jsonReader.isReference()) {
@@ -174,7 +191,7 @@ public final class ObjectReaderImplObject
                                 continue;
                             }
                         } else {
-                            value = jsonReader.readObject();
+                            value = jsonReader.readObject((features & JSONReader.Feature.ErrorOnDuplicateKeys.mask));
                         }
                         break;
                     case '"':
@@ -246,7 +263,7 @@ public final class ObjectReaderImplObject
                 value = jsonReader.readNumber();
                 break;
             case '[':
-                value = jsonReader.readArray();
+                value = jsonReader.readArray((features & JSONReader.Feature.ErrorOnDuplicateKeys.mask));
                 break;
             case '"':
             case '\'':
@@ -298,5 +315,8 @@ public final class ObjectReaderImplObject
         }
 
         return jsonReader.readAny();
+    }
+    static JSONException duplicateKeyError(JSONReader jsonReader, Object name) {
+        return new JSONException(jsonReader.info("duplicate key : " + name));
     }
 }

@@ -63,10 +63,8 @@ final class JSONWriterJSONB
             return;
         }
 
-        boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
-
         Class<?> valueClass = value.getClass();
-        ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+        ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, context.features);
 
         if (isBeanToArray()) {
             objectWriter.writeArrayMappingJSONB(this, value, null, null, 0);
@@ -1435,7 +1433,7 @@ final class JSONWriterJSONB
         }
 
         int precision = value.precision();
-        int scale = value.scale();
+        int scale = checkDecimalScale(value.scale());
 
         int off = this.off;
         byte[] bytes = this.bytes;
@@ -1505,8 +1503,7 @@ final class JSONWriterJSONB
         int off = this.off;
         grow1(off)[off] = BC_REFERENCE;
         this.off = off + 1;
-        writeString(path == this.lastReference ? "#-1" : path);
-        this.lastReference = path;
+        writeString(collapseReference(path));
     }
 
     @Override

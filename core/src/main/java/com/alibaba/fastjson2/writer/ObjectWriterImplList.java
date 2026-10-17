@@ -41,6 +41,7 @@ final class ObjectWriterImplList
     final long features;
     final boolean itemClassRefDetect;
     volatile ObjectWriter itemClassWriter;
+    volatile ObjectWriterImplList sortedItemsWriter;
 
     public ObjectWriterImplList(
             Class defineClass,
@@ -55,6 +56,19 @@ final class ObjectWriterImplList
         this.itemType = itemType;
         this.features = features;
         this.itemClassRefDetect = itemClass != null && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
+    }
+
+    /**
+     * This writer with the sort bit in its own feature word. A field-level sort reaches the items, and the containers
+     * nested in them, through this instance, so the item loops stay unchanged for every other write.
+     */
+    ObjectWriterImplList sortedItemsWriter() {
+        ObjectWriterImplList writer = sortedItemsWriter;
+        if (writer == null) {
+            writer = new ObjectWriterImplList(defineClass, defineType, itemClass, itemType, features | JSONWriter.Feature.SortFieldNamesAlphabetically.mask);
+            sortedItemsWriter = writer;
+        }
+        return writer;
     }
 
     @Override
@@ -80,7 +94,10 @@ final class ObjectWriterImplList
             if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
             } else {
-                itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                // resolve items with the merged effective features so positional output
+                // never takes a sorted writer
+                itemObjectWriter = jsonWriter.getContext().getProvider()
+                        .getObjectWriter(itemClass, itemClass, this.features | features | jsonWriter.getFeatures());
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
             }
@@ -93,6 +110,10 @@ final class ObjectWriterImplList
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
             jsonWriter.writeArrayNull();
+            return;
+        }
+        if ((features & ~this.features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+            sortedItemsWriter().writeJSONB(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
 
@@ -152,7 +173,8 @@ final class ObjectWriterImplList
                 if (itemClass == previousClass) {
                     itemObjectWriter = previousObjectWriter;
                 } else {
-                    itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                    itemObjectWriter = jsonWriter.getContext().getProvider()
+                            .getObjectWriter(itemClass, itemClass, jsonWriter.getFeatures(features) | this.features);
                     previousClass = itemClass;
                     previousObjectWriter = itemObjectWriter;
                 }
@@ -186,7 +208,9 @@ final class ObjectWriterImplList
 
             ObjectWriter itemObjectWriter;
 
-            if (itemClass == this.itemClass && itemClassWriter != null) {
+            if (itemClass == this.itemClass
+                    && itemClassWriter != null
+                    && (context.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
                 itemObjectWriter = itemClassWriter;
             } else if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
@@ -200,12 +224,13 @@ final class ObjectWriterImplList
                 } else if (itemClass == CLASS_JSON_ARRAY_1x) {
                     itemObjectWriter = ObjectWriterImplList.INSTANCE_JSON_ARRAY_1x;
                 } else {
-                    itemObjectWriter = context.getObjectWriter(itemClass);
+                    itemObjectWriter = context.provider.getObjectWriter(itemClass, itemClass, jsonWriter.getFeatures(features) | this.features);
                 }
 
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
-                if (itemClass == this.itemClass) {
+                if (itemClass == this.itemClass
+                        && (context.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
                     this.itemClassWriter = itemObjectWriter;
                 }
             }
@@ -234,6 +259,10 @@ final class ObjectWriterImplList
             jsonWriter.writeArrayNull();
             return;
         }
+        if ((features & ~this.features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+            sortedItemsWriter().write(jsonWriter, object, fieldName, fieldType, features);
+            return;
+        }
 
         List list = toList(object);
         Class previousClass = null;
@@ -253,7 +282,8 @@ final class ObjectWriterImplList
                 if (itemClass == previousClass) {
                     itemObjectWriter = previousObjectWriter;
                 } else {
-                    itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                    itemObjectWriter = jsonWriter.getContext().getProvider()
+                            .getObjectWriter(itemClass, itemClass, jsonWriter.getFeatures(features) | this.features);
                     previousClass = itemClass;
                     previousObjectWriter = itemObjectWriter;
                 }
@@ -325,7 +355,9 @@ final class ObjectWriterImplList
             boolean refDetect;
             ObjectWriter itemObjectWriter;
 
-            if (itemClass == this.itemClass && itemClassWriter != null) {
+            if (itemClass == this.itemClass
+                    && itemClassWriter != null
+                    && (context.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
                 itemObjectWriter = itemClassWriter;
                 refDetect = this.itemClassRefDetect && jsonWriter.isRefDetect();
             } else if (itemClass == previousClass) {
@@ -345,14 +377,15 @@ final class ObjectWriterImplList
                     itemObjectWriter = ObjectWriterImplList.INSTANCE_JSON_ARRAY_1x;
                     refDetect = jsonWriter.isRefDetect();
                 } else {
-                    itemObjectWriter = context.getObjectWriter(itemClass);
+                    itemObjectWriter = context.provider.getObjectWriter(itemClass, itemClass, jsonWriter.getFeatures(features) | this.features);
                     refDetect = jsonWriter.isRefDetect(item);
                 }
 
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
                 previousRefDetect = refDetect;
-                if (itemClass == this.itemClass) {
+                if (itemClass == this.itemClass
+                        && (context.getFeatures() & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) == 0) {
                     this.itemClassWriter = itemObjectWriter;
                 }
             }
