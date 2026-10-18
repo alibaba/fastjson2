@@ -25,6 +25,8 @@ final class AnyOf
             Object item = items.get(i);
             if (item instanceof Boolean) {
                 this.items[i] = (Boolean) item ? Any.INSTANCE : Any.NOT_ANY;
+            } else if (item instanceof JSONSchema) {
+                this.items[i] = (JSONSchema) item;
             } else {
                 this.items[i] = JSONSchema.of((JSONObject) item, parent);
             }
