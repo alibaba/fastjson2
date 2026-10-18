@@ -131,3 +131,7 @@ import com.alibaba.fastjson2.JSON;
 String format = "millis";
 JSON.toJSONString(obj, format);
 ```
+
+### 3.8 兼容模式的byte[]如何序列化
+
+在兼容模式（com.alibaba.fastjson的API）下，byte[]仍然序列化为Base64字符串，静态入口（JSON.toJSONString(...)）和实例入口（JSONObject.toJSONString()、JSONObject.toString()、JSONArray.toJSONString()、JSONArray.toString()）的行为一致。空byte[]序列化为""，其他数组或集合（如int[]、long[]、List<Byte>）保持不变，仍然输出JSON数组。需要注意这只是兼容层的行为，fastjson2（com.alibaba.fastjson2.JSON）的缺省行为不变，byte[]仍然输出为数字数组。
