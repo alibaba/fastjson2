@@ -33,18 +33,55 @@ public abstract class JSONSchema {
     final String description;
     final String customErrorMessage;
 
+    /**
+     * The optional {@code enum} constraint for this typed schema.
+     * <details><summary>中文</summary>
+     * 此类型模式的可选 {@code enum} 约束。
+     * </details>
+     */
+    final EnumSchema enumSchema;
+
     static final JSONReader.Context CONTEXT = JSONFactory.createReadContext();
 
     JSONSchema(JSONObject input) {
+        this(input, true);
+    }
+
+    /**
+     * @param parseEnum {@code false} for a schema that keeps the {@code enum} keyword itself, so that the constraint
+     *                  is not read twice
+     */
+    JSONSchema(JSONObject input, boolean parseEnum) {
         this.title = input.getString("title");
         this.description = input.getString("description");
         this.customErrorMessage = input.getString("error");
+        this.enumSchema = parseEnum ? parseEnumSchema(input) : null;
     }
 
     JSONSchema(String title, String description) {
         this.title = title;
         this.description = description;
         this.customErrorMessage = null;
+        this.enumSchema = null;
+    }
+
+    /**
+     * Builds the {@code enum} constraint of a schema. A {@code string} schema keeps the keyword in
+     * {@link StringSchema} and asks for no parsing here, while every other schema applies it next to its own type
+     * checks, whether the type comes from the schema or from the declaring field class.
+     */
+    static EnumSchema parseEnumSchema(JSONObject input) {
+        Object enumValue = input.get("enum");
+        if (!(enumValue instanceof Collection) && !(enumValue instanceof Object[])) {
+            return null;
+        }
+
+        Object[] enums = input.getObject("enum", Object[].class);
+        if (enums == null || enums.length == 0) {
+            return null;
+        }
+
+        return new EnumSchema(enums);
     }
 
     void addResolveTask(UnresolvedReference.ResolveTask task){
@@ -376,11 +413,14 @@ public abstract class JSONSchema {
 
     @JSONCreator
     public static JSONSchema of(JSONObject input, JSONSchema parent) {
-        if (input.size() == 1 && input.isArray("type")) {
+        // Apply enum membership to each allowed type without discarding sibling constraints.
+        if (input.isArray("type") && (input.size() == 1 || input.containsKey("enum"))) {
             JSONArray types = input.getJSONArray("type");
             JSONSchema[] items = new JSONSchema[types.size()];
             for (int i = 0; i < types.size(); i++) {
-                items[i] = JSONSchema.of(JSONObject.of("type", types.get(i)));
+                JSONObject item = new JSONObject(input);
+                item.put("type", types.get(i));
+                items[i] = JSONSchema.of(item, parent);
             }
             return new AnyOf(items);
         }
@@ -691,8 +731,33 @@ public abstract class JSONSchema {
 
     protected abstract ValidateResult validateInternal(Object value);
 
+    /**
+     * Applies the {@code enum} keyword declared next to {@code type} after the type specific validation succeeded.
+     * A {@code null} enum keeps the cost of this call to one field test for every non-enum schema.
+     */
+    final ValidateResult validateEnum(ValidateResult result, Object value) {
+        if (enumSchema == null || !result.isSuccess()) {
+            return result;
+        }
+        return enumSchema.validateInternal(value);
+    }
+
+    final ValidateResult validateEnum(ValidateResult result, long value) {
+        if (enumSchema == null || !result.isSuccess()) {
+            return result;
+        }
+        return enumSchema.validateInternal(value);
+    }
+
+    final ValidateResult validateEnum(ValidateResult result, double value) {
+        if (enumSchema == null || !result.isSuccess()) {
+            return result;
+        }
+        return enumSchema.validateInternal(value);
+    }
+
     public final ValidateResult validate(Object value) {
-        ValidateResult result = validateInternal(value);
+        ValidateResult result = validateEnum(validateInternal(value), value);
 
         if (!result.isSuccess() && this.customErrorMessage != null) {
             return new ValidateResult(false, this.customErrorMessage);
@@ -746,7 +811,7 @@ public abstract class JSONSchema {
     }
 
     public final ValidateResult validate(long value) {
-        ValidateResult result = validateInternal(value);
+        ValidateResult result = validateEnum(validateInternal(value), value);
         if (!result.isSuccess() && customErrorMessage != null) {
             return new ValidateResult(false, customErrorMessage);
         }
@@ -757,7 +822,7 @@ public abstract class JSONSchema {
     }
 
     public final ValidateResult validate(double value) {
-        ValidateResult result = validateInternal(value);
+        ValidateResult result = validateEnum(validateInternal(value), value);
         if (!result.isSuccess() && customErrorMessage != null) {
             return new ValidateResult(false, customErrorMessage);
         }
@@ -769,7 +834,7 @@ public abstract class JSONSchema {
     }
 
     public final ValidateResult validate(Double value) {
-        ValidateResult result = validateInternal(value);
+        ValidateResult result = validateEnum(validateInternal(value), value);
         if (!result.isSuccess() && customErrorMessage != null) {
             return new ValidateResult(false, customErrorMessage);
         }
@@ -781,7 +846,7 @@ public abstract class JSONSchema {
     }
 
     public final ValidateResult validate(Integer value) {
-        ValidateResult result = validateInternal(value);
+        ValidateResult result = validateEnum(validateInternal(value), value);
         if (!result.isSuccess() && customErrorMessage != null) {
             return new ValidateResult(false, customErrorMessage);
         }
@@ -793,7 +858,7 @@ public abstract class JSONSchema {
     }
 
     public final ValidateResult validate(Long value) {
-        ValidateResult result = validateInternal(value);
+        ValidateResult result = validateEnum(validateInternal(value), value);
         if (!result.isSuccess() && customErrorMessage != null) {
             return new ValidateResult(false, customErrorMessage);
         }
@@ -805,7 +870,7 @@ public abstract class JSONSchema {
     }
 
     public final ValidateResult validate(Float value) {
-        ValidateResult result = validateInternal(value);
+        ValidateResult result = validateEnum(validateInternal(value), value);
         if (!result.isSuccess() && customErrorMessage != null) {
             return new ValidateResult(false, customErrorMessage);
         }
@@ -894,7 +959,19 @@ public abstract class JSONSchema {
     }
 
     public JSONObject toJSONObject() {
-        return new JSONObject();
+        JSONObject object = new JSONObject();
+        addEnum(object);
+        return object;
+    }
+
+    /**
+     * Writes the {@code enum} keyword declared next to {@code type} back into an exported schema, so that
+     * {@code toString()} / {@code toJSONObject()} keep the constraint instead of dropping it.
+     */
+    final void addEnum(JSONObject object) {
+        if (enumSchema != null) {
+            object.put("enum", new JSONArray(enumSchema.items));
+        }
     }
 
     public enum Type {
