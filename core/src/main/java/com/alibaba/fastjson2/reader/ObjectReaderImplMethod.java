@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -31,7 +30,7 @@ public class ObjectReaderImplMethod
         String methodName = jsonReader.readString();
         List<String> paramTypeNames = jsonReader.readArray(String.class);
 
-        return getMethod(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName, paramTypeNames);
+        return getMethod(jsonReader.getContext(), jsonReader.getContext().getFeatures() | features, methodName, declaringClassName, paramTypeNames);
     }
 
     @Override
@@ -52,7 +51,7 @@ public class ObjectReaderImplMethod
 
         jsonReader.nextIfComma();
 
-        return getMethod(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName, paramTypeNames);
+        return getMethod(jsonReader.getContext(), jsonReader.getContext().getFeatures() | features, methodName, declaringClassName, paramTypeNames);
     }
 
     @Override
@@ -89,10 +88,11 @@ public class ObjectReaderImplMethod
             jsonReader.nextIfComma();
         }
 
-        return getMethod(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName, paramTypeNames);
+        return getMethod(jsonReader.getContext(), jsonReader.getContext().getFeatures() | features, methodName, declaringClassName, paramTypeNames);
     }
 
-    private Method getMethod(long features,
+    private Method getMethod(JSONReader.Context context,
+                             long features,
                              String methodName,
                              String declaringClassName,
                              List<String> paramTypeNames) {
@@ -100,7 +100,7 @@ public class ObjectReaderImplMethod
 
         boolean supportClassForName = (features & JSONReader.Feature.SupportClassForName.mask) != 0;
         if (supportClassForName) {
-            declaringClass = TypeUtils.loadClass(declaringClassName);
+            declaringClass = ObjectReaderImplClass.loadClass(context, declaringClassName, features);
         } else {
             throw new JSONException("ClassForName not support");
         }
@@ -112,7 +112,7 @@ public class ObjectReaderImplMethod
             paramTypes = new Class[paramTypeNames.size()];
             for (int i = 0; i < paramTypeNames.size(); i++) {
                 String paramTypeName = paramTypeNames.get(i);
-                paramTypes[i] = TypeUtils.loadClass(paramTypeName);
+                paramTypes[i] = ObjectReaderImplClass.loadClass(context, paramTypeName, features);
             }
         }
 

@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -28,7 +27,7 @@ public class ObjectReaderImplField
         String declaringClassName = jsonReader.readString();
         String methodName = jsonReader.readString();
 
-        return getField(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName);
+        return getField(jsonReader.getContext(), jsonReader.getContext().getFeatures() | features, methodName, declaringClassName);
     }
 
     @Override
@@ -48,7 +47,7 @@ public class ObjectReaderImplField
 
         jsonReader.nextIfComma();
 
-        return getField(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName);
+        return getField(jsonReader.getContext(), jsonReader.getContext().getFeatures() | features, methodName, declaringClassName);
     }
 
     @Override
@@ -82,17 +81,18 @@ public class ObjectReaderImplField
             jsonReader.nextIfComma();
         }
 
-        return getField(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName);
+        return getField(jsonReader.getContext(), jsonReader.getContext().getFeatures() | features, methodName, declaringClassName);
     }
 
-    private Field getField(long features,
+    private Field getField(JSONReader.Context context,
+                           long features,
                            String methodName,
                            String declaringClassName) {
         Class declaringClass;
 
         boolean supportClassForName = (features & JSONReader.Feature.SupportClassForName.mask) != 0;
         if (supportClassForName) {
-            declaringClass = TypeUtils.loadClass(declaringClassName);
+            declaringClass = ObjectReaderImplClass.loadClass(context, declaringClassName, features);
         } else {
             throw new JSONException("ClassForName not support");
         }
