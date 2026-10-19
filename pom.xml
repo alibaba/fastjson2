@@ -897,6 +897,10 @@
                                 ${javadoc.default.exclude.packages}:jdk.incubator.vector
                             </excludePackageNames>
                             <doclint>all,-missing</doclint>
+                            <!-- Keep javadoc hermetic: the plugin default (detectJavaApiLink)
+                                 adds -link to docs.oracle.com for every module, so a transient
+                                 runner DNS fault fails the build (2.0.64 tag gate). -->
+                            <detectJavaApiLink>false</detectJavaApiLink>
                             <additionalJOptions>
                                 <additionalJOption>-J-Duser.language=en -J-Duser.country=US</additionalJOption>
                             </additionalJOptions>

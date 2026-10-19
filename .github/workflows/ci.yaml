@@ -143,6 +143,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Cache Maven wrapper distribution
+        # `setup-java`'s `cache: maven` only caches ~/.m2/repository. The wrapper
+        # downloads apache-maven-*-bin.zip into ~/.m2/wrapper on first use, which
+        # is the step that failed on windows-latest (run 33629858155).
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/wrapper
+          key: maven-wrapper-${{ runner.os }}-${{ hashFiles('.mvn/wrapper/maven-wrapper.properties') }}
+          restore-keys: |
+            maven-wrapper-${{ runner.os }}-
+
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v4
         with:
@@ -178,9 +189,10 @@ jobs:
         # and Central requires the kotlin javadoc jar that only dokka produces.
         #
         # -Pgen-javadoc stays: doclint behaviour is JDK-dependent and it has
-        # never hung. Not risk-free though -- it hard-failed the 2.0.64 tag run
-        # when maven-javadoc-plugin could not fetch the docs.oracle.com <link>
-        # declared at codegen/pom.xml:168 (a transient runner DNS fault).
+        # never hung. Javadoc is hermetic now: the gen-javadoc profile disables
+        # detectJavaApiLink and codegen no longer declares a docs.oracle.com
+        # <link>, so no lane resolves external URLs. Before that, a transient
+        # runner DNS fault hard-failed the 2.0.64 tag gate.
         #
         # shell: bash is required, not cosmetic. windows-latest defaults to
         # pwsh -- confirmed from a windows test lane's job log, which records
@@ -234,6 +246,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Fetch all history for better coverage analysis
+
+      - name: Cache Maven wrapper distribution
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/wrapper
+          key: maven-wrapper-${{ runner.os }}-${{ hashFiles('.mvn/wrapper/maven-wrapper.properties') }}
+          restore-keys: |
+            maven-wrapper-${{ runner.os }}-
 
       - name: Set up JDK 11
         uses: actions/setup-java@v4
