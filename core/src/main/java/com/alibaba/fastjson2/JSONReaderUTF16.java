@@ -4067,7 +4067,7 @@ final class JSONReaderUTF16
                 ch = offset == end ? EOI : chars[offset++];
             }
 
-            if (ch < '0' || ch > '9') {
+            if (quote == 0 && (ch < '0' || ch > '9')) {
                 throw new JSONException(info("illegal input"));
             }
 

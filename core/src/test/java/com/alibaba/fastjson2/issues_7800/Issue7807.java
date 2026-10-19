@@ -43,4 +43,11 @@ class Issue7807 {
         assertEquals(0.0015, ((Number) JSON.parse("1.5e-3")).doubleValue(), 1e-12);
         assertEquals(-2.0E10, ((Number) JSON.parse("-2E+10")).doubleValue(), 1e-3);
     }
+
+    @Test
+    public void quotedTruncatedExponentKeepsCoercion() {
+        assertEquals(1.0, JSON.parseObject("\"1e\"", Double.class), 0.0);
+        assertEquals(1.0, JSON.parseObject("\"1e+\"", Double.class), 0.0);
+        assertEquals(100000.0, JSON.parseObject("\"1e5\"", Double.class), 1e-9);
+    }
 }
