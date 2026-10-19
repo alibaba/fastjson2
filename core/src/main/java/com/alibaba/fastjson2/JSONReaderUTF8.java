@@ -3327,8 +3327,11 @@ class JSONReaderUTF8
                 }
 
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    offset++;
-                    ch = bytes[offset] & 0xff;
+                    if (offset + 1 >= end) {
+                        ch = EOI;
+                        break;
+                    }
+                    ch = bytes[++offset] & 0xff;
                 }
                 if (ch != ':') {
                     throw syntaxError(offset, ch);
@@ -5172,7 +5175,7 @@ class JSONReaderUTF8
             boolean endOfComment = false;
             if (multi) {
                 if (ch == '*'
-                        && offset <= end && bytes[offset] == '/') {
+                        && offset < end && bytes[offset] == '/') {
                     offset++;
                     endOfComment = true;
                 }
@@ -5532,13 +5535,17 @@ class JSONReaderUTF8
         if (ch == 'e' || ch == 'E') {
             boolean negativeExp = false;
             int expValue = 0;
-            ch = bytes[offset++];
+            ch = offset == end ? EOI : bytes[offset++];
 
             if (ch == '-') {
                 negativeExp = true;
-                ch = bytes[offset++];
+                ch = offset == end ? EOI : bytes[offset++];
             } else if (ch == '+') {
-                ch = (char) bytes[offset++];
+                ch = offset == end ? EOI : (char) bytes[offset++];
+            }
+
+            if (ch < '0' || ch > '9') {
+                throw new JSONException(info("illegal input"));
             }
 
             while (ch >= '0' && ch <= '9') {
