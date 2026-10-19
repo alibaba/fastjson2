@@ -129,3 +129,7 @@ import com.alibaba.fastjson2.JSON;
 String format = "millis";
 JSON.toJSONString(obj, format);
 ```
+
+### 3.8 Field matching in the fastjson1-compatible module
+
+`JSONObject.toJavaObject(Type)` uses smart field-name matching by default, as in fastjson 1.x and the `Class` overload. For example, `MYVALUE` matches a writable `myValue` property, including properties in parameterized types. This compatibility behavior does not change the fastjson2 core API defaults.

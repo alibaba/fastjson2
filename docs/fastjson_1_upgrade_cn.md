@@ -131,3 +131,7 @@ import com.alibaba.fastjson2.JSON;
 String format = "millis";
 JSON.toJSONString(obj, format);
 ```
+
+### 3.8 fastjson1-compatible 模块的字段匹配
+
+`JSONObject.toJavaObject(Type)` 默认启用字段名智能匹配，与 fastjson 1.x 和 `Class` 重载保持一致。例如，`MYVALUE` 能匹配可写的 `myValue` 属性，也适用于泛型中的属性。此兼容行为不改变 fastjson2 核心 API 的默认设置。
