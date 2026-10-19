@@ -480,10 +480,13 @@ abstract class JSONPathSegment {
     static final class MultiIndexSegment
             extends JSONPathSegment {
         final int[] indexes;
+        final int[] sortedIndexes;
 
         public MultiIndexSegment(int[] indexes) {
-//            Arrays.sort(indexes);
             this.indexes = indexes;
+            int[] sortedIndexes = indexes.clone();
+            Arrays.sort(sortedIndexes);
+            this.sortedIndexes = sortedIndexes;
         }
 
         @Override
@@ -570,19 +573,23 @@ abstract class JSONPathSegment {
                 return;
             }
 
+            // negative indexes are relative to the array size, which is only known at the end
+            boolean negative = sortedIndexes.length > 0 && sortedIndexes[0] < 0;
+
             if (jsonReader.jsonb) {
                 JSONArray array = new JSONArray();
                 int itemCnt = jsonReader.startArray();
                 for (int i = 0; i < itemCnt; i++) {
-                    boolean match = Arrays.binarySearch(indexes, i) >= 0;
+                    boolean match = negative || Arrays.binarySearch(sortedIndexes, i) >= 0;
                     if (!match) {
                         jsonReader.skipValue();
+                        array.add(null);
                         continue;
                     }
 
                     array.add(jsonReader.readAny());
                 }
-                context.value = array;
+                context.value = select(array);
                 return;
             }
 
@@ -595,10 +602,11 @@ abstract class JSONPathSegment {
                     break;
                 }
 
-                boolean match = Arrays.binarySearch(indexes, i) >= 0;
+                boolean match = negative || Arrays.binarySearch(sortedIndexes, i) >= 0;
 
                 if (!match) {
                     jsonReader.skipValue();
+                    array.add(null);
                     if (jsonReader.ch == ',') {
                         jsonReader.next();
                     }
@@ -647,7 +655,19 @@ abstract class JSONPathSegment {
 
                 array.add(val);
             }
-            context.value = array;
+            context.value = select(array);
+        }
+
+        private JSONArray select(JSONArray array) {
+            int size = array.size();
+            JSONArray result = new JSONArray(indexes.length);
+            for (int index : indexes) {
+                int itemIndex = index >= 0 ? index : size + index;
+                if (itemIndex >= 0 && itemIndex < size) {
+                    result.add(array.get(itemIndex));
+                }
+            }
+            return result;
         }
 
         public void setCallback(JSONPath.Context context, BiFunction callback) {
