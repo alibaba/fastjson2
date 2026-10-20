@@ -292,25 +292,7 @@ public class ObjectReaderCreatorASM
 
         if (match) {
             for (FieldReader fieldReader : fieldReaderArray) {
-                if (fieldReader.defaultValue != null || fieldReader.schema != null) {
-                    match = false;
-                    break;
-                }
-
-                Class fieldClass = fieldReader.fieldClass;
-                if (fieldClass != null && !Modifier.isPublic(fieldClass.getModifiers())) {
-                    match = false;
-                    break;
-                }
-
-                if (fieldReader instanceof FieldReaderMap
-                        && ((FieldReaderMap<?>) fieldReader).arrayToMapKey != null) {
-                    match = false;
-                    break;
-                }
-
-                if (fieldReader.fieldClass == Number.class
-                        && !Number.class.equals(fieldReader.fieldType)) {
+                if (!isFieldJitCompatible(fieldReader)) {
                     match = false;
                     break;
                 }
@@ -416,25 +398,7 @@ public class ObjectReaderCreatorASM
                     break;
                 }
 
-                if (fieldReader.defaultValue != null || fieldReader.schema != null) {
-                    match = false;
-                    break;
-                }
-
-                Class fieldClass = fieldReader.fieldClass;
-                if (fieldClass != null && (!Modifier.isPublic(fieldClass.getModifiers()) || classLoader.isExternalClass(fieldClass))) {
-                    match = false;
-                    break;
-                }
-
-                if (fieldReader instanceof FieldReaderMap
-                        && ((FieldReaderMap<?>) fieldReader).arrayToMapKey != null) {
-                    match = false;
-                    break;
-                }
-
-                if (fieldReader.fieldClass == Number.class
-                        && !Number.class.equals(fieldReader.fieldType)) {
+                if (!isFieldJitCompatible(fieldReader)) {
                     match = false;
                     break;
                 }
@@ -567,6 +531,35 @@ public class ObjectReaderCreatorASM
                 buildFunction,
                 fieldReaders
         );
+    }
+
+    private boolean isFieldJitCompatible(FieldReader fieldReader) {
+        if (fieldReader.defaultValue != null || fieldReader.schema != null) {
+            return false;
+        }
+
+        Class fieldClass = fieldReader.fieldClass;
+        if (fieldClass != null
+                && (!Modifier.isPublic(fieldClass.getModifiers()) || classLoader.isExternalClass(fieldClass))) {
+            return false;
+        }
+
+        Type itemType = fieldReader.itemType;
+        if (itemType instanceof Class && classLoader.isExternalClass((Class) itemType)) {
+            return false;
+        }
+
+        if (fieldReader instanceof FieldReaderMap
+                && ((FieldReaderMap<?>) fieldReader).arrayToMapKey != null) {
+            return false;
+        }
+
+        if (fieldReader.fieldClass == Number.class
+                && !Number.class.equals(fieldReader.fieldType)) {
+            return false;
+        }
+
+        return true;
     }
 
     private <T> ObjectReaderBean jitObjectReader(
@@ -4051,7 +4044,12 @@ public class ObjectReaderCreatorASM
                 mw.aload(JSON_READER);
                 gwGetFieldType(classNameType, mw, i, fieldType);
                 mw.visitLdcInsn(fieldReader.fieldName);
+                // the FEATURES slot is the caller's word (0 on a root call); merge only the strict bit of the
+                // field's own word, so @JSONField(deserializeFeatures=ErrorOnDuplicateKeys) travels to item
+                // readers while other field features keep applying to the list alone, as with the reflective creator
+                mw.visitLdcInsn(fieldReader.features & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
                 mw.lload(FEATURES);
+                mw.lor();
                 mw.invokeinterface(
                         TYPE_OBJECT_READER,
                         jsonb ? "readArrayMappingJSONBObject" : "readArrayMappingObject",
@@ -4068,7 +4066,9 @@ public class ObjectReaderCreatorASM
             mw.aload(JSON_READER);
             gwGetFieldType(classNameType, mw, i, fieldType);
             mw.visitLdcInsn(fieldReader.fieldName);
+            mw.visitLdcInsn(fieldReader.features & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
             mw.lload(FEATURES);
+            mw.lor();
             mw.invokeinterface(
                     TYPE_OBJECT_READER,
                     jsonb ? "readJSONBObject" : "readObject",

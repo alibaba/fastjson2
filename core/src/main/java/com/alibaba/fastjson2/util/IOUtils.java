@@ -2451,6 +2451,88 @@ public class IOUtils {
     }
 
     /**
+     * Checks whether a byte array region contains a character that cannot appear in a Java
+     * binary class name but is meaningful in a URL: {@code ':'} (0x3A) or {@code '!'} (0x21).
+     * Used to reject autoType type names while scanning them, see
+     * {@link TypeUtils#hasIllegalTypeNameChars(String)}.
+     *
+     * @param buf the byte array to check
+     * @param off the starting offset in the array
+     * @param end the end offset (exclusive)
+     * @return true if the region contains {@code ':'} or {@code '!'}
+     */
+    public static boolean containsTypeNameSpecialChar(byte[] buf, int off, int end) {
+        int i = off;
+        long address = ARRAY_BYTE_BASE_OFFSET + off;
+        int upperBound = off + ((end - off) & ~7);
+        while (i < upperBound
+                && notContains2(UNSAFE.getLong(buf, address), 0x3A3A3A3A3A3A3A3AL, 0x2121212121212121L)) {
+            i += 8;
+            address += 8;
+        }
+        while (i < end) {
+            byte b = buf[i++];
+            if (b == ':' || b == '!') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean notContains2(long value, long v0, long v1) {
+        long x0 = value ^ v0;
+        long x1 = value ^ v1;
+        return ((((x0 - 0x0101010101010101L) & ~x0) | ((x1 - 0x0101010101010101L) & ~x1)) & 0x8080808080808080L) == 0;
+    }
+
+    /**
+     * Checks whether a char array region contains a character that cannot appear in a Java
+     * binary class name but is meaningful in a URL: {@code ':'} or {@code '!'}.
+     * Used to reject autoType type names while scanning them, see
+     * {@link TypeUtils#hasIllegalTypeNameChars(String)}.
+     *
+     * @param buf the char array to check
+     * @param off the starting offset in the array
+     * @param end the end offset (exclusive)
+     * @return true if the region contains {@code ':'} or {@code '!'}
+     */
+    public static boolean containsTypeNameSpecialChar(char[] buf, int off, int end) {
+        int i = off;
+        long address = ARRAY_CHAR_BASE_OFFSET + ((long) off << 1);
+        int upperBound = off + ((end - off) & ~3);
+        while (i < upperBound
+                && notContains2UTF16(UNSAFE.getLong(buf, address), 0x003A_003A_003A_003AL, 0x0021_0021_0021_0021L)) {
+            i += 4;
+            address += 8;
+        }
+        while (i < end) {
+            char c = buf[i++];
+            if (c == ':' || c == '!') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean notContains2UTF16(long value, long v0, long v1) {
+        /*
+          for (int i = 0; i < 4; ++i) {
+            short c = (short) value;
+            if (c == (short) v0 || c == (short) v1) {
+                return false;
+            }
+            value >>>= 16;
+          }
+          return true;
+         */
+        long x0 = value ^ v0;
+        long x1 = value ^ v1;
+        x0 = (x0 - 0x0001_0001_0001_0001L) & ~x0;
+        x1 = (x1 - 0x0001_0001_0001_0001L) & ~x1;
+        return ((x0 | x1) & 0x8000_8000_8000_8000L) == 0;
+    }
+
+    /**
      * Checks if a byte array region matches a prefix string.
      * This method compares a segment of a byte array with a string prefix to see
      * if they match exactly.
@@ -2539,6 +2621,14 @@ public class IOUtils {
         return new JSONException("offset overflow, offset " + offset + ", end " + end);
     }
 
+    static JSONException invalidUnicodeEscape(int offset) {
+        return new JSONException("invalid unicode escape, offset " + offset);
+    }
+
+    public static boolean isHex(int ch) {
+        return (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f');
+    }
+
     /**
      * Extracts a 4-digit hexadecimal number from a byte array at the specified offset.
      * This method performs optimized hexadecimal digit extraction by processing 4 bytes at once
@@ -2549,6 +2639,9 @@ public class IOUtils {
      * @return the extracted 4-digit hexadecimal number
      */
     public static int hexDigit4(byte[] buf, int offset) {
+        if (!isHex(buf[offset]) || !isHex(buf[offset + 1]) || !isHex(buf[offset + 2]) || !isHex(buf[offset + 3])) {
+            throw invalidUnicodeEscape(offset);
+        }
         int v = getIntLE(buf, offset);
         v = (v & 0x0F0F0F0F) + ((((v & 0x40404040) >> 2) | ((v & 0x40404040) << 1)) >>> 4);
         return ((v & 0xF000000) >>> 24) + ((v & 0xF0000) >>> 12) + (v & 0xF00) + ((v & 0xF) << 12);
@@ -2571,6 +2664,9 @@ public class IOUtils {
      * @return the extracted 4-digit hexadecimal number
      */
     public static int hexDigit4(char[] buf, int offset) {
+        if (!isHex(buf[offset]) || !isHex(buf[offset + 1]) || !isHex(buf[offset + 2]) || !isHex(buf[offset + 3])) {
+            throw invalidUnicodeEscape(offset);
+        }
         long v = getLongLE(buf, offset);
         v = (v & 0x000F_000F_000F_000FL) + ((((v & 0x0004_0004_0004_00040L) >> 2) | ((v & 0x0004_0004_0004_00040L) << 1)) >>> 4);
         return (int) (((v & 0xF_0000_0000_0000L) >>> 48) + ((v & 0xF_0000_0000L) >>> 28) + ((v & 0xF_0000) >> 8) + ((v & 0xF) << 12));

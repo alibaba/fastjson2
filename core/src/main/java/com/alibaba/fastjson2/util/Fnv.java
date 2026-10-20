@@ -79,7 +79,16 @@ public final class Fnv {
             return hashCode64UTF8(bytes, offset, len);
         }
         if (len > 0 && len <= 8) {
-            long nameValue = IOUtils.getLongLE(bytes, offset) & (0xFFFFFFFFFFFFFFFFL >>> ((8 - len) << 3));
+            long nameValue;
+            if (bytes.length - offset >= 8) {
+                nameValue = IOUtils.getLongLE(bytes, offset) & (0xFFFFFFFFFFFFFFFFL >>> ((8 - len) << 3));
+            } else {
+                // fewer than 8 bytes left in the array: an 8-byte read would run past its end
+                nameValue = 0;
+                for (int i = 0; i < len; ++i) {
+                    nameValue |= (bytes[offset + i] & 0xFFL) << (i << 3);
+                }
+            }
             if (nameValue != 0) {
                 return nameValue;
             }

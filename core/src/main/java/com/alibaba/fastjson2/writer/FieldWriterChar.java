@@ -77,9 +77,6 @@ class FieldWriterChar<T>
     }
 
     protected final boolean writeChar(JSONWriter jsonWriter, char value) {
-        if (value == '\0' && (jsonWriter.getFeatures(features) & Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
-            return false;
-        }
         writeFieldName(jsonWriter);
         jsonWriter.writeChar(value);
         return true;

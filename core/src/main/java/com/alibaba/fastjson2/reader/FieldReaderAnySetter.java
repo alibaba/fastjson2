@@ -38,7 +38,9 @@ class FieldReaderAnySetter<T>
         String name = jsonReader.getFieldName();
 
         ObjectReader itemObjectReader = getItemObjectReader(jsonReader);
-        Object value = itemObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
+        Object value = itemObjectReader.readObject(jsonReader, fieldType, fieldName,
+                (features | jsonReader.getContext().getFeatures())
+                        & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
 
         try {
             method.invoke(object, name, value);
@@ -52,7 +54,8 @@ class FieldReaderAnySetter<T>
         try {
             method.invoke(object, name, value);
         } catch (Exception e) {
-            throw new JSONException("any set error");
+            // keep the any-setter's own exception reachable, as processExtra does on the text path
+            throw new JSONException("any set error", e);
         }
     }
 

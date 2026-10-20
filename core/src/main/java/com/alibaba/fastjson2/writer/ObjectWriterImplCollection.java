@@ -99,7 +99,8 @@ final class ObjectWriterImplCollection
             if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
             } else {
-                itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                itemObjectWriter = jsonWriter.getContext().getProvider()
+                        .getObjectWriter(itemClass, itemClass, jsonWriter.getFeatures(features) | this.features);
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
             }
@@ -169,7 +170,8 @@ final class ObjectWriterImplCollection
                 itemObjectWriter = previousObjectWriter;
                 itemRefDetect = previousRefDetect;
             } else {
-                itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                itemObjectWriter = jsonWriter.getContext().getProvider()
+                        .getObjectWriter(itemClass, itemClass, jsonWriter.getFeatures(features) | this.features);
                 itemRefDetect = refDetect && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
