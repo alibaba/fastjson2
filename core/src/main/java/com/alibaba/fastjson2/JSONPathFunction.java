@@ -518,12 +518,10 @@ final class JSONPathFunction
             } else if (item instanceof Float || item instanceof Double) {
                 return ((Number) item).doubleValue() == value;
             } else if (item instanceof BigDecimal) {
-                BigDecimal decimal = (BigDecimal) item;
-                decimal = decimal.stripTrailingZeros();
                 if (decimalValue == null) {
                     decimalValue = BigDecimal.valueOf(value);
                 }
-                return decimalValue.equals(decimal);
+                return decimalValue.compareTo((BigDecimal) item) == 0;
             }
             return false;
         }
@@ -550,8 +548,7 @@ final class JSONPathFunction
             }
 
             if (item instanceof Float || item instanceof Double) {
-                double doubleValue = ((Number) item).doubleValue();
-                BigDecimal decimal = new BigDecimal(doubleValue).stripTrailingZeros();
+                BigDecimal decimal = new BigDecimal(item.toString()).stripTrailingZeros();
                 return value.equals(decimal);
             }
 
