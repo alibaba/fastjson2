@@ -827,6 +827,9 @@ public class ObjectReaderProvider
         if (autoTypeBeforeHandler != null) {
             Class<?> resolvedClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
             if (resolvedClass != null) {
+                if (SAFE_MODE && JDKUtils.isAutoTypeDenyClass(resolvedClass)) {
+                    throw new JSONException("autoType is not support. " + typeName);
+                }
                 afterAutoType(typeName, resolvedClass);
                 return resolvedClass;
             }
