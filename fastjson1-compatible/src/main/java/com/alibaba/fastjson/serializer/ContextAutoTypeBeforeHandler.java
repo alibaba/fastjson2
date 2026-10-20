@@ -6,4 +6,8 @@ public class ContextAutoTypeBeforeHandler
     public ContextAutoTypeBeforeHandler(String[] acceptNames) {
         super(acceptNames);
     }
+
+    public ContextAutoTypeBeforeHandler(boolean includeBasic, String[] acceptNames) {
+        super(includeBasic, acceptNames);
+    }
 }
