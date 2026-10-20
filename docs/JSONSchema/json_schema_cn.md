@@ -142,6 +142,11 @@ public void test2() {
 
 # 5. 通过类型构造JSONSchema
 在后端和前端交互时，需要将java类型转换成JSONSchema返回给客户端。
+
+模式也可以通过 `JSONSchema.parseSchema(schema.toString())` 或
+`JSONSchema.of(schema.toJSONObject())` 导出后重新构造。这两种形式保留 `not`、`allOf`、
+`anyOf`、`oneOf`、`enum` 和 null 类型约束，也支持属性或数组元素中的嵌套组合。
+
 ```java
 @Test
 public void test() {

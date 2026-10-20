@@ -14,6 +14,13 @@ final class NullSchema
     }
 
     @Override
+    public JSONObject toJSONObject() {
+        JSONObject object = super.toJSONObject();
+        object.put("type", "null");
+        return object;
+    }
+
+    @Override
     protected ValidateResult validateInternal(Object value) {
         if (value == null) {
             return SUCCESS;

@@ -28,6 +28,8 @@ final class AllOf
             Object item = items.get(i);
             if (item instanceof Boolean) {
                 itemSchema = (Boolean) item ? Any.INSTANCE : Any.NOT_ANY;
+            } else if (item instanceof JSONSchema) {
+                itemSchema = (JSONSchema) item;
             } else {
                 JSONObject itemObject = (JSONObject) item;
                 if (!itemObject.containsKey("$ref") && !itemObject.containsKey("type") && type != null) {
@@ -67,6 +69,11 @@ final class AllOf
     @Override
     public Type getType() {
         return Type.AllOf;
+    }
+
+    @Override
+    public JSONObject toJSONObject() {
+        return JSONObject.of("allOf", this.items);
     }
 
     @Override

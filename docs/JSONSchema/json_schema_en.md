@@ -143,6 +143,11 @@ public void test2() {
 
 ## 5. Constructing JSONSchema from a Type
 When interacting between the backend and frontend, it is often necessary to convert a Java type into a JSONSchema and return it to the client.
+
+A schema can also be exported and reloaded with `JSONSchema.parseSchema(schema.toString())` or
+`JSONSchema.of(schema.toJSONObject())`. These forms preserve the `not`, `allOf`, `anyOf`, `oneOf`,
+`enum` and null-type constraints, including combinations nested in properties or array items.
+
 ```java
 @Test
 public void test() {
