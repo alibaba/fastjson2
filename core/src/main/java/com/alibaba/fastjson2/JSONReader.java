@@ -5769,6 +5769,9 @@ public abstract class JSONReader
             if (autoTypeBeforeHandler != null) {
                 Class<?> autoTypeClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
                 if (autoTypeClass != null) {
+                    if (ObjectReaderProvider.SAFE_MODE && isAutoTypeDenyClass(autoTypeClass)) {
+                        throw new JSONException("autoType is not support. " + typeName);
+                    }
                     boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
                     return provider.getObjectReader(autoTypeClass, fieldBased);
                 }
@@ -5798,6 +5801,9 @@ public abstract class JSONReader
             if (autoTypeBeforeHandler != null) {
                 Class<?> autoTypeClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
                 if (autoTypeClass != null) {
+                    if (ObjectReaderProvider.SAFE_MODE && isAutoTypeDenyClass(autoTypeClass)) {
+                        throw new JSONException("autoType is not support. " + typeName);
+                    }
                     boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
                     return provider.getObjectReader(autoTypeClass, fieldBased);
                 }
