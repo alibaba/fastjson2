@@ -43,17 +43,12 @@ public class FieldWriterObjectFinal<T>
             return super.getObjectWriter(jsonWriter, valueClass);
         }
 
-        if (!writeUsing
-                && format == null
-                && !BeanUtils.SUPER.equals(fieldName)
-                && ObjectWriterProvider.isFieldNamesSorted(features | jsonWriter.getFeatures())) {
-            // sorted writers are not stored on the field writer (see FieldWriterObject#getObjectWriter);
-            // explicitly configured writers
-            // (@JSONField(writeUsing)) are always honored instead, $super$ pseudo-fields
-            // resolve via the parent's dedicated branch, and resolution merges field
-            // features so positional output never sorts
-            return jsonWriter.getContext().getProvider()
-                    .getObjectWriter(valueClass, valueClass, features | jsonWriter.getFeatures());
+        // see FieldWriterObject#getObjectWriter: the common path pays one feature bit test only
+        if ((jsonWriter.getFeatures(features) & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0) {
+            ObjectWriter sortedWriter = getSortedVariantObjectWriter(jsonWriter, valueClass);
+            if (sortedWriter != null) {
+                return sortedWriter;
+            }
         }
 
         if (objectWriter != null) {
@@ -61,6 +56,29 @@ public class FieldWriterObjectFinal<T>
         } else {
             return objectWriter = super.getObjectWriter(jsonWriter, valueClass);
         }
+    }
+
+    /**
+     * Resolves the writer for a value written under
+     * {@link JSONWriter.Feature#SortFieldNamesAlphabetically}; called only when the caller saw the
+     * feature bit. See {@link FieldWriterObject#getObjectWriter} for the storage rules.
+     *
+     * @param jsonWriter the writer being used
+     * @param valueClass the runtime class of the value
+     * @return the sorted-variant writer, or null when this field must keep the regular resolution
+     */
+    private ObjectWriter getSortedVariantObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+        if (writeUsing
+                || format != null
+                || BeanUtils.SUPER.equals(fieldName)) {
+            return null;
+        }
+        long mergedFeatures = jsonWriter.getFeatures(features);
+        if (!ObjectWriterProvider.isFieldNamesSorted(mergedFeatures)) {
+            return null;
+        }
+        return jsonWriter.getContext().getProvider()
+                .getObjectWriter(valueClass, valueClass, mergedFeatures);
     }
 
     @Override

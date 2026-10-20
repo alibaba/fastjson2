@@ -88,6 +88,11 @@ public abstract class JSONWriter
     protected Object rootObject;
     protected IdentityHashMap<Object, Path> refs;
     protected Path path;
+    // per-writer memo for ObjectWriterProvider#isNotReferenceDetect: the lookup scans a static
+    // int[] and runs for every pushed and popped path segment; references are only tracked
+    // within one writer, so a single entry covers the usual runs of one value class
+    private Class<?> notRefDetectClass;
+    private boolean notRefDetect;
     protected String lastReference;
     protected byte pretty;
     protected Object attachment;
@@ -305,7 +310,7 @@ public abstract class JSONWriter
      * or the object's class is excluded from reference detection
      */
     public final String setPath0(FieldWriter fieldWriter, Object object) {
-        if (object == null || ObjectWriterProvider.isNotReferenceDetect(object.getClass())) {
+        if (object == null || isNotReferenceDetect(object.getClass())) {
             return null;
         }
 
@@ -391,7 +396,7 @@ public abstract class JSONWriter
      * or the object's class is excluded from reference detection
      */
     public final String setPath0(int index, Object object) {
-        if (path == null || object == null || ObjectWriterProvider.isNotReferenceDetect(object.getClass())) {
+        if (path == null || object == null || isNotReferenceDetect(object.getClass())) {
             return null;
         }
         this.path = index == 0
@@ -446,7 +451,7 @@ public abstract class JSONWriter
         if (this.path == null
                 || (context.features & MASK_REFERENCE_DETECTION) == 0
                 || object == null
-                || ObjectWriterProvider.isNotReferenceDetect(object.getClass())
+                || isNotReferenceDetect(object.getClass())
         ) {
             return;
         }
@@ -522,7 +527,26 @@ public abstract class JSONWriter
         return (context.features & ReferenceDetection.mask) != 0
                 && (context.features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
                 && object != null
-                && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
+                && !isNotReferenceDetect(object.getClass());
+    }
+
+    /**
+     * Cached form of {@link ObjectWriterProvider#isNotReferenceDetect(Class)} for the path
+     * push/pop hot path: the provider lookup scans a static int[], while the path methods run for
+     * every nested value of every write. The memo is per writer (references are never shared
+     * between writers), so it stays thread-confined.
+     *
+     * @param objectClass the runtime class of the value being written
+     * @return true if the class is excluded from reference detection
+     */
+    final boolean isNotReferenceDetect(Class<?> objectClass) {
+        if (objectClass == notRefDetectClass) {
+            return notRefDetect;
+        }
+        boolean result = ObjectWriterProvider.isNotReferenceDetect(objectClass);
+        notRefDetectClass = objectClass;
+        notRefDetect = result;
+        return result;
     }
 
     /**
