@@ -1024,7 +1024,10 @@ public class JSONObject
 
     @Override
     public String toString() {
-        return com.alibaba.fastjson2.JSON.toJSONString(this, JSONWriter.Feature.ReferenceDetection);
+        return com.alibaba.fastjson2.JSON.toJSONString(
+                this,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteByteArrayAsBase64);
     }
 
     @Override

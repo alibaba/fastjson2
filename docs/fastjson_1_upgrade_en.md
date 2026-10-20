@@ -129,3 +129,7 @@ import com.alibaba.fastjson2.JSON;
 String format = "millis";
 JSON.toJSONString(obj, format);
 ```
+
+### 3.8 How is `byte[]` serialized in compatibility mode?
+
+In compatibility mode (the `com.alibaba.fastjson` APIs) a primitive `byte[]` is still written as a Base64 string, on the static entry points (`JSON.toJSONString(...)`) and on the instance ones (`JSONObject.toJSONString()`, `JSONObject.toString()`, `JSONArray.toJSONString()`, `JSONArray.toString()`) alike. An empty `byte[]` is written as `""`, and other arrays and collections, such as `int[]`, `long[]` or `List<Byte>`, are unchanged and still serialized as JSON arrays. This is only the compatibility layer: the plain fastjson2 API (`com.alibaba.fastjson2.JSON`) keeps its own default, where `byte[]` is written as a numeric array.

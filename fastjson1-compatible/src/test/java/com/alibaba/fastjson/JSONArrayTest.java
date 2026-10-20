@@ -15,6 +15,7 @@
  */
 package com.alibaba.fastjson;
 
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -1027,5 +1028,47 @@ public class JSONArrayTest {
         Object[] javaArray = new Object[0];
         array.setRelatedArray(javaArray);
         assertSame(javaArray, array.getRelatedArray());
+    }
+
+    // legacy fastjson 1.x contract: byte[] is serialized as a Base64 string,
+    // whichever public entry point is used.
+    @Test
+    public void test_toJSONString_byteArray_base64() {
+        JSONArray array = new JSONArray();
+        array.add(new byte[]{1, 2});
+
+        assertEquals("[\"AQI=\"]", JSON.toJSONString(array));
+        assertEquals("[\"AQI=\"]", array.toString());
+        assertEquals("[\"AQI=\"]", array.toString(SerializerFeature.WriteMapNullValue));
+        assertEquals("[\"AQI=\"]", array.toJSONString());
+    }
+
+    @Test
+    public void test_toJSONString_byteArray_emptyAndNull() {
+        JSONArray empty = new JSONArray();
+        empty.add(new byte[0]);
+        String legacyEmpty = JSON.toJSONString(empty);
+        assertEquals("[\"\"]", legacyEmpty);
+        assertEquals(legacyEmpty, empty.toString());
+        assertEquals(legacyEmpty, empty.toJSONString());
+
+        JSONArray nullElement = new JSONArray();
+        nullElement.add(null);
+        String legacyNull = JSON.toJSONString(nullElement);
+        assertEquals("[null]", legacyNull);
+        assertEquals(legacyNull, nullElement.toString());
+        assertEquals(legacyNull, nullElement.toJSONString());
+    }
+
+    // control: only byte[] follows the Base64 legacy default
+    @Test
+    public void test_toJSONString_nonByteArrayValuesUnchanged() {
+        JSONArray array = new JSONArray();
+        array.add(new int[]{1, 2});
+        array.add(Arrays.asList((byte) 1, (byte) 2));
+
+        assertEquals("[[1,2],[1,2]]", JSON.toJSONString(array));
+        assertEquals("[[1,2],[1,2]]", array.toString());
+        assertEquals("[[1,2],[1,2]]", array.toJSONString());
     }
 }
