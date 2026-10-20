@@ -86,8 +86,11 @@ public class FieldWriterList<T>
 
     @Override
     public final ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
-        boolean sortVariant = ObjectWriterProvider.isFieldNamesSorted(this.features | jsonWriter.getFeatures());
         long resolvedFeatures = this.features | jsonWriter.getFeatures();
+        // the field writer is shared by the natural and the sorted writer variants, so the
+        // variant has to be decided whenever the item class changes; the merged word is
+        // computed once and reused for the resolution below
+        boolean sortVariant = ObjectWriterProvider.isFieldNamesSorted(resolvedFeatures);
 
         if (contentAs != null) {
             ObjectWriter itemObjectWriter = this.itemObjectWriter;
