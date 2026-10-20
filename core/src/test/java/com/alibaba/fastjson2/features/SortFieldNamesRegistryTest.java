@@ -911,14 +911,16 @@ public class SortFieldNamesRegistryTest {
 
     @Test
     public void beanToArrayFieldDoesNotResolveTheSortedVariant() {
-        // isFieldNamesSorted rejects Sort|BeanToArray before the variant conditions; deleting that
-        // conjunct leaves the positional output identical, so pin the provider resolution count
+        // isFieldNamesSorted keeps Sort|BeanToArray out of the sorted variant: dropping that check
+        // sorts the positional array ([1,3] instead of [3,1]) and resolves the provider on every
+        // write. The three writes pin both the shape and the flat resolution count.
         CountingProvider provider = new CountingProvider(Child.class);
         JSONWriter.Context context = new JSONWriter.Context(
                 provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
         String expected = "{\"child\":[3,1]}";
         assertEquals(expected, JSON.toJSONString(new ChildHolder(), context));
         int afterFirst = provider.calls.get();
+        assertTrue(afterFirst > 0, "the BeanToArray field must still resolve through the context provider");
         assertEquals(expected, JSON.toJSONString(new ChildHolder(), context));
         assertEquals(expected, JSON.toJSONString(new ChildHolder(), context));
         assertEquals(afterFirst, provider.calls.get());
