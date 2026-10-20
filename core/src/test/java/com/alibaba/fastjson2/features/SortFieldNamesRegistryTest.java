@@ -879,11 +879,16 @@ public class SortFieldNamesRegistryTest {
 
     static final class CountingProvider
             extends ObjectWriterProvider {
+        final Class countedClass;
         final java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+
+        CountingProvider(Class countedClass) {
+            this.countedClass = countedClass;
+        }
 
         @Override
         public ObjectWriter getObjectWriter(java.lang.reflect.Type objectType, Class objectClass, long contextFeatures) {
-            if (objectClass == Position.class) {
+            if (objectClass == countedClass) {
                 calls.incrementAndGet();
             }
             return super.getObjectWriter(objectType, objectClass, contextFeatures);
@@ -894,7 +899,7 @@ public class SortFieldNamesRegistryTest {
     public void sortedWritesResolveTheItemWriterThroughTheProvider() {
         // the sorted variant is resolved through the provider on every write: nothing is stored on
         // the field writer, so cleanup(ClassLoader) and provider-level eviction always take effect
-        CountingProvider provider = new CountingProvider();
+        CountingProvider provider = new CountingProvider(Position.class);
         String expected = "{\"position\":{\"alpha\":1,\"zulu\":7}}";
         assertEquals(expected, JSON.toJSONString(new MemoOuter(),
                 new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
@@ -904,24 +909,11 @@ public class SortFieldNamesRegistryTest {
         assertTrue(provider.calls.get() > afterFirst);
     }
 
-    static final class CountingChildProvider
-            extends ObjectWriterProvider {
-        final java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
-
-        @Override
-        public ObjectWriter getObjectWriter(java.lang.reflect.Type objectType, Class objectClass, long contextFeatures) {
-            if (objectClass == Child.class) {
-                calls.incrementAndGet();
-            }
-            return super.getObjectWriter(objectType, objectClass, contextFeatures);
-        }
-    }
-
     @Test
     public void beanToArrayFieldDoesNotResolveTheSortedVariant() {
         // isFieldNamesSorted rejects Sort|BeanToArray before the variant conditions; deleting that
         // conjunct leaves the positional output identical, so pin the provider resolution count
-        CountingChildProvider provider = new CountingChildProvider();
+        CountingProvider provider = new CountingProvider(Child.class);
         JSONWriter.Context context = new JSONWriter.Context(
                 provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
         String expected = "{\"child\":[3,1]}";
