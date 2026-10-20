@@ -567,7 +567,7 @@ public class FieldWriterObject<T>
             throw new JSONException("get value writer error, valueType : " + valueClass);
         }
 
-        boolean refDetect = jsonWriter.isRefDetect() && !ObjectWriterProvider.isNotReferenceDetect(valueClass);
+        boolean refDetect = jsonWriter.isRefDetect(value);
 
         if (refDetect) {
             if (value == object) {
