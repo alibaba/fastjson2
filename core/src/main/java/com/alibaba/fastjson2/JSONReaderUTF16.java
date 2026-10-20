@@ -2017,8 +2017,11 @@ final class JSONReaderUTF16
                 }
 
                 while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-                    offset++;
-                    c = chars[offset];
+                    if (offset + 1 >= end) {
+                        c = EOI;
+                        break;
+                    }
+                    c = chars[++offset];
                 }
                 if (c != ':') {
                     throw new JSONException("syntax error : " + offset);
@@ -2027,8 +2030,11 @@ final class JSONReaderUTF16
                 c = ++offset == end ? EOI : chars[offset];
 
                 while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-                    offset++;
-                    c = chars[offset];
+                    if (offset + 1 >= end) {
+                        c = EOI;
+                        break;
+                    }
+                    c = chars[++offset];
                 }
 
                 this.offset = offset + 1;
@@ -3877,7 +3883,7 @@ final class JSONReaderUTF16
             boolean endOfComment = false;
             if (multi) {
                 if (ch == '*'
-                        && offset <= end && chars[offset] == '/') {
+                        && offset < end && chars[offset] == '/') {
                     offset++;
                     endOfComment = true;
                 }
@@ -4052,13 +4058,17 @@ final class JSONReaderUTF16
         if (ch == 'e' || ch == 'E') {
             boolean negativeExp = false;
             int expValue = 0;
-            ch = chars[offset++];
+            ch = offset == end ? EOI : chars[offset++];
 
             if (ch == '-') {
                 negativeExp = true;
-                ch = chars[offset++];
+                ch = offset == end ? EOI : chars[offset++];
             } else if (ch == '+') {
-                ch = chars[offset++];
+                ch = offset == end ? EOI : chars[offset++];
+            }
+
+            if (quote == 0 && (ch < '0' || ch > '9')) {
+                throw new JSONException(info("illegal input"));
             }
 
             while (ch >= '0' && ch <= '9') {
