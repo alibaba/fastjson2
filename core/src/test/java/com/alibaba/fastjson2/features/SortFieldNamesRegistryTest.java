@@ -904,6 +904,34 @@ public class SortFieldNamesRegistryTest {
         assertTrue(provider.calls.get() > afterFirst);
     }
 
+    static final class CountingChildProvider
+            extends ObjectWriterProvider {
+        final java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+
+        @Override
+        public ObjectWriter getObjectWriter(java.lang.reflect.Type objectType, Class objectClass, long contextFeatures) {
+            if (objectClass == Child.class) {
+                calls.incrementAndGet();
+            }
+            return super.getObjectWriter(objectType, objectClass, contextFeatures);
+        }
+    }
+
+    @Test
+    public void beanToArrayFieldDoesNotResolveTheSortedVariant() {
+        // isFieldNamesSorted rejects Sort|BeanToArray before the variant conditions; deleting that
+        // conjunct leaves the positional output identical, so pin the provider resolution count
+        CountingChildProvider provider = new CountingChildProvider();
+        JSONWriter.Context context = new JSONWriter.Context(
+                provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
+        String expected = "{\"child\":[3,1]}";
+        assertEquals(expected, JSON.toJSONString(new ChildHolder(), context));
+        int afterFirst = provider.calls.get();
+        assertEquals(expected, JSON.toJSONString(new ChildHolder(), context));
+        assertEquals(expected, JSON.toJSONString(new ChildHolder(), context));
+        assertEquals(afterFirst, provider.calls.get());
+    }
+
     public static class ObjectHolder {
         public Object value;
     }

@@ -75,24 +75,10 @@ public class FieldWriterObject<T>
 
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        // this method runs for every object field of every write; the bit test below is only a
-        // short-circuit, isFieldNamesSorted stays the authoritative rule (it also rejects
-        // BeanToArray), and the variant conditions are evaluated only when the feature applies
-        long mergedFeatures = jsonWriter.getFeatures(this.features);
-        if ((mergedFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
-                && ObjectWriterProvider.isFieldNamesSorted(mergedFeatures)
-                && canUseSortedVariant()) {
-            // sorted writers are never stored on the field writer: not in initValueClass/initObjectWriter,
-            // where a writer resolved under one variant would be reused under the other, and not in a
-            // memo of their own, which would keep a value class (and its loader) reachable from the
-            // holder's writer after ObjectWriterProvider#cleanup(ClassLoader);
-            // explicitly configured writers (@JSONField(writeUsing)) are always honored instead,
-            // $super$ pseudo-fields always resolve via getObjectWriterVoid's dedicated branch,
-            // Map-valued fields keep the type-carrying resolution (the untyped provider writer
-            // would drop the declared key/value types and gain a spurious @type under WriteClassName),
-            // and resolution merges field features so positional output never sorts
+        long sortedFeatures = sortedVariantFeatures(jsonWriter);
+        if (sortedFeatures != 0) {
             return jsonWriter.getContext().getProvider()
-                    .getObjectWriter(valueClass, valueClass, mergedFeatures);
+                    .getObjectWriter(valueClass, valueClass, sortedFeatures);
         }
 
         final Class initValueClass = this.initValueClass;
@@ -116,17 +102,37 @@ public class FieldWriterObject<T>
     }
 
     /**
-     * Whether the sorted writer variant may apply to this field at all. Explicitly configured
-     * writers ({@code @JSONField(writeUsing)}), format presets, the {@code $super$} pseudo-field
-     * and Map-valued fields keep their own resolution; see {@link #getObjectWriter}.
+     * Returns the merged feature word when this field must be resolved through the sorted writer
+     * variant, or 0 when the regular resolution applies. Both {@code getObjectWriter} overrides
+     * share this decision so the merged word and the conditions cannot drift apart.
+     * <p>
+     * {@link ObjectWriterProvider#isFieldNamesSorted(long)} stays the authoritative rule (it also
+     * rejects {@code BeanToArray}); the mask test before it only short-circuits the common
+     * unsorted path. Sorted writers are never stored on the field writer: not in
+     * {@link #initValueClass}/{@link #initObjectWriter}, where a writer resolved under one variant
+     * would be reused under the other, and not in a memo of their own, which would keep a value
+     * class (and its loader) reachable from the holder's writer after
+     * {@link ObjectWriterProvider#cleanup(ClassLoader)}. Explicitly configured writers
+     * ({@code @JSONField(writeUsing)}) are always honored instead, {@code $super$} pseudo-fields
+     * resolve via {@link #getObjectWriterVoid}'s dedicated branch, Map-valued fields keep the
+     * type-carrying resolution (the untyped provider writer would drop the declared key/value
+     * types and gain a spurious {@code @type} under WriteClassName), and resolution merges field
+     * features so positional output never sorts.
      *
-     * @return true when the sorted variant applies to this field
+     * @param jsonWriter the writer being used
+     * @return the merged feature word, or 0 when the regular resolution applies
      */
-    final boolean canUseSortedVariant() {
-        return !writeUsing
+    final long sortedVariantFeatures(JSONWriter jsonWriter) {
+        long mergedFeatures = jsonWriter.getFeatures(this.features);
+        if ((mergedFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
+                && ObjectWriterProvider.isFieldNamesSorted(mergedFeatures)
+                && !writeUsing
                 && format == null
                 && !BeanUtils.SUPER.equals(fieldName)
-                && !Map.class.isAssignableFrom(fieldClass);
+                && !Map.class.isAssignableFrom(fieldClass)) {
+            return mergedFeatures;
+        }
+        return 0;
     }
 
     /**

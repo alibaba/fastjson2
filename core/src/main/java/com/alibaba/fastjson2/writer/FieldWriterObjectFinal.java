@@ -42,14 +42,11 @@ public class FieldWriterObjectFinal<T>
             return super.getObjectWriter(jsonWriter, valueClass);
         }
 
-        // see FieldWriterObject#getObjectWriter: the bit test only short-circuits, while
-        // isFieldNamesSorted stays the authoritative rule
-        long mergedFeatures = jsonWriter.getFeatures(features);
-        if ((mergedFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
-                && ObjectWriterProvider.isFieldNamesSorted(mergedFeatures)
-                && canUseSortedVariant()) {
+        // see FieldWriterObject#sortedVariantFeatures: one shared decision for both overrides
+        long sortedFeatures = sortedVariantFeatures(jsonWriter);
+        if (sortedFeatures != 0) {
             return jsonWriter.getContext().getProvider()
-                    .getObjectWriter(valueClass, valueClass, mergedFeatures);
+                    .getObjectWriter(valueClass, valueClass, sortedFeatures);
         }
 
         if (objectWriter != null) {
