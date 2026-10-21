@@ -75,22 +75,10 @@ public class FieldWriterObject<T>
 
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        if (!writeUsing
-                && format == null
-                && !BeanUtils.SUPER.equals(fieldName)
-                && !Map.class.isAssignableFrom(fieldClass)
-                && ObjectWriterProvider.isFieldNamesSorted(this.features | jsonWriter.getFeatures())) {
-            // sorted writers are never stored on the field writer: not in initValueClass/initObjectWriter,
-            // where a writer resolved under one variant would be reused under the other, and not in a
-            // memo of their own, which would keep a value class (and its loader) reachable from the
-            // holder's writer after ObjectWriterProvider#cleanup(ClassLoader);
-            // explicitly configured writers (@JSONField(writeUsing)) are always honored instead,
-            // $super$ pseudo-fields always resolve via getObjectWriterVoid's dedicated branch,
-            // Map-valued fields keep the type-carrying resolution (the untyped provider writer
-            // would drop the declared key/value types and gain a spurious @type under WriteClassName),
-            // and resolution merges field features so positional output never sorts
+        long sortedFeatures = sortedVariantFeatures(jsonWriter);
+        if (sortedFeatures != 0) {
             return jsonWriter.getContext().getProvider()
-                    .getObjectWriter(valueClass, valueClass, this.features | jsonWriter.getFeatures());
+                    .getObjectWriter(valueClass, valueClass, sortedFeatures);
         }
 
         final Class initValueClass = this.initValueClass;
@@ -111,6 +99,55 @@ public class FieldWriterObject<T>
                 return getObjectWriterTypeNotMatch(jsonWriter, valueClass);
             }
         }
+    }
+
+    /**
+     * Returns the merged feature word when this field must be resolved through the sorted writer
+     * variant, or 0 when the regular resolution applies. Both {@code getObjectWriter} overrides
+     * share this decision so the merged word and the conditions cannot drift apart.
+     * <p>
+     * {@link ObjectWriterProvider#isFieldNamesSorted(long)} stays the authoritative rule (it also
+     * rejects {@code BeanToArray}); the mask test before it only short-circuits the common
+     * unsorted path. Sorted writers are never stored on the field writer: not in
+     * {@link #initValueClass}/{@link #initObjectWriter}, where a writer resolved under one variant
+     * would be reused under the other, and not in a memo of their own, which would keep a value
+     * class (and its loader) reachable from the holder's writer after
+     * {@link ObjectWriterProvider#cleanup(ClassLoader)}. Explicitly configured writers
+     * ({@code @JSONField(writeUsing)}) are always honored instead, {@code $super$} pseudo-fields
+     * resolve via {@link #getObjectWriterVoid}'s dedicated branch, Map-valued fields keep the
+     * type-carrying resolution (the untyped provider writer would drop the declared key/value
+     * types and gain a spurious {@code @type} under WriteClassName), and resolution merges field
+     * features so positional output never sorts.
+     *
+     * @param jsonWriter the writer being used
+     * @return the merged feature word, or 0 when the regular resolution applies
+     */
+    final long sortedVariantFeatures(JSONWriter jsonWriter) {
+        return sortedVariantFeatures(jsonWriter, true);
+    }
+
+    /**
+     * Variant of {@link #sortedVariantFeatures(JSONWriter)} that controls the Map-shaped fields
+     * rule. {@code FieldWriterObjectFinal} passes {@code false}: its pre-existing routing never
+     * excluded Map-assignable field classes, and a final Map subclass reaches it only through the
+     * lambda/JIT overload, where the sorted branch must stay reachable so a sorted context resolves
+     * the sorted writer instead of caching a natural one.
+     *
+     * @param jsonWriter the writer being used
+     * @param excludeMap whether Map-assignable field classes keep their type-carrying resolution
+     * @return the merged feature word, or 0 when the regular resolution applies
+     */
+    final long sortedVariantFeatures(JSONWriter jsonWriter, boolean excludeMap) {
+        long mergedFeatures = jsonWriter.getFeatures(this.features);
+        if ((mergedFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
+                && ObjectWriterProvider.isFieldNamesSorted(mergedFeatures)
+                && !writeUsing
+                && format == null
+                && !BeanUtils.SUPER.equals(fieldName)
+                && (!excludeMap || !Map.class.isAssignableFrom(fieldClass))) {
+            return mergedFeatures;
+        }
+        return 0;
     }
 
     /**
@@ -540,7 +577,7 @@ public class FieldWriterObject<T>
             throw new JSONException("get value writer error, valueType : " + valueClass);
         }
 
-        boolean refDetect = jsonWriter.isRefDetect() && !ObjectWriterProvider.isNotReferenceDetect(valueClass);
+        boolean refDetect = jsonWriter.isRefDetect(value);
 
         if (refDetect) {
             if (value == object) {

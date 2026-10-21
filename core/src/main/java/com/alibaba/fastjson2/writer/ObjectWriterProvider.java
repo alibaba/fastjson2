@@ -1019,6 +1019,11 @@ public class ObjectWriterProvider
 
     /**
      * Checks if the specified class is a type that should not have reference detection.
+     * <p>
+     * The lookup is a binarySearch over the static identity-hash table plus the enum check. The
+     * answer must stay a pure function of the class: the path push and pop sites, and the
+     * collection element sites, all have to agree, or the path stack drifts a level and every
+     * later path (and emitted {@code $ref}) is wrong (see Issue7795).
      *
      * @param clazz the class to check
      * @return true if the class should not have reference detection, false otherwise
