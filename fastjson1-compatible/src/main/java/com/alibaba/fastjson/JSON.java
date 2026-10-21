@@ -175,6 +175,34 @@ public abstract class JSON
         return context;
     }
 
+    /**
+     * Build a {@link JSONReader.Context} bound to the given {@link ParserConfig}'s provider.
+     * When {@link ParserConfig#isAutoTypeSupport()} is enabled and the caller has not suppressed
+     * {@code @type} resolution via the per-call {@link Feature#IgnoreAutoType}, this enables
+     * {@link JSONReader.Feature#SupportAutoType} so that {@code JSON.parse} / {@code JSON.parseObject}
+     * with an autoType-supporting {@link ParserConfig} resolve {@code @type}.
+     * <p>
+     * Resolution follows fastjson2's {@code SupportAutoType} semantics: the accept (allow) list
+     * ({@code ParserConfig.addAccept}) plus fastjson2's built-in JDK gadget denylist
+     * ({@code JDKUtils.isAutoTypeDenyClass}). The deprecated fastjson 1.x
+     * {@code ParserConfig.addDeny} denylist is <em>not</em> enforced here &mdash; in fastjson2
+     * {@code ObjectReaderProvider.addAutoTypeDeny} is a deprecated no-op and {@code checkAutoType}
+     * does not consult a user denylist, by design (fastjson2's security model is allowlist-based).
+     * Migrators that relied on a deny list should move to {@code addAccept}.
+     */
+    public static JSONReader.Context createReadContext(ParserConfig config, int featuresValue, Feature... features) {
+        for (Feature feature : features) {
+            featuresValue |= feature.mask;
+        }
+        JSONReader.Context context = createReadContext(config.getProvider(), featuresValue, features);
+        // Honour ParserConfig.autoTypeSupport only when the caller has not explicitly
+        // suppressed @type resolution for this call (fastjson 1.x Feature.IgnoreAutoType).
+        if (config.isAutoTypeSupport() && (featuresValue & Feature.IgnoreAutoType.mask) == 0) {
+            context.config(JSONReader.Feature.SupportAutoType);
+        }
+        return context;
+    }
+
     public static JSONObject parseObject(String str) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -269,7 +297,7 @@ public abstract class JSON
         }
 
         JSONReader.Context context = createReadContext(
-                config.getProvider(),
+                config,
                 featureValues,
                 features
         );
@@ -317,7 +345,7 @@ public abstract class JSON
         }
 
         JSONReader.Context context = createReadContext(
-                config.getProvider(),
+                config,
                 featureValues,
                 features
         );
@@ -424,7 +452,7 @@ public abstract class JSON
         }
 
         JSONReader.Context context = createReadContext(
-                config.getProvider(),
+                config,
                 featureValues,
                 features
         );
@@ -630,7 +658,7 @@ public abstract class JSON
         }
 
         JSONReader.Context context = createReadContext(
-                config.getProvider(),
+                config,
                 DEFAULT_PARSER_FEATURE,
                 features
         );
@@ -692,7 +720,7 @@ public abstract class JSON
         }
 
         JSONReader.Context context = createReadContext(
-                config.getProvider(),
+                config,
                 featureValues,
                 features
         );
@@ -983,7 +1011,7 @@ public abstract class JSON
             return null;
         }
 
-        JSONReader.Context context = createReadContext(config.getProvider(), DEFAULT_PARSER_FEATURE, features);
+        JSONReader.Context context = createReadContext(config, DEFAULT_PARSER_FEATURE, features);
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
             Object object;
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
@@ -1005,7 +1033,7 @@ public abstract class JSON
             return null;
         }
 
-        JSONReader.Context context = createReadContext(config.getProvider(), DEFAULT_PARSER_FEATURE);
+        JSONReader.Context context = createReadContext(config, DEFAULT_PARSER_FEATURE);
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
             Object object;
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
@@ -1027,7 +1055,7 @@ public abstract class JSON
             return null;
         }
 
-        JSONReader.Context context = createReadContext(config.getProvider(), features);
+        JSONReader.Context context = createReadContext(config, features);
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
             Object object;
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
@@ -2234,7 +2262,7 @@ public abstract class JSON
 
         try (JSONReader reader = JSONReader.of(
                 text,
-                createReadContext(config.getProvider(), DEFAULT_PARSER_FEATURE))
+                createReadContext(config, DEFAULT_PARSER_FEATURE))
         ) {
             List<T> list = reader.read(paramType);
             reader.handleResolveTasks(list);
