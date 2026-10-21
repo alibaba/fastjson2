@@ -910,7 +910,7 @@ public class SortFieldNamesRegistryTest {
     }
 
     @Test
-    public void beanToArrayFieldDoesNotResolveTheSortedVariant() {
+    public void beanToArrayAnnotatedFieldNeverResolvesTheSortedVariant() {
         // isFieldNamesSorted keeps Sort|BeanToArray out of the sorted variant: dropping that check
         // sorts the positional array ([1,3] instead of [3,1]) and resolves the provider on every
         // write. The three writes pin both the shape and the flat resolution count.
