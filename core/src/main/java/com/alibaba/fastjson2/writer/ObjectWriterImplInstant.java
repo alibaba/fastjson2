@@ -36,13 +36,24 @@ final class ObjectWriterImplInstant
                 : context.getDateFormat();
 
         Instant instant = (Instant) object;
-        if (dateFormat == null) {
+
+        // Honor formatISO8601 / context.isDateFormatISO8601() ahead of any
+        // string-pattern shape flags (yyyyMMddHHmmss19 etc.) — when the caller
+        // explicitly requested ISO8601 (e.g. SerializerFeature.UseISO8601DateFormat
+        // or JSONWriter.Feature.WriteISO8601DateFormat) it must take priority over
+        // a default dateFormat that may have been set on the context (issue #4003).
+        boolean iso8601 = formatISO8601 || (this.format == null && context.isDateFormatISO8601());
+
+        if (dateFormat == null && !iso8601) {
             jsonWriter.writeInstant(instant);
             return;
         }
 
-        boolean yyyyMMddhhmmss19 = this.yyyyMMddhhmmss19 || (context.isFormatyyyyMMddhhmmss19() && this.format == null);
-        if (yyyyMMddhhmmss14 || yyyyMMddhhmmss19 || yyyyMMdd8 || yyyyMMdd10) {
+        boolean yyyyMMddhhmmss19 = !iso8601 && (this.yyyyMMddhhmmss19 || (context.isFormatyyyyMMddhhmmss19() && this.format == null));
+        boolean yyyyMMddhhmmss14local = !iso8601 && yyyyMMddhhmmss14;
+        boolean yyyyMMdd8local = !iso8601 && yyyyMMdd8;
+        boolean yyyyMMdd10local = !iso8601 && yyyyMMdd10;
+        if (yyyyMMddhhmmss14local || yyyyMMddhhmmss19 || yyyyMMdd8local || yyyyMMdd10local) {
             final long SECONDS_PER_DAY = 60 * 60 * 24;
             ZoneId zoneId = context.getZoneId();
             long epochSecond = instant.getEpochSecond();
@@ -173,7 +184,7 @@ final class ObjectWriterImplInstant
 
         int year = zdt.getYear();
         if (year >= 0 && year <= 9999) {
-            if (formatISO8601 || (format == null && context.isDateFormatISO8601())) {
+            if (iso8601) {
                 jsonWriter.writeDateTimeISO8601(
                         year,
                         zdt.getMonthValue(),
