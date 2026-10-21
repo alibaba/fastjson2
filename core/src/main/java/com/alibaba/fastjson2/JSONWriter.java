@@ -88,9 +88,11 @@ public abstract class JSONWriter
     protected Object rootObject;
     protected IdentityHashMap<Object, Path> refs;
     protected Path path;
-    // per-writer memo for ObjectWriterProvider#isNotReferenceDetect: the lookup scans a static
-    // int[] and runs for every pushed and popped path segment; references are only tracked
-    // within one writer, so a single entry covers the usual runs of one value class
+    // per-writer fast path for ObjectWriterProvider#isNotReferenceDetect: that lookup is a
+    // binarySearch over a static identity-hash table plus an enum check, and runs for every
+    // pushed/popped path segment. It is safe only because the provider predicate is a pure
+    // function of the class; this memo must keep agreeing with the call sites that decide the
+    // other half of a push/pop pair (see Issue7795).
     private Class<?> notRefDetectClass;
     private boolean notRefDetect;
     protected String lastReference;
@@ -531,10 +533,12 @@ public abstract class JSONWriter
     }
 
     /**
-     * Cached form of {@link ObjectWriterProvider#isNotReferenceDetect(Class)} for the path
-     * push/pop hot path: the provider lookup scans a static int[], while the path methods run for
-     * every nested value of every write. The memo is per writer (references are never shared
-     * between writers), so it stays thread-confined.
+     * Fast path for {@link ObjectWriterProvider#isNotReferenceDetect(Class)}: the provider
+     * predicate is a binarySearch over a static identity-hash table plus an enum check, and the
+     * path methods run for every nested value of every write. The memo is per writer and only
+     * avoids the lookup for runs of one value class; it is safe only because the predicate is a
+     * pure function of the class, and it must keep agreeing with the call sites that decide the
+     * other half of a push/pop pair (setPath0/popPath0 symmetry, see Issue7795).
      *
      * @param objectClass the runtime class of the value being written
      * @return true if the class is excluded from reference detection
