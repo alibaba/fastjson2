@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderInt32<T, V>
-        extends FieldReader<T> {
+        extends FieldReaderBoxedType<T, Integer> {
     FieldReaderInt32(
             String fieldName,
             Class<V> fieldClass,
@@ -26,32 +26,11 @@ final class FieldReaderInt32<T, V>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
     }
 
     @Override
-    public void accept(T object, Object value) {
-        propertyAccessor.setObject(object, value);
-    }
-
-    @Override
-    public void readFieldValue(JSONReader jsonReader, T object) {
-        Integer value;
-        try {
-            value = jsonReader.readInt32();
-        } catch (Exception e) {
-            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
-                value = null;
-            } else {
-                throw e;
-            }
-        }
-
-        propertyAccessor.setObject(object, value);
-    }
-
-    @Override
-    public Object readFieldValue(JSONReader jsonReader) {
+    protected Integer readValue(JSONReader jsonReader) {
         return jsonReader.readInt32();
     }
 }
