@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,47 @@ public class IOUtilsTest {
     public void size() {
         assertEquals(Long.toString(Long.MAX_VALUE), toString(Long.MAX_VALUE));
         assertEquals(Long.toString(Long.MAX_VALUE), toString1(Long.MAX_VALUE));
+    }
+
+    @Test
+    public void groupedIntSafeWrites() {
+        for (int value = 0; value <= 999; value++) {
+            String expected = Integer.toString(value);
+            byte[] bytes = new byte[5];
+            char[] chars = new char[5];
+            assertEquals(1 + expected.length(), IOUtils.writeInt3Safe(bytes, 1, value));
+            assertEquals(expected, new String(bytes, 1, expected.length()));
+            assertEquals(1 + expected.length(), IOUtils.writeInt3Safe(chars, 1, value));
+            assertEquals(expected, new String(chars, 1, expected.length()));
+        }
+
+        for (int value = 0; value <= 9999; value += 7) {
+            String expected = String.format("%04d", value);
+            byte[] bytes = new byte[6];
+            char[] chars = new char[6];
+            assertEquals(1 + expected.length(), IOUtils.writeIntNSafe(bytes, 1, value, 4));
+            assertEquals(expected, new String(bytes, 1, 4));
+            assertEquals(1 + expected.length(), IOUtils.writeIntNSafe(chars, 1, value, 4));
+            assertEquals(expected, new String(chars, 1, 4));
+        }
+
+        byte[] bytes = new byte[10];
+        char[] chars = new char[10];
+        assertEquals(9, IOUtils.writeInt8Safe(bytes, 1, 12, 3456));
+        assertEquals("00123456", new String(bytes, 1, 8));
+        assertEquals(9, IOUtils.writeInt8Safe(chars, 1, 12, 3456));
+        assertEquals("00123456", new String(chars, 1, 8));
+    }
+
+    @Test
+    public void groupedIntArraySerialization() {
+        int[] values = {1, 12, 123, 1234, 12345678};
+        String expected = "[1,12,123,1234,12345678]";
+        for (int i = 0; i < 5000; i++) {
+            String actual = JSON.toJSONString(values);
+            assertEquals(expected, actual);
+            assertArrayEquals(expected.getBytes(StandardCharsets.UTF_8), JSON.toJSONBytes(values));
+        }
     }
 
     static String toString(long i) {
