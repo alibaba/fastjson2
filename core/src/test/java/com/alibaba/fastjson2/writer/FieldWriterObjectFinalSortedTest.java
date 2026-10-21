@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-@Tag("features")
+@Tag("writer")
 public class FieldWriterObjectFinalSortedTest {
     public static final class FinalMap extends LinkedHashMap<String, String> {
     }
