@@ -1114,6 +1114,21 @@ public class JSONArray
     }
 
     /**
+     * Serialize to JSON UTF-8 bytes
+     *
+     * @param features features to be enabled in serialization
+     * @return JSON UTF-8 bytes
+     * @since 2.0.61
+     */
+    public byte[] toJSONBytes(JSONWriter.Feature... features) {
+        try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
+            writer.setRootObject(this);
+            writer.write(this);
+            return writer.getBytes();
+        }
+    }
+
+    /**
      * Convert this {@link JSONArray} to the specified Object
      *
      * <pre>{@code
