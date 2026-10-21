@@ -911,9 +911,11 @@ public class SortFieldNamesRegistryTest {
 
     @Test
     public void beanToArrayAnnotatedFieldNeverResolvesTheSortedVariant() {
-        // isFieldNamesSorted keeps Sort|BeanToArray out of the sorted variant: dropping that check
-        // sorts the positional array ([1,3] instead of [3,1]) and resolves the provider on every
-        // write. The three writes pin both the shape and the flat resolution count.
+        // isFieldNamesSorted keeps Sort|BeanToArray out of the sorted variant. Dropping the gate's
+        // isFieldNamesSorted conjunct does NOT change the output shape: provider resolution
+        // re-applies the predicate to the merged word and still returns the BeanToArray writer.
+        // It makes every write re-resolve through the provider, so the flat-count assertion
+        // below is the witness; the three writes keep it honest.
         CountingProvider provider = new CountingProvider(Child.class);
         JSONWriter.Context context = new JSONWriter.Context(
                 provider, JSONWriter.Feature.SortFieldNamesAlphabetically);

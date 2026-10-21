@@ -123,13 +123,28 @@ public class FieldWriterObject<T>
      * @return the merged feature word, or 0 when the regular resolution applies
      */
     final long sortedVariantFeatures(JSONWriter jsonWriter) {
+        return sortedVariantFeatures(jsonWriter, true);
+    }
+
+    /**
+     * Variant of {@link #sortedVariantFeatures(JSONWriter)} that controls the Map-shaped fields
+     * rule. {@code FieldWriterObjectFinal} passes {@code false}: its pre-existing routing never
+     * excluded Map-assignable field classes, and a final Map subclass reaches it only through the
+     * lambda/JIT overload, where the sorted branch must stay reachable so a sorted context resolves
+     * the sorted writer instead of caching a natural one.
+     *
+     * @param jsonWriter the writer being used
+     * @param excludeMap whether Map-assignable field classes keep their type-carrying resolution
+     * @return the merged feature word, or 0 when the regular resolution applies
+     */
+    final long sortedVariantFeatures(JSONWriter jsonWriter, boolean excludeMap) {
         long mergedFeatures = jsonWriter.getFeatures(this.features);
         if ((mergedFeatures & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
                 && ObjectWriterProvider.isFieldNamesSorted(mergedFeatures)
                 && !writeUsing
                 && format == null
                 && !BeanUtils.SUPER.equals(fieldName)
-                && !Map.class.isAssignableFrom(fieldClass)) {
+                && (!excludeMap || !Map.class.isAssignableFrom(fieldClass))) {
             return mergedFeatures;
         }
         return 0;

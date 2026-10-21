@@ -42,8 +42,9 @@ public class FieldWriterObjectFinal<T>
             return super.getObjectWriter(jsonWriter, valueClass);
         }
 
-        // see FieldWriterObject#sortedVariantFeatures: one shared decision for both overrides
-        long sortedFeatures = sortedVariantFeatures(jsonWriter);
+        // this override never excluded Map-assignable field classes: a final Map subclass reaches
+        // it only through the lambda/JIT overload, and the sorted branch must stay reachable
+        long sortedFeatures = sortedVariantFeatures(jsonWriter, false);
         if (sortedFeatures != 0) {
             return jsonWriter.getContext().getProvider()
                     .getObjectWriter(valueClass, valueClass, sortedFeatures);
