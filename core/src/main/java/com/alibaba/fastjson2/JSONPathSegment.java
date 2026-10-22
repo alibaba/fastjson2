@@ -532,18 +532,18 @@ abstract class JSONPathSegment {
                             continue;
                         }
                     }
-                } else if (object instanceof Object[]) {
-                    Object[] array = (Object[]) object;
+                } else if (object != null && object.getClass().isArray()) {
+                    int length = Array.getLength(object);
                     if (index >= 0) {
-                        if (index < array.length) {
-                            value = array[index];
+                        if (index < length) {
+                            value = Array.get(object, index);
                         } else {
                             continue;
                         }
                     } else {
-                        int itemIndex = array.length + index;
+                        int itemIndex = length + index;
                         if (itemIndex >= 0) {
-                            value = array[itemIndex];
+                            value = Array.get(object, itemIndex);
                         } else {
                             continue;
                         }
