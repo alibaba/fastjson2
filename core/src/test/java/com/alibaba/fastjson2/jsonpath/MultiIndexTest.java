@@ -55,6 +55,14 @@ public class MultiIndexTest {
     }
 
     @Test
+    public void eval_array() {
+        int[] array = new int[] {100, 101, 102, 103, 104, 105};
+
+        assertEquals("[103,101]", JSON.toJSONString(JSONPath.eval(array, "$[3,1]")));
+        assertEquals("[100,105]", JSON.toJSONString(JSONPath.eval(array, "$[0,-1]")));
+    }
+
+    @Test
     public void setCallback() {
         JSONPath jsonPath = JSONPath.of("$[1,3]");
 
