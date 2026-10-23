@@ -413,7 +413,8 @@ public abstract class JSONSchema {
 
     @JSONCreator
     public static JSONSchema of(JSONObject input, JSONSchema parent) {
-        // Apply enum membership to each allowed type without discarding sibling constraints.
+        // Expand an array-valued "type" into one schema per allowed type, keeping sibling constraints such as enum,
+        // and compose a sibling "not" through allOf so the typed constraints and the negation both apply.
         if (input.isArray("type") && (input.size() == 1 || input.containsKey("enum"))) {
             JSONArray types = input.getJSONArray("type");
             JSONSchema[] items = new JSONSchema[types.size()];
@@ -421,6 +422,10 @@ public abstract class JSONSchema {
                 JSONObject item = new JSONObject(input);
                 item.put("type", types.get(i));
                 items[i] = JSONSchema.of(item, parent);
+            }
+            if (input.containsKey("not")) {
+                // Keep the typed definition for export as well as its compiled assertions.
+                return new TypeArrayEnumNotSchema(items, input);
             }
             return new AnyOf(items);
         }

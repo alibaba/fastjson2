@@ -292,6 +292,114 @@ public class TypedEnumSchemaTest {
     }
 
     @Test
+    public void typeArrayEnumNotRejectsExcludedValueAndKeepsSiblings() {
+        JSONSchema schema = parseSchema("{\"type\":[\"integer\",\"string\"],\"enum\":[1,2],\"not\":{\"enum\":[1]}}");
+        assertFalse(schema.isValid(1));
+        assertTrue(schema.isValid(2));
+        assertFalse(schema.isValid(3));
+        assertFalse(schema.isValid(true));
+    }
+
+    @Test
+    public void typeArrayEnumNotTrueRejectsEveryValue() {
+        JSONSchema schema = parseSchema("{\"type\":[\"integer\",\"string\"],\"enum\":[1,2],\"not\":true}");
+        assertFalse(schema.isValid(1));
+        assertFalse(schema.isValid(2));
+        assertFalse(schema.isValid((Object) null));
+    }
+
+    @Test
+    public void typeArrayEnumNotFalseKeepsTypeAndEnum() {
+        JSONSchema schema = parseSchema("{\"type\":[\"integer\",\"string\"],\"enum\":[1,2],\"not\":false}");
+        assertTrue(schema.isValid(1));
+        assertTrue(schema.isValid(2));
+        assertFalse(schema.isValid(3));
+        assertFalse(schema.isValid(true));
+        assertFalse(schema.isValid((Object) null));
+    }
+
+    @Test
+    public void typeArrayEnumEmptyNotObjectRejectsEveryValue() {
+        JSONSchema schema = parseSchema("{\"type\":[\"integer\",\"string\"],\"enum\":[1,2],\"not\":{}}");
+        assertFalse(schema.isValid(1));
+        assertFalse(schema.isValid(2));
+    }
+
+    @Test
+    public void nullableTypeArrayEnumNotNullBoundary() {
+        JSONSchema schema = parseSchema("{\"type\":[\"integer\",\"null\"],\"enum\":[1,null],\"not\":{\"type\":\"null\"}}");
+        assertTrue(schema.isValid(1));
+        assertFalse(schema.isValid((Object) null));
+        assertFalse(schema.isValid("1"));
+    }
+
+    @Test
+    public void typedArrayEnumNotKeepsExportAndRoundTrip() {
+        JSONSchema textSchema = parseSchema("{\"type\":[\"integer\",\"string\"],\"enum\":[1,2],\"not\":{\"enum\":[1]}}");
+        JSONObject exported = textSchema.toJSONObject();
+        JSONSchema objectSchema = JSONSchema.of(exported);
+        for (JSONSchema schema : new JSONSchema[]{textSchema, objectSchema, JSONSchema.parseSchema(textSchema.toString())}) {
+            assertTrue(schema.validate(2).isSuccess());
+            assertFalse(schema.validate(1).isSuccess());
+            assertFalse(schema.validate(3).isSuccess());
+            assertFalse(schema.validate("a").isSuccess());
+            assertFalse(schema.validate(true).isSuccess());
+            assertFalse(schema.validate((Object) null).isSuccess());
+        }
+
+        assertEquals(2, exported.getJSONArray("type").size());
+        assertEquals("integer", exported.getJSONArray("type").getString(0));
+        assertEquals("string", exported.getJSONArray("type").getString(1));
+        assertEquals(2, exported.getJSONArray("enum").size());
+        assertEquals(Integer.valueOf(1), exported.getJSONArray("enum").get(0));
+        assertEquals(Integer.valueOf(2), exported.getJSONArray("enum").get(1));
+        assertEquals(1, exported.getJSONObject("not").getJSONArray("enum").size());
+    }
+
+    @Test
+    public void typedArrayEnumNotBooleanAndNullableRoundTrip() {
+        JSONSchema nullable = parseSchema("{\"type\":[\"integer\",\"null\"],\"enum\":[1,null],\"not\":{\"type\":\"null\"}}");
+        JSONSchema nullableReloaded = JSONSchema.of(nullable.toJSONObject());
+        JSONSchema anything = parseSchema("{\"type\":[\"integer\",\"string\"],\"enum\":[1,2],\"not\":true}");
+        JSONSchema anythingReloaded = JSONSchema.of(anything.toJSONObject());
+        JSONSchema nothing = parseSchema("{\"type\":[\"integer\",\"string\"],\"enum\":[1,2],\"not\":false}");
+        JSONSchema nothingReloaded = JSONSchema.of(nothing.toJSONObject());
+
+        for (JSONSchema schema : new JSONSchema[]{nullable, nullableReloaded, JSONSchema.parseSchema(nullable.toString())}) {
+            assertTrue(schema.validate(1).isSuccess());
+            assertFalse(schema.validate(2).isSuccess());
+            assertFalse(schema.validate((Object) null).isSuccess());
+        }
+        for (JSONSchema schema : new JSONSchema[]{anything, anythingReloaded, JSONSchema.parseSchema(anything.toString())}) {
+            assertFalse(schema.validate(1).isSuccess());
+            assertFalse(schema.validate(2).isSuccess());
+        }
+        for (JSONSchema schema : new JSONSchema[]{nothing, nothingReloaded, JSONSchema.parseSchema(nothing.toString())}) {
+            assertTrue(schema.validate(1).isSuccess());
+            assertTrue(schema.validate(2).isSuccess());
+            assertFalse(schema.validate(3).isSuccess());
+        }
+    }
+
+    @Test
+    public void exportedTypedArrayEnumNotIsDetachedFromSchema() {
+        JSONSchema textSchema = parseSchema("{\"type\":[\"integer\",\"string\"],\"enum\":[1,2],\"not\":{\"enum\":[1]}}");
+        JSONObject exported = textSchema.toJSONObject();
+        exported.getJSONArray("enum").clear();
+        exported.getJSONObject("not").getJSONArray("enum").clear();
+        exported.put("type", "null");
+
+        assertTrue(textSchema.validate(2).isSuccess());
+        assertFalse(textSchema.validate(1).isSuccess());
+
+        JSONObject again = textSchema.toJSONObject();
+        assertEquals(2, again.getJSONArray("type").size());
+        assertEquals(2, again.getJSONArray("enum").size());
+        assertEquals(1, again.getJSONObject("not").getJSONArray("enum").size());
+        assertFalse(JSONSchema.of(again).validate(1).isSuccess());
+    }
+
+    @Test
     public void exportedEnumCannotChangeValidation() {
         JSONSchema schema = parseSchema("{\"type\":\"integer\",\"enum\":[1,2]}");
         JSONObject exported = schema.toJSONObject();
