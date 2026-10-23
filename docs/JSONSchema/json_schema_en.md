@@ -73,6 +73,10 @@ public static class Point {
 ## 3. Configuring schema on JSONField
 Since version 2.0.4, you can configure a schema on the `JSONField` annotation to validate the input JSON data.
 
+`enum` also applies when the Java field supplies the type. For example, an `int status` field annotated
+with `@JSONField(schema = "{'enum':[1,2]}")` accepts only the listed values. If the schema declares
+`type` explicitly, both the type and enum membership must match.
+
 ```java
 public static class Point1 {
     @JSONField(schema = "{'minimum':-180,'maximum':180}")

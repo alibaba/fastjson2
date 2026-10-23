@@ -35,7 +35,7 @@ public final class StringSchema
     final Predicate<String> formatValidator;
 
     StringSchema(JSONObject input) {
-        super(input);
+        super(input, false);
         this.typed = "string".equalsIgnoreCase(input.getString("type"));
         this.minLength = input.getIntValue("minLength", -1);
         this.maxLength = input.getIntValue("maxLength", -1);

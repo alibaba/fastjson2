@@ -291,6 +291,8 @@ public final class NumberSchema
             object.put("multipleOf", multipleOf);
         }
 
+        addEnum(object);
+
         return object;
     }
 }
