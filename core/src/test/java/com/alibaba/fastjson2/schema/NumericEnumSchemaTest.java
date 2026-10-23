@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -270,5 +272,85 @@ public class NumericEnumSchemaTest {
         assertFalse(schema.isValid(false));
         assertFalse(schema.isValid(1));
         assertFalse(schema.isValid((Object) JSONObject.of("a", 1)));
+    }
+
+    @Test
+    public void testShortMembersAndValues() {
+        JSONSchema schema = schemaOf("{\"enum\":[1,2]}");
+        assertTrue(schema.isValid((Object) Short.valueOf((short) 2)));
+        assertFalse(schema.isValid((Object) Short.valueOf((short) 3)));
+        assertTrue(new EnumSchema((short) 2).isValid(2));
+    }
+
+    @Test
+    public void testByteMembersAndValues() {
+        JSONSchema schema = schemaOf("{\"enum\":[1,2]}");
+        assertTrue(schema.isValid((Object) Byte.valueOf((byte) 2)));
+        assertFalse(schema.isValid((Object) Byte.valueOf((byte) 3)));
+        assertTrue(new EnumSchema((byte) 2).isValid(2));
+    }
+
+    @Test
+    public void testAtomicIntegerMembersAndValues() {
+        JSONSchema schema = schemaOf("{\"enum\":[1,2]}");
+        assertTrue(schema.isValid((Object) new AtomicInteger(2)));
+        assertFalse(schema.isValid((Object) new AtomicInteger(3)));
+        assertTrue(new EnumSchema(new AtomicInteger(2)).isValid(2));
+    }
+
+    @Test
+    public void testAtomicLongMembersAndValues() {
+        JSONSchema schema = schemaOf("{\"enum\":[1,2]}");
+        assertTrue(schema.isValid((Object) new AtomicLong(2)));
+        assertFalse(schema.isValid((Object) new AtomicLong(3)));
+        assertTrue(new EnumSchema(new AtomicLong(2)).isValid(2));
+        long aboveInt = (long) Integer.MAX_VALUE + 1;
+        assertTrue(new EnumSchema(aboveInt).isValid(new AtomicLong(aboveInt)));
+        assertTrue(new EnumSchema(new AtomicLong(aboveInt)).isValid(aboveInt));
+        assertFalse(new EnumSchema(aboveInt).isValid(new AtomicLong(aboveInt + 1)));
+    }
+
+    @Test
+    public void testLongMaximumMatchesDecimal() {
+        assertTrue(new EnumSchema(Long.MAX_VALUE).isValid(new BigDecimal("9223372036854775807")));
+    }
+
+    @Test
+    public void testLongMinimumMatchesDecimal() {
+        assertTrue(new EnumSchema(Long.MIN_VALUE).isValid(new BigDecimal("-9223372036854775808")));
+    }
+
+    @Test
+    public void testBeyondLongDoesNotMatchBoundary() {
+        assertFalse(new EnumSchema(Long.MAX_VALUE).isValid(new BigInteger("9223372036854775808")));
+        assertFalse(new EnumSchema(Long.MIN_VALUE).isValid(new BigInteger("-9223372036854775809")));
+    }
+
+    @Test
+    public void testIntegerMaximumMatchesDecimal() {
+        assertTrue(new EnumSchema(Integer.MAX_VALUE).isValid(new BigDecimal("2147483647")));
+        assertEquals(Integer.MAX_VALUE, EnumSchema.canonicalize(new BigDecimal("2147483647")));
+    }
+
+    @Test
+    public void testIntegerMinimumMatchesDecimal() {
+        assertTrue(new EnumSchema(Integer.MIN_VALUE).isValid(new BigDecimal("-2147483648")));
+        assertEquals(Integer.MIN_VALUE, EnumSchema.canonicalize(new BigDecimal("-2147483648")));
+    }
+
+    @Test
+    public void testDoubleAtLongLimitDoesNotClamp() {
+        assertFalse(new EnumSchema(Long.MAX_VALUE).isValid(0x1p63));
+        assertFalse(new EnumSchema(Long.MIN_VALUE).isValid(-0x1p63));
+    }
+
+    @Test
+    public void testLargeIntegralDoubleKeepsDecimalRoundTrip() {
+        double positive = 1.00000000000000013E18;
+        double negative = -positive;
+        assertTrue(new EnumSchema(BigDecimal.valueOf(positive)).isValid(positive));
+        assertTrue(new EnumSchema(BigDecimal.valueOf(negative)).isValid(negative));
+        assertFalse(new EnumSchema((long) positive).isValid(positive));
+        assertFalse(new EnumSchema((long) negative).isValid(negative));
     }
 }

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.alibaba.fastjson2.util.TypeUtils.BIGINT_INT32_MAX;
 import static com.alibaba.fastjson2.util.TypeUtils.BIGINT_INT32_MIN;
@@ -79,22 +81,38 @@ public final class EnumSchema
             return value;
         }
 
-        if (value instanceof Double) {
-            double doubleValue = (Double) value;
-            if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
-                return value;
-            }
-            return canonicalize(BigDecimal.valueOf(doubleValue));
+        if (value instanceof Double || value instanceof Float) {
+            return canonicalizeFloating((Number) value);
         }
 
-        if (value instanceof Float) {
-            float floatValue = (Float) value;
-            if (Float.isNaN(floatValue) || Float.isInfinite(floatValue)) {
-                return value;
-            }
-            return canonicalize(BigDecimal.valueOf(floatValue));
+        if (value instanceof Short || value instanceof Byte || value instanceof AtomicInteger) {
+            return ((Number) value).intValue();
         }
 
+        if (value instanceof AtomicLong) {
+            return canonicalizeLong(((AtomicLong) value).longValue());
+        }
+
+        return value;
+    }
+
+    private static Object canonicalizeFloating(Number value) {
+        double doubleValue = value.doubleValue();
+        if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
+            return value;
+        }
+        // Above 2^53, the decimal round-trip can differ from a direct long cast.
+        // 超出 2^53 后，十进制往返结果可能与直接转换为 long 不同。
+        if (doubleValue >= -0x1p53 && doubleValue <= 0x1p53 && doubleValue == (long) doubleValue) {
+            return canonicalizeLong((long) doubleValue);
+        }
+        return canonicalize(BigDecimal.valueOf(doubleValue));
+    }
+
+    private static Object canonicalizeLong(long value) {
+        if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
+            return (int) value;
+        }
         return value;
     }
 
