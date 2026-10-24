@@ -883,4 +883,13 @@ public final class JSONFactory {
         JSONFactory.defaultSkipTransient = skipTransient;
         defaultObjectWriterProvider.setSkipTransient(skipTransient);
     }
+
+    /**
+     * Sets the global safe mode flag shared by all {@link ObjectReaderProvider} instances.
+     *
+     * @param safeMode true to enable safe mode, false to disable it
+     */
+    public static void setSafeMode(boolean safeMode) {
+        ObjectReaderProvider.SAFE_MODE = safeMode;
+    }
 }
