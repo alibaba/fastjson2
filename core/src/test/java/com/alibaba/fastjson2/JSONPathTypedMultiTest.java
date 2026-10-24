@@ -200,6 +200,7 @@ public class JSONPathTypedMultiTest {
                 new String[]{"$", "$.values[0].name", "$.values[0].date"},
                 new Type[]{JSONObject.class, String.class, Date.class}
         );
+        assertTrue(JSONPath.contains(object, "$"));
         assertFalse(jsonPath.contains(object));
         assertTrue(jsonPath.isRef());
     }
