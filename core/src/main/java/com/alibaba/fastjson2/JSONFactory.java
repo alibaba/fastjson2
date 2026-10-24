@@ -890,6 +890,11 @@ public final class JSONFactory {
      * @param safeMode true to enable safe mode, false to disable it
      */
     public static void setSafeMode(boolean safeMode) {
+    public static void setSafeMode(boolean safeMode) {
+        if (!safeMode && ObjectReaderProvider.SAFE_MODE_BY_CONFIG) {
+            throw new JSONException("safeMode cannot be disabled when enabled by configuration");
+        }
         ObjectReaderProvider.SAFE_MODE = safeMode;
+    }
     }
 }
