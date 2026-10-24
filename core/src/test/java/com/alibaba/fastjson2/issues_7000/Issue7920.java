@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues_7000;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
@@ -16,8 +17,25 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue7920 {
+    @Test
+    public void publicPathConvertsToString() {
+        Child child = JSONObject.parseObject("{\"headers\":{\"k\":{}}}").toJavaObject(Child.class);
+        assertEquals(String.class, child.getHeaders().get("k").getClass());
+    }
+
+    @Test
+    public void bridgeSortsAfterRealSetter() {
+        Method[] setters = setters();
+        OrderedCreator creator = new OrderedCreator();
+        FieldReader bridgeReader = creator.fieldReader(setters[0]);
+        FieldReader realReader = creator.fieldReader(setters[1]);
+        assertTrue(bridgeReader.compareTo(realReader) > 0);
+        assertTrue(realReader.compareTo(bridgeReader) < 0);
+    }
+
     @Test
     public void bridgeSetterFirst() {
         Method[] setters = setters();
@@ -56,18 +74,29 @@ public class Issue7920 {
     }
 
     static class OrderedCreator extends ObjectReaderCreator {
-        Child parse(String json, Method... setters) {
-            ObjectReaderProvider provider = new ObjectReaderProvider();
+        private final ObjectReaderProvider provider = new ObjectReaderProvider();
+
+        // a map holds one reader per field name, so each setter gets its own map to keep its reader
+        FieldReader fieldReader(Method setter) {
             Map<String, List<FieldReader>> fields = new LinkedHashMap<>();
-            BeanInfo beanInfo = new BeanInfo(provider);
+            addFieldReader(setter, fields);
+            return fields.get("headers").get(0);
+        }
+
+        Child parse(String json, Method... setters) {
+            Map<String, List<FieldReader>> fields = new LinkedHashMap<>();
             for (Method setter : setters) {
-                FieldInfo fieldInfo = new FieldInfo();
-                fieldInfo.init();
-                createFieldReader(Child.class, Child.class, null, null, beanInfo, fieldInfo, setter, fields, provider);
+                addFieldReader(setter, fields);
             }
             FieldReader[] readers = fields.get("headers").toArray(new FieldReader[0]);
             provider.register(Child.class, createObjectReader(Child.class, readers));
             return JSON.parseObject(json, Child.class, new JSONReader.Context(provider));
+        }
+
+        private void addFieldReader(Method setter, Map<String, List<FieldReader>> fields) {
+            FieldInfo fieldInfo = new FieldInfo();
+            fieldInfo.init();
+            createFieldReader(Child.class, Child.class, null, null, new BeanInfo(provider), fieldInfo, setter, fields, provider);
         }
     }
 
