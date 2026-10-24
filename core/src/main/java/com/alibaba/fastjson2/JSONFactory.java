@@ -889,7 +889,19 @@ public final class JSONFactory {
      *
      * @param safeMode true to enable safe mode, false to disable it
      */
-    public static void setSafeMode(boolean safeMode) {
+boolean prev = ObjectReaderProvider.SAFE_MODE;
+try {
+    JSONFactory.setSafeMode(true);
+    assertInstanceOf(Map.class, JSON.parseObject(
+            "{\"@type\":\"" + Bean.class.getName() + "\"}",
+            Object.class, JSONReader.Feature.SupportAutoType));
+    JSONFactory.setSafeMode(false);
+    assertInstanceOf(Bean.class, JSON.parseObject(
+            "{\"@type\":\"" + Bean.class.getName() + "\"}",
+            Object.class, JSONReader.Feature.SupportAutoType));
+} finally {
+    JSONFactory.setSafeMode(prev);
+}
     public static void setSafeMode(boolean safeMode) {
         if (!safeMode && ObjectReaderProvider.SAFE_MODE_BY_CONFIG) {
             throw new JSONException("safeMode cannot be disabled when enabled by configuration");
