@@ -128,8 +128,11 @@ public class Issue7771 {
         assertFalse(JSONPath.contains("{}", "$.values()"));
         assertTrue(JSONPath.contains("{\"a\":[{\"x\":1}],\"b\":[{\"x\":2}]}", "$.*.x"));
         assertTrue(JSONPath.contains("[{\"a\":null,\"b\":1}]", "$[?(@.b==1 && exists(@.a))]"));
+        assertTrue(JSONPath.contains("[{\"a\":null}]", "$[?(@.a)]"));
         assertTrue(JSONPath.contains("{\"a\":1,\"b\":2}", "$[1]"));
         assertFalse(JSONPath.contains("[{\"z\":1}]", "$['x','y']"));
+        assertTrue(JSONPath.contains("{\"x\":1}", "$['x','y'][0]"));
+        assertFalse(JSONPath.contains("{\"x\":1}", "$['x','y'][1]"));
         assertFalse(JSONPath.contains("{}", "$['x','y'][0]"));
 
         JSONPath typedPaths = JSONPath.of(

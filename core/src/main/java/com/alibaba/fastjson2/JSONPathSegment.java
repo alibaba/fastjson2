@@ -869,8 +869,9 @@ abstract class JSONPathSegment {
                 Map map = (Map) object;
                 JSONArray array = new JSONArray(names.length);
                 for (String name : names) {
-                    Object value = map.get(name);
-                    array.add(value);
+                    if (context.next == null || map.containsKey(name)) {
+                        array.add(map.get(name));
+                    }
                 }
                 context.value = array;
                 return;
