@@ -23,6 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -74,16 +75,20 @@ public class ObjectReaderProvider
     static Consumer<Class> DEFAULT_AUTO_TYPE_HANDLER;
     static boolean DEFAULT_AUTO_TYPE_HANDLER_INIT_ERROR;
 
-    static ObjectReaderCachePair readerCache;
+    static volatile ObjectReaderCachePair readerCache;
+    // bumped after every sweep, a pair from an older generation may hold a reader that was evicted
+    static volatile int readerCacheGeneration;
 
     private static final class ObjectReaderCachePair {
         final long hashCode;
         final ObjectReader reader;
+        final int generation;
         volatile int missCount;
 
-        public ObjectReaderCachePair(long hashCode, ObjectReader reader) {
+        public ObjectReaderCachePair(long hashCode, ObjectReader reader, int generation) {
             this.hashCode = hashCode;
             this.reader = reader;
+            this.generation = generation;
         }
     }
 
@@ -183,6 +188,8 @@ public class ObjectReaderProvider
     final ConcurrentMap<Type, ObjectReader> cacheFieldBased = new ConcurrentHashMap<>();
     final ConcurrentMap<Integer, ConcurrentHashMap<Long, ObjectReader>> tclHashCaches = new ConcurrentHashMap<>();
     final ConcurrentMap<Long, ObjectReader> hashCache = new ConcurrentHashMap<>();
+    // the class each auto type name was registered for, since a custom reader does not report its class
+    final ConcurrentMap<Long, Class<?>> autoTypeClasses = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
 
     final LRUAutoTypeCache autoTypeList = new LRUAutoTypeCache(1024);
@@ -544,6 +551,9 @@ public class ObjectReaderProvider
                 }
             }
         }
+        hashCache.values().removeIf(reader -> reader.getObjectClass() == objectClass);
+        removeAutoTypeReaders(autoTypeClass -> autoTypeClass == objectClass);
+        invalidateReaderCache();
         BeanUtils.cleanupCache(objectClass);
     }
 
@@ -556,6 +566,38 @@ public class ObjectReaderProvider
         mixInCache.clear();
         cache.clear();
         cacheFieldBased.clear();
+        tclHashCaches.clear();
+        // the readers the constructor installs for the built-in types have to stay
+        hashCache.values().removeIf(reader -> reader != ObjectArrayReader.INSTANCE
+                && reader != ObjectReaderImplString.INSTANCE
+                && reader != ObjectReaderImplMap.INSTANCE);
+        autoTypeClasses.clear();
+        invalidateReaderCache();
+    }
+
+    private void removeAutoTypeReaders(Predicate<Class<?>> owned) {
+        for (Iterator<Map.Entry<Long, Class<?>>> it = autoTypeClasses.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<Long, Class<?>> entry = it.next();
+            if (owned.test(entry.getValue())) {
+                Long hashCode = entry.getKey();
+                hashCache.remove(hashCode);
+                for (ConcurrentHashMap<Long, ObjectReader> tlc : tclHashCaches.values()) {
+                    tlc.remove(hashCode);
+                }
+                it.remove();
+            }
+        }
+    }
+
+    /**
+     * Drops the reader cached in the static slot. It has to run after the maps were swept, and a pair published
+     * by a lookup that started before that is rejected by its older generation.
+     */
+    private static void invalidateReaderCache() {
+        synchronized (ObjectReaderProvider.class) {
+            readerCacheGeneration++;
+        }
+        readerCache = null;
     }
 
     static boolean match(Type objectType, ObjectReader objectReader, ClassLoader classLoader) {
@@ -632,6 +674,12 @@ public class ObjectReaderProvider
 
         int tclHash = System.identityHashCode(classLoader);
         tclHashCaches.remove(tclHash);
+        for (ConcurrentHashMap<Long, ObjectReader> tlc : tclHashCaches.values()) {
+            tlc.values().removeIf(reader -> match(reader.getObjectClass(), reader, classLoader));
+        }
+        hashCache.values().removeIf(reader -> match(reader.getObjectClass(), reader, classLoader));
+        removeAutoTypeReaders(autoTypeClass -> autoTypeClass.getClassLoader() == classLoader);
+        invalidateReaderCache();
 
         BeanUtils.cleanupCache(classLoader);
     }
@@ -743,9 +791,12 @@ public class ObjectReaderProvider
      * @return the ObjectReader associated with the hash code, or null if not found
      */
     public ObjectReader getObjectReader(long hashCode) {
+        int generation = readerCacheGeneration;
         ObjectReaderCachePair pair = readerCache;
         if (pair != null) {
-            if (pair.hashCode == hashCode) {
+            if (pair.generation != generation) {
+                readerCache = null;
+            } else if (pair.hashCode == hashCode) {
                 return pair.reader;
             } else {
                 if (pair.missCount++ > 16) {
@@ -770,7 +821,7 @@ public class ObjectReaderProvider
         }
 
         if (objectReader != null && readerCache == null) {
-            readerCache = new ObjectReaderCachePair(hashCode, objectReader);
+            readerCache = new ObjectReaderCachePair(hashCode, objectReader, generation);
         }
 
         return objectReader;
@@ -794,7 +845,9 @@ public class ObjectReaderProvider
         ObjectReader objectReader = getObjectReader(autoTypeClass, fieldBased);
 
         if (autoTypeClass != expectClass) {
-            registerIfAbsent(Fnv.hashCode64(typeName), objectReader);
+            long hashCode = Fnv.hashCode64(typeName);
+            registerIfAbsent(hashCode, objectReader);
+            autoTypeClasses.putIfAbsent(hashCode, autoTypeClass);
         }
         return objectReader;
     }
