@@ -883,4 +883,30 @@ public final class JSONFactory {
         JSONFactory.defaultSkipTransient = skipTransient;
         defaultObjectWriterProvider.setSkipTransient(skipTransient);
     }
+
+    /**
+     * Sets the global safe mode flag shared by all {@link ObjectReaderProvider} instances.
+     *
+     * @param safeMode true to enable safe mode, false to disable it
+     */
+boolean prev = ObjectReaderProvider.SAFE_MODE;
+try {
+    JSONFactory.setSafeMode(true);
+    assertInstanceOf(Map.class, JSON.parseObject(
+            "{\"@type\":\"" + Bean.class.getName() + "\"}",
+            Object.class, JSONReader.Feature.SupportAutoType));
+    JSONFactory.setSafeMode(false);
+    assertInstanceOf(Bean.class, JSON.parseObject(
+            "{\"@type\":\"" + Bean.class.getName() + "\"}",
+            Object.class, JSONReader.Feature.SupportAutoType));
+} finally {
+    JSONFactory.setSafeMode(prev);
+}
+    public static void setSafeMode(boolean safeMode) {
+        if (!safeMode && ObjectReaderProvider.SAFE_MODE_BY_CONFIG) {
+            throw new JSONException("safeMode cannot be disabled when enabled by configuration");
+        }
+        ObjectReaderProvider.SAFE_MODE = safeMode;
+    }
+    }
 }
