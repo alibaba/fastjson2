@@ -1833,7 +1833,10 @@ public class ObjectReaderBaseModule
             return typedMap((Class) type, TreeMap.class, null, Object.class);
         }
 
-        if (type == Calendar.class || "javax.xml.datatype.XMLGregorianCalendar".equals(typeName)) {
+        if (type == Calendar.class
+                || (type instanceof Class && Calendar.class.isAssignableFrom((Class) type))
+                || "javax.xml.datatype.XMLGregorianCalendar".equals(typeName)
+        ) {
             return ObjectReaderImplCalendar.INSTANCE;
         }
 
