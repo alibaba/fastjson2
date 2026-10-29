@@ -1386,9 +1386,9 @@ final class JSONReaderASCII
             }
         }
 
-        int ch = bytes[++offset];
+        int ch = offset + 1 >= end ? EOI : bytes[++offset];
         while (ch > 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = bytes[++offset];
+            ch = offset + 1 >= end ? EOI : bytes[++offset];
         }
 
         this.offset = offset + 1;

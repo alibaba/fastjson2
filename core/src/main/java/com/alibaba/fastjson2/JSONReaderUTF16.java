@@ -3173,7 +3173,7 @@ final class JSONReaderUTF16
             b = chars[offset];
         }
         while (b <= ' ' && ((1L << b) & SPACE) != 0) {
-            b = chars[++offset];
+            b = offset + 1 >= end ? EOI : chars[++offset];
         }
 
         if (comma = (b == ',')) {
