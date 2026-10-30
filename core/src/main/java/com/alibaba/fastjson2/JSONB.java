@@ -2831,7 +2831,10 @@ public interface JSONB {
          */
         static int stringCapacity(String str) {
             if (str == null) {
-                return 0;
+                // writeString emits one BC_NULL byte for null. The ASM direct-write group reserves
+                // capacity up front and then stores without bounds checks, so reserving 0 here lets
+                // an Unsafe store write past the buffer end. See issue #7927.
+                return 1;
             }
 
             int strlen = str.length();
