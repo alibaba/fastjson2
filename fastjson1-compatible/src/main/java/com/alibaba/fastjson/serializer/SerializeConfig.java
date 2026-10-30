@@ -29,7 +29,7 @@ public class SerializeConfig {
     }
 
     public SerializeConfig() {
-        this(new ObjectWriterProvider());
+        this(new ObjectWriterProvider(null, false));
     }
 
     public SerializeConfig(ObjectWriterProvider provider) {
