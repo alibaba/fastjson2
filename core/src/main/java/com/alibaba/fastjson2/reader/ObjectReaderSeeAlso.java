@@ -112,16 +112,21 @@ final class ObjectReaderSeeAlso<T>
 
             long hash = jsonReader.readFieldNameHashCode();
             if (hash == typeKeyHashCode) {
-                long typeHash = jsonReader.readValueHashCode();
+                jsonReader.readValueHashCode();
                 JSONReader.Context context = jsonReader.getContext();
-                ObjectReader autoTypeObjectReader = autoType(context, typeHash);
-                if (autoTypeObjectReader == null) {
-                    String typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-
-                    if (autoTypeObjectReader == null) {
-                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
+                String typeName = jsonReader.getString();
+                ObjectReader autoTypeObjectReader = null;
+                if (seeAlsoMapping != null && seeAlsoMapping.size() > 0) {
+                    Class seeAlsoClass = seeAlsoMapping.get(Fnv.hashCode64(typeName));
+                    if (seeAlsoClass != null) {
+                        autoTypeObjectReader = context.getObjectReader(seeAlsoClass);
                     }
+                }
+                if (autoTypeObjectReader == null) {
+                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
+                }
+                if (autoTypeObjectReader == null) {
+                    throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                 }
 
                 if (autoTypeObjectReader == this) {
@@ -247,35 +252,31 @@ final class ObjectReaderSeeAlso<T>
                     && ((((features3 = (features | getFeatures() | context.getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0) || autoTypeFilter != null)
             ) {
                 ObjectReader reader = null;
-                long typeHash = jsonReader.readTypeHashCode();
+                jsonReader.readTypeHashCode();
 
                 Number typeNumber = null;
                 String typeNumberStr = null;
-                if (typeHash == -1 && jsonReader.isNumber()) {
+                if (jsonReader.isNumber()) {
                     typeNumber = jsonReader.readNumber();
                     typeNumberStr = typeNumber.toString();
-                    typeHash = Fnv.hashCode64(typeNumberStr);
                 }
-                if (autoTypeFilter != null) {
-                    Class<?> filterClass = autoTypeFilter.apply(typeHash, objectClass, features3);
-                    if (filterClass == null) {
-                        filterClass = autoTypeFilter.apply(jsonReader.getString(), objectClass, features3);
-                        if (filterClass != null) {
-                            reader = context.getObjectReader(filterClass);
-                        }
+
+                String typeName = typeNumberStr != null ? typeNumberStr : jsonReader.getString();
+                if (seeAlsoMapping != null && seeAlsoMapping.size() > 0) {
+                    Class seeAlsoClass = seeAlsoMapping.get(Fnv.hashCode64(typeName));
+                    if (seeAlsoClass != null) {
+                        reader = context.getObjectReader(seeAlsoClass);
                     }
                 }
 
-                String typeName = null;
-                if (reader == null) {
-                    reader = autoType(context, typeHash);
-                    if (reader != null && hash != HASH_TYPE) {
-                        typeName = jsonReader.getString();
+                if (reader == null && autoTypeFilter != null) {
+                    Class<?> filterClass = autoTypeFilter.apply(typeName, objectClass, features3);
+                    if (filterClass != null) {
+                        reader = context.getObjectReader(filterClass);
                     }
                 }
 
                 if (reader == null) {
-                    typeName = jsonReader.getString();
                     reader = context.getObjectReaderAutoType(
                             typeName, objectClass, features3
                     );

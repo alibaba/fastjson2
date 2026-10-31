@@ -127,6 +127,159 @@ public class JSONObject
     }
 
     /**
+     * Returns the value associated with the specified key, throwing a {@link JSONException}
+     * when the key is absent or associated with a null value.
+     *
+     * <p>This is the counterpart of jackson {@code JsonNode.required(String)} and is
+     * intended for validating protocol and fixture payloads.
+     *
+     * @param key the key whose associated value is required
+     * @return the non-null value associated with the key
+     * @throws JSONException if the key is absent or its value is null
+     * @since 2.0.66
+     */
+    public Object required(String key) {
+        Object value = get(key);
+        if (value == null) {
+            throw new JSONException(missingRequiredMessage(key));
+        }
+        return value;
+    }
+
+    /**
+     * Returns the typed value associated with the specified key, throwing a {@link JSONException}
+     * when the key is absent, associated with a null value, or not an instance of the given class.
+     *
+     * <p>No numeric widening is performed: a value parsed as {@code Integer} does not match
+     * {@code Long.class}. Use {@link #getLong} or {@link #getObject} for widening conversions.
+     *
+     * @param key the key whose associated value is required
+     * @param valueClass the expected class of the value
+     * @param <T> the expected type of the value
+     * @return the non-null value associated with the key
+     * @throws JSONException if the key is absent, its value is null, or the value is not of the expected type
+     * @since 2.0.66
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> T required(String key, Class<T> valueClass) {
+        Object value = get(key);
+        if (value == null) {
+            throw new JSONException(missingRequiredMessage(key));
+        }
+        // Class.isInstance and Class.cast both reject a primitive class literal;
+        // the boxed type is meant
+        Class checkedClass = com.alibaba.fastjson2.util.TypeUtils.nonePrimitive(valueClass);
+        if (!checkedClass.isInstance(value)) {
+            throw new JSONException(typeMismatchMessage(valueClass, key));
+        }
+        return (T) checkedClass.cast(value);
+    }
+
+    private static String missingRequiredMessage(String key) {
+        return "required value missing : " + key;
+    }
+
+    private static String typeMismatchMessage(Class<?> valueClass, String key) {
+        return "required value not of type " + valueClass.getName() + " : " + key;
+    }
+
+    /**
+     * Checks whether the value associated with the specified key is a number that can be
+     * converted to a 32-bit int without overflow, following jackson
+     * {@code JsonNode.canConvertToInt()} semantics: integral values within the int range,
+     * and decimal values within the int range (jackson's conversion truncates any fraction),
+     * count as convertible. Strings, missing keys, null values, non-finite values and
+     * values out of range report false.
+     *
+     * @param key the key whose associated value is to be checked
+     * @return true if the value is a number convertible to int without overflow
+     * @since 2.0.66
+     */
+    public boolean canConvertToInt(String key) {
+        Object value = get(key);
+        if (value instanceof Integer || value instanceof Short || value instanceof Byte) {
+            return true;
+        }
+        if (value instanceof Long) {
+            long v = (Long) value;
+            return v >= Integer.MIN_VALUE && v <= Integer.MAX_VALUE;
+        }
+        if (value instanceof BigInteger) {
+            return ((BigInteger) value).bitLength() <= 31;
+        }
+        if (value instanceof Double || value instanceof Float) {
+            double v = ((Number) value).doubleValue();
+            return !Double.isNaN(v) && !Double.isInfinite(v)
+                    && v >= -2147483648.0 && v <= 2147483647.0;
+        }
+        if (value instanceof BigDecimal) {
+            BigDecimal decimal = (BigDecimal) value;
+            return decimal.compareTo(BigDecimal.valueOf(Integer.MIN_VALUE)) >= 0
+                    && decimal.compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) <= 0;
+        }
+        if (value instanceof Number) {
+            // any other Number (AtomicInteger, AtomicLong, LongAdder, DoubleAdder, custom types):
+            // answered from the same conversion getIntValue would use, with the same fractional
+            // tolerance the Double/BigDecimal branches have; NaN and out-of-range values false
+            Number number = (Number) value;
+            double d = number.doubleValue();
+            return Math.abs(number.longValue() - d) < 1
+                    && d >= -2147483648.0 && d <= 2147483647.0;
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether the value associated with the specified key is a number that can be
+     * converted to a 64-bit long without overflow, following jackson
+     * {@code JsonNode.canConvertToLong()} semantics: integral values within the long range,
+     * and decimal values within the long range (jackson's conversion truncates any fraction),
+     * count as convertible. Strings, missing keys, null values, non-finite values and
+     * values out of range report false.
+     *
+     * @param key the key whose associated value is to be checked
+     * @return true if the value is a number convertible to long without overflow
+     * @since 2.0.66
+     */
+    public boolean canConvertToLong(String key) {
+        Object value = get(key);
+        if (value instanceof Integer || value instanceof Short || value instanceof Byte || value instanceof Long) {
+            return true;
+        }
+        if (value instanceof BigInteger) {
+            return ((BigInteger) value).bitLength() <= 63;
+        }
+        if (value instanceof Double || value instanceof Float) {
+            double v = ((Number) value).doubleValue();
+            // the upper bound is exclusive: 9.223372036854776E18 is exactly 2^63, one greater
+            // than Long.MAX_VALUE, and would read back as Long.MAX_VALUE; the lower bound is
+            // inclusive because -2^63 is exactly (double) Long.MIN_VALUE
+            return !Double.isNaN(v) && !Double.isInfinite(v)
+                    && v >= -9.223372036854776E18 && v < 9.223372036854776E18;
+        }
+        if (value instanceof BigDecimal) {
+            BigDecimal decimal = (BigDecimal) value;
+            return decimal.compareTo(BigDecimal.valueOf(Long.MIN_VALUE)) >= 0
+                    && decimal.compareTo(BigDecimal.valueOf(Long.MAX_VALUE)) <= 0;
+        }
+        if (value instanceof Number) {
+            // floating accumulators convert by truncation, as for Double/Float/BigDecimal, but
+            // an accumulator at exactly 2^63 has longValue() clamped to Long.MAX_VALUE while the
+            // truncation diff still reads 0, so the top of the domain is rejected explicitly.
+            // Other Number types (AtomicLong, LongAdder, custom types) keep the truncation check:
+            // a saturated, wrapped or NaN longValue() is more than one away from doubleValue()
+            Number number = (Number) value;
+            double d = number.doubleValue();
+            if (number instanceof java.util.concurrent.atomic.DoubleAdder
+                    || number instanceof java.util.concurrent.atomic.DoubleAccumulator) {
+                return Math.abs(number.longValue() - d) < 1 && d < 9.223372036854776E18;
+            }
+            return Math.abs(number.longValue() - d) < 1;
+        }
+        return false;
+    }
+
+    /**
      * Returns true if this map contains a mapping for the specified key
      *
      * @param key the key whose presence in this map is to be tested
@@ -1915,6 +2068,44 @@ public class JSONObject
     @Override
     public JSONObject clone() {
         return new JSONObject(this);
+    }
+
+    /**
+     * Returns a deep copy of this {@link JSONObject}: nested {@link JSONObject} and
+     * {@link JSONArray} values are copied recursively, so structural changes to the
+     * returned object never affect this instance.
+     *
+     * <p>Values that are not {@link JSONObject} or {@link JSONArray} (strings, numbers,
+     * dates, POJOs and so on) are shared between this object and the copy.
+     *
+     * <p>Cyclic trees (reachable for example through {@code $ref} reference detection)
+     * are copied into copies with the same cycle shape.
+     *
+     * @return a deep copy of this object
+     * @see #clone()
+     * @since 2.0.66
+     */
+    public JSONObject deepCopy() {
+        return deepCopy(new IdentityHashMap<>());
+    }
+
+    JSONObject deepCopy(IdentityHashMap<Object, Object> visited) {
+        JSONObject already = (JSONObject) visited.get(this);
+        if (already != null) {
+            return already;
+        }
+        JSONObject copy = new JSONObject(this.size(), 1F);
+        visited.put(this, copy);
+        for (Map.Entry<String, Object> entry : entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof JSONObject) {
+                value = ((JSONObject) value).deepCopy(visited);
+            } else if (value instanceof JSONArray) {
+                value = ((JSONArray) value).deepCopy(visited);
+            }
+            copy.put(entry.getKey(), value);
+        }
+        return copy;
     }
 
     /**

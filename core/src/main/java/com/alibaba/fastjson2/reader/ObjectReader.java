@@ -137,11 +137,7 @@ public interface ObjectReader<T> {
 
         if (typeKey instanceof String) {
             String typeName = (String) typeKey;
-            long typeHash = Fnv.hashCode64(typeName);
-            ObjectReader<T> reader = null;
-            if ((features & JSONReader.Feature.SupportAutoType.mask) != 0 || this instanceof ObjectReaderSeeAlso) {
-                reader = autoType(provider, typeHash);
-            }
+            ObjectReader<T> reader = autoType(provider, Fnv.hashCode64(typeName));
 
             if (reader == null) {
                 reader = provider.getObjectReader(
@@ -347,7 +343,7 @@ public interface ObjectReader<T> {
      * @return the ObjectReader for the type, or null if not found
      */
     default ObjectReader autoType(JSONReader.Context context, long typeHash) {
-        return context.getObjectReaderAutoType(typeHash);
+        return null;
     }
 
     /**
@@ -358,7 +354,7 @@ public interface ObjectReader<T> {
      * @return the ObjectReader for the type, or null if not found
      */
     default ObjectReader autoType(ObjectReaderProvider provider, long typeHash) {
-        return provider.getObjectReader(typeHash);
+        return null;
     }
 
     /**
@@ -389,16 +385,11 @@ public interface ObjectReader<T> {
             long hash = jsonReader.readFieldNameHashCode();
 
             if (hash == getTypeKeyHash() && i == 0) {
-                long typeHash = jsonReader.readTypeHashCode();
-                ObjectReader reader = autoType(context, typeHash);
-
+                jsonReader.readTypeHashCode();
+                String typeName = jsonReader.getString();
+                ObjectReader reader = context.getObjectReaderAutoType(typeName, null);
                 if (reader == null) {
-                    String typeName = jsonReader.getString();
-                    reader = context.getObjectReaderAutoType(typeName, null);
-
-                    if (reader == null) {
-                        throw new JSONException(jsonReader.info("No suitable ObjectReader found for " + typeName));
-                    }
+                    throw new JSONException(jsonReader.info("No suitable ObjectReader found for " + typeName));
                 }
 
                 if (reader == this) {

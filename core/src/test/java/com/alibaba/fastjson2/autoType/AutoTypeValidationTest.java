@@ -1,8 +1,11 @@
 package com.alibaba.fastjson2.autoType;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
@@ -26,6 +29,7 @@ public class AutoTypeValidationTest {
     static final String PACKAGE_PREFIX = "com.alibaba.fastjson2.autoType.";
     static final String TEST_BEAN = "com.alibaba.fastjson2.autoType.AutoTypeValidationTest$TestBean";
     static final String TEST_CLASS_LOADER = "com.alibaba.fastjson2.autoType.AutoTypeValidationTest$TestClassLoader";
+    static final String UNAUTHORIZED_TYPE = "com.example.Unauthorized";
     static final String TEST_DATA_SOURCE = "com.alibaba.fastjson2.autoType.AutoTypeValidationTest$TestDataSource";
 
     // =========================================================================
@@ -364,6 +368,144 @@ public class AutoTypeValidationTest {
     }
 
     @Test
+    public void testParseHashCacheDoesNotBypassTypeNameValidation() {
+        String typeName = "jar:http://127.0.0.1/evil.jar!/Evil";
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        provider.registerIfAbsent(
+                Fnv.hashCode64(typeName),
+                provider.getObjectReader(TestBean.class)
+        );
+
+        AtomicReference<String> requested = new AtomicReference<>();
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        ClassLoader recording = new ClassLoader(contextClassLoader) {
+            @Override
+            public Class<?> loadClass(String name) throws ClassNotFoundException {
+                requested.set(name);
+                return super.loadClass(name);
+            }
+        };
+
+        try {
+            Thread.currentThread().setContextClassLoader(recording);
+            Object object = JSON.parseObject(
+                    "{\"@type\":\"" + typeName + "\",\"id\":123}",
+                    Object.class,
+                    JSONFactory.createReadContext(provider, JSONReader.Feature.SupportAutoType)
+            );
+            assertInstanceOf(Map.class, object);
+            assertNull(requested.get(), "invalid type name must not reach the class loader");
+        } finally {
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
+        }
+    }
+
+    @Test
+    public void testParseHashCacheDoesNotBypassDenyClassCheck() {
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        provider.registerIfAbsent(
+                Fnv.hashCode64(TEST_CLASS_LOADER),
+                provider.getObjectReader(TestClassLoader.class)
+        );
+
+        JSONReader.Context context = JSONFactory.createReadContext(
+                provider,
+                JSONReader.Feature.SupportAutoType
+        );
+        assertThrows(JSONException.class, () -> JSON.parseObject(
+                "{\"@type\":\"" + TEST_CLASS_LOADER + "\"}",
+                Object.class,
+                context
+        ));
+    }
+
+    @Test
+    public void testParseHashCacheRequiresMatchingTypeName() {
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        provider.registerIfAbsent(
+                Fnv.hashCode64(TEST_BEAN),
+                provider.getObjectReader(String.class)
+        );
+
+        TestBean bean = (TestBean) JSON.parseObject(
+                "{\"@type\":\"" + TEST_BEAN + "\",\"id\":123}",
+                Object.class,
+                JSONFactory.createReadContext(provider, JSONReader.Feature.SupportAutoType)
+        );
+        assertEquals(123, bean.id);
+    }
+
+    @Test
+    public void testParseJSONBHashCacheRequiresMatchingTypeName() {
+        TestBean bean = new TestBean();
+        bean.id = 123;
+        byte[] jsonb = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName);
+
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        provider.registerIfAbsent(
+                Fnv.hashCode64(TEST_BEAN),
+                provider.getObjectReader(String.class)
+        );
+
+        try (JSONReader jsonReader = JSONReader.ofJSONB(
+                jsonb,
+                JSONFactory.createReadContext(provider, JSONReader.Feature.SupportAutoType)
+        )) {
+            TestBean parsed = (TestBean) jsonReader.readAny();
+            assertEquals(123, parsed.id);
+        }
+    }
+
+    @Test
+    public void testConcreteBeanHashCacheDoesNotAuthorizeReader() {
+        SideEffect.created = false;
+        ObjectReaderProvider provider = registerSideEffect(UNAUTHORIZED_TYPE);
+
+        parseTextIgnoreError(UNAUTHORIZED_TYPE, OneFieldBean.class, provider);
+        assertFalse(SideEffect.created, "concrete bean hash cache hit must not authorize reader");
+    }
+
+    @Test
+    public void testInterfaceHashCacheDoesNotAuthorizeReader() {
+        SideEffect.created = false;
+        ObjectReaderProvider provider = registerSideEffect(UNAUTHORIZED_TYPE);
+
+        parseTextIgnoreError(UNAUTHORIZED_TYPE, TestInterface.class, provider);
+        assertFalse(SideEffect.created, "interface hash cache hit must not authorize reader");
+    }
+
+    @Test
+    public void testNoDefaultConstructorHashCacheDoesNotAuthorizeReader() {
+        SideEffect.created = false;
+        ObjectReaderProvider provider = registerSideEffect(UNAUTHORIZED_TYPE);
+
+        parseTextIgnoreError(UNAUTHORIZED_TYPE, NoDefaultBean.class, provider);
+        assertFalse(SideEffect.created, "no-default-constructor hash cache hit must not authorize reader");
+    }
+
+    @Test
+    public void testExceptionHashCacheDoesNotAuthorizeReader() {
+        SideEffect.created = false;
+        ObjectReaderProvider provider = registerSideEffect(UNAUTHORIZED_TYPE);
+
+        parseTextIgnoreError(UNAUTHORIZED_TYPE, TestException.class, provider);
+        assertFalse(SideEffect.created, "exception hash cache hit must not authorize reader");
+    }
+
+    @Test
+    public void testJSONBEmbeddedHashCacheDoesNotAuthorizeReader() {
+        SideEffect.created = false;
+        ObjectReaderProvider provider = registerSideEffect(UNAUTHORIZED_TYPE);
+        byte[] jsonb = embeddedTypedJsonb(UNAUTHORIZED_TYPE);
+
+        try {
+            JSONB.parseObject(jsonb, TestInterface.class, JSONFactory.createReadContext(provider));
+        } catch (JSONException ignored) {
+        }
+        assertFalse(SideEffect.created, "JSONB embedded @type hash cache hit must not authorize reader");
+    }
+
+    @Test
     public void testDenyPrefixOnlyRejectionIsDistinguishable() {
         ObjectReaderProvider provider = new ObjectReaderProvider();
         long features = JSONReader.Feature.SupportAutoType.mask;
@@ -378,6 +520,71 @@ public class AutoTypeValidationTest {
         JSONException prefixOnly = assertThrows(JSONException.class, () ->
                 provider.checkAutoType(TEST_CLASS_LOADER, null, features));
         assertTrue(prefixOnly.getMessage().contains("add the type name in full to accept"));
+    }
+
+    static ObjectReaderProvider registerSideEffect(String typeName) {
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        provider.registerIfAbsent(
+                Fnv.hashCode64(typeName),
+                provider.getObjectReader(SideEffect.class)
+        );
+        return provider;
+    }
+
+    static void parseTextIgnoreError(String typeName, Class<?> expectClass, ObjectReaderProvider provider) {
+        try {
+            JSON.parseObject(
+                    "{\"@type\":\"" + typeName + "\",\"id\":1}",
+                    expectClass,
+                    JSONFactory.createReadContext(provider, JSONReader.Feature.SupportAutoType)
+            );
+        } catch (JSONException ignored) {
+        }
+    }
+
+    static byte[] embeddedTypedJsonb(String typeName) {
+        byte[] typeNameField = JSONB.toBytes("@type");
+        byte[] typeNameValue = JSONB.toBytes(typeName);
+        byte[] idField = JSONB.toBytes("id");
+        byte[] bytes = new byte[1 + typeNameField.length + typeNameValue.length + idField.length + 5 + 1];
+        int off = 0;
+        bytes[off++] = JSONB.Constants.BC_OBJECT;
+        System.arraycopy(typeNameField, 0, bytes, off, typeNameField.length);
+        off += typeNameField.length;
+        System.arraycopy(typeNameValue, 0, bytes, off, typeNameValue.length);
+        off += typeNameValue.length;
+        System.arraycopy(idField, 0, bytes, off, idField.length);
+        off += idField.length;
+        off = JSONB.IO.writeInt32(bytes, off, 1);
+        bytes[off++] = JSONB.Constants.BC_OBJECT_END;
+        return Arrays.copyOf(bytes, off);
+    }
+
+    public interface TestInterface {
+    }
+
+    public static class TestException
+            extends RuntimeException {
+    }
+
+    public static class SideEffect {
+        static volatile boolean created;
+
+        public SideEffect() {
+            created = true;
+        }
+    }
+
+    public static class OneFieldBean {
+        public int id;
+    }
+
+    public static class NoDefaultBean {
+        public final int id;
+
+        public NoDefaultBean(int id) {
+            this.id = id;
+        }
     }
 
     public static class TestBean {

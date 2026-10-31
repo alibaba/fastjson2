@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.alibaba.fastjson2</groupId>
         <artifactId>fastjson2-parent</artifactId>
-        <version>2.0.65-SNAPSHOT</version>
+        <version>2.0.67-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -164,9 +164,6 @@
                             <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/examples/exclude-package-names.html -->
                             <excludePackageNames>jdk.incubator.vector</excludePackageNames>
                             <doclint>all,-missing</doclint>
-                            <links>
-                                <link>https://docs.oracle.com/javase/8/docs/api</link>
-                            </links>
                             <additionalJOptions>
                                 <additionalJOption>-J-Duser.language=en -J-Duser.country=US</additionalJOption>
                             </additionalJOptions>

@@ -78,9 +78,6 @@ class FieldWriterDouble<T>
 
     protected final void writeDoubleValue(JSONWriter jsonWriter, Double value, long features) {
         double doubleValue = value;
-        if (doubleValue == 0.0 && (features & Feature.NotWriteDefaultValue.mask) != 0 && defaultValue == null) {
-            return;
-        }
 
         writeFieldName(jsonWriter);
 

@@ -825,9 +825,10 @@ final class JSONReaderASCII
         }
 
         if (JDKUtils.STRING_CREATOR_JDK11 != null) {
-            byte[] chars = new byte[nameLength];
+            byte[] chars = new byte[nameEnd - nameBegin];
+            int i = 0;
             forStmt:
-            for (int i = 0, end = this.end; offset < nameEnd; ++i) {
+            for (int end = this.end; offset < nameEnd; ++i) {
                 byte b = bytes[offset];
 
                 if (b == '\\') {
@@ -878,7 +879,12 @@ final class JSONReaderASCII
             }
 
             if (chars != null) {
-                return STRING_CREATOR_JDK11.apply(chars, LATIN1);
+                // nameLength is computed by the inherited (UTF-8-decoding)
+                // readFieldNameHashCode0(), which counts *characters*; this loop
+                // walks the buffer as latin1 *bytes*, so nameLength can undercount
+                // the byte span and overflow a nameLength-sized buffer (gh-7808).
+                // Size from the byte span instead and trim to what was written.
+                return STRING_CREATOR_JDK11.apply(i == chars.length ? chars : Arrays.copyOf(chars, i), LATIN1);
             }
         }
 
@@ -962,8 +968,11 @@ final class JSONReaderASCII
                 }
 
                 while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-                    offset++;
-                    c = bytes[offset];
+                    if (offset + 1 >= end) {
+                        c = EOI;
+                        break;
+                    }
+                    c = bytes[++offset];
                 }
                 if (c != ':') {
                     throw syntaxError(offset, ch);
@@ -978,8 +987,11 @@ final class JSONReaderASCII
                 c = bytes[offset];
 
                 while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-                    offset++;
-                    c = bytes[offset];
+                    if (offset + 1 >= end) {
+                        c = EOI;
+                        break;
+                    }
+                    c = bytes[++offset];
                 }
 
                 this.offset = offset + 1;

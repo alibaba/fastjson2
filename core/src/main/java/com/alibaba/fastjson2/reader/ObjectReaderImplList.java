@@ -651,7 +651,7 @@ public final class ObjectReaderImplList
             jsonReader.next();
         } else {
             if ((itemClass != Object.class && itemObjectReader != null) || (itemClass == Object.class && jsonReader.isObject())) {
-                Object item = itemObjectReader.readObject(jsonReader, itemType, 0, 0);
+                Object item = itemObjectReader.readObject(jsonReader, itemType, 0, (features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
                 list.add(item);
                 if (builder != null) {
                     list = (Collection) builder.apply(list);
@@ -692,7 +692,7 @@ public final class ObjectReaderImplList
                         continue;
                     }
                 } else {
-                    item = itemObjectReader.readObject(jsonReader, itemType, i, 0);
+                    item = itemObjectReader.readObject(jsonReader, itemType, i, (features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
                 }
             } else {
                 throw new JSONException(jsonReader.info("TODO : " + itemType));
