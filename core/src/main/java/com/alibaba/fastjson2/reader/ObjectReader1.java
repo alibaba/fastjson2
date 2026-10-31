@@ -156,16 +156,12 @@ public class ObjectReader1<T>
             long hashCode = jsonReader.readFieldNameHashCode();
 
             if (hashCode == getTypeKeyHash() && i == 0) {
-                long typeHash = jsonReader.readTypeHashCode();
+                jsonReader.readTypeHashCode();
                 JSONReader.Context context = jsonReader.getContext();
-                ObjectReader autoTypeObjectReader = autoType(context, typeHash);
+                String typeName = jsonReader.getString();
+                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
                 if (autoTypeObjectReader == null) {
-                    String typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-
-                    if (autoTypeObjectReader == null) {
-                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
-                    }
+                    throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                 }
 
                 if (autoTypeObjectReader == this) {
@@ -262,16 +258,12 @@ public class ObjectReader1<T>
 
             long hashCode = jsonReader.readFieldNameHashCode();
             if (i == 0 && hashCode == HASH_TYPE) {
-                long typeHash = jsonReader.readTypeHashCode();
+                jsonReader.readTypeHashCode();
                 JSONReader.Context context = jsonReader.getContext();
-                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+                String typeName = jsonReader.getString();
+                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
                 if (autoTypeObjectReader == null) {
-                    String typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
-
-                    if (autoTypeObjectReader == null) {
-                        continue;
-                    }
+                    continue;
                 }
 
                 if (autoTypeObjectReader != this) {

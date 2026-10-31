@@ -151,17 +151,12 @@ final class ObjectReaderException<T>
             long hash = jsonReader.readFieldNameHashCode();
 
             if (i == 0 && hash == HASH_TYPE && jsonReader.isSupportAutoType(features)) {
-                long typeHash = jsonReader.readTypeHashCode();
+                jsonReader.readTypeHashCode();
                 JSONReader.Context context = jsonReader.getContext();
-                ObjectReader reader = autoType(context, typeHash);
-                String typeName;
+                String typeName = jsonReader.getString();
+                ObjectReader reader = context.getObjectReaderAutoType(typeName, objectClass, features);
                 if (reader == null) {
-                    typeName = jsonReader.getString();
-                    reader = context.getObjectReaderAutoType(typeName, objectClass, features);
-
-                    if (reader == null) {
-                        throw new JSONException(jsonReader.info("No suitable ObjectReader found for" + typeName));
-                    }
+                    throw new JSONException(jsonReader.info("No suitable ObjectReader found for" + typeName));
                 }
 
                 if (reader == this) {
@@ -357,16 +352,12 @@ final class ObjectReaderException<T>
 
             if (jsonReader.isSupportAutoType(features) || context.getContextAutoTypeBeforeHandler() != null) {
                 jsonReader.next();
-                long typeHash = jsonReader.readTypeHashCode();
+                jsonReader.readTypeHashCode();
 
-                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+                String typeName = jsonReader.getString();
+                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
                 if (autoTypeObjectReader == null) {
-                    String typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-
-                    if (autoTypeObjectReader == null) {
-                        throw new JSONException("autoType not support : " + typeName + ", offset " + jsonReader.getOffset());
-                    }
+                    throw new JSONException("autoType not support : " + typeName + ", offset " + jsonReader.getOffset());
                 }
                 return (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, 0);
             }

@@ -1,13 +1,13 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
@@ -36,20 +36,12 @@ public final class ObjectReaderImplObject
 
         if (typeKey instanceof String) {
             String typeName = (String) typeKey;
-            long typeHash = Fnv.hashCode64(typeName);
-            ObjectReader reader = null;
-            if ((features & JSONReader.Feature.SupportAutoType.mask) != 0) {
-                reader = autoType(provider, typeHash);
-            }
+            ObjectReader reader = provider.getObjectReader(
+                    typeName, getObjectClass(), features | getFeatures()
+            );
 
             if (reader == null) {
-                reader = provider.getObjectReader(
-                        typeName, getObjectClass(), features | getFeatures()
-                );
-
-                if (reader == null) {
-                    throw new JSONException("No suitable ObjectReader found for" + typeName);
-                }
+                throw new JSONException("No suitable ObjectReader found for" + typeName);
             }
 
             if (reader != this) {
@@ -79,48 +71,13 @@ public final class ObjectReaderImplObject
 
                 if (hash == HASH_TYPE) {
                     boolean supportAutoType = context.isEnabled(JSONReader.Feature.SupportAutoType);
+                    typeName = jsonReader.readString();
+                    ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
-                    ObjectReader autoTypeObjectReader;
-
-                    if (supportAutoType) {
-                        long typeHash = jsonReader.readTypeHashCode();
-                        autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
-
-                        if (autoTypeObjectReader != null) {
-                            Class objectClass = autoTypeObjectReader.getObjectClass();
-                            if (objectClass != null) {
-                                ClassLoader objectClassLoader = objectClass.getClassLoader();
-                                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-                                if (objectClassLoader != classLoader) {
-                                    Class contextClass = null;
-
-                                    typeName = jsonReader.getString();
-                                    try {
-                                        if (classLoader == null) {
-                                            classLoader = getClass().getClassLoader();
-                                        }
-                                        contextClass = classLoader.loadClass(typeName);
-                                    } catch (ClassNotFoundException ignored) {
-                                    }
-                                    //明确contextClass类型与objectClass不一致时才更改reader
-                                    if (contextClass != null && !objectClass.equals(contextClass)) {
-                                        autoTypeObjectReader = context.getObjectReader(contextClass);
-                                    }
-                                }
-                            }
-                        }
-
-                        if (autoTypeObjectReader == null) {
-                            typeName = jsonReader.getString();
-                            autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-                        }
-                    } else {
-                        typeName = jsonReader.readString();
-                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-
-                        if (autoTypeObjectReader == null && jsonReader.getContext().isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
-                            throw new JSONException(jsonReader.info("autoType not support : " + typeName));
-                        }
+                    if (!supportAutoType
+                            && autoTypeObjectReader == null
+                            && context.isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
+                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                     }
 
                     if (autoTypeObjectReader != null) {
@@ -143,7 +100,17 @@ public final class ObjectReaderImplObject
                 }
             }
 
+            Set<String> seenKeys = null;
+            if (((features | context.getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0) {
+                seenKeys = new HashSet<>();
+            }
+
             if (typeName != null) {
+                if (seenKeys != null) {
+                    // register the discriminator where it is consumed, whichever arm handles it;
+                    // the ImmutableCollections arms deliberately never store it in the map
+                    seenKeys.add("@type");
+                }
                 switch (typeName) {
                     case "java.util.ImmutableCollections$Map1":
                     case "java.util.ImmutableCollections$MapN":
@@ -176,7 +143,8 @@ public final class ObjectReaderImplObject
                 if (name == null) {
                     char current = jsonReader.current();
                     if (current == '{' || current == '[') {
-                        name = jsonReader.readAny();
+                        name = jsonReader.readAny((features | context.getFeatures())
+                                & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
                         if (!jsonReader.nextIfMatch(':')) {
                             throw new JSONException(jsonReader.info("illegal input"));
                         }
@@ -186,6 +154,11 @@ public final class ObjectReaderImplObject
                             jsonReader.next();
                         }
                     }
+                }
+
+                if (seenKeys != null
+                        && !seenKeys.add(name instanceof String ? (String) name : String.valueOf(name))) {
+                    throw duplicateKeyError(jsonReader, name);
                 }
 
                 Object value;
@@ -206,7 +179,7 @@ public final class ObjectReaderImplObject
                         value = jsonReader.readNumber();
                         break;
                     case '[':
-                        value = jsonReader.readArray();
+                        value = jsonReader.readArray((features & JSONReader.Feature.ErrorOnDuplicateKeys.mask));
                         break;
                     case '{':
                         if (jsonReader.isReference()) {
@@ -218,7 +191,7 @@ public final class ObjectReaderImplObject
                                 continue;
                             }
                         } else {
-                            value = jsonReader.readObject();
+                            value = jsonReader.readObject((features & JSONReader.Feature.ErrorOnDuplicateKeys.mask));
                         }
                         break;
                     case '"':
@@ -290,7 +263,7 @@ public final class ObjectReaderImplObject
                 value = jsonReader.readNumber();
                 break;
             case '[':
-                value = jsonReader.readArray();
+                value = jsonReader.readArray((features & JSONReader.Feature.ErrorOnDuplicateKeys.mask));
                 break;
             case '"':
             case '\'':
@@ -342,5 +315,8 @@ public final class ObjectReaderImplObject
         }
 
         return jsonReader.readAny();
+    }
+    static JSONException duplicateKeyError(JSONReader jsonReader, Object name) {
+        return new JSONException(jsonReader.info("duplicate key : " + name));
     }
 }

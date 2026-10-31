@@ -110,7 +110,7 @@ class ObjectReaderImplGenericArray
         while (!jsonReader.nextIfArrayEnd()) {
             Object item;
             if (itemObjectReader != null) {
-                item = itemObjectReader.readObject(jsonReader, itemType, null, 0);
+                item = itemObjectReader.readObject(jsonReader, itemType, null, (features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
             } else {
                 if (itemType == String.class) {
                     item = jsonReader.readString();

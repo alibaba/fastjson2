@@ -49,7 +49,9 @@ final class ObjectWriterImplOptional
         }
 
         Object value = optional.get();
-        ObjectWriter objectWriter = jsonWriter.getObjectWriter(value.getClass());
+        Class<?> valueClass = value.getClass();
+        ObjectWriter objectWriter = jsonWriter.getContext().getProvider()
+                .getObjectWriter(valueClass, valueClass, jsonWriter.getFeatures() | this.features | features);
         objectWriter.writeJSONB(jsonWriter, value, fieldName, null, features);
     }
 
@@ -74,8 +76,9 @@ final class ObjectWriterImplOptional
         }
 
         if (valueWriter == null) {
-            valueWriter = jsonWriter.getObjectWriter(valueClass);
+            valueWriter = jsonWriter.getContext().getProvider()
+                    .getObjectWriter(valueClass, valueClass, jsonWriter.getFeatures() | this.features | features);
         }
-        valueWriter.write(jsonWriter, value, fieldName, valueType, this.features);
+        valueWriter.write(jsonWriter, value, fieldName, valueType, this.features | (features & JSONWriter.Feature.SortFieldNamesAlphabetically.mask));
     }
 }

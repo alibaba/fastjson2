@@ -27,8 +27,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.isFunction;
 import static com.alibaba.fastjson2.writer.ObjectWriterProvider.TYPE_INT64_MASK;
 
-public class ObjectWriterCreatorASM
-        extends ObjectWriterCreator {
+public class ObjectWriterCreatorASM extends ObjectWriterCreator {
     // GraalVM not support
     // Android not support
     public static final ObjectWriterCreatorASM INSTANCE = new ObjectWriterCreatorASM(
@@ -394,7 +393,10 @@ public class ObjectWriterCreatorASM
         fieldWriters = new ArrayList<>(fieldWriterMap.values());
 
         handleIgnores(beanInfo, fieldWriters);
-        if (beanInfo.alphabetic) {
+        if (beanInfo.alphabetic
+                || (((features | beanInfo.writerFeatures) & JSONWriter.Feature.SortFieldNamesAlphabetically.mask) != 0
+                        && ((features | beanInfo.writerFeatures) & JSONWriter.Feature.BeanToArray.mask) == 0)) {
+            // BeanToArray output order is positional and must never be reordered
             try {
                 Collections.sort(fieldWriters);
             } catch (Exception e) {
@@ -1172,11 +1174,17 @@ public class ObjectWriterCreatorASM
             if (fieldWriter.defaultValue == null) {
                 if (!fieldClass.isPrimitive()) {
                     Label L_NOT_NULL = new Label();
-                    mw.iload(mwc.var(WRITE_NULLS));
-                    mw.ifne(L_NOT_NULL);
+                    // field-level WriteNulls writes the null field regardless of the context,
+                    // exactly like the text generators (gwFieldValueEnum and friends); the
+                    // whole name+value block has to be kept, the name goes straight to the
+                    // byte buffer below
+                    if ((fieldWriter.features & WriteNulls.mask) == 0) {
+                        mw.iload(mwc.var(WRITE_NULLS));
+                        mw.ifne(L_NOT_NULL);
 
-                    mw.aload(FIELD_VALUE);
-                    mw.ifnull(endFieldValue_);
+                        mw.aload(FIELD_VALUE);
+                        mw.ifnull(endFieldValue_);
+                    }
 
                     mw.visitLabel(L_NOT_NULL);
                 } else {
@@ -1186,8 +1194,14 @@ public class ObjectWriterCreatorASM
                         mw.iload(FIELD_VALUE);
                         mw.ifne(L_NOT_DEFAULT_VALUE);
 
-                        mw.iload(WRITE_DEFAULT_VALUE);
-                        mw.ifne(endFieldValue_);
+                        // field-level NotWriteDefaultValue drops the default value regardless
+                        // of the context (same generation-time bake as gwFieldValueInt64V)
+                        if ((fieldWriter.features & NotWriteDefaultValue.mask) == 0) {
+                            mw.iload(WRITE_DEFAULT_VALUE);
+                            mw.ifne(endFieldValue_);
+                        } else {
+                            mw.goto_(endFieldValue_);
+                        }
 
                         mw.visitLabel(L_NOT_DEFAULT_VALUE);
                     } else if (fieldClass == long.class) {
@@ -1196,8 +1210,28 @@ public class ObjectWriterCreatorASM
                         mw.lcmp();
                         mw.ifne(L_NOT_DEFAULT_VALUE);
 
-                        mw.iload(WRITE_DEFAULT_VALUE);
-                        mw.ifne(endFieldValue_);
+                        if ((fieldWriter.features & NotWriteDefaultValue.mask) == 0) {
+                            mw.iload(WRITE_DEFAULT_VALUE);
+                            mw.ifne(endFieldValue_);
+                        } else {
+                            mw.goto_(endFieldValue_);
+                        }
+
+                        mw.visitLabel(L_NOT_DEFAULT_VALUE);
+                    } else if (fieldClass == float.class || fieldClass == double.class) {
+                        // the text generators (gwFieldValueInt32V / gwFieldValueInt64V) and the
+                        // reflect creator drop zero float/double under NotWriteDefaultValue;
+                        // the direct JSONB path used to always write them
+                        mw.loadLocal(fieldClass, FIELD_VALUE);
+                        mw.cmpWithZero(fieldClass);
+                        mw.ifne(L_NOT_DEFAULT_VALUE);
+
+                        if ((fieldWriter.features & NotWriteDefaultValue.mask) == 0) {
+                            mw.iload(WRITE_DEFAULT_VALUE);
+                            mw.ifne(endFieldValue_);
+                        } else {
+                            mw.goto_(endFieldValue_);
+                        }
 
                         mw.visitLabel(L_NOT_DEFAULT_VALUE);
                     }
@@ -1225,14 +1259,31 @@ public class ObjectWriterCreatorASM
 
         if (fieldWriter instanceof FieldWriterEnum) {
             /*
+             * if (fieldValue == null) {
+             *     bytes[off++] = BC_NULL;
+             *     goto endFieldValue_;
+             * }
              * if (fieldValue != null && symbolTable != null) {
              *     offset = fieldWriterN.writeEnumValueJSONB(bytes, off, fieldValue, symbolTable, features);
              *     goto endFieldValue_;
              * }
+             *
+             * A null enum is reachable with a field-level WriteNulls, and with a context
+             * WriteNulls the guard above already let the field through. JSONB.IO.writeEnum
+             * dereferences the value, so the null has to be written here; the reflect creator
+             * writes a JSONB null as well (see JSONWriterJSONB#writeEnum).
              */
-            Label L0 = new Label();
+            Label L_NOT_NULL = new Label();
             mw.aload(FIELD_VALUE);
-            mw.ifnull(L0);
+            mw.ifnonnull(L_NOT_NULL);
+
+            gwWriteByte(mw, BYTES, OFFSET, BC_NULL);
+            mw.visitIincInsn(OFFSET, 1);
+            mw.goto_(endFieldValue_);
+
+            mw.visitLabel(L_NOT_NULL);
+
+            Label L0 = new Label();
             mw.aload(SYMBOL_TABLE);
             mw.ifnull(L0);
 
@@ -2549,8 +2600,10 @@ public class ObjectWriterCreatorASM
         mw.visitLabel(null_);
 
         // if (!jw.isWriteNulls())
-        mw.iload(mwc.var(WRITE_NULLS));
-        mw.ifeq(notNull_);
+        if ((fieldWriter.features & WriteNulls.mask) == 0) {
+            mw.iload(mwc.var(WRITE_NULLS));
+            mw.ifeq(notNull_);
+        }
 
         // writeFieldName(w);
         gwFieldName(mwc, fieldWriter, i);
@@ -3975,18 +4028,25 @@ public class ObjectWriterCreatorASM
 
         mw.ifnonnull(notNull_);
 
-        mw.iload(mwc.var(WRITE_NULLS));
-        mw.ifne(writeNullValue_);
+        // the field-level array-null family: WriteNulls writes null, NullAsDefaultValue and
+        // WriteNullListAsEmpty write [], which is what the reflect creator emits (it merges
+        // the field features into the context, see FieldWriterObject#write)
+        if ((fieldWriter.features & FieldWriter.ARRAY_NULL_FEATURES) == 0) {
+            mw.iload(mwc.var(WRITE_NULLS));
+            mw.ifne(writeNullValue_);
 
-        mw.goto_(endIfNull_);
+            mw.goto_(endIfNull_);
+        }
 
         mw.visitLabel(writeNullValue_);
 
         gwFieldName(mwc, fieldWriter, i);
 
-        // TODO if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsEmpty.mask)) == 0) {
         mw.aload(JSON_WRITER);
-        mw.invokevirtual(TYPE_JSON_WRITER, "writeArrayNull", "()V");
+        mw.lload(mwc.var2(CONTEXT_FEATURES));
+        mw.visitLdcInsn(fieldWriter.features);
+        mw.lor();
+        mw.invokevirtual(TYPE_JSON_WRITER, "writeArrayNull", "(J)V");
 
         mw.goto_(endIfNull_);
 
@@ -4026,8 +4086,10 @@ public class ObjectWriterCreatorASM
         mw.ifne(notDefaultValue_);
 
         if (fieldWriter.defaultValue == null) {
-            mw.iload(WRITE_DEFAULT_VALUE);
-            mw.ifeq(notDefaultValue_);
+            if ((fieldWriter.features & NotWriteDefaultValue.mask) == 0) {
+                mw.iload(WRITE_DEFAULT_VALUE);
+                mw.ifeq(notDefaultValue_);
+            }
             mw.goto_(endWriteValue_);
         }
         mw.visitLabel(notDefaultValue_);
@@ -4078,18 +4140,25 @@ public class ObjectWriterCreatorASM
 
         mw.ifnonnull(notNull_);
 
-        mw.iload(mwc.var(WRITE_NULLS));
-        mw.ifne(writeNullValue_);
+        // the field-level array-null family: WriteNulls writes null, NullAsDefaultValue and
+        // WriteNullListAsEmpty write [], which is what the reflect creator emits (it merges
+        // the field features into the context, see FieldWriterObject#write)
+        if ((fieldWriter.features & FieldWriter.ARRAY_NULL_FEATURES) == 0) {
+            mw.iload(mwc.var(WRITE_NULLS));
+            mw.ifne(writeNullValue_);
 
-        mw.goto_(endIfNull_);
+            mw.goto_(endIfNull_);
+        }
 
         mw.visitLabel(writeNullValue_);
 
         gwFieldName(mwc, fieldWriter, i);
 
-        // TODO if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsEmpty.mask)) == 0) {
         mw.aload(JSON_WRITER);
-        mw.invokevirtual(TYPE_JSON_WRITER, "writeArrayNull", "()V");
+        mw.lload(mwc.var2(CONTEXT_FEATURES));
+        mw.visitLdcInsn(fieldWriter.features);
+        mw.lor();
+        mw.invokevirtual(TYPE_JSON_WRITER, "writeArrayNull", "(J)V");
 
         mw.goto_(endIfNull_);
 
@@ -4129,8 +4198,10 @@ public class ObjectWriterCreatorASM
         mw.ifne(notDefaultValue_);
 
         if (fieldWriter.defaultValue == null) {
-            mw.iload(WRITE_DEFAULT_VALUE);
-            mw.ifeq(notDefaultValue_);
+            if ((fieldWriter.features & NotWriteDefaultValue.mask) == 0) {
+                mw.iload(WRITE_DEFAULT_VALUE);
+                mw.ifeq(notDefaultValue_);
+            }
             mw.goto_(endWriteValue_);
         }
         mw.visitLabel(notDefaultValue_);
@@ -4162,8 +4233,10 @@ public class ObjectWriterCreatorASM
         mw.ifne(notDefaultValue_);
 
         if (fieldWriter.defaultValue == null) {
-            mw.iload(WRITE_DEFAULT_VALUE);
-            mw.ifeq(notDefaultValue_);
+            if ((fieldWriter.features & NotWriteDefaultValue.mask) == 0) {
+                mw.iload(WRITE_DEFAULT_VALUE);
+                mw.ifeq(notDefaultValue_);
+            }
             mw.goto_(endWriteValue_);
         }
         mw.visitLabel(notDefaultValue_);
@@ -4593,8 +4666,14 @@ public class ObjectWriterCreatorASM
         boolean direct = false;
         List<FieldWriter> fieldWriters = null;
         Class<?> itemClass = TypeUtils.getClass(itemType);
-        if (itemClass != null && field != null && field.getDeclaringClass() != itemClass) {
-            ObjectWriter fieldValueWriter = provider.getObjectWriterFromCache(itemType, itemClass, FieldBased.isEnabled(features));
+        // bail under the sort bit as under BeanToArray: direct-JIT list writers bake the natural
+        // field order into JSONB output, which a sorted creation must not ship
+        if (itemClass != null
+                && field != null
+                && field.getDeclaringClass() != itemClass
+                && (features & (JSONWriter.Feature.BeanToArray.mask
+                        | JSONWriter.Feature.SortFieldNamesAlphabetically.mask)) == 0) {
+            ObjectWriter fieldValueWriter = provider.getObjectWriterFromCache(itemType, itemClass, features);
             if (fieldValueWriter == null && itemClass != null) {
                 fieldValueWriter = super.createObjectWriter(itemClass, features, provider);
             }
