@@ -3014,6 +3014,11 @@ public interface JSON {
      * Parses the json string as a list of {@link T}. Returns
      * {@code null} if received {@link String} is {@code null} or empty.
      *
+     * <p>Note: a literal {@code null} filter followed by at least one feature
+     * (e.g. {@code parseArray(text, type, null, feature)}) is a compile-time
+     * ambiguity with {@code parseArray(String, Class, JSONReader.Feature...)};
+     * cast the argument to {@code (Filter) null} if that call shape is needed.
+     *
      * @param text the specified string to be parsed
      * @param type the specified actual class of {@link T}
      * @param filter the specified filter is applied to parsing
