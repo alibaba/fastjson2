@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Tag("primitives")
 public class LocalTimeTest {
@@ -68,9 +68,7 @@ public class LocalTimeTest {
             String str = JSON.toJSONString(vo);
 
             LocalTime1 v1 = JSON.parseObject(str, LocalTime1.class);
-            if (v1 == null) {
-                fail();
-            }
+            assertNotNull(v1);
             assertEquals(vo.getDate(), v1.getDate());
         }
     }
