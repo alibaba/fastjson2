@@ -34,6 +34,10 @@ public class ParserConfig {
     public PropertyNamingStrategy propertyNamingStrategy;
     private boolean asmEnable;
     private boolean autoTypeSupport;
+    /**
+     * Guards the one-shot warning about the deprecated deny list; see {@link #addDeny(String)}.
+     */
+    private volatile boolean denyUnsupportedWarned;
 
     ParserConfig(ObjectReaderProvider provider, boolean fieldBase) {
         this.provider = provider;
@@ -94,12 +98,40 @@ public class ParserConfig {
         getProvider().addAutoTypeAccept(name);
     }
 
+    /**
+     * @deprecated no-op in fastjson2. {@link ObjectReaderProvider#addAutoTypeDeny(String)} is a
+     * deprecated empty implementation and {@code checkAutoType} never consults a user supplied
+     * denylist, so the names registered here do <em>not</em> block {@code @type} resolution once
+     * auto type support is enabled. Reject types explicitly with
+     * {@link #addAutoTypeCheckHandler(AutoTypeCheckHandler)}, or narrow resolution with
+     * {@link #addAccept(String)}.
+     */
+    @Deprecated
     public void addDeny(String name) {
+        warnDenyNotSupported();
         getProvider().addAutoTypeDeny(name);
     }
 
+    /**
+     * @deprecated no-op in fastjson2, see {@link #addDeny(String)}.
+     */
+    @Deprecated
     public void addDenyInternal(String name) {
+        warnDenyNotSupported();
         getProvider().addAutoTypeDeny(name);
+    }
+
+    private void warnDenyNotSupported() {
+        if (denyUnsupportedWarned) {
+            return;
+        }
+        denyUnsupportedWarned = true;
+        System.err.println(
+                "fastjson2: ParserConfig.addDeny() has no effect - "
+                + "ObjectReaderProvider.addAutoTypeDeny() is a no-op and checkAutoType() does not "
+                + "consult a user supplied denylist, so the listed types are NOT blocked. Use "
+                + "addAutoTypeCheckHandler() to reject them explicitly."
+        );
     }
 
     @Deprecated
@@ -131,6 +163,11 @@ public class ParserConfig {
         }
     }
 
+    /**
+     * Applies the fastjson 1.x configuration properties. Note that {@link #DENY_PROPERTY} is still
+     * read for compatibility but has no effect: the deny list is not consulted by fastjson2, see
+     * {@link #addDeny(String)}.
+     */
     public void configFromPropety(Properties properties) {
         {
             String property = properties.getProperty(DENY_PROPERTY);
