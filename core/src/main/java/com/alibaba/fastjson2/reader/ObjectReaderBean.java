@@ -176,10 +176,10 @@ public abstract class ObjectReaderBean<T>
         JSONReader.Context context = jsonReader.getContext();
         long features3 = jsonReader.features(features | this.features);
         JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
-        String typeName = jsonReader.getString();
 
         ObjectReader autoTypeObjectReader;
         if (autoTypeFilter != null) {
+            String typeName = jsonReader.getString();
             Class<?> filterClass = autoTypeFilter.apply(typeName, expectClass, features);
 
             if (filterClass != null && !expectClass.isAssignableFrom(filterClass)) {
@@ -191,7 +191,11 @@ public abstract class ObjectReaderBean<T>
             }
 
             autoTypeObjectReader = context.getObjectReader(filterClass);
+        } else if (jsonReader.isTypeNameIllegal()
+                && context.getProvider().getAutoTypeBeforeHandler() == null) {
+            throw auotypeError(jsonReader);
         } else {
+            String typeName = jsonReader.getString();
             autoTypeObjectReader = context.getObjectReaderAutoType(typeName, expectClass, features3);
 
             if (autoTypeObjectReader == null) {

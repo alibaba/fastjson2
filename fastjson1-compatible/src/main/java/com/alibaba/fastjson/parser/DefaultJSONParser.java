@@ -1,5 +1,6 @@
 package com.alibaba.fastjson.parser;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
@@ -42,14 +43,13 @@ public class DefaultJSONParser
      * same payload parsed through {@code new DefaultJSONParser(text, config).parse()} resolved
      * {@code @type} while this class silently returned a plain {@link JSONObject}.
      * <p>
-     * Only the {@link JSONReader.Feature#SupportAutoType} bit is flipped on the default context.
-     * Routing through {@code JSON.createReadContext(config, JSON.DEFAULT_PARSER_FEATURE)} would
-     * also apply that feature set ({@code SupportSmartMatch}, {@code Base64StringAsByteArray},
-     * {@code UseBigDecimalForDoubles}, ...) and change this constructor's existing behaviour beyond
-     * the auto type flag, so it is deliberately not used here.
+     * The default context is built exactly as before and only the
+     * {@link JSONReader.Feature#SupportAutoType} bit is flipped on top of it, so no other default
+     * ({@code SupportSmartMatch}, {@code Base64StringAsByteArray},
+     * {@code UseBigDecimalForDoubles}, ...) and no reader provider changes with the flag.
      */
     private static JSONReader autoTypeSupportReader(String text, ParserConfig config) {
-        JSONReader reader = JSONReader.of(text);
+        JSONReader reader = JSONReader.of(text, JSON.createReadContext());
         if (config != null && config.isAutoTypeSupport()) {
             reader.getContext().config(JSONReader.Feature.SupportAutoType);
         }

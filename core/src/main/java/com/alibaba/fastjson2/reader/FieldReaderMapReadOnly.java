@@ -94,7 +94,7 @@ class FieldReaderMapReadOnly<T>
         String name = jsonReader.getFieldName();
 
         ObjectReader itemObjectReader = getItemObjectReader(jsonReader);
-        Object value = itemObjectReader.readObject(jsonReader, getItemType(), fieldName, 0);
+        Object value = itemObjectReader.readObject(jsonReader, getItemType(), fieldName, (features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
         getReadOnlyMap(object)
                 .put(name, value);
     }

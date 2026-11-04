@@ -15,6 +15,7 @@ import java.util.Map;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
+import static com.alibaba.fastjson2.JSONFactory.checkDecimalScale;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONBDump {
@@ -265,7 +266,7 @@ final class JSONBDump {
                 return;
             }
             case BC_DECIMAL: {
-                int scale = readInt32Value();
+                int scale = checkDecimalScale(readInt32Value());
                 BigInteger unscaledValue;
                 int type = bytes[offset++];
                 switch (type) {

@@ -129,7 +129,7 @@ public class FieldReaderList<T, V>
                 if (jsonReader.isString() && itemObjectReader instanceof ObjectReaderInterface) {
                     value = jsonReader.readString();
                 } else {
-                    value = itemObjectReader.readObject(jsonReader, null, null, 0);
+                    value = itemObjectReader.readObject(jsonReader, null, null, (features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
                 }
                 list.add(value);
 
@@ -175,7 +175,7 @@ public class FieldReaderList<T, V>
                     = getItemObjectReader(
                     jsonReader.getContext());
             for (int i = 0; i < entryCnt; ++i) {
-                array[i] = itemObjectReader.readObject(jsonReader, null, null, 0);
+                array[i] = itemObjectReader.readObject(jsonReader, null, null, (features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
             }
             return Arrays.asList(array);
         }
@@ -188,7 +188,7 @@ public class FieldReaderList<T, V>
             jsonReader.next();
             while (!jsonReader.nextIfArrayEnd()) {
                 list.add(
-                        itemObjectReader.readObject(jsonReader, fieldType, fieldName, 0)
+                        itemObjectReader.readObject(jsonReader, fieldType, fieldName, (features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.ErrorOnDuplicateKeys.mask)
                 );
 
                 jsonReader.nextIfComma();

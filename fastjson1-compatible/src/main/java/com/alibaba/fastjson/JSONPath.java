@@ -37,10 +37,10 @@ public class JSONPath {
 
     public static <T> T read(String json, String path, Type clazz, ParserConfig parserConfig) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
-        JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
-        // fastjson 1.x honoured ParserConfig.autoTypeSupport here as well. Only the
-        // SupportAutoType bit is flipped, so the config's reader provider is not swapped in for
-        // the extraction step (that would additionally apply its custom deserializers).
+        JSONReader.Context context = JSON.createReadContext();
+        // fastjson 1.x honoured ParserConfig.autoTypeSupport on this overload as well. Only the
+        // SupportAutoType bit is added, so the config's reader provider is not swapped in for the
+        // extraction step (that would additionally apply its custom deserializers).
         if (parserConfig != null && parserConfig.isAutoTypeSupport()) {
             context.config(JSONReader.Feature.SupportAutoType);
         }
@@ -51,7 +51,7 @@ public class JSONPath {
 
     public static <T> T read(String json, String path, Type clazz) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
-        Object r = jsonPath.extract(JSONReader.of(json));
+        Object r = jsonPath.extract(JSONReader.of(json, JSON.createReadContext()));
         return TypeUtils.cast(r, clazz, ParserConfig.global);
     }
 
@@ -65,7 +65,7 @@ public class JSONPath {
 
     public static boolean set(Object rootObject, String path, Object value) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
-        jsonPath.setReaderContext(JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE));
+        jsonPath.setReaderContext(JSON.createReadContext());
         jsonPath.set(rootObject, value);
         return true;
     }
@@ -81,7 +81,7 @@ public class JSONPath {
 
     public static Object extract(String json, String path) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
-        JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
+        JSONReader.Context context = JSON.createReadContext();
         JSONReader jsonReader = JSONReader.of(json, context);
         Object result = jsonPath.extract(jsonReader);
         return JSON.adaptResult(result);
@@ -102,7 +102,7 @@ public class JSONPath {
     }
 
     public static Object read(String json, String path) {
-        JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
+        JSONReader.Context context = JSON.createReadContext();
         JSONReader jsonReader = JSONReader.of(json, context);
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
         return jsonPath.extract(jsonReader);

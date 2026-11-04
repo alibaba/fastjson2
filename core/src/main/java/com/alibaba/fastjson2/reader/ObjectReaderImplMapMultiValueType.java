@@ -117,6 +117,8 @@ public class ObjectReaderImplMapMultiValueType
             object = (Map) createInstance(contextFeatures);
         }
 
+        Set<String> seenKeys = (contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask) != 0 ? new HashSet<>() : null;
+
         String name;
         Type valueType = null;
         for (int i = 0; ; i++) {
@@ -128,9 +130,15 @@ public class ObjectReaderImplMapMultiValueType
                 if (!jsonReader.nextIfMatch(':')) {
                     throw new JSONException(jsonReader.info("illegal json"));
                 }
+                if (seenKeys != null && !seenKeys.add(null)) {
+                    throw duplicateKeyError(jsonReader, null);
+                }
                 name = null;
             } else {
                 name = jsonReader.readFieldName();
+                if (seenKeys != null && !seenKeys.add((String) name)) {
+                    throw duplicateKeyError(jsonReader, name);
+                }
                 valueType = multiValueType.getType(name);
             }
 
@@ -139,7 +147,8 @@ public class ObjectReaderImplMapMultiValueType
                 value = jsonReader.readAny();
             } else {
                 ObjectReader valueObjectReader = jsonReader.getObjectReader(valueType);
-                value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
+                value = valueObjectReader.readObject(jsonReader, valueType, fieldName,
+                        contextFeatures & JSONReader.Feature.ErrorOnDuplicateKeys.mask);
             }
 
             if (value == null && (contextFeatures & JSONReader.Feature.IgnoreNullPropertyValue.mask) != 0) {
@@ -173,5 +182,8 @@ public class ObjectReaderImplMapMultiValueType
         }
 
         return object;
+    }
+    static JSONException duplicateKeyError(JSONReader jsonReader, Object name) {
+        return new JSONException(jsonReader.info("duplicate key : " + name));
     }
 }

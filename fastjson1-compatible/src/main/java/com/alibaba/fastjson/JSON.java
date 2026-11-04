@@ -95,6 +95,10 @@ public abstract class JSON
         writerProvider.register(new Fastjson1xWriterModule(writerProvider));
     }
 
+    public static JSONReader.Context createReadContext(Feature... features) {
+        return createReadContext(JSONFactory.getDefaultObjectReaderProvider(), DEFAULT_PARSER_FEATURE, features);
+    }
+
     public static JSONReader.Context createReadContext(int featuresValue, Feature... features) {
         return createReadContext(JSONFactory.getDefaultObjectReaderProvider(), featuresValue, features);
     }

@@ -197,31 +197,7 @@ class JSONPathSegmentName
         }
 
         if (object instanceof Map) {
-            Map map = (Map) object;
-            Object value = map.get(name);
-            if (value == null) {
-                boolean isNum = IOUtils.isNumber(this.name);
-                Long longValue = null;
-
-                for (Object o : map.entrySet()) {
-                    Map.Entry entry = (Map.Entry) o;
-                    Object entryKey = entry.getKey();
-                    if (entryKey instanceof Enum && ((Enum<?>) entryKey).name().equals(this.name)) {
-                        value = entry.getValue();
-                        break;
-                    } else if (entryKey instanceof Long) {
-                        if (longValue == null && isNum) {
-                            longValue = Long.parseLong(this.name);
-                        }
-                        if (entryKey.equals(longValue)) {
-                            value = entry.getValue();
-                            break;
-                        }
-                    }
-                }
-            }
-
-            context.value = value;
+            context.value = getMapValue((Map) object, name);
             return;
         }
 
@@ -340,6 +316,67 @@ class JSONPathSegmentName
         }
 
         throw new JSONException("not support : " + object.getClass());
+    }
+
+    /**
+     * Looks up a map value by a JSONPath name segment.
+     * <p>
+     * A name segment is always a String while the map key may be typed (Enum/Integer/Long),
+     * so a miss on the exact lookup falls back to a scan that matches the typed key forms.
+     * Comparator based maps such as {@code TreeMap<Long, ?>} reject the String segment with a
+     * ClassCastException instead of returning null, so the exact lookup is guarded.
+     *
+     * @param map the map to look up
+     * @param name the name segment
+     * @return the mapped value, or null when nothing matches
+     */
+    static Object getMapValue(Map map, String name) {
+        try {
+            Object value = map.get(name);
+            if (value != null || map.containsKey(name)) {
+                return value;
+            }
+        } catch (ClassCastException ignored) {
+            // the map orders keys by a comparator that cannot accept a String, fall through
+        }
+
+        return getTypedKeyValue(map, name);
+    }
+
+    private static Object getTypedKeyValue(Map map, String name) {
+        Long longValue = null;
+        Integer intValue = null;
+        if (IOUtils.isNumber(name)) {
+            try {
+                long num = Long.parseLong(name);
+                longValue = num;
+                if (num >= Integer.MIN_VALUE && num <= Integer.MAX_VALUE) {
+                    intValue = (int) num;
+                }
+            } catch (NumberFormatException ignored) {
+                // out of the long range, no boxed numeric key can match
+            }
+        }
+
+        for (Object o : map.entrySet()) {
+            Map.Entry entry = (Map.Entry) o;
+            Object entryKey = entry.getKey();
+            if (entryKey instanceof Enum) {
+                if (((Enum<?>) entryKey).name().equals(name)) {
+                    return entry.getValue();
+                }
+            } else if (entryKey instanceof Long) {
+                if (entryKey.equals(longValue)) {
+                    return entry.getValue();
+                }
+            } else if (entryKey instanceof Integer) {
+                if (entryKey.equals(intValue)) {
+                    return entry.getValue();
+                }
+            }
+        }
+
+        return null;
     }
 
     @Override

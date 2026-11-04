@@ -91,6 +91,9 @@ public class BeanInfo {
         if (naming != null) {
             namingStrategy = naming.name();
         }
+        // the writer drives array positions, so the reader has to start from the same
+        // default; an explicit alphabetic annotation still overrides it below
+        alphabetic = JSONFactory.isDefaultWriterAlphabetic();
     }
 
     public BeanInfo(ObjectWriterProvider provider) {
