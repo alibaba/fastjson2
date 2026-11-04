@@ -1547,6 +1547,9 @@ final class JSONReaderUTF16
         } else {
             hashCode = Fnv.MAGIC_HASH_CODE;
             for (int i = 0; ; ++i) {
+                if (offset >= end) {
+                    throw error("illegal fieldName input");
+                }
                 char c = chars[offset];
                 if (c == '\\') {
                     nameEscape = true;
