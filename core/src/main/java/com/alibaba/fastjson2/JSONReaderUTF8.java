@@ -2663,6 +2663,9 @@ class JSONReaderUTF8
         } else {
             hashCode = MAGIC_HASH_CODE;
             for (int i = 0; ; ++i) {
+                if (offset >= end) {
+                    throw error("illegal fieldName input");
+                }
                 ch = bytes[offset];
                 if (ch == '\\') {
                     nameEscape = true;
