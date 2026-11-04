@@ -40,21 +40,13 @@ public class CSVTest4 {
         parser.config(StreamReader.Feature.ErrorAsNull);
         parser.config(StreamReader.Feature.ErrorAsNull, false);
         parser.config(StreamReader.Feature.ErrorAsNull, true);
-        try {
-            parser.stream(String[].class).findFirst().get();
-        } catch (Exception e) {
-            assertTrue(e instanceof ClassCastException);
-            assertEquals("class [Ljava.lang.Object; can not cast to class [Ljava.lang.String;", e.getMessage());
-        }
+        ClassCastException stringArrayError = assertThrows(ClassCastException.class, () -> parser.stream(String[].class).findFirst().get());
+        assertEquals("class [Ljava.lang.Object; can not cast to class [Ljava.lang.String;", stringArrayError.getMessage());
 
         in = new ByteArrayInputStream(bytes);
-        parser = CSVReader.of(in, types);
-        try {
-            parser.stream(Integer[].class).findFirst().get();
-        } catch (Exception e) {
-            assertTrue(e instanceof ClassCastException);
-            assertEquals("class [Ljava.lang.Object; can not cast to class [Ljava.lang.Integer;", e.getMessage());
-        }
+        CSVReader integerArrayParser = CSVReader.of(in, types);
+        ClassCastException integerArrayError = assertThrows(ClassCastException.class, () -> integerArrayParser.stream(Integer[].class).findFirst().get());
+        assertEquals("class [Ljava.lang.Object; can not cast to class [Ljava.lang.Integer;", integerArrayError.getMessage());
 
         in = new ByteArrayInputStream(bytes);
         CSVReader<Integer[]> parser2 = CSVReader.of(in, types);
