@@ -38,6 +38,12 @@ public class JSONPath {
     public static <T> T read(String json, String path, Type clazz, ParserConfig parserConfig) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
         JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE);
+        // fastjson 1.x honoured ParserConfig.autoTypeSupport here as well. Only the
+        // SupportAutoType bit is flipped, so the config's reader provider is not swapped in for
+        // the extraction step (that would additionally apply its custom deserializers).
+        if (parserConfig != null && parserConfig.isAutoTypeSupport()) {
+            context.config(JSONReader.Feature.SupportAutoType);
+        }
         JSONReader jsonReader = JSONReader.of(json, context);
         Object r = jsonPath.extract(jsonReader);
         return TypeUtils.cast(r, clazz, parserConfig);

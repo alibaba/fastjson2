@@ -202,6 +202,28 @@ public abstract class JSON
      * before the accept list or the class-loading fallback is reached, so enabling auto type support
      * here cannot bypass safe mode. (As everywhere else, a registered
      * {@code AutoTypeBeforeHandler} is consulted before the safe mode check.)
+     * <p>
+     * <strong>Scope of the flag.</strong> Exactly the read paths that accept a {@link ParserConfig}
+     * honour {@code isAutoTypeSupport()}: the nine {@code JSON} statics ({@code parse} x3,
+     * {@code parseObject} x5, {@code parseArray}), {@code new DefaultJSONParser(String)} /
+     * {@code new DefaultJSONParser(String, ParserConfig)} and
+     * {@code JSONPath.read(String, String, Type, ParserConfig)}. Two consequences are deliberate
+     * and worth stating for migrators:
+     * <ul>
+     *   <li>{@code JSON.parse(String, int)} and
+     *       {@code JSON.parseObject(String, Type, int, Feature...)} delegate with
+     *       {@link ParserConfig#global}, so a global {@code setAutoTypeSupport(true)} is live on
+     *       them, while the no-config siblings ({@code parse(String)},
+     *       {@code parse(String, Feature...)}, {@code parseObject(String, Class)},
+     *       {@code parseArray(String, Class)}, {@code JSONPath.read(String, String, Type)}) build
+     *       from the default provider and stay inert.</li>
+     *   <li>JAX-RS {@code FastJsonProvider.readFrom} passes
+     *       {@code fastJsonConfig.getParserConfig()} into the {@code InputStream} overload, so the
+     *       flag becomes live on HTTP request bodies there; Spring's
+     *       {@code FastJsonHttpMessageConverter.readType} builds its context from the default
+     *       provider and still ignores the same {@code FastJsonConfig} field. Migration docs please
+     *       note both rows.</li>
+     * </ul>
      */
     public static JSONReader.Context createReadContext(ParserConfig config, int featuresValue, Feature... features) {
         for (Feature feature : features) {

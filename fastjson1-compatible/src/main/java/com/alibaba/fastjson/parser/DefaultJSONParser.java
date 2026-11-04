@@ -18,7 +18,7 @@ public class DefaultJSONParser
     private Object input;
 
     public DefaultJSONParser(String text) {
-        this(JSONReader.of(text), ParserConfig.global);
+        this(autoTypeSupportReader(text, ParserConfig.global), ParserConfig.global);
         this.input = text;
     }
 
@@ -34,7 +34,26 @@ public class DefaultJSONParser
     }
 
     public DefaultJSONParser(String text, ParserConfig config) {
-        this(JSONReader.of(text), config);
+        this(autoTypeSupportReader(text, config), config);
+    }
+
+    /**
+     * fastjson 1.x honoured {@link ParserConfig#isAutoTypeSupport()} on this constructor, so the
+     * same payload parsed through {@code new DefaultJSONParser(text, config).parse()} resolved
+     * {@code @type} while this class silently returned a plain {@link JSONObject}.
+     * <p>
+     * Only the {@link JSONReader.Feature#SupportAutoType} bit is flipped on the default context.
+     * Routing through {@code JSON.createReadContext(config, JSON.DEFAULT_PARSER_FEATURE)} would
+     * also apply that feature set ({@code SupportSmartMatch}, {@code Base64StringAsByteArray},
+     * {@code UseBigDecimalForDoubles}, ...) and change this constructor's existing behaviour beyond
+     * the auto type flag, so it is deliberately not used here.
+     */
+    private static JSONReader autoTypeSupportReader(String text, ParserConfig config) {
+        JSONReader reader = JSONReader.of(text);
+        if (config != null && config.isAutoTypeSupport()) {
+            reader.getContext().config(JSONReader.Feature.SupportAutoType);
+        }
+        return reader;
     }
 
     public DefaultJSONParser(JSONReader reader, ParserConfig config) {
