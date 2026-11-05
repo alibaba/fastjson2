@@ -5,6 +5,8 @@ import com.alibaba.fastjson2_vo.IntField1;
 import com.alibaba.fastjson2_vo.Integer1;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -421,6 +423,24 @@ public class JSONPathTest3 {
         );
 
         assertEquals("$[0]", JSONPath.of("$[0]").toString());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    public void test_extractScalarNegativeIndex(boolean jsonb) {
+        assertExtractScalar("$[-2]", "[1,2,3]", "2", jsonb);
+        assertExtractScalar("$[-1]", "[1,2,3]", "3", jsonb);
+        assertExtractScalar("$[-2]", "[1,null,3]", "null", jsonb);
+        assertExtractScalar("$[-4]", "[1,2,3]", "null", jsonb);
+        assertExtractScalar("$[-1]", "[]", "null", jsonb);
+    }
+
+    private static void assertExtractScalar(String path, String json, String expected, boolean jsonb) {
+        try (JSONReader reader = jsonb
+                ? JSONReader.ofJSONB(JSONB.fromJSONString(json))
+                : JSONReader.of(json)) {
+            assertEquals(expected, JSONPath.of(path).extractScalar(reader));
+        }
     }
 
     @Test
