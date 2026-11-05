@@ -103,6 +103,10 @@ class JSONPathSingle
 
     @Override
     public String extractScalar(JSONReader jsonReader) {
+        if (!extractSupport && segment instanceof JSONPathSegmentIndex
+                && (((JSONPathSegmentIndex) segment).index < -1 || jsonReader.jsonb)) {
+            return JSON.toJSONString(extract(jsonReader));
+        }
         Context context = new Context(this, null, segment, null, 0);
         segment.accept(jsonReader, context);
         return JSON.toJSONString(context.value);
