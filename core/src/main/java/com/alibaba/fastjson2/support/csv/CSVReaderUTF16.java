@@ -95,30 +95,42 @@ final class CSVReaderUTF16<T>
             }
         }
 
-        for (int k = 0; k < 3; ++k) {
-            lineTerminated = false;
-
-            int i = off, end = this.end;
+        // Scan progress (i, quote, lineSize) is kept across refills instead of rescanning from off,
+        // so any number of legal short reads is handled in a single linear pass.
+        lineTerminated = false;
+        int i = off, end = this.end;
+        for (; ; ) {
             while (i + 4 < end && !containsQuoteOrLineSeparator(IOUtils.getLongUnaligned(buf, i))) {
                 i += 4;
             }
+
             for (; i < end; i++) {
                 char ch = buf[i];
                 if (ch == '"') {
-                    lineSize++;
                     if (!quote) {
                         quote = true;
-                    } else {
-                        int n = i + 1;
-                        if (n >= end) {
+                        lineSize++;
+                        continue;
+                    }
+
+                    int n = i + 1;
+                    if (n >= end) {
+                        if (!inputEnd && input != null) {
+                            // closing quote or escaped double quote needs the next char,
+                            // retry this quote after the refill below
                             break;
                         }
-                        if (buf[n] == '"') {
-                            lineSize++;
-                            i++;
-                        } else {
-                            quote = false;
-                        }
+                        quote = false;
+                        lineSize++;
+                        continue;
+                    }
+
+                    if (buf[n] == '"') {
+                        lineSize += 2;
+                        i++;
+                    } else {
+                        quote = false;
+                        lineSize++;
                     }
                     continue;
                 }
@@ -140,6 +152,13 @@ final class CSVReaderUTF16<T>
 
                     break;
                 } else if (ch == '\r') {
+                    int n = i + 1;
+                    if (n >= end && !inputEnd && input != null) {
+                        // the '\r' may be the first half of a CRLF split across reads,
+                        // retry it after the refill below
+                        break;
+                    }
+
                     if (lineSize > 0 || (features & Feature.IgnoreEmptyLine.mask) == 0) {
                         rowCount++;
                     }
@@ -148,11 +167,7 @@ final class CSVReaderUTF16<T>
                     lineSize = 0;
                     lineEnd = i;
 
-                    int n = i + 1;
-                    if (n >= end) {
-                        break;
-                    }
-                    if (buf[n] == '\n') {
+                    if (n < end && buf[n] == '\n') {
                         i++;
                     }
 
@@ -165,44 +180,56 @@ final class CSVReaderUTF16<T>
                 }
             }
 
-            if (!lineTerminated) {
-                if (input != null && !inputEnd) {
-                    int len = end - off;
-                    if (off > 0) {
-                        if (len > 0) {
-                            System.arraycopy(buf, off, buf, 0, len);
-                        }
-                        lineStart = lineNextStart = 0;
-                        off = 0;
-                        end = len;
-                        quote = false;
-                    }
+            if (lineTerminated) {
+                break;
+            }
 
+            // Refill unfinished data without rescanning the accumulated prefix.
+            if (input != null && !inputEnd) {
+                int len = end - off;
+                if (off > 0) {
+                    if (len > 0) {
+                        System.arraycopy(buf, off, buf, 0, len);
+                    }
+                    i -= off;
+                    lineStart = lineNextStart = 0;
+                    off = 0;
+                    end = len;
+                    this.end = end;
+                }
+
+                if (end < buf.length) {
                     int cnt = input.read(buf, end, buf.length - end);
                     if (cnt == -1) {
                         inputEnd = true;
-                        if (off == end) {
-                            this.off = off;
-                            return false;
-                        }
                     } else {
                         end += cnt;
                         this.end = end;
-                        continue;
+                        if (cnt > 0) {
+                            continue;
+                        }
                     }
                 }
 
-                lineStart = lineNextStart;
-                lineEnd = end;
-                rowCount++;
-                lineSize = 0;
-                off = end;
+                if (inputEnd) {
+                    if (off == end) {
+                        this.off = off;
+                        return false;
+                    }
+                    // a pending '\r' or quote lookahead can now be resolved with inputEnd known
+                    continue;
+                }
             }
 
-            lineTerminated = off == end;
+            lineStart = lineNextStart;
+            lineEnd = end;
+            rowCount++;
+            lineSize = 0;
+            off = end;
             break;
         }
 
+        lineTerminated = off == end;
         this.off = off;
         return true;
     }
