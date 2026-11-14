@@ -5,9 +5,12 @@ import com.alibaba.fastjson2_vo.IntField1;
 import com.alibaba.fastjson2_vo.Integer1;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -421,6 +424,83 @@ public class JSONPathTest3 {
         );
 
         assertEquals("$[0]", JSONPath.of("$[0]").toString());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    public void test_extractScalarNegativeIndex(boolean jsonb) {
+        assertExtractScalar("$[-2]", "[1,2,3]", "2", jsonb);
+        assertExtractScalar("$[-1]", "[1,2,3]", "3", jsonb);
+        assertExtractScalar("$[-2]", "[1,null,3]", "null", jsonb);
+        assertExtractScalar("$[-4]", "[1,2,3]", "null", jsonb);
+        assertExtractScalar("$[-1]", "[]", "null", jsonb);
+        assertExtractScalar("$[-2]", "{\"-2\":7}", "7", jsonb);
+        assertExtractScalar("$[-2]", "null", "null", jsonb);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    public void test_extractScalarNegativeIndexMultiSegment(boolean jsonb) {
+        assertExtractScalar("$.a[-2]", "{\"a\":[1,2,3]}", "2", jsonb);
+        assertExtractScalar("$[-1].id", "[{\"id\":1},{\"id\":2},{\"id\":3}]", "3", jsonb);
+        assertExtractScalar("$[-2].id", "[{\"id\":1},{\"id\":2},{\"id\":3}]", "2", jsonb);
+        assertExtractScalar("$.a[-2].id", "{\"a\":[{\"id\":1},{\"id\":2},{\"id\":3}]}", "2", jsonb);
+        assertExtractScalar("$.a.b[-2]", "{\"a\":{\"b\":[1,2,3]}}", "2", jsonb);
+        assertExtractScalar("$[-1][-2].id", "[[{\"id\":1}],[{\"id\":2},{\"id\":3}]]", "2", jsonb);
+        assertExtractScalar("$[-4].id", "[{\"id\":1},{\"id\":2},{\"id\":3}]", "null", jsonb);
+        assertExtractScalar("$[-1].id", "[]", "null", jsonb);
+        assertExtractScalar("$[-1].id", "[null]", "null", jsonb);
+        assertExtractScalar("$[-1].id", "[{}]", "null", jsonb);
+        assertExtractScalar("$[-1].a.b", "[{}]", "null", jsonb);
+        assertExtractScalar("$[-2].a.b", "[{}, {\"b\":42}]", "null", jsonb);
+        assertExtractScalar("$[-1].a.b", "[{\"other\":1}]", "null", jsonb);
+        assertExtractScalar("$[-2147483648]", "[1,2,3]", "null", jsonb);
+        assertExtractScalar("$[-3]", "[1,2,3]", "1", jsonb);
+        assertExtractScalar("$[1].id", "[{\"id\":1},{\"id\":2},{\"id\":3}]", "2", jsonb);
+    }
+
+    @Test
+    public void test_extractScalarNegativeIndexNonArray() {
+        assertExtractScalar("$[-1]", "123", "null", false);
+        assertExtractScalar("$[-2]", "123", "null", false);
+        assertExtractScalar("$[-2]", "{\"-2\":7}", "7", false);
+        assertExtractScalar("$[-1]", "[1,]", "1", false);
+        assertExtractScalar("$[-2]", "[1,2,]", "1", false);
+        assertExtractScalar("$[-1].id", "[{\"id\":1},]", "1", false);
+        assertThrows(JSONException.class, () -> JSONPath.of("$[-2]").extractScalar(JSONReader.of("[1,2")));
+        assertThrows(JSONException.class, () -> JSONPath.of("$[-2]").extractScalar(JSONReader.of("[")));
+    }
+
+    @Test
+    public void test_extractScalarNegativeIndexEscapes() {
+        String[] values = {"a\\b", "a\"b", "\n\t\r", "你好", "plain"};
+        for (String first : values) {
+            for (String second : values) {
+                for (String third : values) {
+                    String json = JSON.toJSONString(JSONArray.of(first, second, third));
+                    assertExtractScalar("$[-2]", json, JSON.toJSONString(second), false);
+                    assertExtractScalar("$[-3]", json, JSON.toJSONString(first), false);
+                    String trailingComma = json.substring(0, json.length() - 1) + ",]";
+                    assertExtractScalar("$[-2]", trailingComma, JSON.toJSONString(second), false);
+                }
+            }
+        }
+    }
+
+    private static void assertExtractScalar(String path, String json, String expected, boolean jsonb) {
+        try (JSONReader reader = jsonb
+                ? JSONReader.ofJSONB(JSONB.fromJSONString(json))
+                : JSONReader.of(json)) {
+            assertEquals(expected, JSONPath.of(path).extractScalar(reader));
+        }
+        if (!jsonb) {
+            try (JSONReader reader = JSONReader.of(json.getBytes(StandardCharsets.UTF_8))) {
+                assertEquals(expected, JSONPath.of(path).extractScalar(reader));
+            }
+            try (JSONReader reader = JSONReader.of(json.toCharArray())) {
+                assertEquals(expected, JSONPath.of(path).extractScalar(reader));
+            }
+        }
     }
 
     @Test
