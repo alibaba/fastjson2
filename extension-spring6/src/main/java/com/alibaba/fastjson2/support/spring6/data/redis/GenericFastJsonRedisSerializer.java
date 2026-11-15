@@ -28,7 +28,12 @@ public class GenericFastJsonRedisSerializer
 
     public GenericFastJsonRedisSerializer(String[] acceptNames, boolean jsonb) {
         this();
-        config.setReaderFilters(new ContextAutoTypeBeforeHandler(acceptNames));
+        boolean acceptList = acceptNames.length > 0;
+        if (acceptList) {
+            // the accept list is the autoType gate, SupportAutoType would let any other type through
+            config.setReaderFeatures();
+        }
+        config.setReaderFilters(new ContextAutoTypeBeforeHandler(acceptList, acceptNames));
         config.setJSONB(jsonb);
     }
 

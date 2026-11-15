@@ -318,7 +318,8 @@ class ObjectReaderImplMapTyped
             } else if (keyType == String.class) {
                 name = jsonReader.readFieldName();
                 if (index == 0
-                        && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                        && ((contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                        || jsonReader.getContext().getContextAutoTypeBeforeHandler() != null)
                         && name.equals(getTypeKey())
                 ) {
                     if (seenKeys != null && !seenKeys.add(getTypeKey())) {

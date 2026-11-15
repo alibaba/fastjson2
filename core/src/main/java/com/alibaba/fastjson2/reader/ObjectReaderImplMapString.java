@@ -73,7 +73,8 @@ final class ObjectReaderImplMapString
 
             String value = jsonReader.readString();
             if (i == 0
-                    && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                    && ((contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                    || context.getContextAutoTypeBeforeHandler() != null)
                     && name.equals(getTypeKey())) {
                 continue;
             }
