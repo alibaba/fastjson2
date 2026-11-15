@@ -371,6 +371,10 @@ public abstract class FieldReader<T>
                     }
                 }
             }
+            // a bridge method is the compiler-generated copy of the real setter and has an erased signature
+            if (this.method.isBridge() != o.method.isBridge()) {
+                return this.method.isBridge() ? 1 : -1;
+            }
 
             if (this.method.getParameterCount() == 1 && o.method.getParameterCount() == 1) {
                 Class<?> thisParamType = this.method.getParameterTypes()[0];
