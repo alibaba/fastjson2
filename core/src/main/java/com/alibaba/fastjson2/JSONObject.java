@@ -1067,12 +1067,12 @@ public class JSONObject
 
             if (value instanceof Float) {
                 float floatValue = (Float) value;
-                return toBigDecimal(floatValue);
+                return new BigDecimal(Float.toString(floatValue));
             }
 
             if (value instanceof Double) {
                 double doubleValue = (Double) value;
-                return toBigDecimal(doubleValue);
+                return BigDecimal.valueOf(doubleValue);
             }
 
             long longValue = ((Number) value).longValue();
