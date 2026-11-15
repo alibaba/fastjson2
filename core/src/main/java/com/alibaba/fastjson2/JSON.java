@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Consumer;
@@ -4521,6 +4522,48 @@ public interface JSON {
     }
 
     /**
+     * Converts a source field value into a form the target field reader accepts, applying
+     * the writer format of date fields and falling back to a tree conversion for
+     * incompatible types.
+     *
+     * @param fieldWriter the writer of the source field, its format is used for date values
+     * @param fieldReader the reader of the target field
+     * @param fieldValue the source field value, never null
+     * @param writeEnumUsingToString whether enum values are converted through toString()
+     * @return the converted value accepted by the target field reader
+     * @since 2.0.67
+     */
+    static Object copyFieldValue(FieldWriter fieldWriter, FieldReader fieldReader, Object fieldValue, boolean writeEnumUsingToString) {
+        Class<?> fieldClass = fieldReader.fieldClass;
+        if (fieldWriter.fieldClass == Date.class && fieldClass == String.class) {
+            return DateUtils.format((Date) fieldValue, fieldWriter.format);
+        }
+        if (fieldWriter.fieldClass == LocalDate.class && fieldClass == String.class) {
+            return DateUtils.format((LocalDate) fieldValue, fieldWriter.format);
+        }
+        if (fieldWriter.fieldClass == LocalDateTime.class && fieldClass == String.class) {
+            return DateUtils.format((LocalDateTime) fieldValue, fieldWriter.format);
+        }
+        if (fieldReader.supportAcceptType(fieldValue.getClass())) {
+            return fieldValue;
+        }
+        if (writeEnumUsingToString && fieldValue instanceof Enum) {
+            return fieldValue.toString();
+        }
+        String format = fieldWriter.format;
+        if (format != null && (fieldValue instanceof Date || fieldValue instanceof LocalDate || fieldValue instanceof LocalDateTime)) {
+            if (fieldValue instanceof LocalDate) {
+                return DateUtils.format((LocalDate) fieldValue, format);
+            }
+            if (fieldValue instanceof LocalDateTime) {
+                return DateUtils.format((LocalDateTime) fieldValue, format);
+            }
+            return DateUtils.format((Date) fieldValue, format);
+        }
+        return toJSON(fieldValue);
+    }
+
+    /**
      * Builds a new instance of targetClass using the properties of the specified object
      *
      * @param <T> the target type
@@ -4531,7 +4574,7 @@ public interface JSON {
      * @since 2.0.16
      */
     static <T> T copyTo(Object object, Class<T> targetClass, JSONWriter.Feature... features) {
-        if (object == null) {
+        if (object == null || targetClass == null) {
             return null;
         }
 
@@ -4575,21 +4618,11 @@ public interface JSON {
                 }
 
                 Object fieldValue = fieldWriter.getFieldValue(object);
-
-                Object fieldValueCopied;
-                if (fieldWriter.fieldClass == Date.class
-                        && fieldReader.fieldClass == String.class) {
-                    fieldValueCopied = DateUtils.format((Date) fieldValue, fieldWriter.format);
-                } else if (fieldWriter.fieldClass == LocalDate.class
-                        && fieldReader.fieldClass == String.class) {
-                    fieldValueCopied = DateUtils.format((LocalDate) fieldValue, fieldWriter.format);
-                } else if (fieldValue == null || fieldReader.supportAcceptType(fieldValue.getClass())) {
-                    fieldValueCopied = fieldValue;
-                } else {
-                    fieldValueCopied = copy(fieldValue);
+                if (fieldValue != null) {
+                    fieldValue = copyFieldValue(fieldWriter, fieldReader, fieldValue, false);
                 }
 
-                fieldReader.accept(instance, fieldValueCopied);
+                fieldReader.accept(instance, fieldValue);
             }
 
             return instance;
@@ -4613,6 +4646,113 @@ public interface JSON {
 
             return (T) objectReader.readJSONBObject(jsonReader, null, null, 0);
         }
+    }
+
+    /**
+     * Copies the properties of the specified source object into the given target object (in-place).
+     * No new instance is created; the target object is modified directly. Only fields with
+     * matching names between source and target are copied.
+     * <p>
+     * Features control the copy semantics: {@code WriteNulls} makes null source fields overwrite
+     * the target (by default null fields are skipped), {@code FieldBased} enables field access on
+     * both source and target, {@code WriteEnumUsingToString} converts enum values through
+     * {@code toString()} when the target field type differs, and {@code IgnoreErrorGetter} skips
+     * source fields whose getter throws.
+     * <p>
+     * Unsupported shapes fail fast with a {@link JSONException}: array, collection and scalar
+     * sources, {@link Map} and collection targets, and the {@code BeanToArray} feature. Values
+     * copied into a target field of a different type are converted through a {@code toJSON}
+     * bridge, so reference cycles between cross-type beans are not supported.
+     *
+     * @param object the source object whose properties will be copied
+     * @param targetObject the target object to receive the copied properties
+     * @param features the specified features are applied to serialization
+     * @param <T> the target type
+     * @return the target object after properties have been copied into it
+     * @since 2.0.67
+     */
+    static <T> T copyTo(Object object, T targetObject, JSONWriter.Feature... features) {
+        if (object == null || targetObject == null) {
+            return targetObject;
+        }
+
+        Class<?> objectClass = object.getClass();
+        Class<?> targetClass = targetObject.getClass();
+
+        if (Map.class.isAssignableFrom(targetClass)
+                || targetClass.isArray()
+                || Collection.class.isAssignableFrom(targetClass)) {
+            throw new JSONException("copyTo not support target : " + targetClass.getName());
+        }
+
+        boolean fieldBased = false;
+        long featuresValue = 0;
+        for (JSONWriter.Feature feature : features) {
+            featuresValue |= feature.mask;
+            if (feature == JSONWriter.Feature.FieldBased) {
+                fieldBased = true;
+            } else if (feature == JSONWriter.Feature.BeanToArray) {
+                throw new JSONException("copyTo not support feature : " + feature);
+            }
+        }
+
+        ObjectWriter objectWriter = defaultObjectWriterProvider.getObjectWriter(objectClass, objectClass, fieldBased);
+        ObjectReader objectReader = defaultObjectReaderProvider.getObjectReader(targetClass, fieldBased);
+
+        // Fast path: copy field values directly, no serialization round-trip, so
+        // same-type references (including cycles and shared instances) are preserved
+        if (objectWriter instanceof ObjectWriterAdapter && objectReader instanceof ObjectReaderBean) {
+            boolean writeNulls = (featuresValue & JSONWriter.Feature.WriteNulls.mask) != 0;
+            boolean writeEnumUsingToString = (featuresValue & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0;
+            boolean ignoreErrorGetter = (featuresValue & JSONWriter.Feature.IgnoreErrorGetter.mask) != 0;
+
+            List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
+            for (int i = 0; i < fieldWriters.size(); i++) {
+                FieldWriter fieldWriter = fieldWriters.get(i);
+                FieldReader fieldReader = objectReader.getFieldReader(fieldWriter.fieldName);
+                if (fieldReader == null) {
+                    continue;
+                }
+
+                Object fieldValue;
+                try {
+                    fieldValue = fieldWriter.getFieldValue(object);
+                } catch (Exception e) {
+                    if (ignoreErrorGetter) {
+                        continue;
+                    }
+                    throw new JSONException("copyTo get field " + fieldWriter.fieldName + " error", e);
+                }
+
+                if (fieldValue == null) {
+                    if (writeNulls) {
+                        fieldReader.accept(targetObject, null);
+                    }
+                } else {
+                    fieldReader.accept(targetObject, copyFieldValue(fieldWriter, fieldReader, fieldValue, writeEnumUsingToString));
+                }
+            }
+
+            return targetObject;
+        }
+
+        // Fallback: shapes without field writers/readers go through a JSONObject bridge,
+        // e.g. a Map source copied into a bean target
+        Object sourceJSON = toJSON(object, features);
+        if (sourceJSON instanceof JSONObject) {
+            JSONObject sourceObject = (JSONObject) sourceJSON;
+            if ((featuresValue & JSONWriter.Feature.WriteNulls.mask) == 0) {
+                sourceObject.entrySet().removeIf(entry -> entry.getValue() == null);
+            }
+            if (fieldBased) {
+                sourceObject.copyTo(targetObject, JSONReader.Feature.FieldBased);
+            } else {
+                sourceObject.copyTo(targetObject);
+            }
+            return targetObject;
+        }
+
+        throw new JSONException("copyTo not support source : " + objectClass.getName());
     }
 
     /**
