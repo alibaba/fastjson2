@@ -2287,7 +2287,10 @@ public interface JSONB {
          */
         static int writeFloat(byte[] bytes, int off, float value) {
             int intValue = (int) value;
-            if (intValue == value && ((intValue + 0x40000) & ~0x7ffff) == 0) {
+            boolean negativeZero = Float.floatToRawIntBits(value) == Integer.MIN_VALUE;
+            if (!negativeZero
+                    && intValue == value
+                    && ((intValue + 0x40000) & ~0x7ffff) == 0) {
                 bytes[off] = BC_FLOAT_INT;
                 return IO.writeInt32(bytes, off + 1, intValue);
             }
@@ -2326,12 +2329,13 @@ public interface JSONB {
          * @return the new offset
          */
         static int writeDouble(byte[] bytes, int off, double value) {
-            if (value == 0 || value == 1) {
+            boolean negativeZero = Double.doubleToRawLongBits(value) == Long.MIN_VALUE;
+            if (!negativeZero && (value == 0 || value == 1)) {
                 bytes[off] = value == 0 ? BC_DOUBLE_NUM_0 : BC_DOUBLE_NUM_1;
                 return off + 1;
             }
 
-            if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
+            if (!negativeZero && value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
                 long longValue = (long) value;
                 if (longValue == value) {
                     bytes[off] = BC_DOUBLE_LONG;
