@@ -443,24 +443,34 @@ final class JSONPathSegmentIndex
             return;
         }
 
+        if (jsonReader.jsonb && index < 0 && jsonReader.isObject()) {
+            context.value = eval(jsonReader.readObject());
+            context.eval = true;
+            return;
+        }
+
         if (jsonReader.jsonb) {
             int itemCnt = jsonReader.startArray();
+            int target = index < 0 ? itemCnt + index : index;
             for (int i = 0; i < itemCnt; i++) {
-                boolean match = index == i;
+                boolean match = target == i;
                 if (!match) {
                     jsonReader.skipValue();
                     continue;
                 }
 
                 if (jsonReader.isArray() || jsonReader.isObject()) {
-                    if (context.next != null) {
+                    if (index >= 0 && context.next != null) {
                         break;
                     }
                 }
 
                 context.value = jsonReader.readAny();
                 context.eval = true;
-                break;
+                return;
+            }
+            if (target < 0 || target >= itemCnt) {
+                context.eval = true;
             }
             return;
         }
@@ -469,6 +479,16 @@ final class JSONPathSegmentIndex
             Map object = jsonReader.readObject();
             context.value = eval(object);
             context.eval = true;
+            return;
+        }
+
+        if (index < 0 && jsonReader.nextIfNull()) {
+            context.eval = true;
+            return;
+        }
+
+        if (index < 0 && (index < -1 || context.next != null) && jsonReader.isArray()) {
+            acceptNegativeIndex(jsonReader, context);
             return;
         }
 
@@ -545,6 +565,59 @@ final class JSONPathSegmentIndex
                 context.value = val;
             }
         }
+    }
+
+    private void acceptNegativeIndex(JSONReader jsonReader, JSONPath.Context context) {
+        JSONReader.SavePoint start = jsonReader.mark();
+        boolean comma = jsonReader.comma;
+        JSONReaderUTF8 utf8 = jsonReader instanceof JSONReaderUTF8 ? (JSONReaderUTF8) jsonReader : null;
+        int nextEscapeIndex = utf8 == null ? 0 : utf8.nextEscapeIndex;
+        jsonReader.next();
+        int count = 0;
+        try {
+            while (jsonReader.ch != ']' && jsonReader.ch != EOI) {
+                jsonReader.skipValue();
+                count++;
+                if (jsonReader.ch == ',') {
+                    jsonReader.next();
+                }
+            }
+        } catch (JSONValidException error) {
+            jsonReader.reset(start);
+            jsonReader.comma = comma;
+            if (utf8 != null) {
+                utf8.nextEscapeIndex = nextEscapeIndex;
+            }
+            List values = jsonReader.readArray();
+            int target = values.size() + index;
+            context.value = target < 0 ? null : values.get(target);
+            context.eval = true;
+            return;
+        }
+        if (jsonReader.ch == EOI) {
+            throw new JSONException(jsonReader.info("unclosed array"));
+        }
+        int target = count + index;
+        if (target < 0) {
+            jsonReader.nextIfArrayEnd();
+            context.eval = true;
+            return;
+        }
+
+        jsonReader.reset(start);
+        jsonReader.comma = comma;
+        if (utf8 != null) {
+            utf8.nextEscapeIndex = nextEscapeIndex;
+        }
+        jsonReader.next();
+        for (int i = 0; i < target; i++) {
+            jsonReader.skipValue();
+            if (jsonReader.ch == ',') {
+                jsonReader.next();
+            }
+        }
+        context.value = jsonReader.readAny();
+        context.eval = true;
     }
 
     @Override
