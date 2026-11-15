@@ -19,6 +19,7 @@ import com.alibaba.fastjson2.JSONException;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Base64;
@@ -574,5 +575,141 @@ public class JSONObjectTest {
 
         jsonObject.put("bytes", Base64.getEncoder().encodeToString("abc中华人民共和国".getBytes()));
         assertEquals("abc中华人民共和国", new String(jsonObject.getBytes("bytes")));
+    }
+
+    @Test
+    public void testToJavaObjectClassSelectorUpperCaseKey() {
+        {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("myValue", "x");
+            assertEquals("x", jsonObject.toJavaObject(PublicBean.class).getMyValue());
+        }
+        {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("MYVALUE", "x");
+            assertEquals("x", jsonObject.toJavaObject(PublicBean.class).getMyValue());
+        }
+    }
+
+    @Test
+    public void testToJavaObjectTypeClassSelectorUpperCaseKey() {
+        {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("myValue", "x");
+            PublicBean bean = jsonObject.toJavaObject((Type) PublicBean.class);
+            assertEquals("x", bean.getMyValue());
+        }
+        {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("MYVALUE", "x");
+            PublicBean bean = jsonObject.toJavaObject((Type) PublicBean.class);
+            assertEquals("x", bean.getMyValue());
+        }
+    }
+
+    @Test
+    public void testToJavaObjectTypeReferenceClassSelectorUpperCaseKey() {
+        Type type = new TypeReference<PublicBean>() {
+        }.getType();
+        {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("myValue", "x");
+            PublicBean bean = jsonObject.toJavaObject(type);
+            assertEquals("x", bean.getMyValue());
+        }
+        {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("MYVALUE", "x");
+            PublicBean bean = jsonObject.toJavaObject(type);
+            assertEquals("x", bean.getMyValue());
+        }
+    }
+
+    @Test
+    public void testToJavaObjectTypeReferenceParameterizedSelectorUpperCaseKey() {
+        Type type = new TypeReference<PublicGenericWrapper<PublicBean>>() {
+        }.getType();
+        {
+            JSONObject inner = new JSONObject();
+            inner.put("myValue", "x");
+            JSONObject outer = new JSONObject();
+            outer.put("value", inner);
+            PublicGenericWrapper<PublicBean> wrapper = outer.toJavaObject(type);
+            assertNotNull(wrapper.getValue());
+            assertEquals("x", wrapper.getValue().getMyValue());
+        }
+        {
+            JSONObject inner = new JSONObject();
+            inner.put("MYVALUE", "x");
+            JSONObject outer = new JSONObject();
+            outer.put("value", inner);
+            PublicGenericWrapper<PublicBean> wrapper = outer.toJavaObject(type);
+            assertNotNull(wrapper.getValue());
+            assertEquals("x", wrapper.getValue().getMyValue());
+        }
+        {
+            JSONObject inner = new JSONObject();
+            inner.put("myValue", "x");
+            JSONObject outer = new JSONObject();
+            outer.put("VALUE", inner);
+            PublicGenericWrapper<PublicBean> wrapper = outer.toJavaObject(type);
+            assertNotNull(wrapper.getValue());
+            assertEquals("x", wrapper.getValue().getMyValue());
+        }
+        {
+            JSONObject inner = new JSONObject();
+            inner.put("MYVALUE", "x");
+            JSONObject outer = new JSONObject();
+            outer.put("VALUE", inner);
+            PublicGenericWrapper<PublicBean> wrapper = outer.toJavaObject(type);
+            assertNotNull(wrapper.getValue());
+            assertEquals("x", wrapper.getValue().getMyValue());
+        }
+    }
+
+    @Test
+    public void testToJavaObjectGetterOnlySelectorBaseline() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("MYVALUE", "x");
+        assertNull(jsonObject.toJavaObject(PublicGetterOnlyBean.class).getMyValue());
+
+        PublicGetterOnlyBean byType = jsonObject.toJavaObject((Type) PublicGetterOnlyBean.class);
+        assertNull(byType.getMyValue());
+
+        PublicGetterOnlyBean byTypeReference = jsonObject.toJavaObject(new TypeReference<PublicGetterOnlyBean>() {
+        }.getType());
+        assertNull(byTypeReference.getMyValue());
+    }
+
+    public static class PublicBean {
+        private String myValue;
+
+        public String getMyValue() {
+            return myValue;
+        }
+
+        public void setMyValue(String myValue) {
+            this.myValue = myValue;
+        }
+    }
+
+    public static class PublicGetterOnlyBean {
+        private String myValue;
+
+        public String getMyValue() {
+            return myValue;
+        }
+    }
+
+    public static class PublicGenericWrapper<T> {
+        private T value;
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(T value) {
+            this.value = value;
+        }
     }
 }

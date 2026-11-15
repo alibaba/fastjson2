@@ -986,10 +986,12 @@ public class JSONObject
 
     public <T> T toJavaObject(Type type) {
         if (type instanceof Class) {
-            return (T) JSONFactory.getDefaultObjectReaderProvider().getObjectReader(type).createInstance(this, 0L);
+            return (T) JSONFactory.getDefaultObjectReaderProvider()
+                    .getObjectReader(type)
+                    .createInstance(this, JSONReader.Feature.SupportSmartMatch.mask);
         }
         String str = com.alibaba.fastjson2.JSON.toJSONString(this);
-        return com.alibaba.fastjson2.JSON.parseObject(str, type);
+        return com.alibaba.fastjson2.JSON.parseObject(str, type, JSONReader.Feature.SupportSmartMatch);
     }
 
     public <T> T toJavaObject(Class<T> clazz) {
