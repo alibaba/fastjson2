@@ -1151,13 +1151,20 @@ public class ObjectWriterBaseModule
                         o -> {
                             ByteBuffer buffer = (ByteBuffer) o;
                             if (buffer.hasArray()) {
-                                return buffer.array();
+                                byte[] array = buffer.array();
+                                int arrayOffset = buffer.arrayOffset() + buffer.position();
+                                int remaining = buffer.remaining();
+                                if (arrayOffset == 0 && remaining == array.length) {
+                                    return array;
+                                }
+
+                                byte[] bytes = new byte[remaining];
+                                System.arraycopy(array, arrayOffset, bytes, 0, remaining);
+                                return bytes;
                             }
-                            // For DirectByteBuffer or read-only buffers that don't have a backing array
-                            int position = buffer.position();
+
                             byte[] bytes = new byte[buffer.remaining()];
-                            buffer.get(bytes);
-                            buffer.position(position); // restore position
+                            buffer.duplicate().get(bytes);
                             return bytes;
                         }
                 );
