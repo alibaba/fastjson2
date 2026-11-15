@@ -4,8 +4,10 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -81,5 +83,54 @@ public class Issue7668 {
 
         assertThrows(JSONException.class, () -> JSON.parseObject(json));
         assertThrows(JSONException.class, () -> JSON.parseObject(json.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Test
+    public void testBigDecimalExceedsMaxDigits() {
+        String digits = repeat('9', 10_001);
+        String[] inputs = {
+                "{\"value\":" + digits + "}",
+                "{\"value\":-0." + digits + "}",
+                "{\"value\":\"" + digits + "\"}",
+                "{\"value\":\"\\u0039" + digits + "\"}"
+        };
+        for (String json : inputs) {
+            JSONException ex = assertThrows(JSONException.class, () -> JSON.parseObject(json, Bean.class));
+            assertTrue(ex.getMessage().contains("Number literal too long"), ex.getMessage());
+            assertThrows(JSONException.class, () -> JSON.parseObject(json.getBytes(StandardCharsets.UTF_8), Bean.class));
+            assertThrows(JSONException.class, () -> JSON.parseObject(json.toCharArray(), Bean.class));
+        }
+
+        assertThrows(JSONException.class, () -> JSON.parseObject(digits, BigDecimal.class));
+        assertThrows(JSONException.class, () -> JSON.parseObject(digits.getBytes(StandardCharsets.UTF_8), BigDecimal.class));
+        assertThrows(JSONException.class, () -> JSON.parseObject("{\"values\":[" + digits + "]}", ListBean.class));
+    }
+
+    @Test
+    public void testBigDecimalWithinMaxDigits() {
+        String digits = repeat('9', 5_000);
+        String json = "{\"value\":-" + digits + "." + digits + "E-10}";
+        BigDecimal expected = new BigDecimal("-" + digits + "." + digits + "E-10");
+
+        assertEquals(expected, JSON.parseObject(json, Bean.class).value);
+        assertEquals(expected, JSON.parseObject(json.getBytes(StandardCharsets.UTF_8), Bean.class).value);
+        assertEquals(expected, JSON.parseObject(json.toCharArray(), Bean.class).value);
+        assertEquals(new BigDecimal(digits), JSON.parseObject("{\"value\":\"" + digits + "\"}", Bean.class).value);
+    }
+
+    private static String repeat(char ch, int n) {
+        StringBuilder sb = new StringBuilder(n);
+        for (int i = 0; i < n; i++) {
+            sb.append(ch);
+        }
+        return sb.toString();
+    }
+
+    public static class Bean {
+        public BigDecimal value;
+    }
+
+    public static class ListBean {
+        public List<BigDecimal> values;
     }
 }

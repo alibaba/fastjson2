@@ -7014,6 +7014,9 @@ class JSONReaderUTF8
         if (quote != 0) {
             if (ch != quote) {
                 String str = readString();
+                if (str != null && str.length() > MAX_NUMBER_DIGITS) {
+                    checkNumberDigits(str.toCharArray(), 0, str.length());
+                }
                 try {
                     return TypeUtils.toBigDecimal(str);
                 } catch (NumberFormatException e) {
@@ -7030,6 +7033,9 @@ class JSONReaderUTF8
             }
 
             if (!value) {
+                if (len > MAX_NUMBER_DIGITS) {
+                    checkNumberDigits(bytes, start - 1, len);
+                }
                 decimal = TypeUtils.parseBigDecimal(bytes, start - 1, len);
             }
 
