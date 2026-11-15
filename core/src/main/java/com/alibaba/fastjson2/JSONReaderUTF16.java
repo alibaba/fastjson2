@@ -3534,6 +3534,9 @@ final class JSONReaderUTF16
                 break;
             }
 
+            if (offset >= end) {
+                throw jsonReader.error("invalid escape character EOI");
+            }
             ch = chars[offset++];
         }
 
