@@ -28,6 +28,9 @@ final class FieldReaderNumber<T, V>
 
     @Override
     public void accept(T object, Object value) {
+        if (value == null && ignoreSetNullValue()) {
+            return;
+        }
         propertyAccessor.setObject(object, value);
     }
 
@@ -52,6 +55,10 @@ final class FieldReaderNumber<T, V>
             } else {
                 throw e;
             }
+        }
+
+        if (fieldValue == null && ignoreSetNullValue(jsonReader)) {
+            return;
         }
 
         propertyAccessor.setObject(object, fieldValue);
