@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSONObject;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
@@ -232,11 +233,7 @@ public final class ArraySchema
                     uniqueItemsSet = new HashSet<>(size, 1F);
                 }
 
-                if (item instanceof BigDecimal) {
-                    item = ((BigDecimal) item).stripTrailingZeros();
-                }
-
-                if (!uniqueItemsSet.add(item)) {
+                if (!uniqueItemsSet.add(uniqueItemKey(item))) {
                     return UNIQUE_ITEMS_NOT_MATCH;
                 }
             }
@@ -282,6 +279,43 @@ public final class ArraySchema
         }
 
         return SUCCESS;
+    }
+
+    private static Object uniqueItemKey(Object value) {
+        if (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long
+                || value instanceof BigInteger || value instanceof BigDecimal
+                || value instanceof Float || value instanceof Double) {
+            if ((value instanceof Double && !Double.isFinite((Double) value))
+                    || (value instanceof Float && !Float.isFinite((Float) value))) {
+                return value;
+            }
+            return new BigDecimal(value.toString()).stripTrailingZeros();
+        }
+        if (value instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) value;
+            Map<Object, Object> key = new HashMap<>(map.size(), 1F);
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                key.put(entry.getKey(), uniqueItemKey(entry.getValue()));
+            }
+            return key;
+        }
+        if (value instanceof Collection) {
+            Collection<?> collection = (Collection<?>) value;
+            List<Object> key = new ArrayList<>(collection.size());
+            for (Object item : collection) {
+                key.add(uniqueItemKey(item));
+            }
+            return key;
+        }
+        if (value != null && value.getClass().isArray()) {
+            int size = Array.getLength(value);
+            List<Object> key = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                key.add(uniqueItemKey(Array.get(value, i)));
+            }
+            return key;
+        }
+        return value;
     }
 
     @Override
