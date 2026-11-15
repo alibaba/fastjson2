@@ -4,7 +4,9 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.internal.asm.ASMUtils;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.*;
@@ -23,6 +25,12 @@ final class ConstructorFunction<T>
     final String[] paramNames;
     final boolean marker;
     final long[] hashCodes;
+    /**
+     * Non-null when parameter 0 is the synthetic enclosing instance of a non-static inner class.
+     * Such a parameter never appears in the JSON, so it must not be left null — the constructor
+     * may dereference it (JDK 25 rejects a null enclosing instance outright).
+     */
+    final Class enclosingParamType;
     final List<Constructor> alternateConstructors;
     Map<Set<Long>, Constructor> alternateConstructorMap;
     Map<Set<Long>, String[]> alternateConstructorNames;
@@ -56,6 +64,8 @@ final class ConstructorFunction<T>
             }
             hashCodes[i] = Fnv.hashCode64(name);
         }
+
+        this.enclosingParamType = BeanUtils.getEnclosingInstanceParamType(constructor);
 
         this.alternateConstructors = alternateConstructors;
         if (alternateConstructors != null) {
@@ -99,6 +109,25 @@ final class ConstructorFunction<T>
         }
     }
 
+    /**
+     * Default for a parameter absent from the JSON. Parameter 0 of a non-static inner class
+     * constructor is the enclosing instance, which is never present in the JSON, so allocate a
+     * bare one rather than passing null. When the enclosing class cannot be allocated (for
+     * example an abstract class), fall back to null as before JDK 25; inner classes compiled
+     * by JDK 25+ then reject the null enclosing instance, which is unavoidable because an
+     * abstract enclosing class cannot be instantiated.
+     */
+    private Object defaultArg(int index, Class<?> paramClass) {
+        if (index == 0 && enclosingParamType != null) {
+            try {
+                return JDKUtils.UNSAFE.allocateInstance(enclosingParamType);
+            } catch (InstantiationException ignored) {
+                // the enclosing type cannot be allocated, fall back to the default value below
+            }
+        }
+        return TypeUtils.getDefaultValue(paramClass);
+    }
+
     @Override
     public T apply(Map<Long, Object> values) {
         boolean containsAll = true;
@@ -139,7 +168,7 @@ final class ConstructorFunction<T>
             Object arg = values.get(hashCodes[0]);
             Class<?> paramType = param.getType();
             if (arg == null) {
-                arg = TypeUtils.getDefaultValue(paramType);
+                arg = defaultArg(0, paramType);
             } else {
                 if (!paramType.isInstance(arg)) {
                     arg = TypeUtils.cast(arg, paramType);
@@ -153,7 +182,7 @@ final class ConstructorFunction<T>
             Parameter param0 = parameters[0];
             Class<?> param0Type = param0.getType();
             if (arg0 == null) {
-                arg0 = TypeUtils.getDefaultValue(param0Type);
+                arg0 = defaultArg(0, param0Type);
             } else {
                 if (!param0Type.isInstance(arg0)) {
                     arg0 = TypeUtils.cast(arg0, param0Type);
@@ -193,8 +222,8 @@ final class ConstructorFunction<T>
                     args[i] = arg;
                 } else {
                     flag |= (1 << i);
-                    if (paramClass.isPrimitive()) {
-                        args[i] = TypeUtils.getDefaultValue(paramClass);
+                    if (paramClass.isPrimitive() || (i == 0 && enclosingParamType != null)) {
+                        args[i] = defaultArg(i, paramClass);
                     }
                 }
                 n = i + 1;
@@ -210,7 +239,7 @@ final class ConstructorFunction<T>
                 Type paramType = parameter.getParameterizedType();
                 Object arg = values.get(hashCodes[i]);
                 if (arg == null) {
-                    arg = TypeUtils.getDefaultValue(paramClass);
+                    arg = defaultArg(i, paramClass);
                 } else {
                     if (!paramClass.isInstance(arg)) {
                         arg = TypeUtils.cast(arg, paramClass);

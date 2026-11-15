@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.v1issues.issue_1000;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -15,15 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class Issue1082 {
     @Test
     public void test_for_issue() throws Exception {
-        Throwable error = null;
-        try {
-            Model_1082 m = (Model_1082) JSON.parseObject("{}", Model_1082.class);
-        } catch (JSONException ex) {
-            error = ex;
-        } catch (NullPointerException ex) {
-            error = ex;
-        }
-        assertNotNull(error);
+        Model_1082 m = (Model_1082) JSON.parseObject("{}", Model_1082.class);
+        assertNotNull(m);
     }
 
     public void f() {
