@@ -68,11 +68,8 @@ public class CustomErrorMessageTest {
     @Test
     public void testAnnotationSchemaMessage() {
         String json = "{\"age\": 5}";
-        try {
-            JSON.parseObject(json, User.class);
-        } catch (JSONSchemaValidException e) {
-            Assertions.assertEquals("Age too young", e.getMessage());
-        }
+        JSONSchemaValidException e = assertThrows(JSONSchemaValidException.class, () -> JSON.parseObject(json, User.class));
+        Assertions.assertEquals("Age too young", e.getMessage());
     }
 
     public static class User {

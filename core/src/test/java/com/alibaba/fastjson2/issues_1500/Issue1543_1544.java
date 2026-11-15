@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("regression")
 public class Issue1543_1544 {
@@ -24,12 +24,8 @@ public class Issue1543_1544 {
         context.setMaxLevel(2049);
         assertEquals(2049, context.getMaxLevel());
 
-        try {
-            JSON.toJSONString(map, context);
-        } catch (Exception e) {
-            assertTrue(e instanceof JSONException);
-            assertEquals("level too large : " + (context.getMaxLevel() + 1), e.getMessage());
-        }
+        JSONException e = assertThrows(JSONException.class, () -> JSON.toJSONString(map, context));
+        assertEquals("level too large : " + (context.getMaxLevel() + 1), e.getMessage());
     }
 
     @Test
@@ -40,11 +36,7 @@ public class Issue1543_1544 {
         JSONWriter.Context context = JSONFactory.createWriteContext();
         context.setMaxLevel(2049);
         assertEquals(2049, context.getMaxLevel());
-        try {
-            JSON.toJSONString(list, context);
-        } catch (Exception e) {
-            assertTrue(e instanceof JSONException);
-            assertEquals("level too large : " + (context.getMaxLevel() + 1), e.getMessage());
-        }
+        JSONException e = assertThrows(JSONException.class, () -> JSON.toJSONString(list, context));
+        assertEquals("level too large : " + (context.getMaxLevel() + 1), e.getMessage());
     }
 }
