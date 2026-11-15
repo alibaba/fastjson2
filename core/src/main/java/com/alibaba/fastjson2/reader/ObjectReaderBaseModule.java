@@ -940,6 +940,19 @@ public class ObjectReaderBaseModule
                     int modifiers = field.getModifiers();
                     if (!Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
+                        if (!field.getName().equals(fieldName)) {
+                            // Lombok generates isXxx()/setXxx() for a boolean isXxx field, so the
+                            // property name is "xxx". Keep the raw field name as an alias so
+                            // {"isXxx": ...} still parses, as it did in fastjson1.
+                            String alias = field.getName();
+                            if (fieldInfo.alternateNames == null) {
+                                fieldInfo.alternateNames = new String[]{alias};
+                            } else if (!Arrays.asList(fieldInfo.alternateNames).contains(alias)) {
+                                String[] names = Arrays.copyOf(fieldInfo.alternateNames, fieldInfo.alternateNames.length + 1);
+                                names[names.length - 1] = alias;
+                                fieldInfo.alternateNames = names;
+                            }
+                        }
                     }
                     fieldInfo.features |= FieldInfo.FIELD_MASK;
                 } else if (field.getName().equals(fieldName1)) {
