@@ -898,6 +898,9 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
                     // bytes[off++] = BC_OBJECT;
                     gwWriteByte(mw, BYTES, OFFSET, BC_OBJECT);
                     mw.visitIincInsn(OFFSET, 1);
+                    // jsonWriter.incrementLevel(); — keep nesting depth in sync with startObject()
+                    mw.aload(JSON_WRITER);
+                    mw.invokevirtual(TYPE_JSON_WRITER, "incrementLevel", "()V");
                 }
                 for (FieldWriterRecord item : group.fieldWriters) {
                     writeFieldValueDirectJSONB(
@@ -918,6 +921,9 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
 
                 if (group.end) {
                     gwWriteByte(mw, BYTES, OFFSET, BC_OBJECT_END);
+                    // jsonWriter.decrementLevel(); — keep nesting depth in sync with endObject()
+                    mw.aload(JSON_WRITER);
+                    mw.invokevirtual(TYPE_JSON_WRITER, "decrementLevel", "()V");
                 }
 
                 mw.aload(JSON_WRITER);
