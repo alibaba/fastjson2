@@ -175,6 +175,74 @@ public abstract class JSON
         return context;
     }
 
+    /**
+     * Build a {@link JSONReader.Context} bound to the given {@link ParserConfig}'s provider.
+     * When {@link ParserConfig#isAutoTypeSupport()} is enabled and the caller has not suppressed
+     * {@code @type} resolution via the per-call {@link Feature#IgnoreAutoType}, this enables
+     * {@link JSONReader.Feature#SupportAutoType} so that {@code JSON.parse} / {@code JSON.parseObject}
+     * with an autoType-supporting {@link ParserConfig} resolve {@code @type}.
+     * <p>
+     * <strong>This restores fastjson 1.x auto type semantics, which are broader than fastjson2's
+     * default.</strong> Once {@code JSONReader.Feature.SupportAutoType} is on, resolution does
+     * <em>not</em> require the accept list: {@code ObjectReaderProvider#checkAutoType} scans
+     * {@code ParserConfig.addAccept} as a fast path only, and a miss still resolves the requested
+     * type by name through {@code TypeUtils.getMapping} / class loading. The built-in gates are
+     * {@code SAFE_MODE} (rejects everything), a type name of 192 characters or more, illegal
+     * characters in the name, {@code expectClass} incompatibility when a target type is supplied,
+     * and {@code JDKUtils.isAutoTypeDenyClass}, which covers exactly two categories:
+     * {@code ClassLoader} subtypes and JDBC {@code DataSource} / {@code RowSet} implementations.
+     * Any other class that loads is instantiable from an input supplied {@code @type}.
+     * <p>
+     * {@code addAccept} is therefore a fast path and a hardening recommendation, not a
+     * restriction; callers that need a strict allowlist should install a
+     * {@code ParserConfig.AutoTypeCheckHandler} instead.
+     * <p>
+     * The deprecated fastjson 1.x {@code ParserConfig.addDeny} denylist is <em>not</em> enforced:
+     * {@code ObjectReaderProvider.addAutoTypeDeny} is a deprecated no-op in fastjson2, so callers
+     * that relied on a deny list have no equivalent protection here. {@code addDeny} now documents
+     * and warns about this at configuration time.
+     * <p>
+     * {@code ObjectReaderProvider.SAFE_MODE} still makes {@code checkAutoType} return {@code null}
+     * before the accept list or the class-loading fallback is reached, so enabling auto type support
+     * here cannot bypass safe mode. (As everywhere else, a registered
+     * {@code AutoTypeBeforeHandler} is consulted before the safe mode check.)
+     * <p>
+     * <strong>Scope of the flag.</strong> Exactly the read paths that accept a {@link ParserConfig}
+     * honour {@code isAutoTypeSupport()}: the nine {@code JSON} statics ({@code parse} x3,
+     * {@code parseObject} x5, {@code parseArray}), {@code new DefaultJSONParser(String)} /
+     * {@code new DefaultJSONParser(String, ParserConfig)} and
+     * {@code JSONPath.read(String, String, Type, ParserConfig)}. Two consequences are deliberate
+     * and worth stating for migrators:
+     * <ul>
+     *   <li>{@code JSON.parse(String, int)} and
+     *       {@code JSON.parseObject(String, Type, int, Feature...)} delegate with
+     *       {@link ParserConfig#global}, so a global {@code setAutoTypeSupport(true)} is live on
+     *       them, while the no-config siblings ({@code parse(String)},
+     *       {@code parse(String, Feature...)}, {@code parseObject(String, Class)},
+     *       {@code parseArray(String, Class)}, {@code JSONPath.read(String, String, Type)}) build
+     *       from the default provider and stay inert.</li>
+     *   <li>JAX-RS {@code FastJsonProvider.readFrom} passes
+     *       {@code fastJsonConfig.getParserConfig()} into the {@code InputStream} overload, so the
+     *       flag becomes live on HTTP request bodies there; Spring's
+     *       {@code FastJsonHttpMessageConverter.readType} builds its context from the default
+     *       provider and still ignores the same {@code FastJsonConfig} field. Migration docs please
+     *       note both rows.</li>
+     * </ul>
+     */
+    public static JSONReader.Context createReadContext(ParserConfig config, int featuresValue, Feature... features) {
+        for (Feature feature : features) {
+            featuresValue |= feature.mask;
+        }
+        // Honour ParserConfig.autoTypeSupport only when the caller has not explicitly
+        // suppressed @type resolution for this call (fastjson 1.x Feature.IgnoreAutoType).
+        // Folding the bit in before delegating keeps the mapping to JSONReader.Feature in
+        // createReadContext(ObjectReaderProvider, int, Feature...) as the only one.
+        if (config.isAutoTypeSupport() && (featuresValue & Feature.IgnoreAutoType.mask) == 0) {
+            featuresValue |= Feature.SupportAutoType.mask;
+        }
+        return createReadContext(config.getProvider(), featuresValue, features);
+    }
+
     public static JSONObject parseObject(String str) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -269,7 +337,7 @@ public abstract class JSON
         }
 
         JSONReader.Context context = createReadContext(
-                config.getProvider(),
+                config,
                 featureValues,
                 features
         );
@@ -317,7 +385,7 @@ public abstract class JSON
         }
 
         JSONReader.Context context = createReadContext(
-                config.getProvider(),
+                config,
                 featureValues,
                 features
         );
@@ -424,7 +492,7 @@ public abstract class JSON
         }
 
         JSONReader.Context context = createReadContext(
-                config.getProvider(),
+                config,
                 featureValues,
                 features
         );
@@ -630,7 +698,7 @@ public abstract class JSON
         }
 
         JSONReader.Context context = createReadContext(
-                config.getProvider(),
+                config,
                 DEFAULT_PARSER_FEATURE,
                 features
         );
@@ -692,7 +760,7 @@ public abstract class JSON
         }
 
         JSONReader.Context context = createReadContext(
-                config.getProvider(),
+                config,
                 featureValues,
                 features
         );
@@ -983,7 +1051,7 @@ public abstract class JSON
             return null;
         }
 
-        JSONReader.Context context = createReadContext(config.getProvider(), DEFAULT_PARSER_FEATURE, features);
+        JSONReader.Context context = createReadContext(config, DEFAULT_PARSER_FEATURE, features);
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
             Object object;
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
@@ -1005,7 +1073,7 @@ public abstract class JSON
             return null;
         }
 
-        JSONReader.Context context = createReadContext(config.getProvider(), DEFAULT_PARSER_FEATURE);
+        JSONReader.Context context = createReadContext(config, DEFAULT_PARSER_FEATURE);
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
             Object object;
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
@@ -1027,7 +1095,7 @@ public abstract class JSON
             return null;
         }
 
-        JSONReader.Context context = createReadContext(config.getProvider(), features);
+        JSONReader.Context context = createReadContext(config, features);
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
             Object object;
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
@@ -2234,7 +2302,7 @@ public abstract class JSON
 
         try (JSONReader reader = JSONReader.of(
                 text,
-                createReadContext(config.getProvider(), DEFAULT_PARSER_FEATURE))
+                createReadContext(config, DEFAULT_PARSER_FEATURE))
         ) {
             List<T> list = reader.read(paramType);
             reader.handleResolveTasks(list);
