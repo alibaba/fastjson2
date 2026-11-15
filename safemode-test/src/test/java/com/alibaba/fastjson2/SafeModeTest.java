@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -71,6 +72,17 @@ public class SafeModeTest {
         } catch (JSONException ignored) {
         }
         assertFalse(SideEffect.created);
+    }
+
+    public static class MethodBean {
+        public Method method;
+    }
+
+    @Test
+    public void testMethodClassForNameDisabledInSafeMode() {
+        String str = "{\"method\":{\"declaringClass\":\"" + SafeModeTest.class.getName() + "\",\"name\":\"test1\"}}";
+        assertThrows(JSONException.class,
+                () -> JSON.parseObject(str, MethodBean.class, JSONReader.Feature.SupportClassForName));
     }
 
     @Test

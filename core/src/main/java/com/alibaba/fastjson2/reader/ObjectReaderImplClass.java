@@ -65,4 +65,26 @@ final class ObjectReaderImplClass
         }
         return resolvedClass;
     }
+
+    /**
+     * Resolves a class name read for a Method or Field value, applying the same checks as a Class value.
+     */
+    static Class<?> loadClass(JSONReader.Context context, String className, long features) {
+        JSONReader.AutoTypeBeforeHandler typeFilter = context.getContextAutoTypeBeforeHandler();
+        if (typeFilter != null && className != null) {
+            Class<?> filterClass = typeFilter.apply(className, null, features);
+            if (filterClass != null) {
+                return filterClass;
+            }
+        }
+
+        Class<?> resolvedClass = className == null ? null : TypeUtils.getMapping(className);
+        if (resolvedClass == null) {
+            resolvedClass = context.getProvider().checkAutoType(className, null, JSONReader.Feature.SupportAutoType.mask);
+        }
+        if (resolvedClass == null) {
+            throw new JSONException("class not found " + className);
+        }
+        return resolvedClass;
+    }
 }
