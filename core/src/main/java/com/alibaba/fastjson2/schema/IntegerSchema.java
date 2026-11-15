@@ -285,6 +285,8 @@ public final class IntegerSchema
             object.put("const", constValue);
         }
 
+        addEnum(object);
+
         return object;
     }
 }

@@ -28,6 +28,8 @@ public final class BooleanSchema
 
     @Override
     public JSONObject toJSONObject() {
-        return JSONObject.of("type", "boolean");
+        JSONObject object = JSONObject.of("type", "boolean");
+        addEnum(object);
+        return object;
     }
 }

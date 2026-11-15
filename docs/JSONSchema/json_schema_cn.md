@@ -72,6 +72,10 @@ public static class Point {
 ## 3. 在JSONField上配置schema
 2.0.4版本后，可以在Annotation JSONField上配置schema校验输入的json数据
 
+当类型由 Java 字段提供时，`enum` 约束仍然生效。例如，`int status` 字段标注
+`@JSONField(schema = "{'enum':[1,2]}")` 后，只接受列出的值。显式声明 `type` 时，
+输入必须同时满足类型和枚举成员约束。
+
 ```java
 public static class Point1 {
     @JSONField(schema = "{'minimum':-180,'maximum':180}")

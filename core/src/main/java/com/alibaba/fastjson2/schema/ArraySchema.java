@@ -329,6 +329,8 @@ public final class ArraySchema
             object.put("uniqueItems", uniqueItems);
         }
 
+        addEnum(object);
+
         return injectIfPresent(object, allOf, anyOf, oneOf);
     }
 

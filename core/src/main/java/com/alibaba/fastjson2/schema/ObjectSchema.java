@@ -673,6 +673,8 @@ public final class ObjectSchema
             object.put("else", elseSchema);
         }
 
+        addEnum(object);
+
         return injectIfPresent(object, allOf, anyOf, oneOf);
     }
 
