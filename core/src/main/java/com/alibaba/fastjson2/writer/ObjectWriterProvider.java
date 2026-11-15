@@ -104,6 +104,20 @@ public class ObjectWriterProvider
      * @param namingStrategy the property naming strategy to use
      */
     public ObjectWriterProvider(PropertyNamingStrategy namingStrategy) {
+        this(namingStrategy, true);
+    }
+
+    /**
+     * Constructs an ObjectWriterProvider with the specified naming strategy and
+     * class loader ownership for its default ASM writer creator.
+     *
+     * @param namingStrategy the property naming strategy to use
+     * @param sharedClassLoader whether the default ASM creator uses the shared class loader;
+     *                          false gives this provider its own creator and class loader.
+     *                          Ignored when ASM is not selected. A context writer creator still takes precedence.
+     * @since 2.0.67
+     */
+    public ObjectWriterProvider(PropertyNamingStrategy namingStrategy, boolean sharedClassLoader) {
         init();
 
         ObjectWriterCreator creator = null;
@@ -116,7 +130,9 @@ public class ObjectWriterProvider
             default:
                 try {
                     if (!JDKUtils.ANDROID && !JDKUtils.GRAAL) {
-                        creator = ObjectWriterCreatorASM.INSTANCE;
+                        creator = sharedClassLoader
+                                ? ObjectWriterCreatorASM.INSTANCE
+                                : new ObjectWriterCreatorASM();
                     }
                 } catch (Throwable ignored) {
                     // ignored
