@@ -1918,15 +1918,21 @@ public class TypeUtils {
     }
 
     public static BigDecimal toBigDecimal(float f) {
+        if (!Float.isFinite(f)) {
+            return null;
+        }
+
         byte[] bytes = new byte[15];
         int size = NumberUtils.writeFloat(bytes, 0, f, true, false);
         return parseBigDecimal(bytes, 0, size);
     }
 
     public static BigDecimal toBigDecimal(double d) {
-        byte[] bytes = new byte[24];
-        int size = NumberUtils.writeDouble(bytes, 0, d, true, false);
-        return parseBigDecimal(bytes, 0, size);
+        if (!Double.isFinite(d)) {
+            return null;
+        }
+
+        return BigDecimal.valueOf(d);
     }
 
     public static BigDecimal toBigDecimal(String str) {
