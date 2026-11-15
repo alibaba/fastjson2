@@ -952,6 +952,9 @@ final class JSONReaderASCII
             int c = bytes[offset];
             if (c == '\\') {
                 nameEscape = true;
+                if (offset + 1 >= end) {
+                    throw new JSONException(info("illegal input"));
+                }
                 c = bytes[offset + 1];
                 offset += (c == 'u' ? 6 : (c == 'x' ? 4 : 2));
                 continue;
