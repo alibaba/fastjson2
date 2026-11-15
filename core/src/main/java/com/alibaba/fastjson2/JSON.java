@@ -3011,6 +3011,40 @@ public interface JSON {
     }
 
     /**
+     * Parses the json string as a list of {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
+     *
+     * <p>Note: a literal {@code null} filter followed by at least one feature
+     * (e.g. {@code parseArray(text, type, null, feature)}) is a compile-time
+     * ambiguity with {@code parseArray(String, Class, JSONReader.Feature...)};
+     * cast the argument to {@code (Filter) null} if that call shape is needed.
+     *
+     * @param text the specified string to be parsed
+     * @param type the specified actual class of {@link T}
+     * @param filter the specified filter is applied to parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     */
+    @SuppressWarnings("unchecked")
+    static <T> List<T> parseArray(String text, Class<T> type, Filter filter, JSONReader.Feature... features) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        final JSONReader.Context context = JSONFactory.createReadContext(filter, features);
+        try (JSONReader reader = JSONReader.of(text, context)) {
+            List<T> list = reader.readArray(type);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return list;
+        }
+    }
+    /**
      * Parses the json char array as a list of {@link T}. Returns
      * {@code null} if received char array is {@code null} or empty.
      *
