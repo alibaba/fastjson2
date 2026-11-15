@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderBool<T, V>
-        extends FieldReader<T> {
+        extends FieldReaderBoxedType<T, Boolean> {
     public FieldReaderBool(
             String fieldName,
             Class<V> fieldClass,
@@ -27,33 +27,22 @@ final class FieldReaderBool<T, V>
             String paramName,
             Parameter parameter
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
+        super(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function, paramName, parameter);
     }
 
     @Override
     public void accept(T object, Object value) {
-        propertyAccessor.setObject(object,
-                TypeUtils.toBoolean(value));
-    }
+        Boolean boolValue = TypeUtils.toBoolean(value);
 
-    @Override
-    public void readFieldValue(JSONReader jsonReader, T object) {
-        Boolean fieldValue;
-        try {
-            fieldValue = jsonReader.readBool();
-        } catch (Exception e) {
-            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
-                fieldValue = null;
-            } else {
-                throw e;
-            }
+        if (schema != null) {
+            schema.assertValidate(boolValue);
         }
 
-        propertyAccessor.setObject(object, fieldValue);
+        propertyAccessor.setObject(object, boolValue);
     }
 
     @Override
-    public Object readFieldValue(JSONReader jsonReader) {
+    protected Boolean readValue(JSONReader jsonReader) {
         return jsonReader.readBool();
     }
 }
