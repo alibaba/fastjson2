@@ -425,6 +425,25 @@ public abstract class FieldReader<T>
                     if (thisAnnotatedWithJsonFiled == (otherAnnotation == null)) {
                         return thisAnnotatedWithJsonFiled ? -1 : 1;
                     }
+
+                    if (!thisAnnotatedWithJsonFiled
+                            && otherAnnotation == null
+                            && thisDeclaringClass == otherDeclaringClass
+                            && this.method.getName().equals(o.method.getName())
+                            && this.method.getName().startsWith("set")
+                            && !thisParamType.isPrimitive()
+                            && !otherParamType.isPrimitive()) {
+                        try {
+                            Class<?> actualFieldClass = thisDeclaringClass.getDeclaredField(this.fieldName).getType();
+                            if (actualFieldClass == thisParamType) {
+                                cmp = -1;
+                            } else if (actualFieldClass == otherParamType) {
+                                cmp = 1;
+                            }
+                        } catch (NoSuchFieldException ignored) {
+                            // ignored
+                        }
+                    }
                 }
             }
 
