@@ -522,6 +522,41 @@ public class AutoTypeValidationTest {
         assertTrue(prefixOnly.getMessage().contains("add the type name in full to accept"));
     }
 
+    // =========================================================================
+    // handler return path — a handler that resolves a business type must keep
+    // working, matching the behaviour preserved by #7703 for the whitelist
+    // branches. The SAFE_MODE rejection cases live in safemode-test, where
+    // fastjson2.parser.safeMode=true is the default.
+    // =========================================================================
+
+    @Test
+    public void testCheckAutoTypeHandlerAcceptsBusinessType() {
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        provider.setAutoTypeBeforeHandler((typeName, expectClass, features) -> {
+            try {
+                return Class.forName(typeName);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        });
+        assertEquals(TestBean.class,
+                provider.checkAutoType(TEST_BEAN, null, JSONReader.Feature.SupportAutoType.mask));
+    }
+
+    @Test
+    public void testParseHandlerAcceptsBusinessType() {
+        JSONReader.AutoTypeBeforeHandler handler = (typeName, expectClass, features) -> {
+            try {
+                return Class.forName(typeName);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        };
+        TestBean bean = (TestBean) JSON.parseObject(
+                "{\"@type\":\"" + TEST_BEAN + "\",\"id\":123}", Object.class, handler);
+        assertEquals(123, bean.id);
+    }
+
     static ObjectReaderProvider registerSideEffect(String typeName) {
         ObjectReaderProvider provider = new ObjectReaderProvider();
         provider.registerIfAbsent(

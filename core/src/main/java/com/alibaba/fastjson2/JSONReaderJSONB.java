@@ -799,6 +799,9 @@ final class JSONReaderJSONB
                     Class<?> filterClass = context.autoTypeBeforeHandler.apply(typeName, null, context.features);
 
                     if (filterClass != null) {
+                        if (ObjectReaderProvider.SAFE_MODE && isAutoTypeDenyClass(filterClass)) {
+                            throw new JSONException("autoType is not support. " + typeName);
+                        }
                         ObjectReader autoTypeObjectReader = context.getObjectReader(filterClass);
                         return autoTypeObjectReader.readJSONBObject(this, null, null, 0);
                     }
@@ -1303,6 +1306,9 @@ final class JSONReaderJSONB
         if (autoTypeBeforeHandler != null) {
             Class<?> objectClass = autoTypeBeforeHandler.apply(getString(), Object.class, 0L);
             if (objectClass != null) {
+                if (ObjectReaderProvider.SAFE_MODE && isAutoTypeDenyClass(objectClass)) {
+                    throw new JSONException("autoType is not support. " + getString());
+                }
                 autoTypeObjectReader = context.getObjectReader(objectClass);
             }
         }
@@ -1386,6 +1392,9 @@ final class JSONReaderJSONB
     ) {
         Class<?> objectClass = autoTypeBeforeHandler.apply(getString(), expectClass, features);
         if (objectClass != null) {
+            if (ObjectReaderProvider.SAFE_MODE && isAutoTypeDenyClass(objectClass)) {
+                throw new JSONException("autoType is not support. " + getString());
+            }
             return context.getObjectReader(objectClass);
         }
         return null;
