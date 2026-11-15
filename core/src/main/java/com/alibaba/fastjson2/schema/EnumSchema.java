@@ -1,5 +1,8 @@
 package com.alibaba.fastjson2.schema;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.LinkedHashSet;
@@ -37,6 +40,11 @@ public final class EnumSchema
     @Override
     public Type getType() {
         return Type.Enum;
+    }
+
+    @Override
+    public JSONObject toJSONObject() {
+        return JSONObject.of("enum", new JSONArray(items));
     }
 
     @Override

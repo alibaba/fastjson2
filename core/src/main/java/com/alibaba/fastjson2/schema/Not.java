@@ -1,9 +1,12 @@
 package com.alibaba.fastjson2.schema;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.reader.ObjectReaderBean;
 
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -24,6 +27,29 @@ final class Not
     @Override
     public Type getType() {
         return Type.AllOf;
+    }
+
+    @Override
+    public JSONObject toJSONObject() {
+        if (schema != null) {
+            return JSONObject.of("not", schema.toJSONObject());
+        }
+
+        if (types != null) {
+            if (types.length == 1 && types[0] == Type.Any) {
+                // "not anything", the same schema as the JSON Schema false boolean schema
+                return JSONObject.of("not", new JSONObject());
+            }
+
+            // a type name the parser did not recognize is kept as null, so reparse gives the same state
+            JSONArray typeNames = new JSONArray(types.length);
+            for (int i = 0; i < types.length; i++) {
+                typeNames.add(types[i] == null ? null : types[i].name().toLowerCase(Locale.ROOT));
+            }
+            return JSONObject.of("not", JSONObject.of("type", typeNames));
+        }
+
+        return JSONObject.of("not", result);
     }
 
     @Override

@@ -146,7 +146,8 @@ public abstract class JSONSchema {
                 JSONArray array = (JSONArray) type;
                 Type[] types = new Type[array.size()];
                 for (int i = 0; i < array.size(); i++) {
-                    types[i] = array.getObject(i, Type.class);
+                    Type parsedType = Type.of(array.getString(i));
+                    types[i] = parsedType != null ? parsedType : array.getObject(i, Type.class);
                 }
                 return new Not(null, types, null);
             }
