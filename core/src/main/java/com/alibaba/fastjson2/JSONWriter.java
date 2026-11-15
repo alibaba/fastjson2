@@ -88,6 +88,13 @@ public abstract class JSONWriter
     protected Object rootObject;
     protected IdentityHashMap<Object, Path> refs;
     protected Path path;
+    // per-writer fast path for ObjectWriterProvider#isNotReferenceDetect: that lookup is a
+    // binarySearch over a static identity-hash table plus an enum check, and runs for every
+    // pushed/popped path segment. It is safe only because the provider predicate is a pure
+    // function of the class; this memo must keep agreeing with the call sites that decide the
+    // other half of a push/pop pair (see Issue7795).
+    private Class<?> notRefDetectClass;
+    private boolean notRefDetect;
     protected String lastReference;
     protected byte pretty;
     protected Object attachment;
@@ -305,7 +312,7 @@ public abstract class JSONWriter
      * or the object's class is excluded from reference detection
      */
     public final String setPath0(FieldWriter fieldWriter, Object object) {
-        if (object == null || ObjectWriterProvider.isNotReferenceDetect(object.getClass())) {
+        if (object == null || isNotReferenceDetect(object.getClass())) {
             return null;
         }
 
@@ -391,7 +398,7 @@ public abstract class JSONWriter
      * or the object's class is excluded from reference detection
      */
     public final String setPath0(int index, Object object) {
-        if (path == null || object == null || ObjectWriterProvider.isNotReferenceDetect(object.getClass())) {
+        if (path == null || object == null || isNotReferenceDetect(object.getClass())) {
             return null;
         }
         this.path = index == 0
@@ -446,7 +453,7 @@ public abstract class JSONWriter
         if (this.path == null
                 || (context.features & MASK_REFERENCE_DETECTION) == 0
                 || object == null
-                || ObjectWriterProvider.isNotReferenceDetect(object.getClass())
+                || isNotReferenceDetect(object.getClass())
         ) {
             return;
         }
@@ -522,7 +529,28 @@ public abstract class JSONWriter
         return (context.features & ReferenceDetection.mask) != 0
                 && (context.features & FieldInfo.DISABLE_REFERENCE_DETECT) == 0
                 && object != null
-                && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
+                && !isNotReferenceDetect(object.getClass());
+    }
+
+    /**
+     * Fast path for {@link ObjectWriterProvider#isNotReferenceDetect(Class)}: the provider
+     * predicate is a binarySearch over a static identity-hash table plus an enum check, and the
+     * path methods run for every nested value of every write. The memo is per writer and only
+     * avoids the lookup for runs of one value class; it is safe only because the predicate is a
+     * pure function of the class, and it must keep agreeing with the call sites that decide the
+     * other half of a push/pop pair (setPath0/popPath0 symmetry, see Issue7795).
+     *
+     * @param objectClass the runtime class of the value being written
+     * @return true if the class is excluded from reference detection
+     */
+    final boolean isNotReferenceDetect(Class<?> objectClass) {
+        if (objectClass == notRefDetectClass) {
+            return notRefDetect;
+        }
+        boolean result = ObjectWriterProvider.isNotReferenceDetect(objectClass);
+        notRefDetectClass = objectClass;
+        notRefDetect = result;
+        return result;
     }
 
     /**

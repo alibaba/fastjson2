@@ -879,11 +879,16 @@ public class SortFieldNamesRegistryTest {
 
     static final class CountingProvider
             extends ObjectWriterProvider {
+        final Class countedClass;
         final java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+
+        CountingProvider(Class countedClass) {
+            this.countedClass = countedClass;
+        }
 
         @Override
         public ObjectWriter getObjectWriter(java.lang.reflect.Type objectType, Class objectClass, long contextFeatures) {
-            if (objectClass == Position.class) {
+            if (objectClass == countedClass) {
                 calls.incrementAndGet();
             }
             return super.getObjectWriter(objectType, objectClass, contextFeatures);
@@ -894,7 +899,7 @@ public class SortFieldNamesRegistryTest {
     public void sortedWritesResolveTheItemWriterThroughTheProvider() {
         // the sorted variant is resolved through the provider on every write: nothing is stored on
         // the field writer, so cleanup(ClassLoader) and provider-level eviction always take effect
-        CountingProvider provider = new CountingProvider();
+        CountingProvider provider = new CountingProvider(Position.class);
         String expected = "{\"position\":{\"alpha\":1,\"zulu\":7}}";
         assertEquals(expected, JSON.toJSONString(new MemoOuter(),
                 new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
@@ -902,6 +907,25 @@ public class SortFieldNamesRegistryTest {
         assertEquals(expected, JSON.toJSONString(new MemoOuter(),
                 new JSONWriter.Context(provider, JSONWriter.Feature.SortFieldNamesAlphabetically)));
         assertTrue(provider.calls.get() > afterFirst);
+    }
+
+    @Test
+    public void beanToArrayAnnotatedFieldNeverResolvesTheSortedVariant() {
+        // isFieldNamesSorted keeps Sort|BeanToArray out of the sorted variant. Dropping the gate's
+        // isFieldNamesSorted conjunct does NOT change the output shape: provider resolution
+        // re-applies the predicate to the merged word and still returns the BeanToArray writer.
+        // It makes every write re-resolve through the provider, so the flat-count assertion
+        // below is the witness; the three writes keep it honest.
+        CountingProvider provider = new CountingProvider(Child.class);
+        JSONWriter.Context context = new JSONWriter.Context(
+                provider, JSONWriter.Feature.SortFieldNamesAlphabetically);
+        String expected = "{\"child\":[3,1]}";
+        assertEquals(expected, JSON.toJSONString(new ChildHolder(), context));
+        int afterFirst = provider.calls.get();
+        assertTrue(afterFirst > 0, "the BeanToArray field must still resolve through the context provider");
+        assertEquals(expected, JSON.toJSONString(new ChildHolder(), context));
+        assertEquals(expected, JSON.toJSONString(new ChildHolder(), context));
+        assertEquals(afterFirst, provider.calls.get());
     }
 
     public static class ObjectHolder {
