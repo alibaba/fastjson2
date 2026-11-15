@@ -4480,9 +4480,9 @@ class JSONReaderUTF8
             str = new String(bytes, this.offset, offset - this.offset, UTF_8);
         }
 
-        int ch = bytes[++offset];
+        int ch = offset + 1 >= end ? EOI : bytes[++offset];
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            ch = bytes[++offset];
+            ch = offset + 1 >= end ? EOI : bytes[++offset];
         }
 
         this.comma = ch == ',';
