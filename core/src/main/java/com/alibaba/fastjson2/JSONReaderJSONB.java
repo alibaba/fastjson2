@@ -205,6 +205,9 @@ final class JSONReaderJSONB
     public int readLength() {
         byte[] bytes = this.bytes;
         int offset = this.offset, end = this.end;
+        if (offset >= end) {
+            throw error("malformed JSONB input: truncated input");
+        }
         int type = bytes[offset++];
         if (isInt32Num(type)) {
             // noop
@@ -355,12 +358,18 @@ final class JSONReaderJSONB
         final int end = this.end;
         final byte[] bytes = this.bytes;
         final long features = context.features;
+        if (offset >= end) {
+            throw error("malformed JSONB input: truncated input");
+        }
         type = bytes[offset++];
         if (type == BC_NULL) {
             return null;
         }
 
         if (type >= BC_OBJECT) {
+            if (offset >= end) {
+                throw error("malformed JSONB input: truncated object");
+            }
             Map map;
             if ((features & Feature.UseNativeObject.mask) != 0) {
                 if (JVM_VERSION == 8 && bytes[offset] != BC_OBJECT_END) {
@@ -377,6 +386,9 @@ final class JSONReaderJSONB
             }
 
             for (int i = 0; ; ++i) {
+                if (offset >= end) {
+                    throw error("malformed JSONB input: truncated object");
+                }
                 type = bytes[offset];
                 if (type == BC_OBJECT_END) {
                     offset++;
@@ -400,6 +412,9 @@ final class JSONReaderJSONB
                     continue;
                 }
 
+                if (offset >= end) {
+                    throw error("malformed JSONB input: truncated object");
+                }
                 byte valueType = bytes[offset];
                 Object value;
                 if (valueType >= BC_STR_ASCII_FIX_MIN && valueType <= BC_STR_GB18030) {
@@ -835,6 +850,9 @@ final class JSONReaderJSONB
                 Map map = null;
                 boolean supportAutoType = (context.features & Feature.SupportAutoType.mask) != 0;
                 for (int i = 0; ; ++i) {
+                    if (offset >= end) {
+                        throw error("malformed JSONB input: truncated object");
+                    }
                     byte type = bytes[offset];
                     if (type == BC_OBJECT_END) {
                         offset++;
@@ -883,6 +901,9 @@ final class JSONReaderJSONB
                         continue;
                     }
 
+                    if (offset >= end) {
+                        throw error("malformed JSONB input: truncated object");
+                    }
                     byte valueType = bytes[offset];
                     Object value;
                     if (valueType >= BC_STR_ASCII_FIX_MIN && valueType <= BC_STR_GB18030) {
@@ -1097,6 +1118,9 @@ final class JSONReaderJSONB
 
     @Override
     public byte getType() {
+        if (offset >= end) {
+            throw error("malformed JSONB input: truncated input");
+        }
         return bytes[offset];
     }
 
@@ -1105,6 +1129,9 @@ final class JSONReaderJSONB
         int entryCnt = startArray();
         JSONArray array = new JSONArray(entryCnt);
         for (int i = 0; i < entryCnt; i++) {
+            if (offset >= end) {
+                throw error("malformed JSONB input: truncated array");
+            }
             byte valueType = bytes[offset];
             Object value;
             if (valueType >= BC_STR_ASCII_FIX_MIN && valueType <= BC_STR_GB18030) {
@@ -1290,6 +1317,9 @@ final class JSONReaderJSONB
     }
 
     Object readAnyObject() {
+        if (offset >= end) {
+            throw error("malformed JSONB input: truncated input");
+        }
         if (bytes[offset] != BC_TYPED_ANY) {
             return readAny();
         }
@@ -1333,6 +1363,9 @@ final class JSONReaderJSONB
     @Override
     public ObjectReader checkAutoType(Class expectClass, long expectClassHash, long features) {
         ObjectReader autoTypeObjectReader = null;
+        if (offset >= end) {
+            throw error("malformed JSONB input: truncated input");
+        }
         if (bytes[offset] == BC_TYPED_ANY) {
             offset++;
 
@@ -1419,6 +1452,9 @@ final class JSONReaderJSONB
 
     @Override
     public int startArray() {
+        if (offset >= end) {
+            throw error("malformed JSONB input: truncated array");
+        }
         final byte type = this.type = bytes[offset++];
 
         if (type == BC_NULL) {
@@ -3168,6 +3204,9 @@ final class JSONReaderJSONB
     }
 
     private String readUTF16LE() {
+        if (offset >= end) {
+            throw error("malformed JSONB input: truncated input");
+        }
         byte strType = bytes[offset];
         if (isInt32Num(strType)) {
             offset++;
@@ -3204,6 +3243,9 @@ final class JSONReaderJSONB
     }
 
     private String readStringUTF8() {
+        if (offset >= end) {
+            throw error("malformed JSONB input: truncated input");
+        }
         byte strType = bytes[offset];
         if (isInt32Num(strType)) {
             offset++;
@@ -3466,6 +3508,9 @@ final class JSONReaderJSONB
 
         final byte[] bytes = this.bytes;
         int offset = this.offset, end = this.end;
+        if (offset >= end) {
+            throw error("malformed JSONB input: truncated input");
+        }
         byte type = bytes[offset++];
 
         long int64Value;
@@ -3622,6 +3667,9 @@ final class JSONReaderJSONB
     }
 
     private int readDecimalScale() {
+        if (offset >= end) {
+            throw error("malformed JSONB input: truncated input");
+        }
         byte type = bytes[offset];
         if (!isInt32Num(type) && !isInt32Byte(type) && !isInt32Short(type)
                 && type != BC_INT32 && type != BC_DECIMAL && type != BC_TRUE && type != BC_FALSE) {
@@ -3680,6 +3728,9 @@ final class JSONReaderJSONB
     public int readInt32Value() {
         final byte[] bytes = this.bytes;
         int offset = this.offset, end = this.end;
+        if (offset >= end) {
+            throw error("malformed JSONB input: truncated input");
+        }
         int type = bytes[offset++]; // reuse type as value
         if (isInt32Num(type)) {
             // noop
@@ -4547,6 +4598,9 @@ final class JSONReaderJSONB
 
     @Override
     public BigInteger readBigInteger() {
+        if (offset >= end) {
+            throw error("malformed JSONB input: truncated input");
+        }
         byte type = bytes[offset++];
         BigInteger bigInt;
         if (type == BC_BIGINT_LONG) {
