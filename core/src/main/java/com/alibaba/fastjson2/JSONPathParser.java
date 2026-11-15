@@ -415,16 +415,16 @@ class JSONPathParser {
                             if (number instanceof BigDecimal) {
                                 BigDecimal decimal = (BigDecimal) number;
                                 decimal = decimal.stripTrailingZeros();
-                                if (decimal.scale() != 0) {
+                                if (decimal.scale() > 0) {
                                     segment = new JSONPathFunction(new JSONPathFunction.IndexDecimal(decimal));
                                     break;
                                 }
-                                BigInteger unscaledValue = decimal.unscaledValue();
-                                if (unscaledValue.compareTo(TypeUtils.BIGINT_INT64_MIN) >= 0
-                                        && unscaledValue.compareTo(TypeUtils.BIGINT_INT64_MAX) <= 0) {
-                                    number = unscaledValue.longValue();
+                                BigInteger integerValue = decimal.toBigInteger();
+                                if (integerValue.compareTo(TypeUtils.BIGINT_INT64_MIN) >= 0
+                                        && integerValue.compareTo(TypeUtils.BIGINT_INT64_MAX) <= 0) {
+                                    number = integerValue.longValue();
                                 } else {
-                                    number = unscaledValue;
+                                    number = integerValue;
                                 }
                             }
 

@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONPath;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("jsonpath")
@@ -50,5 +52,21 @@ public class IndexTest {
         assertEquals(1, JSONPath.extract("['A','B','C','D']", "$.index('B')"));
         assertEquals(2, JSONPath.extract("['Big', 'Medium', 'Small']", "$.index('Small')"));
         assertEquals(2, JSONPath.eval(JSONArray.of("Big", "Medium", "Small"), "$.index('Small')"));
+    }
+
+    @Test
+    public void indexTrailingZeros() {
+        assertEquals(1, JSONPath.extract("[1,10.0]", "$.index(10)"));
+        assertEquals(1, JSONPath.extract("[1,100.00]", "$.index(100)"));
+        assertEquals(0, JSONPath.eval(JSONArray.of(new BigDecimal("10")), "$.index(10)"));
+        assertEquals(1, JSONPath.extract("[1,10]", "$.index(10.0)"));
+        assertEquals(1, JSONPath.eval(JSONArray.of(1, 20L), "$.index(20.00)"));
+        assertEquals(-1, JSONPath.extract("[1,10.5]", "$.index(10)"));
+    }
+
+    @Test
+    public void indexDecimalDouble() {
+        assertEquals(1, JSONPath.eval(JSONArray.of(12.3D, 23.4D, 45.6D), "$.index(23.4)"));
+        assertEquals(1, JSONPath.eval(JSONArray.of(12.3F, 23.4F, 45.6F), "$.index(23.4)"));
     }
 }
