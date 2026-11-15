@@ -50,7 +50,12 @@ class FieldWriterFloat<T>
             if (decimalFormat != null) {
                 jsonWriter.writeFloat(floatValue, decimalFormat);
             } else {
-                jsonWriter.writeFloat(floatValue);
+                long features = this.features | jsonWriter.getFeatures();
+                if ((features & Feature.WriteNonStringValueAsString.mask) != 0) {
+                    jsonWriter.writeString(floatValue);
+                } else {
+                    jsonWriter.writeFloat(floatValue);
+                }
             }
         }
     }

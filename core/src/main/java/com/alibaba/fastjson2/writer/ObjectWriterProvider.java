@@ -530,8 +530,8 @@ public class ObjectWriterProvider
      * @return the ObjectWriter for the specified type
      */
     public ObjectWriter getObjectWriter(Type objectType, String format, Locale locale) {
-        // "string" is a sentinel (e.g. @JsonFormat(shape = STRING)), not a DecimalFormat pattern
-        if ("string".equals(format)) {
+        // Jackson shape sentinels select a mode, not a DecimalFormat pattern.
+        if (FieldWriter.isSentinelFormat(format)) {
             if (objectType == Double.class) {
                 return ObjectWriterImplDouble.INSTANCE;
             }
