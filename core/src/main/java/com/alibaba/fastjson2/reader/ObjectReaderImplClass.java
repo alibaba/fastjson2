@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
@@ -47,6 +48,19 @@ final class ObjectReaderImplClass
         }
 
         String className = jsonReader.getString();
+
+        // Defence-in-depth: refuse to load any class whose name matches the FQCN deny table before
+        // invoking TypeUtils.loadClass. Without this check, an attacker controlling JSON input
+        // could send {"@type":"java.lang.Class","val":"com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl"}
+        // and rely on the outer checkAutoType to silently permit the resolution because the inner
+        // Class.forName runs in a privileged context. This makes the policy explicit and matches
+        // the same safety check applied to the fastjson 1.x MiscCodec branch.
+        for (int i = 0; i < JDKUtils.AUTO_TYPE_DENY_FQCN.length; i++) {
+            if (className.equals(JDKUtils.AUTO_TYPE_DENY_FQCN[i])) {
+                throw new JSONException(jsonReader.info("autoType is not support : " + className));
+            }
+        }
+
         boolean classForName = ((context.getFeatures() | features) & JSONReader.Feature.SupportClassForName.mask) != 0;
         if (!classForName) {
             String msg = jsonReader.info("not support ClassForName : " + className + ", you can config 'JSONReader.Feature.SupportClassForName'");
@@ -62,6 +76,13 @@ final class ObjectReaderImplClass
         Class<?> resolvedClass = provider.checkAutoType(className, null, JSONReader.Feature.SupportAutoType.mask);
         if (resolvedClass == null) {
             throw new JSONException(jsonReader.info("class not found " + className));
+        }
+        // Defence-in-depth: even after the outer checkAutoType gate has run, re-check the resolved
+        // class against the FQCN deny table. This closes the residual surface where
+        // SupportClassForName is opted in and the outer checkAutoType would otherwise have to
+        // assume the resolved class is safe.
+        if (JDKUtils.isAutoTypeDenyClass(resolvedClass)) {
+            throw new JSONException(jsonReader.info("autoType is not support : " + className));
         }
         return resolvedClass;
     }
