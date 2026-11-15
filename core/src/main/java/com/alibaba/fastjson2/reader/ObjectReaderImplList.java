@@ -72,6 +72,9 @@ public final class ObjectReaderImplList
                         itemType = actualTypeArguments[0];
                     }
                 }
+                if (itemType == Object.class) {
+                    itemType = getAddMethodItemType(listClass);
+                }
             }
         }
 
@@ -209,6 +212,35 @@ public final class ObjectReaderImplList
         }
 
         return new ObjectReaderImplList(type, listClass, instanceClass, itemType, builder);
+    }
+
+    private static Type getAddMethodItemType(Class<?> listClass) {
+        Class<?> itemType = null;
+        for (Method method : listClass.getMethods()) {
+            if (!method.isBridge()
+                    || !"add".equals(method.getName())
+                    || method.getParameterCount() != 1
+                    || method.getParameterTypes()[0] != Object.class) {
+                continue;
+            }
+
+            for (Method candidate : method.getDeclaringClass().getDeclaredMethods()) {
+                if (candidate.isBridge()
+                        || !"add".equals(candidate.getName())
+                        || candidate.getParameterCount() != 1) {
+                    continue;
+                }
+
+                Class<?> itemClass = candidate.getParameterTypes()[0];
+                if (!itemClass.isPrimitive() && itemClass != Object.class) {
+                    if (itemType != null && itemType != itemClass) {
+                        return Object.class;
+                    }
+                    itemType = itemClass;
+                }
+            }
+        }
+        return itemType == null ? Object.class : itemType;
     }
 
     ObjectReaderImplList(Class listClass, Object listSingleton) {
