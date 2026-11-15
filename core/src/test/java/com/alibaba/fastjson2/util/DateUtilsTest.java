@@ -2931,6 +2931,29 @@ public class DateUtilsTest {
     }
 
     @Test
+    public void parseMillisStaysInWindow() {
+        // "0000-00-" is the window, the trailing "00" belongs to the caller's buffer
+        byte[] bytes = "0000-00-00".getBytes(StandardCharsets.US_ASCII);
+        char[] chars = "0000-00-00".toCharArray();
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis(bytes, 0, 8));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis(chars, 0, 8));
+
+        byte[] zeroBytes = "xx0000-00-00".getBytes(StandardCharsets.US_ASCII);
+        char[] zeroChars = "xx0000-00-00".toCharArray();
+        long epoch = DateUtils.parseMillis(bytes, 0, 10);
+        assertEquals(epoch, DateUtils.parseMillis(zeroBytes, 2, 10));
+        assertEquals(epoch, DateUtils.parseMillis(zeroChars, 2, 10));
+
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis("abc".getBytes(StandardCharsets.US_ASCII), 0, 3));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis("abc".toCharArray(), 0, 3));
+
+        String quoted = "\"2024-01-02\"";
+        long millis = DateUtils.parseMillis(quoted.getBytes(StandardCharsets.US_ASCII), 0, quoted.length());
+        assertEquals(millis, DateUtils.parseMillis(("xx" + quoted).getBytes(StandardCharsets.US_ASCII), 2, quoted.length()));
+        assertEquals(millis, DateUtils.parseMillis(("xx" + quoted).toCharArray(), 2, quoted.length()));
+    }
+
+    @Test
     public void ymdTest() {
         String str = "2019-10-14T10:28:31.669682461Z";
         byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);

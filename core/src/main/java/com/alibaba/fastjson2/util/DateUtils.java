@@ -997,7 +997,7 @@ public class DateUtils {
         char c10;
         long millis;
         char c0 = (char) chars[off];
-        if (c0 == '"' && chars[len - 1] == '"') {
+        if (c0 == '"' && chars[off + len - 1] == '"') {
             try (JSONReader jsonReader = JSONReader.of(chars, off, len, charset)) {
                 Date date = (Date) ObjectReaderImplDate.INSTANCE.readObject(
                         jsonReader,
@@ -1049,18 +1049,25 @@ public class DateUtils {
                 }
             }
         } else {
-            char last = (char) chars[len - 1];
+            char last = (char) chars[off + len - 1];
             if (last == 'Z') {
                 zoneId = UTC;
             }
             LocalDateTime ldt = DateUtils.parseLocalDateTime(chars, off, len);
             if (ldt == null
                     // && "0000-00-00".equals(str)
+                    && len >= 10
                     && getLongLE(chars, off) == 0x2d30302d30303030L
                     && getShortLE(chars, off + 8) == 0x3030
             ) {
                 ldt = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
             }
+
+            if (ldt == null) {
+                String input = new String(chars, off, len);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
             ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
             long seconds = zdt.toEpochSecond();
             int nanos = ldt.getNano();
@@ -1089,7 +1096,7 @@ public class DateUtils {
         char c10;
         long millis;
         char c0 = chars[off];
-        if (c0 == '"' && chars[len - 1] == '"') {
+        if (c0 == '"' && chars[off + len - 1] == '"') {
             try (JSONReader jsonReader = JSONReader.of(chars, off, len)) {
                 Date date = (Date) ObjectReaderImplDate.INSTANCE.readObject(
                         jsonReader,
@@ -1141,7 +1148,7 @@ public class DateUtils {
                 }
             }
         } else {
-            char last = chars[len - 1];
+            char last = chars[off + len - 1];
             if (last == 'Z') {
                 len--;
                 zoneId = UTC;
@@ -1149,6 +1156,7 @@ public class DateUtils {
             LocalDateTime ldt = DateUtils.parseLocalDateTime(chars, off, len);
             if (ldt == null
                     // && "0000-00-00".equals(str)
+                    && len >= 10
                     && getLongLE(chars, off) == 0x30003000300030L
                     && getLongLE(chars, off + 4) == 0x2d00300030002dL
                     && getIntLE(chars, off + 8) == 0x300030L
