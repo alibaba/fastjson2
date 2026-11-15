@@ -32,6 +32,12 @@ abstract class JSONPathFilter
 
     abstract boolean apply(JSONPath.Context context, Object object);
 
+    @Override
+    public boolean contains(JSONPath.Context context) {
+        eval(context);
+        return hasMatch(context.value);
+    }
+
     enum Operator {
         EQ,
         NE,
@@ -1178,6 +1184,38 @@ abstract class JSONPathFilter
             if (object instanceof Map) {
                 return ((Map) object).containsKey(name);
             }
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean contains(JSONPath.Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof List) {
+                List list = (List) object;
+                for (Object item : list) {
+                    if (item instanceof Map && ((Map) item).containsKey(name)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            if (object instanceof Map) {
+                return ((Map) object).containsKey(name);
+            }
+
+            if (object instanceof JSONPath.Sequence) {
+                for (Object item : ((JSONPath.Sequence) object).values) {
+                    if (item instanceof Map && ((Map) item).containsKey(name)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             throw new UnsupportedOperationException();
         }
     }
