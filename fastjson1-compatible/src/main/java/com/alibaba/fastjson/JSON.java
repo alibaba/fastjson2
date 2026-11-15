@@ -2452,7 +2452,10 @@ public abstract class JSON
     }
 
     public String toJSONString() {
-        return com.alibaba.fastjson2.JSON.toJSONString(this, JSONWriter.Feature.ReferenceDetection);
+        if ((DEFAULT_GENERATE_FEATURE & SerializerFeature.DisableCircularReferenceDetect.mask) == 0) {
+            return com.alibaba.fastjson2.JSON.toJSONString(this, JSONWriter.Feature.ReferenceDetection);
+        }
+        return com.alibaba.fastjson2.JSON.toJSONString(this);
     }
 
     public String toString(SerializerFeature... features) {
