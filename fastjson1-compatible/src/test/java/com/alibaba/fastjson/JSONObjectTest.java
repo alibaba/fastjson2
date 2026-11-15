@@ -15,12 +15,14 @@
  */
 package com.alibaba.fastjson;
 
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson2.JSONException;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
@@ -574,5 +576,59 @@ public class JSONObjectTest {
 
         jsonObject.put("bytes", Base64.getEncoder().encodeToString("abc中华人民共和国".getBytes()));
         assertEquals("abc中华人民共和国", new String(jsonObject.getBytes("bytes")));
+    }
+
+    // legacy fastjson 1.x contract: byte[] is serialized as a Base64 string,
+    // whichever public entry point is used.
+    @Test
+    public void test_toJSONString_byteArray_base64() {
+        JSONObject object = new JSONObject(true);
+        object.put("x", new byte[]{1, 2});
+
+        assertEquals("{\"x\":\"AQI=\"}", JSON.toJSONString(object));
+        assertEquals("{\"x\":\"AQI=\"}", object.toJSONString());
+        assertEquals("{\"x\":\"AQI=\"}", object.toString());
+
+        assertEquals("{\"x\":\"AQI=\"}", JSON.toJSONString(object, SerializerFeature.WriteMapNullValue));
+        assertEquals("{\"x\":\"AQI=\"}", object.toString(SerializerFeature.WriteMapNullValue));
+    }
+
+    @Test
+    public void test_toJSONString_byteArray_empty() {
+        JSONObject object = new JSONObject(true);
+        object.put("x", new byte[0]);
+
+        String legacy = JSON.toJSONString(object);
+        assertEquals("{\"x\":\"\"}", legacy);
+
+        assertEquals(legacy, object.toJSONString());
+        assertEquals(legacy, object.toString());
+    }
+
+    @Test
+    public void test_toJSONString_byteArray_null() {
+        JSONObject object = new JSONObject(true);
+        object.put("x", null);
+
+        // null entries are skipped by the default feature set on every entry point
+        assertEquals("{}", JSON.toJSONString(object));
+        assertEquals("{}", object.toJSONString());
+        assertEquals("{}", object.toString());
+
+        // and written as JSON null once WriteMapNullValue is enabled
+        assertEquals("{\"x\":null}", JSON.toJSONString(object, SerializerFeature.WriteMapNullValue));
+        assertEquals("{\"x\":null}", object.toString(SerializerFeature.WriteMapNullValue));
+    }
+
+    // control: only byte[] follows the Base64 legacy default
+    @Test
+    public void test_toJSONString_nonByteArrayValuesUnchanged() {
+        JSONObject object = new JSONObject(true);
+        object.put("ints", new int[]{1, 2});
+        object.put("list", Arrays.asList((byte) 1, (byte) 2));
+
+        assertEquals("{\"ints\":[1,2],\"list\":[1,2]}", JSON.toJSONString(object));
+        assertEquals("{\"ints\":[1,2],\"list\":[1,2]}", object.toJSONString());
+        assertEquals("{\"ints\":[1,2],\"list\":[1,2]}", object.toString());
     }
 }
