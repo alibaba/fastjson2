@@ -27,6 +27,29 @@ public class EnumTest {
     }
 
     @Test
+    public void testNullEnumField() {
+        Bean5 bean = new Bean5();
+        bean.value = null;
+
+        byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName);
+
+        Bean5 parsed = (Bean5) JSONB.parse(bytes, JSONReader.Feature.SupportAutoType);
+        assertEquals(null, parsed.value);
+    }
+
+    @Test
+    public void testWriteEnumNull() {
+        byte[] bytes = new byte[16];
+        int off = JSONB.IO.writeEnum(bytes, 0, null, 0);
+        assertEquals(1, off);
+        assertEquals(JSONB.Constants.BC_NULL, bytes[0]);
+    }
+
+    public static class Bean5 {
+        public Type value;
+    }
+
+    @Test
     public void test1() {
         Bean bean = new Bean();
         bean.value = PropertyNamingStrategy.KebabCase;
