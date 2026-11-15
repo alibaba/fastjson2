@@ -123,4 +123,23 @@ public class MultiIndexTest {
                 () -> jsonPath.remove(JSONObject.of())
         );
     }
+
+    @Test
+    public void extract_order_and_negative() {
+        String json = "[100,101,102,103,104,105]";
+        JSONArray array = JSON.parseArray(json);
+        byte[] jsonbBytes = JSONB.toBytes(array);
+
+        String[] paths = {"$[3,1]", "$[4,2,0]", "$[5,0,2]", "$[0,-1]", "$[-1,-2]", "$[1,9]"};
+        for (String path : paths) {
+            JSONPath jsonPath = JSONPath.of(path);
+            String expected = JSON.toJSONString(jsonPath.eval(array));
+            assertEquals(expected, JSON.toJSONString(jsonPath.extract(json)), path);
+            assertEquals(expected, JSON.toJSONString(jsonPath.extract(JSONReader.ofJSONB(jsonbBytes))), path);
+        }
+
+        assertEquals("[103,101]", JSON.toJSONString(JSONPath.extract(json, "$[3,1]")));
+        assertEquals("[100,105]", JSON.toJSONString(JSONPath.extract(json, "$[0,-1]")));
+        assertEquals("[103,101]", JSON.toJSONString(JSONPath.extract("{\"x\":" + json + "}", "$.x[3,1]")));
+    }
 }
