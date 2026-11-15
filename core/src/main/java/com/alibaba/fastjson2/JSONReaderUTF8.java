@@ -534,6 +534,9 @@ class JSONReaderUTF8
     public long readFieldNameHashCodeUnquote() {
         this.nameEscape = false;
         int offset = this.offset, end = this.end;
+        if (offset > end) {
+            throw error("illegal input");
+        }
         final byte[] bytes = this.bytes;
         int ch = this.ch;
         this.nameBegin = offset - 1;
