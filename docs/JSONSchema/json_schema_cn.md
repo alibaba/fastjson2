@@ -16,6 +16,9 @@ JSONSchemaBenchmark.networknt  thrpt    5   2.337 ± 0.007  ops/ms
 
 ## 2. 通过构造JSONSchema对象直接校验
 
+数值枚举成员按数值比较：`100.0` 可以匹配整数 `100` 或 `new BigDecimal("1E2")`。
+形似数字的字符串仍按字符串处理，因此 `"100"` 不会匹配数值成员。
+
 ```java
 @Test
 public void test() {

@@ -16,6 +16,10 @@ JSONSchemaBenchmark.networknt  thrpt    5   2.337 ± 0.007  ops/ms
 
 ## 2. Direct Validation by Constructing a JSONSchema Object
 
+Numeric enum members compare by value: a member written as `100.0` matches the integer `100` or
+`new BigDecimal("1E2")`. Numeric-looking strings remain strings, so `"100"` does not match a numeric
+member.
+
 ```java
 @Test
 public void test() {
