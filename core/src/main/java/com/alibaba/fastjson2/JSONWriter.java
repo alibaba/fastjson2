@@ -944,7 +944,7 @@ public abstract class JSONWriter
         JSONWriter.Context writeContext = new JSONWriter.Context(defaultObjectWriterProvider);
         JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
-            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
+            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9 && !AARCH64_JDK8) {
                 jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
             } else {
                 jsonWriter = new JSONWriterUTF16JDK8(writeContext);
@@ -987,7 +987,7 @@ public abstract class JSONWriter
 
         JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
-            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
+            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9 && !AARCH64_JDK8) {
                 jsonWriter = new JSONWriterUTF16JDK8UF(context);
             } else {
                 jsonWriter = new JSONWriterUTF16JDK8(context);
@@ -1015,7 +1015,7 @@ public abstract class JSONWriter
         Context writeContext = createWriteContext(features);
         JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
-            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
+            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9 && !AARCH64_JDK8) {
                 jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
             } else {
                 jsonWriter = new JSONWriterUTF16JDK8(writeContext);
@@ -1043,7 +1043,7 @@ public abstract class JSONWriter
         Context writeContext = createWriteContext(features);
         JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
-            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
+            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9 && !AARCH64_JDK8) {
                 jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
             } else {
                 jsonWriter = new JSONWriterUTF16JDK8(writeContext);
