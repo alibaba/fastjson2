@@ -2518,35 +2518,27 @@ public class TypeUtils {
     }
 
     public static boolean toBooleanValue(Object value) {
-        if (value == null) {
-            return false;
-        }
-
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
-                return false;
-            }
-            return Boolean.parseBoolean(str);
-        }
-
-        if (value instanceof Number) {
-            int intValue = ((Number) value).intValue();
-            if (intValue == 1) {
-                return true;
-            }
-            if (intValue == 0) {
-                return false;
-            }
-        }
-
-        throw new JSONException("can not cast to boolean");
+        Boolean booleanValue = toBoolean(value);
+        return booleanValue != null && booleanValue;
     }
 
+    /**
+     * Cast an object to a Boolean. This is the shared boolean conversion used by
+     * {@link #toBooleanValue(Object)} and
+     * {@link com.alibaba.fastjson2.JSONObject#getBoolean(String)}, so JSON/Object
+     * conversion applies one set of literal rules.
+     *
+     * <p>Before this was unified, {@code toBoolean("1")} returned {@code false}
+     * (the String branch used {@link Boolean#parseBoolean(String)}) while
+     * {@code JSONObject.getBoolean("1")} returned {@code true}.
+     *
+     * <p>Rules: literals are case insensitive and whitespace tolerant
+     * ({@code "1"/"t"/"y"/"true"/"yes"/"on"} are true,
+     * {@code "0"/"f"/"n"/"false"/"no"/"off"} and any other literal are false);
+     * numbers are true only when their int value equals 1;
+     * {@code null}/empty/{@code "null"} map to {@code null};
+     * unsupported types throw {@link JSONException}.
+     */
     public static Boolean toBoolean(Object value) {
         if (value == null) {
             return null;
@@ -2556,25 +2548,52 @@ public class TypeUtils {
             return (Boolean) value;
         }
 
+        if (value instanceof Number) {
+            return ((Number) value).intValue() == 1;
+        }
+
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || "null".equals(str)) {
+            int end = str.length();
+            int start = 0;
+            while (start < end && str.charAt(start) <= ' ') {
+                start++;
+            }
+            while (end > start && str.charAt(end - 1) <= ' ') {
+                end--;
+            }
+            int len = end - start;
+            if (len == 0) {
                 return null;
             }
-            return Boolean.parseBoolean(str);
+            switch (len) {
+                case 1:
+                    char c = str.charAt(start);
+                    return c == '1' || c == 'T' || c == 't' || c == 'Y' || c == 'y'
+                            ? Boolean.TRUE : Boolean.FALSE;
+                case 2:
+                    return (str.charAt(start) | 0x20) == 'o' && (str.charAt(start + 1) | 0x20) == 'n'
+                            ? Boolean.TRUE : Boolean.FALSE;
+                case 3:
+                    return (str.charAt(start) | 0x20) == 'y' && (str.charAt(start + 1) | 0x20) == 'e'
+                            && (str.charAt(start + 2) | 0x20) == 's'
+                            ? Boolean.TRUE : Boolean.FALSE;
+                case 4:
+                    char c0 = (char) (str.charAt(start) | 0x20);
+                    char c1 = (char) (str.charAt(start + 1) | 0x20);
+                    char c2 = (char) (str.charAt(start + 2) | 0x20);
+                    char c3 = (char) (str.charAt(start + 3) | 0x20);
+                    if (c0 == 'n' && c1 == 'u' && c2 == 'l' && c3 == 'l') {
+                        return null;
+                    }
+                    return c0 == 't' && c1 == 'r' && c2 == 'u' && c3 == 'e'
+                            ? Boolean.TRUE : Boolean.FALSE;
+                default:
+                    return Boolean.FALSE;
+            }
         }
 
-        if (value instanceof Number) {
-            int intValue = ((Number) value).intValue();
-            if (intValue == 1) {
-                return true;
-            }
-            if (intValue == 0) {
-                return false;
-            }
-        }
-
-        throw new JSONException("can not cast to boolean");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to boolean");
     }
 
     public static float toFloatValue(Object value) {

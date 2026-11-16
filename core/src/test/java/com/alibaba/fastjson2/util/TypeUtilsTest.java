@@ -940,4 +940,118 @@ public class TypeUtilsTest {
                     JSONReader.of("\"" + str + "\"").readDoubleValue());
         }
     }
+
+    /**
+     * Boolean conversion must be defined in one place: {@link TypeUtils#toBoolean(Object)},
+     * {@link TypeUtils#toBooleanValue(Object)} and {@link JSONObject#getBoolean(String)}.
+     *
+     * <p>The literal set is inherited from fastjson 1.x {@code TypeUtils#castToBoolean}:
+     * "1"/"Y"/"y"/"T"/"t"/"true" are true, "0"/"F"/"f"/"N"/"n"/"false" are false,
+     * empty/"null" are null. fastjson 1.x was case-sensitive for "T"/"N"; here all
+     * literals are case-insensitive and tolerant of surrounding whitespace, and the
+     * common "yes"/"no"/"on"/"off" spellings are additionally accepted.
+     */
+    @Test
+    public void test_toBoolean() {
+        Object[] values = {
+                "1", "0", "true", "TRUE", "false", "FALSE", "Y", "T", "N", "F",
+                "yes", "no", "on", "off", "y", "t", "n", "f", "2", "", "null", "NULL",
+                1, 0, 2, -1, 1L, 0L, BigDecimal.ONE, Boolean.TRUE, Boolean.FALSE, null
+        };
+
+        for (Object value : values) {
+            JSONObject object = new JSONObject();
+            object.put("v", value);
+
+            Boolean expected = object.getBoolean("v");
+            assertEquals(expected, TypeUtils.toBoolean(value), describe(value));
+            assertEquals(expected != null && expected, TypeUtils.toBooleanValue(value), describe(value));
+        }
+    }
+
+    @Test
+    public void test_toBoolean_trueLiterals() {
+        String[] literals = {
+                "1", "true", "TRUE", "True", "t", "T", "y", "Y",
+                "yes", "YES", "Yes", "on", "ON", "On", " true ", "\tY\n"
+        };
+        for (String literal : literals) {
+            assertEquals(Boolean.TRUE, TypeUtils.toBoolean(literal), literal);
+            assertTrue(TypeUtils.toBooleanValue(literal), literal);
+
+            JSONObject object = new JSONObject();
+            object.put("v", literal);
+            assertEquals(Boolean.TRUE, object.getBoolean("v"), literal);
+            assertTrue(object.getBooleanValue("v"), literal);
+        }
+    }
+
+    @Test
+    public void test_toBoolean_falseLiterals() {
+        String[] literals = {
+                "0", "false", "FALSE", "False", "f", "F", "n", "N",
+                "no", "NO", "No", "off", "OFF", "Off", " false ", "0 "
+        };
+        for (String literal : literals) {
+            assertEquals(Boolean.FALSE, TypeUtils.toBoolean(literal), literal);
+            assertFalse(TypeUtils.toBooleanValue(literal), literal);
+
+            JSONObject object = new JSONObject();
+            object.put("v", literal);
+            assertEquals(Boolean.FALSE, object.getBoolean("v"), literal);
+            assertFalse(object.getBooleanValue("v"), literal);
+        }
+    }
+
+    @Test
+    public void test_toBoolean_fastjson1xCompatibility() {
+        // fastjson 1.2.83 TypeUtils#castToBoolean accepted these spellings.
+        assertEquals(Boolean.TRUE, TypeUtils.toBoolean("1"));
+        assertEquals(Boolean.TRUE, TypeUtils.toBoolean("Y"));
+        assertEquals(Boolean.TRUE, TypeUtils.toBoolean("T"));
+        assertEquals(Boolean.FALSE, TypeUtils.toBoolean("0"));
+        assertEquals(Boolean.FALSE, TypeUtils.toBoolean("F"));
+        assertEquals(Boolean.FALSE, TypeUtils.toBoolean("N"));
+        // 1.x was case-sensitive for "T"/"N"; the unified rule also accepts lower case.
+        assertEquals(Boolean.TRUE, TypeUtils.toBoolean("t"));
+        assertEquals(Boolean.FALSE, TypeUtils.toBoolean("n"));
+    }
+
+    @Test
+    public void test_toBoolean_nullishAndNumbers() {
+        assertNull(TypeUtils.toBoolean(null));
+        assertNull(TypeUtils.toBoolean(""));
+        assertNull(TypeUtils.toBoolean("   "));
+        assertNull(TypeUtils.toBoolean("null"));
+        assertNull(TypeUtils.toBoolean("NULL"));
+        assertFalse(TypeUtils.toBooleanValue(null));
+
+        assertEquals(Boolean.TRUE, TypeUtils.toBoolean(1));
+        assertEquals(Boolean.TRUE, TypeUtils.toBoolean(1L));
+        assertEquals(Boolean.TRUE, TypeUtils.toBoolean(BigDecimal.ONE));
+        assertEquals(Boolean.FALSE, TypeUtils.toBoolean(0));
+        assertEquals(Boolean.FALSE, TypeUtils.toBoolean(2));
+        assertEquals(Boolean.FALSE, TypeUtils.toBoolean(-1));
+        assertEquals(Boolean.TRUE, TypeUtils.toBoolean(Boolean.TRUE));
+        assertEquals(Boolean.FALSE, TypeUtils.toBoolean(Boolean.FALSE));
+    }
+
+    @Test
+    public void test_toBoolean_unsupportedType() {
+        Object unsupported = new Object();
+        assertThrows(JSONException.class, () -> TypeUtils.toBoolean(unsupported));
+
+        JSONObject object = new JSONObject();
+        object.put("v", unsupported);
+        assertThrows(JSONException.class, () -> object.getBoolean("v"));
+    }
+
+    private static String describe(Object value) {
+        if (value == null) {
+            return "null";
+        }
+        return value instanceof String
+                ? "String(\"" + value + "\")"
+                : value.getClass().getSimpleName() + "(" + value + ")";
+    }
 }

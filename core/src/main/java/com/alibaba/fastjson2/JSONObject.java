@@ -944,31 +944,9 @@ public class JSONObject
      * @throws JSONException Unsupported type conversion to {@link Boolean}
      */
     public Boolean getBoolean(String key) {
-        Object value = super.get(key);
-
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).intValue() == 1;
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return null;
-            }
-
-            return "true".equalsIgnoreCase(str) || "1".equals(str);
-        }
-
-        throw new JSONException("Can not cast '" + value.getClass() + "' to boolean");
+        // Delegate to TypeUtils so JSONObject and the utility methods always
+        // share exactly one set of boolean conversion rules.
+        return TypeUtils.toBoolean(super.get(key));
     }
 
     /**
