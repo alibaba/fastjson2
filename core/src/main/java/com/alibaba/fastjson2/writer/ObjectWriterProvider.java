@@ -944,7 +944,8 @@ public class ObjectWriterProvider
                 == JSONWriter.Feature.SortFieldNamesAlphabetically.mask;
     }
 
-    static final int ENUM = 0x00004000;
+    static final Set<Class<?>> PRIMITIVE_CLASSES;
+    static final Set<Class<?>> NOT_REFERENCE_CLASSES;
     static final int[] PRIMITIVE_HASH_CODES;
     static final int[] NOT_REFERENCES_TYPE_HASH_CODES;
 
@@ -991,6 +992,16 @@ public class ObjectWriterProvider
                 Collections.emptySet().getClass()
         };
 
+        // Identity hash codes can collide across distinct Class objects. Keep the fast
+        // hash lookup, but verify an actual class match before excluding an object.
+        Set<Class<?>> primitiveClasses = Collections.newSetFromMap(new IdentityHashMap<Class<?>, Boolean>());
+        Collections.addAll(primitiveClasses, classes);
+        PRIMITIVE_CLASSES = Collections.unmodifiableSet(primitiveClasses);
+        Set<Class<?>> nonReferenceClasses = Collections.newSetFromMap(new IdentityHashMap<Class<?>, Boolean>());
+        nonReferenceClasses.addAll(primitiveClasses);
+        Collections.addAll(nonReferenceClasses, Class.class, int[].class, long[].class);
+        NOT_REFERENCE_CLASSES = Collections.unmodifiableSet(nonReferenceClasses);
+
         int[] codes = new int[classes.length];
         for (int i = 0; i < classes.length; i++) {
             codes[i] = System.identityHashCode(classes[i]);
@@ -1013,8 +1024,8 @@ public class ObjectWriterProvider
      * @return true if the class is a primitive type or an enum, false otherwise
      */
     public static boolean isPrimitiveOrEnum(final Class<?> clazz) {
-        return Arrays.binarySearch(PRIMITIVE_HASH_CODES, System.identityHashCode(clazz)) >= 0
-                || ((clazz.getModifiers() & ENUM) != 0 && clazz.getSuperclass() == Enum.class);
+        return containsClass(PRIMITIVE_HASH_CODES, PRIMITIVE_CLASSES, clazz)
+                || clazz.isEnum();
     }
 
     /**
@@ -1024,8 +1035,12 @@ public class ObjectWriterProvider
      * @return true if the class should not have reference detection, false otherwise
      */
     public static boolean isNotReferenceDetect(final Class<?> clazz) {
-        return Arrays.binarySearch(NOT_REFERENCES_TYPE_HASH_CODES, System.identityHashCode(clazz)) >= 0
-                || ((clazz.getModifiers() & ENUM) != 0 && clazz.getSuperclass() == Enum.class);
+        return containsClass(NOT_REFERENCES_TYPE_HASH_CODES, NOT_REFERENCE_CLASSES, clazz)
+                || clazz.isEnum();
+    }
+
+    private static boolean containsClass(int[] hashes, Set<Class<?>> classes, Class<?> clazz) {
+        return Arrays.binarySearch(hashes, System.identityHashCode(clazz)) >= 0 && classes.contains(clazz);
     }
 
     /**
