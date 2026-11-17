@@ -6799,6 +6799,40 @@ public abstract class JSONReader
         return new JSONException("illegal number, offset " + offset + ", char " + ch);
     }
 
+    static void checkNumberDigits(byte[] bytes, int off, int len) {
+        int digits = 0;
+        for (int i = off, end = off + len; i < end; i++) {
+            int ch = bytes[i];
+            if (ch == 'e' || ch == 'E') {
+                break;
+            }
+            if (ch >= '0' && ch <= '9') {
+                digits++;
+            }
+        }
+        checkNumberDigits(digits);
+    }
+
+    static void checkNumberDigits(char[] chars, int off, int len) {
+        int digits = 0;
+        for (int i = off, end = off + len; i < end; i++) {
+            int ch = chars[i];
+            if (ch == 'e' || ch == 'E') {
+                break;
+            }
+            if (ch >= '0' && ch <= '9') {
+                digits++;
+            }
+        }
+        checkNumberDigits(digits);
+    }
+
+    private static void checkNumberDigits(int digits) {
+        if (digits > MAX_NUMBER_DIGITS) {
+            throw new JSONException("Number literal too long: " + digits + " digits (max " + MAX_NUMBER_DIGITS + ")");
+        }
+    }
+
     public final String info() {
         return info(null);
     }
