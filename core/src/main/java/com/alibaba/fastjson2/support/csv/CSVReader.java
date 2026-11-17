@@ -24,6 +24,16 @@ public abstract class CSVReader<T>
         extends StreamReader<T>
         implements Closeable {
     boolean quote;
+    /**
+     * The previous buffer ended with '\r', so a leading '\n' in the next buffer
+     * belongs to the same line terminator and must not count another row.
+     */
+    private boolean pendingCr;
+    /**
+     * The previous buffer ended with '"' while inside a quoted value, so whether
+     * it is the first half of an escaped pair is only known from the next buffer.
+     */
+    private boolean pendingQuote;
     protected Class<T> objectClass;
     private boolean objectSupport = true;
 
@@ -515,8 +525,28 @@ public abstract class CSVReader<T>
 
     void rowCount(byte[] bytes, int length) {
         lineTerminated = false;
+        int i = 0;
 
-        for (int i = 0; i < length; i++) {
+        if (length > 0) {
+            if (pendingCr) {
+                pendingCr = false;
+                if (bytes[0] == '\n') {
+                    i = 1;
+                    lineTerminated = i == length;
+                }
+            }
+
+            if (pendingQuote) {
+                pendingQuote = false;
+                if (i < length && bytes[i] == '"') {
+                    i++;
+                } else {
+                    quote = false;
+                }
+            }
+        }
+
+        for (; i < length; i++) {
             if (i + 4 < length) {
                 byte b0 = bytes[i];
                 byte b1 = bytes[i + 1];
@@ -541,6 +571,7 @@ public abstract class CSVReader<T>
                 } else {
                     int n = i + 1;
                     if (n >= length) {
+                        pendingQuote = true;
                         break;
                     }
                     byte next = bytes[n];
@@ -574,6 +605,7 @@ public abstract class CSVReader<T>
 
                 int n = i + 1;
                 if (n >= length) {
+                    pendingCr = true;
                     break;
                 }
                 byte next = bytes[n];
