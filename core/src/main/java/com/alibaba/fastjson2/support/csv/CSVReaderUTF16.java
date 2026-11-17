@@ -14,6 +14,7 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -196,10 +197,22 @@ final class CSVReaderUTF16<T>
                     off = 0;
                     end = len;
                     this.end = end;
+                    this.off = off;
+                }
+
+                if (i < end && end == buf.length) {
+                    buf = this.buf = Arrays.copyOf(buf, buf.length + 1);
                 }
 
                 if (end < buf.length) {
-                    int cnt = input.read(buf, end, buf.length - end);
+                    int cnt;
+                    try {
+                        cnt = input.read(buf, end, buf.length - end);
+                    } catch (IOException error) {
+                        quote = false;
+                        lineSize = 0;
+                        throw error;
+                    }
                     if (cnt == -1) {
                         inputEnd = true;
                     } else {

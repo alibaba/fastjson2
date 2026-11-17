@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.support.csv;
 
+import com.alibaba.fastjson2.JSONException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Regression tests for {@code CSVReader.of(Reader, Type...)} / {@code readLine()} when the
@@ -171,6 +174,135 @@ public class CSVReaderShortReadTest {
         assertArrayEquals(row("a", "b"), first);
     }
 
+    /**
+     * Boundary condition: the first read request from CSVReader should be filled completely
+     * (up to the requested length) to test the allocation boundary without using a large
+     * hard-coded buffer size. The reader records the requested length on the first positive
+     * read and fills exactly that many chars with 'a' except the final CR, honoring the
+     * provided offset and length. Subsequent reads provide the remainder of the row and then EOF.
+     */
+    @Test
+    public void testFullBufferReadBoundary() throws IOException {
+        FullBufferReader reader = new FullBufferReader();
+        try (CSVReader csvReader = CSVReader.of(reader)) {
+            String[] first = csvReader.readLine();
+            assertNotNull(first, "first row should not be null");
+            assertEquals(1, first.length, "first row should have one field");
+            int firstReadLength = reader.getFirstReadLength();
+            assertEquals(firstReadLength - 1, first[0].length(), "field length should be firstReadLength - 1");
+            assertTrue(first[0].chars().allMatch(c -> c == 'a'), "field should consist only of 'a' characters");
+
+            String[] second = csvReader.readLine();
+            assertNotNull(second, "second row should not be null");
+            assertArrayEquals(row("next", "row"), second);
+
+            assertNull(csvReader.readLine(), "EOF expected after second row");
+        }
+    }
+
+    /**
+     * Escaped quotes inside a quoted field must not break row boundaries. For all chunk sizes
+     * from 1 to 8, the CSV reader should parse three rows: header, row with escaped quotes and
+     * trailing fields, and a simple row. We only assert row boundaries and unaffected fields,
+     * not the exact decoded value of the escaped field because that is not relevant to short
+     * read handling.
+     */
+    @Test
+    public void testEscapedQuoteRowBoundaries() throws IOException {
+        String data = "id,note,z\n1,\"a\"\"b\",z\n2,q\n";
+        String[] expectedHeader = row("id", "note", "z");
+
+        for (int chunk = 1; chunk <= 8; chunk++) {
+            try (CSVReader csvReader = CSVReader.of(new ShortReadCharReader(data, chunk))) {
+                String[] header = csvReader.readLine();
+                assertNotNull(header, "expected header, chunk=" + chunk);
+                assertArrayEquals(expectedHeader, header, "header mismatch, chunk=" + chunk);
+
+                String[] row2 = csvReader.readLine();
+                assertNotNull(row2, "expected second row, chunk=" + chunk);
+                assertEquals(3, row2.length, "second row should have 3 fields, chunk=" + chunk);
+                assertEquals("1", row2[0], "first field of second row, chunk=" + chunk);
+                assertEquals("z", row2[2], "third field of second row, chunk=" + chunk);
+                // row2[1] is the escaped quoted field; we do not assert its exact value here.
+
+                String[] row3 = csvReader.readLine();
+                assertNotNull(row3, "expected third row, chunk=" + chunk);
+                assertArrayEquals(row("2", "q"), row3, "third row mismatch, chunk=" + chunk);
+
+                assertNull(csvReader.readLine(), "expected EOF after third row, chunk=" + chunk);
+            }
+        }
+    }
+
+    /**
+     * A closing quote at the very end of input, without a newline, must be parsed correctly.
+     * This tests the char-array path where the final quote is seen when the buffer is exhausted.
+     */
+    @Test
+    public void testCharArrayTrailingQuoteAtEof() throws IOException {
+        try (CSVReader csvReader = CSVReader.of("x,\"y\"".toCharArray())) {
+            assertArrayEquals(row("x", "y"), csvReader.readLine());
+            assertNull(csvReader.readLine());
+        }
+    }
+
+    @Test
+    public void testCharArrayTrailingBareCr() throws IOException {
+        try (CSVReader csvReader = CSVReader.of("a,值\r".toCharArray())) {
+            assertArrayEquals(row("a", "值"), csvReader.readLine());
+            assertNull(csvReader.readLine());
+        }
+    }
+
+    /**
+     * A trailing bare CR must also work through the Reader overload.
+     */
+    @Test
+    public void testReaderBareCrRowsThroughAllChunkSizes() {
+        assertAllChunkSizes(
+                "a,b\rc,d\r",
+                row("a", "b"),
+                row("c", "d"));
+    }
+
+    /**
+     * Reader that returns 4-char reads; on the second read it throws once, then recovers.
+     * CSVReader must propagate the exception and remain usable afterward.
+     */
+    @Test
+    public void testFlakyReader() throws IOException {
+        try (CSVReader csvReader = CSVReader.of(new FlakyReader())) {
+            String[] first = csvReader.readLine();
+            assertNotNull(first, "first row");
+            assertArrayEquals(row("a", "b"), first);
+
+            assertThrows(JSONException.class, csvReader::readLine, "expected exception on second read");
+
+            String[] third = csvReader.readLine();
+            assertNotNull(third, "third row after exception");
+            assertArrayEquals(row("c", "d"), third);
+
+            String[] fourth = csvReader.readLine();
+            assertNotNull(fourth, "fourth row");
+            assertArrayEquals(row("eeeeeeeeeeeeeeeeeeee", "f"), fourth);
+
+            assertNull(csvReader.readLine(), "EOF after fourth row");
+        }
+    }
+
+    @Test
+    public void testIOExceptionWhileQuotedRowIsBuffered() throws IOException {
+        String csv = "a,b\n1,\"line\ncontinued\",z\n2,q\n";
+        FlakyReader flaky = new FlakyReader(csv, 3);
+        try (CSVReader reader = CSVReader.of(flaky)) {
+            assertArrayEquals(row("a", "b"), reader.readLine());
+            assertThrows(JSONException.class, reader::readLine);
+            assertArrayEquals(row("1", "line\ncontinued", "z"), reader.readLine());
+            assertArrayEquals(row("2", "q"), reader.readLine());
+            assertNull(reader.readLine());
+        }
+    }
+
     private static void assertAllChunkSizes(String data, String[]... expectedRows) {
         List<String[]> expected = Arrays.asList(expectedRows);
         String printable = data.replace("\r", "\\r").replace("\n", "\\n");
@@ -238,6 +370,11 @@ public class CSVReaderShortReadTest {
         public synchronized int read(byte[] b, int off, int len) {
             return super.read(b, off, Math.min(len, chunk));
         }
+
+        @Override
+        public synchronized int available() {
+            return 0;
+        }
     }
 
     /**
@@ -263,6 +400,105 @@ public class CSVReaderShortReadTest {
             }
 
             int count = Math.min(len, Math.min(2, data.length() - position));
+            data.getChars(position, position + count, cbuf, off);
+            position += count;
+            return count;
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
+    /**
+     * Fills the entire requested read length with 'a' characters except the final CR,
+     * recording the requested length on the first positive read. The next read provides
+     * the rest of the row (LF + "next,row" + LF), then EOF.
+     */
+    static final class FullBufferReader
+            extends Reader {
+        private int firstReadLength = -1;
+        private boolean servedFirst;
+        private String suffix = "\nnext,row\n";
+        private int suffixPos;
+
+        int getFirstReadLength() {
+            if (firstReadLength < 0) {
+                throw new IllegalStateException("first read has not been requested yet");
+            }
+            return firstReadLength;
+        }
+
+        @Override
+        public int read(char[] cbuf, int off, int len) {
+            if (len == 0) {
+                return 0;
+            }
+            if (!servedFirst) {
+                // First read: fill exactly len chars with 'a's, but the last char becomes CR.
+                servedFirst = true;
+                firstReadLength = len;
+                int fillLength = len - 1; // last char will be CR
+                for (int i = 0; i < fillLength; i++) {
+                    cbuf[off + i] = 'a';
+                }
+                cbuf[off + len - 1] = '\r';
+                return len;
+            } else {
+                // Subsequent reads: serve suffix (LF + "next,row" + LF)
+                if (suffixPos >= suffix.length()) {
+                    return -1; // EOF
+                }
+                int count = Math.min(len, suffix.length() - suffixPos);
+                suffix.getChars(suffixPos, suffixPos + count, cbuf, off);
+                suffixPos += count;
+                return count;
+            }
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
+    /**
+     * Reader that returns 4 chars per read (except possibly the last), and on the second
+     * read throws an IOException once. The data is constructed to produce rows:
+     * "a,b\n", "c,d\n", "eeeeeeeeeeeeeeeeeeee,f\n".
+     * We need to control reads: first read returns "a,b\n" (4 chars), second read throws,
+     * then subsequent reads return remaining content in 4-char chunks.
+     */
+    static final class FlakyReader
+            extends Reader {
+        private final String data;
+        private final int failureRead;
+        private int position;
+        private boolean thrownOnce;
+        private int readCount;
+
+        FlakyReader() {
+            this("a,b\nc,d\neeeeeeeeeeeeeeeeeeee,f\n", 2);
+        }
+
+        FlakyReader(String data, int failureRead) {
+            this.data = data;
+            this.failureRead = failureRead;
+        }
+
+        @Override
+        public int read(char[] cbuf, int off, int len) throws IOException {
+            if (len == 0) {
+                return 0;
+            }
+            readCount++;
+            if (readCount == failureRead && !thrownOnce) {
+                thrownOnce = true;
+                throw new IOException("simulated flaky read");
+            }
+            if (position >= data.length()) {
+                return -1;
+            }
+            int count = Math.min(len, Math.min(4, data.length() - position));
             data.getChars(position, position + count, cbuf, off);
             position += count;
             return count;
