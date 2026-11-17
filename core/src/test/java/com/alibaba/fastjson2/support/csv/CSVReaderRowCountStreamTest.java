@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Regression tests for {@link CSVReader#rowCount(java.io.InputStream)}.
@@ -86,6 +87,9 @@ public class CSVReaderRowCountStreamTest {
         assertEachChunk("a", 1);
         assertEachChunk("a\nb", 2);
         assertEachChunk("a\rb", 2);
+        // unterminated final row after a CRLF that a read() boundary splits
+        assertEachChunk("a\r\nb", 2);
+        assertEachChunk("a\r\nb\r\nc", 3);
         // unterminated final quoted row
         assertEachChunk("\"a\"\n\"b\"", 2);
         assertEachChunk("\"a\"\"b\"\nc", 2);
@@ -103,21 +107,27 @@ public class CSVReaderRowCountStreamTest {
         StringBuilder buf = new StringBuilder(BUFFER_SIZE + 16);
         repeat(buf, 'a', BUFFER_SIZE - 1);
         buf.append("\r\nb\n");
-        assertEquals(2, CSVReader.rowCount(new ByteArrayInputStream(toUTF8(buf))));
+        ReadCountingInputStream in = new ReadCountingInputStream(toUTF8(buf));
+        assertEquals(2, CSVReader.rowCount(in));
+        assertTrue(in.dataReads >= 2, "default buffer must split this data at least once");
 
         // closing quote as the last byte of the first read, LF as the first byte of the second read
         buf = new StringBuilder(BUFFER_SIZE + 16);
         buf.append('"');
         repeat(buf, 'a', BUFFER_SIZE - 2);
         buf.append("\"\nb\n");
-        assertEquals(2, CSVReader.rowCount(new ByteArrayInputStream(toUTF8(buf))));
+        in = new ReadCountingInputStream(toUTF8(buf));
+        assertEquals(2, CSVReader.rowCount(in));
+        assertTrue(in.dataReads >= 2, "default buffer must split this data at least once");
 
         // closing quote as the first byte of the second read
         buf = new StringBuilder(BUFFER_SIZE + 16);
         buf.append('"');
         repeat(buf, 'a', BUFFER_SIZE - 1);
         buf.append("\"\nb\n");
-        assertEquals(2, CSVReader.rowCount(new ByteArrayInputStream(toUTF8(buf))));
+        in = new ReadCountingInputStream(toUTF8(buf));
+        assertEquals(2, CSVReader.rowCount(in));
+        assertTrue(in.dataReads >= 2, "default buffer must split this data at least once");
     }
 
     /**
@@ -164,6 +174,27 @@ public class CSVReaderRowCountStreamTest {
         @Override
         public synchronized int read(byte[] b, int off, int len) {
             return super.read(b, off, Math.min(len, chunk));
+        }
+    }
+
+    /**
+     * ByteArrayInputStream that counts how many read() calls returned a positive number of bytes.
+     */
+    static final class ReadCountingInputStream
+            extends ByteArrayInputStream {
+        private int dataReads;
+
+        ReadCountingInputStream(byte[] buf) {
+            super(buf);
+        }
+
+        @Override
+        public synchronized int read(byte[] b, int off, int len) {
+            int n = super.read(b, off, len);
+            if (n > 0) {
+                dataReads++;
+            }
+            return n;
         }
     }
 }
