@@ -1602,7 +1602,7 @@ public class DateUtils {
         int minute = digit2(str, off + 10);
 
         if ((year | month | dom | hour | minute) < 0) {
-            String input = new String(str, off, off + 12);
+            String input = new String(str, off, 12);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -1629,7 +1629,7 @@ public class DateUtils {
         int minute = digit2(str, off + 10);
 
         if ((year | month | dom | hour | minute) < 0) {
-            String input = new String(str, off, off + 12);
+            String input = new String(str, off, 12);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
