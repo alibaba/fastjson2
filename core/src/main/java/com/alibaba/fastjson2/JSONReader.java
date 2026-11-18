@@ -4214,13 +4214,18 @@ public abstract class JSONReader
                     val = readArray(features);
                     break;
                 case '{':
-                    if (context.autoTypeBeforeHandler != null || (context.features & Feature.SupportAutoType.mask) != 0) {
+                    if (isReference()) {
+                        val = JSONPath.of(readReference());
+                    } else if (context.autoTypeBeforeHandler != null
+                            || context.provider.getAutoTypeBeforeHandler() != null
+                            || (context.features & Feature.SupportAutoType.mask) != 0) {
+                        // a provider-level AutoTypeBeforeHandler must be honored the same way as a
+                        // context-level one, otherwise JSON.parse(byte[]) rejects types the handler
+                        // would allow while JSON.parse(String) accepts them (issue #7952)
                         // the ObjectReader contract takes a declared-features word, so forward the
                         // strict bit only; every other bit keeps parsing as on the plain call
                         val = ObjectReaderImplObject.INSTANCE.readObject(this, null, null,
                                 features & Feature.ErrorOnDuplicateKeys.mask);
-                    } else if (isReference()) {
-                        val = JSONPath.of(readReference());
                     } else {
                         val = readObject(features);
                     }
