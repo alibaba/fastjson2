@@ -91,7 +91,9 @@ public class JDKUtils {
         try {
             String jvmName = System.getProperty("java.vm.name");
             if (jvmName != null) {
-                openj9 = jvmName.contains("OpenJ9");
+                // IBM JDK 8 reports java.vm.name as "IBM J9 VM", Eclipse OpenJ9 as "Eclipse OpenJ9 VM".
+                // Both are J9-based VMs whose String internals differ from HotSpot, so match "J9" instead of "OpenJ9" only.
+                openj9 = jvmName.contains("J9");
                 android = "Dalvik".equals(jvmName);
             }
             graal = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
@@ -359,7 +361,10 @@ public class JDKUtils {
 
         Boolean compact_strings = null;
         try {
-            if (JVM_VERSION == 8) {
+            // The package-private String(char[], boolean) constructor is a HotSpot internal.
+            // On J9-based VMs (including IBM JDK 8, java.vm.name "IBM J9 VM") it produces
+            // strings with trailing '\0' (issue #7956), so only use it on non-OpenJ9 JVMs.
+            if (JVM_VERSION == 8 && !openj9) {
                 MethodHandles.Lookup lookup = trustedLookup(String.class);
 
                 MethodHandle handle = lookup.findConstructor(
