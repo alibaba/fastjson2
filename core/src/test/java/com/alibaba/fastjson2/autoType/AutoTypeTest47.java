@@ -15,13 +15,18 @@ public class AutoTypeTest47 {
     @Test
     public void test_0() throws Exception {
         String text = "{\"@type\":\"com.mchange.v2.c3p0.impl.PoolBackedDataSourceBase\"}";
-        JSONFactory.getDefaultObjectReaderProvider().setAutoTypeBeforeHandler(
-                (String typeName, Class<?> expectClass, long features)
-                        -> typeName.equals("com.mchange.v2.c3p0.impl.PoolBackedDataSourceBase")
-                        ? TypeUtils.loadClass(typeName)
-                        : null
-        );
-        PoolBackedDataSourceBase dataSource = (PoolBackedDataSourceBase) JSON.parseObject(text, Object.class, JSONReader.Feature.SupportAutoType);
-        assertNotNull(dataSource);
+        JSONReader.AutoTypeBeforeHandler saved = JSONFactory.getDefaultObjectReaderProvider().getAutoTypeBeforeHandler();
+        try {
+            JSONFactory.getDefaultObjectReaderProvider().setAutoTypeBeforeHandler(
+                    (String typeName, Class<?> expectClass, long features)
+                            -> typeName.equals("com.mchange.v2.c3p0.impl.PoolBackedDataSourceBase")
+                            ? TypeUtils.loadClass(typeName)
+                            : null
+            );
+            PoolBackedDataSourceBase dataSource = (PoolBackedDataSourceBase) JSON.parseObject(text, Object.class, JSONReader.Feature.SupportAutoType);
+            assertNotNull(dataSource);
+        } finally {
+            JSONFactory.getDefaultObjectReaderProvider().setAutoTypeBeforeHandler(saved);
+        }
     }
 }
