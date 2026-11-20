@@ -636,6 +636,8 @@ public abstract class FieldReader<T>
         if (format != null && !format.isEmpty()) {
             String typeName = fieldType.getTypeName();
             switch (typeName) {
+                case "cn.hutool.core.date.DateTime":
+                    return new ObjectReaderImplHutoolDateTime(fieldClass, format, locale);
                 case "java.sql.Time":
                     return JdbcSupport.createTimeReader((Class) fieldType, format, locale);
                 case "java.sql.Timestamp":

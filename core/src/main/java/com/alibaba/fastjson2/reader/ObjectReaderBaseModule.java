@@ -2294,6 +2294,8 @@ public class ObjectReaderBaseModule
         }
 
         switch (typeName) {
+            case "cn.hutool.core.date.DateTime":
+                return new ObjectReaderImplHutoolDateTime((Class) type, null, null);
             case "java.sql.Time":
                 return JdbcSupport.createTimeReader((Class) type, null, null);
             case "java.sql.Timestamp":
