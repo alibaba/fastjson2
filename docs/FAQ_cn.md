@@ -92,6 +92,19 @@ JSONObject obj = JSON.parseObject(json,
     JSONReader.Feature.UseBigDecimalForDoubles);
 ```
 
+普通十进制小数默认已经使用 `BigDecimal`。`1.234567890123456789E-10` 这样的科学计数法数值通常使用 `Double`；这些特性在无目标类型的浮点数读取中使用 `BigDecimal`，保留该数值的十进制精度。
+
+选择 `BigDecimal` 不等于保留原始 JSON 文本或所有输入的 scale。例如，无类型的 `0E-10` 在开启任一特性后，会得到 scale 为 0 的零值。需要保留其 scale 时，可直接指定 `BigDecimal.class`，或使用声明为 `BigDecimal` 的字段：
+
+```java
+BigDecimal value = JSON.parseObject("0E-10", BigDecimal.class);
+System.out.println(value.scale());             // 10
+System.out.println(value.toString());          // 0E-10
+System.out.println(JSON.toJSONString(value));  // 0.0000000000
+```
+
+Java 数值、scale 和输出的 JSON 表示是不同的概念。`WriteBigDecimalAsPlain` 用于避免科学计数法，不能强制输出指数形式。跨库验签协议需要约定包括数字格式在内的字节表示，不能假定解析后再序列化会保留原始字节。
+
 ### 如何在解析时去除字符串空格？
 
 ```java
