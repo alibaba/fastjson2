@@ -75,8 +75,8 @@ public class Model {
 | InitStringFieldAsEmpty | 初始化String字段为空字符串\"\"                  |
 | TrimString | 对读取到的字符串值做trim处理                      |
 | Base64StringAsByteArray | 将Base64格式的字符串反序列化为byte[]              |
-| UseBigDecimalForFloats | 默认配置会使用BigDecimal来parse小数，打开后会使用Float |
-| UseBigDecimalForDoubles | 默认配置会使用BigDecimal来parse小数，打开后会使用Double |
+| UseBigDecimalForFloats | 在无目标类型的读取中使用 BigDecimal 表示浮点数，包括科学计数法数值。 |
+| UseBigDecimalForDoubles | 在无目标类型的读取中使用 BigDecimal 表示浮点数，包括通常使用 Double 的科学计数法数值。 |
 | EmptyStringAsNull | 空字符串解析为null |
 | NonZeroNumberCastToBooleanAsTrue | 非零数字转为布尔 true  |
 | UseBigIntegerForInts | 整型解析为 BigInteger |

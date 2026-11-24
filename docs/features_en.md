@@ -77,8 +77,8 @@ public class Model {
 | InitStringFieldAsEmpty | Initialize String fields as empty strings \"\". |
 | TrimString | Trim the read string values. |
 | Base64StringAsByteArray | Deserialize Base64 format strings into byte[]. |
-| UseBigDecimalForFloats | The default configuration uses BigDecimal to parse decimals. When enabled, it will use Float. |
-| UseBigDecimalForDoubles | The default configuration uses BigDecimal to parse decimals. When enabled, it will use Double. |
+| UseBigDecimalForFloats | Read untyped floating-point values as BigDecimal, including scientific-notation literals. |
+| UseBigDecimalForDoubles | Read untyped floating-point values as BigDecimal, including scientific-notation literals that otherwise use Double. |
 | EmptyStringAsNull | Parse empty strings as null. |
 | NonZeroNumberCastToBooleanAsTrue | Cast non-zero numbers to boolean true. |
 | UseBigIntegerForInts | Parse integers as BigInteger. |

@@ -92,6 +92,19 @@ JSONObject obj = JSON.parseObject(json,
     JSONReader.Feature.UseBigDecimalForDoubles);
 ```
 
+Ordinary decimal literals already use `BigDecimal` by default. Scientific notation such as `1.234567890123456789E-10` normally uses `Double`; these features select `BigDecimal` for untyped floating-point reads and retain that value's decimal precision.
+
+Choosing `BigDecimal` does not preserve the original JSON text or every input scale. For example, an untyped `0E-10` read with either feature produces a zero with scale 0. To retain its scale, read directly into `BigDecimal.class` or a declared `BigDecimal` field:
+
+```java
+BigDecimal value = JSON.parseObject("0E-10", BigDecimal.class);
+System.out.println(value.scale());             // 10
+System.out.println(value.toString());          // 0E-10
+System.out.println(JSON.toJSONString(value));  // 0.0000000000
+```
+
+The Java value, its scale, and the emitted JSON representation are different concerns. `WriteBigDecimalAsPlain` avoids scientific notation; it does not force exponent output. A cross-library signature protocol needs an agreed byte representation, including numeric formatting, rather than assuming that parsing and serializing preserves the original bytes.
+
 ### How do I trim string values during parsing?
 
 ```java
