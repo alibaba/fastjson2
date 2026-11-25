@@ -3574,6 +3574,9 @@ class JSONReaderUTF8
                                 + ((long) bytes[nameBegin + 8]);
                         break;
                     default:
+                        if (length >= 17 && length <= 32) {
+                            return getFieldNameUTF8Cache3(nameBegin, length);
+                        }
                         break;
                 }
 
@@ -3639,6 +3642,49 @@ class JSONReaderUTF8
         }
 
         return getFieldName();
+    }
+
+    final String getFieldNameUTF8Cache3(int nameBegin, int length) {
+        final byte[] bytes = this.bytes;
+        // Boundary bytes keep hashing cheap; the full name comparison below disambiguates the middle.
+        int hash = length;
+        for (int i = 0; i < 8; i++) {
+            hash = hash * 31 + (bytes[nameBegin + i] & 0xff);
+        }
+        for (int i = length - 8; i < length; i++) {
+            hash = hash * 31 + (bytes[nameBegin + i] & 0xff);
+        }
+        hash ^= (hash >>> 16);
+        hash *= 0x85ebca6b;
+        hash ^= (hash >>> 13);
+        int index = hash & (NAME_CACHE3.length - 1);
+        String cached = NAME_CACHE3[index];
+        if (cached != null && cached.length() == length) {
+            boolean match = true;
+            for (int i = 0; i < length; i++) {
+                if (cached.charAt(i) != (char) (bytes[nameBegin + i] & 0xff)) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) {
+                return cached;
+            }
+        }
+        String name;
+        if (STRING_CREATOR_JDK8 != null) {
+            name = asciiStringJDK8(bytes, nameBegin, length);
+        } else if (ANDROID) {
+            name = getLatin1String(nameBegin, length);
+        } else if (STRING_CREATOR_JDK11 != null) {
+            name = STRING_CREATOR_JDK11.apply(
+                    Arrays.copyOfRange(bytes, nameBegin, nameBegin + length),
+                    LATIN1);
+        } else {
+            name = new String(bytes, nameBegin, length, ISO_8859_1);
+        }
+        NAME_CACHE3[index] = name;
+        return name;
     }
 
     @Override

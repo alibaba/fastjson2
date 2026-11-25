@@ -1,0 +1,6 @@
+Source: OpenTelemetry opentelemetry-proto, examples/metrics.json
+https://github.com/open-telemetry/opentelemetry-proto/blob/b363281e5c30f343bfd2405519cc3db93d11f252/examples/metrics.json
+Git blob: 33e72c4b53aa9fdad6549de5e6e10251aa0a5236
+
+Licensed under the Apache License, Version 2.0. The license text is provided
+in the repository LICENSE file.

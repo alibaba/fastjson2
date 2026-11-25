@@ -1200,6 +1200,9 @@ final class JSONReaderASCII
                             + (bytes[nameBegin + 8] & 0xFFL);
                     break;
                 default:
+                    if (length >= 17 && length <= 32 && IOUtils.isASCII(bytes, nameBegin, length)) {
+                        return getFieldNameUTF8Cache3(nameBegin, length);
+                    }
                     break;
             }
 
