@@ -318,7 +318,7 @@ class ObjectReaderImplMapTyped
             } else if (keyType == String.class) {
                 name = jsonReader.readFieldName();
                 if (index == 0
-                        && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                        && jsonReader.isSupportAutoTypeOrHandler(features)
                         && name.equals(getTypeKey())
                 ) {
                     if (seenKeys != null && !seenKeys.add(getTypeKey())) {
@@ -345,7 +345,7 @@ class ObjectReaderImplMapTyped
                 }
             } else {
                 if (index == 0
-                        && (jsonReader.isEnabled(JSONReader.Feature.SupportAutoType) || jsonReader.getContext().getContextAutoTypeBeforeHandler() != null)
+                        && jsonReader.isSupportAutoTypeOrHandler(features)
                         && jsonReader.current() == '"'
                         && !(keyType instanceof Class && Enum.class.isAssignableFrom((Class) keyType))
                 ) {
