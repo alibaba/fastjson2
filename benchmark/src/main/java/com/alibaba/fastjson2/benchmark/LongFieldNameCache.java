@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
  * Benchmark for long field name caching in fastjson2.
  * Compares parsing performance with standard OTLP metrics JSON containing long property names
  * (e.g., startTimeUnixNano, aggregationTemporality, exponentialHistogram) versus a modified
- * version where those names are shortened to <=16 characters.
+ * version where those names are shortened to 16 characters or fewer.
  *
  * Data source: OpenTelemetry metrics example (https://github.com/open-telemetry/opentelemetry-proto/blob/b363281e5c30f343bfd2405519cc3db93d11f252/examples/metrics.json)
  * Licensed under Apache License 2.0.
