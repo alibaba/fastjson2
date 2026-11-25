@@ -217,6 +217,57 @@ public class JSONFactoryNameCacheTest {
         assertNotSame(obj1.keySet().iterator().next(), obj2.keySet().iterator().next());
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {17, 24, 25, 32})
+    void iso8859_1LongAsciiNamesReused(int len) {
+        String name = asciiName(len);
+        byte[] bytes = jsonBytes(name, 123);
+        JSONObject one = JSON.parseObject(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1, JSONObject.class);
+        JSONObject two = JSON.parseObject(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1, JSONObject.class);
+        assertEquals(123, one.getIntValue(name));
+        assertEquals(123, two.getIntValue(name));
+        assertSame(one.keySet().iterator().next(), two.keySet().iterator().next());
+    }
+
+    @Test
+    void latin1DistinctNamesRemainDistinct() {
+        String name1 = "prefixABmiddle01suffixYZ";
+        String name2 = "prefixABmiddle02suffixYZ";
+        byte[] isoBytes = ("{" + JSON.toJSONString(name1) + ":1," + JSON.toJSONString(name2) + ":2}").getBytes(StandardCharsets.ISO_8859_1);
+        for (int i = 0; i < 20; i++) {
+            JSONObject obj = JSON.parseObject(isoBytes, 0, isoBytes.length, StandardCharsets.ISO_8859_1, JSONObject.class);
+            assertEquals(2, obj.size());
+            assertEquals(1, obj.getIntValue(name1));
+            assertEquals(2, obj.getIntValue(name2));
+        }
+    }
+
+    @Test
+    void offsetAndReusedBufferIso8859_1KeepValues() {
+        String name1 = asciiName(17);
+        String name2 = asciiName(24);
+        int val1 = 100;
+        int val2 = 200;
+        byte[] jsonBytes1 = jsonBytes(name1, val1);
+        byte[] jsonBytes2 = jsonBytes(name2, val2);
+        byte[] buffer = new byte[256];
+        Arrays.fill(buffer, (byte) 'x');
+        int offset = 5;
+        System.arraycopy(jsonBytes1, 0, buffer, offset, jsonBytes1.length);
+        JSONObject one = JSON.parseObject(buffer, offset, jsonBytes1.length, StandardCharsets.ISO_8859_1, JSONObject.class);
+        assertEquals(val1, one.getIntValue(name1));
+        assertEquals(1, one.size());
+
+        Arrays.fill(buffer, (byte) 'x');
+        System.arraycopy(jsonBytes2, 0, buffer, offset, jsonBytes2.length);
+        JSONObject two = JSON.parseObject(buffer, offset, jsonBytes2.length, StandardCharsets.ISO_8859_1, JSONObject.class);
+        assertEquals(val2, two.getIntValue(name2));
+
+        assertEquals(val1, one.getIntValue(name1));
+        assertEquals(1, one.size());
+        assertNotSame(one.keySet().iterator().next(), two.keySet().iterator().next());
+    }
+
     public static class Task
             implements Runnable {
         final CountDownLatch latch;
