@@ -94,6 +94,8 @@ public final class JSONFactory {
 
     static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
+    // Longer names do not displace the existing short-name entries.
+    static final String[] NAME_CACHE3 = new String[8192];
 
     static int defaultDecimalMaxScale = 2048;
     static int defaultMaxLevel;
