@@ -67,4 +67,11 @@ public class ObjectReaderImplMapTypedTest {
         );
         assertTrue(param.getVarsMap() instanceof LinkedHashMap);
     }
+
+    @Test
+    void testMapStringKeyInnerAutoTypeWithSupportAutoTypeFeature() {
+        String json = "{\"varsMap\":{\"@type\":\"java.util.LinkedHashMap\",\"1\":{\"name\":\"x\"}}}";
+        Param param = JSON.parseObject(json, Param.class, JSONReader.Feature.SupportAutoType);
+        assertTrue(param.getVarsMap() instanceof LinkedHashMap);
+    }
 }
