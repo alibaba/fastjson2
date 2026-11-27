@@ -74,6 +74,59 @@ final class MutableBigInteger {
     static final int KNUTH_POW2_THRESH_LEN = 6;
     static final int KNUTH_POW2_THRESH_ZEROS = 3;
 
+    static long divideKnuthLongFast(long intCompact, int ql, int scale) {
+        if (ql <= 0 && ql > -64 && scale > 0 && scale <= 18 && intCompact > 0) {
+            // (intCompact << -ql) / 10^scale without allocation, when the quotient fits in [2^32, 2^63)
+            int n = -ql;
+            long d = NumberUtils.POW10_LONG_VALUES[scale - 1];
+            long hi = n == 0 ? 0 : intCompact >>> (64 - n);
+            if (hi < (d >>> 1)) {
+                long q = divide128(hi, intCompact << n, d);
+                if ((q >>> 32) != 0) {
+                    return q;
+                }
+            }
+        }
+        return divideKnuthLong(intCompact, ql, scale);
+    }
+
+    /**
+     * Unsigned (u1 * 2^64 + u0) / v, for 0 &lt; v &lt; 2^63 and u1 &lt; v (Hacker's Delight, divlu).
+     */
+    private static long divide128(long u1, long u0, long v) {
+        final long b = 1L << 32;
+        int s = Long.numberOfLeadingZeros(v);
+        v <<= s;
+        long vn1 = v >>> 32;
+        long vn0 = v & LONG_MASK;
+        long un32 = (u1 << s) | (u0 >>> (64 - s));
+        long un10 = u0 << s;
+        long un1 = un10 >>> 32;
+        long un0 = un10 & LONG_MASK;
+
+        long q1 = Long.divideUnsigned(un32, vn1);
+        long rhat = un32 - q1 * vn1;
+        while (q1 >= b || Long.compareUnsigned(q1 * vn0, (rhat << 32) | un1) > 0) {
+            q1--;
+            rhat += vn1;
+            if (rhat >= b) {
+                break;
+            }
+        }
+
+        long un21 = (un32 << 32) + un1 - q1 * v;
+        long q0 = Long.divideUnsigned(un21, vn1);
+        rhat = un21 - q0 * vn1;
+        while (q0 >= b || Long.compareUnsigned(q0 * vn0, (rhat << 32) | un0) > 0) {
+            q0--;
+            rhat += vn1;
+            if (rhat >= b) {
+                break;
+            }
+        }
+        return (q1 << 32) | q0;
+    }
+
     static long divideKnuthLong(long intCompact, int ql, int scale) {
         int[] pow10 = MutableBigInteger.BIG_TEN_POWERS_MAGIC_TABLE[scale];
         int[] magic_a, magic_b;

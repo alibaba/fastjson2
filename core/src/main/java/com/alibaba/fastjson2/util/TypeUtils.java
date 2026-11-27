@@ -3817,7 +3817,7 @@ public class TypeUtils {
         }
 
         int ql = (int) qb - (P_D + 3);  // narrowing qb to an int is safe
-        long i = MutableBigInteger.divideKnuthLong(intCompact, ql, scale);
+        long i = MutableBigInteger.divideKnuthLongFast(intCompact, ql, scale);
 
         int dq = (Long.SIZE - (P_D + 2)) - Long.numberOfLeadingZeros(i);
         int eq = (Q_MIN_D - 2) - ql;
