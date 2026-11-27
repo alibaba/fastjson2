@@ -7715,7 +7715,9 @@ class JSONReaderUTF8
         }
 
         int slashIndex = indexOfSlash(this, bytes, offset, end);
-        if (slashIndex != -1) {
+        if (slashIndex != -1 && slashIndex < index) {
+            // a backslash is invalid base64, but only when it lies within this string;
+            // escaped content after the value must not reject it (issue #7967)
             throw error("invalid base64 string");
         }
 
